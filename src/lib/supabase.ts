@@ -21,6 +21,16 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
 })
 
+// Export createClient function for API routes and server-side usage
+export const createSupabaseClient = () => {
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
+
 // Helper function for server-side operations with service role (server-only)
 export const createServerSupabaseAdmin = () => {
   if (typeof window !== 'undefined') {

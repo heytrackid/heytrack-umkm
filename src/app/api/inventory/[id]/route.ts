@@ -1,0 +1,72 @@
+import { NextResponse } from 'next/server';
+import { createSupabaseClient } from '@/lib/supabase';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createSupabaseClient();
+    
+    const { data: inventory, error } = await supabase
+      .from('inventory')
+      .select(`
+        *,
+        ingredient:ingredients(name, unit)
+      `)
+      .eq('id', params.id)
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(inventory);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createSupabaseClient();
+    const body = await request.json() as any;
+
+    const { data: inventory, error } = await supabase
+      .from('inventory')
+      .update(body)
+      .eq('id', params.id)
+      .select(`
+        *,
+        ingredient:ingredients(name, unit)
+      `)
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(inventory);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createSupabaseClient();
+
+    const { error } = await supabase
+      .from('inventory')
+      .delete()
+      .eq('id', params.id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ message: 'Inventory item deleted successfully' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

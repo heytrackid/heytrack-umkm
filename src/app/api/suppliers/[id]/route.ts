@@ -1,0 +1,66 @@
+import { NextResponse } from 'next/server';
+import { createSupabaseClient } from '@/lib/supabase';
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createSupabaseClient();
+    
+    const { data: supplier, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(supplier);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createSupabaseClient();
+    const body = await request.json() as any;
+
+    const { data: supplier, error } = await supabase
+      .from('suppliers')
+      .update(body)
+      .eq('id', params.id)
+      .select('*')
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(supplier);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createSupabaseClient();
+
+    const { error } = await supabase
+      .from('suppliers')
+      .delete()
+      .eq('id', params.id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ message: 'Supplier deleted successfully' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
