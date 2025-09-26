@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const { data: recipe, error } = await supabase
+    const { data: recipe, error } = await (supabase as any)
       .from('recipes')
       .select(`
         *,
@@ -62,7 +62,7 @@ export async function PUT(
     const { ingredients, ...recipeData } = body
     
     // Update the recipe
-    const { data: recipe, error: recipeError } = await supabase
+    const { data: recipe, error: recipeError } = await (supabase as any)
       .from('recipes')
       .update(recipeData)
       .eq('id', id)
@@ -86,7 +86,7 @@ export async function PUT(
     // If ingredients are provided, update them
     if (ingredients !== undefined) {
       // Delete existing recipe ingredients
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await (supabase as any)
         .from('recipe_ingredients')
         .delete()
         .eq('recipe_id', id)
@@ -108,7 +108,7 @@ export async function PUT(
           unit: ingredient.unit
         }))
 
-        const { error: insertError } = await supabase
+        const { error: insertError } = await (supabase as any)
           .from('recipe_ingredients')
           .insert(recipeIngredients)
 
@@ -123,7 +123,7 @@ export async function PUT(
     }
 
     // Fetch the complete updated recipe with ingredients
-    const { data: completeRecipe, error: fetchError } = await supabase
+    const { data: completeRecipe, error: fetchError } = await (supabase as any)
       .from('recipes')
       .select(`
         *,
@@ -165,7 +165,7 @@ export async function DELETE(
   const { id } = await params
   try {
     // Check if recipe exists first
-    const { data: existingRecipe, error: checkError } = await supabase
+    const { data: existingRecipe, error: checkError } = await (supabase as any)
       .from('recipes')
       .select('id')
       .eq('id', id)
@@ -179,7 +179,7 @@ export async function DELETE(
     }
 
     // Delete the recipe (cascade will handle recipe_ingredients)
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('recipes')
       .delete()
       .eq('id', id)

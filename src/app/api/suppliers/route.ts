@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const supabase = createSupabaseClient();
     
-    const { data: suppliers, error } = await supabase
+    const { data: suppliers, error } = await (supabase as any)
       .from('suppliers')
       .select('*')
       .order('name', { ascending: true });
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const supabase = createSupabaseClient();
     const body = await request.json();
 
-    const { data: supplier, error } = await supabase
+    const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
       .insert([body])
       .select('*')

@@ -5,7 +5,7 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 export async function GET() {
   try {
     const supabase = createServerSupabaseAdmin()
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('ingredients')
       .select('*')
       .order('name')
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServerSupabaseAdmin()
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('ingredients')
       .insert(body)
       .select()

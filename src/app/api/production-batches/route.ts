@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const supabase = createSupabaseClient();
     
-    const { data: batches, error } = await supabase
+    const { data: batches, error } = await (supabase as any)
       .from('production_batches')
       .select(`
         *,
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const supabase = createSupabaseClient();
     const body = await request.json();
 
-    const { data: batch, error } = await supabase
+    const { data: batch, error } = await (supabase as any)
       .from('production_batches')
       .insert([body])
       .select(`

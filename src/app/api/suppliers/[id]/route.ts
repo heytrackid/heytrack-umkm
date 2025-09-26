@@ -3,15 +3,16 @@ import { createSupabaseClient } from '@/lib/supabase';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const supabase = createSupabaseClient();
     
-    const { data: supplier, error } = await supabase
+    const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) throw error;
@@ -24,16 +25,17 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const supabase = createSupabaseClient();
     const body = await request.json() as any;
 
-    const { data: supplier, error } = await supabase
+    const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .select('*')
       .single();
 
@@ -47,15 +49,16 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const supabase = createSupabaseClient();
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('suppliers')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw error;
 

@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const supabase = createSupabaseClient();
     
-    const { data: sales, error } = await supabase
+    const { data: sales, error } = await (supabase as any)
       .from('sales')
       .select(`
         *,
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const supabase = createSupabaseClient();
     const body = await request.json();
 
-    const { data: sale, error } = await supabase
+    const { data: sale, error } = await (supabase as any)
       .from('sales')
       .insert([body])
       .select(`

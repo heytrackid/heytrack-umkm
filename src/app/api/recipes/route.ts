@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 // GET /api/recipes - Get all recipes with ingredient relationships
 export async function GET() {
   try {
-    const { data: recipes, error } = await supabase
+    const { data: recipes, error } = await (supabase as any)
       .from('recipes')
       .select(`
         *,
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Start a transaction by creating the recipe first
-    const { data: recipe, error: recipeError } = await supabase
+    const { data: recipe, error: recipeError } = await (supabase as any)
       .from('recipes')
       .insert(recipeData)
       .select()
@@ -78,14 +78,14 @@ export async function POST(request: NextRequest) {
         unit: ingredient.unit
       }))
 
-      const { error: ingredientsError } = await supabase
+      const { error: ingredientsError } = await (supabase as any)
         .from('recipe_ingredients')
         .insert(recipeIngredients)
 
       if (ingredientsError) {
         console.error('Error adding recipe ingredients:', ingredientsError)
         // If ingredients fail, we should delete the recipe to maintain consistency
-        await supabase.from('recipes').delete().eq('id', recipe.id)
+        await (supabase as any).from('recipes').delete().eq('id', recipe.id)
         return NextResponse.json(
           { error: 'Failed to add recipe ingredients' },
           { status: 500 }
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch the complete recipe with ingredients for response
-    const { data: completeRecipe, error: fetchError } = await supabase
+    const { data: completeRecipe, error: fetchError } = await (supabase as any)
       .from('recipes')
       .select(`
         *,

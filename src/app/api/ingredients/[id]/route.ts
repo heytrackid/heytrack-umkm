@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('ingredients')
       .select('*')
       .eq('id', id)
@@ -49,7 +49,7 @@ export async function PUT(
     const supabase = createServerSupabaseAdmin()
     const body = await request.json()
     
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('ingredients')
       .update(body)
       .eq('id', id)
@@ -88,7 +88,7 @@ export async function DELETE(
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('ingredients')
       .delete()
       .eq('id', id)

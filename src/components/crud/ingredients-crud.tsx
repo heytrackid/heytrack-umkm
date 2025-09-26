@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useIngredients } from '@/hooks/useSupabaseCRUD';
 import { DataTable } from '@/components/ui/data-table';
 import { Modal } from '@/components/ui/modal';
-import { FormField, CrudForm, FormActions, ConfirmDialog } from '@/components/ui/crud-form';
+import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
 import { Database } from '@/types/database';
 
@@ -72,25 +72,30 @@ export function IngredientsCRUD() {
     {
       key: 'name',
       header: 'Name',
+      priority: 'high' as const,
     },
     {
       key: 'unit',
       header: 'Unit',
+      priority: 'high' as const,
     },
     {
       key: 'cost_per_unit',
       header: 'Cost per Unit',
       render: (value: number) => `Rp ${value.toLocaleString()}`,
+      hideOnMobile: true,
     },
     {
       key: 'current_stock',
       header: 'Current Stock',
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
+      priority: 'medium' as const,
     },
     {
       key: 'minimum_stock',
       header: 'Min Stock',
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
+      hideOnMobile: true,
     },
   ];
 
@@ -118,7 +123,7 @@ export function IngredientsCRUD() {
     if (!validateAll()) return;
 
     try {
-      await create(formData as IngredientInsert);
+      await create(formData as any);
       setIsCreateModalOpen(false);
       resetForm();
     } catch (error) {
@@ -131,7 +136,7 @@ export function IngredientsCRUD() {
     if (!validateAll() || !selectedIngredient) return;
 
     try {
-      await update(selectedIngredient.id, formData as IngredientUpdate);
+      await update(selectedIngredient.id, formData as any);
       setIsEditModalOpen(false);
       setSelectedIngredient(null);
       resetForm();
@@ -180,6 +185,7 @@ export function IngredientsCRUD() {
         title="Ingredients"
         createButtonText="Add Ingredient"
         emptyMessage="No ingredients found. Add your first ingredient to get started."
+        searchable={true}
       />
 
       {/* Create Modal */}
@@ -187,90 +193,112 @@ export function IngredientsCRUD() {
         isOpen={isCreateModalOpen}
         onClose={closeModals}
         title="Add New Ingredient"
-        size="md"
+        size="lg"
+        fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitCreate}>
-          <FormField
-            label="Name"
-            name="name"
-            type="text"
-            value={formData.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.name ? errors.name : undefined}
-            required
-            placeholder="e.g., Flour, Sugar, Butter"
-          />
+          <FormSection
+            title="Basic Information"
+            description="Enter the basic details for the ingredient"
+          >
+            <FormGrid cols={2}>
+              <FormField
+                label="Name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.name ? errors.name : undefined}
+                required
+                placeholder="e.g., Flour, Sugar, Butter"
+                hint="Enter the ingredient name"
+              />
 
-          <FormField
-            label="Unit"
-            name="unit"
-            type="select"
-            value={formData.unit}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.unit ? errors.unit : undefined}
-            required
-            options={unitOptions}
-          />
+              <FormField
+                label="Unit"
+                name="unit"
+                type="select"
+                value={formData.unit}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.unit ? errors.unit : undefined}
+                required
+                options={unitOptions}
+                hint="Select measurement unit"
+              />
+            </FormGrid>
+          </FormSection>
 
-          <FormField
-            label="Cost per Unit (Rp)"
-            name="cost_per_unit"
-            type="number"
-            value={formData.cost_per_unit}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.cost_per_unit ? errors.cost_per_unit : undefined}
-            required
-            min={0}
-            step={0.01}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
+          <FormSection
+            title="Stock & Pricing"
+            description="Set stock levels and cost information"
+          >
             <FormField
-              label="Current Stock"
-              name="current_stock"
+              label="Cost per Unit (Rp)"
+              name="cost_per_unit"
               type="number"
-              value={formData.current_stock}
+              value={formData.cost_per_unit}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.current_stock ? errors.current_stock : undefined}
+              error={touched.cost_per_unit ? errors.cost_per_unit : undefined}
               required
               min={0}
               step={0.01}
+              hint="Enter cost in Rupiah"
             />
 
+            <FormGrid cols={2}>
+              <FormField
+                label="Current Stock"
+                name="current_stock"
+                type="number"
+                value={formData.current_stock}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.current_stock ? errors.current_stock : undefined}
+                required
+                min={0}
+                step={0.01}
+                hint="Available quantity"
+              />
+
+              <FormField
+                label="Minimum Stock"
+                name="minimum_stock"
+                type="number"
+                value={formData.minimum_stock}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.minimum_stock ? errors.minimum_stock : undefined}
+                required
+                min={0}
+                step={0.01}
+                hint="Reorder threshold"
+              />
+            </FormGrid>
+          </FormSection>
+
+          <FormSection title="Additional Information">
             <FormField
-              label="Minimum Stock"
-              name="minimum_stock"
-              type="number"
-              value={formData.minimum_stock}
+              label="Description"
+              name="description"
+              type="textarea"
+              value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.minimum_stock ? errors.minimum_stock : undefined}
-              required
-              min={0}
-              step={0.01}
+              error={touched.description ? errors.description : undefined}
+              placeholder="Optional description or notes about the ingredient"
+              rows={3}
+              hint="Add any additional notes or specifications"
             />
-          </div>
-
-          <FormField
-            label="Description"
-            name="description"
-            type="textarea"
-            value={formData.description}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.description ? errors.description : undefined}
-            placeholder="Optional description or notes"
-            rows={3}
-          />
+          </FormSection>
 
           <FormActions
             onCancel={closeModals}
             submitText="Create Ingredient"
             loading={loading}
+            sticky={true}
           />
         </CrudForm>
       </Modal>
@@ -280,90 +308,106 @@ export function IngredientsCRUD() {
         isOpen={isEditModalOpen}
         onClose={closeModals}
         title="Edit Ingredient"
-        size="md"
+        size="lg"
+        fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitEdit}>
-          <FormField
-            label="Name"
-            name="name"
-            type="text"
-            value={formData.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.name ? errors.name : undefined}
-            required
-            placeholder="e.g., Flour, Sugar, Butter"
-          />
+          <FormSection
+            title="Basic Information"
+            description="Update the basic details for the ingredient"
+          >
+            <FormGrid cols={2}>
+              <FormField
+                label="Name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.name ? errors.name : undefined}
+                required
+                placeholder="e.g., Flour, Sugar, Butter"
+              />
 
-          <FormField
-            label="Unit"
-            name="unit"
-            type="select"
-            value={formData.unit}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.unit ? errors.unit : undefined}
-            required
-            options={unitOptions}
-          />
+              <FormField
+                label="Unit"
+                name="unit"
+                type="select"
+                value={formData.unit}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.unit ? errors.unit : undefined}
+                required
+                options={unitOptions}
+              />
+            </FormGrid>
+          </FormSection>
 
-          <FormField
-            label="Cost per Unit (Rp)"
-            name="cost_per_unit"
-            type="number"
-            value={formData.cost_per_unit}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.cost_per_unit ? errors.cost_per_unit : undefined}
-            required
-            min={0}
-            step={0.01}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
+          <FormSection
+            title="Stock & Pricing"
+            description="Update stock levels and cost information"
+          >
             <FormField
-              label="Current Stock"
-              name="current_stock"
+              label="Cost per Unit (Rp)"
+              name="cost_per_unit"
               type="number"
-              value={formData.current_stock}
+              value={formData.cost_per_unit}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.current_stock ? errors.current_stock : undefined}
+              error={touched.cost_per_unit ? errors.cost_per_unit : undefined}
               required
               min={0}
               step={0.01}
             />
 
+            <FormGrid cols={2}>
+              <FormField
+                label="Current Stock"
+                name="current_stock"
+                type="number"
+                value={formData.current_stock}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.current_stock ? errors.current_stock : undefined}
+                required
+                min={0}
+                step={0.01}
+              />
+
+              <FormField
+                label="Minimum Stock"
+                name="minimum_stock"
+                type="number"
+                value={formData.minimum_stock}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.minimum_stock ? errors.minimum_stock : undefined}
+                required
+                min={0}
+                step={0.01}
+              />
+            </FormGrid>
+          </FormSection>
+
+          <FormSection title="Additional Information">
             <FormField
-              label="Minimum Stock"
-              name="minimum_stock"
-              type="number"
-              value={formData.minimum_stock}
+              label="Description"
+              name="description"
+              type="textarea"
+              value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.minimum_stock ? errors.minimum_stock : undefined}
-              required
-              min={0}
-              step={0.01}
+              error={touched.description ? errors.description : undefined}
+              placeholder="Optional description or notes"
+              rows={3}
             />
-          </div>
-
-          <FormField
-            label="Description"
-            name="description"
-            type="textarea"
-            value={formData.description}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.description ? errors.description : undefined}
-            placeholder="Optional description or notes"
-            rows={3}
-          />
+          </FormSection>
 
           <FormActions
             onCancel={closeModals}
             submitText="Update Ingredient"
             loading={loading}
+            sticky={true}
           />
         </CrudForm>
       </Modal>

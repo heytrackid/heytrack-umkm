@@ -4,13 +4,22 @@ import React, { useState } from 'react';
 import { useSuppliers } from '@/hooks/useSupabaseCRUD';
 import { DataTable } from '@/components/ui/data-table';
 import { Modal } from '@/components/ui/modal';
-import { FormField, CrudForm, FormActions, ConfirmDialog } from '@/components/ui/crud-form';
+import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
 import { Database } from '@/types/database';
 
-type Supplier = Database['public']['Tables']['suppliers']['Row'];
-type SupplierInsert = Database['public']['Tables']['suppliers']['Insert'];
-type SupplierUpdate = Database['public']['Tables']['suppliers']['Update'];
+// Using generic types since suppliers might not be in the database schema yet
+type Supplier = {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+type SupplierInsert = Omit<Supplier, 'id' | 'created_at' | 'updated_at'>;
+type SupplierUpdate = Partial<SupplierInsert>;
 
 interface SupplierFormData {
   name: string;
@@ -41,7 +50,8 @@ const validationRules = {
 };
 
 export function SuppliersCRUD() {
-  const { data: suppliers, loading, error, create, update, remove } = useSuppliers();
+  const { data: suppliersData, loading, error, create, update, remove } = useSuppliers();
+  const suppliers = suppliersData as Supplier[];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -70,21 +80,25 @@ export function SuppliersCRUD() {
     {
       key: 'name',
       header: 'Name',
+      priority: 'high' as const,
     },
     {
       key: 'contact_person',
       header: 'Contact Person',
       render: (value: string) => value || '-',
+      priority: 'high' as const,
     },
     {
       key: 'phone',
       header: 'Phone',
       render: (value: string) => value || '-',
+      hideOnMobile: true,
     },
     {
       key: 'email',
       header: 'Email',
       render: (value: string) => value || '-',
+      hideOnMobile: true,
     },
   ];
 
@@ -174,6 +188,7 @@ export function SuppliersCRUD() {
         title="Suppliers"
         createButtonText="Add Supplier"
         emptyMessage="No suppliers found. Add your first supplier to get started."
+        searchable={true}
       />
 
       {/* Create Modal */}

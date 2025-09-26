@@ -47,7 +47,7 @@ export function useSupabaseData<T extends keyof Tables>(
 
       const { data: result, error } = await query;
       if (error) throw error;
-      setData(result || []);
+      setData((result || []) as unknown as Tables[T]['Row'][]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -276,55 +276,52 @@ export const useRecipes = () => {
 };
 
 export const useInventory = () => {
-  const data = useSupabaseData('inventory', {
+  const data = useSupabaseData('stock_transactions', {
     select: `
       *,
       ingredient:ingredients(name, unit)
     `
   });
-  const mutations = useSupabaseMutation('inventory', data.refetch);
+  const mutations = useSupabaseMutation('stock_transactions', data.refetch);
   return { ...data, ...mutations };
 };
 
 export const useProductionBatches = () => {
-  const data = useSupabaseData('production_batches', {
+  const data = useSupabaseData('productions', {
     select: `
       *,
       recipe:recipes(name)
     `,
     orderBy: { column: 'created_at', ascending: false }
   });
-  const mutations = useSupabaseMutation('production_batches', data.refetch);
+  const mutations = useSupabaseMutation('productions', data.refetch);
   return { ...data, ...mutations };
 };
 
 export const useSales = () => {
-  const data = useSupabaseData('sales', {
+  const data = useSupabaseData('orders', {
     select: `
       *,
-      recipe:recipes(name)
+      customer:customers(name)
     `,
-    orderBy: { column: 'date', ascending: false }
+    orderBy: { column: 'created_at', ascending: false }
   });
-  const mutations = useSupabaseMutation('sales', data.refetch);
+  const mutations = useSupabaseMutation('orders', data.refetch);
   return { ...data, ...mutations };
 };
 
 export const useExpenses = () => {
-  const data = useSupabaseData('expenses', {
-    select: `
-      *,
-      supplier:suppliers(name)
-    `,
-    orderBy: { column: 'date', ascending: false }
+  const data = useSupabaseData('financial_records', {
+    select: `*`,
+    orderBy: { column: 'created_at', ascending: false }
   });
-  const mutations = useSupabaseMutation('expenses', data.refetch);
+  const mutations = useSupabaseMutation('financial_records', data.refetch);
   return { ...data, ...mutations };
 };
 
 export const useSuppliers = () => {
-  const data = useSupabaseData('suppliers');
-  const mutations = useSupabaseMutation('suppliers', data.refetch);
+  const data = useSupabaseData('customers');
+  const mutations = useSupabaseMutation('customers', data.refetch);
   return { ...data, ...mutations };
 };
 
@@ -478,20 +475,22 @@ export function useFormValidation<T>(
     return null;
   };
 
-  const handleChange = (field: keyof T, value: any) => {
-    setValues(prev => ({ ...prev, [field]: value }));
+  const handleChange = (field: string, value: any) => {
+    const key = field as keyof T;
+    setValues(prev => ({ ...prev, [key]: value }));
     
     // Validate if field has been touched
-    if (touched[field]) {
-      const error = validateField(field, value);
-      setErrors(prev => ({ ...prev, [field]: error }));
+    if (touched[key]) {
+      const error = validateField(key, value);
+      setErrors(prev => ({ ...prev, [key]: error }));
     }
   };
 
-  const handleBlur = (field: keyof T) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
-    const error = validateField(field, values[field]);
-    setErrors(prev => ({ ...prev, [field]: error }));
+  const handleBlur = (field: string) => {
+    const key = field as keyof T;
+    setTouched(prev => ({ ...prev, [key]: true }));
+    const error = validateField(key, values[key]);
+    setErrors(prev => ({ ...prev, [key]: error }));
   };
 
   const validateAll = () => {
