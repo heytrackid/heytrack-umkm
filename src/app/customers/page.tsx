@@ -337,10 +337,10 @@ export default function CustomersPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-semibold truncate">{customer.name}</h3>
                       <div className="flex gap-1">
-                        <Badge className={getTypeColor(customer.customerType)} size="sm">
+                        <Badge className={getTypeColor(customer.customerType)}>
                           {getTypeLabel(customer.customerType)}
                         </Badge>
-                        <Badge className={getStatusColor(customer.status)} size="sm">
+                        <Badge className={getStatusColor(customer.status)}>
                           {getStatusLabel(customer.status)}
                         </Badge>
                       </div>
@@ -628,7 +628,6 @@ function CustomerDetailView({ customer }: { customer: any }) {
               <div className="text-right">
                 <p className="font-medium">Rp {order.total.toLocaleString()}</p>
                 <Badge 
-                  size="sm" 
                   className={
                     order.status === 'DELIVERED' 
                       ? 'bg-green-100 text-green-800' 

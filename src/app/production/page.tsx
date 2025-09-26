@@ -25,7 +25,7 @@ import {
   TrendingUp,
   Play,
   Pause,
-  Stop,
+  Square,
   Eye,
   Users,
   Timer,

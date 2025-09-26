@@ -436,6 +436,10 @@ function TransactionForm({ onClose }: { onClose: () => void }) {
 
 // Transaction Detail View Component
 function TransactionDetailView({ transaction }: { transaction: any }) {
+  const getTypeInfo = (type: string) => {
+    return transactionTypes.find(t => t.value === type) || transactionTypes[0]
+  }
+  
   const typeInfo = getTypeInfo(transaction.type)
   const Icon = typeInfo.icon
 

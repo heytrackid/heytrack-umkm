@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { Ingredient } from '@/types/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -123,38 +124,78 @@ const sampleIngredients = [
 const categories = ['Semua', 'Tepung', 'Dairy', 'Protein', 'Pemanis', 'Cokelat', 'Ragi', 'Bumbu']
 const units = ['kg', 'g', 'l', 'ml', 'butir', 'bks', 'pcs']
 
-interface Ingredient {
-  id: string
-  name: string
-  description: string
-  category: string
-  unit: string
-  currentStock: number
-  minStock: number
-  maxStock: number
-  pricePerUnit: number
-  supplier: string
-  supplierPhone: string
-  lastPurchase: string
-  expiryDate: string
+// Enhanced ingredient type for UI display
+interface IngredientWithStats extends Omit<Ingredient, 'stock' | 'min_stock' | 'price_per_unit'> {
+  category?: string
+  currentStock: number // Map from 'stock' field
+  minStock: number // Map from 'min_stock' field
+  pricePerUnit: number // Map from 'price_per_unit' field
   status: 'adequate' | 'low' | 'critical'
-  usagePerWeek: number
+  usagePerWeek?: number
   totalValue: number
+  supplierPhone?: string
+  lastPurchase?: string
+  expiryDate?: string
 }
 
 export default function IngredientsPage() {
-  const [ingredients, setIngredients] = useState(sampleIngredients)
+  const [ingredients, setIngredients] = useState<IngredientWithStats[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [selectedStatus, setSelectedStatus] = useState('Semua')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [selectedIngredient, setSelectedIngredient] = useState<any>(null)
+  const [selectedIngredient, setSelectedIngredient] = useState<IngredientWithStats | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+
+  // Fetch ingredients from API
+  useEffect(() => {
+    fetchIngredients()
+  }, [])
+
+  const fetchIngredients = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/ingredients')
+      if (!response.ok) {
+        throw new Error('Failed to fetch ingredients')
+      }
+      const data: Ingredient[] = await response.json()
+      
+      // Transform data to include calculated fields for UI
+      const transformedData: IngredientWithStats[] = data.map(ingredient => ({
+        ...ingredient,
+        category: 'Umum', // Default category since it's not in our DB schema yet
+        currentStock: ingredient.stock,
+        minStock: ingredient.min_stock,
+        pricePerUnit: ingredient.price_per_unit,
+        status: getStockStatus(ingredient.stock, ingredient.min_stock),
+        totalValue: ingredient.stock * ingredient.price_per_unit,
+        usagePerWeek: 0, // Default since we don't track this yet
+        supplierPhone: '', // Default since we don't have this field yet
+        lastPurchase: '', // Default since we don't have this field yet
+        expiryDate: '' // Default since we don't have this field yet
+      }))
+      
+      setIngredients(transformedData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load ingredients')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getStockStatus = (currentStock: number, minStock: number): 'adequate' | 'low' | 'critical' => {
+    if (currentStock <= minStock * 0.5) return 'critical'
+    if (currentStock <= minStock) return 'low'
+    return 'adequate'
+  }
 
   // Filter ingredients
   const filteredIngredients = ingredients.filter(ingredient => {
     const matchesSearch = ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ingredient.description.toLowerCase().includes(searchTerm.toLowerCase())
+                         (ingredient.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
     const matchesCategory = selectedCategory === 'Semua' || ingredient.category === selectedCategory
     const matchesStatus = selectedStatus === 'Semua' || ingredient.status === selectedStatus
     return matchesSearch && matchesCategory && matchesStatus
@@ -188,7 +229,9 @@ export default function IngredientsPage() {
     totalIngredients: ingredients.length,
     lowStockItems: ingredients.filter(i => i.status === 'low' || i.status === 'critical').length,
     totalValue: ingredients.reduce((sum, i) => sum + i.totalValue, 0),
-    avgUsage: ingredients.reduce((sum, i) => sum + i.usagePerWeek, 0) / ingredients.length
+    avgUsage: ingredients.length > 0 
+      ? ingredients.reduce((sum, i) => sum + (i.usagePerWeek || 0), 0) / ingredients.length
+      : 0
   }
 
   return (
@@ -216,6 +259,33 @@ export default function IngredientsPage() {
           </Dialog>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground mt-2">Memuat data bahan baku...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-4">
+                <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                <p className="text-red-600 font-medium">Gagal memuat data</p>
+                <p className="text-sm text-muted-foreground mb-4">{error}</p>
+                <Button onClick={fetchIngredients}>Coba Lagi</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Content - only show when not loading and no error */}
+        {!loading && !error && (
+          <>
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
@@ -324,7 +394,7 @@ export default function IngredientsPage() {
                         <div>
                           <p className="font-medium">{ingredient.name}</p>
                           <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                            {ingredient.description}
+                            {ingredient.description || 'Tidak ada deskripsi'}
                           </p>
                         </div>
                       </td>
@@ -342,7 +412,7 @@ export default function IngredientsPage() {
                       <td className="p-4">
                         <div className="text-sm">
                           <p>Min: {ingredient.minStock} {ingredient.unit}</p>
-                          <p>Max: {ingredient.maxStock} {ingredient.unit}</p>
+                          <p>Max: {ingredient.minStock * 3} {ingredient.unit}</p>
                         </div>
                       </td>
                       <td className="p-4">
@@ -450,6 +520,8 @@ export default function IngredientsPage() {
             {selectedIngredient && <IngredientDetailView ingredient={selectedIngredient} />}
           </DialogContent>
         </Dialog>
+        </>
+        )}
       </div>
     </AppLayout>
   )

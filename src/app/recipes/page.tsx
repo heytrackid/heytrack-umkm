@@ -518,7 +518,7 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Kesulitan:</span>
-                  <Badge className={getDifficultyColor(recipe.difficulty)} size="sm">
+                  <Badge className={getDifficultyColor(recipe.difficulty)}>
                     {recipe.difficulty}
                   </Badge>
                 </div>

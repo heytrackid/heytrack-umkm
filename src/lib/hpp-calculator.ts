@@ -1,4 +1,4 @@
-import { Database } from './supabase'
+import { Database } from '@/types/database'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
