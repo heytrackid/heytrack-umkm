@@ -1,0 +1,115 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { 
+  LayoutDashboard, 
+  ChefHat, 
+  Package, 
+  ShoppingCart, 
+  Users, 
+  TrendingUp,
+  Calculator,
+  Warehouse,
+  CreditCard,
+  BarChart3,
+  Settings
+} from 'lucide-react'
+
+const navigation = [
+  {
+    name: 'Dashboard',
+    href: '/',
+    icon: LayoutDashboard,
+  },
+  {
+    name: 'Resep',
+    href: '/recipes',
+    icon: ChefHat,
+  },
+  {
+    name: 'HPP Calculator',
+    href: '/hpp',
+    icon: Calculator,
+  },
+  {
+    name: 'Bahan Baku',
+    href: '/ingredients',
+    icon: Package,
+  },
+  {
+    name: 'Stok & Inventory',
+    href: '/inventory',
+    icon: Warehouse,
+  },
+  {
+    name: 'Pesanan',
+    href: '/orders',
+    icon: ShoppingCart,
+  },
+  {
+    name: 'Pelanggan',
+    href: '/customers',
+    icon: Users,
+  },
+  {
+    name: 'Produksi',
+    href: '/production',
+    icon: TrendingUp,
+  },
+  {
+    name: 'Keuangan',
+    href: '/finance',
+    icon: CreditCard,
+  },
+  {
+    name: 'Laporan',
+    href: '/reports',
+    icon: BarChart3,
+  },
+  {
+    name: 'Pengaturan',
+    href: '/settings',
+    icon: Settings,
+  },
+]
+
+export default function Sidebar() {
+  const pathname = usePathname()
+
+  return (
+    <div className="flex h-full w-64 flex-col bg-gray-50 border-r">
+      <div className="flex h-16 items-center px-6 border-b">
+        <ChefHat className="h-8 w-8 text-orange-600" />
+        <span className="ml-2 text-xl font-bold text-gray-900">Bakery MS</span>
+      </div>
+      <nav className="flex-1 px-4 py-6">
+        <ul className="space-y-2">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <li key={item.name}>
+                <Link href={item.href}>
+                  <Button
+                    variant={isActive ? "default" : "ghost"}
+                    className={cn(
+                      "w-full justify-start",
+                      isActive 
+                        ? "bg-orange-600 text-white hover:bg-orange-700" 
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.name}
+                  </Button>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+    </div>
+  )
+}
