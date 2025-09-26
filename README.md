@@ -1,6 +1,6 @@
 # 🎯 HeyTrack - Business Management Module
 
-HeyTrack adalah modul manajemen bisnis yang komprehensif untuk aplikasi BISMILLAH. Modul ini menyediakan semua fitur yang diperlukan untuk mengelola operasi bisnis seperti inventory, suppliers, customers, orders, dan financial transactions.
+HeyTrack adalah sistem manajemen bisnis yang komprehensif untuk UMKM Indonesia. Sistem ini menyediakan semua fitur yang diperlukan untuk mengelola operasi bisnis seperti inventory, suppliers, customers, orders, dan financial transactions.
 
 ## 📁 Struktur Folder
 
@@ -249,4 +249,6 @@ Saat menambah fitur baru ke HeyTrack:
 
 ## 📝 License
 
-Part of BISMILLAH Business Management Application.
+Developed by HeyTrack ID for Indonesian UMKM businesses.
+
+© 2025 HeyTrack ID. All rights reserved.

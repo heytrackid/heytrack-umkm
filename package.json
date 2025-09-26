@@ -31,7 +31,7 @@
     "vite",
     "supabase"
   ],
-  "author": "BISMILLAH Team",
+  "author": "HeyTrack ID <contact@heytrack.id>",
   "license": "MIT",
   "dependencies": {
     "react": "^18.3.1",
