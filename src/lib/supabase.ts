@@ -91,7 +91,7 @@ export const dbService = {
   async addIngredient(ingredient: Database['public']['Tables']['ingredients']['Insert']) {
     const { data, error } = await supabase
       .from('ingredients')
-      .insert(ingredient)
+      .insert(ingredient as any)
       .select()
       .single()
     
@@ -100,15 +100,15 @@ export const dbService = {
   },
 
   async updateIngredient(id: string, updates: Database['public']['Tables']['ingredients']['Update']) {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('ingredients')
       .update(updates)
       .eq('id', id)
-      .select()
+      .select('*')
       .single()
     
     if (error) throw error
-    return data
+    return data as Database['public']['Tables']['ingredients']['Row']
   },
 
   // Recipes with ingredients

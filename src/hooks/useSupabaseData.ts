@@ -9,6 +9,8 @@ import {
   Customer, 
   ProductionWithRecipe, 
   FinancialRecord,
+  Order,
+  Production,
   Database
 } from '@/types/database'
 
@@ -193,7 +195,7 @@ export function useSupabaseMutations() {
     executeWithLoading(async () => {
       const { data, error } = await supabase
         .from('customers')
-        .insert(customer)
+        .insert(customer as any)
         .select()
         .single()
       
@@ -203,22 +205,22 @@ export function useSupabaseMutations() {
 
   const updateCustomer = (id: string, updates: Database['public']['Tables']['customers']['Update']) =>
     executeWithLoading(async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('customers')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select('*')
         .single()
       
       if (error) throw error
-      return data
+      return data as Customer
     })
 
   const addOrder = (order: Database['public']['Tables']['orders']['Insert']) =>
     executeWithLoading(async () => {
       const { data, error } = await supabase
         .from('orders')
-        .insert(order)
+        .insert(order as any)
         .select()
         .single()
       
@@ -228,22 +230,22 @@ export function useSupabaseMutations() {
 
   const updateOrderStatus = (id: string, status: Database['public']['Enums']['order_status']) =>
     executeWithLoading(async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('orders')
         .update({ status })
         .eq('id', id)
-        .select()
+        .select('*')
         .single()
       
       if (error) throw error
-      return data
+      return data as Order
     })
 
   const addProduction = (production: Database['public']['Tables']['productions']['Insert']) =>
     executeWithLoading(async () => {
       const { data, error } = await supabase
         .from('productions')
-        .insert(production)
+        .insert(production as any)
         .select()
         .single()
       
@@ -253,22 +255,22 @@ export function useSupabaseMutations() {
 
   const updateProductionStatus = (id: string, status: Database['public']['Enums']['production_status']) =>
     executeWithLoading(async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('productions')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', id)
-        .select()
+        .select('*')
         .single()
       
       if (error) throw error
-      return data
+      return data as Production
     })
 
   const addFinancialRecord = (record: Database['public']['Tables']['financial_records']['Insert']) =>
     executeWithLoading(async () => {
       const { data, error } = await supabase
         .from('financial_records')
-        .insert(record)
+        .insert(record as any)
         .select()
         .single()
       
@@ -286,12 +288,13 @@ export function useSupabaseMutations() {
         .single()
 
       if (ingredientError) throw ingredientError
+      if (!ingredient) throw new Error('Ingredient not found')
 
       const newStock = type === 'USAGE' || type === 'WASTE' 
-        ? ingredient.current_stock - quantity 
-        : ingredient.current_stock + quantity
+        ? (ingredient as any).current_stock - quantity 
+        : (ingredient as any).current_stock + quantity
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('ingredients')
         .update({ current_stock: newStock })
         .eq('id', ingredientId)
@@ -305,10 +308,10 @@ export function useSupabaseMutations() {
           ingredient_id: ingredientId,
           type,
           quantity,
-          unit: ingredient.unit,
+          unit: (ingredient as any).unit,
           reference,
           notes: `Stock ${type.toLowerCase()}: ${reference || 'Manual adjustment'}`
-        })
+        } as any)
         .select()
         .single()
 

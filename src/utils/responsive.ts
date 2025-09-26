@@ -216,7 +216,7 @@ export function throttle<T extends (...args: unknown[]) => void>(
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
   
-  return function executedFunction(...args: Parameters<T>) {
+  return function executedFunction(this: unknown, ...args: Parameters<T>) {
     if (!inThrottle) {
       func.apply(this, args);
       inThrottle = true;
