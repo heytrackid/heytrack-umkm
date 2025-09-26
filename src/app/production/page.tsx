@@ -1,0 +1,907 @@
+'use client'
+
+import { useState } from 'react'
+import AppLayout from '@/components/layout/app-layout'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { 
+  Plus, 
+  Search, 
+  Edit, 
+  Trash2, 
+  Factory, 
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  DollarSign,
+  Package,
+  Calendar,
+  TrendingUp,
+  Play,
+  Pause,
+  Stop,
+  Eye,
+  Users,
+  Timer,
+  Target,
+  BarChart3
+} from 'lucide-react'
+
+// Sample data
+const sampleProductions = [
+  {
+    id: '1',
+    batchNo: 'BATCH-20240125-001',
+    recipeName: 'Roti Tawar Premium',
+    recipeId: 'RCP-001',
+    plannedQuantity: 50,
+    actualQuantity: 48,
+    status: 'COMPLETED',
+    priority: 'normal',
+    plannedStartTime: '2024-01-25 06:00',
+    actualStartTime: '2024-01-25 06:15',
+    plannedEndTime: '2024-01-25 09:00',
+    actualEndTime: '2024-01-25 09:30',
+    estimatedDuration: 180,
+    actualDuration: 195,
+    assignedStaff: ['Ahmad', 'Budi'],
+    materialCost: 400000,
+    laborCost: 120000,
+    overheadCost: 50000,
+    totalCost: 570000,
+    costPerUnit: 11875,
+    expectedRevenue: 750000,
+    profitMargin: 31.6,
+    qualityRating: 4.8,
+    notes: 'Produksi berjalan lancar, sedikit delay karena menunggu oven',
+    ingredients: [
+      { name: 'Tepung Terigu', planned: 25, used: 25.2, unit: 'kg' },
+      { name: 'Ragi', planned: 0.35, used: 0.35, unit: 'kg' },
+      { name: 'Mentega', planned: 2.5, used: 2.4, unit: 'kg' }
+    ]
+  },
+  {
+    id: '2',
+    batchNo: 'BATCH-20240125-002',
+    recipeName: 'Croissant Butter',
+    recipeId: 'RCP-002',
+    plannedQuantity: 100,
+    actualQuantity: 0,
+    status: 'IN_PROGRESS',
+    priority: 'high',
+    plannedStartTime: '2024-01-25 08:00',
+    actualStartTime: '2024-01-25 08:00',
+    plannedEndTime: '2024-01-25 12:00',
+    actualEndTime: null,
+    estimatedDuration: 240,
+    actualDuration: 0,
+    assignedStaff: ['Sari', 'Dewi'],
+    materialCost: 800000,
+    laborCost: 200000,
+    overheadCost: 80000,
+    totalCost: 1080000,
+    costPerUnit: 10800,
+    expectedRevenue: 2500000,
+    profitMargin: 131.5,
+    qualityRating: 0,
+    notes: 'Proses laminating sedang berlangsung',
+    ingredients: [
+      { name: 'Tepung Terigu', planned: 40, used: 40, unit: 'kg' },
+      { name: 'Mentega Premium', planned: 20, used: 20, unit: 'kg' },
+      { name: 'Telur', planned: 5, used: 5, unit: 'kg' }
+    ]
+  },
+  {
+    id: '3',
+    batchNo: 'BATCH-20240125-003',
+    recipeName: 'Donat Glaze',
+    recipeId: 'RCP-003',
+    plannedQuantity: 200,
+    actualQuantity: 0,
+    status: 'PLANNED',
+    priority: 'normal',
+    plannedStartTime: '2024-01-25 14:00',
+    actualStartTime: null,
+    plannedEndTime: '2024-01-25 17:00',
+    actualEndTime: null,
+    estimatedDuration: 180,
+    actualDuration: 0,
+    assignedStaff: ['Ahmad', 'Rian'],
+    materialCost: 600000,
+    laborCost: 150000,
+    overheadCost: 60000,
+    totalCost: 810000,
+    costPerUnit: 4050,
+    expectedRevenue: 1600000,
+    profitMargin: 97.5,
+    qualityRating: 0,
+    notes: 'Menunggu selesai batch sebelumnya',
+    ingredients: [
+      { name: 'Tepung Terigu', planned: 35, used: 0, unit: 'kg' },
+      { name: 'Gula', planned: 6, used: 0, unit: 'kg' },
+      { name: 'Telur', planned: 3, used: 0, unit: 'kg' }
+    ]
+  },
+  {
+    id: '4',
+    batchNo: 'BATCH-20240124-004',
+    recipeName: 'Roti Tawar Premium',
+    recipeId: 'RCP-001',
+    plannedQuantity: 40,
+    actualQuantity: 39,
+    status: 'COMPLETED',
+    priority: 'normal',
+    plannedStartTime: '2024-01-24 06:00',
+    actualStartTime: '2024-01-24 06:00',
+    plannedEndTime: '2024-01-24 09:00',
+    actualEndTime: '2024-01-24 08:45',
+    estimatedDuration: 180,
+    actualDuration: 165,
+    assignedStaff: ['Budi', 'Sari'],
+    materialCost: 320000,
+    laborCost: 100000,
+    overheadCost: 40000,
+    totalCost: 460000,
+    costPerUnit: 11795,
+    expectedRevenue: 585000,
+    profitMargin: 27.2,
+    qualityRating: 4.5,
+    notes: 'Produksi lebih cepat dari jadwal',
+    ingredients: [
+      { name: 'Tepung Terigu', planned: 20, used: 19.8, unit: 'kg' },
+      { name: 'Ragi', planned: 0.28, used: 0.28, unit: 'kg' },
+      { name: 'Mentega', planned: 2, used: 1.9, unit: 'kg' }
+    ]
+  }
+]
+
+const productionStatuses = [
+  { value: 'PLANNED', label: 'Direncanakan', color: 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100' },
+  { value: 'IN_PROGRESS', label: 'Sedang Berjalan', color: 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100' },
+  { value: 'COMPLETED', label: 'Selesai', color: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' },
+  { value: 'PAUSED', label: 'Dihentikan', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100' },
+  { value: 'CANCELLED', label: 'Dibatalkan', color: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' }
+]
+
+const priorities = [
+  { value: 'low', label: 'Rendah', color: 'bg-gray-100 text-gray-800' },
+  { value: 'normal', label: 'Normal', color: 'bg-blue-100 text-blue-800' },
+  { value: 'high', label: 'Tinggi', color: 'bg-red-100 text-red-800' }
+]
+
+export default function ProductionPage() {
+  const [productions, setProductions] = useState(sampleProductions)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('Semua')
+  const [priorityFilter, setPriorityFilter] = useState('Semua')
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [selectedProduction, setSelectedProduction] = useState<any>(null)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+
+  // Filter productions
+  const filteredProductions = productions.filter(production => {
+    const matchesSearch = production.batchNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         production.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'Semua' || production.status === statusFilter
+    const matchesPriority = priorityFilter === 'Semua' || production.priority === priorityFilter
+    return matchesSearch && matchesStatus && matchesPriority
+  })
+
+  const getStatusInfo = (status: string) => {
+    return productionStatuses.find(s => s.value === status) || productionStatuses[0]
+  }
+
+  const getPriorityInfo = (priority: string) => {
+    return priorities.find(p => p.value === priority) || priorities[1]
+  }
+
+  const handleViewProduction = (production: any) => {
+    setSelectedProduction(production)
+    setIsViewDialogOpen(true)
+  }
+
+  const updateProductionStatus = (productionId: string, newStatus: string) => {
+    setProductions(prev => prev.map(production => 
+      production.id === productionId ? { ...production, status: newStatus } : production
+    ))
+  }
+
+  // Calculate stats
+  const stats = {
+    totalBatches: productions.length,
+    activeBatches: productions.filter(p => p.status === 'IN_PROGRESS' || p.status === 'PLANNED').length,
+    completedToday: productions.filter(p => p.status === 'COMPLETED' && p.actualEndTime?.startsWith('2024-01-25')).length,
+    totalProduced: productions.filter(p => p.status === 'COMPLETED').reduce((sum, p) => sum + p.actualQuantity, 0),
+    avgEfficiency: productions.filter(p => p.status === 'COMPLETED').length > 0 ? 
+      productions.filter(p => p.status === 'COMPLETED').reduce((sum, p) => sum + (p.actualQuantity / p.plannedQuantity * 100), 0) / 
+      productions.filter(p => p.status === 'COMPLETED').length : 0
+  }
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Produksi</h1>
+            <p className="text-muted-foreground">Kelola perencanaan dan tracking produksi</p>
+          </div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Batch Baru
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Buat Batch Produksi Baru</DialogTitle>
+              </DialogHeader>
+              <ProductionForm onClose={() => setIsAddDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-5">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Batch</CardTitle>
+              <Factory className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalBatches}</div>
+              <p className="text-xs text-muted-foreground">semua batch</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Batch Aktif</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{stats.activeBatches}</div>
+              <p className="text-xs text-muted-foreground">sedang berjalan</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Selesai Hari Ini</CardTitle>
+              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.completedToday}</div>
+              <p className="text-xs text-muted-foreground">batch completed</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Produksi</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalProduced}</div>
+              <p className="text-xs text-muted-foreground">unit diproduksi</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Rata-rata Efisiensi</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.avgEfficiency.toFixed(1)}%</div>
+              <p className="text-xs text-muted-foreground">target vs actual</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters and Search */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari batch atau resep..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <select
+                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="Semua">Semua Status</option>
+                  {productionStatuses.map(status => (
+                    <option key={status.value} value={status.value}>{status.label}</option>
+                  ))}
+                </select>
+                <select
+                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                >
+                  <option value="Semua">Semua Prioritas</option>
+                  {priorities.map(priority => (
+                    <option key={priority.value} value={priority.value}>{priority.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Production List */}
+        <div className="space-y-4">
+          {filteredProductions.map((production) => {
+            const statusInfo = getStatusInfo(production.status)
+            const priorityInfo = getPriorityInfo(production.priority)
+            const efficiency = production.status === 'COMPLETED' ? (production.actualQuantity / production.plannedQuantity * 100) : 0
+            
+            return (
+              <Card key={production.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold">{production.batchNo}</h3>
+                        <Badge className={statusInfo.color}>
+                          {statusInfo.label}
+                        </Badge>
+                        {production.priority !== 'normal' && (
+                          <Badge variant="outline" className={priorityInfo.color}>
+                            {priorityInfo.label}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            <span>{production.recipeName}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4" />
+                            <span>Target: {production.plannedQuantity} unit</span>
+                          </div>
+                          {production.actualQuantity > 0 && (
+                            <div className="flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4" />
+                              <span>Actual: {production.actualQuantity} unit</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>Mulai: {production.plannedStartTime}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Timer className="h-4 w-4" />
+                            <span>Durasi: {production.estimatedDuration} menit</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span>Staff: {production.assignedStaff.join(', ')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold">
+                        Rp {production.costPerUnit.toLocaleString()}/unit
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Total: Rp {production.totalCost.toLocaleString()}
+                      </div>
+                      {production.status === 'COMPLETED' && (
+                        <div className="text-sm">
+                          <span className={`font-medium ${efficiency >= 90 ? 'text-green-600' : efficiency >= 75 ? 'text-yellow-600' : 'text-red-600'}`}>
+                            Efisiensi: {efficiency.toFixed(1)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="text-muted-foreground">
+                        Profit Margin: {production.profitMargin.toFixed(1)}%
+                      </div>
+                      {production.qualityRating > 0 && (
+                        <div className="text-muted-foreground">
+                          Kualitas: ⭐ {production.qualityRating}
+                        </div>
+                      )}
+                      {production.notes && (
+                        <div className="text-muted-foreground truncate max-w-xs">
+                          Note: {production.notes}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewProduction(production)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Detail
+                      </Button>
+                      {production.status === 'PLANNED' && (
+                        <Button 
+                          size="sm"
+                          onClick={() => updateProductionStatus(production.id, 'IN_PROGRESS')}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Mulai
+                        </Button>
+                      )}
+                      {production.status === 'IN_PROGRESS' && (
+                        <>
+                          <Button 
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateProductionStatus(production.id, 'PAUSED')}
+                          >
+                            <Pause className="h-3 w-3 mr-1" />
+                            Pause
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => updateProductionStatus(production.id, 'COMPLETED')}
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Selesai
+                          </Button>
+                        </>
+                      )}
+                      {production.status === 'PAUSED' && (
+                        <Button 
+                          size="sm"
+                          onClick={() => updateProductionStatus(production.id, 'IN_PROGRESS')}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          Lanjutkan
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+
+        {filteredProductions.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Factory className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Tidak ada batch produksi ditemukan</h3>
+              <p className="text-muted-foreground mb-4">
+                Coba ubah kata kunci pencarian atau filter
+              </p>
+              <Button onClick={() => setIsAddDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Buat Batch Pertama
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Production Detail Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Detail Batch {selectedProduction?.batchNo}</DialogTitle>
+            </DialogHeader>
+            {selectedProduction && <ProductionDetailView production={selectedProduction} />}
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AppLayout>
+  )
+}
+
+// Production Form Component
+function ProductionForm({ onClose }: { onClose: () => void }) {
+  return (
+    <Tabs defaultValue="basic" className="w-full">
+      <TabsList className="grid w-full grid-cols-4">
+        <TabsTrigger value="basic">Info Dasar</TabsTrigger>
+        <TabsTrigger value="schedule">Jadwal</TabsTrigger>
+        <TabsTrigger value="resources">Sumber Daya</TabsTrigger>
+        <TabsTrigger value="costing">Costing</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="basic" className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="recipe">Resep</Label>
+            <select className="w-full p-2 border border-input rounded-md bg-background">
+              <option value="">Pilih resep</option>
+              <option value="RCP-001">Roti Tawar Premium</option>
+              <option value="RCP-002">Croissant Butter</option>
+              <option value="RCP-003">Donat Glaze</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="plannedQuantity">Jumlah Target</Label>
+            <Input id="plannedQuantity" type="number" placeholder="50" />
+          </div>
+          <div>
+            <Label htmlFor="priority">Prioritas</Label>
+            <select className="w-full p-2 border border-input rounded-md bg-background">
+              <option value="normal">Normal</option>
+              <option value="high">Tinggi</option>
+              <option value="low">Rendah</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="batchNo">Nomor Batch</Label>
+            <Input id="batchNo" placeholder="Auto-generate" disabled />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="notes">Catatan</Label>
+          <Textarea id="notes" placeholder="Catatan untuk batch ini..." />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="schedule" className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="startDate">Tanggal Mulai</Label>
+            <Input id="startDate" type="date" />
+          </div>
+          <div>
+            <Label htmlFor="startTime">Waktu Mulai</Label>
+            <Input id="startTime" type="time" />
+          </div>
+          <div>
+            <Label htmlFor="estimatedDuration">Estimasi Durasi (menit)</Label>
+            <Input id="estimatedDuration" type="number" placeholder="180" />
+          </div>
+          <div>
+            <Label htmlFor="endTime">Estimasi Selesai</Label>
+            <Input id="endTime" type="time" disabled />
+          </div>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="resources" className="space-y-4">
+        <div>
+          <Label>Staff yang Ditugaskan</Label>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {['Ahmad', 'Budi', 'Sari', 'Dewi', 'Rian'].map(staff => (
+              <label key={staff} className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">{staff}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Label>Equipment yang Dibutuhkan</Label>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {['Mixer Besar', 'Oven A', 'Oven B', 'Proofer', 'Work Station 1'].map(equipment => (
+              <label key={equipment} className="flex items-center gap-2">
+                <input type="checkbox" className="rounded" />
+                <span className="text-sm">{equipment}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="costing" className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="materialCost">Biaya Bahan</Label>
+            <Input id="materialCost" type="number" placeholder="400000" />
+          </div>
+          <div>
+            <Label htmlFor="laborCost">Biaya Tenaga Kerja</Label>
+            <Input id="laborCost" type="number" placeholder="120000" />
+          </div>
+          <div>
+            <Label htmlFor="overheadCost">Biaya Overhead</Label>
+            <Input id="overheadCost" type="number" placeholder="50000" />
+          </div>
+          <div>
+            <Label htmlFor="expectedRevenue">Target Revenue</Label>
+            <Input id="expectedRevenue" type="number" placeholder="750000" />
+          </div>
+        </div>
+        <div className="bg-muted p-4 rounded-lg">
+          <h4 className="font-medium mb-2">Estimasi Profitabilitas</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Total Cost:</span>
+              <span>Rp 0</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Cost per Unit:</span>
+              <span>Rp 0</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Expected Revenue:</span>
+              <span>Rp 0</span>
+            </div>
+            <div className="flex justify-between font-medium">
+              <span>Profit Margin:</span>
+              <span>0%</span>
+            </div>
+          </div>
+        </div>
+      </TabsContent>
+      
+      <div className="flex justify-end gap-2 pt-4 border-t">
+        <Button variant="outline" onClick={onClose}>Batal</Button>
+        <Button>Buat Batch</Button>
+      </div>
+    </Tabs>
+  )
+}
+
+// Production Detail View Component
+function ProductionDetailView({ production }: { production: any }) {
+  const statusInfo = getStatusInfo(production.status)
+  const efficiency = production.status === 'COMPLETED' ? (production.actualQuantity / production.plannedQuantity * 100) : 0
+
+  return (
+    <Tabs defaultValue="overview" className="w-full">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="materials">Bahan</TabsTrigger>
+        <TabsTrigger value="timeline">Timeline</TabsTrigger>
+        <TabsTrigger value="costing">Costing</TabsTrigger>
+        <TabsTrigger value="quality">Kualitas</TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="overview" className="space-y-4">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium">Informasi Batch</h3>
+              <div className="mt-2 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Batch No:</span>
+                  <span className="font-mono">{production.batchNo}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Resep:</span>
+                  <span>{production.recipeName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Status:</span>
+                  <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Target Produksi:</span>
+                  <span>{production.plannedQuantity} unit</span>
+                </div>
+                {production.actualQuantity > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Actual Produksi:</span>
+                    <span>{production.actualQuantity} unit</span>
+                  </div>
+                )}
+                {production.status === 'COMPLETED' && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Efisiensi:</span>
+                    <span className={efficiency >= 90 ? 'text-green-600 font-medium' : efficiency >= 75 ? 'text-yellow-600 font-medium' : 'text-red-600 font-medium'}>
+                      {efficiency.toFixed(1)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium">Tim & Sumber Daya</h3>
+              <div className="mt-2 space-y-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Staff Ditugaskan:</span>
+                  <div className="mt-1">
+                    {production.assignedStaff.map((staff: string, index: number) => (
+                      <Badge key={index} variant="outline" className="mr-1 mb-1">{staff}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Durasi Estimasi:</span>
+                  <span>{production.estimatedDuration} menit</span>
+                </div>
+                {production.actualDuration > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Durasi Actual:</span>
+                    <span className={production.actualDuration <= production.estimatedDuration ? 'text-green-600' : 'text-red-600'}>
+                      {production.actualDuration} menit
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        {production.notes && (
+          <div>
+            <h3 className="font-medium">Catatan</h3>
+            <p className="mt-2 text-sm text-muted-foreground p-3 bg-muted rounded-lg">{production.notes}</p>
+          </div>
+        )}
+      </TabsContent>
+      
+      <TabsContent value="materials" className="space-y-4">
+        <h3 className="font-medium">Penggunaan Bahan ({production.ingredients.length})</h3>
+        <div className="space-y-2">
+          {production.ingredients.map((ingredient: any, index: number) => (
+            <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg">
+              <div>
+                <p className="font-medium">{ingredient.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  Planned: {ingredient.planned} {ingredient.unit}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">Used: {ingredient.used} {ingredient.unit}</p>
+                <p className={`text-xs ${ingredient.used <= ingredient.planned ? 'text-green-600' : 'text-red-600'}`}>
+                  {ingredient.used <= ingredient.planned ? 'Efisien' : 'Over'}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="timeline" className="space-y-4">
+        <h3 className="font-medium">Timeline Produksi</h3>
+        <div className="space-y-4">
+          <div className="border-l-2 border-muted pl-4">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <div>
+                  <p className="font-medium">Planned Start</p>
+                  <p className="text-sm text-muted-foreground">{production.plannedStartTime}</p>
+                </div>
+              </div>
+              {production.actualStartTime && (
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div>
+                    <p className="font-medium">Actual Start</p>
+                    <p className="text-sm text-muted-foreground">{production.actualStartTime}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <div>
+                  <p className="font-medium">Planned End</p>
+                  <p className="text-sm text-muted-foreground">{production.plannedEndTime}</p>
+                </div>
+              </div>
+              {production.actualEndTime && (
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div>
+                    <p className="font-medium">Actual End</p>
+                    <p className="text-sm text-muted-foreground">{production.actualEndTime}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="costing" className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Biaya Bahan</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold">Rp {production.materialCost.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Biaya Tenaga Kerja</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold">Rp {production.laborCost.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Biaya Overhead</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold">Rp {production.overheadCost.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Total Biaya</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold">Rp {production.totalCost.toLocaleString()}</p>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <span>Cost per Unit:</span>
+            <span className="font-medium">Rp {production.costPerUnit.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Expected Revenue:</span>
+            <span className="font-medium">Rp {production.expectedRevenue.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Profit Margin:</span>
+            <span className="font-medium text-green-600">{production.profitMargin.toFixed(1)}%</span>
+          </div>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="quality" className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Quality Rating</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {production.qualityRating > 0 ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">⭐</span>
+                  <span className="text-xl font-bold">{production.qualityRating}</span>
+                </div>
+              ) : (
+                <span className="text-muted-foreground">Belum dinilai</span>
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Defect Rate</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold">
+                {production.status === 'COMPLETED' ? 
+                  ((production.plannedQuantity - production.actualQuantity) / production.plannedQuantity * 100).toFixed(1) + '%' 
+                  : 'N/A'}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        <div>
+          <Label htmlFor="qualityNotes">Catatan Kualitas</Label>
+          <Textarea id="qualityNotes" placeholder="Tambahkan catatan kualitas..." />
+          <Button className="mt-2" size="sm">Simpan Catatan</Button>
+        </div>
+      </TabsContent>
+    </Tabs>
+  )
+}
+
+function getStatusInfo(status: string) {
+  return productionStatuses.find(s => s.value === status) || productionStatuses[0]
+}
