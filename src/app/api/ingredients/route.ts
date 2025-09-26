@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // GET /api/ingredients - Get all ingredients
 export async function GET() {
   try {
+    const supabase = createServerSupabaseAdmin()
     const { data, error } = await supabase
       .from('ingredients')
       .select('*')
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = createServerSupabaseAdmin()
     const { data, error } = await supabase
       .from('ingredients')
       .insert(body)

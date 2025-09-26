@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // GET /api/ingredients/[id] - Get single ingredient
 export async function GET(
@@ -8,6 +8,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
+    const supabase = createServerSupabaseAdmin()
     const { data, error } = await supabase
       .from('ingredients')
       .select('*')
@@ -45,6 +46,7 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
+    const supabase = createServerSupabaseAdmin()
     const body = await request.json()
     
     const { data, error } = await supabase
@@ -85,6 +87,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
+    const supabase = createServerSupabaseAdmin()
     const { error } = await supabase
       .from('ingredients')
       .delete()

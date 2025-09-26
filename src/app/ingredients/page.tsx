@@ -125,9 +125,8 @@ const categories = ['Semua', 'Tepung', 'Dairy', 'Protein', 'Pemanis', 'Cokelat',
 const units = ['kg', 'g', 'l', 'ml', 'butir', 'bks', 'pcs']
 
 // Enhanced ingredient type for UI display
-interface IngredientWithStats extends Omit<Ingredient, 'stock' | 'min_stock' | 'price_per_unit'> {
-  category?: string
-  currentStock: number // Map from 'stock' field
+interface IngredientWithStats extends Omit<Ingredient, 'current_stock' | 'min_stock' | 'price_per_unit'> {
+  currentStock: number // Map from 'current_stock' field
   minStock: number // Map from 'min_stock' field
   pricePerUnit: number // Map from 'price_per_unit' field
   status: 'adequate' | 'low' | 'critical'
@@ -166,12 +165,12 @@ export default function IngredientsPage() {
       // Transform data to include calculated fields for UI
       const transformedData: IngredientWithStats[] = data.map(ingredient => ({
         ...ingredient,
-        category: 'Umum', // Default category since it's not in our DB schema yet
-        currentStock: ingredient.stock,
+        category: ingredient.category || 'Umum', // Use DB category if available
+        currentStock: ingredient.current_stock,
         minStock: ingredient.min_stock,
         pricePerUnit: ingredient.price_per_unit,
-        status: getStockStatus(ingredient.stock, ingredient.min_stock),
-        totalValue: ingredient.stock * ingredient.price_per_unit,
+        status: getStockStatus(ingredient.current_stock, ingredient.min_stock),
+        totalValue: ingredient.current_stock * ingredient.price_per_unit,
         usagePerWeek: 0, // Default since we don't track this yet
         supplierPhone: '', // Default since we don't have this field yet
         lastPurchase: '', // Default since we don't have this field yet

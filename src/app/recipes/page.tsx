@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { RecipeWithIngredients } from '@/types/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -24,121 +25,96 @@ import {
   TrendingUp
 } from 'lucide-react'
 
-// Sample data - in real app, this would come from your database
-const sampleRecipes = [
-  {
-    id: '1',
-    name: 'Roti Tawar Premium',
-    description: 'Roti tawar lembut dengan tekstur yang sempurna',
-    category: 'Roti',
-    servings: 12,
-    prepTime: 30,
-    cookTime: 45,
-    difficulty: 'Medium',
-    isActive: true,
-    cost: 8500,
-    sellingPrice: 15000,
-    margin: 76.5,
-    rating: 4.8,
-    totalMade: 245,
-    ingredients: [
-      { name: 'Tepung Terigu', quantity: 500, unit: 'g', cost: 3000 },
-      { name: 'Ragi Instan', quantity: 7, unit: 'g', cost: 500 },
-      { name: 'Gula Pasir', quantity: 50, unit: 'g', cost: 300 },
-      { name: 'Garam', quantity: 8, unit: 'g', cost: 50 },
-      { name: 'Mentega', quantity: 50, unit: 'g', cost: 2000 },
-      { name: 'Susu Cair', quantity: 300, unit: 'ml', cost: 2000 },
-      { name: 'Telur', quantity: 1, unit: 'butir', cost: 650 }
-    ],
-    instructions: `1. Campurkan tepung terigu, ragi instan, gula, dan garam dalam mangkuk besar
-2. Tambahkan susu cair hangat dan telur, aduk hingga tercampur
-3. Masukkan mentega, uleni hingga kalis elastis (15-20 menit)
-4. Istirahatkan adonan 1 jam hingga mengembang 2x lipat
-5. Kempiskan adonan, bentuk sesuai loyang
-6. Istirahatkan 45 menit hingga mengembang lagi
-7. Panggang di suhu 180°C selama 30-35 menit
-8. Dinginkan sebelum dipotong`
-  },
-  {
-    id: '2',
-    name: 'Croissant Butter',
-    description: 'Croissant berlapis dengan mentega premium',
-    category: 'Pastry',
-    servings: 8,
-    prepTime: 180,
-    cookTime: 20,
-    difficulty: 'Hard',
-    isActive: true,
-    cost: 12000,
-    sellingPrice: 25000,
-    margin: 108.3,
-    rating: 4.9,
-    totalMade: 89,
-    ingredients: [
-      { name: 'Tepung Terigu', quantity: 400, unit: 'g', cost: 2400 },
-      { name: 'Mentega Premium', quantity: 200, unit: 'g', cost: 6000 },
-      { name: 'Susu', quantity: 150, unit: 'ml', cost: 1500 },
-      { name: 'Gula', quantity: 30, unit: 'g', cost: 180 },
-      { name: 'Ragi', quantity: 6, unit: 'g', cost: 420 },
-      { name: 'Garam', quantity: 6, unit: 'g', cost: 38 },
-      { name: 'Telur', quantity: 1, unit: 'butir', cost: 650 }
-    ],
-    instructions: `1. Buat adonan dasar dengan tepung, susu, gula, ragi, dan garam
-2. Uleni hingga kalis, istirahatkan 30 menit
-3. Pipihkan mentega hingga ketebalan 1cm
-4. Bungkus mentega dengan adonan
-5. Lakukan teknik laminating 3x dengan istirahat 30 menit setiap lipatan
-6. Bentuk croissant, istirahatkan 2 jam
-7. Oles dengan telur kocok
-8. Panggang 180°C selama 15-20 menit`
-  },
-  {
-    id: '3',
-    name: 'Donat Glaze',
-    description: 'Donat empuk dengan glazing manis',
-    category: 'Donat',
-    servings: 15,
-    prepTime: 45,
-    cookTime: 15,
-    difficulty: 'Easy',
-    isActive: true,
-    cost: 4500,
-    sellingPrice: 8000,
-    margin: 77.8,
-    rating: 4.6,
-    totalMade: 456,
-    ingredients: [
-      { name: 'Tepung Terigu', quantity: 350, unit: 'g', cost: 2100 },
-      { name: 'Gula', quantity: 60, unit: 'g', cost: 360 },
-      { name: 'Ragi', quantity: 5, unit: 'g', cost: 350 },
-      { name: 'Mentega', quantity: 40, unit: 'g', cost: 1200 },
-      { name: 'Telur', quantity: 1, unit: 'butir', cost: 650 },
-      { name: 'Susu', quantity: 100, unit: 'ml', cost: 1000 }
-    ],
-    instructions: `1. Campur semua bahan kering
-2. Tambahkan bahan basah, uleni hingga kalis
-3. Istirahatkan 1 jam
-4. Bentuk donat, istirahatkan 30 menit
-5. Goreng dalam minyak 170°C hingga keemasan
-6. Tiriskan dan beri topping sesuai selera`
-  }
-]
-
 const categories = ['Semua', 'Roti', 'Pastry', 'Donat', 'Kue', 'Cookies']
 const difficulties = ['Easy', 'Medium', 'Hard']
 
+// Enhanced recipe type for UI display  
+interface RecipeWithStats extends RecipeWithIngredients {
+  cost?: number
+  sellingPrice?: number
+  margin?: number
+  rating?: number
+  totalMade?: number
+}
+
 export default function RecipesPage() {
-  const [recipes, setRecipes] = useState(sampleRecipes)
+  const [recipes, setRecipes] = useState<RecipeWithStats[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
+  const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithStats | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+
+  // Fetch recipes from API
+  useEffect(() => {
+    fetchRecipes()
+  }, [])
+
+  const fetchRecipes = async () => {
+    try {
+      setLoading(true)
+      setError('') // Clear previous errors
+      
+      const response = await fetch('/api/recipes')
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('API endpoint tidak ditemukan. Pastikan server berjalan dengan benar.')
+        } else if (response.status === 500) {
+          throw new Error('Server mengalami kesalahan internal. Silakan coba lagi.')
+        } else if (response.status >= 400) {
+          throw new Error(`Gagal mengambil data resep (${response.status}). Silakan coba lagi.`)
+        }
+        throw new Error('Gagal terhubung ke server. Periksa koneksi internet Anda.')
+      }
+      
+      const data: RecipeWithIngredients[] = await response.json()
+      
+      // Transform data to include calculated fields for UI
+      const transformedData: RecipeWithStats[] = data.map(recipe => {
+        // Calculate total cost from ingredients if not set in recipe
+        const calculatedCost = recipe.recipe_ingredients?.reduce((sum, ri) => {
+          const ingredientCost = (ri.ingredient?.price_per_unit || 0) * ri.quantity
+          return sum + ingredientCost
+        }, 0) || 0
+        
+        // Use database values if available, otherwise fall back to calculated/default values
+        const cost = recipe.cost_per_unit || calculatedCost
+        const sellingPrice = recipe.selling_price || (cost * 1.5) // 50% markup as fallback
+        const margin = recipe.margin_percentage || (sellingPrice > 0 ? ((sellingPrice - cost) / sellingPrice * 100) : 0)
+        
+        return {
+          ...recipe,
+          cost,
+          sellingPrice,
+          margin,
+          rating: recipe.rating || 0, // Use actual rating or 0
+          totalMade: recipe.times_made || 0 // Use actual times made
+        }
+      })
+      
+      setRecipes(transformedData)
+    } catch (err) {
+      let errorMessage = 'Gagal memuat data resep'
+      
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (typeof err === 'string') {
+        errorMessage = err
+      }
+      
+      setError(errorMessage)
+      console.error('Error fetching recipes:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Filter recipes
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
+                         (recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
     const matchesCategory = selectedCategory === 'Semua' || recipe.category === selectedCategory
     return matchesSearch && matchesCategory
   })
@@ -152,7 +128,7 @@ export default function RecipesPage() {
     }
   }
 
-  const handleViewRecipe = (recipe: any) => {
+  const handleViewRecipe = (recipe: RecipeWithStats) => {
     setSelectedRecipe(recipe)
     setIsViewDialogOpen(true)
   }
@@ -182,6 +158,33 @@ export default function RecipesPage() {
           </Dialog>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground mt-2">Memuat resep...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-4">
+                <ChefHat className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                <p className="text-red-600 font-medium">Gagal memuat resep</p>
+                <p className="text-sm text-muted-foreground mb-4">{error}</p>
+                <Button onClick={fetchRecipes}>Coba Lagi</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Content - only show when not loading and no error */}
+        {!loading && !error && (
+          <>
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
@@ -192,7 +195,7 @@ export default function RecipesPage() {
             <CardContent>
               <div className="text-2xl font-bold">{recipes.length}</div>
               <p className="text-xs text-muted-foreground">
-                {recipes.filter(r => r.isActive).length} aktif
+                {recipes.filter(r => r.is_active).length} aktif
               </p>
             </CardContent>
           </Card>
@@ -203,7 +206,9 @@ export default function RecipesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {(recipes.reduce((sum, r) => sum + r.margin, 0) / recipes.length).toFixed(1)}%
+                {recipes.length > 0 
+                  ? (recipes.reduce((sum, r) => sum + (r.margin || 0), 0) / recipes.length).toFixed(1)
+                  : 0}%
               </div>
               <p className="text-xs text-muted-foreground">
                 dari semua resep
@@ -216,9 +221,11 @@ export default function RecipesPage() {
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sampleRecipes[2].name}</div>
+              <div className="text-2xl font-bold">
+                {recipes.length > 0 ? recipes[0]?.name || '-' : '-'}
+              </div>
               <p className="text-xs text-muted-foreground">
-                {sampleRecipes[2].totalMade} kali dibuat
+                {recipes.length > 0 ? (recipes[0]?.totalMade || 0) : 0} kali dibuat
               </p>
             </CardContent>
           </Card>
@@ -229,7 +236,7 @@ export default function RecipesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {recipes.reduce((sum, r) => sum + r.totalMade, 0)}
+                {recipes.reduce((sum, r) => sum + (r.totalMade || 0), 0)}
               </div>
               <p className="text-xs text-muted-foreground">
                 item diproduksi
@@ -281,8 +288,8 @@ export default function RecipesPage() {
                       {recipe.description}
                     </p>
                   </div>
-                  <Badge className={getDifficultyColor(recipe.difficulty)}>
-                    {recipe.difficulty}
+                  <Badge className={getDifficultyColor(recipe.difficulty || 'Medium')}>
+                    {recipe.difficulty || 'Medium'}
                   </Badge>
                 </div>
                 <div className="flex gap-2 text-xs text-muted-foreground">
@@ -292,7 +299,7 @@ export default function RecipesPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {recipe.prepTime + recipe.cookTime} menit
+                    {(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit
                   </div>
                 </div>
               </CardHeader>
@@ -300,21 +307,21 @@ export default function RecipesPage() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">HPP</p>
-                    <p className="font-medium">Rp {recipe.cost.toLocaleString()}</p>
+                    <p className="font-medium">Rp {(recipe.cost || 0).toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Harga Jual</p>
-                    <p className="font-medium">Rp {recipe.sellingPrice.toLocaleString()}</p>
+                    <p className="font-medium">Rp {(recipe.sellingPrice || 0).toLocaleString()}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Margin</p>
-                    <p className="font-medium text-green-600">{recipe.margin.toFixed(1)}%</p>
+                    <p className="font-medium text-green-600">{(recipe.margin || 0).toFixed(1)}%</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Rating</p>
                     <div className="flex items-center gap-1">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{recipe.rating}</span>
+                      <span className="font-medium">{recipe.rating || 0}</span>
                     </div>
                   </div>
                 </div>
@@ -341,13 +348,33 @@ export default function RecipesPage() {
           ))}
         </div>
 
-        {filteredRecipes.length === 0 && (
+        {filteredRecipes.length === 0 && recipes.length > 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">Tidak ada resep yang sesuai</h3>
+              <p className="text-muted-foreground mb-4">
+                Tidak ada resep yang sesuai dengan filter "{searchTerm}" dalam kategori "{selectedCategory}"
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button variant="outline" onClick={() => setSearchTerm('')}>
+                  Hapus Pencarian
+                </Button>
+                <Button variant="outline" onClick={() => setSelectedCategory('Semua')}>
+                  Reset Filter
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {filteredRecipes.length === 0 && recipes.length === 0 && !loading && !error && (
           <Card>
             <CardContent className="py-12 text-center">
               <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Tidak ada resep ditemukan</h3>
+              <h3 className="text-lg font-medium mb-2">Belum ada resep</h3>
               <p className="text-muted-foreground mb-4">
-                Coba ubah kata kunci pencarian atau filter kategori
+                Mulai dengan menambahkan resep pertama Anda untuk mengelola formula produk bakery
               </p>
               <Button onClick={() => setIsAddDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -366,6 +393,8 @@ export default function RecipesPage() {
             {selectedRecipe && <RecipeDetailView recipe={selectedRecipe} />}
           </DialogContent>
         </Dialog>
+        </>
+        )}
       </div>
     </AppLayout>
   )
@@ -488,7 +517,7 @@ function RecipeForm({ onClose }: { onClose: () => void }) {
 }
 
 // Recipe Detail View Component
-function RecipeDetailView({ recipe }: { recipe: any }) {
+function RecipeDetailView({ recipe }: { recipe: RecipeWithStats }) {
   return (
     <Tabs defaultValue="overview" className="w-full">
       <TabsList className="grid w-full grid-cols-4">
@@ -514,12 +543,12 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Waktu Total:</span>
-                  <span>{recipe.prepTime + recipe.cookTime} menit</span>
+                  <span>{(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Kesulitan:</span>
-                  <Badge className={getDifficultyColor(recipe.difficulty)}>
-                    {recipe.difficulty}
+                  <Badge className={getDifficultyColor(recipe.difficulty || 'Medium')}>
+                    {recipe.difficulty || 'Medium'}
                   </Badge>
                 </div>
               </div>
@@ -531,19 +560,19 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
               <div className="mt-2 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">HPP Total:</span>
-                  <span>Rp {recipe.cost.toLocaleString()}</span>
+                  <span>Rp {(recipe.cost || 0).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">HPP per Porsi:</span>
-                  <span>Rp {(recipe.cost / recipe.servings).toLocaleString()}</span>
+                  <span>Rp {((recipe.cost || 0) / recipe.servings).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Harga Jual:</span>
-                  <span>Rp {recipe.sellingPrice.toLocaleString()}</span>
+                  <span>Rp {(recipe.sellingPrice || 0).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-muted-foreground">Margin:</span>
-                  <span className="text-green-600">{recipe.margin.toFixed(1)}%</span>
+                  <span className="text-green-600">{(recipe.margin || 0).toFixed(1)}%</span>
                 </div>
               </div>
             </div>
@@ -556,20 +585,20 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
       </TabsContent>
       
       <TabsContent value="ingredients" className="space-y-4">
-        <h3 className="font-medium">Daftar Bahan ({recipe.ingredients.length})</h3>
+        <h3 className="font-medium">Daftar Bahan ({recipe.recipe_ingredients?.length || 0})</h3>
         <div className="space-y-2">
-          {recipe.ingredients.map((ingredient: any, index: number) => (
+          {(recipe.recipe_ingredients || []).map((recipeIngredient: any, index: number) => (
             <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg">
               <div>
-                <p className="font-medium">{ingredient.name}</p>
+                <p className="font-medium">{recipeIngredient.ingredient?.name || 'Unknown'}</p>
                 <p className="text-sm text-muted-foreground">
-                  {ingredient.quantity} {ingredient.unit}
+                  {recipeIngredient.quantity} {recipeIngredient.unit}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium">Rp {ingredient.cost.toLocaleString()}</p>
+                <p className="font-medium">Rp {((recipeIngredient.ingredient?.price_per_unit || 0) * recipeIngredient.quantity).toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">
-                  Rp {(ingredient.cost / ingredient.quantity).toLocaleString()}/{ingredient.unit}
+                  Rp {(recipeIngredient.ingredient?.price_per_unit || 0).toLocaleString()}/{recipeIngredient.unit}
                 </p>
               </div>
             </div>
@@ -578,7 +607,7 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
         <div className="pt-4 border-t">
           <div className="flex justify-between items-center font-medium">
             <span>Total Biaya Bahan:</span>
-            <span>Rp {recipe.cost.toLocaleString()}</span>
+            <span>Rp {(recipe.cost || 0).toLocaleString()}</span>
           </div>
         </div>
       </TabsContent>
@@ -586,7 +615,7 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
       <TabsContent value="instructions" className="space-y-4">
         <h3 className="font-medium">Langkah Pembuatan</h3>
         <div className="space-y-3">
-          {recipe.instructions.split('\n').map((step: string, index: number) => (
+          {(recipe.instructions || 'Tidak ada instruksi').split('\n').map((step: string, index: number) => (
             <div key={index} className="flex gap-3">
               <div className="flex-shrink-0 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
                 {index + 1}
@@ -604,7 +633,7 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
               <CardTitle className="text-sm">Total Diproduksi</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{recipe.totalMade}</p>
+              <p className="text-2xl font-bold">{recipe.totalMade || 0}</p>
               <p className="text-xs text-muted-foreground">kali dibuat</p>
             </CardContent>
           </Card>
@@ -615,7 +644,7 @@ function RecipeDetailView({ recipe }: { recipe: any }) {
             <CardContent>
               <div className="flex items-center gap-2">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-2xl font-bold">{recipe.rating}</span>
+                <span className="text-2xl font-bold">{recipe.rating || 0}</span>
               </div>
               <p className="text-xs text-muted-foreground">dari pelanggan</p>
             </CardContent>

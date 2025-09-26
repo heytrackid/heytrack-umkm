@@ -1,15 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { SmartFinancialDashboard } from '@/components/automation/smart-financial-dashboard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useFinancialRecords, useSupabaseMutations } from '@/hooks/useSupabaseData'
 import { 
   Plus, 
   Search, 
@@ -27,7 +29,8 @@ import {
   Trash2,
   Download,
   Filter,
-  BarChart3
+  BarChart3,
+  AlertTriangle
 } from 'lucide-react'
 
 // Sample data
@@ -132,15 +135,18 @@ const expenseCategories = ['Bahan Baku', 'Gaji', 'Operasional', 'Equipment', 'Ma
 const paymentMethods = ['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']
 
 export default function FinancePage() {
+  const { records: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
+  const { addFinancialRecord, loading: mutationLoading, error: mutationError } = useSupabaseMutations()
+  
   const [transactions, setTransactions] = useState(sampleTransactions)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
   const [categoryFilter, setCategoryFilter] = useState('Semua')
   const [dateFilter, setDateFilter] = useState('')
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('Semua')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-
   // Filter transactions
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -274,6 +280,39 @@ export default function FinancePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Smart Financial Dashboard */}
+        {recordsLoading ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-3">Memuat data keuangan...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : recordsError ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8 text-destructive">
+                <AlertTriangle className="h-4 w-4 mx-auto mb-4" />
+                <p>Error loading financial data: {recordsError}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <SmartFinancialDashboard 
+            data={{
+              sales: financialRecords
+                .filter(t => t.type === 'INCOME')
+                .map(t => ({ amount: t.amount, cost: t.amount * 0.6, date: t.date })),
+              expenses: financialRecords
+                .filter(t => t.type === 'EXPENSE')
+                .map(t => ({ amount: t.amount, category: t.category, date: t.date })),
+              inventory: []
+            }} 
+          />
+        )}
 
         {/* Quick Analytics */}
         <div className="grid gap-6 md:grid-cols-3">

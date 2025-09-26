@@ -8,7 +8,9 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { SmartInventoryManager } from '@/components/automation/smart-inventory-manager'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useIngredients, useSupabaseMutations } from '@/hooks/useSupabaseData'
 import { 
   Plus, 
   Search, 
@@ -123,6 +125,9 @@ const transactionTypes = [
 ]
 
 export default function InventoryPage() {
+  const { data: ingredients, loading: ingredientsLoading, error: ingredientsError } = useIngredients()
+  const { updateStock, loading: mutationLoading, error: mutationError } = useSupabaseMutations()
+  
   const [transactions, setTransactions] = useState(sampleTransactions)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
@@ -232,6 +237,29 @@ export default function InventoryPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Smart Inventory Manager */}
+        {ingredientsLoading ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-3">Memuat data ingredients...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : ingredientsError ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8 text-destructive">
+                <AlertTriangle className="h-12 w-12 mx-auto mb-4" />
+                <p>Error loading ingredients: {ingredientsError}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <SmartInventoryManager ingredients={ingredients} />
+        )}
 
         {/* Filters */}
         <Card>

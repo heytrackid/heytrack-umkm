@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { SmartPricingAssistant } from '@/components/automation/smart-pricing-assistant'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Calculator, 
@@ -449,6 +450,54 @@ export default function HPPCalculatorPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Smart Pricing Assistant */}
+            <SmartPricingAssistant 
+              recipe={{
+                id: 'demo-recipe',
+                name: calculation.recipeName || 'Resep Demo',
+                description: 'Resep demo untuk testing pricing assistant',
+                prep_time: 30,
+                cook_time: 60,
+                servings: calculation.servings,
+                difficulty: 'medium',
+                category: 'bakery',
+                instructions: 'Demo instructions',
+                notes: null,
+                image_url: null,
+                is_active: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                recipe_ingredients: calculation.ingredients.map(ing => ({
+                  id: ing.id,
+                  recipe_id: 'demo-recipe',
+                  ingredient_id: ing.id,
+                  quantity: ing.quantity,
+                  unit: ing.unit,
+                  cost: ing.totalCost,
+                  notes: null,
+                  created_at: new Date().toISOString(),
+                  ingredient: {
+                    id: ing.id,
+                    name: ing.name,
+                    price_per_unit: ing.pricePerUnit,
+                    unit: ing.unit,
+                    current_stock: 100,
+                    min_stock: 10,
+                    category: 'ingredient',
+                    supplier: null,
+                    description: null,
+                    is_active: true,
+                    storage_requirements: null,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  }
+                }))
+              }}
+              onPriceUpdate={(price) => {
+                setCalculation(prev => ({ ...prev, sellingPrice: price }))
+              }}
+            />
           </div>
 
           {/* Summary Section */}

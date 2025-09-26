@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { SmartProductionPlanner } from '@/components/automation/smart-production-planner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Plus, 
@@ -33,7 +34,186 @@ import {
   BarChart3
 } from 'lucide-react'
 
-// Sample data
+// Sample data - untuk SmartProductionPlanner
+const sampleOrders = [
+  {
+    id: '1',
+    recipe_id: 'RCP-001',
+    quantity: 50,
+    delivery_date: '2024-01-26',
+    customer_name: 'Toko Roti Mawar',
+    priority: 'normal' as const,
+    status: 'pending' as const
+  },
+  {
+    id: '2', 
+    recipe_id: 'RCP-002',
+    quantity: 100,
+    delivery_date: '2024-01-27',
+    customer_name: 'Cafe Melati',
+    priority: 'high' as const,
+    status: 'scheduled' as const
+  },
+  {
+    id: '3',
+    recipe_id: 'RCP-001', 
+    quantity: 30,
+    delivery_date: '2024-01-28',
+    customer_name: 'Warung Pak Budi',
+    priority: 'low' as const,
+    status: 'pending' as const
+  }
+]
+
+const sampleRecipes = [
+  {
+    id: 'RCP-001',
+    name: 'Roti Tawar Premium',
+    description: 'Roti tawar premium dengan tekstur lembut',
+    category: 'bread',
+    servings: 1,
+    prep_time: 30,
+    cook_time: 45,
+    difficulty: 'medium',
+    instructions: 'Campurkan bahan kering, tambahkan bahan basah, panggang 45 menit',
+    notes: null,
+    cost_per_unit: 5000,
+    selling_price: 15000,
+    margin_percentage: 200,
+    rating: null,
+    times_made: null,
+    image_url: null,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    recipe_ingredients: [
+      {
+        id: 'RI-001-1',
+        recipe_id: 'RCP-001',
+        ingredient_id: '1',
+        quantity: 500,
+        unit: 'g',
+        cost: null,
+        notes: null,
+        created_at: new Date().toISOString(),
+        ingredient: {
+          id: '1',
+          name: 'Tepung Terigu',
+          current_stock: 25,
+          min_stock: 10,
+          unit: 'kg',
+          price_per_unit: 12000,
+          category: 'flour',
+          supplier: null,
+          description: null,
+          is_active: true,
+          storage_requirements: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      },
+      {
+        id: 'RI-001-2',
+        recipe_id: 'RCP-001',
+        ingredient_id: '2',
+        quantity: 50,
+        unit: 'g',
+        cost: null,
+        notes: null,
+        created_at: new Date().toISOString(),
+        ingredient: {
+          id: '2',
+          name: 'Mentega',
+          current_stock: 8,
+          min_stock: 5,
+          unit: 'kg',
+          price_per_unit: 35000,
+          category: 'dairy',
+          supplier: null,
+          description: null,
+          is_active: true,
+          storage_requirements: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      }
+    ]
+  },
+  {
+    id: 'RCP-002',
+    name: 'Croissant Butter',
+    description: 'Croissant mentega dengan teknik laminating',
+    category: 'pastry',
+    servings: 1,
+    prep_time: 180,
+    cook_time: 25,
+    difficulty: 'hard',
+    instructions: 'Buat adonan dasar, proses laminating, bentuk dan panggang',
+    notes: null,
+    cost_per_unit: 8000,
+    selling_price: 25000,
+    margin_percentage: 212.5,
+    rating: null,
+    times_made: null,
+    image_url: null,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    recipe_ingredients: [
+      {
+        id: 'RI-002-1',
+        recipe_id: 'RCP-002',
+        ingredient_id: '1',
+        quantity: 400,
+        unit: 'g',
+        cost: null,
+        notes: null,
+        created_at: new Date().toISOString(),
+        ingredient: {
+          id: '1',
+          name: 'Tepung Terigu',
+          current_stock: 25,
+          min_stock: 10,
+          unit: 'kg',
+          price_per_unit: 12000,
+          category: 'flour',
+          supplier: null,
+          description: null,
+          is_active: true,
+          storage_requirements: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      },
+      {
+        id: 'RI-002-2',
+        recipe_id: 'RCP-002',
+        ingredient_id: '2',
+        quantity: 200,
+        unit: 'g',
+        cost: null,
+        notes: null,
+        created_at: new Date().toISOString(),
+        ingredient: {
+          id: '2',
+          name: 'Mentega Premium',
+          current_stock: 8,
+          min_stock: 5,
+          unit: 'kg',
+          price_per_unit: 35000,
+          category: 'dairy',
+          supplier: null,
+          description: null,
+          is_active: true,
+          storage_requirements: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      }
+    ]
+  }
+]
+
 const sampleProductions = [
   {
     id: '1',
@@ -301,6 +481,17 @@ export default function ProductionPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Smart Production Planner */}
+        <SmartProductionPlanner 
+          orders={sampleOrders}
+          recipes={sampleRecipes}
+          inventory={[
+            { id: '1', name: 'Tepung Terigu', current_stock: 25, min_stock: 10, unit: 'kg', price_per_unit: 12000, category: 'flour', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '2', name: 'Mentega', current_stock: 8, min_stock: 5, unit: 'kg', price_per_unit: 35000, category: 'dairy', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+            { id: '3', name: 'Telur Ayam', current_stock: 3, min_stock: 12, unit: 'kg', price_per_unit: 28000, category: 'protein', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+          ]}
+        />
 
         {/* Filters and Search */}
         <Card>

@@ -37,9 +37,12 @@ export type Database = {
           description?: string | null
           unit: string
           price_per_unit: number
-          stock: number
+          current_stock: number
           min_stock: number
           supplier?: string | null
+          category?: string | null
+          storage_requirements?: string | null
+          is_active: boolean
           created_at: string
           updated_at: string
         }
@@ -49,9 +52,12 @@ export type Database = {
           description?: string | null
           unit: string
           price_per_unit: number
-          stock?: number
+          current_stock?: number
           min_stock?: number
           supplier?: string | null
+          category?: string | null
+          storage_requirements?: string | null
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -61,9 +67,12 @@ export type Database = {
           description?: string | null
           unit?: string
           price_per_unit?: number
-          stock?: number
+          current_stock?: number
           min_stock?: number
           supplier?: string | null
+          category?: string | null
+          storage_requirements?: string | null
+          is_active?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -73,10 +82,19 @@ export type Database = {
           id: string
           name: string
           description?: string | null
-          instructions?: string | null
+          category: string
           servings: number
           prep_time?: number | null
           cook_time?: number | null
+          difficulty?: string | null
+          instructions?: string | null
+          notes?: string | null
+          cost_per_unit?: number | null
+          selling_price?: number | null
+          margin_percentage?: number | null
+          rating?: number | null
+          times_made?: number | null
+          image_url?: string | null
           is_active: boolean
           created_at: string
           updated_at: string
@@ -85,10 +103,19 @@ export type Database = {
           id?: string
           name: string
           description?: string | null
-          instructions?: string | null
+          category: string
           servings?: number
           prep_time?: number | null
           cook_time?: number | null
+          difficulty?: string | null
+          instructions?: string | null
+          notes?: string | null
+          cost_per_unit?: number | null
+          selling_price?: number | null
+          margin_percentage?: number | null
+          rating?: number | null
+          times_made?: number | null
+          image_url?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -97,10 +124,19 @@ export type Database = {
           id?: string
           name?: string
           description?: string | null
-          instructions?: string | null
+          category?: string
           servings?: number
           prep_time?: number | null
           cook_time?: number | null
+          difficulty?: string | null
+          instructions?: string | null
+          notes?: string | null
+          cost_per_unit?: number | null
+          selling_price?: number | null
+          margin_percentage?: number | null
+          rating?: number | null
+          times_made?: number | null
+          image_url?: string | null
           is_active?: boolean
           created_at?: string
           updated_at?: string
@@ -113,6 +149,9 @@ export type Database = {
           ingredient_id: string
           quantity: number
           unit: string
+          cost?: number | null
+          notes?: string | null
+          created_at: string
         }
         Insert: {
           id?: string
@@ -120,6 +159,9 @@ export type Database = {
           ingredient_id: string
           quantity: number
           unit: string
+          cost?: number | null
+          notes?: string | null
+          created_at?: string
         }
         Update: {
           id?: string
@@ -127,6 +169,8 @@ export type Database = {
           ingredient_id?: string
           quantity?: number
           unit?: string
+          cost?: number | null
+          notes?: string | null
         }
       }
       orders: {
