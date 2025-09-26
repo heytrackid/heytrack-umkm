@@ -80,10 +80,10 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col bg-gray-50 border-r">
-      <div className="flex h-16 items-center px-6 border-b">
+    <div className="flex h-full w-64 flex-col bg-card border-r border-border">
+      <div className="flex h-16 items-center px-6 border-b border-border">
         <ChefHat className="h-8 w-8 text-orange-600" />
-        <span className="ml-2 text-xl font-bold text-gray-900">Bakery MS</span>
+        <span className="ml-2 text-xl font-bold text-foreground">Bakery MS</span>
       </div>
       <nav className="flex-1 px-4 py-6">
         <ul className="space-y-2">
@@ -98,7 +98,7 @@ export default function Sidebar() {
                       "w-full justify-start",
                       isActive 
                         ? "bg-orange-600 text-white hover:bg-orange-700" 
-                        : "text-gray-700 hover:bg-gray-100"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                   >
                     <item.icon className="mr-2 h-4 w-4" />

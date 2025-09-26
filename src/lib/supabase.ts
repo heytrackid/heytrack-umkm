@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { createClientComponentClient, createServerComponentClient } from '@supabase/ssr'
+import { createBrowserClient, createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -9,10 +9,19 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // For client components
-export const createClientSupabase = () => createClientComponentClient()
+export const createClientSupabase = () => createBrowserClient(supabaseUrl, supabaseAnonKey)
 
 // For server components
-export const createServerSupabase = () => createServerComponentClient({ cookies })
+export const createServerSupabase = async () => {
+  const cookieStore = await cookies()
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+    },
+  })
+}
 
 // Database types (we'll define these based on our schema)
 export type Database = {

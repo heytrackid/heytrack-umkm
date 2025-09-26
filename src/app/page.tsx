@@ -73,8 +73,8 @@ export default function Dashboard() {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Selamat datang di sistem manajemen toko roti</p>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground">Selamat datang di sistem manajemen toko roti</p>
         </div>
 
         {/* Stats Cards */}
@@ -120,7 +120,7 @@ export default function Dashboard() {
                   <div key={index} className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         Stok: {item.stock} {item.unit} / Min: {item.minStock} {item.unit}
                       </p>
                     </div>
@@ -147,7 +147,7 @@ export default function Dashboard() {
                     <div key={index} className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{order.id}</p>
-                        <p className="text-sm text-gray-600">{order.customer}</p>
+                        <p className="text-sm text-muted-foreground">{order.customer}</p>
                       </div>
                       <div className="text-right">
                         <Badge variant={status.variant}>{status.label}</Badge>
@@ -170,21 +170,21 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-4">
-              <button className="flex flex-col items-center space-y-2 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
                 <ShoppingCart className="h-8 w-8 text-blue-500" />
-                <span className="font-medium">Pesanan Baru</span>
+                <span className="font-medium text-foreground">Pesanan Baru</span>
               </button>
-              <button className="flex flex-col items-center space-y-2 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
                 <Package className="h-8 w-8 text-green-500" />
-                <span className="font-medium">Tambah Resep</span>
+                <span className="font-medium text-foreground">Tambah Resep</span>
               </button>
-              <button className="flex flex-col items-center space-y-2 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
                 <TrendingUp className="h-8 w-8 text-purple-500" />
-                <span className="font-medium">Hitung HPP</span>
+                <span className="font-medium text-foreground">Hitung HPP</span>
               </button>
-              <button className="flex flex-col items-center space-y-2 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
                 <CheckCircle className="h-8 w-8 text-orange-500" />
-                <span className="font-medium">Update Stok</span>
+                <span className="font-medium text-foreground">Update Stok</span>
               </button>
             </div>
           </CardContent>

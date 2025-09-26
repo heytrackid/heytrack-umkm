@@ -5,6 +5,7 @@ import Sidebar from './sidebar'
 import { Bell, Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -12,14 +13,14 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-background">
       <Sidebar />
       <div className="flex flex-1 flex-col">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between bg-white border-b px-6">
+        <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6">
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Cari resep, bahan, pesanan..."
@@ -31,6 +32,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <Button variant="ghost" size="icon">
               <Bell className="h-4 w-4" />
             </Button>
+            <ThemeToggle />
             <Button variant="ghost" size="icon">
               <User className="h-4 w-4" />
             </Button>
@@ -38,7 +40,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 overflow-auto p-6 bg-background">
           {children}
         </main>
       </div>
