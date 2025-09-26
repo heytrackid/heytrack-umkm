@@ -87,10 +87,10 @@
   "packageManager": "pnpm@9.10.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/monifinebakery/HeyTrack.git"
+    "url": "https://github.com/heytrackid/heytrack-umkm.git"
   },
   "bugs": {
-    "url": "https://github.com/monifinebakery/HeyTrack/issues"
+    "url": "https://github.com/heytrackid/heytrack-umkm/issues"
   },
-  "homepage": "https://github.com/monifinebakery/HeyTrack#readme"
+  "homepage": "https://github.com/heytrackid/heytrack-umkm#readme"
 }
