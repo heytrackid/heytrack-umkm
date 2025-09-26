@@ -66,110 +66,122 @@ export function SmartNotificationCenter({
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
 
   useEffect(() => {
-    generateNotifications()
-  }, [ingredients, orders, financialMetrics])
+    const generateNotificationsStable = () => {
+      try {
+        const smartNotifications = automationEngine.generateSmartNotifications(
+          ingredients, 
+          orders, 
+          financialMetrics
+        )
+
+        // Convert to our notification format
+        const formattedNotifications: SmartNotification[] = smartNotifications.map((notif, index) => ({
+          id: `notif-${Date.now()}-${index}`,
+          type: notif.type as any,
+          category: notif.category as any,
+          title: notif.title,
+          message: notif.message,
+          action: notif.action,
+          priority: notif.priority,
+          timestamp: new Date(),
+          read: false
+        }))
+
+        // Add some additional smart notifications based on business logic
+        const additionalNotifs = (() => {
+          const additional: SmartNotification[] = []
+
+          // Check for orders due today
+          const today = new Date().toDateString()
+          const todayOrders = orders.filter(o => new Date(o.delivery_date).toDateString() === today)
+          
+          if (todayOrders.length > 0) {
+            additional.push({
+              id: `today-orders-${Date.now()}`,
+              type: 'warning',
+              category: 'orders',
+              title: `${todayOrders.length} Pesanan Hari Ini`,
+              message: `Ada ${todayOrders.length} pesanan yang harus diselesaikan hari ini. Pastikan produksi berjalan sesuai jadwal.`,
+              action: 'check_production',
+              priority: 'high',
+              timestamp: new Date(),
+              read: false,
+              actionUrl: '/production'
+            })
+          }
+
+          // Check for weekend preparation
+          const tomorrow = new Date()
+          tomorrow.setDate(tomorrow.getDate() + 1)
+          if (tomorrow.getDay() === 6) { // Saturday
+            additional.push({
+              id: `weekend-prep-${Date.now()}`,
+              type: 'info',
+              category: 'system',
+              title: 'Persiapan Weekend',
+              message: 'Besok weekend! Pastikan stok bahan cukup dan cek jadwal produksi untuk Senin.',
+              action: 'check_inventory',
+              priority: 'medium',
+              timestamp: new Date(),
+              read: false,
+              actionUrl: '/inventory'
+            })
+          }
+
+          // Performance celebration
+          if (financialMetrics.grossMargin > 60) {
+            additional.push({
+              id: `good-performance-${Date.now()}`,
+              type: 'success',
+              category: 'financial',
+              title: 'Performa Excellent! 🎉',
+              message: `Margin kotor mencapai ${financialMetrics.grossMargin.toFixed(1)}%! Pertahankan kualitas dan efisiensi ini.`,
+              priority: 'low',
+              timestamp: new Date(),
+              read: false
+            })
+          }
+
+          return additional
+        })()
+        
+        setNotifications(prev => {
+          // Only update if notifications have actually changed to prevent loops
+          const newNotifs = [...formattedNotifications, ...additionalNotifs]
+          if (JSON.stringify(prev.map(n => ({ title: n.title, message: n.message }))) === 
+              JSON.stringify(newNotifs.map(n => ({ title: n.title, message: n.message })))) {
+            return prev
+          }
+          return newNotifs
+        })
+        
+        // Play sound for critical notifications
+        if (soundEnabled && formattedNotifications.some(n => n.type === 'critical')) {
+          playNotificationSound('critical')
+        }
+      } catch (error) {
+        console.error('Error generating notifications:', error)
+      }
+    }
+
+    generateNotificationsStable()
+  }, [ingredients, orders, financialMetrics, soundEnabled])
 
   useEffect(() => {
     if (!autoRefresh) return
     
     const interval = setInterval(() => {
-      generateNotifications()
+      // Use a fresh timestamp for interval-based updates
+      setNotifications(prev => {
+        // Just update timestamps for existing notifications to show they're fresh
+        return prev.map(notif => ({ ...notif, timestamp: new Date() }))
+      })
     }, 30000) // Refresh every 30 seconds
 
     return () => clearInterval(interval)
-  }, [autoRefresh, ingredients, orders, financialMetrics])
+  }, [autoRefresh])
 
-  const generateNotifications = () => {
-    try {
-      const smartNotifications = automationEngine.generateSmartNotifications(
-        ingredients, 
-        orders, 
-        financialMetrics
-      )
 
-      // Convert to our notification format
-      const formattedNotifications: SmartNotification[] = smartNotifications.map((notif, index) => ({
-        id: `notif-${Date.now()}-${index}`,
-        type: notif.type as any,
-        category: notif.category as any,
-        title: notif.title,
-        message: notif.message,
-        action: notif.action,
-        priority: notif.priority,
-        timestamp: new Date(),
-        read: false
-      }))
-
-      // Add some additional smart notifications based on business logic
-      const additionalNotifs = generateAdditionalNotifications()
-      
-      setNotifications([...formattedNotifications, ...additionalNotifs])
-      
-      // Play sound for critical notifications
-      if (soundEnabled && formattedNotifications.some(n => n.type === 'critical')) {
-        playNotificationSound('critical')
-      }
-    } catch (error) {
-      console.error('Error generating notifications:', error)
-    }
-  }
-
-  const generateAdditionalNotifications = (): SmartNotification[] => {
-    const additional: SmartNotification[] = []
-
-    // Check for orders due today
-    const today = new Date().toDateString()
-    const todayOrders = orders.filter(o => new Date(o.delivery_date).toDateString() === today)
-    
-    if (todayOrders.length > 0) {
-      additional.push({
-        id: `today-orders-${Date.now()}`,
-        type: 'warning',
-        category: 'orders',
-        title: `${todayOrders.length} Pesanan Hari Ini`,
-        message: `Ada ${todayOrders.length} pesanan yang harus diselesaikan hari ini. Pastikan produksi berjalan sesuai jadwal.`,
-        action: 'check_production',
-        priority: 'high',
-        timestamp: new Date(),
-        read: false,
-        actionUrl: '/production'
-      })
-    }
-
-    // Check for weekend preparation
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    if (tomorrow.getDay() === 6) { // Saturday
-      additional.push({
-        id: `weekend-prep-${Date.now()}`,
-        type: 'info',
-        category: 'system',
-        title: 'Persiapan Weekend',
-        message: 'Besok weekend! Pastikan stok bahan cukup dan cek jadwal produksi untuk Senin.',
-        action: 'check_inventory',
-        priority: 'medium',
-        timestamp: new Date(),
-        read: false,
-        actionUrl: '/inventory'
-      })
-    }
-
-    // Performance celebration
-    if (financialMetrics.grossMargin > 60) {
-      additional.push({
-        id: `good-performance-${Date.now()}`,
-        type: 'success',
-        category: 'financial',
-        title: 'Performa Excellent! 🎉',
-        message: `Margin kotor mencapai ${financialMetrics.grossMargin.toFixed(1)}%! Pertahankan kualitas dan efisiensi ini.`,
-        priority: 'low',
-        timestamp: new Date(),
-        read: false
-      })
-    }
-
-    return additional
-  }
 
   const playNotificationSound = (type: 'critical' | 'warning' | 'info') => {
     if (!soundEnabled) return
