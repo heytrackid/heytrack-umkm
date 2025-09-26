@@ -1,0 +1,155 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8] [cursor=pointer]
+  - alert [ref=e11]
+  - generic [ref=e12]:
+    - button "Toggle menu" [ref=e13]:
+      - img
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - img [ref=e17]
+          - generic [ref=e19]: Bakery MS
+        - button "Close menu" [ref=e20]:
+          - img
+      - navigation [ref=e21]:
+        - list [ref=e22]:
+          - listitem [ref=e23]:
+            - link "Dashboard" [ref=e24] [cursor=pointer]:
+              - /url: /
+              - button "Dashboard" [ref=e25]:
+                - img
+                - generic [ref=e26]: Dashboard
+          - listitem [ref=e27]:
+            - link "Resep" [ref=e28] [cursor=pointer]:
+              - /url: /recipes
+              - button "Resep" [ref=e29]:
+                - img
+                - generic [ref=e30]: Resep
+          - listitem [ref=e31]:
+            - link "HPP Calculator" [ref=e32] [cursor=pointer]:
+              - /url: /hpp
+              - button "HPP Calculator" [ref=e33]:
+                - img
+                - generic [ref=e34]: HPP Calculator
+          - listitem [ref=e35]:
+            - link "Bahan Baku" [ref=e36] [cursor=pointer]:
+              - /url: /ingredients
+              - button "Bahan Baku" [ref=e37]:
+                - img
+                - generic [ref=e38]: Bahan Baku
+          - listitem [ref=e39]:
+            - link "Stok & Inventory" [ref=e40] [cursor=pointer]:
+              - /url: /inventory
+              - button "Stok & Inventory" [ref=e41]:
+                - img
+                - generic [ref=e42]: Stok & Inventory
+          - listitem [ref=e43]:
+            - link "Pesanan" [ref=e44] [cursor=pointer]:
+              - /url: /orders
+              - button "Pesanan" [ref=e45]:
+                - img
+                - generic [ref=e46]: Pesanan
+          - listitem [ref=e47]:
+            - link "Pelanggan" [ref=e48] [cursor=pointer]:
+              - /url: /customers
+              - button "Pelanggan" [ref=e49]:
+                - img
+                - generic [ref=e50]: Pelanggan
+          - listitem [ref=e51]:
+            - link "Produksi" [ref=e52] [cursor=pointer]:
+              - /url: /production
+              - button "Produksi" [ref=e53]:
+                - img
+                - generic [ref=e54]: Produksi
+          - listitem [ref=e55]:
+            - link "Keuangan" [ref=e56] [cursor=pointer]:
+              - /url: /finance
+              - button "Keuangan" [ref=e57]:
+                - img
+                - generic [ref=e58]: Keuangan
+          - listitem [ref=e59]:
+            - link "Laporan" [ref=e60] [cursor=pointer]:
+              - /url: /reports
+              - button "Laporan" [ref=e61]:
+                - img
+                - generic [ref=e62]: Laporan
+          - listitem [ref=e63]:
+            - link "Pengaturan" [ref=e64] [cursor=pointer]:
+              - /url: /settings
+              - button "Pengaturan" [ref=e65]:
+                - img
+                - generic [ref=e66]: Pengaturan
+    - generic [ref=e67]:
+      - banner [ref=e68]:
+        - generic [ref=e70]:
+          - img [ref=e71]
+          - searchbox "Cari resep, bahan, pesanan..." [ref=e74]
+        - generic [ref=e75]:
+          - button [ref=e76]:
+            - img
+          - button "Toggle theme" [ref=e77]:
+            - img
+            - generic [ref=e78]: Toggle theme
+          - button [ref=e79]:
+            - img
+      - main [ref=e80]:
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - heading "Manajemen Resep" [level=1] [ref=e84]
+              - paragraph [ref=e85]: Kelola resep dan formula produk
+            - button "Tambah Resep" [ref=e86]:
+              - img
+              - text: Tambah Resep
+          - generic [ref=e87]:
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - generic [ref=e90]: Total Resep
+                - img [ref=e91]
+              - generic [ref=e93]:
+                - generic [ref=e94]: "0"
+                - paragraph [ref=e95]: 0 aktif
+            - generic [ref=e96]:
+              - generic [ref=e97]:
+                - generic [ref=e98]: Rata-rata Margin
+                - img [ref=e99]
+              - generic [ref=e102]:
+                - generic [ref=e103]: 0%
+                - paragraph [ref=e104]: dari semua resep
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - generic [ref=e107]: Resep Terpopuler
+                - img [ref=e108]
+              - generic [ref=e110]:
+                - generic [ref=e111]: "-"
+                - paragraph [ref=e112]: 0 kali dibuat
+            - generic [ref=e113]:
+              - generic [ref=e114]:
+                - generic [ref=e115]: Total Produksi
+                - img [ref=e116]
+              - generic [ref=e118]:
+                - generic [ref=e119]: "0"
+                - paragraph [ref=e120]: item diproduksi
+          - generic [ref=e123]:
+            - generic [ref=e125]:
+              - img [ref=e126]
+              - textbox "Cari resep..." [ref=e129]
+            - generic [ref=e130]:
+              - button "Semua" [ref=e131]
+              - button "Roti" [ref=e132]
+              - button "Pastry" [ref=e133]
+              - button "Donat" [ref=e134]
+              - button "Kue" [ref=e135]
+              - button "Cookies" [ref=e136]
+          - generic [ref=e138]:
+            - img [ref=e139]
+            - heading "Belum ada resep" [level=3] [ref=e141]
+            - paragraph [ref=e142]: Mulai dengan menambahkan resep pertama Anda untuk mengelola formula produk bakery
+            - button "Tambah Resep Pertama" [ref=e143]:
+              - img
+              - text: Tambah Resep Pertama
+```

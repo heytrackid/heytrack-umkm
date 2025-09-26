@@ -9,8 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SmartFinancialDashboard } from '@/components/automation/smart-financial-dashboard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { FinancialTrendsChart } from '@/components/charts/financial-trends-chart'
 import { useFinancialRecords, useSupabaseMutations } from '@/hooks/useSupabaseData'
 import { 
   Plus, 
@@ -281,6 +283,19 @@ export default function FinancePage() {
           </Card>
         </div>
 
+        {/* Financial Trends Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tren Keuangan</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Analisis pendapatan, pengeluaran, keuntungan, dan HPP
+            </p>
+          </CardHeader>
+          <CardContent>
+            <FinancialTrendsChart />
+          </CardContent>
+        </Card>
+
         {/* Smart Financial Dashboard */}
         {recordsLoading ? (
           <Card>
@@ -413,26 +428,28 @@ export default function FinancePage() {
                 </div>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="Semua">Semua Tipe</option>
-                  {transactionTypes.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
-                </select>
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                >
-                  <option value="Semua">Semua Kategori</option>
-                  {[...incomeCategories, ...expenseCategories].map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Semua Tipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Semua">Semua Tipe</SelectItem>
+                    {transactionTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Semua Kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Semua">Semua Kategori</SelectItem>
+                    {[...incomeCategories, ...expenseCategories].map(category => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input
                   type="date"
                   value={dateFilter}
@@ -566,23 +583,29 @@ function FinanceForm({ onClose }: { onClose: () => void }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="type">Tipe Transaksi</Label>
-          <select 
-            className="w-full p-2 border border-input rounded-md bg-background"
-            value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
-          >
-            {transactionTypes.map(type => (
-              <option key={type.value} value={type.value}>{type.label}</option>
-            ))}
-          </select>
+          <Select value={selectedType} onValueChange={setSelectedType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih tipe transaksi" />
+            </SelectTrigger>
+            <SelectContent>
+              {transactionTypes.map(type => (
+                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="category">Kategori</Label>
-          <select className="w-full p-2 border border-input rounded-md bg-background">
-            {(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih kategori" />
+            </SelectTrigger>
+            <SelectContent>
+              {(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(category => (
+                <SelectItem key={category} value={category}>{category}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="amount">Jumlah</Label>
@@ -590,11 +613,16 @@ function FinanceForm({ onClose }: { onClose: () => void }) {
         </div>
         <div>
           <Label htmlFor="paymentMethod">Metode Pembayaran</Label>
-          <select className="w-full p-2 border border-input rounded-md bg-background">
-            {paymentMethods.map(method => (
-              <option key={method} value={method}>{getPaymentMethodLabel(method)}</option>
-            ))}
-          </select>
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih metode pembayaran" />
+            </SelectTrigger>
+            <SelectContent>
+              {paymentMethods.map(method => (
+                <SelectItem key={method} value={method}>{getPaymentMethodLabel(method)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="date">Tanggal</Label>

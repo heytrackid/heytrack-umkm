@@ -8,8 +8,10 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SmartInventoryManager } from '@/components/automation/smart-inventory-manager'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { InventoryTrendsChart } from '@/components/charts/inventory-trends-chart'
 import { useIngredients, useSupabaseMutations } from '@/hooks/useSupabaseData'
 import { 
   Plus, 
@@ -238,6 +240,19 @@ export default function InventoryPage() {
           </Card>
         </div>
 
+        {/* Inventory Trends Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tren Inventory</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Analisis pergerakan stok, pembelian, pemakaian, dan waste
+            </p>
+          </CardHeader>
+          <CardContent>
+            <InventoryTrendsChart />
+          </CardContent>
+        </Card>
+
         {/* Smart Inventory Manager */}
         {ingredientsLoading ? (
           <Card>
@@ -277,16 +292,17 @@ export default function InventoryPage() {
                 </div>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="Semua">Semua Tipe</option>
-                  {transactionTypes.map(type => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
-                </select>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Semua Tipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Semua">Semua Tipe</SelectItem>
+                    {transactionTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Input
                   type="date"
                   value={dateFilter}
@@ -414,20 +430,29 @@ function TransactionForm({ onClose }: { onClose: () => void }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="ingredient">Bahan</Label>
-          <select className="w-full p-2 border border-input rounded-md bg-background">
-            <option value="">Pilih bahan</option>
-            <option value="ING-001">Tepung Terigu Premium</option>
-            <option value="ING-002">Mentega Premium</option>
-            <option value="ING-003">Telur Ayam</option>
-          </select>
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih bahan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ING-001">Tepung Terigu Premium</SelectItem>
+              <SelectItem value="ING-002">Mentega Premium</SelectItem>
+              <SelectItem value="ING-003">Telur Ayam</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="type">Tipe Transaksi</Label>
-          <select className="w-full p-2 border border-input rounded-md bg-background">
-            {transactionTypes.map(type => (
-              <option key={type.value} value={type.value}>{type.label}</option>
-            ))}
-          </select>
+          <Select>
+            <SelectTrigger>
+              <SelectValue placeholder="Pilih tipe transaksi" />
+            </SelectTrigger>
+            <SelectContent>
+              {transactionTypes.map(type => (
+                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="quantity">Quantity</Label>

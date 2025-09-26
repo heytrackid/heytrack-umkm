@@ -1,0 +1,269 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - button "Toggle menu" [active] [ref=e3]:
+      - img
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e8]
+          - generic [ref=e11]: Bakery MS
+        - button "Close menu" [ref=e12]:
+          - img
+      - navigation [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Dashboard" [ref=e16] [cursor=pointer]:
+              - /url: /
+              - button "Dashboard" [ref=e17]:
+                - img
+                - generic [ref=e18]: Dashboard
+          - listitem [ref=e19]:
+            - link "Resep" [ref=e20] [cursor=pointer]:
+              - /url: /recipes
+              - button "Resep" [ref=e21]:
+                - img
+                - generic [ref=e22]: Resep
+          - listitem [ref=e23]:
+            - link "HPP Calculator" [ref=e24] [cursor=pointer]:
+              - /url: /hpp
+              - button "HPP Calculator" [ref=e25]:
+                - img
+                - generic [ref=e26]: HPP Calculator
+          - listitem [ref=e27]:
+            - link "Bahan Baku" [ref=e28] [cursor=pointer]:
+              - /url: /ingredients
+              - button "Bahan Baku" [ref=e29]:
+                - img
+                - generic [ref=e30]: Bahan Baku
+          - listitem [ref=e31]:
+            - link "Stok & Inventory" [ref=e32] [cursor=pointer]:
+              - /url: /inventory
+              - button "Stok & Inventory" [ref=e33]:
+                - img
+                - generic [ref=e34]: Stok & Inventory
+          - listitem [ref=e35]:
+            - link "Pesanan" [ref=e36] [cursor=pointer]:
+              - /url: /orders
+              - button "Pesanan" [ref=e37]:
+                - img
+                - generic [ref=e38]: Pesanan
+          - listitem [ref=e39]:
+            - link "Pelanggan" [ref=e40] [cursor=pointer]:
+              - /url: /customers
+              - button "Pelanggan" [ref=e41]:
+                - img
+                - generic [ref=e42]: Pelanggan
+          - listitem [ref=e43]:
+            - link "Produksi" [ref=e44] [cursor=pointer]:
+              - /url: /production
+              - button "Produksi" [ref=e45]:
+                - img
+                - generic [ref=e46]: Produksi
+          - listitem [ref=e47]:
+            - link "Keuangan" [ref=e48] [cursor=pointer]:
+              - /url: /finance
+              - button "Keuangan" [ref=e49]:
+                - img
+                - generic [ref=e50]: Keuangan
+          - listitem [ref=e51]:
+            - link "Laporan" [ref=e52] [cursor=pointer]:
+              - /url: /reports
+              - button "Laporan" [ref=e53]:
+                - img
+                - generic [ref=e54]: Laporan
+          - listitem [ref=e55]:
+            - link "Pengaturan" [ref=e56] [cursor=pointer]:
+              - /url: /settings
+              - button "Pengaturan" [ref=e57]:
+                - img
+                - generic [ref=e58]: Pengaturan
+    - generic [ref=e59]:
+      - banner [ref=e60]:
+        - generic [ref=e62]:
+          - img [ref=e63]
+          - searchbox "Cari resep, bahan, pesanan..." [ref=e66]
+        - generic [ref=e67]:
+          - button [ref=e68]:
+            - img
+          - button "Toggle theme" [ref=e69]:
+            - img
+            - generic [ref=e70]: Toggle theme
+          - button [ref=e71]:
+            - img
+      - main [ref=e72]:
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - heading "Dashboard" [level=1] [ref=e75]
+            - paragraph [ref=e76]: Selamat datang di sistem manajemen toko roti
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - generic [ref=e80]: Total Penjualan Hari Ini
+                - img [ref=e81]
+              - generic [ref=e84]:
+                - generic [ref=e85]: Rp 2.450.000
+                - generic [ref=e86]:
+                  - img [ref=e87]
+                  - generic [ref=e90]: +12.5%
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - generic [ref=e93]: Pesanan Aktif
+                - img [ref=e94]
+              - generic [ref=e98]:
+                - generic [ref=e99]: "24"
+                - generic [ref=e100]:
+                  - img [ref=e101]
+                  - generic [ref=e104]: "+3"
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - generic [ref=e107]: Produk Terjual
+                - img [ref=e108]
+              - generic [ref=e113]:
+                - generic [ref=e114]: "156"
+                - generic [ref=e115]:
+                  - img [ref=e116]
+                  - generic [ref=e119]: +8.2%
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - generic [ref=e122]: Pelanggan Baru
+                - img [ref=e123]
+              - generic [ref=e128]:
+                - generic [ref=e129]: "12"
+                - generic [ref=e130]:
+                  - img [ref=e131]
+                  - generic [ref=e134]: "+2"
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - generic [ref=e138]:
+                - generic [ref=e139]:
+                  - img [ref=e140]
+                  - text: Smart Notification Center
+                  - generic [ref=e145]: 1 Unread
+                - generic [ref=e146]:
+                  - button [ref=e147]:
+                    - img
+                  - button "Auto" [ref=e148]:
+                    - img
+                    - text: Auto
+                  - button "Mark All Read" [ref=e149]
+              - generic [ref=e150]:
+                - generic [ref=e151]:
+                  - generic [ref=e152]:
+                    - generic [ref=e153]: "1"
+                    - generic [ref=e154]: Total
+                  - generic [ref=e155]:
+                    - generic [ref=e156]: "1"
+                    - generic [ref=e157]: Unread
+                  - generic [ref=e158]:
+                    - generic [ref=e159]: "0"
+                    - generic [ref=e160]: Critical
+                  - generic [ref=e161]:
+                    - generic [ref=e162]: "0"
+                    - generic [ref=e163]: High Priority
+                - generic [ref=e164]:
+                  - button "Semua 1" [ref=e165]:
+                    - text: Semua
+                    - generic [ref=e166]: "1"
+                  - button "Inventory" [ref=e167]:
+                    - img
+                    - text: Inventory
+                  - button "Produksi" [ref=e168]:
+                    - img
+                    - text: Produksi
+                  - button "Keuangan 1" [ref=e169]:
+                    - img
+                    - text: Keuangan
+                    - generic [ref=e170]: "1"
+                  - button "Orders" [ref=e171]:
+                    - img
+                    - text: Orders
+            - generic [ref=e176]:
+              - generic [ref=e177]:
+                - img [ref=e178]
+                - generic [ref=e182]: Margin Keuntungan Rendah
+                - generic [ref=e183]:
+                  - img
+                  - generic [ref=e184]: financial
+                - generic [ref=e185]: medium
+                - generic [ref=e186]: NEW
+              - paragraph [ref=e187]: Margin kotor hanya 0.0%. Pertimbangkan menaikkan harga atau efisiensi cost.
+              - generic [ref=e188]:
+                - generic [ref=e189]: 00.47.04
+                - generic [ref=e190]:
+                  - button "Action" [ref=e191]:
+                    - img
+                    - text: Action
+                  - button "Mark Read" [ref=e192]:
+                    - img
+                    - text: Mark Read
+                  - button [ref=e193]:
+                    - img
+          - generic [ref=e194]:
+            - generic [ref=e195]:
+              - generic [ref=e197]:
+                - img [ref=e198]
+                - generic [ref=e202]: Stok Menipis
+              - generic [ref=e204]:
+                - generic [ref=e205]:
+                  - generic [ref=e206]:
+                    - paragraph [ref=e207]: Tepung Terigu
+                    - paragraph [ref=e208]: "Stok: 8 kg / Min: 10 kg"
+                  - generic [ref=e209]: Rendah
+                - generic [ref=e210]:
+                  - generic [ref=e211]:
+                    - paragraph [ref=e212]: Telur Ayam
+                    - paragraph [ref=e213]: "Stok: 2 kg / Min: 5 kg"
+                  - generic [ref=e214]: Rendah
+                - generic [ref=e215]:
+                  - generic [ref=e216]:
+                    - paragraph [ref=e217]: Mentega
+                    - paragraph [ref=e218]: "Stok: 1 kg / Min: 2 kg"
+                  - generic [ref=e219]: Rendah
+            - generic [ref=e220]:
+              - generic [ref=e222]:
+                - img [ref=e223]
+                - generic [ref=e227]: Pesanan Terbaru
+              - generic [ref=e229]:
+                - generic [ref=e230]:
+                  - generic [ref=e231]:
+                    - paragraph [ref=e232]: ORD20240101-001
+                    - paragraph [ref=e233]: Ibu Sari
+                  - generic [ref=e234]:
+                    - generic [ref=e235]: Menunggu
+                    - paragraph [ref=e236]: Rp 125.000
+                - generic [ref=e237]:
+                  - generic [ref=e238]:
+                    - paragraph [ref=e239]: ORD20240101-002
+                    - paragraph [ref=e240]: Pak Budi
+                  - generic [ref=e241]:
+                    - generic [ref=e242]: Proses
+                    - paragraph [ref=e243]: Rp 450.000
+                - generic [ref=e244]:
+                  - generic [ref=e245]:
+                    - paragraph [ref=e246]: ORD20240101-003
+                    - paragraph [ref=e247]: Toko Roti Mawar
+                  - generic [ref=e248]:
+                    - generic [ref=e249]: Siap
+                    - paragraph [ref=e250]: Rp 850.000
+          - generic [ref=e251]:
+            - generic [ref=e253]: Aksi Cepat
+            - generic [ref=e255]:
+              - button "Pesanan Baru" [ref=e256]:
+                - img [ref=e257]
+                - generic [ref=e261]: Pesanan Baru
+              - button "Tambah Resep" [ref=e262]:
+                - img [ref=e263]
+                - generic [ref=e268]: Tambah Resep
+              - button "Hitung HPP" [ref=e269]:
+                - img [ref=e270]
+                - generic [ref=e273]: Hitung HPP
+              - button "Update Stok" [ref=e274]:
+                - img [ref=e275]
+                - generic [ref=e278]: Update Stok
+  - button "Open Next.js Dev Tools" [ref=e284] [cursor=pointer]:
+    - img [ref=e285] [cursor=pointer]
+  - alert [ref=e289]
+```
