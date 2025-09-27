@@ -49,11 +49,11 @@ import {
 
 // Expense categories with icons
 const expenseCategories = [
-  { value: 'rent', label: 'Sewa Tempat', icon: Building, color: 'bg-blue-100 text-blue-800' },
-  { value: 'utilities', label: 'Listrik & Air', icon: Zap, color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'salary', label: 'Gaji Karyawan', icon: Users, color: 'bg-green-100 text-green-800' },
+  { value: 'rent', label: 'Sewa Tempat', icon: Building, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  { value: 'utilities', label: 'Listrik & Air', icon: Zap, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  { value: 'salary', label: 'Gaji Karyawan', icon: Users, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
   { value: 'maintenance', label: 'Perawatan', icon: Wrench, color: 'bg-orange-100 text-orange-800' },
-  { value: 'transport', label: 'Transportasi', icon: Car, color: 'bg-purple-100 text-purple-800' },
+  { value: 'transport', label: 'Transportasi', icon: Car, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
   { value: 'communication', label: 'Komunikasi', icon: Phone, color: 'bg-pink-100 text-pink-800' },
   { value: 'internet', label: 'Internet', icon: Wifi, color: 'bg-indigo-100 text-indigo-800' },
   { value: 'other', label: 'Lain-lain', icon: Receipt, color: 'bg-gray-100 text-gray-800' }
@@ -265,7 +265,7 @@ export default function ExpensesPage() {
               }`} />
             </CardHeader>
             <CardContent className={isMobile ? 'px-0 pb-0' : ''}>
-              <div className={`font-bold text-red-600 ${
+              <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-lg' : 'text-2xl'
               }`}>
                 Rp {stats.totalExpenses.toLocaleString()}
@@ -328,12 +328,12 @@ export default function ExpensesPage() {
               <CardTitle className={`font-medium ${
                 isMobile ? 'text-xs' : 'text-sm'
               }`}>Biaya Mingguan</CardTitle>
-              <TrendingUp className={`text-purple-500 ${
+              <TrendingUp className={`text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'h-3 w-3' : 'h-4 w-4'
               }`} />
             </CardHeader>
             <CardContent className={isMobile ? 'px-0 pb-0' : ''}>
-              <div className={`font-bold text-purple-600 ${
+              <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-lg' : 'text-2xl'
               }`}>
                 Rp {stats.weeklyRecurring.toLocaleString()}
@@ -362,12 +362,12 @@ export default function ExpensesPage() {
               <CardTitle className={`font-medium ${
                 isMobile ? 'text-xs' : 'text-sm'
               }`}>Rata-rata</CardTitle>
-              <BarChart3 className={`text-blue-500 ${
+              <BarChart3 className={`text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'h-3 w-3' : 'h-4 w-4'
               }`} />
             </CardHeader>
             <CardContent className={isMobile ? 'px-0 pb-0' : ''}>
-              <div className={`font-bold text-blue-600 ${
+              <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-lg' : 'text-2xl'
               }`}>
                 Rp {stats.averageExpense.toLocaleString()}
@@ -602,10 +602,10 @@ export default function ExpensesPage() {
                             <Badge 
                               className={
                                 expense.status === 'paid' 
-                                  ? 'bg-green-100 text-green-800' 
+                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
                                   : expense.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                               }
                             >
                               {expense.status === 'paid' ? 'Lunas' : 
@@ -617,7 +617,7 @@ export default function ExpensesPage() {
                         <div className="flex justify-between items-center">
                           <div>
                             <p className="text-xs text-muted-foreground">Jumlah</p>
-                            <p className="font-bold text-lg text-red-600">
+                            <p className="font-bold text-lg text-gray-600 dark:text-gray-400">
                               -Rp {expense.amount.toLocaleString()}
                             </p>
                           </div>
@@ -633,7 +633,7 @@ export default function ExpensesPage() {
                           </div>
                           <div>
                             {expense.recurring ? (
-                              <Badge variant="outline" className="text-blue-600 text-xs">
+                              <Badge variant="outline" className="text-gray-600 dark:text-gray-400 text-xs">
                                 {expense.recurring_period === 'monthly' ? 'Bulanan' : 
                                  expense.recurring_period === 'weekly' ? 'Mingguan' : 'Berulang'}
                               </Badge>
@@ -697,7 +697,7 @@ export default function ExpensesPage() {
                             <span>{expense.vendor}</span>
                           </td>
                           <td className="p-4">
-                            <span className="font-medium text-red-600">
+                            <span className="font-medium text-gray-600 dark:text-gray-400">
                               Rp {expense.amount.toLocaleString()}
                             </span>
                           </td>
@@ -705,10 +705,10 @@ export default function ExpensesPage() {
                             <Badge 
                               className={
                                 expense.status === 'paid' 
-                                  ? 'bg-green-100 text-green-800' 
+                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
                                   : expense.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
+                                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                               }
                             >
                               {expense.status === 'paid' ? 'Lunas' : 
@@ -717,7 +717,7 @@ export default function ExpensesPage() {
                           </td>
                           <td className="p-4">
                             {expense.recurring ? (
-                              <Badge variant="outline" className="text-blue-600">
+                              <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
                                 {expense.recurring_period === 'monthly' ? 'Bulanan' : 
                                  expense.recurring_period === 'weekly' ? 'Mingguan' : 'Ya'}
                               </Badge>
@@ -747,7 +747,7 @@ export default function ExpensesPage() {
                               >
                                 <Edit className="h-3 w-3" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600">
+                              <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                                 <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
@@ -1095,10 +1095,10 @@ function ExpenseDetailView({ expense }: { expense: any }) {
               <Badge 
                 className={
                   expense.status === 'paid' 
-                    ? 'bg-green-100 text-green-800' 
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
                     : expense.status === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                 }
               >
                 {expense.status === 'paid' ? 'Lunas' : 
@@ -1124,7 +1124,7 @@ function ExpenseDetailView({ expense }: { expense: any }) {
             </div>
             <div className="flex justify-between font-medium">
               <span className="text-muted-foreground">Jumlah:</span>
-              <span className={`text-red-600 ${
+              <span className={`text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-lg' : 'text-xl'
               }`}>
                 Rp {expense.amount.toLocaleString()}

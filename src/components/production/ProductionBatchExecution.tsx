@@ -290,9 +290,9 @@ export default function ProductionBatchExecution({
   const getStatusColor = (status: ProductionBatch['status']) => {
     switch (status) {
       case 'scheduled': return 'bg-gray-500'
-      case 'in_progress': return 'bg-yellow-500'
-      case 'completed': return 'bg-green-500'
-      case 'blocked': return 'bg-red-500'
+      case 'in_progress': return 'bg-gray-100 dark:bg-gray-8000'
+      case 'completed': return 'bg-gray-100 dark:bg-gray-8000'
+      case 'blocked': return 'bg-gray-100 dark:bg-gray-8000'
       case 'cancelled': return 'bg-gray-400'
       default: return 'bg-gray-500'
     }
@@ -318,7 +318,7 @@ export default function ProductionBatchExecution({
                 <p className="text-sm text-muted-foreground">Active Batches</p>
                 <p className="text-2xl font-bold">{batches.filter(b => b.status === 'in_progress').length}</p>
               </div>
-              <Play className="h-8 w-8 text-yellow-500" />
+              <Play className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -330,7 +330,7 @@ export default function ProductionBatchExecution({
                 <p className="text-sm text-muted-foreground">Scheduled</p>
                 <p className="text-2xl font-bold">{batches.filter(b => b.status === 'scheduled').length}</p>
               </div>
-              <Clock className="h-8 w-8 text-blue-500" />
+              <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -342,7 +342,7 @@ export default function ProductionBatchExecution({
                 <p className="text-sm text-muted-foreground">Completed Today</p>
                 <p className="text-2xl font-bold">{completedBatches.length}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
+              <CheckCircle className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -596,7 +596,7 @@ export default function ProductionBatchExecution({
                 <div key={batch.id} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium">{batch.recipe_name}</h4>
-                    <Badge className="bg-green-500 text-white">Completed</Badge>
+                    <Badge className="bg-gray-100 dark:bg-gray-8000 text-white">Completed</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Quantity: {batch.quantity}

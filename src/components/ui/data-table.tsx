@@ -123,7 +123,7 @@ export function DataTable<T extends Record<string, any>>({
             {onDelete && (
               <button
                 onClick={() => onDelete(item)}
-                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors"
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-800 rounded-full transition-colors"
                 title="Delete"
               >
                 <Trash2 className="w-4 h-4" />
@@ -312,7 +312,7 @@ export function DataTable<T extends Record<string, any>>({
                               {onDelete && (
                                 <button
                                   onClick={() => onDelete(item)}
-                                  className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                                  className="text-gray-600 dark:text-gray-400 hover:text-red-900 p-1 rounded hover:bg-gray-100 dark:bg-gray-800 transition-colors"
                                   title="Delete"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -379,7 +379,7 @@ export function DataTable<T extends Record<string, any>>({
                             {onDelete && (
                               <button
                                 onClick={() => onDelete(item)}
-                                className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                                className="text-gray-600 dark:text-gray-400 hover:text-red-900 p-1 rounded hover:bg-gray-100 dark:bg-gray-800 transition-colors"
                                 title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />

@@ -99,11 +99,11 @@ export default function QualityControl({ className }: QualityControlProps) {
 
   const getQualityStatusColor = (status: QualityStatus) => {
     switch (status) {
-      case 'passed': return 'text-green-600 bg-green-100'
-      case 'failed': return 'text-red-600 bg-red-100'
+      case 'passed': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+      case 'failed': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
       case 'conditional': return 'text-orange-600 bg-orange-100'
-      case 'pending': return 'text-blue-600 bg-blue-100'
-      case 'retesting': return 'text-purple-600 bg-purple-100'
+      case 'pending': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+      case 'retesting': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
       default: return 'text-gray-600 bg-gray-100'
     }
   }
@@ -160,11 +160,11 @@ export default function QualityControl({ className }: QualityControlProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Pass Rate
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   {qualityMetrics.passRate}%
                 </p>
               </div>
-              <div className="flex items-center text-green-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-4 w-4 mr-1" />
                 <span className="text-sm">+{qualityMetrics.trend}%</span>
               </div>
@@ -183,7 +183,7 @@ export default function QualityControl({ className }: QualityControlProps) {
                   {qualityMetrics.totalChecks}
                 </p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-blue-600" />
+              <CheckCircle2 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -195,11 +195,11 @@ export default function QualityControl({ className }: QualityControlProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Failed Checks
                 </p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   {qualityMetrics.failedChecks}
                 </p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -271,7 +271,7 @@ export default function QualityControl({ className }: QualityControlProps) {
                   key={alert.id} 
                   className={`flex items-center justify-between p-4 rounded-lg border-l-4 ${
                     alert.severity === 'critical' 
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950' 
+                      ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 dark:bg-red-950' 
                       : 'border-orange-500 bg-orange-50 dark:bg-orange-950'
                   }`}
                 >
@@ -279,7 +279,7 @@ export default function QualityControl({ className }: QualityControlProps) {
                     <div className="flex items-center space-x-2">
                       <Badge className={
                         alert.severity === 'critical' 
-                          ? 'bg-red-100 text-red-800' 
+                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
                           : 'bg-orange-100 text-orange-800'
                       }>
                         {alert.severity}
@@ -387,7 +387,7 @@ export default function QualityControl({ className }: QualityControlProps) {
                       <Thermometer className="h-4 w-4 mr-1" />
                       Temperature
                     </span>
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
                       Within range
                     </Badge>
                   </div>

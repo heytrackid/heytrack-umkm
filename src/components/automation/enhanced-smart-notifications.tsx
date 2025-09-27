@@ -231,9 +231,9 @@ export default function EnhancedSmartNotifications() {
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-1">
                             <div className={`p-2 rounded-full ${
-                              alert.type === 'CRITICAL' ? 'bg-red-100 text-red-600' :
-                              alert.type === 'WARNING' ? 'bg-yellow-100 text-yellow-600' :
-                              'bg-blue-100 text-blue-600'
+                              alert.type === 'CRITICAL' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' :
+                              alert.type === 'WARNING' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' :
+                              'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                             }`}>
                               <Icon className="h-4 w-4" />
                             </div>
@@ -263,10 +263,10 @@ export default function EnhancedSmartNotifications() {
                                 
                                 {/* Smart Suggestions */}
                                 {alert.smart_suggestions.length > 0 && (
-                                  <div className="bg-blue-50 border border-blue-200 rounded p-2">
+                                  <div className="bg-gray-100 dark:bg-gray-800 border border-blue-200 rounded p-2">
                                     <div className="flex items-center gap-1 mb-1">
-                                      <Lightbulb className="h-3 w-3 text-blue-600" />
-                                      <span className="text-xs font-medium text-blue-800">Smart Suggestions:</span>
+                                      <Lightbulb className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+                                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Smart Suggestions:</span>
                                     </div>
                                     {alert.smart_suggestions.slice(0, 2).map((suggestion, idx) => (
                                       <p key={idx} className="text-xs text-blue-700">
@@ -321,7 +321,7 @@ export default function EnhancedSmartNotifications() {
 
                 {criticalAlerts.length === 0 && alerts.filter(a => a.type === 'WARNING' && !a.acknowledged).length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                    <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-600 dark:text-gray-400" />
                     <p className="font-medium">All clear! 🎉</p>
                     <p className="text-sm">No high-priority alerts at the moment</p>
                   </div>
@@ -346,7 +346,7 @@ export default function EnhancedSmartNotifications() {
                   return (
                     <Card key={idx} className="p-4">
                       <div className="flex items-start gap-3">
-                        <div className="p-2 bg-purple-100 text-purple-600 rounded-full">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
@@ -372,7 +372,7 @@ export default function EnhancedSmartNotifications() {
                             <div className="space-y-1">
                               <span className="text-xs font-medium text-green-700">Proactive Actions:</span>
                               {trend.proactive_recommendations.map((rec, ridx) => (
-                                <p key={ridx} className="text-xs text-green-600">• {rec}</p>
+                                <p key={ridx} className="text-xs text-gray-600 dark:text-gray-400">• {rec}</p>
                               ))}
                             </div>
                           )}
@@ -415,7 +415,7 @@ export default function EnhancedSmartNotifications() {
                   {businessInsights.growth_opportunities.length > 0 && (
                     <Card className="p-4">
                       <div className="flex items-center gap-2 mb-3">
-                        <Target className="h-4 w-4 text-green-600" />
+                        <Target className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         <h4 className="font-medium text-sm">Growth Opportunities</h4>
                       </div>
                       <div className="space-y-1">
@@ -430,7 +430,7 @@ export default function EnhancedSmartNotifications() {
                   {businessInsights.risk_factors.length > 0 && (
                     <Card className="p-4">
                       <div className="flex items-center gap-2 mb-3">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         <h4 className="font-medium text-sm">Risk Factors</h4>
                       </div>
                       <div className="space-y-1">
@@ -445,7 +445,7 @@ export default function EnhancedSmartNotifications() {
                   {businessInsights.strategic_recommendations.length > 0 && (
                     <Card className="p-4">
                       <div className="flex items-center gap-2 mb-3">
-                        <Lightbulb className="h-4 w-4 text-blue-600" />
+                        <Lightbulb className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                         <h4 className="font-medium text-sm">Strategic Recommendations</h4>
                       </div>
                       <div className="space-y-1">
@@ -495,9 +495,9 @@ export default function EnhancedSmartNotifications() {
                       }`}
                     >
                       <Icon className={`h-4 w-4 ${
-                        alert.type === 'CRITICAL' ? 'text-red-600' :
-                        alert.type === 'WARNING' ? 'text-yellow-600' :
-                        'text-blue-600'
+                        alert.type === 'CRITICAL' ? 'text-gray-600 dark:text-gray-400' :
+                        alert.type === 'WARNING' ? 'text-gray-600 dark:text-gray-400' :
+                        'text-gray-600 dark:text-gray-400'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <p className={`font-medium text-sm ${alert.acknowledged ? 'text-muted-foreground' : ''}`}>

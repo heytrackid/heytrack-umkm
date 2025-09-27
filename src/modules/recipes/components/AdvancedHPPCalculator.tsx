@@ -115,16 +115,16 @@ export default function AdvancedHPPCalculator({
   }
 
   const getMarginColor = (margin: number) => {
-    if (margin >= 50) return 'text-green-600'
-    if (margin >= 30) return 'text-yellow-600'
-    return 'text-red-600'
+    if (margin >= 50) return 'text-gray-600 dark:text-gray-400'
+    if (margin >= 30) return 'text-gray-600 dark:text-gray-400'
+    return 'text-gray-600 dark:text-gray-400'
   }
 
   const getRiskLevelColor = (risk: 'LOW' | 'MEDIUM' | 'HIGH') => {
     switch (risk) {
-      case 'LOW': return 'text-green-600'
-      case 'MEDIUM': return 'text-yellow-600'
-      case 'HIGH': return 'text-red-600'
+      case 'LOW': return 'text-gray-600 dark:text-gray-400'
+      case 'MEDIUM': return 'text-gray-600 dark:text-gray-400'
+      case 'HIGH': return 'text-gray-600 dark:text-gray-400'
       default: return 'text-gray-600'
     }
   }
@@ -162,8 +162,8 @@ export default function AdvancedHPPCalculator({
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-              <p className="text-red-600 font-medium">Calculation Error</p>
+              <AlertTriangle className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Calculation Error</p>
               <p className="text-sm text-muted-foreground mb-4">{error}</p>
               <Button onClick={calculateAdvancedHPP} size="sm">
                 Retry Calculation
@@ -232,7 +232,7 @@ export default function AdvancedHPPCalculator({
               {/* Cost Breakdown */}
               <Card className="p-4">
                 <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <DollarSign className="h-4 w-4 text-green-600" />
+                  <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   Cost Breakdown
                 </h4>
                 <div className="space-y-2 text-sm">
@@ -257,7 +257,7 @@ export default function AdvancedHPPCalculator({
                     <span>Total Cost:</span>
                     <span className="font-mono">Rp {hppResult.hpp_breakdown.total_cost.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between font-medium text-blue-600">
+                  <div className="flex justify-between font-medium text-gray-600 dark:text-gray-400">
                     <span>Cost per Serving:</span>
                     <span className="font-mono">Rp {hppResult.hpp_breakdown.cost_per_serving.toLocaleString()}</span>
                   </div>
@@ -267,7 +267,7 @@ export default function AdvancedHPPCalculator({
               {/* Current Pricing Analysis */}
               <Card className="p-4">
                 <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <BarChart3 className="h-4 w-4 text-blue-600" />
+                  <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   Current Pricing
                 </h4>
                 <div className="space-y-2 text-sm">
@@ -324,7 +324,7 @@ export default function AdvancedHPPCalculator({
                     <Card 
                       key={tier}
                       className={`p-4 cursor-pointer transition-colors ${
-                        selectedPricing === tier ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'
+                        selectedPricing === tier ? 'ring-2 ring-blue-500 bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50'
                       }`}
                       onClick={() => applyPricingSuggestion(tier)}
                     >
@@ -359,7 +359,7 @@ export default function AdvancedHPPCalculator({
               {/* Custom Pricing */}
               <Card className="p-4">
                 <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <Target className="h-4 w-4 text-purple-600" />
+                  <Target className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   Custom Pricing
                 </h4>
                 <div className="flex gap-3 items-end">
@@ -399,15 +399,15 @@ export default function AdvancedHPPCalculator({
               {/* Production Capacity */}
               <Card className="p-4">
                 <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <Package className="h-4 w-4 text-green-600" />
+                  <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   Production Status
                 </h4>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     {hppResult.availability.can_produce ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     ) : (
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     )}
                     <span className="font-medium">
                       {hppResult.availability.can_produce ? 'Can Produce' : 'Cannot Produce'}
@@ -420,9 +420,9 @@ export default function AdvancedHPPCalculator({
                   </div>
 
                   {!hppResult.availability.can_produce && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm text-red-800 font-medium mb-1">Production Blocked</p>
-                      <p className="text-xs text-red-600">
+                    <div className="p-3 bg-gray-100 dark:bg-gray-800 border border-red-200 rounded">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1">Production Blocked</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
                         Insufficient ingredients to produce this recipe
                       </p>
                     </div>
@@ -433,17 +433,17 @@ export default function AdvancedHPPCalculator({
               {/* Stock Issues */}
               <Card className="p-4">
                 <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                  <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   Stock Alerts
                 </h4>
                 <div className="space-y-2">
                   {hppResult.availability.limiting_ingredients.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-red-600 mb-1">Insufficient Stock:</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Insufficient Stock:</p>
                       <ul className="text-sm space-y-1">
                         {hppResult.availability.limiting_ingredients.map((ingredient, idx) => (
                           <li key={idx} className="flex items-center gap-2">
-                            <span className="h-1 w-1 bg-red-500 rounded-full"></span>
+                            <span className="h-1 w-1 bg-gray-100 dark:bg-gray-8000 rounded-full"></span>
                             {ingredient}
                           </li>
                         ))}
@@ -453,11 +453,11 @@ export default function AdvancedHPPCalculator({
 
                   {hppResult.availability.stock_warnings.length > 0 && (
                     <div>
-                      <p className="text-sm font-medium text-yellow-600 mb-1">Stock Warnings:</p>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Stock Warnings:</p>
                       <ul className="text-sm space-y-1">
                         {hppResult.availability.stock_warnings.map((warning, idx) => (
                           <li key={idx} className="flex items-center gap-2">
-                            <span className="h-1 w-1 bg-yellow-500 rounded-full"></span>
+                            <span className="h-1 w-1 bg-gray-100 dark:bg-gray-8000 rounded-full"></span>
                             {warning}
                           </li>
                         ))}
@@ -467,7 +467,7 @@ export default function AdvancedHPPCalculator({
 
                   {hppResult.availability.limiting_ingredients.length === 0 && 
                    hppResult.availability.stock_warnings.length === 0 && (
-                    <div className="flex items-center gap-2 text-green-600">
+                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <CheckCircle className="h-4 w-4" />
                       <span className="text-sm">All ingredients available</span>
                     </div>
@@ -481,7 +481,7 @@ export default function AdvancedHPPCalculator({
           <TabsContent value="analysis" className="space-y-4">
             <Card className="p-4">
               <h4 className="flex items-center gap-2 font-medium mb-4">
-                <Lightbulb className="h-4 w-4 text-blue-600" />
+                <Lightbulb className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 Smart Insights & Recommendations
               </h4>
 
@@ -492,7 +492,7 @@ export default function AdvancedHPPCalculator({
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <div className={`h-2 w-2 rounded-full ${
-                        hppResult.margin_analysis.is_profitable ? 'bg-green-500' : 'bg-red-500'
+                        hppResult.margin_analysis.is_profitable ? 'bg-gray-100 dark:bg-gray-8000' : 'bg-gray-100 dark:bg-gray-8000'
                       }`}></div>
                       <span>
                         {hppResult.margin_analysis.is_profitable 
@@ -530,7 +530,7 @@ export default function AdvancedHPPCalculator({
                         </div>
                         <div className="h-2 bg-gray-200 rounded-full relative mt-1">
                           <div 
-                            className="absolute h-full bg-blue-500 rounded-full"
+                            className="absolute h-full bg-gray-100 dark:bg-gray-8000 rounded-full"
                             style={{
                               left: `${((hppResult.pricing_analysis.current_price - hppResult.pricing_analysis.competitor_price_range.min) / 
                                 (hppResult.pricing_analysis.competitor_price_range.max - hppResult.pricing_analysis.competitor_price_range.min)) * 100}%`,
@@ -549,8 +549,8 @@ export default function AdvancedHPPCalculator({
               </div>
 
               {/* Action Recommendations */}
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h5 className="font-medium text-sm text-blue-800 mb-2">Recommended Actions:</h5>
+              <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 border border-blue-200 rounded-lg">
+                <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Recommended Actions:</h5>
                 <ul className="space-y-1 text-sm text-blue-700">
                   {!hppResult.margin_analysis.is_profitable && (
                     <li className="flex items-center gap-2">

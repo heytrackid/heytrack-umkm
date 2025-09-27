@@ -199,10 +199,10 @@ export function SmartNotificationCenter({
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />
-      case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-500" />
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
-      default: return <Bell className="h-4 w-4 text-blue-500" />
+      case 'critical': return <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'warning': return <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'success': return <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      default: return <Bell className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     }
   }
 
@@ -218,10 +218,10 @@ export function SmartNotificationCenter({
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'critical': return 'border-red-200 bg-red-50'
-      case 'warning': return 'border-yellow-200 bg-yellow-50'
-      case 'success': return 'border-green-200 bg-green-50'
-      default: return 'border-blue-200 bg-blue-50'
+      case 'critical': return 'border-red-200 bg-gray-100 dark:bg-gray-800'
+      case 'warning': return 'border-yellow-200 bg-gray-100 dark:bg-gray-800'
+      case 'success': return 'border-green-200 bg-gray-100 dark:bg-gray-800'
+      default: return 'border-blue-200 bg-gray-100 dark:bg-gray-800'
     }
   }
 
@@ -269,7 +269,7 @@ export function SmartNotificationCenter({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
-              <BellRing className="h-5 w-5 text-blue-500" />
+              <BellRing className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               Smart Notification Center
               {stats.unread > 0 && (
                 <Badge variant="destructive" className="ml-2">
@@ -291,7 +291,7 @@ export function SmartNotificationCenter({
                 size="sm"
                 onClick={() => setAutoRefresh(!autoRefresh)}
               >
-                <Zap className={`h-4 w-4 ${autoRefresh ? 'text-green-500' : 'text-gray-400'}`} />
+                <Zap className={`h-4 w-4 ${autoRefresh ? 'text-gray-600 dark:text-gray-400' : 'text-gray-400'}`} />
                 Auto
               </Button>
               {stats.unread > 0 && (
@@ -310,11 +310,11 @@ export function SmartNotificationCenter({
               <div className="text-xs text-muted-foreground">Total</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.unread}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.unread}</div>
               <div className="text-xs text-muted-foreground">Unread</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.critical}</div>
               <div className="text-xs text-muted-foreground">Critical</div>
             </div>
             <div className="text-center">
@@ -354,8 +354,8 @@ export function SmartNotificationCenter({
 
       {/* Critical Alerts Banner */}
       {stats.critical > 0 && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-500" />
+        <Alert className="border-red-200 bg-gray-100 dark:bg-gray-800">
+          <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           <AlertDescription className="text-red-700">
             <strong>CRITICAL ALERTS!</strong> Ada {stats.critical} notifikasi kritis yang memerlukan perhatian segera.
           </AlertDescription>
@@ -456,7 +456,7 @@ export function SmartNotificationCenter({
         {filteredNotifications.length === 0 && (
           <Card>
             <CardContent className="py-12 text-center">
-              <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              <CheckCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2 text-green-700">
                 All Clear! 🎉
               </h3>

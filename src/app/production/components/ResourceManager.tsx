@@ -105,20 +105,20 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
 
   const getStatusColor = (status: EquipmentStatus) => {
     switch (status) {
-      case 'available': return 'text-green-600 bg-green-100'
-      case 'in_use': return 'text-blue-600 bg-blue-100'
+      case 'available': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+      case 'in_use': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
       case 'maintenance': return 'text-orange-600 bg-orange-100'
-      case 'broken': return 'text-red-600 bg-red-100'
-      case 'reserved': return 'text-purple-600 bg-purple-100'
+      case 'broken': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+      case 'reserved': return 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
       default: return 'text-gray-600 bg-gray-100'
     }
   }
 
   const getUtilizationColor = (utilization: number) => {
-    if (utilization >= 90) return 'text-red-600'
+    if (utilization >= 90) return 'text-gray-600 dark:text-gray-400'
     if (utilization >= 70) return 'text-orange-600'
-    if (utilization >= 50) return 'text-blue-600'
-    return 'text-green-600'
+    if (utilization >= 50) return 'text-gray-600 dark:text-gray-400'
+    return 'text-gray-600 dark:text-gray-400'
   }
 
   const getEquipmentIcon = (type: EquipmentType) => {
@@ -159,7 +159,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                   {equipmentUtilization.filter(e => e.status === 'in_use').length}/{equipmentUtilization.length}
                 </p>
               </div>
-              <Settings className="h-8 w-8 text-blue-600" />
+              <Settings className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -175,7 +175,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                   {staffWorkload.length}
                 </p>
               </div>
-              <Users className="h-8 w-8 text-green-600" />
+              <Users className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -203,11 +203,11 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Maintenance Due
                 </p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   {maintenanceAlerts.length}
                 </p>
               </div>
-              <Wrench className="h-8 w-8 text-red-600" />
+              <Wrench className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -229,7 +229,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                   key={alert.id}
                   className={`flex items-center justify-between p-4 rounded-lg border-l-4 ${
                     alert.priority === 'high' 
-                      ? 'border-red-500 bg-red-50 dark:bg-red-950'
+                      ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 dark:bg-red-950'
                       : 'border-orange-500 bg-orange-50 dark:bg-orange-950'
                   }`}
                 >
@@ -237,7 +237,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                     <div className="flex items-center space-x-2">
                       <Badge className={
                         alert.priority === 'high'
-                          ? 'bg-red-100 text-red-800'
+                          ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                           : 'bg-orange-100 text-orange-800'
                       }>
                         {alert.priority} priority
@@ -349,7 +349,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                         Current Status
                       </span>
                       {equipment.status === 'in_use' ? (
-                        <Badge variant="outline" className="text-blue-600">
+                        <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
                           <Zap className="h-3 w-3 mr-1" />
                           Active
                         </Badge>
@@ -359,7 +359,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                           Maintenance
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-green-600">
+                        <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
                           Available
                         </Badge>
@@ -433,8 +433,8 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                       </div>
                       <div>
                         <CardTitle className="text-lg">
@@ -445,7 +445,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                         </p>
                       </div>
                     </div>
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
                       <Shield className="h-3 w-3 mr-1" />
                       Active
                     </Badge>
@@ -472,7 +472,7 @@ export default function ResourceManager({ className }: ResourceManagerProps) {
                         <span className="text-gray-600 dark:text-gray-400">
                           Efficiency Score
                         </span>
-                        <span className="font-medium text-green-600">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">
                           {staff.efficiency}%
                         </span>
                       </div>

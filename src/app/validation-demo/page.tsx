@@ -110,19 +110,19 @@ export default function ValidationDemoPage() {
 
   const getResultIcon = (result: string) => {
     switch (result) {
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'error': return <XCircle className="h-4 w-4 text-red-500" />
-      case 'info': return <Info className="h-4 w-4 text-blue-500" />
-      default: return <AlertCircle className="h-4 w-4 text-yellow-500" />
+      case 'success': return <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'error': return <XCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'info': return <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      default: return <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     }
   }
 
   const getResultColor = (result: string) => {
     switch (result) {
-      case 'success': return 'border-green-200 bg-green-50'
-      case 'error': return 'border-red-200 bg-red-50'
-      case 'info': return 'border-blue-200 bg-blue-50'
-      default: return 'border-yellow-200 bg-yellow-50'
+      case 'success': return 'border-green-200 bg-gray-100 dark:bg-gray-800'
+      case 'error': return 'border-red-200 bg-gray-100 dark:bg-gray-800'
+      case 'info': return 'border-blue-200 bg-gray-100 dark:bg-gray-800'
+      default: return 'border-yellow-200 bg-gray-100 dark:bg-gray-800'
     }
   }
 
@@ -135,7 +135,7 @@ export default function ValidationDemoPage() {
             Demo dan testing sistem validasi Zod yang telah diimplementasi
           </p>
         </div>
-        <Badge variant="secondary" className="bg-green-100 text-green-800">
+        <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
           TypeScript ✓ Clean Build
         </Badge>
       </div>
@@ -199,7 +199,7 @@ export default function ValidationDemoPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-green-600">✓ Implemented Features:</h4>
+                  <h4 className="font-semibold text-gray-600 dark:text-gray-400">✓ Implemented Features:</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>Real-time validation with Zod schemas</li>
                     <li>Indonesian error messages</li>
@@ -213,7 +213,7 @@ export default function ValidationDemoPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-blue-600">🔧 Validation Rules:</h4>
+                  <h4 className="font-semibold text-gray-600 dark:text-gray-400">🔧 Validation Rules:</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>Nama: 2-100 karakter, wajib diisi</li>
                     <li>Unit: Enum (kg, gram, liter, ml, pcs, pack)</li>
@@ -236,7 +236,7 @@ export default function ValidationDemoPage() {
               <CardContent className="space-y-4">
                 <div>
                   <h4 className="font-semibold mb-2">Valid Request:</h4>
-                  <pre className="bg-green-50 p-3 rounded text-sm overflow-x-auto">
+                  <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm overflow-x-auto">
 {`POST /api/ingredients
 {
   "name": "Tepung Terigu",
@@ -258,7 +258,7 @@ Response: 200 OK
 
                 <div>
                   <h4 className="font-semibold mb-2">Invalid Request:</h4>
-                  <pre className="bg-red-50 p-3 rounded text-sm overflow-x-auto">
+                  <pre className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-sm overflow-x-auto">
 {`POST /api/ingredients
 {
   "name": "",
@@ -287,7 +287,7 @@ Response: 400 Bad Request
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-green-600">✓ Server-side Validation:</h4>
+                  <h4 className="font-semibold text-gray-600 dark:text-gray-400">✓ Server-side Validation:</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>Request body validation with Zod</li>
                     <li>Query parameter validation</li>
@@ -299,7 +299,7 @@ Response: 400 Bad Request
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-blue-600">🔧 Middleware:</h4>
+                  <h4 className="font-semibold text-gray-600 dark:text-gray-400">🔧 Middleware:</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>withValidation() - Body validation</li>
                     <li>withQueryValidation() - URL params</li>
@@ -310,7 +310,7 @@ Response: 400 Bad Request
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-semibold text-purple-600">🚀 Enhanced Features:</h4>
+                  <h4 className="font-semibold text-gray-600 dark:text-gray-400">🚀 Enhanced Features:</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     <li>Pagination with search & sort</li>
                     <li>Rate limiting</li>

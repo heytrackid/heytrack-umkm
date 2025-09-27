@@ -151,7 +151,7 @@ export function MobileTable<T extends Record<string, any>>({
                                 e.stopPropagation()
                                 action.onClick(item)
                               }}
-                              className={action.variant === 'destructive' ? 'text-red-600' : ''}
+                              className={action.variant === 'destructive' ? 'text-gray-600 dark:text-gray-400' : ''}
                             >
                               {action.icon && <span className="mr-2">{action.icon}</span>}
                               {action.label}
@@ -268,7 +268,7 @@ export function MobileTable<T extends Record<string, any>>({
                               e.stopPropagation()
                               action.onClick(item)
                             }}
-                            className={action.variant === 'destructive' ? 'text-red-600' : ''}
+                            className={action.variant === 'destructive' ? 'text-gray-600 dark:text-gray-400' : ''}
                           >
                             {action.icon && <span className="mr-2">{action.icon}</span>}
                             {action.label}

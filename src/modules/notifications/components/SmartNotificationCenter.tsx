@@ -193,10 +193,10 @@ export default function SmartNotificationCenter({
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />
-      case 'warning': return <AlertCircle className="h-4 w-4 text-yellow-500" />
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
-      default: return <Bell className="h-4 w-4 text-blue-500" />
+      case 'critical': return <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'warning': return <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'success': return <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      default: return <Bell className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     }
   }
 
@@ -212,10 +212,10 @@ export default function SmartNotificationCenter({
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'critical': return 'border-red-200 bg-red-50'
-      case 'warning': return 'border-yellow-200 bg-yellow-50'
-      case 'success': return 'border-green-200 bg-green-50'
-      default: return 'border-blue-200 bg-blue-50'
+      case 'critical': return 'border-red-200 bg-gray-100 dark:bg-gray-800'
+      case 'warning': return 'border-yellow-200 bg-gray-100 dark:bg-gray-800'
+      case 'success': return 'border-green-200 bg-gray-100 dark:bg-gray-800'
+      default: return 'border-blue-200 bg-gray-100 dark:bg-gray-800'
     }
   }
 
@@ -263,7 +263,7 @@ export default function SmartNotificationCenter({
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
-              <BellRing className="h-5 w-5 text-blue-500" />
+              <BellRing className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               Smart Notification Center
               {stats.unread > 0 && (
                 <Badge variant="destructive" className="ml-2">
@@ -285,7 +285,7 @@ export default function SmartNotificationCenter({
                 size="sm"
                 onClick={() => setAutoRefresh(!autoRefresh)}
               >
-                <Zap className={`h-4 w-4 ${autoRefresh ? 'text-green-500' : 'text-gray-400'}`} />
+                <Zap className={`h-4 w-4 ${autoRefresh ? 'text-gray-600 dark:text-gray-400' : 'text-gray-400'}`} />
                 Auto
               </Button>
               {stats.unread > 0 && (
@@ -309,11 +309,11 @@ export default function SmartNotificationCenter({
               <div className="text-xs text-muted-foreground">Unread</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{stats.critical}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.critical}</div>
               <div className="text-xs text-muted-foreground">Critical</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">{stats.high}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.high}</div>
               <div className="text-xs text-muted-foreground">High Priority</div>
             </div>
           </div>
@@ -333,7 +333,7 @@ export default function SmartNotificationCenter({
               <div className="space-y-3">
                 {filteredNotifications.length === 0 ? (
                   <div className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                    <CheckCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
                     <p className="text-muted-foreground">No notifications in this category</p>
                   </div>
                 ) : (
@@ -377,7 +377,7 @@ export default function SmartNotificationCenter({
                                   {notification.priority}
                                 </Badge>
                                 {!notification.read && (
-                                  <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800">
+                                  <Badge variant="outline" className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                                     New
                                   </Badge>
                                 )}

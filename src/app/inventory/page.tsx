@@ -145,10 +145,10 @@ const sampleTransactions = [
 ]
 
 const transactionTypes = [
-  { value: 'PURCHASE', label: 'Pembelian', color: 'bg-green-100 text-green-800', icon: ArrowUp },
-  { value: 'USAGE', label: 'Pemakaian', color: 'bg-blue-100 text-blue-800', icon: Factory },
-  { value: 'ADJUSTMENT', label: 'Penyesuaian', color: 'bg-yellow-100 text-yellow-800', icon: RotateCcw },
-  { value: 'WASTE', label: 'Terbuang', color: 'bg-red-100 text-red-800', icon: Trash2 }
+  { value: 'PURCHASE', label: 'Pembelian', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300', icon: ArrowUp },
+  { value: 'USAGE', label: 'Pemakaian', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300', icon: Factory },
+  { value: 'ADJUSTMENT', label: 'Penyesuaian', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300', icon: RotateCcw },
+  { value: 'WASTE', label: 'Terbuang', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300', icon: Trash2 }
 ]
 
 export default function InventoryPage() {
@@ -264,10 +264,10 @@ export default function InventoryPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Nilai Pembelian</CardTitle>
-              <ArrowUp className="h-4 w-4 text-green-500" />
+              <ArrowUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className={`font-bold text-green-600 ${
+              <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>
                 Rp {stats.totalPurchaseValue.toLocaleString()}
@@ -278,10 +278,10 @@ export default function InventoryPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Nilai Pemakaian</CardTitle>
-              <ArrowDown className="h-4 w-4 text-blue-500" />
+              <ArrowDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className={`font-bold text-blue-600 ${
+              <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>
                 Rp {stats.totalUsageValue.toLocaleString()}
@@ -292,10 +292,10 @@ export default function InventoryPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Nilai Waste</CardTitle>
-              <Trash2 className="h-4 w-4 text-red-500" />
+              <Trash2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className={`font-bold text-red-600 ${
+              <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>
                 Rp {stats.totalWasteValue.toLocaleString()}
@@ -494,7 +494,7 @@ export default function InventoryPage() {
                     accessor: 'quantity',
                     render: (value, transaction) => (
                       <span className={`${
-                        transaction.quantity > 0 ? 'text-green-600' : 'text-red-600'
+                        transaction.quantity > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                       } ${isMobile ? 'text-sm' : ''}`}>
                         {transaction.quantity > 0 ? '+' : ''}{transaction.quantity} {transaction.unit}
                       </span>
@@ -518,7 +518,7 @@ export default function InventoryPage() {
                     accessor: 'totalValue',
                     render: (value, transaction) => (
                       <span className={`font-medium ${
-                        transaction.totalValue > 0 ? 'text-green-600' : 'text-red-600'
+                        transaction.totalValue > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                       } ${isMobile ? 'text-sm' : ''}`}>
                         {transaction.totalValue > 0 ? '+' : ''}Rp {transaction.totalValue.toLocaleString()}
                       </span>
@@ -680,7 +680,7 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Quantity:</span>
-              <span className={transaction.quantity > 0 ? 'text-green-600' : 'text-red-600'}>
+              <span className={transaction.quantity > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}>
                 {transaction.quantity > 0 ? '+' : ''}{transaction.quantity} {transaction.unit}
               </span>
             </div>
@@ -690,7 +690,7 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
             </div>
             <div className="flex justify-between font-medium">
               <span className="text-muted-foreground">Total Nilai:</span>
-              <span className={transaction.totalValue > 0 ? 'text-green-600' : 'text-red-600'}>
+              <span className={transaction.totalValue > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}>
                 {transaction.totalValue > 0 ? '+' : ''}Rp {transaction.totalValue.toLocaleString()}
               </span>
             </div>

@@ -31,10 +31,10 @@ interface SimplePengeluaran {
 }
 
 const KATEGORI_UMKM = [
-  { value: 'sewa', label: 'Sewa Toko', icon: Building, color: 'bg-blue-100 text-blue-800' },
-  { value: 'listrik', label: 'Listrik & Air', icon: Zap, color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'gaji', label: 'Gaji Karyawan', icon: Users, color: 'bg-green-100 text-green-800' },
-  { value: 'transport', label: 'Transportasi', icon: Car, color: 'bg-purple-100 text-purple-800' },
+  { value: 'sewa', label: 'Sewa Toko', icon: Building, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  { value: 'listrik', label: 'Listrik & Air', icon: Zap, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  { value: 'gaji', label: 'Gaji Karyawan', icon: Users, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  { value: 'transport', label: 'Transportasi', icon: Car, color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
   { value: 'lainnya', label: 'Lain-lain', icon: Receipt, color: 'bg-gray-100 text-gray-800' }
 ]
 
@@ -151,7 +151,7 @@ export default function PengeluaranSimplePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Receipt className="h-8 w-8 text-slate-600" />
+              <Receipt className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               Pengeluaran Harian
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -246,11 +246,11 @@ export default function PengeluaranSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Bulan Ini</p>
-                  <p className="text-xl font-bold text-red-600">
+                  <p className="text-xl font-bold text-gray-600 dark:text-gray-400">
                     Rp {stats.pengeluaranBulan.toLocaleString()}
                   </p>
                 </div>
-                <Calendar className="h-8 w-8 text-red-600" />
+                <Calendar className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -264,7 +264,7 @@ export default function PengeluaranSimplePage() {
                     Rp {stats.pengeluaranHariIni.toLocaleString()}
                   </p>
                 </div>
-                <Receipt className="h-8 w-8 text-blue-600" />
+                <Receipt className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -278,7 +278,7 @@ export default function PengeluaranSimplePage() {
                     Rp {stats.totalPengeluaran.toLocaleString()}
                   </p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-600" />
+                <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -292,7 +292,7 @@ export default function PengeluaranSimplePage() {
                     Rp {stats.rataHarian.toLocaleString()}
                   </p>
                 </div>
-                <Receipt className="h-8 w-8 text-purple-600" />
+                <Receipt className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -343,7 +343,7 @@ export default function PengeluaranSimplePage() {
                     
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <p className="text-xl font-bold text-red-600">
+                        <p className="text-xl font-bold text-gray-600 dark:text-gray-400">
                           Rp {item.jumlah.toLocaleString()}
                         </p>
                       </div>
@@ -352,7 +352,7 @@ export default function PengeluaranSimplePage() {
                         variant="outline" 
                         size="sm"
                         onClick={() => deletePengeluaran(item.id)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -387,19 +387,19 @@ export default function PengeluaranSimplePage() {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                 <p className="font-medium text-blue-900 dark:text-blue-100">📝 Catat Langsung</p>
                 <p className="text-blue-700 dark:text-blue-200">
                   Langsung catat setiap pengeluaran agar tidak lupa
                 </p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                 <p className="font-medium text-green-900 dark:text-green-100">🏷️ Pakai Kategori</p>
                 <p className="text-green-700 dark:text-green-200">
                   Kategorikan dengan benar untuk analisa yang lebih baik
                 </p>
               </div>
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
                 <p className="font-medium text-yellow-900 dark:text-yellow-100">📊 Pantau Bulanan</p>
                 <p className="text-yellow-700 dark:text-yellow-200">
                   Cek total bulanan untuk kontrol anggaran

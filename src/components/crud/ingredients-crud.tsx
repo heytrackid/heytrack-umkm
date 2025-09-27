@@ -167,8 +167,8 @@ export function IngredientsCRUD() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <p className="text-red-600">Error loading ingredients: {error}</p>
+      <div className="bg-gray-100 dark:bg-gray-800 border border-red-200 rounded-md p-4">
+        <p className="text-gray-600 dark:text-gray-400">Error loading ingredients: {error}</p>
       </div>
     );
   }

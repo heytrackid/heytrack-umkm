@@ -47,8 +47,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   pending: {
     label: 'Menunggu Konfirmasi',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Menunggu konfirmasi dari customer atau admin',
     nextStatuses: ['confirmed', 'cancelled'],
     allowEdit: true,
@@ -56,8 +56,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   confirmed: {
     label: 'Dikonfirmasi',
-    color: 'text-blue-600', 
-    bgColor: 'bg-blue-100',
+    color: 'text-gray-600 dark:text-gray-400', 
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Order sudah dikonfirmasi, siap untuk produksi',
     nextStatuses: ['in_production', 'cancelled'],
     allowEdit: false,
@@ -65,8 +65,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   in_production: {
     label: 'Sedang Diproduksi',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100', 
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800', 
     description: 'Order sedang dalam proses produksi',
     nextStatuses: ['ready', 'cancelled'],
     allowEdit: false,
@@ -83,8 +83,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   completed: {
     label: 'Selesai',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Order sudah selesai dan diterima customer',
     nextStatuses: [],
     allowEdit: false,
@@ -92,8 +92,8 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   },
   cancelled: {
     label: 'Dibatalkan',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Order dibatalkan',
     nextStatuses: [],
     allowEdit: false,
@@ -110,20 +110,20 @@ export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, {
 }> = {
   unpaid: {
     label: 'Belum Dibayar',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Belum ada pembayaran yang diterima'
   },
   partial: {
     label: 'Dibayar Sebagian',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100', 
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800', 
     description: 'Sudah dibayar sebagian (DP)'
   },
   paid: {
     label: 'Lunas',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Sudah dibayar lunas'
   },
   refunded: {
@@ -219,8 +219,8 @@ export const ORDER_PRIORITY_CONFIG = {
   },
   normal: {
     label: 'Normal',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     icon: '➡️',
     description: 'Prioritas normal'
   },
@@ -233,8 +233,8 @@ export const ORDER_PRIORITY_CONFIG = {
   },
   urgent: {
     label: 'Urgent',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
+    color: 'text-gray-600 dark:text-gray-400',
+    bgColor: 'bg-gray-100 dark:bg-gray-800',
     icon: '🚨',
     description: 'Sangat urgent, butuh perhatian khusus'
   }

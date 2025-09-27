@@ -186,21 +186,21 @@ export function getDifficultyInfo(difficulty: string) {
     case 'easy':
       return {
         label: 'Mudah',
-        color: 'bg-green-100 text-green-800',
+        color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
         icon: '🟢',
         description: 'Cocok untuk pemula'
       }
     case 'medium':
       return {
         label: 'Sedang',
-        color: 'bg-yellow-100 text-yellow-800',
+        color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
         icon: '🟡',
         description: 'Memerlukan sedikit pengalaman'
       }
     case 'hard':
       return {
         label: 'Sulit',
-        color: 'bg-red-100 text-red-800',
+        color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
         icon: '🔴',
         description: 'Untuk baker berpengalaman'
       }

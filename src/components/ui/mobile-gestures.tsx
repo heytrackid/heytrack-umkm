@@ -361,10 +361,10 @@ export function SwipeActions({
 
   const getActionColor = (color: SwipeAction['color']) => {
     const colors = {
-      red: 'bg-red-500 hover:bg-red-600 text-white',
-      green: 'bg-green-500 hover:bg-green-600 text-white',
-      blue: 'bg-blue-500 hover:bg-blue-600 text-white',
-      yellow: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+      red: 'bg-gray-100 dark:bg-gray-8000 hover:bg-red-600 text-white',
+      green: 'bg-gray-100 dark:bg-gray-8000 hover:bg-green-600 text-white',
+      blue: 'bg-gray-100 dark:bg-gray-8000 hover:bg-blue-600 text-white',
+      yellow: 'bg-gray-100 dark:bg-gray-8000 hover:bg-yellow-600 text-white',
       gray: 'bg-gray-500 hover:bg-gray-600 text-white'
     }
     return colors[color]

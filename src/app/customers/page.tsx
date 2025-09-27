@@ -170,16 +170,16 @@ export default function CustomersPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'retail': return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
-      case 'wholesale': return 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100'
+      case 'retail': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-blue-800 dark:text-blue-100'
+      case 'wholesale': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-purple-800 dark:text-purple-100'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-      case 'inactive': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+      case 'active': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
+      case 'inactive': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
     }
   }
@@ -256,7 +256,7 @@ export default function CustomersPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.activeCustomers}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.activeCustomers}</div>
               <p className="text-xs text-muted-foreground">
                 {((stats.activeCustomers / stats.totalCustomers) * 100).toFixed(1)}% dari total
               </p>
@@ -379,7 +379,7 @@ export default function CustomersPage() {
                   <div>
                     <p className="text-muted-foreground">Poin Loyalitas</p>
                     <div className="flex items-center gap-1">
-                      <Gift className="h-3 w-3 text-yellow-500" />
+                      <Gift className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                       <span className="font-medium">{customer.loyaltyPoints}</span>
                     </div>
                   </div>
@@ -576,7 +576,7 @@ function CustomerDetailView({ customer }: { customer: any }) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Poin Loyalitas:</span>
                   <div className="flex items-center gap-1">
-                    <Gift className="h-3 w-3 text-yellow-500" />
+                    <Gift className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                     <span className="font-medium">{customer.loyaltyPoints}</span>
                   </div>
                 </div>
@@ -630,7 +630,7 @@ function CustomerDetailView({ customer }: { customer: any }) {
                 <Badge 
                   className={
                     order.status === 'DELIVERED' 
-                      ? 'bg-green-100 text-green-800' 
+                      ? 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
                       : 'bg-orange-100 text-orange-800'
                   }
                 >
@@ -668,7 +668,7 @@ function CustomerDetailView({ customer }: { customer: any }) {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Gift className="h-4 w-4 text-yellow-500" />
+                <Gift className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <span className="text-2xl font-bold">{customer.loyaltyPoints}</span>
               </div>
               <p className="text-xs text-muted-foreground">poin terkumpul</p>
@@ -709,16 +709,16 @@ function CustomerDetailView({ customer }: { customer: any }) {
 
 function getTypeColor(type: string) {
   switch (type) {
-    case 'retail': return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100'
-    case 'wholesale': return 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100'
+    case 'retail': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-blue-800 dark:text-blue-100'
+    case 'wholesale': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-purple-800 dark:text-purple-100'
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
   }
 }
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'active': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-    case 'inactive': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+    case 'active': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
+    case 'inactive': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
   }
 }

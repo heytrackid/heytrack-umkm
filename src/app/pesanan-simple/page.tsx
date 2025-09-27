@@ -46,16 +46,16 @@ interface PesananItem {
 }
 
 const STATUS_COLORS = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  proses: 'bg-blue-100 text-blue-800',
-  selesai: 'bg-green-100 text-green-800',
-  batal: 'bg-red-100 text-red-800'
+  pending: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  proses: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  selesai: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  batal: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
 }
 
 const STATUS_BAYAR_COLORS = {
-  belum: 'bg-red-100 text-red-800',
-  dp: 'bg-yellow-100 text-yellow-800',
-  lunas: 'bg-green-100 text-green-800'
+  belum: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  dp: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  lunas: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
 }
 
 const PRODUK_POPULER = [
@@ -252,7 +252,7 @@ export default function PesananSimplePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <ShoppingCart className="h-8 w-8 text-slate-600" />
+              <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               Pesanan Sederhana
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -369,7 +369,7 @@ export default function PesananSimplePage() {
                                   key={produk.nama}
                                   type="button"
                                   onClick={() => selectProduk(index, produk)}
-                                  className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                  className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 text-blue-700 rounded hover:bg-blue-200"
                                 >
                                   {produk.nama}
                                 </button>
@@ -409,10 +409,10 @@ export default function PesananSimplePage() {
                   </div>
                   
                   {/* Total */}
-                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Total Pesanan:</span>
-                      <span className="text-xl font-bold text-blue-600">
+                      <span className="text-xl font-bold text-gray-600 dark:text-gray-400">
                         Rp {totalEstimate.toLocaleString()}
                       </span>
                     </div>
@@ -449,11 +449,11 @@ export default function PesananSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Pesanan</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.totalPesanan}
                   </p>
                 </div>
-                <ShoppingCart className="h-8 w-8 text-blue-600" />
+                <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -463,11 +463,11 @@ export default function PesananSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Hari Ini</p>
-                  <p className="text-2xl font-bold text-green-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.pesananHariIni}
                   </p>
                 </div>
-                <Calendar className="h-8 w-8 text-green-600" />
+                <Calendar className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -477,11 +477,11 @@ export default function PesananSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Pendapatan</p>
-                  <p className="text-xl font-bold text-purple-600">
+                  <p className="text-xl font-bold text-gray-600 dark:text-gray-400">
                     Rp {stats.totalPendapatan.toLocaleString()}
                   </p>
                 </div>
-                <DollarSign className="h-8 w-8 text-purple-600" />
+                <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -491,11 +491,11 @@ export default function PesananSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold text-yellow-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.pesananPending}
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-yellow-600" />
+                <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -542,7 +542,7 @@ export default function PesananSimplePage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-blue-600" />
+                      <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                       {item.namaPelanggan}
                       <span className={`px-2 py-1 rounded text-xs ${STATUS_COLORS[item.status]}`}>
                         {getStatusIcon(item.status)}
@@ -568,7 +568,7 @@ export default function PesananSimplePage() {
                       variant="outline" 
                       size="sm"
                       onClick={() => deletePesanan(item.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -597,7 +597,7 @@ export default function PesananSimplePage() {
                   <div className="border-t pt-2">
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">Total:</span>
-                      <span className="text-xl font-bold text-blue-600">
+                      <span className="text-xl font-bold text-gray-600 dark:text-gray-400">
                         Rp {item.totalHarga.toLocaleString()}
                       </span>
                     </div>
@@ -608,8 +608,8 @@ export default function PesananSimplePage() {
 
                   {/* Catatan */}
                   {item.catatan && (
-                    <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-yellow-200">
                         💬 {item.catatan}
                       </p>
                     </div>
@@ -669,19 +669,19 @@ export default function PesananSimplePage() {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                 <p className="font-medium text-blue-900 dark:text-blue-100">📱 Catat Kontak</p>
                 <p className="text-blue-700 dark:text-blue-200">
                   Simpan nomor telepon untuk konfirmasi pesanan
                 </p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                 <p className="font-medium text-green-900 dark:text-green-100">💰 Update Status</p>
                 <p className="text-green-700 dark:text-green-200">
                   Selalu update status pesanan dan pembayaran
                 </p>
               </div>
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
                 <p className="font-medium text-yellow-900 dark:text-yellow-100">📅 Jadwal Ambil</p>
                 <p className="text-yellow-700 dark:text-yellow-200">
                   Set tanggal ambil yang realistis untuk produksi

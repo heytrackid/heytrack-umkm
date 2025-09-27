@@ -313,15 +313,15 @@ export default function HPPCalculatorPage() {
               <p className="text-muted-foreground">Hitung HPP mudah tanpa ribet - semua overhead otomatis!</p>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                   <span>Overhead +{OVERHEAD_PERCENTAGE}% otomatis</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                   <span>Tenaga kerja +{LABOR_PERCENTAGE}% otomatis</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3 text-blue-500" />
+                  <TrendingUp className="h-3 w-3 text-gray-600 dark:text-gray-400" />
                   <span>Rekomendasi harga otomatis</span>
                 </div>
               </div>
@@ -489,7 +489,7 @@ export default function HPPCalculatorPage() {
                         variant="outline" 
                         size="sm" 
                         onClick={() => removeIngredient(ingredient.id)}
-                        className="text-red-600"
+                        className="text-gray-600 dark:text-gray-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -517,7 +517,7 @@ export default function HPPCalculatorPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="p-4 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                     <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">🤖 Otomatis Dihitung!</h4>
                     <div className="space-y-2 text-sm text-blue-700 dark:text-blue-200">
                       <div className="flex justify-between">
@@ -551,14 +551,14 @@ export default function HPPCalculatorPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Recommended Price */}
-                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="p-4 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="font-medium text-green-900 dark:text-green-100">🎯 Harga Rekomendasi</h4>
                       <p className="text-sm text-green-700 dark:text-green-200">Margin {RECOMMENDED_MARGIN}% - sudah aman!</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-green-600">Rp {totals.suggestedPrice?.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">Rp {totals.suggestedPrice?.toLocaleString()}</p>
                       <Button 
                         size="sm" 
                         onClick={() => setCalculation(prev => ({ ...prev, sellingPrice: totals.suggestedPrice || 0 }))}
@@ -594,7 +594,7 @@ export default function HPPCalculatorPage() {
                     <div className="text-center p-3 bg-muted rounded-lg">
                       <p className="text-muted-foreground">Keuntungan</p>
                       <p className={`text-lg font-bold ${
-                        totals.profitPerServing > 0 ? 'text-green-600' : 'text-red-600'
+                        totals.profitPerServing > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                       }`}>
                         Rp {totals.profitPerServing.toLocaleString()}
                       </p>
@@ -602,8 +602,8 @@ export default function HPPCalculatorPage() {
                     <div className="text-center p-3 bg-muted rounded-lg">
                       <p className="text-muted-foreground">Margin</p>
                       <p className={`text-lg font-bold ${
-                        totals.margin >= 40 ? 'text-green-600' : 
-                        totals.margin >= 20 ? 'text-yellow-600' : 'text-red-600'
+                        totals.margin >= 40 ? 'text-gray-600 dark:text-gray-400' : 
+                        totals.margin >= 20 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                       }`}>
                         {totals.margin.toFixed(1)}%
                       </p>
@@ -622,13 +622,13 @@ export default function HPPCalculatorPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                   <h4 className="font-medium text-green-900 dark:text-green-100 mb-1">✅ Margin Sehat</h4>
                   <p className="text-sm text-green-700 dark:text-green-200">
                     Untuk bakery, margin 40-60% sudah bagus. Jangan terlalu rendah!
                   </p>
                 </div>
-                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                   <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">⚡ Otomatis Dihitung</h4>
                   <p className="text-sm text-blue-700 dark:text-blue-200">
                     Overhead dan tenaga kerja sudah otomatis dihitung {OVERHEAD_PERCENTAGE + LABOR_PERCENTAGE}% dari bahan baku
@@ -660,7 +660,7 @@ export default function HPPCalculatorPage() {
                     <span className="text-muted-foreground">Biaya Bahan Baku:</span>
                     <span className="font-medium">Rp {totals.materialCost.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-blue-600">
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                     <span>Overhead Otomatis (+{OVERHEAD_PERCENTAGE + LABOR_PERCENTAGE}%):</span>
                     <span className="font-medium">Rp {totals.overheadCost.toLocaleString()}</span>
                   </div>
@@ -669,7 +669,7 @@ export default function HPPCalculatorPage() {
                     <span>Total HPP:</span>
                     <span>Rp {totals.totalCost.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between font-bold text-xl text-blue-600">
+                  <div className="flex justify-between font-bold text-xl text-gray-600 dark:text-gray-400">
                     <span>HPP per Porsi:</span>
                     <span>Rp {totals.costPerServing.toLocaleString()}</span>
                   </div>
@@ -677,9 +677,9 @@ export default function HPPCalculatorPage() {
 
                 {/* Smart Recommendation */}
                 {totals.costPerServing > 0 && (
-                  <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
                     <div className="flex items-center gap-2 mb-1">
-                      <TrendingUp className="h-4 w-4 text-yellow-600" />
+                      <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       <span className="font-medium text-yellow-900 dark:text-yellow-100">Saran Otomatis</span>
                     </div>
                     <p className="text-sm text-yellow-700 dark:text-yellow-200">
@@ -694,11 +694,11 @@ export default function HPPCalculatorPage() {
                       <span className="text-muted-foreground">Harga Jual:</span>
                       <span className="font-medium">Rp {calculation.sellingPrice.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between font-medium text-green-600">
+                    <div className="flex justify-between font-medium text-gray-600 dark:text-gray-400">
                       <span>Keuntungan:</span>
                       <span>Rp {totals.profitPerServing.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between font-medium text-blue-600">
+                    <div className="flex justify-between font-medium text-gray-600 dark:text-gray-400">
                       <span>Margin:</span>
                       <span>{totals.margin.toFixed(1)}%</span>
                     </div>
@@ -715,9 +715,9 @@ export default function HPPCalculatorPage() {
                 )}
 
                 {totals.margin >= 30 && calculation.sellingPrice > 0 && (
-                  <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <p className="text-sm text-green-600">
+                  <div className="flex items-center gap-2 p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-900/20 rounded-lg">
+                    <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Margin baik! Harga sudah menguntungkan.
                     </p>
                   </div>
@@ -748,7 +748,7 @@ export default function HPPCalculatorPage() {
                         </div>
                         <div>
                           <p className="text-muted-foreground">Margin:</p>
-                          <p className="font-medium text-green-600">{calc.margin.toFixed(1)}%</p>
+                          <p className="font-medium text-gray-600 dark:text-gray-400">{calc.margin.toFixed(1)}%</p>
                         </div>
                       </div>
                     </div>

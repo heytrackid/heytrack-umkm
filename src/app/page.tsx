@@ -296,7 +296,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <ShoppingCart className="h-5 w-5 text-blue-500" />
+                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <span>Pesanan Terbaru</span>
               </CardTitle>
             </CardHeader>
@@ -433,7 +433,7 @@ export default function Dashboard() {
                 }`}
                 onClick={() => window.location.href = '/orders'}
               >
-                <ShoppingCart className={`text-blue-500 ${
+                <ShoppingCart className={`text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'h-6 w-6' : 'h-8 w-8'
                 }`} />
                 <span className={`font-medium text-foreground ${
@@ -447,7 +447,7 @@ export default function Dashboard() {
                 }`}
                 onClick={() => window.location.href = '/recipes'}
               >
-                <Package className={`text-green-500 ${
+                <Package className={`text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'h-6 w-6' : 'h-8 w-8'
                 }`} />
                 <span className={`font-medium text-foreground ${
@@ -461,7 +461,7 @@ export default function Dashboard() {
                 }`}
                 onClick={() => window.location.href = '/hpp'}
               >
-                <TrendingUp className={`text-purple-500 ${
+                <TrendingUp className={`text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'h-6 w-6' : 'h-8 w-8'
                 }`} />
                 <span className={`font-medium text-foreground ${

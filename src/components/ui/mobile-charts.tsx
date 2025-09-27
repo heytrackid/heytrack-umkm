@@ -149,9 +149,9 @@ function BaseMobileChart({
     
     switch (trend.direction) {
       case 'up':
-        return <TrendingUp className="h-4 w-4 text-green-500" />
+        return <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       case 'down':
-        return <TrendingDown className="h-4 w-4 text-red-500" />
+        return <TrendingDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       default:
         return <Minus className="h-4 w-4 text-gray-500" />
     }

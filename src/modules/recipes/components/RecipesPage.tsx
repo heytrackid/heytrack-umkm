@@ -131,9 +131,9 @@ export default function RecipesPage({
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-100 text-green-800'
-      case 'medium': return 'bg-yellow-100 text-yellow-800' 
-      case 'hard': return 'bg-red-100 text-red-800'
+      case 'easy': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
+      case 'hard': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -209,7 +209,7 @@ export default function RecipesPage({
                 <p className="text-sm font-medium text-muted-foreground">Total Resep</p>
                 <p className="text-2xl font-bold">{recipes.length}</p>
               </div>
-              <ChefHat className="h-8 w-8 text-blue-600" />
+              <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -220,7 +220,7 @@ export default function RecipesPage({
                 <p className="text-sm font-medium text-muted-foreground">Avg Margin</p>
                 <p className="text-2xl font-bold">67%</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendingUp className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -242,7 +242,7 @@ export default function RecipesPage({
                 <p className="text-sm font-medium text-muted-foreground">Best Seller</p>
                 <p className="text-2xl font-bold">Roti Tawar</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>

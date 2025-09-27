@@ -172,7 +172,7 @@ export function MobileInput({
             {error ? (
               <AlertCircle className="h-4 w-4 text-destructive" />
             ) : (
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <CheckCircle2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             )}
           </div>
         )}

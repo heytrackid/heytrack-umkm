@@ -92,9 +92,9 @@ export function SmartProductionPlanner({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'in_progress': return <PlayCircle className="h-4 w-4 text-blue-500" />
-      case 'scheduled': return <Clock className="h-4 w-4 text-yellow-500" />
+      case 'completed': return <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'in_progress': return <PlayCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'scheduled': return <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       default: return <PauseCircle className="h-4 w-4 text-gray-500" />
     }
   }
@@ -149,7 +149,7 @@ export function SmartProductionPlanner({
         <Card className="border-l-4 border-l-blue-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <Factory className="h-4 w-4 text-blue-500" />
+              <Factory className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <div className="text-2xl font-bold">{summary.totalOrders}</div>
             </div>
             <p className="text-xs text-muted-foreground">Total Orders</p>
@@ -159,8 +159,8 @@ export function SmartProductionPlanner({
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <div className="text-2xl font-bold text-green-600">{summary.canProduceCount}</div>
+              <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{summary.canProduceCount}</div>
             </div>
             <p className="text-xs text-muted-foreground">Ready to Produce</p>
           </CardContent>
@@ -169,8 +169,8 @@ export function SmartProductionPlanner({
         <Card className="border-l-4 border-l-red-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-              <div className="text-2xl font-bold text-red-600">{summary.blockedCount}</div>
+              <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{summary.blockedCount}</div>
             </div>
             <p className="text-xs text-muted-foreground">Blocked</p>
           </CardContent>
@@ -179,8 +179,8 @@ export function SmartProductionPlanner({
         <Card className="border-l-4 border-l-purple-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <Package className="h-4 w-4 text-purple-500" />
-              <div className="text-2xl font-bold text-purple-600">{summary.totalBatches}</div>
+              <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{summary.totalBatches}</div>
             </div>
             <p className="text-xs text-muted-foreground">Total Batches</p>
           </CardContent>
@@ -199,8 +199,8 @@ export function SmartProductionPlanner({
 
       {/* Critical Alerts */}
       {summary.blockedCount > 0 && (
-        <Alert className="border-red-200 bg-red-50">
-          <AlertTriangle className="h-4 w-4 text-red-500" />
+        <Alert className="border-red-200 bg-gray-100 dark:bg-gray-800">
+          <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           <AlertDescription className="text-red-700">
             <strong>ATTENTION!</strong> {summary.blockedCount} pesanan tidak bisa diproduksi karena kekurangan bahan. 
             Segera lakukan restock atau ubah jadwal.
@@ -210,8 +210,8 @@ export function SmartProductionPlanner({
 
       {/* Optimizations Alert */}
       {optimizations.length > 0 && (
-        <Alert className="border-blue-200 bg-blue-50">
-          <Lightbulb className="h-4 w-4 text-blue-500" />
+        <Alert className="border-blue-200 bg-gray-100 dark:bg-gray-800">
+          <Lightbulb className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           <AlertDescription className="text-blue-700">
             <strong>OPTIMIZATION AVAILABLE!</strong> Ditemukan {optimizations.length} peluang optimasi yang bisa menghemat waktu dan cost produksi.
           </AlertDescription>
@@ -257,8 +257,8 @@ export function SmartProductionPlanner({
               const order = orders.find(o => o.recipe_id === item.recipe.id)
               return (
                 <Card key={index} className={`${
-                  !item.production.canProduce ? 'border-red-200 bg-red-50' : 
-                  new Date(item.deliveryDate) <= new Date(Date.now() + 24*60*60*1000) ? 'border-yellow-200 bg-yellow-50' : ''
+                  !item.production.canProduce ? 'border-red-200 bg-gray-100 dark:bg-gray-800' : 
+                  new Date(item.deliveryDate) <= new Date(Date.now() + 24*60*60*1000) ? 'border-yellow-200 bg-gray-100 dark:bg-gray-800' : ''
                 }`}>
                   <CardContent className="pt-4">
                     <div className="flex justify-between items-start">
@@ -326,13 +326,13 @@ export function SmartProductionPlanner({
 
                     {/* Ingredient Status */}
                     {!item.production.canProduce && (
-                      <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-red-200">
                         <div className="font-medium text-red-700 mb-2">Missing Ingredients:</div>
                         <div className="space-y-1">
                           {item.ingredients.requirements
                             .filter((req: any) => !req.sufficient)
                             .map((req: any, idx: number) => (
-                              <div key={idx} className="text-sm text-red-600">
+                              <div key={idx} className="text-sm text-gray-600 dark:text-gray-400">
                                 • {req.ingredient.name}: Need {req.needed} {req.ingredient.unit}, 
                                 have {req.available} {req.ingredient.unit} 
                                 (short {req.shortage} {req.ingredient.unit})
@@ -344,11 +344,11 @@ export function SmartProductionPlanner({
 
                     {/* Recommendations */}
                     {item.recommendations.length > 0 && (
-                      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-blue-200">
                         <div className="font-medium text-blue-700 mb-2">Recommendations:</div>
                         <div className="space-y-1">
                           {item.recommendations.map((rec: string, idx: number) => (
-                            <div key={idx} className="text-sm text-blue-600">• {rec}</div>
+                            <div key={idx} className="text-sm text-gray-600 dark:text-gray-400">• {rec}</div>
                           ))}
                         </div>
                       </div>
@@ -365,7 +365,7 @@ export function SmartProductionPlanner({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Timer className="h-5 w-5 text-blue-500" />
+                <Timer className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 Production Timeline - {formatDate(new Date(selectedDate))}
               </CardTitle>
             </CardHeader>
@@ -438,7 +438,7 @@ export function SmartProductionPlanner({
           {optimizations.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center">
-                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <CheckCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2 text-green-700">
                   Production Already Optimized! 🎉
                 </h3>
@@ -516,19 +516,19 @@ export function SmartProductionPlanner({
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {plan.filter((item: any) => item.production.canProduce).length}
                   </div>
                   <div className="text-xs text-muted-foreground">Orders Ready</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {plan.reduce((sum: number, item: any) => sum + item.production.batchCount, 0)}
                   </div>
                   <div className="text-xs text-muted-foreground">Total Batches</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-purple-600">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {plan.reduce((sum: number, item: any) => sum + item.production.estimatedDuration, 0).toFixed(1)}h
                   </div>
                   <div className="text-xs text-muted-foreground">Production Time</div>

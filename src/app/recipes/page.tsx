@@ -147,9 +147,9 @@ function LegacyRecipesPage() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Easy': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-      case 'Medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-      case 'Hard': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+      case 'Easy': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
+      case 'Medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-yellow-800 dark:text-yellow-100'
+      case 'Hard': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
     }
   }
@@ -242,8 +242,8 @@ function LegacyRecipesPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-4">
-                <ChefHat className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                <p className="text-red-600 font-medium">Gagal memuat resep</p>
+                <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 dark:text-gray-400 font-medium">Gagal memuat resep</p>
                 <p className="text-sm text-muted-foreground mb-4">{error}</p>
                 <Button onClick={fetchRecipes}>Coba Lagi</Button>
               </div>
@@ -443,7 +443,7 @@ function LegacyRecipesPage() {
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground">Margin</p>
-                        <p className="font-medium text-green-600 text-sm">{(recipe.margin || 0).toFixed(1)}%</p>
+                        <p className="font-medium text-gray-600 dark:text-gray-400 text-sm">{(recipe.margin || 0).toFixed(1)}%</p>
                       </div>
                     </div>
                     
@@ -463,7 +463,7 @@ function LegacyRecipesPage() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="h-8 px-2 text-red-600 hover:text-red-700"
+                        className="h-8 px-2 text-gray-600 dark:text-gray-400 hover:text-red-700"
                         onClick={(e) => {
                           e.stopPropagation()
                           handleDeleteRecipe(recipe)
@@ -515,7 +515,7 @@ function LegacyRecipesPage() {
                       </div>
                       <div>
                         <p className="text-muted-foreground">Margin</p>
-                        <p className="font-medium text-green-600">{(recipe.margin || 0).toFixed(1)}%</p>
+                        <p className="font-medium text-gray-600 dark:text-gray-400">{(recipe.margin || 0).toFixed(1)}%</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Rating</p>
@@ -546,7 +546,7 @@ function LegacyRecipesPage() {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-red-600 hover:text-red-700"
+                        className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                         onClick={() => handleDeleteRecipe(recipe)}
                       >
                         <Trash2 className="h-3 w-3" />
@@ -838,7 +838,7 @@ function RecipeForm({ onClose, onSuccess, editData }: {
         </TabsList>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
@@ -985,7 +985,7 @@ function RecipeForm({ onClose, onSuccess, editData }: {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="text-red-600 hover:text-red-700"
+                    className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                     onClick={() => removeIngredient(index)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -1052,7 +1052,7 @@ function RecipeForm({ onClose, onSuccess, editData }: {
               </div>
               <div>
                 <p className="text-muted-foreground">Margin Aktual:</p>
-                <p className={`font-medium ${costCalculation.actualMargin > 50 ? 'text-green-600' : costCalculation.actualMargin > 30 ? 'text-yellow-600' : 'text-red-600'}`}>
+                <p className={`font-medium ${costCalculation.actualMargin > 50 ? 'text-gray-600 dark:text-gray-400' : costCalculation.actualMargin > 30 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
                   {costCalculation.actualMargin.toFixed(1)}%
                 </p>
               </div>
@@ -1131,7 +1131,7 @@ function RecipeDetailView({ recipe }: { recipe: RecipeWithStats }) {
                 </div>
                 <div className="flex justify-between font-medium">
                   <span className="text-muted-foreground">Margin:</span>
-                  <span className="text-green-600">{(recipe.margin || 0).toFixed(1)}%</span>
+                  <span className="text-gray-600 dark:text-gray-400">{(recipe.margin || 0).toFixed(1)}%</span>
                 </div>
               </div>
             </div>
@@ -1226,9 +1226,9 @@ function RecipeDetailView({ recipe }: { recipe: RecipeWithStats }) {
 
 function getDifficultyColor(difficulty: string) {
   switch (difficulty) {
-    case 'Easy': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-    case 'Medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'  
-    case 'Hard': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+    case 'Easy': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
+    case 'Medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-yellow-800 dark:text-yellow-100'  
+    case 'Hard': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
   }
 }

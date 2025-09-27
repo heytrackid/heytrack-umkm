@@ -140,7 +140,7 @@ export function IntegrationDashboard({ className }: IntegrationDashboardProps) {
           <div className="flex items-center space-x-2">
             {config.auto_schedule_enabled ? (
               <>
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <span className="text-sm">Auto-scheduling is enabled</span>
                 {isAutoScheduleDue && (
                   <Badge variant="secondary">Scheduling due</Badge>
@@ -198,7 +198,7 @@ export function IntegrationDashboard({ className }: IntegrationDashboardProps) {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
               {integrationStats.onTimeDeliveries}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -431,9 +431,9 @@ function PendingOrdersList({
                           <Clock className="h-4 w-4 mr-1" />
                           <span className={
                             timeline.on_time_probability > 0.8 
-                              ? 'text-green-600' 
+                              ? 'text-gray-600 dark:text-gray-400' 
                               : timeline.on_time_probability < 0.5 
-                                ? 'text-red-600' 
+                                ? 'text-gray-600 dark:text-gray-400' 
                                 : 'text-orange-600'
                           }>
                             {Math.round(timeline.on_time_probability * 100)}% on-time
@@ -562,11 +562,11 @@ function IngredientStatusList({ ingredients }: { ingredients: any[] }) {
                 <div className="space-y-1">
                   <Progress 
                     value={stockPercentage}
-                    className={`h-2 ${isLow ? 'text-red-500' : ''}`}
+                    className={`h-2 ${isLow ? 'text-gray-600 dark:text-gray-400' : ''}`}
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Reorder at: {ingredient.reorder_point} {ingredient.unit}</span>
-                    {isLow && <span className="text-red-500">LOW STOCK</span>}
+                    {isLow && <span className="text-gray-600 dark:text-gray-400">LOW STOCK</span>}
                   </div>
                 </div>
               </div>
@@ -613,7 +613,7 @@ function SchedulingResultsView({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {result.created_batches.length}
               </div>
               <p className="text-sm text-muted-foreground">Batches Created</p>

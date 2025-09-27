@@ -110,7 +110,7 @@ export default function LaporanSimplePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <BarChart3 className="h-8 w-8 text-slate-600" />
+              <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               Laporan Sederhana
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -175,15 +175,15 @@ export default function LaporanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Penjualan</p>
-                  <p className="text-2xl font-bold text-slate-700">
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                     Rp {laporanData.penjualan.total.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
-                    <TrendingUp className="h-3 w-3 text-slate-600" />
-                    <span className="text-xs text-slate-600">+15.3%</span>
+                    <TrendingUp className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">+15.3%</span>
                   </div>
                 </div>
-                <DollarSign className="h-8 w-8 text-slate-600" />
+                <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -193,15 +193,15 @@ export default function LaporanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Pengeluaran</p>
-                  <p className="text-2xl font-bold text-slate-700">
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                     Rp {laporanData.pengeluaran.total.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
-                    <TrendingDown className="h-3 w-3 text-slate-600" />
-                    <span className="text-xs text-slate-600">{laporanData.pengeluaran.persentaseFromPenjualan.toFixed(1)}%</span>
+                    <TrendingDown className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{laporanData.pengeluaran.persentaseFromPenjualan.toFixed(1)}%</span>
                   </div>
                 </div>
-                <Receipt className="h-8 w-8 text-slate-600" />
+                <Receipt className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -211,15 +211,15 @@ export default function LaporanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Profit Bersih</p>
-                  <p className="text-2xl font-bold text-slate-700">
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                     Rp {laporanData.profit.bersih.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
-                    <TrendingUp className="h-3 w-3 text-slate-600" />
-                    <span className="text-xs text-slate-600">{laporanData.profit.margin.toFixed(1)}% margin</span>
+                    <TrendingUp className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{laporanData.profit.margin.toFixed(1)}% margin</span>
                   </div>
                 </div>
-                <TrendingUp className="h-8 w-8 text-slate-600" />
+                <TrendingUp className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -229,17 +229,17 @@ export default function LaporanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Transaksi</p>
-                  <p className="text-2xl font-bold text-slate-700">
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                     {laporanData.penjualan.transaksi}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
-                    <ShoppingCart className="h-3 w-3 text-slate-600" />
-                    <span className="text-xs text-slate-600">
+                    <ShoppingCart className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
                       Rp {laporanData.penjualan.rataPerTransaksi.toLocaleString()}/avg
                     </span>
                   </div>
                 </div>
-                <ShoppingCart className="h-8 w-8 text-slate-600" />
+                <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -251,25 +251,25 @@ export default function LaporanSimplePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-green-600" />
+                <PieChart className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 Analisis Penjualan
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-4 text-center p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="grid grid-cols-3 gap-4 text-center p-4 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                   <div>
-                    <p className="text-2xl font-bold text-green-600">{laporanData.penjualan.transaksi}</p>
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">{laporanData.penjualan.transaksi}</p>
                     <p className="text-sm text-muted-foreground">Total Transaksi</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       Rp {(laporanData.penjualan.rataPerTransaksi / 1000).toFixed(0)}K
                     </p>
                     <p className="text-sm text-muted-foreground">Rata-rata/Transaksi</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {laporanData.penjualan.produkTerlaris.length}
                     </p>
                     <p className="text-sm text-muted-foreground">Jenis Produk Terjual</p>
@@ -291,7 +291,7 @@ export default function LaporanSimplePage() {
                           <span className="font-medium">{produk.nama}</span>
                         </div>
                         <div className="text-right">
-                          <div className="font-semibold text-green-600">
+                          <div className="font-semibold text-gray-600 dark:text-gray-400">
                             Rp {produk.pendapatan.toLocaleString()}
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -310,14 +310,14 @@ export default function LaporanSimplePage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <LineChart className="h-5 w-5 text-purple-600" />
+                <LineChart className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 Analisis Keuangan
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {/* Profit Breakdown */}
-                <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                <div className="p-4 bg-gray-100 dark:bg-gray-800 dark:bg-purple-950 rounded-lg">
                   <h4 className="font-medium mb-3">Breakdown Profit:</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -326,11 +326,11 @@ export default function LaporanSimplePage() {
                     </div>
                     <div className="flex justify-between">
                       <span>Total Pengeluaran:</span>
-                      <span className="font-semibold text-red-600">- Rp {laporanData.pengeluaran.total.toLocaleString()}</span>
+                      <span className="font-semibold text-gray-600 dark:text-gray-400">- Rp {laporanData.pengeluaran.total.toLocaleString()}</span>
                     </div>
                     <div className="border-t pt-2 flex justify-between">
                       <span className="font-medium">Profit Bersih:</span>
-                      <span className="font-bold text-purple-600">Rp {laporanData.profit.bersih.toLocaleString()}</span>
+                      <span className="font-bold text-gray-600 dark:text-gray-400">Rp {laporanData.profit.bersih.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Margin Profit:</span>
@@ -340,7 +340,7 @@ export default function LaporanSimplePage() {
                 </div>
 
                 {/* Expense Insight */}
-                <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg">
+                <div className="p-4 bg-gray-100 dark:bg-gray-800 dark:bg-red-950 rounded-lg">
                   <h4 className="font-medium mb-3">Insight Pengeluaran:</h4>
                   <div className="space-y-2">
                     <div className="flex justify-between">
@@ -358,19 +358,19 @@ export default function LaporanSimplePage() {
                 </div>
 
                 {/* Customer Insight */}
-                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <div className="p-4 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                   <h4 className="font-medium mb-3">Insight Pelanggan:</h4>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <div className="text-xl font-bold text-blue-600">{laporanData.pelanggan.total}</div>
+                      <div className="text-xl font-bold text-gray-600 dark:text-gray-400">{laporanData.pelanggan.total}</div>
                       <div className="text-xs text-muted-foreground">Total</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-green-600">{laporanData.pelanggan.baru}</div>
+                      <div className="text-xl font-bold text-gray-600 dark:text-gray-400">{laporanData.pelanggan.baru}</div>
                       <div className="text-xs text-muted-foreground">Baru</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold text-purple-600">{laporanData.pelanggan.returning}</div>
+                      <div className="text-xl font-bold text-gray-600 dark:text-gray-400">{laporanData.pelanggan.returning}</div>
                       <div className="text-xs text-muted-foreground">Returning</div>
                     </div>
                   </div>
@@ -450,7 +450,7 @@ export default function LaporanSimplePage() {
             <CardContent>
               <div className="space-y-3">
                 {laporanData.profit.margin < 20 && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950 rounded-lg border-l-4 border-red-500">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-red-950 rounded-lg border-l-4 border-gray-300 dark:border-gray-600">
                     <p className="font-medium text-red-900 dark:text-red-100">Tingkatkan Margin Profit</p>
                     <p className="text-sm text-red-700 dark:text-red-200">
                       Cek ulang harga jual atau kurangi biaya operasional
@@ -468,7 +468,7 @@ export default function LaporanSimplePage() {
                 )}
 
                 {(laporanData.pelanggan.returning / laporanData.pelanggan.total) < 0.6 && (
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border-l-4 border-blue-500">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg border-l-4 border-gray-300 dark:border-gray-600">
                     <p className="font-medium text-blue-900 dark:text-blue-100">Improve Customer Retention</p>
                     <p className="text-sm text-blue-700 dark:text-blue-200">
                       Buat program loyalty atau tingkatkan customer service
@@ -479,7 +479,7 @@ export default function LaporanSimplePage() {
                 {laporanData.profit.margin >= 20 && 
                  laporanData.pengeluaran.persentaseFromPenjualan <= 40 && 
                  (laporanData.pelanggan.returning / laporanData.pelanggan.total) >= 0.6 && (
-                  <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg border-l-4 border-green-500">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg border-l-4 border-gray-300 dark:border-gray-600">
                     <p className="font-medium text-green-900 dark:text-green-100">🎉 Bisnis Sehat!</p>
                     <p className="text-sm text-green-700 dark:text-green-200">
                       Semua indikator baik. Pertahankan dan ekspansi jika memungkinkan
@@ -497,25 +497,25 @@ export default function LaporanSimplePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
-                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                   <p className="font-medium text-blue-900 dark:text-blue-100">📊 Monitor Harian</p>
                   <p className="text-blue-700 dark:text-blue-200">
                     Cek laporan setiap hari untuk deteksi dini masalah keuangan
                   </p>
                 </div>
-                <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                   <p className="font-medium text-green-900 dark:text-green-100">💰 Fokus Produk Laris</p>
                   <p className="text-green-700 dark:text-green-200">
                     Produk terlaris adalah {laporanData.penjualan.produkTerlaris[0]?.nama}, tingkatkan produksi
                   </p>
                 </div>
-                <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
                   <p className="font-medium text-yellow-900 dark:text-yellow-100">🎯 Target Margin</p>
                   <p className="text-yellow-700 dark:text-yellow-200">
                     Target margin profit minimal 20% untuk bisnis bakery yang sehat
                   </p>
                 </div>
-                <div className="p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-purple-950 rounded-lg">
                   <p className="font-medium text-purple-900 dark:text-purple-100">📈 Analisa Trend</p>
                   <p className="text-purple-700 dark:text-purple-200">
                     Bandingkan laporan minggu ini dengan minggu lalu untuk lihat trend

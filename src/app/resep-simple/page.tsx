@@ -211,9 +211,9 @@ export default function ResepSimplePage() {
 
   const getDifficultyColor = (tingkat: string) => {
     switch (tingkat) {
-      case 'mudah': return 'bg-green-100 text-green-800'
-      case 'sedang': return 'bg-yellow-100 text-yellow-800'
-      case 'sulit': return 'bg-red-100 text-red-800'
+      case 'mudah': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'sedang': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'sulit': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -248,7 +248,7 @@ export default function ResepSimplePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <ChefHat className="h-8 w-8 text-slate-600" />
+              <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               Resep Sederhana
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -447,11 +447,11 @@ export default function ResepSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Favorit</p>
-                  <p className="text-2xl font-bold text-yellow-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.favoriteResep}
                   </p>
                 </div>
-                <Star className="h-8 w-8 text-yellow-600" />
+                <Star className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -461,11 +461,11 @@ export default function ResepSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Rata-rata Waktu</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.rataWaktuMasak}m
                   </p>
                 </div>
-                <Clock className="h-8 w-8 text-blue-600" />
+                <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -479,7 +479,7 @@ export default function ResepSimplePage() {
                     {kategoriTerfavorit}
                   </p>
                 </div>
-                <ChefHat className="h-8 w-8 text-green-600" />
+                <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -521,7 +521,7 @@ export default function ResepSimplePage() {
                       </Button>
                     </CardTitle>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
+                      <span className="px-2 py-1 rounded text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                         {item.kategori}
                       </span>
                       <span className={`px-2 py-1 rounded text-xs ${getDifficultyColor(item.tingkatKesulitan)}`}>
@@ -533,7 +533,7 @@ export default function ResepSimplePage() {
                     variant="outline" 
                     size="sm"
                     onClick={() => deleteResep(item.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -587,8 +587,8 @@ export default function ResepSimplePage() {
 
                   {/* Catatan */}
                   {item.catatan && (
-                    <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-yellow-200">
                         💡 {item.catatan}
                       </p>
                     </div>
@@ -622,19 +622,19 @@ export default function ResepSimplePage() {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                 <p className="font-medium text-blue-900 dark:text-blue-100">⭐ Beri Rating</p>
                 <p className="text-blue-700 dark:text-blue-200">
                   Rating resep membantu prioritas produksi
                 </p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                 <p className="font-medium text-green-900 dark:text-green-100">💰 Harga Akurat</p>
                 <p className="text-green-700 dark:text-green-200">
                   Update harga jual sesuai kondisi pasar
                 </p>
               </div>
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
                 <p className="font-medium text-yellow-900 dark:text-yellow-100">📝 Catat Detail</p>
                 <p className="text-yellow-700 dark:text-yellow-200">
                   Tulis tips dan trik di bagian catatan

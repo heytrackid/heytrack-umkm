@@ -55,24 +55,24 @@ import {
 
 // Order Status Configurations
 const orderStatuses = {
-  'PENDING': { label: 'Menunggu', color: 'bg-yellow-100 text-yellow-800' },
-  'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-blue-100 text-blue-800' },
+  'PENDING': { label: 'Menunggu', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
   'IN_PROGRESS': { label: 'Dalam Proses', color: 'bg-orange-100 text-orange-800' },
-  'READY': { label: 'Siap', color: 'bg-green-100 text-green-800' },
+  'READY': { label: 'Siap', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
   'DELIVERED': { label: 'Terkirim', color: 'bg-gray-100 text-gray-800' },
-  'CANCELLED': { label: 'Dibatalkan', color: 'bg-red-100 text-red-800' }
+  'CANCELLED': { label: 'Dibatalkan', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }
 }
 
 const paymentStatuses = {
-  'UNPAID': { label: 'Belum Bayar', color: 'bg-red-100 text-red-800' },
-  'PARTIAL': { label: 'Bayar Sebagian', color: 'bg-yellow-100 text-yellow-800' },
-  'PAID': { label: 'Lunas', color: 'bg-green-100 text-green-800' }
+  'UNPAID': { label: 'Belum Bayar', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  'PARTIAL': { label: 'Bayar Sebagian', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  'PAID': { label: 'Lunas', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }
 }
 
 const priorities = {
   'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-800' },
-  'normal': { label: 'Normal', color: 'bg-blue-100 text-blue-800' },
-  'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' }
+  'normal': { label: 'Normal', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' },
+  'high': { label: 'Tinggi', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' }
 }
 
 // Helper functions
@@ -424,7 +424,7 @@ function LegacyOrdersPage() {
                   <div>
                     <p className="font-medium">Rp {(value || 0).toLocaleString()}</p>
                     {(order.paid_amount || 0) > 0 && (
-                      <p className="text-sm text-green-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Dibayar: Rp {(order.paid_amount || 0).toLocaleString()}
                       </p>
                     )}
@@ -839,7 +839,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
         </TabsList>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
@@ -997,7 +997,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="text-red-600 hover:text-red-700 ml-2 mt-4"
+                            className="text-gray-600 dark:text-gray-400 hover:text-red-700 ml-2 mt-4"
                             onClick={() => removeOrderItem(index)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -1031,8 +1031,8 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             {hasHPP && hppData.margin_analysis && (
                               <span className={`text-xs px-1 py-0.5 rounded text-white ${
                                 hppData.margin_analysis.is_profitable 
-                                  ? 'bg-green-500' 
-                                  : 'bg-red-500'
+                                  ? 'bg-gray-100 dark:bg-gray-8000' 
+                                  : 'bg-gray-100 dark:bg-gray-8000'
                               }`}>
                                 {hppData.margin_analysis.current_margin}%
                               </span>
@@ -1042,9 +1042,9 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             type="number"
                             className={`text-sm mt-1 ${
                               hasHPP && !hppData.margin_analysis?.is_profitable 
-                                ? 'border-red-300 bg-red-50' 
+                                ? 'border-red-300 bg-gray-100 dark:bg-gray-800' 
                                 : hasHPP && hppData.margin_analysis?.is_profitable
-                                ? 'border-green-300 bg-green-50'
+                                ? 'border-green-300 bg-gray-100 dark:bg-gray-800'
                                 : ''
                             }`}
                             value={item.unit_price}
@@ -1053,7 +1053,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             step="500"
                           />
                           {hasHPP && hppData.suggested_selling_price !== item.unit_price && (
-                            <div className="text-xs text-blue-600 mt-1">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                               💡 Saran: Rp {hppData.suggested_selling_price.toLocaleString()}
                             </div>
                           )}
@@ -1094,8 +1094,8 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             {hasHPP && hppData.margin_analysis && (
                               <span className={`text-xs px-1 py-0.5 rounded text-white ${
                                 hppData.margin_analysis.is_profitable 
-                                  ? 'bg-green-500' 
-                                  : 'bg-red-500'
+                                  ? 'bg-gray-100 dark:bg-gray-8000' 
+                                  : 'bg-gray-100 dark:bg-gray-8000'
                               }`}>
                                 {hppData.margin_analysis.current_margin}%
                               </span>
@@ -1105,9 +1105,9 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             type="number"
                             className={`text-sm mt-1 ${
                               hasHPP && !hppData.margin_analysis?.is_profitable 
-                                ? 'border-red-300 bg-red-50' 
+                                ? 'border-red-300 bg-gray-100 dark:bg-gray-800' 
                                 : hasHPP && hppData.margin_analysis?.is_profitable
-                                ? 'border-green-300 bg-green-50'
+                                ? 'border-green-300 bg-gray-100 dark:bg-gray-800'
                                 : ''
                             }`}
                             value={item.unit_price}
@@ -1116,7 +1116,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             step="500"
                           />
                           {hasHPP && hppData.suggested_selling_price !== item.unit_price && (
-                            <div className="absolute -bottom-6 left-0 text-xs text-blue-600">
+                            <div className="absolute -bottom-6 left-0 text-xs text-gray-600 dark:text-gray-400">
                               💡 Saran: Rp {hppData.suggested_selling_price.toLocaleString()}
                             </div>
                           )}
@@ -1134,7 +1134,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="text-red-600 hover:text-red-700"
+                        className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                         onClick={() => removeOrderItem(index)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -1156,8 +1156,8 @@ function OrderForm({ onClose, onSuccess, editData }: {
                                 <span>Profit per unit:</span>
                                 <span className={`font-mono ${
                                   item.unit_price > hppData.hpp_breakdown.cost_per_serving 
-                                    ? 'text-green-600' 
-                                    : 'text-red-600'
+                                    ? 'text-gray-600 dark:text-gray-400' 
+                                    : 'text-gray-600 dark:text-gray-400'
                                 }`}>
                                   Rp {(item.unit_price - hppData.hpp_breakdown.cost_per_serving).toLocaleString()}
                                 </span>
@@ -1168,9 +1168,9 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             <div className="font-medium text-gray-700 mb-1">📦 Stock & Produksi</div>
                             <div className="space-y-1">
                               {hppData.availability.can_produce ? (
-                                <div className="text-green-600">✅ Bisa diproduksi (kapasitas: {hppData.availability.production_capacity} batch)</div>
+                                <div className="text-gray-600 dark:text-gray-400">✅ Bisa diproduksi (kapasitas: {hppData.availability.production_capacity} batch)</div>
                               ) : (
-                                <div className="text-red-600">❌ Tidak bisa diproduksi - stock kurang</div>
+                                <div className="text-gray-600 dark:text-gray-400">❌ Tidak bisa diproduksi - stock kurang</div>
                               )}
                               {hppData.availability.stock_warnings.length > 0 && (
                                 <div className="text-orange-600">⚠️ {hppData.availability.stock_warnings.length} bahan akan habis segera</div>
@@ -1186,7 +1186,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                             <div className="flex flex-wrap gap-1 sm:gap-2">
                               <button
                                 type="button"
-                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 min-w-0"
+                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-blue-700 rounded hover:bg-blue-200 min-w-0"
                                 onClick={() => updateOrderItem(index, 'unit_price', hppData.pricing_suggestions.economy.price)}
                               >
                                 <span className="hidden sm:inline">Ekonomis:</span>
@@ -1195,7 +1195,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                               </button>
                               <button
                                 type="button"
-                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 min-w-0"
+                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-green-700 rounded hover:bg-green-200 min-w-0"
                                 onClick={() => updateOrderItem(index, 'unit_price', hppData.pricing_suggestions.standard.price)}
                               >
                                 <span className="hidden sm:inline">Standar:</span>
@@ -1204,7 +1204,7 @@ function OrderForm({ onClose, onSuccess, editData }: {
                               </button>
                               <button
                                 type="button"
-                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 min-w-0"
+                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-purple-700 rounded hover:bg-purple-200 min-w-0"
                                 onClick={() => updateOrderItem(index, 'unit_price', hppData.pricing_suggestions.premium.price)}
                               >
                                 <span className="hidden sm:inline">Premium:</span>
@@ -1366,12 +1366,12 @@ function OrderForm({ onClose, onSuccess, editData }: {
                 <span>Total:</span>
                 <span>Rp {totalAmount.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between text-green-600">
+              <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Dibayar:</span>
                 <span>Rp {formData.paid_amount.toLocaleString()}</span>
               </div>
               {totalAmount > formData.paid_amount && (
-                <div className="flex justify-between text-red-600">
+                <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Sisa:</span>
                   <span>Rp {(totalAmount - formData.paid_amount).toLocaleString()}</span>
                 </div>
@@ -1461,12 +1461,12 @@ function OrderDetailView({ order }: { order: any }) {
                   <span>Total:</span>
                   <span>Rp {(order.total_amount || 0).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Dibayar:</span>
                   <span>Rp {(order.paid_amount || 0).toLocaleString()}</span>
                 </div>
                 {(order.total_amount || 0) > (order.paid_amount || 0) && (
-                  <div className="flex justify-between text-red-600">
+                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Sisa:</span>
                     <span>Rp {((order.total_amount || 0) - (order.paid_amount || 0)).toLocaleString()}</span>
                   </div>

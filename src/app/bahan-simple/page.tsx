@@ -143,9 +143,9 @@ export default function BahanSimplePage() {
 
   const getStatusColor = (status: 'aman' | 'rendah' | 'habis') => {
     switch (status) {
-      case 'aman': return 'text-green-600 bg-green-100'
-      case 'rendah': return 'text-yellow-600 bg-yellow-100'
-      case 'habis': return 'text-red-600 bg-red-100'
+      case 'aman': return 'text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-800'
+      case 'rendah': return 'text-gray-600 bg-gray-200 dark:text-gray-300 dark:bg-gray-700'
+      case 'habis': return 'text-gray-500 bg-gray-300 dark:text-gray-400 dark:bg-gray-600'
     }
   }
 
@@ -176,7 +176,7 @@ export default function BahanSimplePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Package className="h-8 w-8 text-slate-600" />
+              <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               Stok Bahan Bakery
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -267,7 +267,7 @@ export default function BahanSimplePage() {
                   <p className="text-sm text-muted-foreground">Total Bahan</p>
                   <p className="text-2xl font-bold">{stats.totalBahan}</p>
                 </div>
-                <Package className="h-8 w-8 text-slate-600" />
+                <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -277,9 +277,9 @@ export default function BahanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Stok Habis</p>
-                  <p className="text-2xl font-bold text-slate-700">{stats.bahanHabis}</p>
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">{stats.bahanHabis}</p>
                 </div>
-                <AlertTriangle className="h-8 w-8 text-red-600" />
+                <AlertTriangle className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -289,9 +289,9 @@ export default function BahanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Stok Rendah</p>
-                  <p className="text-2xl font-bold text-yellow-600">{stats.bahanRendah}</p>
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">{stats.bahanRendah}</p>
                 </div>
-                <AlertTriangle className="h-8 w-8 text-yellow-600" />
+                <AlertTriangle className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -303,7 +303,7 @@ export default function BahanSimplePage() {
                   <p className="text-sm text-muted-foreground">Total Nilai</p>
                   <p className="text-lg font-bold">Rp {stats.totalNilai.toLocaleString()}</p>
                 </div>
-                <ShoppingCart className="h-8 w-8 text-green-600" />
+                <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -331,7 +331,7 @@ export default function BahanSimplePage() {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-blue-600" />
+                    <Package className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                     <span className="font-semibold">{item.nama}</span>
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${getStatusColor(item.statusStok)}`}>
@@ -364,22 +364,22 @@ export default function BahanSimplePage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Total Nilai</p>
-                    <p className="font-medium text-green-600">Rp {item.total.toLocaleString()}</p>
+                    <p className="font-medium text-gray-700 dark:text-gray-300">Rp {item.total.toLocaleString()}</p>
                   </div>
                 </div>
 
                 {/* Peringatan stok */}
                 {item.statusStok === 'habis' && (
-                  <div className="p-3 bg-red-50 dark:bg-red-950 rounded-lg">
-                    <p className="text-red-800 dark:text-red-200 text-sm font-medium">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">
                       ⚠️ Stok habis! Segera beli lagi
                     </p>
                   </div>
                 )}
 
                 {item.statusStok === 'rendah' && (
-                  <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                    <p className="text-yellow-800 dark:text-yellow-200 text-sm font-medium">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">
                       ⚡ Stok rendah! Perlu diisi ulang
                     </p>
                   </div>
@@ -399,7 +399,7 @@ export default function BahanSimplePage() {
                     variant="outline" 
                     size="sm"
                     onClick={() => deleteBahan(item.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -432,21 +432,21 @@ export default function BahanSimplePage() {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <p className="font-medium text-blue-900 dark:text-blue-100">🎯 Stok Minimal</p>
-                <p className="text-blue-700 dark:text-blue-200">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium text-gray-800 dark:text-gray-200">🎯 Stok Minimal</p>
+                <p className="text-gray-600 dark:text-gray-400">
                   Set stok minimal yang realistis agar tidak kehabisan
                 </p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-                <p className="font-medium text-green-900 dark:text-green-100">📱 Update Real-time</p>
-                <p className="text-green-700 dark:text-green-200">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium text-gray-800 dark:text-gray-200">📱 Update Real-time</p>
+                <p className="text-gray-600 dark:text-gray-400">
                   Klik angka stok untuk update langsung saat pakai bahan
                 </p>
               </div>
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                <p className="font-medium text-yellow-900 dark:text-yellow-100">⚡ Alert Otomatis</p>
-                <p className="text-yellow-700 dark:text-yellow-200">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium text-gray-800 dark:text-gray-200">⚡ Alert Otomatis</p>
+                <p className="text-gray-600 dark:text-gray-400">
                   Sistem akan peringati jika stok menipis atau habis
                 </p>
               </div>

@@ -90,14 +90,14 @@ export default function BatchPlanner({ className }: BatchPlannerProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'planned': return 'bg-blue-100 text-blue-800'
-      case 'ingredients_ready': return 'bg-green-100 text-green-800'
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800'
-      case 'quality_check': return 'bg-purple-100 text-purple-800'
-      case 'completed': return 'bg-green-100 text-green-800'
+      case 'planned': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'ingredients_ready': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'in_progress': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'quality_check': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'completed': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       case 'on_hold': return 'bg-gray-100 text-gray-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
-      case 'failed': return 'bg-red-100 text-red-800'
+      case 'cancelled': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'failed': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -105,10 +105,10 @@ export default function BatchPlanner({ className }: BatchPlannerProps) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'low': return 'bg-gray-100 text-gray-800'
-      case 'normal': return 'bg-blue-100 text-blue-800'
+      case 'normal': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       case 'high': return 'bg-orange-100 text-orange-800'
-      case 'urgent': return 'bg-red-100 text-red-800'
-      case 'rush': return 'bg-purple-100 text-purple-800'
+      case 'urgent': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'rush': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -210,7 +210,7 @@ export default function BatchPlanner({ className }: BatchPlannerProps) {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <ChefHat className="h-5 w-5 text-blue-600" />
+                  <ChefHat className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                   <span className="font-semibold">{batch.batch_number}</span>
                 </div>
                 <Badge className={getPriorityColor(batch.priority)}>

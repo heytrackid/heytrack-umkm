@@ -92,9 +92,9 @@ export default function SmartProductionPlanner({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'in_progress': return <PlayCircle className="h-4 w-4 text-blue-500" />
-      case 'scheduled': return <Clock className="h-4 w-4 text-yellow-500" />
+      case 'completed': return <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'in_progress': return <PlayCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      case 'scheduled': return <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       default: return <PauseCircle className="h-4 w-4 text-gray-500" />
     }
   }
@@ -149,7 +149,7 @@ export default function SmartProductionPlanner({
         <Card className="border-l-4 border-l-blue-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <Factory className="h-4 w-4 text-blue-500" />
+              <Factory className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <div className="text-2xl font-bold">{summary.totalOrders}</div>
             </div>
             <p className="text-xs text-muted-foreground">Total Orders</p>
@@ -159,8 +159,8 @@ export default function SmartProductionPlanner({
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <div className="text-2xl font-bold text-green-600">{summary.canProduceCount}</div>
+              <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{summary.canProduceCount}</div>
             </div>
             <p className="text-xs text-muted-foreground">Ready to Produce</p>
           </CardContent>
@@ -169,8 +169,8 @@ export default function SmartProductionPlanner({
         <Card className="border-l-4 border-l-red-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-              <div className="text-2xl font-bold text-red-600">{summary.blockedCount}</div>
+              <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{summary.blockedCount}</div>
             </div>
             <p className="text-xs text-muted-foreground">Blocked</p>
           </CardContent>
@@ -179,8 +179,8 @@ export default function SmartProductionPlanner({
         <Card className="border-l-4 border-l-purple-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <Package className="h-4 w-4 text-purple-500" />
-              <div className="text-2xl font-bold text-purple-600">{summary.totalBatches}</div>
+              <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{summary.totalBatches}</div>
             </div>
             <p className="text-xs text-muted-foreground">Total Batches</p>
           </CardContent>
@@ -215,7 +215,7 @@ export default function SmartProductionPlanner({
                     <div className="font-medium">{alert.title}</div>
                     <p className="text-sm text-muted-foreground mt-1">{alert.description}</p>
                     {alert.suggestion && (
-                      <div className="mt-2 p-2 bg-blue-50 rounded text-sm">
+                      <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-sm">
                         <Lightbulb className="h-4 w-4 inline mr-1" />
                         <strong>Suggestion:</strong> {alert.suggestion}
                       </div>
@@ -232,7 +232,7 @@ export default function SmartProductionPlanner({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-blue-600" />
+            <Calendar className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Smart Production Timeline
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -318,7 +318,7 @@ export default function SmartProductionPlanner({
                           {order.customer_name && ` • ${order.customer_name}`}
                         </p>
                         {orderPlan?.canProduce === false && (
-                          <p className="text-sm text-red-600 mt-1">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                             ⚠️ {orderPlan.reason}
                           </p>
                         )}
@@ -364,7 +364,7 @@ export default function SmartProductionPlanner({
                               </div>
                               <Progress 
                                 value={Math.min(utilizationPercent, 100)}
-                                className={`h-2 ${utilizationPercent > 90 ? 'bg-red-100' : utilizationPercent > 70 ? 'bg-yellow-100' : 'bg-green-100'}`}
+                                className={`h-2 ${utilizationPercent > 90 ? 'bg-gray-100 dark:bg-gray-800' : utilizationPercent > 70 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-800'}`}
                               />
                             </div>
                           )

@@ -192,9 +192,9 @@ export function SmartExpenseAutomation() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'high': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-red-200'
+      case 'medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-yellow-200'
+      case 'low': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-blue-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
@@ -235,11 +235,11 @@ export function SmartExpenseAutomation() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-5">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{automationStats.totalRules}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{automationStats.totalRules}</div>
               <p className="text-xs text-muted-foreground">Total Rules</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{automationStats.activeRules}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{automationStats.activeRules}</div>
               <p className="text-xs text-muted-foreground">Active Rules</p>
             </div>
             <div className="text-center">
@@ -247,7 +247,7 @@ export function SmartExpenseAutomation() {
               <p className="text-xs text-muted-foreground">Alerts Today</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {automationStats.costSaved.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Cost Saved</p>
@@ -264,7 +264,7 @@ export function SmartExpenseAutomation() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-red-600" />
+            <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Smart Alerts & Notifications
             <Badge variant="destructive" className="ml-auto">{alerts.length}</Badge>
           </CardTitle>
@@ -273,7 +273,7 @@ export function SmartExpenseAutomation() {
           <div className="space-y-3">
             {alerts.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                <CheckCircle className="h-12 w-12 mx-auto mb-2 text-gray-600 dark:text-gray-400" />
                 <p>Semua alert sudah ditangani! 🎉</p>
               </div>
             ) : (
@@ -329,7 +329,7 @@ export function SmartExpenseAutomation() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-600" />
+            <BarChart3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Automation Rules
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -345,8 +345,8 @@ export function SmartExpenseAutomation() {
               return (
                 <div key={rule.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-full ${rule.isActive ? 'bg-green-100' : 'bg-gray-100'}`}>
-                      <CategoryIcon className={`h-4 w-4 ${rule.isActive ? 'text-green-600' : 'text-gray-500'}`} />
+                    <div className={`p-2 rounded-full ${rule.isActive ? 'bg-gray-100 dark:bg-gray-800' : 'bg-gray-100'}`}>
+                      <CategoryIcon className={`h-4 w-4 ${rule.isActive ? 'text-gray-600 dark:text-gray-400' : 'text-gray-500'}`} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -400,7 +400,7 @@ export function SmartExpenseAutomation() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-purple-600" />
+            <Target className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Budget Tracking & Optimization
           </CardTitle>
         </CardHeader>
@@ -426,22 +426,22 @@ export function SmartExpenseAutomation() {
                     </div>
                     <div className="text-right">
                       <div className="font-medium">
-                        <span className={isOverBudget ? 'text-red-600' : 'text-foreground'}>
+                        <span className={isOverBudget ? 'text-gray-600 dark:text-gray-400' : 'text-foreground'}>
                           Rp {item.spent.toLocaleString()}
                         </span>
                         <span className="text-muted-foreground"> / Rp {item.budget.toLocaleString()}</span>
                       </div>
-                      <div className={`text-sm ${isOverBudget ? 'text-red-600' : 'text-muted-foreground'}`}>
+                      <div className={`text-sm ${isOverBudget ? 'text-gray-600 dark:text-gray-400' : 'text-muted-foreground'}`}>
                         {percentage.toFixed(1)}%
                       </div>
                     </div>
                   </div>
                   <Progress 
                     value={Math.min(percentage, 100)} 
-                    className={`h-2 ${isOverBudget ? 'bg-red-100' : ''}`}
+                    className={`h-2 ${isOverBudget ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
                   />
                   {isOverBudget && (
-                    <p className="text-xs text-red-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       ⚠️ Over budget by Rp {(item.spent - item.budget).toLocaleString()}
                     </p>
                   )}
@@ -456,14 +456,14 @@ export function SmartExpenseAutomation() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-green-600" />
+            <TrendingUp className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Smart Cost Optimization
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Alert className="border-green-200 bg-green-50">
-              <TrendingUp className="h-4 w-4 text-green-600" />
+            <Alert className="border-green-200 bg-gray-100 dark:bg-gray-800">
+              <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <AlertDescription>
                 <strong>Penghematan Potensial: Rp 450,000/bulan</strong>
                 <br />
@@ -472,9 +472,9 @@ export function SmartExpenseAutomation() {
             </Alert>
             
             <div className="space-y-3">
-              <div className="p-3 border rounded-lg bg-blue-50 border-blue-200">
+              <div className="p-3 border rounded-lg bg-gray-100 dark:bg-gray-800 border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-4 w-4 text-blue-600" />
+                  <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   <span className="font-medium">Optimisasi Listrik</span>
                   <Badge variant="secondary">Hemat 20%</Badge>
                 </div>
@@ -483,9 +483,9 @@ export function SmartExpenseAutomation() {
                 </p>
               </div>
               
-              <div className="p-3 border rounded-lg bg-purple-50 border-purple-200">
+              <div className="p-3 border rounded-lg bg-gray-100 dark:bg-gray-800 border-purple-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <Car className="h-4 w-4 text-purple-600" />
+                  <Car className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   <span className="font-medium">Optimisasi Delivery</span>
                   <Badge variant="secondary">Hemat 15%</Badge>
                 </div>

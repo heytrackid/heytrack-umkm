@@ -175,7 +175,7 @@ export default function EnhancedProductionPlanningDashboard({
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{dashboardMetrics.totalOrders}</div>
+            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{dashboardMetrics.totalOrders}</div>
             <div className="text-xs text-muted-foreground">Active Orders</div>
           </CardContent>
         </Card>
@@ -189,21 +189,21 @@ export default function EnhancedProductionPlanningDashboard({
 
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{dashboardMetrics.totalBatches}</div>
+            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{dashboardMetrics.totalBatches}</div>
             <div className="text-xs text-muted-foreground">Scheduled Batches</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{dashboardMetrics.activeBatches}</div>
+            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{dashboardMetrics.activeBatches}</div>
             <div className="text-xs text-muted-foreground">In Progress</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{dashboardMetrics.completedBatches}</div>
+            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{dashboardMetrics.completedBatches}</div>
             <div className="text-xs text-muted-foreground">Completed</div>
           </CardContent>
         </Card>
@@ -225,7 +225,7 @@ export default function EnhancedProductionPlanningDashboard({
 
       {/* Alerts and Warnings */}
       {(schedulingResult?.warnings.length || 0) > 0 && (
-        <Alert className="border-yellow-200 bg-yellow-50">
+        <Alert className="border-yellow-200 bg-gray-100 dark:bg-gray-800">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="font-semibold mb-1">Production Alerts</div>
@@ -240,7 +240,7 @@ export default function EnhancedProductionPlanningDashboard({
 
       {/* Resource Constraints Warnings */}
       {productionDemand?.resourceConstraints.ingredient_shortfalls.length ? (
-        <Alert className="border-red-200 bg-red-50">
+        <Alert className="border-red-200 bg-gray-100 dark:bg-gray-800">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="font-semibold mb-1">Inventory Shortfalls</div>
@@ -279,17 +279,17 @@ export default function EnhancedProductionPlanningDashboard({
                 {schedulingResult ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-blue-50 rounded">
+                      <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded">
                         <div className="text-lg font-bold text-blue-700">
                           {schedulingResult.optimization_metrics.total_profit.toLocaleString()}
                         </div>
-                        <div className="text-xs text-blue-600">Total Profit Score</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Total Profit Score</div>
                       </div>
-                      <div className="text-center p-3 bg-green-50 rounded">
+                      <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded">
                         <div className="text-lg font-bold text-green-700">
                           {schedulingResult.optimization_metrics.resource_efficiency}%
                         </div>
-                        <div className="text-xs text-green-600">Resource Efficiency</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Resource Efficiency</div>
                       </div>
                     </div>
                     
@@ -331,11 +331,11 @@ export default function EnhancedProductionPlanningDashboard({
                         </div>
                         <div className="text-xs text-orange-600">Next 24 Hours</div>
                       </div>
-                      <div className="text-center p-3 bg-purple-50 rounded">
+                      <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded">
                         <div className="text-lg font-bold text-purple-700">
                           {productionDemand.forecastedDemand.next_week}
                         </div>
-                        <div className="text-xs text-purple-600">Next Week</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">Next Week</div>
                       </div>
                     </div>
                     
@@ -372,8 +372,8 @@ export default function EnhancedProductionPlanningDashboard({
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {schedulingResult.suggestions.map((suggestion, index) => (
-                    <div key={index} className="flex items-start gap-2 p-3 bg-blue-50 rounded">
-                      <Zap className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div key={index} className="flex items-start gap-2 p-3 bg-gray-100 dark:bg-gray-800 rounded">
+                      <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-blue-700">{suggestion}</span>
                     </div>
                   ))}

@@ -87,14 +87,14 @@ export function SmartFinancialDashboard({
   }
 
   const getHealthColor = (value: number, good: number, bad: number) => {
-    if (value >= good) return 'text-green-600'
-    if (value <= bad) return 'text-red-600'
-    return 'text-yellow-600'
+    if (value >= good) return 'text-gray-600 dark:text-gray-400'
+    if (value <= bad) return 'text-gray-600 dark:text-gray-400'
+    return 'text-gray-600 dark:text-gray-400'
   }
 
   const getTrendIcon = (current: number, previous: number) => {
-    if (current > previous) return <TrendingUp className="h-4 w-4 text-green-500" />
-    if (current < previous) return <TrendingDown className="h-4 w-4 text-red-500" />
+    if (current > previous) return <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+    if (current < previous) return <TrendingDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     return <DollarSign className="h-4 w-4 text-gray-500" />
   }
 
@@ -137,8 +137,8 @@ export function SmartFinancialDashboard({
         <Card className="md:col-span-2 border-l-4 border-l-blue-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <DollarSign className="h-4 w-4 text-blue-500" />
-              <div className="text-2xl font-bold text-blue-600">
+              <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {formatCurrency(metrics.revenue)}
               </div>
             </div>
@@ -153,7 +153,7 @@ export function SmartFinancialDashboard({
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <div className={`text-2xl font-bold ${getHealthColor(metrics.grossMargin, 50, 30)}`}>
                 {formatPercentage(metrics.grossMargin)}
               </div>
@@ -166,7 +166,7 @@ export function SmartFinancialDashboard({
         <Card className="border-l-4 border-l-purple-500">
           <CardContent className="pt-4">
             <div className="flex items-center space-x-2">
-              <Wallet className="h-4 w-4 text-purple-500" />
+              <Wallet className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               <div className={`text-2xl font-bold ${getHealthColor(metrics.netMargin, 15, 5)}`}>
                 {formatPercentage(metrics.netMargin)}
               </div>
@@ -180,7 +180,7 @@ export function SmartFinancialDashboard({
             <div className="flex items-center space-x-2">
               <CreditCard className="h-4 w-4 text-orange-500" />
               <div className={`text-2xl font-bold ${
-                metrics.netProfit >= 0 ? 'text-green-600' : 'text-red-600'
+                metrics.netProfit >= 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
               }`}>
                 {formatCurrency(metrics.netProfit)}
               </div>
@@ -207,10 +207,10 @@ export function SmartFinancialDashboard({
         <div className="space-y-2">
           {alerts.map((alert: any, index: number) => (
             <Alert key={index} className={`${
-              alert.type === 'danger' ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'
+              alert.type === 'danger' ? 'border-red-200 bg-gray-100 dark:bg-gray-800' : 'border-yellow-200 bg-gray-100 dark:bg-gray-800'
             }`}>
               <AlertTriangle className={`h-4 w-4 ${
-                alert.type === 'danger' ? 'text-red-500' : 'text-yellow-500'
+                alert.type === 'danger' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
               }`} />
               <AlertDescription className={
                 alert.type === 'danger' ? 'text-red-700' : 'text-yellow-700'
@@ -247,14 +247,14 @@ export function SmartFinancialDashboard({
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Cost of Goods Sold</span>
-                    <span className="font-medium text-red-600">
+                    <span className="font-medium text-gray-600 dark:text-gray-400">
                       -{formatCurrency(metrics.revenue - metrics.grossProfit)}
                     </span>
                   </div>
                   <hr />
                   <div className="flex justify-between items-center font-bold">
                     <span>Gross Profit</span>
-                    <span className="text-green-600">{formatCurrency(metrics.grossProfit)}</span>
+                    <span className="text-gray-600 dark:text-gray-400">{formatCurrency(metrics.grossProfit)}</span>
                   </div>
                 </div>
 
@@ -278,8 +278,8 @@ export function SmartFinancialDashboard({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 rounded-lg bg-green-50">
-                    <div className="text-2xl font-bold text-green-600">
+                  <div className="text-center p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {formatPercentage(metrics.grossMargin)}
                     </div>
                     <div className="text-xs text-green-700">Gross Margin</div>
@@ -287,8 +287,8 @@ export function SmartFinancialDashboard({
                       Target: {formatPercentage(targetMargin)}
                     </div>
                   </div>
-                  <div className="text-center p-3 rounded-lg bg-blue-50">
-                    <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-center p-3 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {formatPercentage(metrics.netMargin)}
                     </div>
                     <div className="text-xs text-blue-700">Net Margin</div>
@@ -333,7 +333,7 @@ export function SmartFinancialDashboard({
             <CardContent>
               <div className="grid gap-4 md:grid-cols-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                     {Math.round(metrics.inventoryValue / metrics.revenue * 100)}%
                   </div>
                   <div className="text-sm text-muted-foreground">Inventory Ratio</div>
@@ -343,7 +343,7 @@ export function SmartFinancialDashboard({
                 </div>
                 
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">
+                  <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                     {Math.round((metrics.revenue / 30))}
                   </div>
                   <div className="text-sm text-muted-foreground">Daily Revenue</div>
@@ -353,7 +353,7 @@ export function SmartFinancialDashboard({
                 </div>
 
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">
+                  <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                     {Math.round(metrics.inventoryValue / (metrics.revenue / 30))}
                   </div>
                   <div className="text-sm text-muted-foreground">Days of Inventory</div>
@@ -396,11 +396,11 @@ export function SmartFinancialDashboard({
                         <div className="text-muted-foreground">Revenue</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium text-red-600">{formatCurrency(week.expenses)}</div>
+                        <div className="font-medium text-gray-600 dark:text-gray-400">{formatCurrency(week.expenses)}</div>
                         <div className="text-muted-foreground">Expenses</div>
                       </div>
                       <div className="text-right">
-                        <div className={`font-medium ${week.revenue - week.expenses >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={`font-medium ${week.revenue - week.expenses >= 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
                           {formatCurrency(week.revenue - week.expenses)}
                         </div>
                         <div className="text-muted-foreground">Net</div>
@@ -418,7 +418,7 @@ export function SmartFinancialDashboard({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-yellow-500" />
+                <Lightbulb className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 Smart Financial Insights
               </CardTitle>
             </CardHeader>
@@ -445,17 +445,17 @@ export function SmartFinancialDashboard({
                   { 
                     name: 'Revenue Growth', 
                     score: Math.min((metrics.revenue / targetRevenue) * 100, 100),
-                    color: 'bg-blue-500'
+                    color: 'bg-gray-100 dark:bg-gray-8000'
                   },
                   { 
                     name: 'Profitability', 
                     score: Math.min((metrics.grossMargin / targetMargin) * 100, 100),
-                    color: 'bg-green-500'
+                    color: 'bg-gray-100 dark:bg-gray-8000'
                   },
                   { 
                     name: 'Cash Flow', 
                     score: metrics.netProfit > 0 ? 100 : 20,
-                    color: 'bg-purple-500'
+                    color: 'bg-gray-100 dark:bg-gray-8000'
                   },
                   { 
                     name: 'Efficiency', 
@@ -477,9 +477,9 @@ export function SmartFinancialDashboard({
                   </div>
                 ))}
                 
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">
+                    <div className="text-3xl font-bold text-gray-600 dark:text-gray-400">
                       {Math.round((
                         Math.min((metrics.revenue / targetRevenue) * 100, 100) +
                         Math.min((metrics.grossMargin / targetMargin) * 100, 100) +
@@ -573,14 +573,14 @@ export function SmartFinancialDashboard({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
+                  <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {Math.round(metrics.revenue / 1000000)}M
                     </div>
                     <div className="text-xs text-green-700">Monthly Revenue</div>
                   </div>
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {Math.round(metrics.netProfit / 1000000)}M
                     </div>
                     <div className="text-xs text-blue-700">Monthly Profit</div>

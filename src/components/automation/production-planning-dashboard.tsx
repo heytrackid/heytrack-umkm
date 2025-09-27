@@ -413,8 +413,8 @@ function ProductionPlanningDashboard() {
                     <div className="text-center">
                       <div className="text-sm text-muted-foreground">Profit Score</div>
                       <div className={`font-medium ${
-                        plan.profitability_score > 40 ? 'text-green-600' : 
-                        plan.profitability_score > 25 ? 'text-yellow-600' : 'text-red-600'
+                        plan.profitability_score > 40 ? 'text-gray-600 dark:text-gray-400' : 
+                        plan.profitability_score > 25 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                       }`}>
                         {plan.profitability_score.toFixed(1)}%
                       </div>
@@ -431,10 +431,10 @@ function ProductionPlanningDashboard() {
 
                   {/* Bottlenecks */}
                   {plan.bottlenecks.length > 0 && (
-                    <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded">
+                    <div className="mb-3 p-3 bg-gray-100 dark:bg-gray-800 border border-red-200 rounded">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                        <span className="font-medium text-red-800">Production Blocked</span>
+                        <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Production Blocked</span>
                       </div>
                       <ul className="text-sm text-red-700 space-y-1">
                         {plan.bottlenecks.map((bottleneck, idx) => (
@@ -447,7 +447,7 @@ function ProductionPlanningDashboard() {
                   {/* Recommendations */}
                   {plan.recommendations.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-xs font-medium text-blue-800">Recommendations:</span>
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Recommendations:</span>
                       {plan.recommendations.slice(0, 2).map((rec, idx) => (
                         <p key={idx} className="text-xs text-blue-700">• {rec}</p>
                       ))}
@@ -465,7 +465,7 @@ function ProductionPlanningDashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Clock className="h-4 w-4 text-blue-600" />
+                      <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       <span className="text-sm font-medium">Total Time</span>
                     </div>
                     <p className="text-2xl font-bold">
@@ -475,7 +475,7 @@ function ProductionPlanningDashboard() {
 
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <BarChart3 className="h-4 w-4 text-green-600" />
+                      <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       <span className="text-sm font-medium">Utilization</span>
                     </div>
                     <p className="text-2xl font-bold">
@@ -485,7 +485,7 @@ function ProductionPlanningDashboard() {
 
                   <Card className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <TrendingUp className="h-4 w-4 text-purple-600" />
+                      <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       <span className="text-sm font-medium">Expected Profit</span>
                     </div>
                     <p className="text-2xl font-bold">
@@ -530,7 +530,7 @@ function ProductionPlanningDashboard() {
                     <h4 className="font-medium mb-3">Bottleneck Analysis</h4>
                     <div className="space-y-3">
                       <div>
-                        <span className="text-sm font-medium text-blue-800">Critical Path:</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Critical Path:</span>
                         <div className="mt-1 space-y-1">
                           {optimization.bottleneck_analysis.critical_path.map((item, idx) => (
                             <p key={idx} className="text-sm text-blue-700">• {item}</p>
@@ -539,7 +539,7 @@ function ProductionPlanningDashboard() {
                       </div>
 
                       <div>
-                        <span className="text-sm font-medium text-green-800">Optimizations:</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Optimizations:</span>
                         <div className="mt-1 space-y-1">
                           {optimization.bottleneck_analysis.optimization_suggestions.map((suggestion, idx) => (
                             <p key={idx} className="text-sm text-green-700">• {suggestion}</p>
@@ -642,7 +642,7 @@ function ProductionPlanningDashboard() {
                 </div>
                 <div className="text-center">
                   <div className="text-sm text-muted-foreground">Profit Margin</div>
-                  <div className="text-xl font-bold text-green-600">
+                  <div className="text-xl font-bold text-gray-600 dark:text-gray-400">
                     {productionPlans.length > 0 
                       ? (productionPlans.reduce((sum, p) => sum + p.profitability_score, 0) / productionPlans.length).toFixed(1)
                       : 0
@@ -653,7 +653,7 @@ function ProductionPlanningDashboard() {
                   <div className="text-sm text-muted-foreground">Bottlenecks</div>
                   <div className={`text-xl font-bold ${
                     productionPlans.filter(p => p.bottlenecks.length > 0).length === 0 
-                      ? 'text-green-600' : 'text-red-600'
+                      ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                   }`}>
                     {productionPlans.filter(p => p.bottlenecks.length > 0).length}
                   </div>

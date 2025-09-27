@@ -164,19 +164,19 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />
+      case 'critical': return <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       case 'warning': return <AlertTriangle className="h-4 w-4 text-orange-500" />
-      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
-      default: return <Info className="h-4 w-4 text-blue-500" />
+      case 'success': return <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+      default: return <Info className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     }
   }
 
   const getNotificationColor = (type: string) => {
     switch (type) {
-      case 'critical': return 'border-red-200 bg-red-50'
+      case 'critical': return 'border-red-200 bg-gray-100 dark:bg-gray-800'
       case 'warning': return 'border-orange-200 bg-orange-50'
-      case 'success': return 'border-green-200 bg-green-50'
-      default: return 'border-blue-200 bg-blue-50'
+      case 'success': return 'border-green-200 bg-gray-100 dark:bg-gray-800'
+      default: return 'border-blue-200 bg-gray-100 dark:bg-gray-800'
     }
   }
 
@@ -202,7 +202,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
           </Badge>
         )}
         {highPriorityCount > 0 && (
-          <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse" />
+          <div className="absolute -top-1 -right-1 h-3 w-3 bg-gray-100 dark:bg-gray-8000 rounded-full animate-pulse" />
         )}
       </Button>
 
@@ -212,7 +212,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
           <div className="p-3 sm:p-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-blue-500" />
+                <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 <h3 className="font-medium text-sm sm:text-base">Smart Notifications</h3>
               </div>
               <div className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
                                 <Button 
                                   variant="ghost" 
                                   size="sm"
-                                  className="h-6 w-6 p-0 text-red-600"
+                                  className="h-6 w-6 p-0 text-gray-600 dark:text-gray-400"
                                   onClick={() => dismissNotification(notification.id)}
                                 >
                                   <X className="h-3 w-3" />

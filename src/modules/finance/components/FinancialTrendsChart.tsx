@@ -133,7 +133,7 @@ export default function FinancialTrendsChart() {
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <BarChart3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               Financial Trends
             </CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -169,9 +169,9 @@ export default function FinancialTrendsChart() {
         {/* Key Metrics */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="text-center">
-            <div className="text-xl font-bold text-green-600">+48.5%</div>
+            <div className="text-xl font-bold text-gray-600 dark:text-gray-400">+48.5%</div>
             <p className="text-xs text-muted-foreground">Revenue Growth</p>
-            <Badge variant="default" className="bg-green-100 text-green-800 mt-1">
+            <Badge variant="default" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
               Excellent
             </Badge>
@@ -184,9 +184,9 @@ export default function FinancialTrendsChart() {
             </Badge>
           </div>
           <div className="text-center">
-            <div className="text-xl font-bold text-blue-600">+60.0%</div>
+            <div className="text-xl font-bold text-gray-600 dark:text-gray-400">+60.0%</div>
             <p className="text-xs text-muted-foreground">Profit Growth</p>
-            <Badge variant="default" className="bg-blue-100 text-blue-800 mt-1">
+            <Badge variant="default" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
               Outstanding
             </Badge>
@@ -203,7 +203,7 @@ export default function FinancialTrendsChart() {
         {/* Insights */}
         <div className="mt-6 space-y-3 border-t pt-4">
           <h4 className="font-medium flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             Key Insights
           </h4>
           <div className="grid gap-2 text-sm">

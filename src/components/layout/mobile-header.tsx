@@ -267,7 +267,7 @@ export default function MobileHeader({
                 Bantuan
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-gray-600 dark:text-gray-400">
                 Keluar
               </DropdownMenuItem>
             </DropdownMenuContent>

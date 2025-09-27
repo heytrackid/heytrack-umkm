@@ -2,35 +2,35 @@ export const STOCK_TRANSACTION_TYPES = {
   PURCHASE: {
     value: 'PURCHASE',
     label: 'Pembelian',
-    color: 'bg-green-100 text-green-800',
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
     icon: 'ArrowUp',
     multiplier: 1
   },
   USAGE: {
     value: 'USAGE',
     label: 'Pemakaian',
-    color: 'bg-blue-100 text-blue-800',
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
     icon: 'Factory',
     multiplier: -1
   },
   ADJUSTMENT: {
     value: 'ADJUSTMENT',
     label: 'Penyesuaian',
-    color: 'bg-yellow-100 text-yellow-800',
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
     icon: 'RotateCcw',
     multiplier: 0 // Bisa positif atau negatif
   },
   WASTE: {
     value: 'WASTE',
     label: 'Terbuang',
-    color: 'bg-red-100 text-red-800',
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
     icon: 'Trash2',
     multiplier: -1
   },
   EXPIRED: {
     value: 'EXPIRED',
     label: 'Kadaluarsa',
-    color: 'bg-red-100 text-red-800',
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
     icon: 'AlertTriangle',
     multiplier: -1
   }
@@ -47,7 +47,7 @@ export const INVENTORY_CATEGORIES = {
     value: 'dairy',
     label: 'Susu & Dairy',
     icon: 'Milk',
-    color: 'bg-blue-100 text-blue-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   },
   SUGAR: {
     value: 'sugar',
@@ -59,7 +59,7 @@ export const INVENTORY_CATEGORIES = {
     value: 'fat',
     label: 'Lemak & Minyak',
     icon: 'Droplets',
-    color: 'bg-yellow-100 text-yellow-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   },
   PROTEIN: {
     value: 'protein',
@@ -71,13 +71,13 @@ export const INVENTORY_CATEGORIES = {
     value: 'flavoring',
     label: 'Perisa & Pewarna',
     icon: 'Palette',
-    color: 'bg-purple-100 text-purple-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   },
   LEAVENING: {
     value: 'leavening',
     label: 'Pengembang',
     icon: 'Wind',
-    color: 'bg-green-100 text-green-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   },
   SPICES: {
     value: 'spices',

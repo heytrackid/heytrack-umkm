@@ -62,10 +62,10 @@ export const FormField: React.FC<FormFieldProps> = ({
 
   const getInputClasses = () => {
     if (hasError) {
-      return `${baseInputClasses} border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500`;
+      return `${baseInputClasses} border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-gray-300 dark:border-gray-600`;
     }
     if (hasSuccess) {
-      return `${baseInputClasses} border-green-300 text-green-900 placeholder-green-300 focus:ring-green-500 focus:border-green-500`;
+      return `${baseInputClasses} border-green-300 text-green-900 placeholder-green-300 focus:ring-green-500 focus:border-gray-300 dark:border-gray-600`;
     }
     return `${baseInputClasses} border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 hover:border-gray-400`;
   };
@@ -112,7 +112,7 @@ export const FormField: React.FC<FormFieldProps> = ({
           className="block text-sm font-medium text-gray-700 sm:text-base"
         >
           {label}
-          {required && <span className="text-red-500 ml-1" aria-label="required">*</span>}
+          {required && <span className="text-gray-600 dark:text-gray-400 ml-1" aria-label="required">*</span>}
         </label>
         {hint && !error && !success && (
           <span className="text-xs text-gray-500 sm:text-sm">{hint}</span>
@@ -188,14 +188,14 @@ export const FormField: React.FC<FormFieldProps> = ({
         {/* Success Icon */}
         {hasSuccess && !isPassword && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <Check className="h-4 w-4 text-green-500" />
+            <Check className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </div>
         )}
         
         {/* Error Icon */}
         {hasError && !isPassword && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <AlertCircle className="h-4 w-4 text-red-500" />
+            <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </div>
         )}
       </div>
@@ -205,16 +205,16 @@ export const FormField: React.FC<FormFieldProps> = ({
         <div className="mt-2 flex items-start space-x-1">
           {error && (
             <>
-              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-              <p id={`${name}-error`} className="text-sm text-red-600 flex-1">
+              <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+              <p id={`${name}-error`} className="text-sm text-gray-600 dark:text-gray-400 flex-1">
                 {error}
               </p>
             </>
           )}
           {success && !error && (
             <>
-              <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-green-600 flex-1">
+              <Check className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 flex-1">
                 {success}
               </p>
             </>

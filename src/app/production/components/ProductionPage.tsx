@@ -192,9 +192,9 @@ export default function ProductionPage({ className }: ProductionPageProps) {
   const getPriorityColor = (priority: 'low' | 'medium' | 'high' | 'critical') => {
     switch (priority) {
       case 'low': return 'bg-gray-100 text-gray-800'
-      case 'medium': return 'bg-blue-100 text-blue-800'
+      case 'medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       case 'high': return 'bg-orange-100 text-orange-800'
-      case 'critical': return 'bg-red-100 text-red-800'
+      case 'critical': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -269,7 +269,7 @@ export default function ProductionPage({ className }: ProductionPageProps) {
                   12
                 </p>
               </div>
-              <Package className="h-8 w-8 text-blue-600" />
+              <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -281,11 +281,11 @@ export default function ProductionPage({ className }: ProductionPageProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Quality Pass Rate
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   94.2%
                 </p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <CheckCircle2 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -313,11 +313,11 @@ export default function ProductionPage({ className }: ProductionPageProps) {
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Equipment Usage
                 </p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   78%
                 </p>
               </div>
-              <Settings className="h-8 w-8 text-purple-600" />
+              <Settings className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>

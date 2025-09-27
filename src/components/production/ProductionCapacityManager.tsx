@@ -242,13 +242,13 @@ export default function ProductionCapacityManager({
         {efficiencyMetrics && (
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {efficiencyMetrics.current_utilization}%
               </div>
               <div className="text-xs text-muted-foreground">Current Utilization</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {Math.round(efficiencyMetrics.peak_capacity)}
               </div>
               <div className="text-xs text-muted-foreground">Peak Capacity/Hr</div>
@@ -260,7 +260,7 @@ export default function ProductionCapacityManager({
               <div className="text-xs text-muted-foreground mt-1">Bottleneck</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {efficiencyMetrics.optimization_score}
               </div>
               <div className="text-xs text-muted-foreground">Efficiency Score</div>
@@ -559,8 +559,8 @@ export default function ProductionCapacityManager({
                     <div className="space-y-2">
                       <h4 className="font-semibold">Optimization Recommendations</h4>
                       {efficiencyMetrics.recommendations.map((rec, index) => (
-                        <div key={index} className="flex items-start gap-2 p-2 bg-blue-50 rounded">
-                          <Zap className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                        <div key={index} className="flex items-start gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                          <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                           <span className="text-sm">{rec}</span>
                         </div>
                       ))}
@@ -568,12 +568,12 @@ export default function ProductionCapacityManager({
 
                     {/* Capacity Planning */}
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-green-50 rounded">
-                        <div className="text-sm font-medium text-green-800">Optimal Capacity</div>
-                        <div className="text-lg font-bold text-green-600">
+                      <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Optimal Capacity</div>
+                        <div className="text-lg font-bold text-gray-600 dark:text-gray-400">
                           {Math.round(efficiencyMetrics.peak_capacity * 0.85)} units/day
                         </div>
-                        <div className="text-xs text-green-600">85% efficiency target</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">85% efficiency target</div>
                       </div>
                       
                       <div className="p-3 bg-orange-50 rounded">

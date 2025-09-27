@@ -119,9 +119,9 @@ export default function ReportsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
-      case 'warning': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-      case 'good': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+      case 'critical': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
+      case 'warning': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-yellow-800 dark:text-yellow-100'
+      case 'good': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
     }
   }
@@ -189,13 +189,13 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Penjualan</CardTitle>
-              <DollarSign className="h-4 w-4 text-green-500" />
+              <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {financialData.monthly.income.toLocaleString()}
               </div>
-              <p className="text-xs text-green-600 flex items-center mt-1">
+              <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center mt-1">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +{financialData.monthly.growth}% dari bulan lalu
               </p>
@@ -204,7 +204,7 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-blue-500" />
+              <ShoppingCart className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
@@ -218,10 +218,10 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Margin Keuntungan</CardTitle>
-              <Target className="h-4 w-4 text-purple-500" />
+              <Target className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {financialData.monthly.margin}%
               </div>
               <p className="text-xs text-muted-foreground">
@@ -232,10 +232,10 @@ export default function ReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Item Stok Rendah</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-500" />
+              <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {inventoryData.lowStock.length}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -268,7 +268,7 @@ export default function ReportsPage() {
                     {salesData.daily.map((day, index) => (
                       <div key={day.date} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-gray-100 dark:bg-gray-8000 rounded-full"></div>
                           <span className="text-sm font-medium">{day.date}</span>
                         </div>
                         <div className="text-right">
@@ -344,7 +344,7 @@ export default function ReportsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-500" />
+                    <AlertTriangle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                     Stok Rendah & Kritis
                   </CardTitle>
                 </CardHeader>
@@ -386,9 +386,9 @@ export default function ReportsPage() {
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {movement.type === 'IN' ? (
-                            <ArrowUpRight className="h-4 w-4 text-green-500" />
+                            <ArrowUpRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                           ) : (
-                            <ArrowDownRight className="h-4 w-4 text-red-500" />
+                            <ArrowDownRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                           )}
                           <div>
                             <p className="font-medium text-sm">{movement.item}</p>
@@ -396,7 +396,7 @@ export default function ReportsPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`font-medium ${movement.type === 'IN' ? 'text-green-600' : 'text-red-600'}`}>
+                          <p className={`font-medium ${movement.type === 'IN' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
                             {movement.type === 'IN' ? '+' : '-'}{movement.quantity}
                           </p>
                           <p className="text-xs text-muted-foreground">{movement.date}</p>
@@ -421,11 +421,11 @@ export default function ReportsPage() {
                     <div key={index} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium text-sm">{waste.item}</h4>
-                        <Badge variant="outline" className="text-red-600">
+                        <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
                           {waste.quantity} item
                         </Badge>
                       </div>
-                      <p className="text-lg font-bold text-red-600 mb-1">
+                      <p className="text-lg font-bold text-gray-600 dark:text-gray-400 mb-1">
                         Rp {waste.value.toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground">{waste.reason}</p>
@@ -433,10 +433,10 @@ export default function ReportsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 dark:bg-red-900/20 rounded-lg">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Total Kerugian Wastage:</span>
-                    <span className="text-lg font-bold text-red-600">
+                    <span className="text-lg font-bold text-gray-600 dark:text-gray-400">
                       Rp {inventoryData.wastage.reduce((sum, w) => sum + w.value, 0).toLocaleString()}
                     </span>
                   </div>
@@ -454,7 +454,7 @@ export default function ReportsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-green-500" />
+                    <DollarSign className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                     Ringkasan Keuangan
                   </CardTitle>
                 </CardHeader>
@@ -462,13 +462,13 @@ export default function ReportsPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Pemasukan:</span>
-                      <span className="font-bold text-green-600">
+                      <span className="font-bold text-gray-600 dark:text-gray-400">
                         Rp {financialData.monthly.income.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Pengeluaran:</span>
-                      <span className="font-bold text-red-600">
+                      <span className="font-bold text-gray-600 dark:text-gray-400">
                         Rp {financialData.monthly.expense.toLocaleString()}
                       </span>
                     </div>
@@ -534,7 +534,7 @@ export default function ReportsPage() {
                       <div key={day.date} className="border-b pb-2 last:border-b-0">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-sm font-medium">{day.date}</span>
-                          <span className={`font-bold ${day.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`font-bold ${day.net >= 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
                             {day.net >= 0 ? '+' : ''}Rp {day.net.toLocaleString()}
                           </span>
                         </div>
@@ -559,21 +559,21 @@ export default function ReportsPage() {
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div className="text-center p-6 border rounded-lg">
-                    <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                    <TrendingUp className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
                     <h3 className="font-medium mb-1">Revenue Growth</h3>
-                    <p className="text-2xl font-bold text-green-600">+{financialData.monthly.growth}%</p>
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">+{financialData.monthly.growth}%</p>
                     <p className="text-sm text-muted-foreground">Vs bulan lalu</p>
                   </div>
                   <div className="text-center p-6 border rounded-lg">
-                    <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                    <Target className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
                     <h3 className="font-medium mb-1">ROI Average</h3>
-                    <p className="text-2xl font-bold text-blue-600">24.5%</p>
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">24.5%</p>
                     <p className="text-sm text-muted-foreground">Return on Investment</p>
                   </div>
                   <div className="text-center p-6 border rounded-lg">
-                    <Clock className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                    <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
                     <h3 className="font-medium mb-1">Avg Order Value</h3>
-                    <p className="text-2xl font-bold text-purple-600">
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       Rp {Math.round(salesData.daily.reduce((sum, d) => sum + d.avgOrder, 0) / salesData.daily.length).toLocaleString()}
                     </p>
                     <p className="text-sm text-muted-foreground">Per transaksi</p>

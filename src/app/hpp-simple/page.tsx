@@ -193,10 +193,10 @@ export default function HPPSimplePage() {
   }
 
   const getMarginStatus = (margin: number) => {
-    if (margin >= RECOMMENDED_MARGIN) return { color: 'text-green-600', status: 'Excellent', icon: CheckCircle }
-    if (margin >= MIN_MARGIN) return { color: 'text-blue-600', status: 'Good', icon: CheckCircle }
-    if (margin >= 20) return { color: 'text-yellow-600', status: 'Low', icon: AlertTriangle }
-    return { color: 'text-red-600', status: 'Too Low', icon: AlertTriangle }
+    if (margin >= RECOMMENDED_MARGIN) return { color: 'text-gray-600 dark:text-gray-400', status: 'Excellent', icon: CheckCircle }
+    if (margin >= MIN_MARGIN) return { color: 'text-gray-600 dark:text-gray-400', status: 'Good', icon: CheckCircle }
+    if (margin >= 20) return { color: 'text-gray-600 dark:text-gray-400', status: 'Low', icon: AlertTriangle }
+    return { color: 'text-gray-600 dark:text-gray-400', status: 'Too Low', icon: AlertTriangle }
   }
 
   const marginStatus = getMarginStatus(recipe.actualMargin || recipe.suggestedMargin)
@@ -337,7 +337,7 @@ export default function HPPSimplePage() {
                             className="h-8 text-xs"
                           />
                         </div>
-                        <div className="col-span-1 flex items-center font-medium text-green-600">
+                        <div className="col-span-1 flex items-center font-medium text-gray-600 dark:text-gray-400">
                           Rp {ingredient.total.toLocaleString()}
                         </div>
                       </div>
@@ -345,7 +345,7 @@ export default function HPPSimplePage() {
                         variant="outline"
                         size="sm"
                         onClick={() => removeIngredient(ingredient.id)}
-                        className="text-red-600"
+                        className="text-gray-600 dark:text-gray-400"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -445,7 +445,7 @@ export default function HPPSimplePage() {
                     <span>Total HPP:</span>
                     <span>Rp {recipe.totalCost.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between font-medium text-lg text-blue-600">
+                  <div className="flex justify-between font-medium text-lg text-gray-600 dark:text-gray-400">
                     <span>HPP per Porsi:</span>
                     <span>Rp {recipe.costPerPortion.toLocaleString()}</span>
                   </div>
@@ -457,7 +457,7 @@ export default function HPPSimplePage() {
                       <span>Harga Jual:</span>
                       <span className="font-medium">Rp {recipe.sellingPrice.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between font-medium text-green-600">
+                    <div className="flex justify-between font-medium text-gray-600 dark:text-gray-400">
                       <span>Keuntungan:</span>
                       <span>Rp {recipe.profit.toLocaleString()}</span>
                     </div>
@@ -479,13 +479,13 @@ export default function HPPSimplePage() {
                 <CardTitle className="text-sm">💡 Tips Cerdas</CardTitle>
               </CardHeader>
               <CardContent className="text-sm space-y-2">
-                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                   <p className="font-medium text-blue-900 dark:text-blue-100">Margin Sehat:</p>
                   <p className="text-blue-700 dark:text-blue-200">
                     Untuk UMKM bakery, margin {MIN_MARGIN}-{RECOMMENDED_MARGIN}% sudah bagus
                   </p>
                 </div>
-                <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                   <p className="font-medium text-green-900 dark:text-green-100">Overhead Otomatis:</p>
                   <p className="text-green-700 dark:text-green-200">
                     Sudah termasuk listrik, gas, dan biaya operasional lainnya

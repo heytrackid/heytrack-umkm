@@ -132,9 +132,9 @@ export default function IngredientsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'adequate': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-      case 'low': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-      case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+      case 'adequate': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
+      case 'low': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-yellow-800 dark:text-yellow-100'
+      case 'critical': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
     }
   }
@@ -267,8 +267,8 @@ export default function IngredientsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-4">
-                <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                <p className="text-red-600 font-medium">Gagal memuat data</p>
+                <AlertTriangle className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 dark:text-gray-400 font-medium">Gagal memuat data</p>
                 <p className="text-sm text-muted-foreground mb-4">{error}</p>
                 <Button onClick={fetchIngredients}>Coba Lagi</Button>
               </div>
@@ -664,7 +664,7 @@ function IngredientForm({ onClose, onSuccess, editData }: {
         </TabsList>
         
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-gray-100 dark:bg-gray-800 border border-red-400 text-red-700 rounded">
             {error}
           </div>
         )}
@@ -960,9 +960,9 @@ function IngredientDetailView({ ingredient }: { ingredient: any }) {
 
 function getStatusColor(status: string) {
   switch (status) {
-    case 'adequate': return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
-    case 'low': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
-    case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+    case 'adequate': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100'
+    case 'low': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-yellow-800 dark:text-yellow-100'
+    case 'critical': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100'
     default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
   }
 }

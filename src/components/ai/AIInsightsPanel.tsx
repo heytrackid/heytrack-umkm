@@ -81,9 +81,9 @@ export function AIInsightsPanel({
   const getConfidenceBadge = (confidence: number) => {
     const level = ai.getConfidenceLevel(confidence)
     const colors = {
-      high: 'bg-green-100 text-green-800',
-      medium: 'bg-yellow-100 text-yellow-800',
-      low: 'bg-red-100 text-red-800'
+      high: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+      medium: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+      low: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
     }
     
     return (
@@ -130,7 +130,7 @@ export function AIInsightsPanel({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center space-x-2">
-                <Brain className="h-5 w-5 text-blue-500" />
+                <Brain className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <span>AI Pricing Recommendations</span>
               </CardTitle>
               {getConfidenceBadge(ai.pricing.confidence)}
@@ -140,19 +140,19 @@ export function AIInsightsPanel({
             {data.recommendedPrice && (
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {formatCurrency(data.recommendedPrice.min)}
                   </div>
                   <p className="text-sm text-muted-foreground">Minimum</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {formatCurrency(data.recommendedPrice.optimal)}
                   </div>
                   <p className="text-sm text-muted-foreground">Optimal</p>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {formatCurrency(data.recommendedPrice.max)}
                   </div>
                   <p className="text-sm text-muted-foreground">Maximum</p>
@@ -165,13 +165,13 @@ export function AIInsightsPanel({
             {data.actionItems && data.actionItems.length > 0 && (
               <div>
                 <h4 className="font-semibold mb-2 flex items-center">
-                  <Lightbulb className="h-4 w-4 mr-2 text-yellow-500" />
+                  <Lightbulb className="h-4 w-4 mr-2 text-gray-600 dark:text-gray-400" />
                   Action Items
                 </h4>
                 <ul className="space-y-1">
                   {data.actionItems.map((item: string, index: number) => (
                     <li key={index} className="flex items-start space-x-2 text-sm">
-                      <Target className="h-4 w-4 text-green-500 mt-0.5" />
+                      <Target className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -181,7 +181,7 @@ export function AIInsightsPanel({
 
             {data.opportunities && data.opportunities.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-2 text-green-600">Opportunities</h4>
+                <h4 className="font-semibold mb-2 text-gray-600 dark:text-gray-400">Opportunities</h4>
                 <ul className="space-y-1">
                   {data.opportunities.map((opp: string, index: number) => (
                     <li key={index} className="text-sm text-green-700">• {opp}</li>
@@ -192,7 +192,7 @@ export function AIInsightsPanel({
 
             {data.risks && data.risks.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-2 text-red-600">Risks</h4>
+                <h4 className="font-semibold mb-2 text-gray-600 dark:text-gray-400">Risks</h4>
                 <ul className="space-y-1">
                   {data.risks.map((risk: string, index: number) => (
                     <li key={index} className="text-sm text-red-700">• {risk}</li>
@@ -242,7 +242,7 @@ export function AIInsightsPanel({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center space-x-2">
-                <Package className="h-5 w-5 text-green-500" />
+                <Package className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <span>AI Inventory Optimization</span>
               </CardTitle>
               {getConfidenceBadge(ai.inventory.confidence)}
@@ -251,13 +251,13 @@ export function AIInsightsPanel({
           <CardContent className="space-y-4">
             {data.criticalItems && data.criticalItems.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-3 flex items-center text-red-600">
+                <h4 className="font-semibold mb-3 flex items-center text-gray-600 dark:text-gray-400">
                   <AlertTriangle className="h-4 w-4 mr-2" />
                   Critical Items ({data.criticalItems.length})
                 </h4>
                 <div className="space-y-2">
                   {data.criticalItems.slice(0, 5).map((item: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
                       <div>
                         <p className="font-medium">{item.ingredient}</p>
                         <p className="text-sm text-muted-foreground">{item.reason}</p>
@@ -276,11 +276,11 @@ export function AIInsightsPanel({
               <div>
                 <h4 className="font-semibold mb-2">Demand Forecast</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
                     <div className="text-xl font-bold">{data.demandForecast.nextWeek}%</div>
                     <p className="text-sm text-muted-foreground">Next Week</p>
                   </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
                     <div className="text-xl font-bold">{data.demandForecast.nextMonth}%</div>
                     <p className="text-sm text-muted-foreground">Next Month</p>
                   </div>
@@ -293,7 +293,7 @@ export function AIInsightsPanel({
                 <h4 className="font-semibold mb-2">Cost Impact</h4>
                 <div className="flex justify-between items-center">
                   <span>Potential Savings:</span>
-                  <span className="text-green-600 font-bold">
+                  <span className="text-gray-600 dark:text-gray-400 font-bold">
                     {formatCurrency(data.costImpact.savings)}
                   </span>
                 </div>
@@ -340,7 +340,7 @@ export function AIInsightsPanel({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-purple-500" />
+              <Users className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               <span>AI Customer Analytics</span>
             </CardTitle>
             {getConfidenceBadge(ai.customer.confidence)}
@@ -364,7 +364,7 @@ export function AIInsightsPanel({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center space-x-2">
-                <Sparkles className="h-5 w-5 text-blue-500" />
+                <Sparkles className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <span>AI Business Intelligence</span>
               </CardTitle>
               <div className="flex items-center space-x-2">
@@ -411,21 +411,21 @@ export function AIInsightsPanel({
             {hasInsights && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
-                  <DollarSign className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                  <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
                   <h3 className="font-semibold">Pricing Optimization</h3>
                   <p className="text-sm text-muted-foreground">
                     {ai.pricing.data ? 'Analysis Ready' : 'No Data'}
                   </p>
                 </div>
                 <div className="text-center">
-                  <Package className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                  <Package className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
                   <h3 className="font-semibold">Inventory Intelligence</h3>
                   <p className="text-sm text-muted-foreground">
                     {ai.inventory.data ? 'Optimization Ready' : 'No Data'}
                   </p>
                 </div>
                 <div className="text-center">
-                  <Users className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                  <Users className="h-8 w-8 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
                   <h3 className="font-semibold">Customer Analytics</h3>
                   <p className="text-sm text-muted-foreground">
                     {ai.customer.data ? 'Insights Ready' : 'No Data'}

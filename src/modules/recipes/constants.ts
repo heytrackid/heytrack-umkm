@@ -15,21 +15,21 @@ export const DIFFICULTY_LEVELS = [
     label: 'Mudah', 
     icon: '🟢',
     description: 'Cocok untuk pemula, teknik dasar',
-    color: 'bg-green-100 text-green-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   },
   { 
     value: 'medium', 
     label: 'Sedang', 
     icon: '🟡',
     description: 'Memerlukan sedikit pengalaman',
-    color: 'bg-yellow-100 text-yellow-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   },
   { 
     value: 'hard', 
     label: 'Sulit', 
     icon: '🔴',
     description: 'Untuk baker berpengalaman, teknik advanced',
-    color: 'bg-red-100 text-red-800'
+    color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
   }
 ] as const
 

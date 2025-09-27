@@ -84,10 +84,10 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
 
   const getUrgencyColor = (urgency: ReorderAlert['urgency']) => {
     switch (urgency) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200'
+      case 'critical': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-red-200'
       case 'high': return 'bg-orange-100 text-orange-800 border-orange-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-yellow-200'
+      case 'low': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-blue-200'
       default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
@@ -105,10 +105,10 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
   const getStatusColor = (status: PurchaseOrder['status']) => {
     switch (status) {
       case 'draft': return 'bg-gray-100 text-gray-800'
-      case 'sent': return 'bg-blue-100 text-blue-800'
-      case 'confirmed': return 'bg-green-100 text-green-800'
-      case 'delivered': return 'bg-green-100 text-green-800'
-      case 'cancelled': return 'bg-red-100 text-red-800'
+      case 'sent': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'confirmed': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'delivered': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+      case 'cancelled': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -185,7 +185,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <AlertTriangle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Critical Items</p>
                   <p className="text-2xl font-bold">{summary.critical_items}</p>
@@ -197,7 +197,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <DollarSign className="h-5 w-5 text-green-500" />
+                <DollarSign className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Estimated Cost</p>
                   <p className="text-2xl font-bold">Rp {summary.total_estimated_cost.toLocaleString('id-ID')}</p>
@@ -209,7 +209,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Auto Orders</p>
                   <p className="text-2xl font-bold">{summary.auto_orders_generated}</p>
@@ -221,7 +221,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center space-x-2">
-                <Eye className="h-5 w-5 text-blue-500" />
+                <Eye className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Manual Review</p>
                   <p className="text-2xl font-bold">{summary.manual_review_required}</p>
@@ -291,7 +291,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                  <CheckCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">All Stock Levels Good</h3>
                   <p className="text-muted-foreground">No reorder alerts at this time.</p>
                 </div>

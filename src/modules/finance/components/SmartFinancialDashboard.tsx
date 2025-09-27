@@ -32,7 +32,7 @@ export default function SmartFinancialDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-600" />
+            <BarChart3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Smart Financial Dashboard
           </CardTitle>
           <p className="text-sm text-muted-foreground">
@@ -42,25 +42,25 @@ export default function SmartFinancialDashboard() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {financialData.revenue.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Total Revenue</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {financialData.expenses.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Total Expenses</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {financialData.profit.toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Net Profit</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {financialData.margin}%
               </div>
               <p className="text-xs text-muted-foreground">Profit Margin</p>
@@ -74,7 +74,7 @@ export default function SmartFinancialDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
+              <TrendingUp className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               Performance Metrics
             </CardTitle>
           </CardHeader>
@@ -82,7 +82,7 @@ export default function SmartFinancialDashboard() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span>Monthly Growth</span>
-                <Badge variant="default" className="bg-green-100 text-green-800">
+                <Badge variant="default" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                   +{financialData.monthlyGrowth}%
                 </Badge>
               </div>
@@ -105,14 +105,14 @@ export default function SmartFinancialDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-blue-600" />
+              <Target className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               Financial Insights
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">Performa Baik</p>
                   <p className="text-xs text-muted-foreground">
@@ -121,7 +121,7 @@ export default function SmartFinancialDashboard() {
                 </div>
               </div>
               <div className="flex items-start gap-2">
-                <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5" />
+                <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">Growth Trend</p>
                   <p className="text-xs text-muted-foreground">
@@ -149,7 +149,7 @@ export default function SmartFinancialDashboard() {
             
             <TabsContent value="summary" className="space-y-4">
               <div className="text-center py-8">
-                <DollarSign className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                <DollarSign className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
                 <h3 className="font-medium mb-2">Financial Summary</h3>
                 <p className="text-sm text-muted-foreground">
                   Detailed financial analysis will be displayed here
@@ -159,7 +159,7 @@ export default function SmartFinancialDashboard() {
             
             <TabsContent value="trends" className="space-y-4">
               <div className="text-center py-8">
-                <BarChart3 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                <BarChart3 className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
                 <h3 className="font-medium mb-2">Trend Analysis</h3>
                 <p className="text-sm text-muted-foreground">
                   Financial trends and patterns will be displayed here
@@ -169,7 +169,7 @@ export default function SmartFinancialDashboard() {
             
             <TabsContent value="forecast" className="space-y-4">
               <div className="text-center py-8">
-                <Target className="h-12 w-12 text-purple-600 mx-auto mb-4" />
+                <Target className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
                 <h3 className="font-medium mb-2">Financial Forecast</h3>
                 <p className="text-sm text-muted-foreground">
                   Predicted financial performance will be displayed here

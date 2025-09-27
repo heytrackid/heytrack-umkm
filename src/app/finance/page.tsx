@@ -137,8 +137,8 @@ const sampleTransactions = [
 ]
 
 const transactionTypes = [
-  { value: 'INCOME', label: 'Pemasukan', color: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' },
-  { value: 'EXPENSE', label: 'Pengeluaran', color: 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100' }
+  { value: 'INCOME', label: 'Pemasukan', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
+  { value: 'EXPENSE', label: 'Pengeluaran', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
 ]
 
 const incomeCategories = ['Penjualan', 'Investasi', 'Lain-lain']
@@ -270,10 +270,10 @@ export default function FinancePage() {
                 <CardTitle className={`font-medium ${
                   isMobile ? 'text-xs' : 'text-sm'
                 }`}>Total Pemasukan</CardTitle>
-                <TrendingUp className="h-4 w-4 text-green-500" />
+                <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <div className={`font-bold text-green-600 ${
+                <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>
                   Rp {stats.totalIncome.toLocaleString()}
@@ -297,10 +297,10 @@ export default function FinancePage() {
                 <CardTitle className={`font-medium ${
                   isMobile ? 'text-xs' : 'text-sm'
                 }`}>Total Pengeluaran</CardTitle>
-                <TrendingDown className="h-4 w-4 text-red-500" />
+                <TrendingDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <div className={`font-bold text-red-600 ${
+                <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>
                   Rp {stats.totalExpense.toLocaleString()}
@@ -324,10 +324,10 @@ export default function FinancePage() {
                 <CardTitle className={`font-medium ${
                   isMobile ? 'text-xs' : 'text-sm'
                 }`}>Keuntungan Bersih</CardTitle>
-                <DollarSign className="h-4 w-4 text-blue-500" />
+                <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <div className={`font-bold ${stats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'} ${
+                <div className={`font-bold ${stats.netProfit >= 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'} ${
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>
                   Rp {stats.netProfit.toLocaleString()}
@@ -701,7 +701,7 @@ export default function FinancePage() {
                             <div>
                               <p className="text-xs text-muted-foreground">Jumlah</p>
                               <p className={`font-bold text-lg ${
-                                transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                                transaction.type === 'INCOME' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                               }`}>
                                 {transaction.type === 'INCOME' ? '+' : '-'}Rp {transaction.amount.toLocaleString()}
                               </p>
@@ -770,7 +770,7 @@ export default function FinancePage() {
                               </Badge>
                             </td>
                             <td className="p-4">
-                              <span className={`font-medium ${transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'}`}>
+                              <span className={`font-medium ${transaction.type === 'INCOME' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
                                 {transaction.type === 'INCOME' ? '+' : '-'}Rp {transaction.amount.toLocaleString()}
                               </span>
                             </td>
@@ -795,7 +795,7 @@ export default function FinancePage() {
                                 <Button variant="ghost" size="sm">
                                   <Edit className="h-3 w-3" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-red-600">
+                                <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400">
                                   <Trash2 className="h-3 w-3" />
                                 </Button>
                               </div>
@@ -1087,7 +1087,7 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
             <div className="flex justify-between font-medium">
               <span className="text-muted-foreground">Jumlah:</span>
               <span className={`${
-                transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+                transaction.type === 'INCOME' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
               } ${
                 isMobile ? 'text-lg' : 'text-xl'
               }`}>

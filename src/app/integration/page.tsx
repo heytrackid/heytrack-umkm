@@ -11,7 +11,7 @@ export default function IntegrationPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+              <AlertTriangle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               Integration Dashboard
             </CardTitle>
           </CardHeader>

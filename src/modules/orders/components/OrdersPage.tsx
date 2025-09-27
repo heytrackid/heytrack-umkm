@@ -309,7 +309,7 @@ export default function OrdersPage({
       <Card>
         <CardContent className="pt-6">
           <div className="text-center py-8">
-            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <XCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
             <h3 className="font-medium mb-2">Gagal Memuat Data</h3>
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
             <Button onClick={fetchOrders}>Coba Lagi</Button>
@@ -346,11 +346,11 @@ export default function OrdersPage({
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
                 <p className="text-2xl font-bold">{stats.total_orders}</p>
-                <p className="text-xs text-green-600 mt-1">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                   +{stats.order_growth}% dari periode sebelumnya
                 </p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
+              <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -361,11 +361,11 @@ export default function OrdersPage({
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
-                <p className="text-xs text-green-600 mt-1">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                   +{stats.revenue_growth}% dari periode sebelumnya
                 </p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -378,7 +378,7 @@ export default function OrdersPage({
                 <p className="text-2xl font-bold">{formatCurrency(stats.average_order_value)}</p>
                 <p className="text-xs text-muted-foreground mt-1">per pesanan</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
@@ -405,23 +405,23 @@ export default function OrdersPage({
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">{stats.pending_orders}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.pending_orders}</div>
               <div className="text-xs text-muted-foreground">Pending</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.confirmed_orders}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.confirmed_orders}</div>
               <div className="text-xs text-muted-foreground">Confirmed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{stats.in_production_orders}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.in_production_orders}</div>
               <div className="text-xs text-muted-foreground">Produksi</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.completed_orders}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.completed_orders}</div>
               <div className="text-xs text-muted-foreground">Selesai</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{stats.cancelled_orders}</div>
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">{stats.cancelled_orders}</div>
               <div className="text-xs text-muted-foreground">Batal</div>
             </div>
             <div className="text-center">

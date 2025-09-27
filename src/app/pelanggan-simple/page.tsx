@@ -40,9 +40,9 @@ interface SimplePelanggan {
 }
 
 const KATEGORI_COLORS = {
-  baru: 'bg-blue-100 text-blue-800',
-  reguler: 'bg-green-100 text-green-800',
-  vip: 'bg-purple-100 text-purple-800'
+  baru: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  reguler: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300',
+  vip: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
 }
 
 export default function PelangganSimplePage() {
@@ -195,7 +195,7 @@ export default function PelangganSimplePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Users className="h-8 w-8 text-slate-600" />
+              <Users className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               Pelanggan Sederhana
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -284,11 +284,11 @@ export default function PelangganSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold text-slate-700">
+                  <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
                     {stats.totalPelanggan}
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-slate-600" />
+                <Users className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -298,11 +298,11 @@ export default function PelangganSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Pelanggan Baru</p>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.pelangganBaru}
                   </p>
                 </div>
-                <Plus className="h-8 w-8 text-blue-600" />
+                <Plus className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -312,11 +312,11 @@ export default function PelangganSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">VIP</p>
-                  <p className="text-2xl font-bold text-purple-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.pelangganVip}
                   </p>
                 </div>
-                <Star className="h-8 w-8 text-purple-600" />
+                <Star className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -326,11 +326,11 @@ export default function PelangganSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Rata Rating</p>
-                  <p className="text-2xl font-bold text-yellow-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {stats.rataRating}
                   </p>
                 </div>
-                <Star className="h-8 w-8 text-yellow-600" />
+                <Star className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -340,11 +340,11 @@ export default function PelangganSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Revenue</p>
-                  <p className="text-lg font-bold text-green-600">
+                  <p className="text-lg font-bold text-gray-600 dark:text-gray-400">
                     Rp {(stats.totalRevenue / 1000).toFixed(0)}K
                   </p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-600" />
+                <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
@@ -410,7 +410,7 @@ export default function PelangganSimplePage() {
                     variant="outline" 
                     size="sm"
                     onClick={() => deletePelanggan(item.id)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-gray-600 dark:text-gray-400 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -436,14 +436,14 @@ export default function PelangganSimplePage() {
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div>
-                      <div className="flex items-center justify-center gap-1 text-blue-600">
+                      <div className="flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
                         <ShoppingCart className="h-4 w-4" />
                         <span className="font-semibold">{item.totalPesanan}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">Pesanan</p>
                     </div>
                     <div>
-                      <div className="flex items-center justify-center gap-1 text-green-600">
+                      <div className="flex items-center justify-center gap-1 text-gray-600 dark:text-gray-400">
                         <DollarSign className="h-4 w-4" />
                         <span className="font-semibold">Rp {(item.totalBelanja / 1000).toFixed(0)}K</span>
                       </div>
@@ -488,7 +488,7 @@ export default function PelangganSimplePage() {
                         {item.produkFavorit.slice(0, 3).map((produk, index) => (
                           <span 
                             key={index}
-                            className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                            className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-blue-700 text-xs rounded"
                           >
                             {produk}
                           </span>
@@ -499,8 +499,8 @@ export default function PelangganSimplePage() {
 
                   {/* Catatan */}
                   {item.catatan && (
-                    <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
-                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 dark:text-yellow-200">
                         💡 {item.catatan}
                       </p>
                     </div>
@@ -556,19 +556,19 @@ export default function PelangganSimplePage() {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
                 <p className="font-medium text-blue-900 dark:text-blue-100">📊 Otomatis Upgrade</p>
                 <p className="text-blue-700 dark:text-blue-200">
                   Kategori pelanggan otomatis naik berdasarkan pembelian
                 </p>
               </div>
-              <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
                 <p className="font-medium text-green-900 dark:text-green-100">⭐ Beri Rating</p>
                 <p className="text-green-700 dark:text-green-200">
                   Rating membantu identifikasi pelanggan terbaik
                 </p>
               </div>
-              <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-yellow-950 rounded-lg">
                 <p className="font-medium text-yellow-900 dark:text-yellow-100">📝 Catat Preferensi</p>
                 <p className="text-yellow-700 dark:text-yellow-200">
                   Catatan membantu memberikan service personal

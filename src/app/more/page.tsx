@@ -103,14 +103,14 @@ const menuSections = [
         href: '/',
         icon: LayoutDashboard,
         description: 'Ringkasan bisnis dan analitik',
-        color: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-800'
+        color: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:bg-gray-800 border-blue-200 text-gray-700 dark:text-gray-300'
       },
       {
         name: 'AI Hub',
         href: '/ai',
         icon: Brain,
         description: 'Asisten AI untuk bisnis Anda',
-        color: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-800'
+        color: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-100 dark:bg-gray-800 border-purple-200 text-gray-700 dark:text-gray-300'
       }
     ]
   }
@@ -134,7 +134,7 @@ export default function MorePage() {
             <div className="space-y-2">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 {section.title.includes('Simple') && (
-                  <Zap className="h-5 w-5 text-slate-600" />
+                  <Zap className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 )}
                 {section.title}
               </h2>

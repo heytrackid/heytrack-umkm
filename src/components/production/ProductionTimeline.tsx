@@ -50,16 +50,16 @@ interface TimelineGridConfig {
 
 const RESOURCE_COLORS = {
   oven: 'bg-orange-500',
-  mixer: 'bg-blue-500', 
-  decorator: 'bg-purple-500',
-  packaging: 'bg-green-500'
+  mixer: 'bg-gray-100 dark:bg-gray-8000', 
+  decorator: 'bg-gray-100 dark:bg-gray-8000',
+  packaging: 'bg-gray-100 dark:bg-gray-8000'
 }
 
 const STATUS_COLORS = {
   scheduled: 'bg-gray-400',
-  in_progress: 'bg-yellow-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-red-500',
+  in_progress: 'bg-gray-100 dark:bg-gray-8000',
+  completed: 'bg-gray-100 dark:bg-gray-8000',
+  cancelled: 'bg-gray-100 dark:bg-gray-8000',
   blocked: 'bg-red-300'
 }
 
@@ -286,12 +286,12 @@ export default function ProductionTimeline({
                     if (currentOffsetMinutes >= 0 && currentOffsetMinutes <= differenceInMinutes(timelineGrid.endDate, timelineGrid.startDate)) {
                       return (
                         <div
-                          className="absolute top-0 h-full w-0.5 bg-red-500 z-20"
+                          className="absolute top-0 h-full w-0.5 bg-gray-100 dark:bg-gray-8000 z-20"
                           style={{ 
                             left: (currentOffsetMinutes / 60) * timelineGrid.pixelsPerHour 
                           }}
                         >
-                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-red-500 rounded-full" />
+                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-100 dark:bg-gray-8000 rounded-full" />
                         </div>
                       )
                     }
@@ -368,13 +368,13 @@ export default function ProductionTimeline({
                                   {/* Status indicator */}
                                   <div className="absolute -top-1 -right-1">
                                     {batch.status === 'completed' && (
-                                      <CheckCircle className="h-3 w-3 text-green-600 bg-white rounded-full" />
+                                      <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
                                     {batch.status === 'in_progress' && (
-                                      <Play className="h-3 w-3 text-yellow-600 bg-white rounded-full" />
+                                      <Play className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
                                     {batch.status === 'blocked' && (
-                                      <AlertTriangle className="h-3 w-3 text-red-600 bg-white rounded-full" />
+                                      <AlertTriangle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
                                   </div>
                                 </div>
@@ -425,11 +425,11 @@ export default function ProductionTimeline({
                   <span>Scheduled</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded" />
+                  <div className="w-3 h-3 bg-gray-100 dark:bg-gray-8000 rounded" />
                   <span>In Progress</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded" />
+                  <div className="w-3 h-3 bg-gray-100 dark:bg-gray-8000 rounded" />
                   <span>Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -444,19 +444,19 @@ export default function ProductionTimeline({
                   <span>Oven</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ChefHat className="h-4 w-4 text-blue-500" />
+                  <ChefHat className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   <span>Mixer</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-purple-500" />
+                  <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   <span>Decorator</span>
                 </div>
               </div>
 
               {/* Warnings and suggestions */}
               {schedulingResult.warnings.length > 0 && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-yellow-800 font-medium mb-2">
+                <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium mb-2">
                     <AlertTriangle className="h-4 w-4" />
                     Scheduling Warnings
                   </div>

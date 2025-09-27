@@ -37,19 +37,19 @@ const mainNavItems: BottomNavItem[] = [
     name: 'Pesanan',
     href: '/pesanan-simple',
     icon: ShoppingCart,
-    color: 'text-slate-600'
+    color: 'text-gray-600 dark:text-gray-400'
   },
   {
     name: 'Bahan',
     href: '/bahan-simple',
     icon: Package,
-    color: 'text-slate-600'
+    color: 'text-gray-600 dark:text-gray-400'
   },
   {
     name: 'Biaya',
     href: '/pengeluaran-simple',
     icon: Receipt,
-    color: 'text-slate-600'
+    color: 'text-gray-600 dark:text-gray-400'
   },
   {
     name: 'Lainnya',
@@ -76,7 +76,8 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
   return (
     <nav className={cn(
       "fixed bottom-0 left-0 right-0 z-50",
-      "bg-white/95 backdrop-blur-md border-t border-border",
+      "bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800",
+      "shadow-lg",
       "md:hidden", // Only show on mobile
       "safe-area-pb", // Respect safe area on devices with notch/home indicator
       className
@@ -91,23 +92,24 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
               "min-w-0 flex-1 py-2 px-1",
               "text-xs font-medium",
               "transition-colors duration-200",
-              "active:scale-95 active:bg-gray-100",
               "rounded-lg",
               isActive(item.href)
-                ? "text-primary bg-primary/10"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                ? "text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
             )}
           >
             <div className="relative">
               <item.icon 
                 className={cn(
-                  "h-5 w-5 mb-1",
-                  // isActive(item.href) && item.color // Removed for cleaner look
+                  "h-5 w-5 mb-1 transition-colors duration-200",
+                  isActive(item.href)
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-500 dark:text-gray-400"
                 )}
               />
               {item.badge && item.badge > 0 && (
                 <Badge 
-                  variant="destructive" 
+                  variant="destructive"
                   className={cn(
                     "absolute -top-1 -right-1",
                     "h-4 w-4 p-0",
@@ -122,7 +124,9 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
             </div>
             <span className={cn(
               "truncate",
-              isActive(item.href) ? "font-semibold" : "font-normal"
+              isActive(item.href) 
+                ? "font-semibold text-gray-900 dark:text-white" 
+                : "font-normal text-gray-500 dark:text-gray-400"
             )}>
               {item.name}
             </span>
@@ -133,15 +137,16 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
       {/* Floating Action Button (FAB) */}
       <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
         <Link
-          href="/orders/new"
+          href="/pesanan-simple"
           className={cn(
             "flex items-center justify-center",
             "w-14 h-14 rounded-full",
-            "bg-primary text-primary-foreground",
+            "bg-gray-900 dark:bg-white",
+            "text-white dark:text-gray-900",
             "shadow-lg hover:shadow-xl",
             "transition-all duration-200",
             "active:scale-95",
-            "border-4 border-white"
+            "border-4 border-white dark:border-black"
           )}
         >
           <Plus className="h-6 w-6" />

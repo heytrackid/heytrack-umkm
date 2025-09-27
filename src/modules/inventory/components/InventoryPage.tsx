@@ -217,10 +217,10 @@ export default function InventoryPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Nilai Pembelian</CardTitle>
-                <ArrowUp className="h-4 w-4 text-green-500" />
+                <ArrowUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <div className={`font-bold text-green-600 ${
+                <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>
                   {formatCurrency(stats.totalPurchaseValue)}
@@ -232,10 +232,10 @@ export default function InventoryPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Nilai Pemakaian</CardTitle>
-                <ArrowDown className="h-4 w-4 text-blue-500" />
+                <ArrowDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <div className={`font-bold text-blue-600 ${
+                <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>
                   {formatCurrency(stats.totalUsageValue)}
@@ -247,10 +247,10 @@ export default function InventoryPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Nilai Waste</CardTitle>
-                <Trash2 className="h-4 w-4 text-red-500" />
+                <Trash2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
               </CardHeader>
               <CardContent>
-                <div className={`font-bold text-red-600 ${
+                <div className={`font-bold text-gray-600 dark:text-gray-400 ${
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>
                   {formatCurrency(stats.totalWasteValue)}
@@ -298,7 +298,7 @@ export default function InventoryPage() {
                 <Card key={index} className="border-l-4 border-l-red-500">
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-red-500" />
+                      <AlertTriangle className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                       <div>
                         <p className="font-medium">{alert.message}</p>
                         <p className="text-sm text-muted-foreground">{alert.actionRequired}</p>

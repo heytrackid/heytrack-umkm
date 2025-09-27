@@ -73,15 +73,15 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
   ]
 
   const getEfficiencyColor = (efficiency: number, target: number) => {
-    if (efficiency >= target + 5) return 'text-green-600'
-    if (efficiency >= target) return 'text-blue-600'
+    if (efficiency >= target + 5) return 'text-gray-600 dark:text-gray-400'
+    if (efficiency >= target) return 'text-gray-600 dark:text-gray-400'
     if (efficiency >= target - 5) return 'text-orange-600'
-    return 'text-red-600'
+    return 'text-gray-600 dark:text-gray-400'
   }
 
   const getTrendIcon = (trend: number) => {
-    if (trend > 0) return <TrendingUp className="h-4 w-4 text-green-600" />
-    if (trend < 0) return <TrendingDown className="h-4 w-4 text-red-600" />
+    if (trend > 0) return <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+    if (trend < 0) return <TrendingDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
     return <div className="h-4 w-4" />
   }
 
@@ -134,11 +134,11 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Overall Efficiency
                 </p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   87.2%
                 </p>
               </div>
-              <div className="flex items-center text-green-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-4 w-4 mr-1" />
                 <span className="text-sm">+3.1%</span>
               </div>
@@ -146,7 +146,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span>Target: 85%</span>
-                <Badge className="bg-green-100 text-green-800">Above Target</Badge>
+                <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Above Target</Badge>
               </div>
               <Progress value={87.2} className="h-2" />
             </div>
@@ -160,11 +160,11 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Quality Score
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   92.1%
                 </p>
               </div>
-              <div className="flex items-center text-green-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-4 w-4 mr-1" />
                 <span className="text-sm">+1.8%</span>
               </div>
@@ -172,7 +172,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span>Target: 90%</span>
-                <Badge className="bg-green-100 text-green-800">Excellent</Badge>
+                <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Excellent</Badge>
               </div>
               <Progress value={92.1} className="h-2" />
             </div>
@@ -190,7 +190,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
                   {formatCost(12500)}
                 </p>
               </div>
-              <div className="flex items-center text-red-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-4 w-4 mr-1" />
                 <span className="text-sm">+2.1%</span>
               </div>
@@ -212,11 +212,11 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   Units Produced
                 </p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                   1,600
                 </p>
               </div>
-              <div className="flex items-center text-green-600">
+              <div className="flex items-center text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-4 w-4 mr-1" />
                 <span className="text-sm">+12.5%</span>
               </div>
@@ -224,7 +224,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span>This week</span>
-                <Badge className="bg-blue-100 text-blue-800">On Track</Badge>
+                <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">On Track</Badge>
               </div>
               <Progress value={80} className="h-2" />
             </div>
@@ -237,7 +237,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Efficiency Trend</CardTitle>
-            <Badge variant="outline" className="text-blue-600">
+            <Badge variant="outline" className="text-gray-600 dark:text-gray-400">
               <Target className="h-3 w-3 mr-1" />
               Target: 85%
             </Badge>
@@ -371,7 +371,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
                       </span>
                       <div className="flex items-center space-x-1">
                         {getTrendIcon(cost.trend)}
-                        <span className={`text-xs ${cost.trend > 0 ? 'text-red-600' : cost.trend < 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                        <span className={`text-xs ${cost.trend > 0 ? 'text-gray-600 dark:text-gray-400' : cost.trend < 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600'}`}>
                           {cost.trend > 0 ? '+' : ''}{cost.trend}%
                         </span>
                       </div>
@@ -416,14 +416,14 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Award className="h-5 w-5 text-green-600" />
+              <Award className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               <span>Performance Highlights</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     Quality target exceeded
@@ -435,7 +435,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
               </div>
               
               <div className="flex items-start space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     Production efficiency improved
@@ -447,7 +447,7 @@ export default function ProductionAnalytics({ className }: ProductionAnalyticsPr
               </div>
               
               <div className="flex items-start space-x-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     Danish Pastry best performer

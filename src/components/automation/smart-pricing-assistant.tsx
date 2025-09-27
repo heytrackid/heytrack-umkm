@@ -114,32 +114,32 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
       <Card className="border-l-4 border-l-blue-500">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-blue-500" />
+            <Zap className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             Smart Pricing Assistant
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {analysis.breakdown.totalCost.toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground">Total HPP</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {analysis.pricing.standard.price.toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground">Harga Optimal</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {analysis.pricing.standard.margin}%
               </div>
               <div className="text-xs text-muted-foreground">Margin Profit</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 Rp {(analysis.pricing.standard.price - analysis.breakdown.totalCost).toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground">Profit per Unit</div>
@@ -184,7 +184,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
                       <span>Profit:</span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-gray-600 dark:text-gray-400">
                         Rp {(data.price - analysis.breakdown.totalCost).toLocaleString()}
                       </span>
                     </div>
@@ -236,7 +236,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
                       <div>Margin: <span className="font-medium">
                         {((customPrice - analysis.breakdown.totalCost) / customPrice * 100).toFixed(1)}%
                       </span></div>
-                      <div>Profit: <span className="font-medium text-green-600">
+                      <div>Profit: <span className="font-medium text-gray-600 dark:text-gray-400">
                         Rp {(customPrice - analysis.breakdown.totalCost).toLocaleString()}
                       </span></div>
                     </>
@@ -336,7 +336,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-yellow-500" />
+                <Lightbulb className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 Rekomendasi Pricing
               </CardTitle>
             </CardHeader>
@@ -360,7 +360,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <h4 className="font-medium mb-2 text-green-600">✅ Keunggulan Pricing</h4>
+                  <h4 className="font-medium mb-2 text-gray-600 dark:text-gray-400">✅ Keunggulan Pricing</h4>
                   <ul className="space-y-1 text-sm">
                     <li>• Margin sehat untuk sustainability</li>
                     <li>• Harga kompetitif di segment</li>
@@ -368,7 +368,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2 text-blue-600">💡 Tips Optimasi</h4>
+                  <h4 className="font-medium mb-2 text-gray-600 dark:text-gray-400">💡 Tips Optimasi</h4>
                   <ul className="space-y-1 text-sm">
                     <li>• Monitor competitor pricing</li>
                     <li>• Test price sensitivity</li>

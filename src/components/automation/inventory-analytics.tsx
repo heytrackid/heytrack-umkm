@@ -301,10 +301,10 @@ function InventoryAnalytics() {
     switch (trend) {
       case 'UP':
       case 'INCREASING':
-        return <ArrowUp className="h-4 w-4 text-green-500" />
+        return <ArrowUp className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       case 'DOWN':
       case 'DECREASING':
-        return <ArrowDown className="h-4 w-4 text-red-500" />
+        return <ArrowDown className="h-4 w-4 text-gray-600 dark:text-gray-400" />
       default:
         return <Minus className="h-4 w-4 text-gray-500" />
     }
@@ -377,7 +377,7 @@ function InventoryAnalytics() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <DollarSign className="h-4 w-4 text-green-600" />
+                    <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     <span className="text-sm font-medium">Total Value</span>
                   </div>
                   <p className="text-2xl font-bold">
@@ -387,10 +387,10 @@ function InventoryAnalytics() {
 
                 <Card className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     <span className="text-sm font-medium">Critical Items</span>
                   </div>
-                  <p className="text-2xl font-bold text-red-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     {insights.critical_items_count}
                   </p>
                 </Card>
@@ -407,10 +407,10 @@ function InventoryAnalytics() {
 
                 <Card className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Target className="h-4 w-4 text-blue-600" />
+                    <Target className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     <span className="text-sm font-medium">Potential Savings</span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">
+                  <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                     Rp {(insights.optimization_savings / 1000000).toFixed(1)}M
                   </p>
                 </Card>
@@ -514,10 +514,10 @@ function InventoryAnalytics() {
                   </div>
 
                   {item.reorder_predictions.days_until_stockout <= 7 && (
-                    <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded">
+                    <div className="mt-3 p-2 bg-gray-100 dark:bg-gray-800 border border-red-200 rounded">
                       <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-red-600" />
-                        <span className="text-sm font-medium text-red-800">
+                        <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                           Urgent: Reorder immediately
                         </span>
                       </div>
@@ -635,7 +635,7 @@ function InventoryAnalytics() {
                         <div className="flex justify-between text-xs">
                           <span>Waste:</span>
                           <span className={
-                            item.quality_metrics.waste_percentage > 8 ? 'text-red-600' : 'text-green-600'
+                            item.quality_metrics.waste_percentage > 8 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
                           }>
                             {item.quality_metrics.waste_percentage.toFixed(1)}%
                           </span>
@@ -650,7 +650,7 @@ function InventoryAnalytics() {
 
                   {/* Automation Recommendations */}
                   <div className="space-y-2">
-                    <h5 className="text-sm font-medium text-purple-800">Smart Recommendations</h5>
+                    <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">Smart Recommendations</h5>
                     <div className="space-y-1">
                       {item.automation_recommendations.slice(0, 3).map((rec, idx) => (
                         <div key={idx} className="flex items-center gap-2 text-xs text-purple-700">
