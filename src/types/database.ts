@@ -8,6 +8,14 @@ export type Database = {
           email?: string | null
           phone?: string | null
           address?: string | null
+          total_orders: number
+          total_spent: number
+          last_order_date?: string | null
+          favorite_items?: any[] | null
+          notes?: string | null
+          customer_type: 'new' | 'regular' | 'vip' | 'inactive'
+          loyalty_points: number
+          discount_percentage: number
           created_at: string
           updated_at: string
         }
@@ -17,6 +25,14 @@ export type Database = {
           email?: string | null
           phone?: string | null
           address?: string | null
+          total_orders?: number
+          total_spent?: number
+          last_order_date?: string | null
+          favorite_items?: any[] | null
+          notes?: string | null
+          customer_type?: 'new' | 'regular' | 'vip' | 'inactive'
+          loyalty_points?: number
+          discount_percentage?: number
           created_at?: string
           updated_at?: string
         }
@@ -26,6 +42,14 @@ export type Database = {
           email?: string | null
           phone?: string | null
           address?: string | null
+          total_orders?: number
+          total_spent?: number
+          last_order_date?: string | null
+          favorite_items?: any[] | null
+          notes?: string | null
+          customer_type?: 'new' | 'regular' | 'vip' | 'inactive'
+          loyalty_points?: number
+          discount_percentage?: number
           created_at?: string
           updated_at?: string
         }
@@ -380,6 +404,117 @@ export type Database = {
           created_at?: string
         }
       }
+      sync_events: {
+        Row: {
+          id: string
+          event_type: 'inventory_updated' | 'recipe_created' | 'recipe_updated' | 'order_created' | 'order_updated' | 'customer_created' | 'stock_consumed' | 'order_cancelled'
+          entity_type: 'ingredient' | 'recipe' | 'order' | 'customer' | 'order_item'
+          entity_id: string
+          data: any
+          metadata?: any
+          sync_status: 'pending' | 'processed' | 'failed'
+          created_at: string
+          processed_at?: string | null
+        }
+        Insert: {
+          id?: string
+          event_type: 'inventory_updated' | 'recipe_created' | 'recipe_updated' | 'order_created' | 'order_updated' | 'customer_created' | 'stock_consumed' | 'order_cancelled'
+          entity_type: 'ingredient' | 'recipe' | 'order' | 'customer' | 'order_item'
+          entity_id: string
+          data?: any
+          metadata?: any
+          sync_status?: 'pending' | 'processed' | 'failed'
+          created_at?: string
+          processed_at?: string | null
+        }
+        Update: {
+          id?: string
+          event_type?: 'inventory_updated' | 'recipe_created' | 'recipe_updated' | 'order_created' | 'order_updated' | 'customer_created' | 'stock_consumed' | 'order_cancelled'
+          entity_type?: 'ingredient' | 'recipe' | 'order' | 'customer' | 'order_item'
+          entity_id?: string
+          data?: any
+          metadata?: any
+          sync_status?: 'pending' | 'processed' | 'failed'
+          created_at?: string
+          processed_at?: string | null
+        }
+      }
+      system_metrics: {
+        Row: {
+          id: string
+          metric_type: 'sync_health' | 'data_consistency' | 'performance' | 'error_rate'
+          metric_name: string
+          metric_value: number
+          unit?: string | null
+          status: 'normal' | 'warning' | 'critical'
+          metadata?: any
+          recorded_at: string
+        }
+        Insert: {
+          id?: string
+          metric_type: 'sync_health' | 'data_consistency' | 'performance' | 'error_rate'
+          metric_name: string
+          metric_value?: number
+          unit?: string | null
+          status?: 'normal' | 'warning' | 'critical'
+          metadata?: any
+          recorded_at?: string
+        }
+        Update: {
+          id?: string
+          metric_type?: 'sync_health' | 'data_consistency' | 'performance' | 'error_rate'
+          metric_name?: string
+          metric_value?: number
+          unit?: string | null
+          status?: 'normal' | 'warning' | 'critical'
+          metadata?: any
+          recorded_at?: string
+        }
+      }
+      inventory_stock_logs: {
+        Row: {
+          id: string
+          ingredient_id: string
+          change_type: 'increase' | 'decrease' | 'adjustment' | 'consumption'
+          quantity_before: number
+          quantity_after: number
+          quantity_changed: number
+          reason?: string | null
+          reference_type?: string | null
+          reference_id?: string | null
+          triggered_by?: string | null
+          metadata?: any
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          ingredient_id: string
+          change_type: 'increase' | 'decrease' | 'adjustment' | 'consumption'
+          quantity_before: number
+          quantity_after: number
+          quantity_changed: number
+          reason?: string | null
+          reference_type?: string | null
+          reference_id?: string | null
+          triggered_by?: string | null
+          metadata?: any
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          ingredient_id?: string
+          change_type?: 'increase' | 'decrease' | 'adjustment' | 'consumption'
+          quantity_before?: number
+          quantity_after?: number
+          quantity_changed?: number
+          reason?: string | null
+          reference_type?: string | null
+          reference_id?: string | null
+          triggered_by?: string | null
+          metadata?: any
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -411,6 +546,9 @@ export type Payment = Database['public']['Tables']['payments']['Row']
 export type Production = Database['public']['Tables']['productions']['Row']
 export type StockTransaction = Database['public']['Tables']['stock_transactions']['Row']
 export type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+export type SyncEvent = Database['public']['Tables']['sync_events']['Row']
+export type SystemMetric = Database['public']['Tables']['system_metrics']['Row']
+export type InventoryStockLog = Database['public']['Tables']['inventory_stock_logs']['Row']
 
 // Insert types
 export type CustomerInsert = Database['public']['Tables']['customers']['Insert']
@@ -423,6 +561,9 @@ export type PaymentInsert = Database['public']['Tables']['payments']['Insert']
 export type ProductionInsert = Database['public']['Tables']['productions']['Insert']
 export type StockTransactionInsert = Database['public']['Tables']['stock_transactions']['Insert']
 export type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
+export type SyncEventInsert = Database['public']['Tables']['sync_events']['Insert']
+export type SystemMetricInsert = Database['public']['Tables']['system_metrics']['Insert']
+export type InventoryStockLogInsert = Database['public']['Tables']['inventory_stock_logs']['Insert']
 
 // Update types
 export type CustomerUpdate = Database['public']['Tables']['customers']['Update']
@@ -435,6 +576,9 @@ export type PaymentUpdate = Database['public']['Tables']['payments']['Update']
 export type ProductionUpdate = Database['public']['Tables']['productions']['Update']
 export type StockTransactionUpdate = Database['public']['Tables']['stock_transactions']['Update']
 export type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
+export type SyncEventUpdate = Database['public']['Tables']['sync_events']['Update']
+export type SystemMetricUpdate = Database['public']['Tables']['system_metrics']['Update']
+export type InventoryStockLogUpdate = Database['public']['Tables']['inventory_stock_logs']['Update']
 
 // Enum types
 export type OrderStatus = Database['public']['Enums']['order_status']
