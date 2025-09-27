@@ -44,7 +44,9 @@ export default function RecipesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithStats | null>(null)
+  const [editingRecipe, setEditingRecipe] = useState<RecipeWithStats | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
   // Fetch recipes from API
@@ -133,6 +135,37 @@ export default function RecipesPage() {
     setIsViewDialogOpen(true)
   }
 
+  const handleEditRecipe = (recipe: RecipeWithStats) => {
+    setEditingRecipe(recipe)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleDeleteRecipe = async (recipe: RecipeWithStats) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus resep "${recipe.name}"?`)) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/recipes/${recipe.id}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Gagal menghapus resep')
+      }
+      
+      // Refresh data after delete
+      fetchRecipes()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal menghapus resep')
+    }
+  }
+
+  const handleFormSuccess = () => {
+    fetchRecipes() // Refresh data after create/update
+  }
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -149,12 +182,15 @@ export default function RecipesPage() {
                 Tambah Resep
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Tambah Resep Baru</DialogTitle>
-              </DialogHeader>
-              <RecipeForm onClose={() => setIsAddDialogOpen(false)} />
-            </DialogContent>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Tambah Resep Baru</DialogTitle>
+                </DialogHeader>
+                <RecipeForm 
+                  onClose={() => setIsAddDialogOpen(false)} 
+                  onSuccess={handleFormSuccess}
+                />
+              </DialogContent>
           </Dialog>
         </div>
 
@@ -335,11 +371,20 @@ export default function RecipesPage() {
                     <Eye className="h-3 w-3 mr-1" />
                     Lihat
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleEditRecipe(recipe)}
+                  >
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
                   </Button>
-                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDeleteRecipe(recipe)}
+                  >
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
@@ -384,6 +429,26 @@ export default function RecipesPage() {
           </Card>
         )}
 
+        {/* Edit Recipe Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Resep</DialogTitle>
+            </DialogHeader>
+            <RecipeForm 
+              onClose={() => {
+                setIsEditDialogOpen(false)
+                setEditingRecipe(null)
+              }}
+              onSuccess={() => {
+                handleFormSuccess()
+                setEditingRecipe(null)
+              }}
+              editData={editingRecipe}
+            />
+          </DialogContent>
+        </Dialog>
+
         {/* Recipe Detail Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -401,118 +466,438 @@ export default function RecipesPage() {
 }
 
 // Recipe Form Component
-function RecipeForm({ onClose }: { onClose: () => void }) {
+function RecipeForm({ onClose, onSuccess, editData }: { 
+  onClose: () => void
+  onSuccess?: () => void
+  editData?: RecipeWithStats | null 
+}) {
+  const [availableIngredients, setAvailableIngredients] = useState<any[]>([])
+  const [formData, setFormData] = useState({
+    name: editData?.name || '',
+    description: editData?.description || '',
+    category: editData?.category || '',
+    servings: editData?.servings || 1,
+    prep_time: editData?.prep_time || 0,
+    cook_time: editData?.cook_time || 0,
+    difficulty: editData?.difficulty || 'Medium',
+    instructions: editData?.instructions || '',
+    selling_price: editData?.selling_price || 0
+  })
+  const [recipeIngredients, setRecipeIngredients] = useState<Array<{
+    ingredient_id: string
+    ingredient: any
+    quantity: number
+    unit: string
+    cost: number
+  }>>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [costCalculation, setCostCalculation] = useState({
+    totalCost: 0,
+    costPerServing: 0,
+    actualMargin: 0,
+    profitPerServing: 0
+  })
+
+  // Fetch available ingredients
+  useEffect(() => {
+    fetchIngredients()
+    if (editData?.recipe_ingredients) {
+      const existingIngredients = editData.recipe_ingredients.map((ri: any) => ({
+        ingredient_id: ri.ingredient.id,
+        ingredient: ri.ingredient,
+        quantity: ri.quantity,
+        unit: ri.unit,
+        cost: ri.ingredient.price_per_unit * ri.quantity
+      }))
+      setRecipeIngredients(existingIngredients)
+    }
+  }, [editData])
+
+  // Calculate cost whenever ingredients or servings change
+  useEffect(() => {
+    calculateCost()
+  }, [recipeIngredients, formData.servings, formData.selling_price])
+
+  const fetchIngredients = async () => {
+    try {
+      const response = await fetch('/api/ingredients')
+      if (response.ok) {
+        const data = await response.json()
+        setAvailableIngredients(data)
+      }
+    } catch (err) {
+      console.error('Error fetching ingredients:', err)
+    }
+  }
+
+  const calculateCost = () => {
+    const totalCost = recipeIngredients.reduce((sum, ri) => sum + ri.cost, 0)
+    const costPerServing = formData.servings > 0 ? totalCost / formData.servings : 0
+    const actualMargin = formData.selling_price > 0 
+      ? ((formData.selling_price - costPerServing) / formData.selling_price * 100) 
+      : 0
+    const profitPerServing = formData.selling_price - costPerServing
+
+    setCostCalculation({
+      totalCost,
+      costPerServing,
+      actualMargin,
+      profitPerServing
+    })
+  }
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (error) setError('')
+  }
+
+  const addIngredient = () => {
+    if (availableIngredients.length === 0) {
+      setError('Belum ada bahan baku tersedia. Tambahkan bahan baku terlebih dahulu.')
+      return
+    }
+    
+    const firstIngredient = availableIngredients[0]
+    const newIngredient = {
+      ingredient_id: firstIngredient.id,
+      ingredient: firstIngredient,
+      quantity: 1,
+      unit: firstIngredient.unit,
+      cost: firstIngredient.price_per_unit * 1
+    }
+    setRecipeIngredients(prev => [...prev, newIngredient])
+  }
+
+  const updateIngredient = (index: number, field: string, value: any) => {
+    setRecipeIngredients(prev => {
+      const updated = [...prev]
+      if (field === 'ingredient_id') {
+        const selectedIngredient = availableIngredients.find(ing => ing.id === value)
+        if (selectedIngredient) {
+          updated[index] = {
+            ...updated[index],
+            ingredient_id: value,
+            ingredient: selectedIngredient,
+            unit: selectedIngredient.unit,
+            cost: selectedIngredient.price_per_unit * updated[index].quantity
+          }
+        }
+      } else if (field === 'quantity') {
+        updated[index] = {
+          ...updated[index],
+          quantity: parseFloat(value) || 0,
+          cost: updated[index].ingredient.price_per_unit * (parseFloat(value) || 0)
+        }
+      } else {
+        updated[index] = { ...updated[index], [field]: value }
+      }
+      return updated
+    })
+  }
+
+  const removeIngredient = (index: number) => {
+    setRecipeIngredients(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.name || !formData.category || formData.servings <= 0) {
+      setError('Nama resep, kategori, dan porsi harus diisi dengan benar')
+      return
+    }
+    
+    if (recipeIngredients.length === 0) {
+      setError('Resep harus memiliki minimal 1 bahan')
+      return
+    }
+    
+    setIsSubmitting(true)
+    setError('')
+    
+    try {
+      const recipeData = {
+        ...formData,
+        cost_per_unit: costCalculation.totalCost,
+        margin_percentage: costCalculation.actualMargin,
+        is_active: true,
+        recipe_ingredients: recipeIngredients.map(ri => ({
+          ingredient_id: ri.ingredient_id,
+          quantity: ri.quantity,
+          unit: ri.unit,
+          cost: ri.cost
+        }))
+      }
+      
+      const url = editData ? `/api/recipes/${editData.id}` : '/api/recipes'
+      const method = editData ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(recipeData)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Gagal menyimpan resep')
+      }
+      
+      onSuccess?.()
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
-    <Tabs defaultValue="basic" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="basic">Info Dasar</TabsTrigger>
-        <TabsTrigger value="ingredients">Bahan</TabsTrigger>
-        <TabsTrigger value="instructions">Instruksi</TabsTrigger>
-        <TabsTrigger value="costing">Costing</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="basic" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="name">Nama Resep</Label>
-            <Input id="name" placeholder="Contoh: Roti Tawar Premium" />
+    <form onSubmit={handleSubmit}>
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="basic">Info Dasar</TabsTrigger>
+          <TabsTrigger value="ingredients">Bahan ({recipeIngredients.length})</TabsTrigger>
+          <TabsTrigger value="instructions">Instruksi</TabsTrigger>
+          <TabsTrigger value="costing">Costing</TabsTrigger>
+        </TabsList>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        <TabsContent value="basic" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Nama Resep *</Label>
+              <Input 
+                id="name" 
+                placeholder="Contoh: Roti Tawar Premium"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="category">Kategori *</Label>
+              <select 
+                className="w-full p-2 border border-input rounded-md bg-background"
+                value={formData.category}
+                onChange={(e) => handleInputChange('category', e.target.value)}
+                required
+              >
+                <option value="">Pilih kategori</option>
+                {categories.filter(c => c !== 'Semua').map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="servings">Porsi *</Label>
+              <Input 
+                id="servings" 
+                type="number" 
+                placeholder="12"
+                value={formData.servings}
+                onChange={(e) => handleInputChange('servings', parseInt(e.target.value) || 1)}
+                required
+                min="1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
+              <select 
+                className="w-full p-2 border border-input rounded-md bg-background"
+                value={formData.difficulty}
+                onChange={(e) => handleInputChange('difficulty', e.target.value)}
+              >
+                <option value="Easy">Mudah</option>
+                <option value="Medium">Sedang</option>
+                <option value="Hard">Sulit</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="prepTime">Waktu Persiapan (menit)</Label>
+              <Input 
+                id="prepTime" 
+                type="number" 
+                placeholder="30"
+                value={formData.prep_time}
+                onChange={(e) => handleInputChange('prep_time', parseInt(e.target.value) || 0)}
+                min="0"
+              />
+            </div>
+            <div>
+              <Label htmlFor="cookTime">Waktu Memasak (menit)</Label>
+              <Input 
+                id="cookTime" 
+                type="number" 
+                placeholder="45"
+                value={formData.cook_time}
+                onChange={(e) => handleInputChange('cook_time', parseInt(e.target.value) || 0)}
+                min="0"
+              />
+            </div>
           </div>
           <div>
-            <Label htmlFor="category">Kategori</Label>
-            <Input id="category" placeholder="Contoh: Roti" />
+            <Label htmlFor="description">Deskripsi</Label>
+            <Textarea 
+              id="description" 
+              placeholder="Deskripsi resep..."
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+            />
           </div>
+        </TabsContent>
+        
+        <TabsContent value="ingredients" className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Daftar Bahan ({recipeIngredients.length})</h3>
+            <Button type="button" size="sm" onClick={addIngredient}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Bahan
+            </Button>
+          </div>
+          
+          {recipeIngredients.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Package className="h-8 w-8 mx-auto mb-2" />
+              <p>Belum ada bahan yang ditambahkan</p>
+              <p className="text-sm">Klik "Tambah Bahan" untuk memulai</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recipeIngredients.map((ri, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                  <div className="flex-1 grid grid-cols-3 gap-3">
+                    <div>
+                      <Label className="text-xs">Bahan</Label>
+                      <select
+                        className="w-full p-2 text-sm border border-input rounded-md bg-background"
+                        value={ri.ingredient_id}
+                        onChange={(e) => updateIngredient(index, 'ingredient_id', e.target.value)}
+                      >
+                        {availableIngredients.map(ingredient => (
+                          <option key={ingredient.id} value={ingredient.id}>
+                            {ingredient.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Jumlah ({ri.unit})</Label>
+                      <Input
+                        type="number"
+                        className="text-sm"
+                        value={ri.quantity}
+                        onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
+                        min="0"
+                        step="0.1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Total Biaya</Label>
+                      <Input
+                        className="text-sm"
+                        value={`Rp ${ri.cost.toLocaleString()}`}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => removeIngredient(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              
+              <div className="pt-3 border-t">
+                <div className="flex justify-between items-center text-sm font-medium">
+                  <span>Total Biaya Bahan:</span>
+                  <span>Rp {costCalculation.totalCost.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="instructions" className="space-y-4">
           <div>
-            <Label htmlFor="servings">Porsi</Label>
-            <Input id="servings" type="number" placeholder="12" />
+            <Label htmlFor="instructions">Instruksi Pembuatan</Label>
+            <Textarea 
+              id="instructions" 
+              placeholder="1. Langkah pertama...&#10;2. Langkah kedua...&#10;3. Dan seterusnya..." 
+              rows={10}
+              value={formData.instructions}
+              onChange={(e) => handleInputChange('instructions', e.target.value)}
+            />
           </div>
-          <div>
-            <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
-            <select className="w-full p-2 border border-input rounded-md bg-background">
-              <option value="">Pilih tingkat kesulitan</option>
-              <option value="Easy">Mudah</option>
-              <option value="Medium">Sedang</option>
-              <option value="Hard">Sulit</option>
-            </select>
+        </TabsContent>
+        
+        <TabsContent value="costing" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="sellingPrice">Harga Jual per Porsi</Label>
+              <Input 
+                id="sellingPrice" 
+                type="number" 
+                placeholder="15000"
+                value={formData.selling_price}
+                onChange={(e) => handleInputChange('selling_price', parseFloat(e.target.value) || 0)}
+                min="0"
+                step="500"
+              />
+            </div>
+            <div>
+              <Label>Saran Harga (Margin 60%)</Label>
+              <Input
+                value={`Rp ${(costCalculation.costPerServing * 2.5).toLocaleString()}`}
+                readOnly
+                className="bg-muted"
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="prepTime">Waktu Persiapan (menit)</Label>
-            <Input id="prepTime" type="number" placeholder="30" />
+          <div className="bg-muted p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Kalkulasi Real-time</h4>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-muted-foreground">Total Biaya Bahan:</p>
+                <p className="font-medium">Rp {costCalculation.totalCost.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Biaya per Porsi:</p>
+                <p className="font-medium">Rp {costCalculation.costPerServing.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Margin Aktual:</p>
+                <p className={`font-medium ${costCalculation.actualMargin > 50 ? 'text-green-600' : costCalculation.actualMargin > 30 ? 'text-yellow-600' : 'text-red-600'}`}>
+                  {costCalculation.actualMargin.toFixed(1)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Keuntungan per Porsi:</p>
+                <p className="font-medium">Rp {costCalculation.profitPerServing.toLocaleString()}</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <Label htmlFor="cookTime">Waktu Memasak (menit)</Label>
-            <Input id="cookTime" type="number" placeholder="45" />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="description">Deskripsi</Label>
-          <Textarea id="description" placeholder="Deskripsi resep..." />
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="ingredients" className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-lg font-medium">Daftar Bahan</h3>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Bahan
+        </TabsContent>
+        
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Menyimpan...' : editData ? 'Update Resep' : 'Simpan Resep'}
           </Button>
         </div>
-        {/* Dynamic ingredients list would go here */}
-        <p className="text-sm text-muted-foreground">
-          Klik "Tambah Bahan" untuk menambahkan bahan-bahan yang diperlukan
-        </p>
-      </TabsContent>
-      
-      <TabsContent value="instructions" className="space-y-4">
-        <div>
-          <Label htmlFor="instructions">Instruksi Pembuatan</Label>
-          <Textarea 
-            id="instructions" 
-            placeholder="1. Langkah pertama...&#10;2. Langkah kedua...&#10;3. Dan seterusnya..." 
-            rows={10}
-          />
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="costing" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="sellingPrice">Harga Jual</Label>
-            <Input id="sellingPrice" type="number" placeholder="15000" />
-          </div>
-          <div>
-            <Label htmlFor="margin">Target Margin (%)</Label>
-            <Input id="margin" type="number" placeholder="70" />
-          </div>
-        </div>
-        <div className="bg-muted p-4 rounded-lg">
-          <h4 className="font-medium mb-2">Kalkulasi Otomatis</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Total Biaya Bahan:</p>
-              <p className="font-medium">Rp 0</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Biaya per Porsi:</p>
-              <p className="font-medium">Rp 0</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Margin Aktual:</p>
-              <p className="font-medium">0%</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Keuntungan per Porsi:</p>
-              <p className="font-medium">Rp 0</p>
-            </div>
-          </div>
-        </div>
-      </TabsContent>
-      
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" onClick={onClose}>Batal</Button>
-        <Button>Simpan Resep</Button>
-      </div>
-    </Tabs>
+      </Tabs>
+    </form>
   )
 }
 

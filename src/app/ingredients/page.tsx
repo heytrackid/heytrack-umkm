@@ -27,99 +27,6 @@ import {
   Clock
 } from 'lucide-react'
 
-// Sample data
-const sampleIngredients = [
-  {
-    id: '1',
-    name: 'Tepung Terigu Premium',
-    description: 'Tepung terigu protein tinggi untuk roti dan pastry',
-    category: 'Tepung',
-    unit: 'kg',
-    currentStock: 45.5,
-    minStock: 10,
-    maxStock: 100,
-    pricePerUnit: 12000,
-    supplier: 'CV. Bahan Berkah',
-    supplierPhone: '+62 812-3456-7890',
-    lastPurchase: '2024-01-20',
-    expiryDate: '2024-06-15',
-    status: 'adequate',
-    usagePerWeek: 15.2,
-    totalValue: 546000
-  },
-  {
-    id: '2',
-    name: 'Mentega Premium',
-    description: 'Mentega berkualitas tinggi untuk pastry dan kue',
-    category: 'Dairy',
-    unit: 'kg',
-    currentStock: 8.2,
-    minStock: 5,
-    maxStock: 25,
-    pricePerUnit: 35000,
-    supplier: 'PT. Dairy Fresh',
-    supplierPhone: '+62 811-2345-6789',
-    lastPurchase: '2024-01-18',
-    expiryDate: '2024-03-20',
-    status: 'adequate',
-    usagePerWeek: 4.5,
-    totalValue: 287000
-  },
-  {
-    id: '3',
-    name: 'Telur Ayam',
-    description: 'Telur ayam segar kualitas A',
-    category: 'Protein',
-    unit: 'kg',
-    currentStock: 3.5,
-    minStock: 5,
-    maxStock: 15,
-    pricePerUnit: 28000,
-    supplier: 'Peternakan Jaya',
-    supplierPhone: '+62 813-4567-8901',
-    lastPurchase: '2024-01-22',
-    expiryDate: '2024-02-05',
-    status: 'low',
-    usagePerWeek: 8.3,
-    totalValue: 98000
-  },
-  {
-    id: '4',
-    name: 'Gula Pasir',
-    description: 'Gula pasir halus untuk pembuatan kue dan roti',
-    category: 'Pemanis',
-    unit: 'kg',
-    currentStock: 2.1,
-    minStock: 8,
-    maxStock: 30,
-    pricePerUnit: 15000,
-    supplier: 'Toko Bahan Kue Sentral',
-    supplierPhone: '+62 814-5678-9012',
-    lastPurchase: '2024-01-15',
-    expiryDate: '2025-01-15',
-    status: 'critical',
-    usagePerWeek: 12.8,
-    totalValue: 31500
-  },
-  {
-    id: '5',
-    name: 'Cokelat Batang',
-    description: 'Cokelat batang premium untuk dekorasi dan isian',
-    category: 'Cokelat',
-    unit: 'kg',
-    currentStock: 12.8,
-    minStock: 3,
-    maxStock: 20,
-    pricePerUnit: 85000,
-    supplier: 'Distributor Cokelat Prima',
-    supplierPhone: '+62 815-6789-0123',
-    lastPurchase: '2024-01-19',
-    expiryDate: '2024-12-30',
-    status: 'adequate',
-    usagePerWeek: 2.7,
-    totalValue: 1088000
-  }
-]
 
 const categories = ['Semua', 'Tepung', 'Dairy', 'Protein', 'Pemanis', 'Cokelat', 'Ragi', 'Bumbu']
 const units = ['kg', 'g', 'l', 'ml', 'butir', 'bks', 'pcs']
@@ -145,8 +52,10 @@ export default function IngredientsPage() {
   const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [selectedStatus, setSelectedStatus] = useState('Semua')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedIngredient, setSelectedIngredient] = useState<IngredientWithStats | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [editingIngredient, setEditingIngredient] = useState<IngredientWithStats | null>(null)
 
   // Fetch ingredients from API
   useEffect(() => {
@@ -222,6 +131,37 @@ export default function IngredientsPage() {
     setSelectedIngredient(ingredient)
     setIsViewDialogOpen(true)
   }
+  
+  const handleEditIngredient = (ingredient: IngredientWithStats) => {
+    setEditingIngredient(ingredient)
+    setIsEditDialogOpen(true)
+  }
+  
+  const handleDeleteIngredient = async (ingredient: IngredientWithStats) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus ${ingredient.name}?`)) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`/api/ingredients/${ingredient.id}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Gagal menghapus ingredient')
+      }
+      
+      // Refresh data after delete
+      fetchIngredients()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Gagal menghapus ingredient')
+    }
+  }
+  
+  const handleFormSuccess = () => {
+    fetchIngredients() // Refresh data after create/update
+  }
 
   // Calculate stats
   const stats = {
@@ -249,12 +189,15 @@ export default function IngredientsPage() {
                 Tambah Bahan
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Tambah Bahan Baru</DialogTitle>
-              </DialogHeader>
-              <IngredientForm onClose={() => setIsAddDialogOpen(false)} />
-            </DialogContent>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Tambah Bahan Baru</DialogTitle>
+                </DialogHeader>
+                <IngredientForm 
+                  onClose={() => setIsAddDialogOpen(false)} 
+                  onSuccess={handleFormSuccess}
+                />
+              </DialogContent>
           </Dialog>
         </div>
 
@@ -437,16 +380,25 @@ export default function IngredientsPage() {
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleViewIngredient(ingredient)}
+                            title="Lihat Detail"
                           >
                             <Eye className="h-3 w-3" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditIngredient(ingredient)}
+                            title="Edit"
+                          >
                             <Edit className="h-3 w-3" />
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <ShoppingCart className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDeleteIngredient(ingredient)}
+                            title="Hapus"
+                          >
                             <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
@@ -510,6 +462,26 @@ export default function IngredientsPage() {
           </Card>
         )}
 
+        {/* Edit Ingredient Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Bahan</DialogTitle>
+            </DialogHeader>
+            <IngredientForm 
+              onClose={() => {
+                setIsEditDialogOpen(false)
+                setEditingIngredient(null)
+              }}
+              onSuccess={() => {
+                handleFormSuccess()
+                setEditingIngredient(null)
+              }}
+              editData={editingIngredient}
+            />
+          </DialogContent>
+        </Dialog>
+
         {/* Ingredient Detail Dialog */}
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -527,100 +499,193 @@ export default function IngredientsPage() {
 }
 
 // Ingredient Form Component
-function IngredientForm({ onClose }: { onClose: () => void }) {
+function IngredientForm({ onClose, onSuccess, editData }: { 
+  onClose: () => void
+  onSuccess?: () => void
+  editData?: IngredientWithStats | null 
+}) {
+  const [formData, setFormData] = useState({
+    name: editData?.name || '',
+    description: editData?.description || '',
+    category: editData?.category || '',
+    unit: editData?.unit || 'kg',
+    price_per_unit: editData?.pricePerUnit || 0,
+    current_stock: editData?.currentStock || 0,
+    min_stock: editData?.minStock || 0,
+    supplier: editData?.supplier || ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!formData.name || !formData.unit || formData.price_per_unit <= 0) {
+      setError('Nama, satuan, dan harga harus diisi')
+      return
+    }
+    
+    setIsSubmitting(true)
+    setError('')
+    
+    try {
+      const url = editData ? `/api/ingredients/${editData.id}` : '/api/ingredients'
+      const method = editData ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Gagal menyimpan ingredient')
+      }
+      
+      onSuccess?.()
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+  
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (error) setError('')
+  }
+
   return (
-    <Tabs defaultValue="basic" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="basic">Info Dasar</TabsTrigger>
-        <TabsTrigger value="stock">Stok</TabsTrigger>
-        <TabsTrigger value="supplier">Supplier</TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="basic" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="name">Nama Bahan</Label>
-            <Input id="name" placeholder="Contoh: Tepung Terigu Premium" />
+    <form onSubmit={handleSubmit}>
+      <Tabs defaultValue="basic" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="basic">Info Dasar</TabsTrigger>
+          <TabsTrigger value="stock">Stok</TabsTrigger>
+          <TabsTrigger value="supplier">Supplier</TabsTrigger>
+        </TabsList>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
+        <TabsContent value="basic" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Nama Bahan *</Label>
+              <Input 
+                id="name" 
+                placeholder="Contoh: Tepung Terigu Premium"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="category">Kategori</Label>
+              <select 
+                className="w-full p-2 border border-input rounded-md bg-background"
+                value={formData.category}
+                onChange={(e) => handleInputChange('category', e.target.value)}
+              >
+                <option value="">Pilih kategori</option>
+                {categories.filter(c => c !== 'Semua').map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="unit">Satuan *</Label>
+              <select 
+                className="w-full p-2 border border-input rounded-md bg-background"
+                value={formData.unit}
+                onChange={(e) => handleInputChange('unit', e.target.value)}
+                required
+              >
+                {units.map(unit => (
+                  <option key={unit} value={unit}>{unit}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="pricePerUnit">Harga per Satuan *</Label>
+              <Input 
+                id="pricePerUnit" 
+                type="number" 
+                placeholder="12000"
+                value={formData.price_per_unit}
+                onChange={(e) => handleInputChange('price_per_unit', parseFloat(e.target.value) || 0)}
+                required
+                min="0"
+                step="100"
+              />
+            </div>
           </div>
           <div>
-            <Label htmlFor="category">Kategori</Label>
-            <select className="w-full p-2 border border-input rounded-md bg-background">
-              <option value="">Pilih kategori</option>
-              {categories.filter(c => c !== 'Semua').map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
+            <Label htmlFor="description">Deskripsi</Label>
+            <Textarea 
+              id="description" 
+              placeholder="Deskripsi bahan..."
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+            />
           </div>
-          <div>
-            <Label htmlFor="unit">Satuan</Label>
-            <select className="w-full p-2 border border-input rounded-md bg-background">
-              {units.map(unit => (
-                <option key={unit} value={unit}>{unit}</option>
-              ))}
-            </select>
+        </TabsContent>
+        
+        <TabsContent value="stock" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="currentStock">Stok Saat Ini</Label>
+              <Input 
+                id="currentStock" 
+                type="number" 
+                placeholder="50"
+                value={formData.current_stock}
+                onChange={(e) => handleInputChange('current_stock', parseFloat(e.target.value) || 0)}
+                min="0"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="minStock">Stok Minimum</Label>
+              <Input 
+                id="minStock" 
+                type="number" 
+                placeholder="10"
+                value={formData.min_stock}
+                onChange={(e) => handleInputChange('min_stock', parseFloat(e.target.value) || 0)}
+                min="0"
+                step="0.1"
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="pricePerUnit">Harga per Satuan</Label>
-            <Input id="pricePerUnit" type="number" placeholder="12000" />
+        </TabsContent>
+        
+        <TabsContent value="supplier" className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="supplier">Nama Supplier</Label>
+              <Input 
+                id="supplier" 
+                placeholder="CV. Bahan Berkah"
+                value={formData.supplier}
+                onChange={(e) => handleInputChange('supplier', e.target.value)}
+              />
+            </div>
           </div>
+        </TabsContent>
+        
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Menyimpan...' : editData ? 'Update Bahan' : 'Simpan Bahan'}
+          </Button>
         </div>
-        <div>
-          <Label htmlFor="description">Deskripsi</Label>
-          <Textarea id="description" placeholder="Deskripsi bahan..." />
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="stock" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="currentStock">Stok Saat Ini</Label>
-            <Input id="currentStock" type="number" placeholder="50" />
-          </div>
-          <div>
-            <Label htmlFor="minStock">Stok Minimum</Label>
-            <Input id="minStock" type="number" placeholder="10" />
-          </div>
-          <div>
-            <Label htmlFor="maxStock">Stok Maksimum</Label>
-            <Input id="maxStock" type="number" placeholder="100" />
-          </div>
-          <div>
-            <Label htmlFor="usagePerWeek">Pemakaian per Minggu</Label>
-            <Input id="usagePerWeek" type="number" placeholder="15" />
-          </div>
-          <div>
-            <Label htmlFor="lastPurchase">Terakhir Beli</Label>
-            <Input id="lastPurchase" type="date" />
-          </div>
-          <div>
-            <Label htmlFor="expiryDate">Tanggal Kedaluwarsa</Label>
-            <Input id="expiryDate" type="date" />
-          </div>
-        </div>
-      </TabsContent>
-      
-      <TabsContent value="supplier" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="supplier">Nama Supplier</Label>
-            <Input id="supplier" placeholder="CV. Bahan Berkah" />
-          </div>
-          <div>
-            <Label htmlFor="supplierPhone">No. Telepon</Label>
-            <Input id="supplierPhone" placeholder="+62 812-3456-7890" />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="supplierAddress">Alamat Supplier</Label>
-          <Textarea id="supplierAddress" placeholder="Alamat lengkap supplier..." />
-        </div>
-      </TabsContent>
-      
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" onClick={onClose}>Batal</Button>
-        <Button>Simpan Bahan</Button>
-      </div>
-    </Tabs>
+      </Tabs>
+    </form>
   )
 }
 

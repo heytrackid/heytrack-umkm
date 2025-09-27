@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
@@ -8,6 +8,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
+    const supabase = createServerSupabaseAdmin()
     const { data: recipe, error } = await (supabase as any)
       .from('recipes')
       .select(`
@@ -58,8 +59,9 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
+    const supabase = createServerSupabaseAdmin()
     const body = await request.json()
-    const { ingredients, ...recipeData } = body
+    const { recipe_ingredients, ...recipeData } = body
     
     // Update the recipe
     const { data: recipe, error: recipeError } = await (supabase as any)
@@ -84,7 +86,7 @@ export async function PUT(
     }
 
     // If ingredients are provided, update them
-    if (ingredients !== undefined) {
+    if (recipe_ingredients !== undefined) {
       // Delete existing recipe ingredients
       const { error: deleteError } = await (supabase as any)
         .from('recipe_ingredients')
@@ -100,17 +102,18 @@ export async function PUT(
       }
 
       // Add new ingredients if any
-      if (ingredients.length > 0) {
-        const recipeIngredients = ingredients.map((ingredient: any) => ({
+      if (recipe_ingredients.length > 0) {
+        const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
           recipe_id: id,
           ingredient_id: ingredient.ingredient_id,
           quantity: ingredient.quantity,
-          unit: ingredient.unit
+          unit: ingredient.unit,
+          cost: ingredient.cost || 0
         }))
 
         const { error: insertError } = await (supabase as any)
           .from('recipe_ingredients')
-          .insert(recipeIngredients)
+          .insert(recipeIngredientsToInsert)
 
         if (insertError) {
           console.error('Error adding new ingredients:', insertError)
@@ -164,6 +167,8 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
+    const supabase = createServerSupabaseAdmin()
+    
     // Check if recipe exists first
     const { data: existingRecipe, error: checkError } = await (supabase as any)
       .from('recipes')

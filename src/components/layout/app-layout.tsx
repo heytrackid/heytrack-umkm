@@ -2,10 +2,11 @@
 
 import { ReactNode } from 'react'
 import Sidebar from './sidebar'
-import { Bell, Search, User } from 'lucide-react'
+import { Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import SmartNotifications from '@/components/automation/smart-notifications'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -29,9 +30,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
-              <Bell className="h-4 w-4" />
-            </Button>
+            <SmartNotifications />
             <ThemeToggle />
             <Button variant="ghost" size="icon">
               <User className="h-4 w-4" />

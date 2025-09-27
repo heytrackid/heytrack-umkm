@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // GET /api/recipes - Get all recipes with ingredient relationships
 export async function GET() {
   try {
+    const supabase = createServerSupabaseAdmin()
     const { data: recipes, error } = await (supabase as any)
       .from('recipes')
       .select(`
@@ -44,7 +45,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { ingredients, ...recipeData } = body
+    const { recipe_ingredients, ...recipeData } = body
     
     // Validate required fields
     if (!recipeData.name) {
@@ -54,6 +55,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = createServerSupabaseAdmin()
+    
     // Start a transaction by creating the recipe first
     const { data: recipe, error: recipeError } = await (supabase as any)
       .from('recipes')
@@ -70,17 +73,18 @@ export async function POST(request: NextRequest) {
     }
 
     // If ingredients are provided, add them to recipe_ingredients
-    if (ingredients && ingredients.length > 0) {
-      const recipeIngredients = ingredients.map((ingredient: any) => ({
+    if (recipe_ingredients && recipe_ingredients.length > 0) {
+      const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
         recipe_id: recipe.id,
         ingredient_id: ingredient.ingredient_id,
         quantity: ingredient.quantity,
-        unit: ingredient.unit
+        unit: ingredient.unit,
+        cost: ingredient.cost || 0
       }))
 
       const { error: ingredientsError } = await (supabase as any)
         .from('recipe_ingredients')
-        .insert(recipeIngredients)
+        .insert(recipeIngredientsToInsert)
 
       if (ingredientsError) {
         console.error('Error adding recipe ingredients:', ingredientsError)
