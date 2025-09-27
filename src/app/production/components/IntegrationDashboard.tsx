@@ -459,7 +459,7 @@ function ProductionBatchesList({ batches }: { batches: any[] }) {
       case 'planned': return 'secondary'
       case 'ingredients_ready': return 'outline'
       case 'in_progress': return 'default'
-      case 'completed': return 'success'
+      case 'completed': return 'default'
       default: return 'secondary'
     }
   }

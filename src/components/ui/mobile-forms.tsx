@@ -43,13 +43,15 @@ interface MobileInputProps {
   defaultValue?: string
   onChange?: (value: string) => void
   onBlur?: () => void
-  type?: 'text' | 'email' | 'password' | 'tel' | 'url'
+  type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'number' | 'date'
   required?: boolean
   disabled?: boolean
   error?: string
   hint?: string
   className?: string
   showPasswordToggle?: boolean
+  multiline?: boolean
+  rows?: number
 }
 
 export function MobileInput({
@@ -65,7 +67,9 @@ export function MobileInput({
   error,
   hint,
   className,
-  showPasswordToggle = false
+  showPasswordToggle = false,
+  multiline = false,
+  rows = 4
 }: MobileInputProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
@@ -79,6 +83,7 @@ export function MobileInput({
       case 'email': return 'email'
       case 'tel': return 'tel'
       case 'url': return 'url'
+      case 'number': return 'decimal'
       default: return 'text'
     }
   }
@@ -99,30 +104,53 @@ export function MobileInput({
       )}
       
       <div className="relative">
-        <Input
-          type={inputType}
-          placeholder={placeholder}
-          value={value}
-          defaultValue={defaultValue}
-          onChange={(e) => onChange?.(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => {
-            setIsFocused(false)
-            onBlur?.()
-          }}
-          disabled={disabled}
-          required={required}
-          inputMode={getInputMode()}
-          className={cn(
-            "transition-all duration-200",
-            isMobile && "h-12 text-base", // Larger touch targets on mobile
-            error && "border-destructive focus-visible:ring-destructive",
-            isFocused && "ring-2 ring-ring ring-offset-2"
-          )}
-        />
+        {multiline ? (
+          <Textarea
+            placeholder={placeholder}
+            value={value}
+            defaultValue={defaultValue}
+            onChange={(e) => onChange?.(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false)
+              onBlur?.()
+            }}
+            disabled={disabled}
+            required={required}
+            rows={rows}
+            className={cn(
+              "transition-all duration-200 resize-none",
+              isMobile && "text-base",
+              error && "border-destructive focus-visible:ring-destructive",
+              isFocused && "ring-2 ring-ring ring-offset-2"
+            )}
+          />
+        ) : (
+          <Input
+            type={inputType}
+            placeholder={placeholder}
+            value={value}
+            defaultValue={defaultValue}
+            onChange={(e) => onChange?.(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false)
+              onBlur?.()
+            }}
+            disabled={disabled}
+            required={required}
+            inputMode={getInputMode()}
+            className={cn(
+              "transition-all duration-200",
+              isMobile && "h-12 text-base", // Larger touch targets on mobile
+              error && "border-destructive focus-visible:ring-destructive",
+              isFocused && "ring-2 ring-ring ring-offset-2"
+            )}
+          />
+        )}
         
         {/* Password toggle */}
-        {showPasswordToggle && type === 'password' && (
+        {showPasswordToggle && type === 'password' && !multiline && (
           <Button
             type="button"
             variant="ghost"
@@ -139,7 +167,7 @@ export function MobileInput({
         )}
 
         {/* Error/Success indicator */}
-        {(error || (!error && value && isFocused)) && (
+        {(error || (!error && value && isFocused)) && !multiline && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
             {error ? (
               <AlertCircle className="h-4 w-4 text-destructive" />

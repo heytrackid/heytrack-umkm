@@ -360,8 +360,7 @@ export function useBatchStatus(batchId: string) {
   const updateStatus = async (newStatus: ProductionStatus, reason?: string) => {
     try {
       const updateData: UpdateBatchData = { 
-        status: newStatus,
-        internal_notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
+        status: newStatus
       }
 
       // Add timestamps for specific status changes
@@ -480,7 +479,14 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
       },
       quality_metrics: {
         overall_quality_score,
-        quality_by_stage: {}, // Would need quality check details
+        quality_by_stage: {
+          ingredient_prep: 0,
+          mixing: 0,
+          baking: 0,
+          cooling: 0,
+          packaging: 0,
+          final_inspection: 0
+        }, // Would need quality check details
         defect_rate,
         rework_rate: 0, // Would need rework tracking
         customer_complaints: 0 // Would need customer feedback integration
@@ -505,9 +511,8 @@ export function useProductionNotifications() {
     error, 
     update,
     refresh
-  } = useSupabaseData<ProductionNotification>({
-    table: 'production_notifications',
-    orderBy: [{ column: 'created_at', ascending: false }]
+  } = useSupabaseCRUD('production_notifications', {
+    orderBy: { column: 'created_at', ascending: false }
   })
 
   const markAsRead = async (notificationId: string) => {

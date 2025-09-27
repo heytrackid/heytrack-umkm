@@ -1,12 +1,36 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types/database';
+import { useSupabaseData as useRealtimeData } from './useSupabaseData';
 
 type Tables = Database['public']['Tables'];
+type ExtendedTableNames = keyof Tables | 'production_batches' | 'quality_checks' | 'production_equipment' | 'production_staff' | 'ingredient_allocations' | 'order_payments' | 'OrderItem' | 'OrderPayment' | 'ProductionBatch' | 'QualityCheck' | 'ProductionEquipment' | 'ProductionStaff' | 'IngredientAllocation' | 'Order';
+
+// Map extended table names to actual database tables
+const tableMap: Record<string, keyof Tables> = {
+  'production_batches': 'productions',
+  'quality_checks': 'productions', // These might need their own tables or be part of productions
+  'production_equipment': 'productions',
+  'production_staff': 'productions',
+  'ingredient_allocations': 'productions',
+  'order_payments': 'payments',
+  'OrderItem': 'order_items',
+  'OrderPayment': 'payments',
+  'ProductionBatch': 'productions',
+  'QualityCheck': 'productions',
+  'ProductionEquipment': 'productions',
+  'ProductionStaff': 'productions',
+  'IngredientAllocation': 'productions',
+  'Order': 'orders'
+};
+
+function getActualTableName(table: ExtendedTableNames): keyof Tables {
+  return tableMap[table as string] || (table as keyof Tables);
+}
 
 // Base CRUD hook for any table
-export function useSupabaseData<T extends keyof Tables>(
-  table: T,
+function useSupabaseDataInternal<T = any>(
+  table: string,
   options?: {
     select?: string;
     filter?: Record<string, any>;
@@ -14,7 +38,7 @@ export function useSupabaseData<T extends keyof Tables>(
     limit?: number;
   }
 ) {
-  const [data, setData] = useState<Tables[T]['Row'][]>([]);
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +48,8 @@ export function useSupabaseData<T extends keyof Tables>(
     
     try {
       const supabase = createSupabaseClient();
-      let query = supabase.from(table).select(options?.select || '*');
+      const actualTable = getActualTableName(table as any);
+      let query = supabase.from(actualTable).select(options?.select || '*');
 
       // Apply filters
       if (options?.filter) {
@@ -47,7 +72,7 @@ export function useSupabaseData<T extends keyof Tables>(
 
       const { data: result, error } = await query;
       if (error) throw error;
-      setData((result || []) as unknown as Tables[T]['Row'][]);
+      setData(result || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -57,28 +82,29 @@ export function useSupabaseData<T extends keyof Tables>(
 
   useEffect(() => {
     const supabase = createSupabaseClient();
+    const actualTable = getActualTableName(table as any);
     
     // Initial fetch
     refetch();
 
     // Set up real-time subscription
     const channel = supabase
-      .channel(`${table}-changes`)
+      .channel(`${actualTable}-changes`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: table,
+          table: actualTable,
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setData((prev) => [payload.new as Tables[T]['Row'], ...prev]);
+            setData((prev) => [payload.new as any, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
             setData((prev) =>
               prev.map((item) =>
                 (item as any).id === (payload.new as any).id
-                  ? (payload.new as Tables[T]['Row'])
+                  ? (payload.new as any)
                   : item
               )
             );
@@ -99,22 +125,26 @@ export function useSupabaseData<T extends keyof Tables>(
   return { data, loading, error, refetch };
 }
 
+// Export useSupabaseData for backward compatibility
+export const useSupabaseData = useSupabaseDataInternal;
+
 // CRUD Mutation hooks
-export function useSupabaseMutation<T extends keyof Tables>(
-  table: T,
+export function useSupabaseMutation<T = any>(
+  table: string,
   onSuccess?: () => void,
   onError?: (error: string) => void
 ) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const create = async (data: Tables[T]['Insert']) => {
+  const create = async (data: any) => {
     setLoading(true);
     setError(null);
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const response = await fetch(`/api/${endpoint}`, {
         method: 'POST',
@@ -140,13 +170,14 @@ export function useSupabaseMutation<T extends keyof Tables>(
     }
   };
 
-  const update = async (id: string, data: Tables[T]['Update']) => {
+  const update = async (id: string, data: any) => {
     setLoading(true);
     setError(null);
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const response = await fetch(`/api/${endpoint}/${id}`, {
         method: 'PUT',
@@ -178,7 +209,8 @@ export function useSupabaseMutation<T extends keyof Tables>(
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const response = await fetch(`/api/${endpoint}/${id}`, {
         method: 'DELETE',
@@ -212,12 +244,12 @@ export function useSupabaseMutation<T extends keyof Tables>(
 }
 
 // Utility hook for single record fetch
-export function useSupabaseRecord<T extends keyof Tables>(
-  table: T,
+export function useSupabaseRecord<T = any>(
+  table: string,
   id: string,
   options?: { select?: string }
 ) {
-  const [data, setData] = useState<Tables[T]['Row'] | null>(null);
+  const [data, setData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -229,7 +261,8 @@ export function useSupabaseRecord<T extends keyof Tables>(
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const response = await fetch(`/api/${endpoint}/${id}`);
       const result = await response.json();
@@ -255,8 +288,32 @@ export function useSupabaseRecord<T extends keyof Tables>(
   return { data, loading, error, refetch };
 }
 
-// Main export alias for backward compatibility
-export const useSupabaseCRUD = useSupabaseMutation;
+// Combined CRUD hook with data and mutations
+export function useSupabaseCRUD<T = any, TInsert = any, TUpdate = any>(
+  table: string | { table: string; relationConfig?: any; filter?: any; orderBy?: any },
+  options?: {
+    select?: string;
+    filter?: Record<string, any>;
+    orderBy?: { column: string; ascending?: boolean };
+    limit?: number;
+  }
+) {
+  // Handle both string and object configurations
+  const tableName = typeof table === 'string' ? table : table.table;
+  const config = typeof table === 'object' ? table : undefined;
+  
+  // Use data hook for fetching
+  const dataHook = useSupabaseDataInternal(tableName as any, options);
+  
+  // Use mutation hook for operations
+  const mutationHook = useSupabaseMutation(tableName as any, dataHook.refetch);
+  
+  return {
+    ...dataHook,
+    ...mutationHook,
+    refresh: dataHook.refetch
+  };
+}
 
 // Specific hooks with combined data and mutations
 export const useIngredients = () => {
@@ -330,21 +387,22 @@ export const useSuppliers = () => {
 };
 
 // Bulk operations hook
-export function useSupabaseBulkOperations<T extends keyof Tables>(
-  table: T,
+export function useSupabaseBulkOperations<T = any>(
+  table: string,
   onSuccess?: () => void,
   onError?: (error: string) => void
 ) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const bulkCreate = async (items: Tables[T]['Insert'][]) => {
+  const bulkCreate = async (items: any[]) => {
     setLoading(true);
     setError(null);
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const promises = items.map(item => 
         fetch(`/api/${endpoint}`, {
@@ -379,13 +437,14 @@ export function useSupabaseBulkOperations<T extends keyof Tables>(
     }
   };
 
-  const bulkUpdate = async (updates: { id: string; data: Tables[T]['Update'] }[]) => {
+  const bulkUpdate = async (updates: { id: string; data: any }[]) => {
     setLoading(true);
     setError(null);
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const promises = updates.map(({ id, data }) => 
         fetch(`/api/${endpoint}/${id}`, {
@@ -426,7 +485,8 @@ export function useSupabaseBulkOperations<T extends keyof Tables>(
     
     try {
       // Convert table name to API endpoint format
-      const endpoint = table.replace(/_/g, '-');
+      const actualTable = getActualTableName(table as any);
+      const endpoint = actualTable.replace(/_/g, '-');
       
       const promises = ids.map(id => 
         fetch(`/api/${endpoint}/${id}`, { method: 'DELETE' })

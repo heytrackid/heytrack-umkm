@@ -625,11 +625,11 @@ export class EnhancedAutomationEngine {
 
   private generateActionRecommendation(item: InventoryAnalysisResult): string {
     if (item.days_until_stockout <= 1) {
-      return `🚨 EMERGENCY: Order ${item.suggested_order_quantity} ${item.ingredient_name} immediately!`
+      return `EMERGENCY: Order ${item.suggested_order_quantity} ${item.ingredient_name} immediately!`
     } else if (item.days_until_stockout <= 3) {
-      return `⚠️ URGENT: Schedule order for ${item.suggested_order_quantity} ${item.ingredient_name} today`
+      return `URGENT: Schedule order for ${item.suggested_order_quantity} ${item.ingredient_name} today`
     } else {
-      return `📋 SCHEDULE: Plan to order ${item.suggested_order_quantity} ${item.ingredient_name} this week`
+      return `SCHEDULE: Plan to order ${item.suggested_order_quantity} ${item.ingredient_name} this week`
     }
   }
 

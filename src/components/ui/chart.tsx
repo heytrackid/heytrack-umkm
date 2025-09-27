@@ -87,10 +87,14 @@ const ChartLegendContent = React.forwardRef<
 })
 ChartLegendContent.displayName = "ChartLegendContent"
 
+// Main Chart component (alias for ChartContainer)
+const Chart = ChartContainer
+
 export {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
+  Chart,
 }

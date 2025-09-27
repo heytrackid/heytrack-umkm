@@ -224,8 +224,12 @@ export class AutomationEngine {
   ) {
     const notifications = []
 
+    // Ensure inventory is an array
+    const safeInventory = Array.isArray(inventory) ? inventory : []
+    const safeOrders = Array.isArray(orders) ? orders : []
+
     // Inventory notifications
-    inventory.forEach(ingredient => {
+    safeInventory.forEach(ingredient => {
       if (ingredient.current_stock <= ingredient.min_stock * 0.5) {
         notifications.push({
           type: 'critical' as const,
@@ -239,7 +243,7 @@ export class AutomationEngine {
     })
 
     // Order notifications
-    const urgentOrders = orders.filter(o => {
+    const urgentOrders = safeOrders.filter(o => {
       const deliveryDate = new Date(o.delivery_date)
       const now = new Date()
       const hoursUntilDelivery = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60)

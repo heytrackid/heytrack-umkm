@@ -77,7 +77,7 @@ interface InventoryInsights {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d']
 
-export default function InventoryAnalytics() {
+function InventoryAnalytics() {
   const [analytics, setAnalytics] = useState<InventoryAnalytics[]>([])
   const [insights, setInsights] = useState<InventoryInsights | null>(null)
   const [loading, setLoading] = useState(false)
@@ -669,3 +669,6 @@ export default function InventoryAnalytics() {
     </Card>
   )
 }
+
+export default InventoryAnalytics
+export { InventoryAnalytics }

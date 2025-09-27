@@ -71,8 +71,7 @@ export const DEFAULT_INTEGRATION_CONFIG: ProductionOrdersIntegrationConfig = {
     'low': 'low',
     'normal': 'normal', 
     'high': 'high',
-    'urgent': 'urgent',
-    'rush': 'rush'
+    'urgent': 'urgent'
   },
   rush_order_threshold_hours: 12,
   
@@ -606,8 +605,7 @@ export class ProductionOrdersIntegrationService {
   }
 
   private getOrderPriorityWeight(priority: OrderPriority): number {
-    const weights: Record<OrderPriority, number> = {
-      'rush': 1,
+    const weights: Record<string, number> = {
       'urgent': 2, 
       'high': 3,
       'normal': 4,
@@ -695,7 +693,6 @@ export class ProductionOrdersIntegrationService {
     // Find highest priority order
     const priorities = orders.map(order => order.priority)
     
-    if (priorities.includes('rush')) return 'rush'
     if (priorities.includes('urgent')) return 'urgent'
     if (priorities.includes('high')) return 'high'
     if (priorities.includes('normal')) return 'normal'

@@ -283,7 +283,7 @@ export function useOrderSummary(filters?: OrderFilters): {
       }
 
       // Top selling items tracking
-      order.items?.forEach(item => {
+      order.items?.forEach((item: any) => {
         if (!topSellingItems[item.recipe_id]) {
           topSellingItems[item.recipe_id] = {
             recipe_id: item.recipe_id,

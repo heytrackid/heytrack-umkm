@@ -47,8 +47,12 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
       ])
 
       if (ingredientsRes.ok && ordersRes.ok) {
-        const ingredients = await ingredientsRes.json()
-        const orders = await ordersRes.json()
+        const ingredientsData = await ingredientsRes.json()
+        const ordersData = await ordersRes.json()
+        
+        // Ensure data is in array format
+        const ingredients = Array.isArray(ingredientsData) ? ingredientsData : []
+        const orders = Array.isArray(ordersData) ? ordersData : []
         
         // Generate smart notifications using automation engine
         const smartNotifications = automationEngine.generateSmartNotifications(

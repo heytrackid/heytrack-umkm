@@ -118,7 +118,7 @@ export default function BatchPlanner({ className }: BatchPlannerProps) {
   }
 
   if (error) {
-    return <div>Error loading batches: {error.message}</div>
+    return <div>Error loading batches: {error}</div>
   }
 
   return (

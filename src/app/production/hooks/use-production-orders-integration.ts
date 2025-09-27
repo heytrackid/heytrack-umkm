@@ -10,7 +10,7 @@ import {
   DEFAULT_INTEGRATION_CONFIG 
 } from '../services/production-orders-integration'
 import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'
-import { useSupabaseData } from '@/hooks/useSupabaseData'
+import { useRealtimeData } from '@/hooks/useSupabaseData'
 import type { ProductionBatch } from '../types/production.types'
 import type { Order } from '../../orders/types/orders.types'
 
@@ -59,37 +59,27 @@ export function useProductionOrdersIntegration(
     availableIngredients: []
   })
 
-  // Data hooks
+  // Data hooks  
   const { 
     data: orders, 
     loading: ordersLoading,
     error: ordersError 
-  } = useSupabaseData<Order>('orders', {
-    filter: { status: ['confirmed', 'paid'] },
-    realtime: true
-  })
+  } = useRealtimeData('orders', [])
 
   const { 
     data: batches, 
     loading: batchesLoading 
-  } = useSupabaseData<ProductionBatch>('production_batches', {
-    filter: { status: ['planned', 'ingredients_ready', 'in_progress'] },
-    realtime: true
-  })
+  } = useRealtimeData('productions', [])
 
   const { 
     data: ingredients,
     loading: ingredientsLoading 
-  } = useSupabaseData('ingredients', {
-    realtime: true
-  })
+  } = useRealtimeData('ingredients', [])
 
   const { 
     data: recipes,
     loading: recipesLoading 
-  } = useSupabaseData('recipes', {
-    realtime: true
-  })
+  } = useRealtimeData('recipes', [])
 
   // CRUD operations for batches
   const batchCRUD = useSupabaseCRUD<ProductionBatch>('production_batches')
@@ -117,7 +107,7 @@ export function useProductionOrdersIntegration(
 
     return ordersList.filter(order => {
       // Only include orders that don't have production batches yet
-      const hasProductionBatch = batches?.some(batch => 
+      const hasProductionBatch = batches?.some((batch: any) => 
         batch.order_ids?.includes(order.id)
       )
       return !hasProductionBatch

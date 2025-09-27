@@ -68,9 +68,13 @@ export function SmartNotificationCenter({
   useEffect(() => {
     const generateNotificationsStable = () => {
       try {
+        // Ensure arrays are valid
+        const safeIngredients = Array.isArray(ingredients) ? ingredients : []
+        const safeOrders = Array.isArray(orders) ? orders : []
+        
         const smartNotifications = automationEngine.generateSmartNotifications(
-          ingredients, 
-          orders, 
+          safeIngredients, 
+          safeOrders, 
           financialMetrics
         )
 
@@ -93,7 +97,7 @@ export function SmartNotificationCenter({
 
           // Check for orders due today
           const today = new Date().toDateString()
-          const todayOrders = orders.filter(o => new Date(o.delivery_date).toDateString() === today)
+          const todayOrders = safeOrders.filter(o => o.delivery_date && new Date(o.delivery_date).toDateString() === today)
           
           if (todayOrders.length > 0) {
             additional.push({

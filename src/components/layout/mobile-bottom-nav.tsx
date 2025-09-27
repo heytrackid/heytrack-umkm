@@ -29,26 +29,26 @@ const mainNavItems: BottomNavItem[] = [
     name: 'Dashboard',
     href: '/',
     icon: LayoutDashboard,
-    color: 'text-blue-600'
+    // color: 'text-blue-600' // Removed for cleaner look
   },
   {
     name: 'Resep',
     href: '/recipes',
     icon: ChefHat,
-    color: 'text-green-600'
+    // color: 'text-green-600' // Removed for cleaner look
   },
   {
     name: 'Bahan',
     href: '/ingredients',
     icon: Package,
-    color: 'text-amber-600'
+    // color: 'text-amber-600' // Removed for cleaner look
   },
   {
     name: 'Order',
     href: '/orders',
     icon: ShoppingCart,
     badge: 3, // Example badge count
-    color: 'text-purple-600'
+    // color: 'text-purple-600' // Removed for cleaner look
   },
   {
     name: 'Lainnya',
@@ -62,7 +62,7 @@ interface MobileBottomNavProps {
   className?: string
 }
 
-export default function MobileBottomNav({ className }: MobileBottomNavProps) {
+function MobileBottomNav({ className }: MobileBottomNavProps) {
   const pathname = usePathname()
 
   const isActive = (href: string) => {
@@ -101,7 +101,7 @@ export default function MobileBottomNav({ className }: MobileBottomNavProps) {
               <item.icon 
                 className={cn(
                   "h-5 w-5 mb-1",
-                  isActive(item.href) && item.color
+                  // isActive(item.href) && item.color // Removed for cleaner look
                 )}
               />
               {item.badge && item.badge > 0 && (
@@ -196,3 +196,6 @@ export function useBottomNavPadding() {
     className: isMobile ? 'pb-20' : ''
   }
 }
+
+export default MobileBottomNav
+export { MobileBottomNav }

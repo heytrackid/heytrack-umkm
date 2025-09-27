@@ -63,7 +63,7 @@ interface ProductionOptimization {
   }
 }
 
-export default function ProductionPlanningDashboard() {
+function ProductionPlanningDashboard() {
   const [productionPlans, setProductionPlans] = useState<ProductionPlan[]>([])
   const [optimization, setOptimization] = useState<ProductionOptimization | null>(null)
   const [loading, setLoading] = useState(false)
@@ -666,3 +666,6 @@ export default function ProductionPlanningDashboard() {
     </Card>
   )
 }
+
+export default ProductionPlanningDashboard
+export { ProductionPlanningDashboard }

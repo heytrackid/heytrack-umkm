@@ -245,6 +245,7 @@ export function formatCurrencyInput(
  * Regional currency configurations for common countries/regions
  */
 export const REGIONAL_DEFAULTS: Record<string, {
+  country_code: string
   currency: string
   tax_rate: number
   business_culture: {
@@ -254,6 +255,7 @@ export const REGIONAL_DEFAULTS: Record<string, {
   }
 }> = {
   'ID': { // Indonesia
+    country_code: 'ID',
     currency: 'IDR',
     tax_rate: 0.11, // PPN 11%
     business_culture: {
@@ -263,6 +265,7 @@ export const REGIONAL_DEFAULTS: Record<string, {
     }
   },
   'US': { // United States
+    country_code: 'US',
     currency: 'USD',
     tax_rate: 0.08, // Average sales tax
     business_culture: {
@@ -272,6 +275,7 @@ export const REGIONAL_DEFAULTS: Record<string, {
     }
   },
   'SG': { // Singapore
+    country_code: 'SG',
     currency: 'SGD',
     tax_rate: 0.07, // GST 7%
     business_culture: {
@@ -281,6 +285,7 @@ export const REGIONAL_DEFAULTS: Record<string, {
     }
   },
   'MY': { // Malaysia
+    country_code: 'MY',
     currency: 'MYR',
     tax_rate: 0.06, // SST 6%
     business_culture: {

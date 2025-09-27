@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Progress } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAIPowered } from '@/hooks/useAIPowered'
 import { useIngredients, useRecipesWithIngredients, useOrdersWithItems, useCustomers } from '@/hooks/useSupabaseData'
 import {
@@ -24,7 +26,10 @@ import {
   BarChart3,
   ShoppingCart,
   Clock,
-  Target
+  Target,
+  Activity,
+  Zap,
+  RefreshCw
 } from 'lucide-react'
 
 interface AIInsight {
@@ -38,9 +43,11 @@ interface AIInsight {
 }
 
 export const AIIntegrationHub: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview')
   const [insights, setInsights] = useState<AIInsight[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [analysisProgress, setAnalysisProgress] = useState(0)
+  const [lastAnalysisTime, setLastAnalysisTime] = useState<Date | null>(null)
+  const [activeTab, setActiveTab] = useState('overview')
 
   // Fetch data from Supabase
   const { data: ingredients } = useIngredients()
@@ -49,40 +56,35 @@ export const AIIntegrationHub: React.FC = () => {
   const { customers } = useCustomers()
 
   // Mock financial records for demo
-  const financialRecords = []
+  const financialRecords: any[] = []
 
   // AI API calls
-  const {
-    analyzeData: analyzePricing,
-    loading: pricingLoading,
-    confidence: pricingConfidence
-  } = useAIPowered()
-
-  const {
-    analyzeData: analyzeInventory,
-    loading: inventoryLoading,
-    confidence: inventoryConfidence
-  } = useAIPowered()
-
-  const {
-    analyzeData: analyzeFinancial,
-    loading: financialLoading,
-    confidence: financialConfidence
-  } = useAIPowered()
+  const aiPowered = useAIPowered()
+  const pricingLoading = aiPowered.pricing.loading
+  const pricingConfidence = aiPowered.pricing.confidence || 85
+  const inventoryLoading = aiPowered.inventory.loading
+  const inventoryConfidence = aiPowered.inventory.confidence || 85
+  const financialLoading = aiPowered.financial.loading
+  const financialConfidence = aiPowered.financial.confidence || 85
 
   // Run comprehensive AI analysis
   const runComprehensiveAnalysis = async () => {
     setIsAnalyzing(true)
+    setAnalysisProgress(0)
     const newInsights: AIInsight[] = []
 
     try {
+      setAnalysisProgress(10)
       // 1. Pricing Analysis
+      setAnalysisProgress(25)
       if (recipes && recipes.length > 0) {
-        const pricingData = await analyzePricing('/api/ai/pricing', {
-          recipes,
-          ingredients,
-          market_conditions: 'stable',
-          target_margin: 60
+        const pricingData = await aiPowered.analyzePricing({
+          productName: 'Bakery Products',
+          ingredients: ingredients?.map(ing => ({
+            name: ing.name,
+            cost: ing.price_per_unit,
+            quantity: ing.current_stock
+          })) || []
         })
 
         if (pricingData?.recommendations) {
@@ -99,12 +101,16 @@ export const AIIntegrationHub: React.FC = () => {
       }
 
       // 2. Inventory Analysis
+      setAnalysisProgress(50)
       if (ingredients && ingredients.length > 0) {
-        const inventoryData = await analyzeInventory('/api/ai/inventory', {
-          ingredients,
-          usage_history: 30,
-          supplier_lead_times: true,
-          seasonal_patterns: true
+        const inventoryData = await aiPowered.optimizeInventory({
+          ingredients: ingredients?.map(ing => ({
+            name: ing.name,
+            currentStock: ing.current_stock,
+            minStock: ing.min_stock,
+            price: ing.price_per_unit,
+            supplier: ing.supplier || 'Unknown'
+          })) || []
         })
 
         if (inventoryData?.alerts) {
@@ -121,12 +127,19 @@ export const AIIntegrationHub: React.FC = () => {
       }
 
       // 3. Financial Analysis
+      setAnalysisProgress(75)
       if (financialRecords && financialRecords.length > 0) {
-        const financialData = await analyzeFinancial('/api/ai/financial', {
-          records: financialRecords,
-          period: '30d',
-          include_forecasting: true,
-          business_metrics: true
+        const financialData = await aiPowered.analyzeFinancials({
+          revenue: [],
+          expenses: [],
+          inventory: { totalValue: 0, turnoverRate: 0 },
+          cashFlow: { current: 0, projected30Days: 0 },
+          businessMetrics: {
+            grossMargin: 0,
+            netMargin: 0,
+            customerCount: 0,
+            averageOrderValue: 0
+          }
         })
 
         if (financialData?.insights) {
@@ -146,7 +159,7 @@ export const AIIntegrationHub: React.FC = () => {
       if (orders && orders.length > 0) {
         const customerData = {
           total_customers: new Set(orders.map(o => o.customer_id)).size,
-          repeat_customers: orders.filter(o => o.customer?.total_orders > 1).length,
+          repeat_customers: orders.filter(o => (o.customer as any)?.total_orders > 1).length,
           avg_order_value: orders.reduce((sum, o) => sum + (o.total_amount || 0), 0) / orders.length,
           top_products: {}
         }
@@ -162,11 +175,14 @@ export const AIIntegrationHub: React.FC = () => {
         })
       }
 
+      setAnalysisProgress(100)
       setInsights(newInsights)
+      setLastAnalysisTime(new Date())
     } catch (error) {
       console.error('AI Analysis Error:', error)
     } finally {
       setIsAnalyzing(false)
+      setAnalysisProgress(0)
     }
   }
 
@@ -200,9 +216,9 @@ export const AIIntegrationHub: React.FC = () => {
   }
 
   const getStatusIcon = (confidence: number) => {
-    if (confidence >= 90) return <CheckCircle className="h-4 w-4 text-green-500" />
-    if (confidence >= 70) return <AlertCircle className="h-4 w-4 text-yellow-500" />
-    return <XCircle className="h-4 w-4 text-red-500" />
+    if (confidence >= 90) return <CheckCircle className="h-4 w-4" />
+    if (confidence >= 70) return <AlertCircle className="h-4 w-4" />
+    return <XCircle className="h-4 w-4" />
   }
 
   return (
@@ -210,18 +226,17 @@ export const AIIntegrationHub: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Brain className="h-6 w-6 text-purple-600" />
+          <div className="p-2 bg-muted rounded-lg">
+            <Brain className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">AI Intelligence Hub</h1>
-            <p className="text-gray-600">Insight bisnis cerdas berbasis AI untuk UMKM F&amp;B Indonesia</p>
+            <p className="text-muted-foreground">Insight bisnis cerdas berbasis AI untuk UMKM F&B Indonesia</p>
           </div>
         </div>
         <Button 
           onClick={runComprehensiveAnalysis}
           disabled={isAnalyzing}
-          className="bg-purple-600 hover:bg-purple-700"
         >
           {isAnalyzing ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Menganalisa...</>
@@ -240,7 +255,7 @@ export const AIIntegrationHub: React.FC = () => {
                 <p className="text-sm font-medium text-gray-600">Total Insights</p>
                 <p className="text-2xl font-bold">{insights.length}</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-blue-500" />
+              <BarChart3 className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -249,12 +264,12 @@ export const AIIntegrationHub: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Critical Alerts</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-sm font-medium text-muted-foreground">Critical Alerts</p>
+                <p className="text-2xl font-bold text-destructive">
                   {insights.filter(i => i.priority === 'critical').length}
                 </p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-500" />
+              <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
           </CardContent>
         </Card>
@@ -263,12 +278,12 @@ export const AIIntegrationHub: React.FC = () => {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Actionable Items</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm font-medium text-muted-foreground">Actionable Items</p>
+                <p className="text-2xl font-bold">
                   {insights.filter(i => i.actionable).length}
                 </p>
               </div>
-              <Target className="h-8 w-8 text-green-500" />
+              <Target className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -282,7 +297,7 @@ export const AIIntegrationHub: React.FC = () => {
                   {insights.length > 0 ? Math.round(insights.reduce((sum, i) => sum + i.confidence, 0) / insights.length) : 0}%
                 </p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-500" />
+              <TrendingUp className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -305,13 +320,12 @@ export const AIIntegrationHub: React.FC = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center py-8">
-                    <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada insight AI</h3>
-                    <p className="text-gray-600 mb-4">Klik tombol "Jalankan Analisa AI" untuk mendapatkan insight bisnis cerdas</p>
+                    <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Belum ada insight AI</h3>
+                    <p className="text-muted-foreground mb-4">Klik tombol "Jalankan Analisa AI" untuk mendapatkan insight bisnis cerdas</p>
                     <Button 
                       onClick={runComprehensiveAnalysis}
                       disabled={isAnalyzing}
-                      className="bg-purple-600 hover:bg-purple-700"
                     >
                       {isAnalyzing ? (
                         <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Menganalisa...</>

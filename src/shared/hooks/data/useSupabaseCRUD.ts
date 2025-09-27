@@ -6,16 +6,20 @@ interface CRUDOptions {
   idField?: string
 }
 
-export function useSupabaseCRUD<T = any>(options: CRUDOptions) {
+export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<T[]>([])
+  
+  // Support both object and string configurations
+  const config = typeof options === 'string' ? { table: options } : options
 
   const create = useCallback(async (data: Omit<T, 'id'>) => {
     setLoading(true)
     setError(null)
     try {
       const { data: result, error } = await supabase
-        .from(options.table)
+        .from(config.table)
         .insert(data)
         .select()
         .single()
@@ -29,16 +33,16 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions) {
     } finally {
       setLoading(false)
     }
-  }, [options.table])
+  }, [config.table])
 
   const read = useCallback(async (id: string | number) => {
     setLoading(true)
     setError(null)
     try {
       const { data, error } = await supabase
-        .from(options.table)
+        .from(config.table)
         .select('*')
-        .eq(options.idField || 'id', id)
+        .eq(config.idField || 'id', id)
         .single()
       
       if (error) throw error
@@ -50,16 +54,16 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions) {
     } finally {
       setLoading(false)
     }
-  }, [options.table, options.idField])
+  }, [config.table, config.idField])
 
   const update = useCallback(async (id: string | number, data: Partial<T>) => {
     setLoading(true)
     setError(null)
     try {
       const { data: result, error } = await supabase
-        .from(options.table)
+        .from(config.table)
         .update(data)
-        .eq(options.idField || 'id', id)
+        .eq(config.idField || 'id', id)
         .select()
         .single()
       
@@ -72,16 +76,16 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions) {
     } finally {
       setLoading(false)
     }
-  }, [options.table, options.idField])
+  }, [config.table, config.idField])
 
   const remove = useCallback(async (id: string | number) => {
     setLoading(true)
     setError(null)
     try {
       const { error } = await supabase
-        .from(options.table)
+        .from(config.table)
         .delete()
-        .eq(options.idField || 'id', id)
+        .eq(config.idField || 'id', id)
       
       if (error) throw error
       return true
@@ -98,7 +102,7 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions) {
     setLoading(true)
     setError(null)
     try {
-      let query = supabase.from(options.table).select('*')
+      let query = supabase.from(config.table).select('*')
       
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -117,15 +121,26 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions) {
     } finally {
       setLoading(false)
     }
-  }, [options.table])
+  }, [config.table])
+
+  const refresh = useCallback(async () => {
+    try {
+      const result = await list()
+      setData(result || [])
+    } catch (err) {
+      // Error already handled in list function
+    }
+  }, [list])
 
   return {
     create,
     read,
     update,
-    remove,
+    remove: remove,
     list,
     loading,
-    error
+    error,
+    data,
+    refresh
   }
 }

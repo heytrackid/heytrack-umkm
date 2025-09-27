@@ -188,8 +188,8 @@ export default function Dashboard() {
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>Rp {stats.totalSales.toLocaleString('id-ID')}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+12.5%</span>
+                <TrendingUp className="h-3 w-3" />
+                <span>+12.5%</span>
               </div>
               {/* Mini trend chart */}
               {stats.totalSales > 0 && (
@@ -214,8 +214,8 @@ export default function Dashboard() {
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>{stats.activeOrders}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+{stats.activeOrders > 0 ? '3' : '0'}</span>
+                <TrendingUp className="h-3 w-3" />
+                <span>+{stats.activeOrders > 0 ? '3' : '0'}</span>
               </div>
             </CardContent>
           </Card>
@@ -229,8 +229,8 @@ export default function Dashboard() {
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>{ingredients?.length || 0}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <AlertTriangle className="h-3 w-3 text-orange-500" />
-                <span className="text-orange-500">{lowStockItems.length} menipis</span>
+                <AlertTriangle className="h-3 w-3" />
+                <span>{lowStockItems.length} menipis</span>
               </div>
             </CardContent>
           </Card>
@@ -244,8 +244,8 @@ export default function Dashboard() {
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>{recipes?.length || 0}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 text-green-500" />
-                <span className="text-green-500">+2</span>
+                <TrendingUp className="h-3 w-3" />
+                <span>+2</span>
               </div>
             </CardContent>
           </Card>
@@ -261,7 +261,7 @@ export default function Dashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
+                <AlertTriangle className="h-5 w-5" />
                 <span>Stok Menipis ({lowStockItems.length})</span>
               </CardTitle>
             </CardHeader>
