@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useResponsive } from '@/hooks/use-mobile'
+import {
+  PullToRefresh,
+  SwipeActions
+} from '@/components/ui/mobile-gestures'
+import { MobileTable } from '@/components/ui/mobile-table'
+import {
+  MobileForm,
+  MobileInput,
+  MobileTextarea,
+  MobileNumberInput,
+  MobileSelect
+} from '@/components/ui/mobile-forms'
+import { MiniChart } from '@/components/ui/mobile-charts'
 import { 
   Plus, 
   Search, 
@@ -69,6 +83,8 @@ function getPriorityInfo(priority: string) {
 
 // Main OrdersPage component
 export default function OrdersPage() {
+  const { isMobile, isTablet } = useResponsive()
+  
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showOrderForm, setShowOrderForm] = useState(false)
@@ -81,6 +97,11 @@ export default function OrdersPage() {
   // Fetch orders from API
   useEffect(() => {
     fetchOrders()
+  }, [])
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    await fetchOrders()
   }, [])
 
   const fetchOrders = async () => {
@@ -181,15 +202,38 @@ export default function OrdersPage() {
     )
   }
 
+  // Swipe actions for mobile
+  const orderSwipeActions = [
+    {
+      id: 'view',
+      label: 'Lihat',
+      icon: <Eye className="h-4 w-4" />,
+      color: 'blue' as const,
+      onClick: (order: any) => handleViewOrder(order)
+    },
+    {
+      id: 'edit',
+      label: 'Edit',
+      icon: <Edit className="h-4 w-4" />,
+      color: 'green' as const,
+      onClick: (order: any) => handleEditOrder(order)
+    }
+  ]
+
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pesanan</h1>
-            <p className="text-muted-foreground">Kelola pesanan dari pelanggan</p>
-          </div>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
+          {/* Header */}
+          <div className={`flex gap-4 ${
+            isMobile ? 'flex-col items-center text-center' : 'flex-col sm:flex-row sm:justify-between sm:items-center'
+          }`}>
+            <div className={isMobile ? 'text-center' : ''}>
+              <h1 className={`font-bold text-foreground ${
+                isMobile ? 'text-2xl' : 'text-2xl sm:text-3xl'
+              }`}>Pesanan</h1>
+              <p className="text-muted-foreground">Kelola pesanan dari pelanggan</p>
+            </div>
           <Button 
             onClick={() => {
               setEditingOrder(null)
@@ -202,16 +246,33 @@ export default function OrdersPage() {
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Stats Cards */}
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
+          }`}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{stats.totalOrders}</div>
               <p className="text-xs text-muted-foreground">semua pesanan</p>
+              {stats.totalOrders > 0 && (
+                <MiniChart 
+                  data={orders.slice(-7).map((order, index) => ({
+                    day: index + 1,
+                    count: 1
+                  }))}
+                  type="bar"
+                  dataKey="count"
+                  color="#3b82f6"
+                  className="mt-2"
+                  height={30}
+                />
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -220,7 +281,9 @@ export default function OrdersPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.pendingOrders}</div>
+              <div className={`font-bold text-orange-600 ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{stats.pendingOrders}</div>
               <p className="text-xs text-muted-foreground">perlu dikerjakan</p>
             </CardContent>
           </Card>
@@ -230,7 +293,9 @@ export default function OrdersPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Rp {stats.totalRevenue.toLocaleString()}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>Rp {stats.totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">dari pesanan selesai</p>
             </CardContent>
           </Card>
@@ -240,218 +305,191 @@ export default function OrdersPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Rp {Math.round(stats.avgOrderValue).toLocaleString()}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>Rp {Math.round(stats.avgOrderValue).toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">per pesanan</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters and Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari nomor pesanan atau nama pelanggan..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
-                  />
+          {/* Filters and Search */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className={`flex gap-4 ${
+                isMobile ? 'flex-col' : 'flex-col md:flex-row'
+              }`}>
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari nomor pesanan atau nama pelanggan..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className={`pl-8 ${
+                        isMobile ? 'h-12 text-base' : ''
+                      }`}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <select
+                    className={`flex-1 sm:flex-none px-3 py-1.5 border border-input rounded-md bg-background text-sm min-w-0 ${
+                      isMobile ? 'h-12 text-base' : ''
+                    }`}
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="all">Semua Status</option>
+                    {Object.entries(orderStatuses).map(([key, status]) => (
+                      <option key={key} value={key}>{status.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <select
-                  className="flex-1 sm:flex-none px-3 py-1.5 border border-input rounded-md bg-background text-sm min-w-0"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="all">Semua Status</option>
-                  {Object.entries(orderStatuses).map(([key, status]) => (
-                    <option key={key} value={key}>{status.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Orders List */}
-        <div className="space-y-4">
-          {filteredOrders.map((order) => {
-            const statusInfo = getStatusInfo(order.status)
-            const priorityInfo = getPriorityInfo(order.priority)
-            
-            return (
-              <Card key={order.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                        <h3 className="text-lg font-semibold truncate">{order.order_no}</h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={statusInfo.color}>
-                            {statusInfo.label}
-                          </Badge>
-                          {order.priority !== 'normal' && (
-                            <Badge variant="outline" className={priorityInfo.color}>
-                              {priorityInfo.label}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span className="font-medium">{order.customer_name}</span>
-                          </div>
-                          {order.customer_phone && (
-                            <div className="flex items-center gap-2 sm:ml-2">
-                              <Phone className="h-4 w-4" />
-                              <span>{order.customer_phone}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>Pesan: {order.order_date}</span>
-                          </div>
-                          {order.delivery_date && (
-                            <div className="flex items-center gap-2 sm:ml-2">
-                              <span>Kirim: {order.delivery_date} {order.delivery_time}</span>
-                            </div>
-                          )}
-                        </div>
-                        {order.customer_address && (
-                          <div className="flex items-start gap-2">
-                            <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                            <span className="break-words">{order.customer_address}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-left lg:text-right flex-shrink-0">
-                      <div className="text-lg font-bold">Rp {(order.total_amount || 0).toLocaleString()}</div>
-                      <div className="text-sm text-muted-foreground space-y-0.5">
-                        {(order.paid_amount || 0) > 0 && (
-                          <div className="text-green-600">
-                            Dibayar: Rp {(order.paid_amount || 0).toLocaleString()}
-                          </div>
-                        )}
-                        {(order.total_amount || 0) > (order.paid_amount || 0) && (
-                          <div className="text-red-600">
-                            Sisa: Rp {((order.total_amount || 0) - (order.paid_amount || 0)).toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Package className="h-4 w-4" />
-                        <span>{order.order_items?.length || 0} item</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span>Qty: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}</span>
-                      </div>
-                      {order.notes && (
-                        <div className="text-muted-foreground truncate max-w-xs hidden sm:block">
-                          Note: {order.notes}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleViewOrder(order)}
-                        className="flex-1 sm:flex-none"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        <span className="hidden sm:inline">Detail</span>
-                        <span className="sm:hidden">Lihat</span>
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleEditOrder(order)}
-                        className="flex-1 sm:flex-none"
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                      {order.status === 'PENDING' && (
-                        <Button 
-                          size="sm"
-                          onClick={() => updateOrderStatus(order.id, 'CONFIRMED')}
-                          className="flex-1 sm:flex-none"
-                        >
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">Konfirmasi</span>
-                          <span className="sm:hidden">OK</span>
-                        </Button>
-                      )}
-                      {order.status === 'CONFIRMED' && (
-                        <Button 
-                          size="sm"
-                          onClick={() => updateOrderStatus(order.id, 'IN_PROGRESS')}
-                          className="flex-1 sm:flex-none"
-                        >
-                          <span className="hidden sm:inline">Mulai Produksi</span>
-                          <span className="sm:hidden">Produksi</span>
-                        </Button>
-                      )}
-                      {order.status === 'IN_PROGRESS' && (
-                        <Button 
-                          size="sm"
-                          onClick={() => updateOrderStatus(order.id, 'READY')}
-                          className="flex-1 sm:flex-none"
-                        >
-                          <span className="hidden sm:inline">Tandai Selesai</span>
-                          <span className="sm:hidden">Selesai</span>
-                        </Button>
-                      )}
-                      {order.status === 'READY' && (
-                        <Button 
-                          size="sm"
-                          onClick={() => updateOrderStatus(order.id, 'DELIVERED')}
-                        >
-                          Tandai Terkirim
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-
-        {filteredOrders.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Tidak ada pesanan ditemukan</h3>
-              <p className="text-muted-foreground mb-4">
-                {orders.length === 0 ? 'Belum ada pesanan masuk' : 'Coba ubah kata kunci pencarian atau filter'}
-              </p>
-              <Button onClick={() => {
-                setEditingOrder(null)
-                setShowOrderForm(true)
-              }}>
-                <Plus className="h-4 w-4 mr-2" />
-                Buat Pesanan Baru
-              </Button>
             </CardContent>
           </Card>
-        )}
 
-        {/* Order Form Dialog */}
+          {/* Orders List - Mobile Optimized */}
+          <MobileTable
+            data={filteredOrders}
+            searchable
+            searchPlaceholder="Cari pesanan..."
+            onSearch={setSearchTerm}
+            columns={[
+              {
+                key: 'order_info',
+                label: 'Pesanan',
+                accessor: 'order_no',
+                render: (value, order) => {
+                  const statusInfo = getStatusInfo(order.status)
+                  const priorityInfo = getPriorityInfo(order.priority)
+                  return (
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium">{value}</p>
+                        <Badge className={statusInfo.color + ' text-xs'}>
+                          {statusInfo.label}
+                        </Badge>
+                        {order.priority !== 'normal' && (
+                          <Badge variant="outline" className={priorityInfo.color + ' text-xs'}>
+                            {priorityInfo.label}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {order.customer_name}
+                      </p>
+                      {isMobile && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {order.order_date} • {order.order_items?.length || 0} item
+                        </p>
+                      )}
+                    </div>
+                  )
+                }
+              },
+              ...(!isMobile ? [{
+                key: 'customer',
+                label: 'Pelanggan',
+                accessor: 'customer_name' as keyof any,
+                render: (value: string, order: any) => (
+                  <div>
+                    <p className="font-medium">{value}</p>
+                    {order.customer_phone && (
+                      <p className="text-sm text-muted-foreground">{order.customer_phone}</p>
+                    )}
+                  </div>
+                )
+              }] : []),
+              {
+                key: 'amount',
+                label: 'Total',
+                accessor: 'total_amount',
+                render: (value, order) => (
+                  <div>
+                    <p className="font-medium">Rp {(value || 0).toLocaleString()}</p>
+                    {(order.paid_amount || 0) > 0 && (
+                      <p className="text-sm text-green-600">
+                        Dibayar: Rp {(order.paid_amount || 0).toLocaleString()}
+                      </p>
+                    )}
+                    {isMobile && order.delivery_date && (
+                      <p className="text-sm text-muted-foreground">
+                        {order.delivery_date}
+                      </p>
+                    )}
+                  </div>
+                )
+              },
+              ...(!isMobile ? [{
+                key: 'items',
+                label: 'Items',
+                accessor: (order: any) => order.order_items?.length || 0,
+                render: (value: number, order: any) => (
+                  <div className="text-sm">
+                    <p>{value} item</p>
+                    <p className="text-muted-foreground">
+                      Qty: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}
+                    </p>
+                  </div>
+                )
+              }] : []),
+              ...(!isMobile ? [{
+                key: 'dates',
+                label: 'Tanggal',
+                accessor: 'order_date' as keyof any,
+                render: (value: string, order: any) => (
+                  <div className="text-sm">
+                    <p>Pesan: {value}</p>
+                    {order.delivery_date && (
+                      <p>Kirim: {order.delivery_date}</p>
+                    )}
+                  </div>
+                )
+              }] : [])
+            ]}
+            actions={[
+              {
+                label: 'Lihat',
+                icon: <Eye className="h-4 w-4" />,
+                onClick: (order) => handleViewOrder(order)
+              },
+              {
+                label: 'Edit',
+                icon: <Edit className="h-4 w-4" />,
+                onClick: (order) => handleEditOrder(order)
+              },
+              ...(filteredOrders.some(order => order.status === 'PENDING') ? [{
+                label: 'Konfirmasi',
+                icon: <CheckCircle className="h-4 w-4" />,
+                onClick: (order: any) => updateOrderStatus(order.id, 'CONFIRMED'),
+                show: (order: any) => order.status === 'PENDING'
+              }] : []),
+              ...(filteredOrders.some(order => order.status === 'CONFIRMED') ? [{
+                label: 'Produksi',
+                icon: <Package className="h-4 w-4" />,
+                onClick: (order: any) => updateOrderStatus(order.id, 'IN_PROGRESS'),
+                show: (order: any) => order.status === 'CONFIRMED'
+              }] : []),
+              ...(filteredOrders.some(order => order.status === 'IN_PROGRESS') ? [{
+                label: 'Selesai',
+                icon: <CheckCircle2 className="h-4 w-4" />,
+                onClick: (order: any) => updateOrderStatus(order.id, 'READY'),
+                show: (order: any) => order.status === 'IN_PROGRESS'
+              }] : []),
+              ...(filteredOrders.some(order => order.status === 'READY') ? [{
+                label: 'Kirim',
+                icon: <Truck className="h-4 w-4" />,
+                onClick: (order: any) => updateOrderStatus(order.id, 'DELIVERED'),
+                show: (order: any) => order.status === 'READY'
+              }] : [])
+            ]}
+            emptyMessage="Tidak ada pesanan ditemukan. Coba ubah filter atau buat pesanan baru."
+          />
+
+          {/* Order Form Dialog */}
         <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
           <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
             <DialogHeader>
@@ -474,16 +512,17 @@ export default function OrdersPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Order Detail Dialog */}
-        <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
-          <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no}</DialogTitle>
-            </DialogHeader>
-            {selectedOrder && <OrderDetailView order={selectedOrder} />}
-          </DialogContent>
-        </Dialog>
-      </div>
+          {/* Order Detail Dialog */}
+          <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
+            <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no}</DialogTitle>
+              </DialogHeader>
+              {selectedOrder && <OrderDetailView order={selectedOrder} />}
+            </DialogContent>
+          </Dialog>
+        </div>
+      </PullToRefresh>
     </AppLayout>
   )
 }

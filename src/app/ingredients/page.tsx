@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Ingredient } from '@/types/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useResponsive } from '@/hooks/use-mobile'
+import {
+  PullToRefresh,
+  SwipeActions
+} from '@/components/ui/mobile-gestures'
+import { MobileTable } from '@/components/ui/mobile-table'
+import {
+  MobileForm,
+  MobileInput,
+  MobileTextarea,
+  MobileNumberInput,
+  MobileSelect
+} from '@/components/ui/mobile-forms'
+import { MiniChart } from '@/components/ui/mobile-charts'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Plus, 
@@ -45,6 +59,8 @@ interface IngredientWithStats extends Omit<Ingredient, 'current_stock' | 'min_st
 }
 
 export default function IngredientsPage() {
+  const { isMobile, isTablet } = useResponsive()
+  
   const [ingredients, setIngredients] = useState<IngredientWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -60,6 +76,11 @@ export default function IngredientsPage() {
   // Fetch ingredients from API
   useEffect(() => {
     fetchIngredients()
+  }, [])
+
+  // Pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    await fetchIngredients()
   }, [])
 
   const fetchIngredients = async () => {
@@ -163,6 +184,31 @@ export default function IngredientsPage() {
     fetchIngredients() // Refresh data after create/update
   }
 
+  // Swipe actions for mobile
+  const ingredientSwipeActions = [
+    {
+      id: 'view',
+      label: 'Lihat',
+      icon: <Eye className="h-4 w-4" />,
+      color: 'blue' as const,
+      onClick: (ingredient: IngredientWithStats) => handleViewIngredient(ingredient)
+    },
+    {
+      id: 'edit',
+      label: 'Edit',
+      icon: <Edit className="h-4 w-4" />,
+      color: 'green' as const,
+      onClick: (ingredient: IngredientWithStats) => handleEditIngredient(ingredient)
+    },
+    {
+      id: 'delete',
+      label: 'Hapus',
+      icon: <Trash2 className="h-4 w-4" />,
+      color: 'red' as const,
+      onClick: (ingredient: IngredientWithStats) => handleDeleteIngredient(ingredient)
+    }
+  ]
+
   // Calculate stats
   const stats = {
     totalIngredients: ingredients.length,
@@ -175,13 +221,18 @@ export default function IngredientsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Bahan Baku</h1>
-            <p className="text-muted-foreground">Kelola stok dan supplier bahan baku</p>
-          </div>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
+          {/* Header */}
+          <div className={`flex justify-between items-center ${
+            isMobile ? 'flex-col gap-4' : ''
+          }`}>
+            <div className={isMobile ? 'text-center' : ''}>
+              <h1 className={`font-bold text-foreground ${
+                isMobile ? 'text-2xl' : 'text-3xl'
+              }`}>Bahan Baku</h1>
+              <p className="text-muted-foreground">Kelola stok dan supplier bahan baku</p>
+            </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -228,15 +279,19 @@ export default function IngredientsPage() {
         {/* Content - only show when not loading and no error */}
         {!loading && !error && (
           <>
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+          {/* Stats Cards */}
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-2' : 'md:grid-cols-4'
+          }`}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Bahan</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalIngredients}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{stats.totalIngredients}</div>
               <p className="text-xs text-muted-foreground">jenis bahan</p>
             </CardContent>
           </Card>
@@ -246,7 +301,9 @@ export default function IngredientsPage() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.lowStockItems}</div>
+              <div className={`font-bold text-orange-600 ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{stats.lowStockItems}</div>
               <p className="text-xs text-muted-foreground">perlu restok</p>
             </CardContent>
           </Card>
@@ -256,7 +313,9 @@ export default function IngredientsPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Rp {stats.totalValue.toLocaleString()}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>Rp {stats.totalValue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">investasi stok</p>
             </CardContent>
           </Card>
@@ -266,201 +325,228 @@ export default function IngredientsPage() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.avgUsage.toFixed(1)}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{stats.avgUsage.toFixed(1)}</div>
               <p className="text-xs text-muted-foreground">kg per minggu</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters and Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari bahan..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
-                  />
+          {/* Filters and Search */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className={`flex gap-4 ${
+                isMobile ? 'flex-col' : 'md:flex-row'
+              }`}>
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari bahan..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className={`pl-8 ${
+                        isMobile ? 'h-12 text-base' : ''
+                      }`}
+                    />
+                  </div>
+                </div>
+                <div className={`flex gap-2 ${
+                  isMobile ? 'flex-col' : 'flex-wrap'
+                }`}>
+                  <select
+                    className={`px-3 py-1.5 border border-input rounded-md bg-background text-sm ${
+                      isMobile ? 'h-12 text-base' : ''
+                    }`}
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                  >
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <select
+                    className={`px-3 py-1.5 border border-input rounded-md bg-background text-sm ${
+                      isMobile ? 'h-12 text-base' : ''
+                    }`}
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                  >
+                    <option value="Semua">Semua Status</option>
+                    <option value="adequate">Cukup</option>
+                    <option value="low">Rendah</option>
+                    <option value="critical">Kritis</option>
+                  </select>
                 </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                >
-                  <option value="Semua">Semua Status</option>
-                  <option value="adequate">Cukup</option>
-                  <option value="low">Rendah</option>
-                  <option value="critical">Kritis</option>
-                </select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Ingredients Table/Grid */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="border-b">
-                  <tr className="text-left">
-                    <th className="p-4 font-medium">Bahan</th>
-                    <th className="p-4 font-medium">Kategori</th>
-                    <th className="p-4 font-medium">Stok Saat Ini</th>
-                    <th className="p-4 font-medium">Min/Max</th>
-                    <th className="p-4 font-medium">Harga/Unit</th>
-                    <th className="p-4 font-medium">Status</th>
-                    <th className="p-4 font-medium">Supplier</th>
-                    <th className="p-4 font-medium">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredIngredients.map((ingredient) => (
-                    <tr key={ingredient.id} className="border-b hover:bg-muted/50">
-                      <td className="p-4">
-                        <div>
-                          <p className="font-medium">{ingredient.name}</p>
-                          <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                            {ingredient.description || 'Tidak ada deskripsi'}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <Badge variant="outline">{ingredient.category}</Badge>
-                      </td>
-                      <td className="p-4">
-                        <div>
-                          <p className="font-medium">{ingredient.currentStock} {ingredient.unit}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {ingredient.usagePerWeek} {ingredient.unit}/minggu
-                          </p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p>Min: {ingredient.minStock} {ingredient.unit}</p>
-                          <p>Max: {ingredient.minStock * 3} {ingredient.unit}</p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <p className="font-medium">Rp {ingredient.pricePerUnit.toLocaleString()}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Total: Rp {ingredient.totalValue.toLocaleString()}
-                        </p>
-                      </td>
-                      <td className="p-4">
-                        <Badge className={getStatusColor(ingredient.status)}>
-                          {getStatusText(ingredient.status)}
+          {/* Ingredients Table/Grid - Mobile Optimized */}
+          <MobileTable
+            data={filteredIngredients}
+            searchable
+            searchPlaceholder="Cari bahan baku..."
+            onSearch={setSearchTerm}
+            columns={[
+              {
+                key: 'name',
+                label: 'Bahan',
+                accessor: 'name',
+                render: (value, row) => (
+                  <div>
+                    <p className="font-medium">{value}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {row.description || 'Tidak ada deskripsi'}
+                    </p>
+                    {isMobile && (
+                      <div className="mt-1 flex gap-1">
+                        <Badge variant="outline" className="text-xs">
+                          {row.category}
                         </Badge>
-                      </td>
-                      <td className="p-4">
-                        <div className="text-sm">
-                          <p className="font-medium">{ingredient.supplier}</p>
-                          <p className="text-muted-foreground">{ingredient.supplierPhone}</p>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleViewIngredient(ingredient)}
-                            title="Lihat Detail"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditIngredient(ingredient)}
-                            title="Edit"
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-red-600 hover:text-red-800"
-                            onClick={() => handleDeleteIngredient(ingredient)}
-                            title="Hapus"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {filteredIngredients.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Tidak ada bahan ditemukan</h3>
-              <p className="text-muted-foreground mb-4">
-                Coba ubah kata kunci pencarian atau filter
-              </p>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Bahan Pertama
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Quick Actions - Low Stock Items */}
-        {stats.lowStockItems > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-orange-600">
-                <AlertTriangle className="h-5 w-5" />
-                Bahan yang Perlu Segera Dibeli
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {ingredients
-                  .filter(ingredient => ingredient.status === 'low' || ingredient.status === 'critical')
-                  .map((ingredient) => (
-                    <div 
-                      key={ingredient.id} 
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium">{ingredient.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Stok: {ingredient.currentStock} {ingredient.unit} / Min: {ingredient.minStock} {ingredient.unit}
-                        </p>
+                        <Badge className={getStatusColor(row.status) + ' text-xs'}>
+                          {getStatusText(row.status)}
+                        </Badge>
                       </div>
-                      <Button size="sm">
-                        <ShoppingCart className="h-3 w-3 mr-1" />
-                        Beli
-                      </Button>
-                    </div>
-                  ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                    )}
+                  </div>
+                )
+              },
+              ...(!isMobile ? [{
+                key: 'category',
+                label: 'Kategori',
+                accessor: 'category' as keyof IngredientWithStats,
+                render: (value: string) => (
+                  <Badge variant="outline">{value}</Badge>
+                )
+              }] : []),
+              {
+                key: 'stock',
+                label: 'Stok',
+                accessor: (item: IngredientWithStats) => `${item.currentStock} ${item.unit}`,
+                render: (value, row) => (
+                  <div>
+                    <p className="font-medium">{row.currentStock} {row.unit}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Min: {row.minStock} {row.unit}
+                    </p>
+                    {!isMobile && (
+                      <p className="text-sm text-muted-foreground">
+                        {row.usagePerWeek} {row.unit}/minggu
+                      </p>
+                    )}
+                  </div>
+                )
+              },
+              {
+                key: 'price',
+                label: 'Harga',
+                accessor: 'pricePerUnit',
+                render: (value, row) => (
+                  <div>
+                    <p className="font-medium">Rp {value.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Total: Rp {row.totalValue.toLocaleString()}
+                    </p>
+                  </div>
+                )
+              },
+              ...(!isMobile ? [{
+                key: 'status',
+                label: 'Status',
+                accessor: 'status' as keyof IngredientWithStats,
+                render: (value: string) => (
+                  <Badge className={getStatusColor(value)}>
+                    {getStatusText(value)}
+                  </Badge>
+                )
+              }] : []),
+              ...(!isMobile ? [{
+                key: 'supplier',
+                label: 'Supplier',
+                accessor: 'supplier' as keyof IngredientWithStats,
+                render: (value: string, row: IngredientWithStats) => (
+                  <div className="text-sm">
+                    <p className="font-medium">{value}</p>
+                    <p className="text-muted-foreground">{row.supplierPhone}</p>
+                  </div>
+                )
+              }] : [])
+            ]}
+            actions={[
+              {
+                label: 'Lihat',
+                icon: <Eye className="h-4 w-4" />,
+                onClick: (row) => handleViewIngredient(row)
+              },
+              {
+                label: 'Edit',
+                icon: <Edit className="h-4 w-4" />,
+                onClick: (row) => handleEditIngredient(row)
+              },
+              {
+                label: 'Hapus',
+                icon: <Trash2 className="h-4 w-4" />,
+                onClick: (row) => handleDeleteIngredient(row),
+                variant: 'destructive'
+              }
+            ]}
+            emptyMessage="Tidak ada bahan baku ditemukan. Coba ubah filter atau tambah bahan baru."
+          />
+
+          {/* Quick Actions - Low Stock Items */}
+          {stats.lowStockItems > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className={`flex items-center gap-2 text-orange-600 ${
+                  isMobile ? 'text-lg' : 'text-xl'
+                }`}>
+                  <AlertTriangle className="h-5 w-5" />
+                  Bahan yang Perlu Segera Dibeli
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`grid gap-3 ${
+                  isMobile ? 'grid-cols-1' : isTablet ? 'grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
+                }`}>
+                  {ingredients
+                    .filter(ingredient => ingredient.status === 'low' || ingredient.status === 'critical')
+                    .map((ingredient) => (
+                      <SwipeActions
+                        key={ingredient.id}
+                        actions={[
+                          {
+                            id: 'buy',
+                            label: 'Beli',
+                            icon: <ShoppingCart className="h-4 w-4" />,
+                            color: 'green' as const,
+                            onClick: () => console.log('Buy', ingredient.name)
+                          }
+                        ]}
+                      >
+                        <div className={`flex items-center justify-between p-3 border rounded-lg ${
+                          isMobile ? 'bg-muted/50' : ''
+                        }`}>
+                          <div>
+                            <p className="font-medium">{ingredient.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Stok: {ingredient.currentStock} {ingredient.unit} / Min: {ingredient.minStock} {ingredient.unit}
+                            </p>
+                          </div>
+                          {!isMobile && (
+                            <Button size="sm">
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              Beli
+                            </Button>
+                          )}
+                        </div>
+                      </SwipeActions>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {/* Edit Ingredient Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -493,7 +579,8 @@ export default function IngredientsPage() {
         </Dialog>
         </>
         )}
-      </div>
+        </div>
+      </PullToRefresh>
     </AppLayout>
   )
 }
@@ -504,6 +591,8 @@ function IngredientForm({ onClose, onSuccess, editData }: {
   onSuccess?: () => void
   editData?: IngredientWithStats | null 
 }) {
+  const { isMobile } = useResponsive()
+  
   const [formData, setFormData] = useState({
     name: editData?.name || '',
     description: editData?.description || '',
@@ -558,12 +647,20 @@ function IngredientForm({ onClose, onSuccess, editData }: {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <MobileForm onSubmit={handleSubmit}>
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="basic">Info Dasar</TabsTrigger>
-          <TabsTrigger value="stock">Stok</TabsTrigger>
-          <TabsTrigger value="supplier">Supplier</TabsTrigger>
+        <TabsList className={`grid w-full grid-cols-3 ${
+          isMobile ? 'h-12' : ''
+        }`}>
+          <TabsTrigger value="basic" className={isMobile ? 'text-sm' : ''}>
+            Info Dasar
+          </TabsTrigger>
+          <TabsTrigger value="stock" className={isMobile ? 'text-sm' : ''}>
+            Stok
+          </TabsTrigger>
+          <TabsTrigger value="supplier" className={isMobile ? 'text-sm' : ''}>
+            Supplier
+          </TabsTrigger>
         </TabsList>
         
         {error && (
@@ -573,119 +670,105 @@ function IngredientForm({ onClose, onSuccess, editData }: {
         )}
         
         <TabsContent value="basic" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="name">Nama Bahan *</Label>
-              <Input 
-                id="name" 
-                placeholder="Contoh: Tepung Terigu Premium"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="category">Kategori</Label>
-              <select 
-                className="w-full p-2 border border-input rounded-md bg-background"
-                value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-              >
-                <option value="">Pilih kategori</option>
-                {categories.filter(c => c !== 'Semua').map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="unit">Satuan *</Label>
-              <select 
-                className="w-full p-2 border border-input rounded-md bg-background"
-                value={formData.unit}
-                onChange={(e) => handleInputChange('unit', e.target.value)}
-                required
-              >
-                {units.map(unit => (
-                  <option key={unit} value={unit}>{unit}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="pricePerUnit">Harga per Satuan *</Label>
-              <Input 
-                id="pricePerUnit" 
-                type="number" 
-                placeholder="12000"
-                value={formData.price_per_unit}
-                onChange={(e) => handleInputChange('price_per_unit', parseFloat(e.target.value) || 0)}
-                required
-                min="0"
-                step="100"
-              />
-            </div>
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-1' : 'grid-cols-2'
+          }`}>
+            <MobileInput
+              label="Nama Bahan"
+              placeholder="Contoh: Tepung Terigu Premium"
+              value={formData.name}
+              onChange={(value) => handleInputChange('name', value)}
+              required
+            />
+            <MobileSelect
+              label="Kategori"
+              placeholder="Pilih kategori"
+              value={formData.category}
+              onChange={(value) => handleInputChange('category', value)}
+              options={categories.filter(c => c !== 'Semua').map(category => ({
+                value: category,
+                label: category
+              }))}
+            />
+            <MobileSelect
+              label="Satuan"
+              value={formData.unit}
+              onChange={(value) => handleInputChange('unit', value)}
+              options={units.map(unit => ({ value: unit, label: unit }))}
+              required
+            />
+            <MobileNumberInput
+              label="Harga per Satuan"
+              value={formData.price_per_unit}
+              onChange={(value) => handleInputChange('price_per_unit', value)}
+              min={0}
+              step={100}
+              formatCurrency
+              required
+            />
           </div>
-          <div>
-            <Label htmlFor="description">Deskripsi</Label>
-            <Textarea 
-              id="description" 
-              placeholder="Deskripsi bahan..."
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
+          <MobileTextarea
+            label="Deskripsi"
+            placeholder="Deskripsi bahan..."
+            value={formData.description}
+            onChange={(value) => handleInputChange('description', value)}
+            rows={isMobile ? 3 : 4}
+          />
+        </TabsContent>
+        
+        <TabsContent value="stock" className="space-y-4">
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-1' : 'grid-cols-2'
+          }`}>
+            <MobileNumberInput
+              label="Stok Saat Ini"
+              placeholder="50"
+              value={formData.current_stock}
+              onChange={(value) => handleInputChange('current_stock', value)}
+              min={0}
+              step={0.1}
+            />
+            <MobileNumberInput
+              label="Stok Minimum"
+              placeholder="10"
+              value={formData.min_stock}
+              onChange={(value) => handleInputChange('min_stock', value)}
+              min={0}
+              step={0.1}
             />
           </div>
         </TabsContent>
         
-        <TabsContent value="stock" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="currentStock">Stok Saat Ini</Label>
-              <Input 
-                id="currentStock" 
-                type="number" 
-                placeholder="50"
-                value={formData.current_stock}
-                onChange={(e) => handleInputChange('current_stock', parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="minStock">Stok Minimum</Label>
-              <Input 
-                id="minStock" 
-                type="number" 
-                placeholder="10"
-                value={formData.min_stock}
-                onChange={(e) => handleInputChange('min_stock', parseFloat(e.target.value) || 0)}
-                min="0"
-                step="0.1"
-              />
-            </div>
-          </div>
-        </TabsContent>
-        
         <TabsContent value="supplier" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="supplier">Nama Supplier</Label>
-              <Input 
-                id="supplier" 
-                placeholder="CV. Bahan Berkah"
-                value={formData.supplier}
-                onChange={(e) => handleInputChange('supplier', e.target.value)}
-              />
-            </div>
-          </div>
+          <MobileInput
+            label="Nama Supplier"
+            placeholder="CV. Bahan Berkah"
+            value={formData.supplier}
+            onChange={(value) => handleInputChange('supplier', value)}
+          />
         </TabsContent>
         
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
-          <Button type="submit" disabled={isSubmitting}>
+        <div className={`flex gap-2 pt-4 border-t ${
+          isMobile ? 'flex-col' : 'justify-end'
+        }`}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onClose}
+            className={isMobile ? 'w-full' : ''}
+          >
+            Batal
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className={isMobile ? 'w-full' : ''}
+          >
             {isSubmitting ? 'Menyimpan...' : editData ? 'Update Bahan' : 'Simpan Bahan'}
           </Button>
         </div>
       </Tabs>
-    </form>
+    </MobileForm>
   )
 }
 

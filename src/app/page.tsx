@@ -1,16 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { SmartNotificationCenter } from '@/components/automation/smart-notification-center'
 import EnhancedSmartNotifications from '@/components/automation/enhanced-smart-notifications'
 import AdvancedHPPCalculator from '@/components/automation/advanced-hpp-calculator'
 import ProductionPlanningDashboard from '@/components/automation/production-planning-dashboard'
 import InventoryAnalytics from '@/components/automation/inventory-analytics'
 import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, BarChart, Bar } from 'recharts'
+import { useResponsive } from '@/hooks/use-mobile'
+import { 
+  PullToRefresh,
+  SwipeActions 
+} from '@/components/ui/mobile-gestures'
+import {
+  MobileBarChart,
+  MobilePieChart,
+  MiniChart
+} from '@/components/ui/mobile-charts'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -20,7 +30,11 @@ import {
   Users,
   AlertTriangle,
   CheckCircle,
-  BarChart3
+  BarChart3,
+  Plus,
+  Edit,
+  Trash2,
+  Star
 } from 'lucide-react'
 
 
@@ -37,14 +51,16 @@ const getStatusBadge = (status: string) => {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
 export default function Dashboard() {
+  const { isMobile, isTablet } = useResponsive()
+  
   // Fetch real data from database
-  const { data: ingredients, loading: ingredientsLoading } = useSupabaseData('ingredients')
-  const { data: orders, loading: ordersLoading } = useSupabaseData('orders', {
+  const { data: ingredients, loading: ingredientsLoading, refetch: refetchIngredients } = useSupabaseData('ingredients')
+  const { data: orders, loading: ordersLoading, refetch: refetchOrders } = useSupabaseData('orders', {
     orderBy: { column: 'created_at', ascending: false },
     limit: 5
   })
-  const { data: customers, loading: customersLoading } = useSupabaseData('customers')
-  const { data: recipes, loading: recipesLoading } = useSupabaseData('recipes')
+  const { data: customers, loading: customersLoading, refetch: refetchCustomers } = useSupabaseData('customers')
+  const { data: recipes, loading: recipesLoading, refetch: refetchRecipes } = useSupabaseData('recipes')
   
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -97,27 +113,88 @@ export default function Dashboard() {
     name: category,
     value: count
   })) : []
+
+  // Mobile pull-to-refresh handler
+  const handleRefresh = useCallback(async () => {
+    try {
+      await Promise.all([
+        refetchIngredients(),
+        refetchOrders(),
+        refetchCustomers(),
+        refetchRecipes()
+      ])
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    }
+  }, [refetchIngredients, refetchOrders, refetchCustomers, refetchRecipes])
+
+  // Chart data for mobile components
+  const salesTrendData = [
+    { name: 'Sen', sales: stats.totalSales * 0.7 },
+    { name: 'Sel', sales: stats.totalSales * 0.8 },
+    { name: 'Rab', sales: stats.totalSales * 0.9 },
+    { name: 'Kam', sales: stats.totalSales * 0.95 },
+    { name: 'Jum', sales: stats.totalSales * 1.1 },
+    { name: 'Sab', sales: stats.totalSales },
+    { name: 'Min', sales: stats.totalSales * 1.2 }
+  ]
+
+  // Swipe actions for order items
+  const orderSwipeActions = [
+    {
+      id: 'view',
+      label: 'Lihat',
+      icon: <Star className="h-4 w-4" />,
+      color: 'blue' as const,
+      onClick: () => console.log('View order')
+    },
+    {
+      id: 'edit',
+      label: 'Edit',
+      icon: <Edit className="h-4 w-4" />,
+      color: 'green' as const,
+      onClick: () => console.log('Edit order')
+    }
+  ]
   return (
     <AppLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Selamat datang di sistem manajemen toko roti</p>
-        </div>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
+          <div>
+            <h1 className={`font-bold text-foreground ${
+              isMobile ? 'text-2xl' : 'text-3xl'
+            }`}>Dashboard</h1>
+            <p className="text-muted-foreground">Selamat datang di sistem manajemen toko roti</p>
+          </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {/* Stats Cards */}
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-4'
+          }`}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Penjualan Hari Ini</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">Rp {stats.totalSales.toLocaleString('id-ID')}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>Rp {stats.totalSales.toLocaleString('id-ID')}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 text-green-500" />
                 <span className="text-green-500">+12.5%</span>
               </div>
+              {/* Mini trend chart */}
+              {stats.totalSales > 0 && (
+                <MiniChart 
+                  data={salesTrendData.slice(0, 4)}
+                  type="area"
+                  dataKey="sales"
+                  color="#10b981"
+                  className="mt-2"
+                  height={40}
+                />
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -126,7 +203,9 @@ export default function Dashboard() {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.activeOrders}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{stats.activeOrders}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 text-green-500" />
                 <span className="text-green-500">+{stats.activeOrders > 0 ? '3' : '0'}</span>
@@ -139,7 +218,9 @@ export default function Dashboard() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{ingredients?.length || 0}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{ingredients?.length || 0}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <AlertTriangle className="h-3 w-3 text-orange-500" />
                 <span className="text-orange-500">{lowStockItems.length} menipis</span>
@@ -152,7 +233,9 @@ export default function Dashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{recipes?.length || 0}</div>
+              <div className={`font-bold ${
+                isMobile ? 'text-xl' : 'text-2xl'
+              }`}>{recipes?.length || 0}</div>
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <TrendingUp className="h-3 w-3 text-green-500" />
                 <span className="text-green-500">+2</span>
@@ -164,7 +247,9 @@ export default function Dashboard() {
         {/* Enhanced Smart Notifications */}
         <EnhancedSmartNotifications />
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className={`grid gap-6 ${
+          isMobile ? 'grid-cols-1' : 'md:grid-cols-2'
+        }`}>
           {/* Low Stock Alert */}
           <Card>
             <CardHeader>
@@ -213,18 +298,22 @@ export default function Dashboard() {
                   orders.slice(0, 5).map((order) => {
                     const status = getStatusBadge(order.status)
                     return (
-                      <div key={order.id} className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{order.order_no}</p>
-                          <p className="text-sm text-muted-foreground">{order.customer_name || 'Walk-in customer'}</p>
+                      <SwipeActions key={order.id} actions={orderSwipeActions}>
+                        <div className={`flex items-center justify-between p-3 rounded-lg ${
+                          isMobile ? 'bg-muted/50' : ''
+                        }`}>
+                          <div>
+                            <p className="font-medium">{order.order_no}</p>
+                            <p className="text-sm text-muted-foreground">{order.customer_name || 'Walk-in customer'}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge variant={status.variant}>{status.label}</Badge>
+                            <p className="text-sm font-medium mt-1">
+                              Rp {(order.total_amount || 0).toLocaleString('id-ID')}
+                            </p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <Badge variant={status.variant}>{status.label}</Badge>
-                          <p className="text-sm font-medium mt-1">
-                            Rp {(order.total_amount || 0).toLocaleString('id-ID')}
-                          </p>
-                        </div>
-                      </div>
+                      </SwipeActions>
                     )
                   })
                 ) : (
@@ -239,81 +328,35 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Inventory Stock Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5" />
-                <span>Stok Bahan Baku</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                {inventoryChartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={inventoryChartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" fontSize={12} />
-                      <YAxis fontSize={12} />
-                      <Tooltip />
-                      <Bar dataKey="stock" fill="#8884d8" name="Stok Saat Ini" />
-                      <Bar dataKey="min" fill="#ff7300" name="Minimum" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    <div className="text-center">
-                      <BarChart3 className="h-8 w-8 mx-auto mb-2" />
-                      <p>Belum ada data stok</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        <div className={`grid gap-6 ${
+          isMobile ? 'grid-cols-1' : 'md:grid-cols-2'
+        }`}>
+          {/* Inventory Stock Chart - Mobile Optimized */}
+          <MobileBarChart
+            title="Stok Bahan Baku"
+            description="Perbandingan stok saat ini dengan minimum"
+            data={inventoryChartData}
+            xKey="name"
+            bars={[
+              { key: 'stock', name: 'Stok Saat Ini', color: '#8884d8' },
+              { key: 'min', name: 'Minimum', color: '#ff7300' }
+            ]}
+            height={isMobile ? 200 : 250}
+            showGrid={!isMobile}
+          />
 
-          {/* Category Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Package className="h-5 w-5" />
-                <span>Kategori Bahan</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64">
-                {pieData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    <div className="text-center">
-                      <Package className="h-8 w-8 mx-auto mb-2" />
-                      <p>Belum ada data kategori</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Category Distribution - Mobile Optimized */}
+          <MobilePieChart
+            title="Kategori Bahan"
+            description="Distribusi bahan baku berdasarkan kategori"
+            data={pieData}
+            valueKey="value"
+            nameKey="name"
+            colors={COLORS}
+            height={isMobile ? 200 : 250}
+            innerRadius={isMobile ? 40 : 60}
+            showLabels={!isMobile}
+          />
         </div>
 
         {/* Enhanced Automation Section */}
@@ -347,30 +390,73 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <Card>
           <CardHeader>
-            <CardTitle>Aksi Cepat</CardTitle>
+            <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>Aksi Cepat</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-4">
-              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
-                <ShoppingCart className="h-8 w-8 text-blue-500" />
-                <span className="font-medium text-foreground">Pesanan Baru</span>
-              </button>
-              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
-                <Package className="h-8 w-8 text-green-500" />
-                <span className="font-medium text-foreground">Tambah Resep</span>
-              </button>
-              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
-                <TrendingUp className="h-8 w-8 text-purple-500" />
-                <span className="font-medium text-foreground">Hitung HPP</span>
-              </button>
-              <button className="flex flex-col items-center space-y-2 p-4 border border-border rounded-lg hover:bg-muted transition-colors">
-                <CheckCircle className="h-8 w-8 text-orange-500" />
-                <span className="font-medium text-foreground">Update Stok</span>
-              </button>
+            <div className={`grid gap-4 ${
+              isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-3' : 'md:grid-cols-4'
+            }`}>
+              <Button 
+                variant="outline" 
+                className={`flex flex-col items-center space-y-2 h-auto ${
+                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
+                }`}
+                onClick={() => window.location.href = '/orders'}
+              >
+                <ShoppingCart className={`text-blue-500 ${
+                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
+                }`} />
+                <span className={`font-medium text-foreground ${
+                  isMobile ? 'text-sm' : 'text-base'
+                }`}>Pesanan Baru</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className={`flex flex-col items-center space-y-2 h-auto ${
+                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
+                }`}
+                onClick={() => window.location.href = '/recipes'}
+              >
+                <Package className={`text-green-500 ${
+                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
+                }`} />
+                <span className={`font-medium text-foreground ${
+                  isMobile ? 'text-sm' : 'text-base'
+                }`}>Tambah Resep</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className={`flex flex-col items-center space-y-2 h-auto ${
+                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
+                }`}
+                onClick={() => window.location.href = '/hpp'}
+              >
+                <TrendingUp className={`text-purple-500 ${
+                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
+                }`} />
+                <span className={`font-medium text-foreground ${
+                  isMobile ? 'text-sm' : 'text-base'
+                }`}>Hitung HPP</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                className={`flex flex-col items-center space-y-2 h-auto ${
+                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
+                }`}
+                onClick={() => window.location.href = '/inventory'}
+              >
+                <CheckCircle className={`text-orange-500 ${
+                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
+                }`} />
+                <span className={`font-medium text-foreground ${
+                  isMobile ? 'text-sm' : 'text-base'
+                }`}>Update Stok</span>
+              </Button>
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </PullToRefresh>
     </AppLayout>
   )
 }

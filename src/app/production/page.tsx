@@ -11,6 +11,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { SmartProductionPlanner } from '@/components/automation/smart-production-planner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Mobile UX imports
+import { useResponsive } from '@/hooks/use-mobile'
+import { PullToRefresh, SwipeActions } from '@/components/ui/mobile-gestures'
+import { MobileInput, MobileSelect, MobileTextarea } from '@/components/ui/mobile-forms'
+import { MiniChart } from '@/components/ui/mobile-charts'
 import { 
   Plus, 
   Search, 
@@ -363,6 +369,16 @@ export default function ProductionPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedProduction, setSelectedProduction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  
+  // Mobile responsive hooks
+  const { isMobile, isTablet } = useResponsive()
+  
+  // Pull-to-refresh handler
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    // In real app, refetch production data
+    setProductions([...sampleProductions])
+  }
 
   // Filter productions
   const filteredProductions = productions.filter(production => {
@@ -405,304 +421,550 @@ export default function ProductionPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Produksi</h1>
-            <p className="text-muted-foreground">Kelola perencanaan dan tracking produksi</p>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
+          {/* Header */}
+          <div className={`flex gap-4 ${
+            isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'
+          }`}>
+            <div className={isMobile ? 'text-center' : ''}>
+              <h1 className={`font-bold text-foreground ${
+                isMobile ? 'text-2xl' : 'text-3xl'
+              }`}>Produksi</h1>
+              <p className="text-muted-foreground">Kelola perencanaan dan tracking produksi</p>
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className={isMobile ? 'w-full' : ''}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Batch Baru
+                </Button>
+              </DialogTrigger>
+              <DialogContent className={`max-w-3xl max-h-[90vh] overflow-y-auto ${
+                isMobile ? 'w-full mx-4 rounded-lg' : ''
+              }`}>
+                <DialogHeader>
+                  <DialogTitle className={isMobile ? 'text-lg' : ''}>
+                    Buat Batch Produksi Baru
+                  </DialogTitle>
+                </DialogHeader>
+                <ProductionForm onClose={() => setIsAddDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Batch Baru
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Buat Batch Produksi Baru</DialogTitle>
-              </DialogHeader>
-              <ProductionForm onClose={() => setIsAddDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-5">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Batch</CardTitle>
-              <Factory className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalBatches}</div>
-              <p className="text-xs text-muted-foreground">semua batch</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Batch Aktif</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{stats.activeBatches}</div>
-              <p className="text-xs text-muted-foreground">sedang berjalan</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Selesai Hari Ini</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{stats.completedToday}</div>
-              <p className="text-xs text-muted-foreground">batch completed</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Produksi</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProduced}</div>
-              <p className="text-xs text-muted-foreground">unit diproduksi</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Rata-rata Efisiensi</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.avgEfficiency.toFixed(1)}%</div>
-              <p className="text-xs text-muted-foreground">target vs actual</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Smart Production Planner */}
-        <SmartProductionPlanner 
-          orders={sampleOrders}
-          recipes={sampleRecipes}
-          inventory={[
-            { id: '1', name: 'Tepung Terigu', current_stock: 25, min_stock: 10, unit: 'kg', price_per_unit: 12000, category: 'flour', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: '2', name: 'Mentega', current_stock: 8, min_stock: 5, unit: 'kg', price_per_unit: 35000, category: 'dairy', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-            { id: '3', name: 'Telur Ayam', current_stock: 3, min_stock: 12, unit: 'kg', price_per_unit: 28000, category: 'protein', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-          ]}
-        />
-
-        {/* Filters and Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari batch atau resep..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
+          {/* Stats Cards */}
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-3' : 'md:grid-cols-5'
+          }`}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={`font-medium ${
+                  isMobile ? 'text-xs' : 'text-sm'
+                }`}>Total Batch</CardTitle>
+                <Factory className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>{stats.totalBatches}</div>
+                <p className="text-xs text-muted-foreground">semua batch</p>
+                <MiniChart 
+                  data={productions.slice(0, 7).map((prod, index) => ({
+                    day: index + 1,
+                    count: prod.status === 'COMPLETED' ? 1 : 0
+                  }))}
+                  type="bar"
+                  dataKey="count"
+                  color="#3b82f6"
+                  className="mt-2"
+                  height={30}
+                />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={`font-medium ${
+                  isMobile ? 'text-xs' : 'text-sm'
+                }`}>Batch Aktif</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold text-orange-600 ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>{stats.activeBatches}</div>
+                <p className="text-xs text-muted-foreground">sedang berjalan</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={`font-medium ${
+                  isMobile ? 'text-xs' : 'text-sm'
+                }`}>Selesai Hari Ini</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold text-green-600 ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>{stats.completedToday}</div>
+                <p className="text-xs text-muted-foreground">batch completed</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={`font-medium ${
+                  isMobile ? 'text-xs' : 'text-sm'
+                }`}>Total Produksi</CardTitle>
+                <Package className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>{stats.totalProduced}</div>
+                <p className="text-xs text-muted-foreground">unit diproduksi</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={`font-medium ${
+                  isMobile ? 'text-xs' : 'text-sm'
+                }`}>Rata-rata Efisiensi</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>{stats.avgEfficiency.toFixed(1)}%</div>
+                <p className="text-xs text-muted-foreground">target vs actual</p>
+                {productions.filter(p => p.status === 'COMPLETED').length > 0 && (
+                  <MiniChart 
+                    data={productions.filter(p => p.status === 'COMPLETED').slice(0, 7).map((prod, index) => ({
+                      day: index + 1,
+                      efficiency: (prod.actualQuantity / prod.plannedQuantity * 100)
+                    }))}
+                    type="line"
+                    dataKey="efficiency"
+                    color="#10b981"
+                    className="mt-2"
+                    height={30}
                   />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Smart Production Planner */}
+          <div className={isMobile ? 'overflow-x-auto' : ''}>
+            <SmartProductionPlanner 
+              orders={sampleOrders}
+              recipes={sampleRecipes}
+              inventory={[
+                { id: '1', name: 'Tepung Terigu', current_stock: 25, min_stock: 10, unit: 'kg', price_per_unit: 12000, category: 'flour', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: '2', name: 'Mentega', current_stock: 8, min_stock: 5, unit: 'kg', price_per_unit: 35000, category: 'dairy', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                { id: '3', name: 'Telur Ayam', current_stock: 3, min_stock: 12, unit: 'kg', price_per_unit: 28000, category: 'protein', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+              ]}
+            />
+          </div>
+
+          {/* Filters and Search */}
+          <Card>
+            <CardContent className={`pt-6 ${isMobile ? 'px-4' : ''}`}>
+              <div className={`flex gap-4 ${
+                isMobile ? 'flex-col space-y-4' : 'flex-col md:flex-row'
+              }`}>
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className={`absolute text-muted-foreground ${
+                      isMobile ? 'left-3 top-3 h-4 w-4' : 'left-2.5 top-2.5 h-4 w-4'
+                    }`} />
+                    {isMobile ? (
+                      <MobileInput
+                        placeholder="Cari batch atau resep..."
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        className="pl-10"
+                      />
+                    ) : (
+                      <Input
+                        placeholder="Cari batch atau resep..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-8"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className={`flex gap-2 ${
+                  isMobile ? 'flex-col space-y-2' : 'flex-wrap'
+                }`}>
+                  {isMobile ? (
+                    <>
+                      <MobileSelect
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                        placeholder="Semua Status"
+                        options={[
+                          { value: "Semua", label: "Semua Status" },
+                          ...productionStatuses.map(status => ({
+                            value: status.value,
+                            label: status.label
+                          }))
+                        ]}
+                      />
+                      <MobileSelect
+                        value={priorityFilter}
+                        onChange={setPriorityFilter}
+                        placeholder="Semua Prioritas"
+                        options={[
+                          { value: "Semua", label: "Semua Prioritas" },
+                          ...priorities.map(priority => ({
+                            value: priority.value,
+                            label: priority.label
+                          }))
+                        ]}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <select
+                        className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                      >
+                        <option value="Semua">Semua Status</option>
+                        {productionStatuses.map(status => (
+                          <option key={status.value} value={status.value}>{status.label}</option>
+                        ))}
+                      </select>
+                      <select
+                        className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                        value={priorityFilter}
+                        onChange={(e) => setPriorityFilter(e.target.value)}
+                      >
+                        <option value="Semua">Semua Prioritas</option>
+                        {priorities.map(priority => (
+                          <option key={priority.value} value={priority.value}>{priority.label}</option>
+                        ))}
+                      </select>
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="Semua">Semua Status</option>
-                  {productionStatuses.map(status => (
-                    <option key={status.value} value={status.value}>{status.label}</option>
-                  ))}
-                </select>
-                <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value)}
-                >
-                  <option value="Semua">Semua Prioritas</option>
-                  {priorities.map(priority => (
-                    <option key={priority.value} value={priority.value}>{priority.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Production List */}
-        <div className="space-y-4">
-          {filteredProductions.map((production) => {
-            const statusInfo = getStatusInfo(production.status)
-            const priorityInfo = getPriorityInfo(production.priority)
-            const efficiency = production.status === 'COMPLETED' ? (production.actualQuantity / production.plannedQuantity * 100) : 0
-            
-            return (
-              <Card key={production.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold">{production.batchNo}</h3>
-                        <Badge className={statusInfo.color}>
-                          {statusInfo.label}
-                        </Badge>
-                        {production.priority !== 'normal' && (
-                          <Badge variant="outline" className={priorityInfo.color}>
-                            {priorityInfo.label}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Package className="h-4 w-4" />
-                            <span>{production.recipeName}</span>
+          {/* Production List */}
+          <div className="space-y-4">
+            {filteredProductions.map((production) => {
+              const statusInfo = getStatusInfo(production.status)
+              const priorityInfo = getPriorityInfo(production.priority)
+              const efficiency = production.status === 'COMPLETED' ? (production.actualQuantity / production.plannedQuantity * 100) : 0
+              
+              // Get swipe actions based on status
+              const getSwipeActions = () => {
+                type SwipeActionType = {
+                  id: string
+                  label: string
+                  icon: React.ReactNode
+                  color: 'red' | 'green' | 'blue' | 'yellow' | 'gray'
+                  onClick: () => void
+                }
+                
+                const actions: SwipeActionType[] = [
+                  {
+                    id: 'view',
+                    label: 'Detail',
+                    icon: <Eye className="h-4 w-4" />,
+                    color: 'blue',
+                    onClick: () => handleViewProduction(production)
+                  }
+                ]
+                
+                if (production.status === 'PLANNED') {
+                  actions.push({
+                    id: 'start',
+                    label: 'Mulai',
+                    icon: <Play className="h-4 w-4" />,
+                    color: 'green',
+                    onClick: () => updateProductionStatus(production.id, 'IN_PROGRESS')
+                  })
+                } else if (production.status === 'IN_PROGRESS') {
+                  actions.push(
+                    {
+                      id: 'pause',
+                      label: 'Pause',
+                      icon: <Pause className="h-4 w-4" />,
+                      color: 'yellow',
+                      onClick: () => updateProductionStatus(production.id, 'PAUSED')
+                    },
+                    {
+                      id: 'complete',
+                      label: 'Selesai',
+                      icon: <CheckCircle className="h-4 w-4" />,
+                      color: 'green',
+                      onClick: () => updateProductionStatus(production.id, 'COMPLETED')
+                    }
+                  )
+                } else if (production.status === 'PAUSED') {
+                  actions.push({
+                    id: 'resume',
+                    label: 'Lanjutkan',
+                    icon: <Play className="h-4 w-4" />,
+                    color: 'green',
+                    onClick: () => updateProductionStatus(production.id, 'IN_PROGRESS')
+                  })
+                }
+                
+                return actions
+              }
+              
+              return isMobile ? (
+                <SwipeActions
+                  key={production.id}
+                  actions={getSwipeActions()}
+                >
+                  <Card className="transition-shadow cursor-pointer">
+                    <CardContent className="p-4" onClick={() => handleViewProduction(production)}>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-base truncate">{production.batchNo}</h3>
+                            <p className="text-sm text-muted-foreground truncate mt-1">
+                              {production.recipeName}
+                            </p>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Target className="h-4 w-4" />
-                            <span>Target: {production.plannedQuantity} unit</span>
+                          <div className="flex flex-col items-end gap-1 ml-2">
+                            <Badge className={`${statusInfo.color} text-xs`}>
+                              {statusInfo.label}
+                            </Badge>
+                            {production.priority !== 'normal' && (
+                              <Badge variant="outline" className={`${priorityInfo.color} text-xs`}>
+                                {priorityInfo.label}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Target</p>
+                            <p className="font-medium">{production.plannedQuantity} unit</p>
                           </div>
                           {production.actualQuantity > 0 && (
-                            <div className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4" />
-                              <span>Actual: {production.actualQuantity} unit</span>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Actual</p>
+                              <p className="font-medium">{production.actualQuantity} unit</p>
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-xs text-muted-foreground">Cost/Unit</p>
+                            <p className="font-medium">Rp {production.costPerUnit.toLocaleString()}</p>
+                          </div>
+                          {production.status === 'COMPLETED' && (
+                            <div>
+                              <p className="text-xs text-muted-foreground">Efisiensi</p>
+                              <p className={`font-medium text-sm ${
+                                efficiency >= 90 ? 'text-green-600' : efficiency >= 75 ? 'text-yellow-600' : 'text-red-600'
+                              }`}>
+                                {efficiency.toFixed(1)}%
+                              </p>
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>Mulai: {production.plannedStartTime}</span>
+                        
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>{production.plannedStartTime.split(' ')[0]}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Timer className="h-4 w-4" />
-                            <span>Durasi: {production.estimatedDuration} menit</span>
+                          <div className="flex items-center gap-1">
+                            <Timer className="h-3 w-3" />
+                            <span>{production.estimatedDuration}m</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span>Staff: {production.assignedStaff.join(', ')}</span>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span>{production.assignedStaff.length} staff</span>
+                          </div>
+                        </div>
+                        
+                        {production.notes && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {production.notes}
+                          </p>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </SwipeActions>
+              ) : (
+                <Card key={production.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold">{production.batchNo}</h3>
+                          <Badge className={statusInfo.color}>
+                            {statusInfo.label}
+                          </Badge>
+                          {production.priority !== 'normal' && (
+                            <Badge variant="outline" className={priorityInfo.color}>
+                              {priorityInfo.label}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Package className="h-4 w-4" />
+                              <span>{production.recipeName}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Target className="h-4 w-4" />
+                              <span>Target: {production.plannedQuantity} unit</span>
+                            </div>
+                            {production.actualQuantity > 0 && (
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4" />
+                                <span>Actual: {production.actualQuantity} unit</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              <span>Mulai: {production.plannedStartTime}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Timer className="h-4 w-4" />
+                              <span>Durasi: {production.estimatedDuration} menit</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4" />
+                              <span>Staff: {production.assignedStaff.join(', ')}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold">
-                        Rp {production.costPerUnit.toLocaleString()}/unit
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Total: Rp {production.totalCost.toLocaleString()}
-                      </div>
-                      {production.status === 'COMPLETED' && (
-                        <div className="text-sm">
-                          <span className={`font-medium ${efficiency >= 90 ? 'text-green-600' : efficiency >= 75 ? 'text-yellow-600' : 'text-red-600'}`}>
-                            Efisiensi: {efficiency.toFixed(1)}%
-                          </span>
+                      <div className="text-right">
+                        <div className="text-lg font-bold">
+                          Rp {production.costPerUnit.toLocaleString()}/unit
                         </div>
-                      )}
+                        <div className="text-sm text-muted-foreground">
+                          Total: Rp {production.totalCost.toLocaleString()}
+                        </div>
+                        {production.status === 'COMPLETED' && (
+                          <div className="text-sm">
+                            <span className={`font-medium ${efficiency >= 90 ? 'text-green-600' : efficiency >= 75 ? 'text-yellow-600' : 'text-red-600'}`}>
+                              Efisiensi: {efficiency.toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="text-muted-foreground">
-                        Profit Margin: {production.profitMargin.toFixed(1)}%
-                      </div>
-                      {production.qualityRating > 0 && (
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4 text-sm">
                         <div className="text-muted-foreground">
-                          Kualitas: ⭐ {production.qualityRating}
+                          Profit Margin: {production.profitMargin.toFixed(1)}%
                         </div>
-                      )}
-                      {production.notes && (
-                        <div className="text-muted-foreground truncate max-w-xs">
-                          Note: {production.notes}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleViewProduction(production)}
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        Detail
-                      </Button>
-                      {production.status === 'PLANNED' && (
+                        {production.qualityRating > 0 && (
+                          <div className="text-muted-foreground">
+                            Kualitas: ⭐ {production.qualityRating}
+                          </div>
+                        )}
+                        {production.notes && (
+                          <div className="text-muted-foreground truncate max-w-xs">
+                            Note: {production.notes}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
                         <Button 
+                          variant="outline" 
                           size="sm"
-                          onClick={() => updateProductionStatus(production.id, 'IN_PROGRESS')}
+                          onClick={() => handleViewProduction(production)}
                         >
-                          <Play className="h-3 w-3 mr-1" />
-                          Mulai
+                          <Eye className="h-3 w-3 mr-1" />
+                          Detail
                         </Button>
-                      )}
-                      {production.status === 'IN_PROGRESS' && (
-                        <>
-                          <Button 
-                            variant="outline"
-                            size="sm"
-                            onClick={() => updateProductionStatus(production.id, 'PAUSED')}
-                          >
-                            <Pause className="h-3 w-3 mr-1" />
-                            Pause
-                          </Button>
+                        {production.status === 'PLANNED' && (
                           <Button 
                             size="sm"
-                            onClick={() => updateProductionStatus(production.id, 'COMPLETED')}
+                            onClick={() => updateProductionStatus(production.id, 'IN_PROGRESS')}
                           >
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Selesai
+                            <Play className="h-3 w-3 mr-1" />
+                            Mulai
                           </Button>
-                        </>
-                      )}
-                      {production.status === 'PAUSED' && (
-                        <Button 
-                          size="sm"
-                          onClick={() => updateProductionStatus(production.id, 'IN_PROGRESS')}
-                        >
-                          <Play className="h-3 w-3 mr-1" />
-                          Lanjutkan
-                        </Button>
-                      )}
+                        )}
+                        {production.status === 'IN_PROGRESS' && (
+                          <>
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => updateProductionStatus(production.id, 'PAUSED')}
+                            >
+                              <Pause className="h-3 w-3 mr-1" />
+                              Pause
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => updateProductionStatus(production.id, 'COMPLETED')}
+                            >
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Selesai
+                            </Button>
+                          </>
+                        )}
+                        {production.status === 'PAUSED' && (
+                          <Button 
+                            size="sm"
+                            onClick={() => updateProductionStatus(production.id, 'IN_PROGRESS')}
+                          >
+                            <Play className="h-3 w-3 mr-1" />
+                            Lanjutkan
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+
+          {filteredProductions.length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Factory className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className={`font-medium mb-2 ${
+                  isMobile ? 'text-base' : 'text-lg'
+                }`}>Tidak ada batch produksi ditemukan</h3>
+                <p className="text-muted-foreground mb-4">
+                  Coba ubah kata kunci pencarian atau filter
+                </p>
+                <Button onClick={() => setIsAddDialogOpen(true)} className={isMobile ? 'w-full' : ''}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Buat Batch Pertama
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Production Detail Dialog */}
+          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className={`max-w-5xl max-h-[90vh] overflow-y-auto ${
+              isMobile ? 'w-full mx-4 rounded-lg' : ''
+            }`}>
+              <DialogHeader>
+                <DialogTitle className={isMobile ? 'text-lg' : ''}>
+                  Detail Batch {selectedProduction?.batchNo}
+                </DialogTitle>
+              </DialogHeader>
+              {selectedProduction && <ProductionDetailView production={selectedProduction} />}
+            </DialogContent>
+          </Dialog>
         </div>
-
-        {filteredProductions.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Factory className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Tidak ada batch produksi ditemukan</h3>
-              <p className="text-muted-foreground mb-4">
-                Coba ubah kata kunci pencarian atau filter
-              </p>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Buat Batch Pertama
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Production Detail Dialog */}
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Detail Batch {selectedProduction?.batchNo}</DialogTitle>
-            </DialogHeader>
-            {selectedProduction && <ProductionDetailView production={selectedProduction} />}
-          </DialogContent>
-        </Dialog>
-      </div>
+      </PullToRefresh>
     </AppLayout>
   )
 }

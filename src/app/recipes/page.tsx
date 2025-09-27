@@ -25,6 +25,12 @@ import {
   TrendingUp
 } from 'lucide-react'
 
+// Mobile UX imports
+import { useResponsive } from '@/hooks/use-mobile'
+import { PullToRefresh } from '@/components/ui/mobile-gestures'
+import { MobileInput, MobileSelect, MobileTextarea, MobileForm } from '@/components/ui/mobile-forms'
+import { MiniChart } from '@/components/ui/mobile-charts'
+
 const categories = ['Semua', 'Roti', 'Pastry', 'Donat', 'Kue', 'Cookies']
 const difficulties = ['Easy', 'Medium', 'Hard']
 
@@ -48,6 +54,15 @@ export default function RecipesPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<RecipeWithStats | null>(null)
   const [editingRecipe, setEditingRecipe] = useState<RecipeWithStats | null>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  
+  // Mobile responsive hooks
+  const { isMobile, isTablet } = useResponsive()
+  
+  // Pull-to-refresh handler
+  const handleRefresh = async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000)) // Simulated delay
+    await fetchRecipes()
+  }
 
   // Fetch recipes from API
   useEffect(() => {
@@ -168,31 +183,40 @@ export default function RecipesPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Manajemen Resep</h1>
-            <p className="text-muted-foreground">Kelola resep dan formula produk</p>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
+          {/* Header */}
+          <div className={`flex gap-4 ${
+            isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'
+          }`}>
+            <div className={isMobile ? 'text-center' : ''}>
+              <h1 className={`font-bold text-foreground ${
+                isMobile ? 'text-2xl' : 'text-3xl'
+              }`}>Manajemen Resep</h1>
+              <p className="text-muted-foreground">Kelola resep dan formula produk</p>
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className={isMobile ? 'w-full' : ''}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah Resep
+                </Button>
+              </DialogTrigger>
+                <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${
+                  isMobile ? 'w-full mx-4 rounded-lg' : ''
+                }`}>
+                  <DialogHeader>
+                    <DialogTitle className={isMobile ? 'text-lg' : ''}>
+                      Tambah Resep Baru
+                    </DialogTitle>
+                  </DialogHeader>
+                  <RecipeForm 
+                    onClose={() => setIsAddDialogOpen(false)} 
+                    onSuccess={handleFormSuccess}
+                  />
+                </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Resep
-              </Button>
-            </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>Tambah Resep Baru</DialogTitle>
-                </DialogHeader>
-                <RecipeForm 
-                  onClose={() => setIsAddDialogOpen(false)} 
-                  onSuccess={handleFormSuccess}
-                />
-              </DialogContent>
-          </Dialog>
-        </div>
 
         {/* Loading State */}
         {loading && (
@@ -221,177 +245,309 @@ export default function RecipesPage() {
         {/* Content - only show when not loading and no error */}
         {!loading && !error && (
           <>
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Resep</CardTitle>
-              <ChefHat className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{recipes.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {recipes.filter(r => r.is_active).length} aktif
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Rata-rata Margin</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {recipes.length > 0 
-                  ? (recipes.reduce((sum, r) => sum + (r.margin || 0), 0) / recipes.length).toFixed(1)
-                  : 0}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                dari semua resep
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Resep Terpopuler</CardTitle>
-              <Star className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {recipes.length > 0 ? recipes[0]?.name || '-' : '-'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {recipes.length > 0 ? (recipes[0]?.totalMade || 0) : 0} kali dibuat
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Produksi</CardTitle>
-              <Calculator className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {recipes.reduce((sum, r) => sum + (r.totalMade || 0), 0)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                item diproduksi
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters and Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Cari resep..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {categories.map((category) => (
-                  <Button
-                    key={category}
-                    variant={selectedCategory === category ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    {category}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Recipes Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredRecipes.map((recipe) => (
-            <Card key={recipe.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{recipe.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {recipe.description}
-                    </p>
-                  </div>
-                  <Badge className={getDifficultyColor(recipe.difficulty || 'Medium')}>
-                    {recipe.difficulty || 'Medium'}
-                  </Badge>
-                </div>
-                <div className="flex gap-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    {recipe.servings} porsi
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit
-                  </div>
-                </div>
+          {/* Stats Cards */}
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-2' : 'md:grid-cols-4'
+          }`}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Resep</CardTitle>
+                <ChefHat className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">HPP</p>
-                    <p className="font-medium">Rp {(recipe.cost || 0).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Harga Jual</p>
-                    <p className="font-medium">Rp {(recipe.sellingPrice || 0).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Margin</p>
-                    <p className="font-medium text-green-600">{(recipe.margin || 0).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Rating</p>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">{recipe.rating || 0}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleViewRecipe(recipe)}
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    Lihat
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleEditRecipe(recipe)}
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => handleDeleteRecipe(recipe)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>{recipes.length}</div>
+                <p className="text-xs text-muted-foreground">
+                  {recipes.filter(r => r.is_active).length} aktif
+                </p>
+                {recipes.length > 0 && (
+                  <MiniChart 
+                    data={recipes.slice(0, 7).map((recipe, index) => ({
+                      day: index + 1,
+                      count: recipe.totalMade || 0
+                    }))}
+                    type="bar"
+                    dataKey="count"
+                    color="#10b981"
+                    className="mt-2"
+                    height={30}
+                  />
+                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Rata-rata Margin</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>
+                  {recipes.length > 0 
+                    ? (recipes.reduce((sum, r) => sum + (r.margin || 0), 0) / recipes.length).toFixed(1)
+                    : 0}%
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  dari semua resep
+                </p>
+                {recipes.length > 0 && (
+                  <MiniChart 
+                    data={recipes.slice(0, 7).map((recipe, index) => ({
+                      day: index + 1,
+                      margin: recipe.margin || 0
+                    }))}
+                    type="line"
+                    dataKey="margin"
+                    color="#3b82f6"
+                    className="mt-2"
+                    height={30}
+                  />
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className={`font-medium ${
+                  isMobile ? 'text-xs' : 'text-sm'
+                }`}>Resep Terpopuler</CardTitle>
+                <Star className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-lg truncate' : 'text-2xl'
+                }`}>
+                  {recipes.length > 0 ? recipes[0]?.name || '-' : '-'}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {recipes.length > 0 ? (recipes[0]?.totalMade || 0) : 0} kali dibuat
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Produksi</CardTitle>
+                <Calculator className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`font-bold ${
+                  isMobile ? 'text-xl' : 'text-2xl'
+                }`}>
+                  {recipes.reduce((sum, r) => sum + (r.totalMade || 0), 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  item diproduksi
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Filters and Search */}
+          <Card>
+            <CardContent className={`pt-6 ${isMobile ? 'px-4' : ''}`}>
+              <div className={`flex gap-4 ${
+                isMobile ? 'flex-col space-y-4' : 'flex-col md:flex-row'
+              }`}>
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className={`absolute text-muted-foreground ${
+                      isMobile ? 'left-3 top-3 h-4 w-4' : 'left-2.5 top-2.5 h-4 w-4'
+                    }`} />
+                    {isMobile ? (
+                      <MobileInput
+                        placeholder="Cari resep..."
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        className="pl-10"
+                      />
+                    ) : (
+                      <Input
+                        placeholder="Cari resep..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-8"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className={`flex gap-2 ${
+                  isMobile ? 'overflow-x-auto pb-2' : 'flex-wrap'
+                }`}>
+                  {categories.map((category) => (
+                    <Button
+                      key={category}
+                      variant={selectedCategory === category ? "default" : "outline"}
+                      size={isMobile ? "sm" : "sm"}
+                      onClick={() => setSelectedCategory(category)}
+                      className={isMobile ? 'whitespace-nowrap flex-shrink-0' : ''}
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recipes Grid */}
+          {isMobile ? (
+            <div className="space-y-4">
+              {filteredRecipes.map((recipe) => (
+                <Card 
+                  key={recipe.id}
+                  className="p-4 transition-all duration-200 hover:shadow-lg cursor-pointer"
+                  onClick={() => handleViewRecipe(recipe)}
+                >
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-base truncate">{recipe.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                          {recipe.description}
+                        </p>
+                      </div>
+                      <Badge className={`ml-2 ${getDifficultyColor(recipe.difficulty || 'Medium')}`}>
+                        {recipe.difficulty || 'Medium'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {recipe.servings}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {(recipe.prep_time || 0) + (recipe.cook_time || 0)}m
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        {recipe.rating || 0}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-xs text-muted-foreground">HPP</p>
+                        <p className="font-medium text-sm">Rp {(recipe.cost || 0).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Margin</p>
+                        <p className="font-medium text-green-600 text-sm">{(recipe.margin || 0).toFixed(1)}%</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 h-8 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditRecipe(recipe)
+                        }}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 px-2 text-red-600 hover:text-red-700"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteRecipe(recipe)
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredRecipes.map((recipe) => (
+                <Card key={recipe.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{recipe.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {recipe.description}
+                        </p>
+                      </div>
+                      <Badge className={getDifficultyColor(recipe.difficulty || 'Medium')}>
+                        {recipe.difficulty || 'Medium'}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {recipe.servings} porsi
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">HPP</p>
+                        <p className="font-medium">Rp {(recipe.cost || 0).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Harga Jual</p>
+                        <p className="font-medium">Rp {(recipe.sellingPrice || 0).toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Margin</p>
+                        <p className="font-medium text-green-600">{(recipe.margin || 0).toFixed(1)}%</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Rating</p>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span className="font-medium">{recipe.rating || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleViewRecipe(recipe)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Lihat
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditRecipe(recipe)}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => handleDeleteRecipe(recipe)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
         {filteredRecipes.length === 0 && recipes.length > 0 && (
           <Card>
@@ -429,38 +585,47 @@ export default function RecipesPage() {
           </Card>
         )}
 
-        {/* Edit Recipe Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Resep</DialogTitle>
-            </DialogHeader>
-            <RecipeForm 
-              onClose={() => {
-                setIsEditDialogOpen(false)
-                setEditingRecipe(null)
-              }}
-              onSuccess={() => {
-                handleFormSuccess()
-                setEditingRecipe(null)
-              }}
-              editData={editingRecipe}
-            />
-          </DialogContent>
-        </Dialog>
+          {/* Edit Recipe Dialog */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${
+              isMobile ? 'w-full mx-4 rounded-lg' : ''
+            }`}>
+              <DialogHeader>
+                <DialogTitle className={isMobile ? 'text-lg' : ''}>
+                  Edit Resep
+                </DialogTitle>
+              </DialogHeader>
+              <RecipeForm 
+                onClose={() => {
+                  setIsEditDialogOpen(false)
+                  setEditingRecipe(null)
+                }}
+                onSuccess={() => {
+                  handleFormSuccess()
+                  setEditingRecipe(null)
+                }}
+                editData={editingRecipe}
+              />
+            </DialogContent>
+          </Dialog>
 
-        {/* Recipe Detail Dialog */}
-        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{selectedRecipe?.name}</DialogTitle>
-            </DialogHeader>
-            {selectedRecipe && <RecipeDetailView recipe={selectedRecipe} />}
-          </DialogContent>
-        </Dialog>
-        </>
+          {/* Recipe Detail Dialog */}
+          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto ${
+              isMobile ? 'w-full mx-4 rounded-lg' : ''
+            }`}>
+              <DialogHeader>
+                <DialogTitle className={isMobile ? 'text-lg' : ''}>
+                  {selectedRecipe?.name}
+                </DialogTitle>
+              </DialogHeader>
+              {selectedRecipe && <RecipeDetailView recipe={selectedRecipe} />}
+            </DialogContent>
+          </Dialog>
+          </>
         )}
-      </div>
+        </div>
+      </PullToRefresh>
     </AppLayout>
   )
 }
