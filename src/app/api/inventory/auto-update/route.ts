@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
 
 // Helper function to check for low stock alerts
 async function checkLowStockAlerts(supabase: any, results: any[]) {
-  const alerts = []
+  const alerts: any[] = []
   
   // Get all affected ingredients
   const ingredientIds = results.flatMap(r => 

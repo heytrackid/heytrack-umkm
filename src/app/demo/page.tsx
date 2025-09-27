@@ -46,7 +46,7 @@ import {
   ChevronDown,
   Cloud,
   CreditCard,
-  GitHub,
+  Github,
   Keyboard,
   LifeBuoy,
   LogOut,

@@ -1,67 +1,88 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { 
+  IngredientSchema,
+  PaginationSchema
+} from '@/lib/validations'
+import {
+  withValidation,
+  withQueryValidation,
+  createSuccessResponse,
+  createErrorResponse,
+  handleDatabaseError,
+  extractPagination,
+  calculateOffset,
+  createPaginationMeta
+} from '@/lib/api-validation'
 
-// GET /api/ingredients - Get all ingredients
-export async function GET() {
-  try {
-    const supabase = createServerSupabaseAdmin()
-    const { data, error } = await (supabase as any)
-      .from('ingredients')
-      .select('*')
-      .order('name')
-    
-    if (error) {
-      console.error('Error fetching ingredients:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch ingredients' },
-        { status: 500 }
-      )
+// GET /api/ingredients - Get all ingredients with pagination and filtering
+export const GET = withQueryValidation(
+  PaginationSchema.partial(), // Make all fields optional for GET requests
+  async (req: NextRequest, query) => {
+    try {
+      const { page = 1, limit = 10, sort, order = 'desc', search } = query
+      const offset = calculateOffset(page, limit)
+      
+      const supabase = createServerSupabaseAdmin()
+      
+      // Build query
+      let supabaseQuery = (supabase as any)
+        .from('ingredients')
+        .select('*', { count: 'exact' })
+        .range(offset, offset + limit - 1)
+
+      // Apply search filter
+      if (search) {
+        supabaseQuery = supabaseQuery.or(`name.ilike.%${search}%,category.ilike.%${search}%,supplier.ilike.%${search}%`)
+      }
+
+      // Apply sorting
+      if (sort) {
+        supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
+      } else {
+        supabaseQuery = supabaseQuery.order('name', { ascending: true })
+      }
+
+      const { data, error, count } = await supabaseQuery
+
+      if (error) {
+        return handleDatabaseError(error)
+      }
+
+      // Create pagination metadata
+      const pagination = createPaginationMeta(count || 0, page, limit)
+
+      return createSuccessResponse({
+        ingredients: data,
+        pagination
+      })
+
+    } catch (error) {
+      return handleDatabaseError(error)
     }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Error in GET /api/ingredients:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
   }
-}
+)
 
 // POST /api/ingredients - Create new ingredient
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    
-    // Validate required fields
-    if (!body.name || !body.unit || body.price_per_unit === undefined) {
-      return NextResponse.json(
-        { error: 'Name, unit, and price_per_unit are required' },
-        { status: 400 }
-      )
-    }
+export const POST = withValidation(
+  IngredientSchema,
+  async (req: NextRequest, validatedData) => {
+    try {
+      const supabase = createServerSupabaseAdmin()
+      const { data, error } = await (supabase as any)
+        .from('ingredients')
+        .insert([validatedData])
+        .select()
+        .single()
 
-    const supabase = createServerSupabaseAdmin()
-    const { data, error } = await (supabase as any)
-      .from('ingredients')
-      .insert(body)
-      .select()
-      .single()
-    
-    if (error) {
-      console.error('Error creating ingredient:', error)
-      return NextResponse.json(
-        { error: 'Failed to create ingredient' },
-        { status: 500 }
-      )
-    }
+      if (error) {
+        return handleDatabaseError(error)
+      }
 
-    return NextResponse.json(data, { status: 201 })
-  } catch (error) {
-    console.error('Error in POST /api/ingredients:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+      return createSuccessResponse(data, 'Ingredient berhasil ditambahkan')
+
+    } catch (error) {
+      return handleDatabaseError(error)
+    }
   }
-}
+)

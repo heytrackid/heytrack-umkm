@@ -5,9 +5,10 @@ import { automationEngine } from '@/lib/automation-engine'
 // GET /api/recipes/[id]/hpp - Calculate HPP and pricing suggestions for a recipe
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const resolvedParams = await params
     const supabase = createServerSupabaseAdmin()
     
     // Fetch recipe with ingredients
@@ -28,7 +29,7 @@ export async function GET(
           )
         )
       `)
-      .eq('id', params.id)
+      .eq('id', resolvedParams.id)
       .single()
     
     if (error) {
@@ -41,7 +42,7 @@ export async function GET(
 
     if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
       return NextResponse.json({
-        recipe_id: params.id,
+        recipe_id: resolvedParams.id,
         recipe_name: recipe.name,
         hpp_breakdown: {
           ingredient_cost: 0,
@@ -73,7 +74,7 @@ export async function GET(
     const costPerServing = pricingAnalysis.breakdown.costPerServing
     
     return NextResponse.json({
-      recipe_id: params.id,
+      recipe_id: resolvedParams.id,
       recipe_name: recipe.name,
       servings: recipe.servings,
       hpp_breakdown: {
@@ -116,8 +117,8 @@ export async function GET(
 
 // Helper function to check ingredient availability
 function checkIngredientAvailability(recipe: any) {
-  const stockWarnings = []
-  const missingIngredients = []
+  const stockWarnings: any[] = []
+  const missingIngredients: any[] = []
   let canProduce = true
   
   recipe.recipe_ingredients.forEach((ri: any) => {

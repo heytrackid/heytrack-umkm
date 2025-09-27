@@ -5,6 +5,10 @@ import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { SmartNotificationCenter } from '@/components/automation/smart-notification-center'
+import EnhancedSmartNotifications from '@/components/automation/enhanced-smart-notifications'
+import AdvancedHPPCalculator from '@/components/automation/advanced-hpp-calculator'
+import ProductionPlanningDashboard from '@/components/automation/production-planning-dashboard'
+import InventoryAnalytics from '@/components/automation/inventory-analytics'
 import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, BarChart, Bar } from 'recharts'
 import { 
@@ -157,8 +161,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Smart Notifications */}
-        <SmartNotificationCenter />
+        {/* Enhanced Smart Notifications */}
+        <EnhancedSmartNotifications />
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Low Stock Alert */}
@@ -287,7 +291,7 @@ export default function Dashboard() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
@@ -310,6 +314,34 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Enhanced Automation Section */}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Smart Automation Dashboard</h2>
+            <p className="text-muted-foreground">Advanced analytics and intelligent business automation</p>
+          </div>
+          
+          {/* Production Planning */}
+          <ProductionPlanningDashboard />
+          
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Inventory Analytics */}
+            <InventoryAnalytics />
+            
+            {/* Advanced HPP Calculator */}
+            {recipes && recipes.length > 0 && (
+              <AdvancedHPPCalculator 
+                recipeId={recipes[0].id}
+                recipeName={recipes[0].name}
+                onPriceUpdate={(price) => {
+                  console.log('Price updated to:', price)
+                  // Could add logic here to update recipe price in database
+                }}
+              />
+            )}
+          </div>
         </div>
 
         {/* Quick Actions */}

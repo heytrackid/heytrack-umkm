@@ -185,22 +185,25 @@ export default function OrdersPage() {
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Pesanan</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pesanan</h1>
             <p className="text-muted-foreground">Kelola pesanan dari pelanggan</p>
           </div>
-          <Button onClick={() => {
-            setEditingOrder(null)
-            setShowOrderForm(true)
-          }}>
+          <Button 
+            onClick={() => {
+              setEditingOrder(null)
+              setShowOrderForm(true)
+            }}
+            className="w-full sm:w-auto"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Pesanan Baru
           </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
@@ -258,9 +261,9 @@ export default function OrdersPage() {
                   />
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <select
-                  className="px-3 py-1.5 border border-input rounded-md bg-background text-sm"
+                  className="flex-1 sm:flex-none px-3 py-1.5 border border-input rounded-md bg-background text-sm min-w-0"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
@@ -282,91 +285,102 @@ export default function OrdersPage() {
             
             return (
               <Card key={order.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold">{order.order_no}</h3>
-                        <Badge className={statusInfo.color}>
-                          {statusInfo.label}
-                        </Badge>
-                        {order.priority !== 'normal' && (
-                          <Badge variant="outline" className={priorityInfo.color}>
-                            {priorityInfo.label}
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                        <h3 className="text-lg font-semibold truncate">{order.order_no}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge className={statusInfo.color}>
+                            {statusInfo.label}
                           </Badge>
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4" />
-                          <span>{order.customer_name}</span>
-                          {order.customer_phone && (
-                            <>
-                              <Phone className="h-4 w-4 ml-2" />
-                              <span>{order.customer_phone}</span>
-                            </>
+                          {order.priority !== 'normal' && (
+                            <Badge variant="outline" className={priorityInfo.color}>
+                              {priorityInfo.label}
+                            </Badge>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          <span>Pesan: {order.order_date}</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span className="font-medium">{order.customer_name}</span>
+                          </div>
+                          {order.customer_phone && (
+                            <div className="flex items-center gap-2 sm:ml-2">
+                              <Phone className="h-4 w-4" />
+                              <span>{order.customer_phone}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>Pesan: {order.order_date}</span>
+                          </div>
                           {order.delivery_date && (
-                            <span className="ml-4">Kirim: {order.delivery_date} {order.delivery_time}</span>
+                            <div className="flex items-center gap-2 sm:ml-2">
+                              <span>Kirim: {order.delivery_date} {order.delivery_time}</span>
+                            </div>
                           )}
                         </div>
                         {order.customer_address && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span className="truncate max-w-md">{order.customer_address}</span>
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                            <span className="break-words">{order.customer_address}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left lg:text-right flex-shrink-0">
                       <div className="text-lg font-bold">Rp {(order.total_amount || 0).toLocaleString()}</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-muted-foreground space-y-0.5">
                         {(order.paid_amount || 0) > 0 && (
-                          <span className="text-green-600">
+                          <div className="text-green-600">
                             Dibayar: Rp {(order.paid_amount || 0).toLocaleString()}
-                          </span>
+                          </div>
                         )}
                         {(order.total_amount || 0) > (order.paid_amount || 0) && (
-                          <span className="text-red-600 block">
+                          <div className="text-red-600">
                             Sisa: Rp {((order.total_amount || 0) - (order.paid_amount || 0)).toLocaleString()}
-                          </span>
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-4 text-sm">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
                       <div className="flex items-center gap-1">
                         <Package className="h-4 w-4" />
                         <span>{order.order_items?.length || 0} item</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span>Total qty: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}</span>
+                        <span>Qty: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}</span>
                       </div>
                       {order.notes && (
-                        <div className="text-muted-foreground truncate max-w-xs">
+                        <div className="text-muted-foreground truncate max-w-xs hidden sm:block">
                           Note: {order.notes}
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => handleViewOrder(order)}
+                        className="flex-1 sm:flex-none"
                       >
                         <Eye className="h-3 w-3 mr-1" />
-                        Detail
+                        <span className="hidden sm:inline">Detail</span>
+                        <span className="sm:hidden">Lihat</span>
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm"
                         onClick={() => handleEditOrder(order)}
+                        className="flex-1 sm:flex-none"
                       >
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
@@ -375,25 +389,31 @@ export default function OrdersPage() {
                         <Button 
                           size="sm"
                           onClick={() => updateOrderStatus(order.id, 'CONFIRMED')}
+                          className="flex-1 sm:flex-none"
                         >
                           <CheckCircle className="h-3 w-3 mr-1" />
-                          Konfirmasi
+                          <span className="hidden sm:inline">Konfirmasi</span>
+                          <span className="sm:hidden">OK</span>
                         </Button>
                       )}
                       {order.status === 'CONFIRMED' && (
                         <Button 
                           size="sm"
                           onClick={() => updateOrderStatus(order.id, 'IN_PROGRESS')}
+                          className="flex-1 sm:flex-none"
                         >
-                          Mulai Produksi
+                          <span className="hidden sm:inline">Mulai Produksi</span>
+                          <span className="sm:hidden">Produksi</span>
                         </Button>
                       )}
                       {order.status === 'IN_PROGRESS' && (
                         <Button 
                           size="sm"
                           onClick={() => updateOrderStatus(order.id, 'READY')}
+                          className="flex-1 sm:flex-none"
                         >
-                          Tandai Selesai
+                          <span className="hidden sm:inline">Tandai Selesai</span>
+                          <span className="sm:hidden">Selesai</span>
                         </Button>
                       )}
                       {order.status === 'READY' && (
@@ -433,9 +453,9 @@ export default function OrdersPage() {
 
         {/* Order Form Dialog */}
         <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">
                 {editingOrder ? `Edit Pesanan ${editingOrder.order_no}` : 'Buat Pesanan Baru'}
               </DialogTitle>
             </DialogHeader>
@@ -456,9 +476,9 @@ export default function OrdersPage() {
 
         {/* Order Detail Dialog */}
         <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Detail Pesanan {selectedOrder?.order_no}</DialogTitle>
+              <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no}</DialogTitle>
             </DialogHeader>
             {selectedOrder && <OrderDetailView order={selectedOrder} />}
           </DialogContent>
@@ -881,9 +901,9 @@ function OrderForm({ onClose, onSuccess, editData }: {
         </TabsContent>
         
         <TabsContent value="items" className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <h3 className="text-lg font-medium">Item Pesanan ({orderItems.length})</h3>
-            <Button type="button" size="sm" onClick={addOrderItem}>
+            <Button type="button" size="sm" onClick={addOrderItem} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Tambah Item
             </Button>
@@ -903,8 +923,95 @@ function OrderForm({ onClose, onSuccess, editData }: {
                 
                 return (
                   <div key={index} className="border rounded-lg overflow-hidden">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4">
-                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {/* Mobile Layout */}
+                    <div className="block sm:hidden">
+                      <div className="p-3 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
+                            <select
+                              className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
+                              value={item.recipe_id}
+                              onChange={(e) => updateOrderItem(index, 'recipe_id', e.target.value)}
+                            >
+                              {availableRecipes.map(recipe => (
+                                <option key={recipe.id} value={recipe.id}>
+                                  {recipe.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 ml-2 mt-4"
+                            onClick={() => removeOrderItem(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
+                            <Input
+                              type="number"
+                              className="text-sm mt-1"
+                              value={item.quantity}
+                              onChange={(e) => updateOrderItem(index, 'quantity', e.target.value)}
+                              min="1"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs font-medium text-muted-foreground">Total</Label>
+                            <Input
+                              className="text-sm font-medium mt-1 bg-gray-50"
+                              value={`Rp ${item.total_price.toLocaleString()}`}
+                              readOnly
+                            />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                            Harga Satuan
+                            {hasHPP && hppData.margin_analysis && (
+                              <span className={`text-xs px-1 py-0.5 rounded text-white ${
+                                hppData.margin_analysis.is_profitable 
+                                  ? 'bg-green-500' 
+                                  : 'bg-red-500'
+                              }`}>
+                                {hppData.margin_analysis.current_margin}%
+                              </span>
+                            )}
+                          </Label>
+                          <Input
+                            type="number"
+                            className={`text-sm mt-1 ${
+                              hasHPP && !hppData.margin_analysis?.is_profitable 
+                                ? 'border-red-300 bg-red-50' 
+                                : hasHPP && hppData.margin_analysis?.is_profitable
+                                ? 'border-green-300 bg-green-50'
+                                : ''
+                            }`}
+                            value={item.unit_price}
+                            onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
+                            min="0"
+                            step="500"
+                          />
+                          {hasHPP && hppData.suggested_selling_price !== item.unit_price && (
+                            <div className="text-xs text-blue-600 mt-1">
+                              💡 Saran: Rp {hppData.suggested_selling_price.toLocaleString()}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:flex sm:items-center gap-3 p-4">
+                      <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-3">
                         <div>
                           <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
                           <select
@@ -971,17 +1078,15 @@ function OrderForm({ onClose, onSuccess, editData }: {
                           />
                         </div>
                       </div>
-                      <div className="flex sm:block">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 ml-auto sm:ml-0"
-                          onClick={() => removeOrderItem(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700"
+                        onClick={() => removeOrderItem(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                     
                     {/* HPP Information Panel */}
@@ -1026,27 +1131,33 @@ function OrderForm({ onClose, onSuccess, editData }: {
                         {hppData.pricing_suggestions && (
                           <div className="mt-2 pt-2 border-t border-gray-200">
                             <div className="font-medium text-gray-700 mb-1">🎯 Saran Harga:</div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-1 sm:gap-2">
                               <button
                                 type="button"
-                                className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 min-w-0"
                                 onClick={() => updateOrderItem(index, 'unit_price', hppData.pricing_suggestions.economy.price)}
                               >
-                                Ekonomis: Rp {hppData.pricing_suggestions.economy.price.toLocaleString()}
+                                <span className="hidden sm:inline">Ekonomis:</span>
+                                <span className="sm:hidden">Eco:</span>
+                                <span className="ml-1">Rp {hppData.pricing_suggestions.economy.price.toLocaleString()}</span>
                               </button>
                               <button
                                 type="button"
-                                className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 min-w-0"
                                 onClick={() => updateOrderItem(index, 'unit_price', hppData.pricing_suggestions.standard.price)}
                               >
-                                Standar: Rp {hppData.pricing_suggestions.standard.price.toLocaleString()}
+                                <span className="hidden sm:inline">Standar:</span>
+                                <span className="sm:hidden">Std:</span>
+                                <span className="ml-1">Rp {hppData.pricing_suggestions.standard.price.toLocaleString()}</span>
                               </button>
                               <button
                                 type="button"
-                                className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                                className="flex-1 sm:flex-none px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 min-w-0"
                                 onClick={() => updateOrderItem(index, 'unit_price', hppData.pricing_suggestions.premium.price)}
                               >
-                                Premium: Rp {hppData.pricing_suggestions.premium.price.toLocaleString()}
+                                <span className="hidden sm:inline">Premium:</span>
+                                <span className="sm:hidden">Pre:</span>
+                                <span className="ml-1">Rp {hppData.pricing_suggestions.premium.price.toLocaleString()}</span>
                               </button>
                             </div>
                           </div>
@@ -1237,15 +1348,15 @@ function OrderDetailView({ order }: { order: any }) {
 
   return (
     <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="items">Item</TabsTrigger>
-        <TabsTrigger value="customer">Pelanggan</TabsTrigger>
-        <TabsTrigger value="payment">Pembayaran</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+        <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+        <TabsTrigger value="items" className="text-xs sm:text-sm">Item</TabsTrigger>
+        <TabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</TabsTrigger>
+        <TabsTrigger value="payment" className="text-xs sm:text-sm">Bayar</TabsTrigger>
       </TabsList>
       
       <TabsContent value="overview" className="space-y-4">
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <div className="space-y-4">
             <div>
               <h3 className="font-medium">Informasi Pesanan</h3>
@@ -1383,7 +1494,7 @@ function OrderDetailView({ order }: { order: any }) {
       </TabsContent>
       
       <TabsContent value="payment" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Metode Pembayaran</CardTitle>

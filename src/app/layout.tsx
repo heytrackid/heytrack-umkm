@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import ErrorBoundary from '@/components/error/error-boundary';
+import { Toaster } from '@/components/ui/toaster';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,7 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

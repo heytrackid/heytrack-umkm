@@ -122,14 +122,14 @@ export function useSupabaseMutation<T extends keyof Tables>(
         body: JSON.stringify(data),
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create record');
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.errors?.join(', ') || 'Failed to create record');
       }
       
-      const result = await response.json();
       onSuccess?.();
-      return result;
+      return result.data;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMsg);
@@ -154,14 +154,14 @@ export function useSupabaseMutation<T extends keyof Tables>(
         body: JSON.stringify(data),
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update record');
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.errors?.join(', ') || 'Failed to update record');
       }
       
-      const result = await response.json();
       onSuccess?.();
-      return result;
+      return result.data;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMsg);
@@ -184,9 +184,10 @@ export function useSupabaseMutation<T extends keyof Tables>(
         method: 'DELETE',
       });
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete record');
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.errors?.join(', ') || 'Failed to delete record');
       }
       
       onSuccess?.();
@@ -231,13 +232,13 @@ export function useSupabaseRecord<T extends keyof Tables>(
       const endpoint = table.replace(/_/g, '-');
       
       const response = await fetch(`/api/${endpoint}/${id}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch record');
+      const result = await response.json();
+      
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || result.errors?.join(', ') || 'Failed to fetch record');
       }
       
-      const result = await response.json();
-      setData(result);
+      setData(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

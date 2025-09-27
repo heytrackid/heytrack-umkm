@@ -1,12 +1,13 @@
 'use client'
 
 import { ReactNode } from 'react'
-import Sidebar from './sidebar'
+import AppSidebar from './sidebar'
 import { Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -14,12 +15,14 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
+    <SidebarProvider>
+      <div className="flex h-screen bg-background">
+        <AppSidebar />
       <div className="flex flex-1 flex-col">
         {/* Header */}
         <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6">
           <div className="flex items-center space-x-4">
+            <SidebarTrigger className="md:hidden" />
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -44,5 +47,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </main>
       </div>
     </div>
+    </SidebarProvider>
   )
 }
