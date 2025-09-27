@@ -13,7 +13,10 @@ import {
   CreditCard,
   BarChart3,
   Plus,
-  MoreHorizontal
+  MoreHorizontal,
+  Calculator,
+  Receipt,
+  Zap
 } from 'lucide-react'
 
 interface BottomNavItem {
@@ -29,26 +32,24 @@ const mainNavItems: BottomNavItem[] = [
     name: 'Dashboard',
     href: '/',
     icon: LayoutDashboard,
-    // color: 'text-blue-600' // Removed for cleaner look
   },
   {
-    name: 'Resep',
-    href: '/recipes',
-    icon: ChefHat,
-    // color: 'text-green-600' // Removed for cleaner look
+    name: 'Pesanan',
+    href: '/pesanan-simple',
+    icon: ShoppingCart,
+    color: 'text-slate-600'
   },
   {
     name: 'Bahan',
-    href: '/ingredients',
+    href: '/bahan-simple',
     icon: Package,
-    // color: 'text-amber-600' // Removed for cleaner look
+    color: 'text-slate-600'
   },
   {
-    name: 'Order',
-    href: '/orders',
-    icon: ShoppingCart,
-    badge: 3, // Example badge count
-    // color: 'text-purple-600' // Removed for cleaner look
+    name: 'Biaya',
+    href: '/pengeluaran-simple',
+    icon: Receipt,
+    color: 'text-slate-600'
   },
   {
     name: 'Lainnya',

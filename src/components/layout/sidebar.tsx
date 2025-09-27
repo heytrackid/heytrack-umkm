@@ -26,80 +26,84 @@ import {
   ChevronRight,
   Brain,
   Sparkles,
-  ChevronLeft
+  ChevronLeft,
+  Zap
 } from 'lucide-react'
 
 interface NavigationItem {
   name: string
   href: string
   icon: any
+  isSimple?: boolean
 }
 
-const navigationItems: NavigationItem[] = [
+interface NavigationSection {
+  title: string
+  items: NavigationItem[]
+}
+
+const navigationSections: NavigationSection[] = [
   {
-    name: 'Dashboard',
-    href: '/',
-    icon: LayoutDashboard,
+    title: 'Main',
+    items: [
+      {
+        name: 'Dashboard',
+        href: '/',
+        icon: LayoutDashboard,
+      },
+      {
+        name: 'AI Hub',
+        href: '/ai',
+        icon: Brain,
+      },
+    ]
   },
   {
-    name: 'AI Hub',
-    href: '/ai',
-    icon: Brain,
-  },
-  {
-    name: 'Resep',
-    href: '/recipes',
-    icon: ChefHat,
-  },
-  {
-    name: 'HPP Calculator',
-    href: '/hpp',
-    icon: Calculator,
-  },
-  {
-    name: 'Produksi',
-    href: '/production',
-    icon: TrendingUp,
-  },
-  {
-    name: 'Bahan Baku',
-    href: '/ingredients',
-    icon: Package,
-  },
-  {
-    name: 'Stok & Inventory',
-    href: '/inventory',
-    icon: Warehouse,
-  },
-  {
-    name: 'Pesanan',
-    href: '/orders',
-    icon: ShoppingCart,
-  },
-  {
-    name: 'Pelanggan',
-    href: '/customers',
-    icon: Users,
-  },
-  {
-    name: 'Keuangan',
-    href: '/finance',
-    icon: CreditCard,
-  },
-  {
-    name: 'Biaya Operasional',
-    href: '/expenses',
-    icon: Receipt,
-  },
-  {
-    name: 'Laporan',
-    href: '/reports',
-    icon: BarChart3,
-  },
-  {
-    name: 'Pengaturan',
-    href: '/settings',
-    icon: Settings,
+    title: 'UMKM Simple',
+    items: [
+      {
+        name: 'Resep',
+        href: '/resep-simple',
+        icon: ChefHat,
+        isSimple: true
+      },
+      {
+        name: 'HPP Cepat',
+        href: '/hpp-simple',
+        icon: Calculator,
+        isSimple: true
+      },
+      {
+        name: 'Bahan Baku',
+        href: '/bahan-simple',
+        icon: Package,
+        isSimple: true
+      },
+      {
+        name: 'Pesanan',
+        href: '/pesanan-simple',
+        icon: ShoppingCart,
+        isSimple: true
+      },
+      {
+        name: 'Pelanggan',
+        href: '/pelanggan-simple',
+        icon: Users,
+        isSimple: true
+      },
+      {
+        name: 'Pengeluaran',
+        href: '/pengeluaran-simple',
+        icon: Receipt,
+        isSimple: true
+      },
+      {
+        name: 'Laporan',
+        href: '/laporan-simple',
+        icon: BarChart3,
+        isSimple: true
+      },
+    ]
   }
 ]
 
@@ -178,73 +182,130 @@ export default function AppSidebar() {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 py-4">
-        <nav className="space-y-1 px-2">
-          {navigationItems.map((item, index) => {
-            const isActive = pathname === item.href
-            return (
-              <motion.div
-                key={item.href}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.02 }}
-              >
-                <Link href={item.href}>
+      <div className="flex-1 py-4 overflow-y-auto">
+        <nav className="space-y-4 px-2">
+          {navigationSections.map((section, sectionIndex) => (
+            <div key={section.title} className="space-y-1">
+              {/* Section Title */}
+              <AnimatePresence>
+                {showContent && (
                   <motion.div
-                    className={cn(
-                      "flex items-center rounded-lg transition-all duration-200 relative group",
-                      "hover:bg-accent hover:text-accent-foreground",
-                      isActive 
-                        ? "bg-primary text-primary-foreground shadow-sm" 
-                        : "text-muted-foreground hover:text-foreground",
-                      showContent ? "px-3 py-2" : "px-3 py-2 justify-center"
-                    )}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    className="px-3 py-1"
+                    variants={contentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
                   >
-                    <item.icon className={cn(
-                      "h-5 w-5 flex-shrink-0",
-                      isActive && "text-primary-foreground"
-                    )} />
-                    
-                    <AnimatePresence>
-                      {showContent && (
-                        <motion.span
-                          className="ml-3 text-sm font-medium truncate"
-                          variants={contentVariants}
-                          initial="hidden"
-                          animate="visible"
-                          exit="hidden"
-                        >
-                          {item.name}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                    
-                    {/* Tooltip for collapsed state only when not hovering */}
-                    {isCollapsed && !isHovered && (
-                      <div className={cn(
-                        "absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground",
-                        "text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100", 
-                        "transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap"
-                      )}>
-                        {item.name}
-                      </div>
-                    )}
-                    
-                    {/* Active indicator */}
-                    {isActive && (
-                      <motion.div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-foreground rounded-r-full"
-                        layoutId="activeIndicator"
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      />
-                    )}
+                    <h3 className={cn(
+                      "text-xs font-semibold uppercase tracking-wider",
+                      section.title === 'UMKM Simple' 
+                        ? "text-slate-600 dark:text-slate-400" 
+                        : "text-muted-foreground"
+                    )}>
+                      {section.title === 'UMKM Simple' && (
+                        <span className="inline-flex items-center gap-1">
+                          <Zap className="h-3 w-3" />
+                          {section.title}
+                        </span>
+                      ) || section.title}
+                    </h3>
                   </motion.div>
-                </Link>
-              </motion.div>
-            )
-          })}
+                )}
+              </AnimatePresence>
+              
+              {/* Section Items */}
+              <div className="space-y-1">
+                {section.items.map((item, itemIndex) => {
+                  const isActive = pathname === item.href
+                  const globalIndex = sectionIndex * 10 + itemIndex
+                  
+                  return (
+                    <motion.div
+                      key={item.href}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: globalIndex * 0.02 }}
+                    >
+                      <Link href={item.href}>
+                        <motion.div
+                          className={cn(
+                            "flex items-center rounded-lg transition-all duration-200 relative group",
+                            "hover:bg-accent hover:text-accent-foreground",
+                            isActive 
+                              ? item.isSimple
+                                ? "bg-slate-700 text-white shadow-sm" 
+                                : "bg-primary text-primary-foreground shadow-sm"
+                              : "text-muted-foreground hover:text-foreground",
+                            showContent ? "px-3 py-2" : "px-3 py-2 justify-center"
+                          )}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <div className="relative">
+                            <item.icon className={cn(
+                              "h-5 w-5 flex-shrink-0",
+                              isActive && (item.isSimple ? "text-white" : "text-primary-foreground")
+                            )} />
+                            {item.isSimple && (
+                              <div className="absolute -top-1 -right-1 w-2 h-2 bg-slate-400 rounded-full" />
+                            )}
+                          </div>
+                          
+                          <AnimatePresence>
+                            {showContent && (
+                              <motion.span
+                                className={cn(
+                                  "ml-3 text-sm font-medium truncate",
+                                  item.isSimple && "flex items-center gap-1"
+                                )}
+                                variants={contentVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                              >
+                                {item.name}
+                                {item.isSimple && (
+                                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                    SIMPLE
+                                  </span>
+                                )}
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                          
+                          {/* Tooltip for collapsed state only when not hovering */}
+                          {isCollapsed && !isHovered && (
+                            <div className={cn(
+                              "absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground",
+                              "text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100", 
+                              "transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap"
+                            )}>
+                              {item.name}
+                              {item.isSimple && (
+                                <span className="ml-1 text-slate-500">⚡</span>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Active indicator */}
+                          {isActive && (
+                            <motion.div
+                              className={cn(
+                                "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full",
+                                item.isSimple ? "bg-white" : "bg-primary-foreground"
+                              )}
+                              layoutId="activeIndicator"
+                              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            />
+                          )}
+                        </motion.div>
+                      </Link>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </div>
 

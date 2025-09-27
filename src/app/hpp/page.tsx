@@ -60,16 +60,16 @@ interface HPPCalculation {
 export default function HPPCalculatorPage() {
   const { toast } = useToast()
   
+  // Konstanta otomatis untuk UMKM
+  const OVERHEAD_PERCENTAGE = 15 // 15% overhead otomatis
+  const LABOR_PERCENTAGE = 20    // 20% tenaga kerja otomatis
+  const RECOMMENDED_MARGIN = 50  // Margin rekomendasi 50%
+  
   const [calculation, setCalculation] = useState<HPPCalculation>({
     recipeName: '',
     servings: 1,
     ingredients: [],
-    overheadCosts: [
-      { id: '1', name: 'Biaya Listrik', type: 'fixed', amount: 50000, percentage: 5 },
-      { id: '2', name: 'Biaya Gas', type: 'variable', amount: 30000, percentage: 3 },
-      { id: '3', name: 'Biaya Tenaga Kerja', type: 'fixed', amount: 100000, percentage: 10 },
-      { id: '4', name: 'Biaya Kemasan', type: 'variable', amount: 25000, percentage: 2.5 }
-    ],
+    overheadCosts: [], // Kosongkan karena sekarang otomatis
     totalMaterialCost: 0,
     totalOverheadCost: 0,
     totalCost: 0,
@@ -111,42 +111,41 @@ export default function HPPCalculatorPage() {
     }
   ])
 
-  // Calculate totals with error handling
+  // Calculate totals with automatic overhead and labor costs
   const calculateTotals = () => {
     try {
+      // 1. Hitung total biaya bahan
       const materialCost = calculation.ingredients.reduce((sum, ing) => {
         const cost = ing.totalCost || 0
         return sum + (isFinite(cost) ? cost : 0)
       }, 0)
       
-      const overheadCost = calculation.overheadCosts.reduce((sum, cost) => {
-        if (cost.type === 'fixed') {
-          const amount = cost.amount || 0
-          return sum + (isFinite(amount) ? amount : 0)
-        } else {
-          const percentage = cost.percentage || 0
-          const calculatedCost = materialCost * (percentage / 100)
-          return sum + (isFinite(calculatedCost) ? calculatedCost : 0)
-        }
-      }, 0)
+      // 2. Otomatis tambahkan overhead dan tenaga kerja (persentase dari material cost)
+      const overheadCost = materialCost * (OVERHEAD_PERCENTAGE / 100)
+      const laborCost = materialCost * (LABOR_PERCENTAGE / 100)
+      const totalOverheadCost = overheadCost + laborCost
       
-      const totalCost = materialCost + overheadCost
-      const servings = Math.max(1, calculation.servings || 1) // Prevent division by zero
+      // 3. Total HPP
+      const totalCost = materialCost + totalOverheadCost
+      const servings = Math.max(1, calculation.servings || 1)
       const costPerServing = totalCost / servings
+      
+      // 4. Hitung profit dan margin
       const sellingPrice = calculation.sellingPrice || 0
       const profit = sellingPrice - costPerServing
       const margin = costPerServing > 0 ? (profit / costPerServing) * 100 : 0
       const profitPerServing = profit
 
-      // Ensure all values are finite
+      // 5. Ensure all values are finite
       return {
         materialCost: isFinite(materialCost) ? materialCost : 0,
-        overheadCost: isFinite(overheadCost) ? overheadCost : 0,
+        overheadCost: isFinite(totalOverheadCost) ? totalOverheadCost : 0,
         totalCost: isFinite(totalCost) ? totalCost : 0,
         costPerServing: isFinite(costPerServing) ? costPerServing : 0,
         profit: isFinite(profit) ? profit : 0,
         margin: isFinite(margin) ? margin : 0,
-        profitPerServing: isFinite(profitPerServing) ? profitPerServing : 0
+        profitPerServing: isFinite(profitPerServing) ? profitPerServing : 0,
+        suggestedPrice: Math.ceil(costPerServing * (1 + RECOMMENDED_MARGIN / 100) / 1000) * 1000 // Bulatkan ke ribuan
       }
     } catch (error) {
       console.error('Error calculating totals:', error)
@@ -157,7 +156,8 @@ export default function HPPCalculatorPage() {
         costPerServing: 0,
         profit: 0,
         margin: 0,
-        profitPerServing: 0
+        profitPerServing: 0,
+        suggestedPrice: 0
       }
     }
   }
@@ -286,14 +286,7 @@ export default function HPPCalculatorPage() {
     }
   }
 
-  const updateOverheadCost = (id: string, field: 'amount' | 'percentage', value: number) => {
-    setCalculation(prev => ({
-      ...prev,
-      overheadCosts: prev.overheadCosts.map(cost => 
-        cost.id === id ? { ...cost, [field]: Math.max(0, value) } : cost
-      )
-    }))
-  }
+  // Removed updateOverheadCost - no longer needed with automatic calculation
 
   const resetCalculation = () => {
     setCalculation(prev => ({
@@ -312,14 +305,26 @@ export default function HPPCalculatorPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Kalkulator HPP</h1>
+            <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
+              <Calculator className="h-8 w-8" />
+              Kalkulator HPP Otomatis
+            </h1>
             <div className="space-y-1">
-              <p className="text-muted-foreground">Hitung Harga Pokok Produksi dengan detail</p>
-              <p className="text-xs text-muted-foreground">
-                Shortcuts: <kbd className="px-1 py-0.5 text-xs bg-muted rounded">Ctrl+S</kbd> Simpan | 
-                <kbd className="px-1 py-0.5 text-xs bg-muted rounded">Ctrl+R</kbd> Reset | 
-                <kbd className="px-1 py-0.5 text-xs bg-muted rounded">Enter</kbd> Tambah Bahan
-              </p>
+              <p className="text-muted-foreground">Hitung HPP mudah tanpa ribet - semua overhead otomatis!</p>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <span>Overhead +{OVERHEAD_PERCENTAGE}% otomatis</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 text-green-500" />
+                  <span>Tenaga kerja +{LABOR_PERCENTAGE}% otomatis</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3 text-blue-500" />
+                  <span>Rekomendasi harga otomatis</span>
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
@@ -502,71 +507,36 @@ export default function HPPCalculatorPage() {
               </CardContent>
             </Card>
 
-            {/* Overhead Costs */}
+            {/* Automatic Overhead Explanation */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5" />
-                    Biaya Overhead
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsEditingOverhead(!isEditingOverhead)}
-                  >
-                    {isEditingOverhead ? 'Selesai' : 'Edit'}
-                  </Button>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Biaya Overhead Otomatis
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {calculation.overheadCosts.map((cost) => (
-                    <div key={cost.id} className="p-3 bg-muted rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex-1">
-                          <p className="font-medium">{cost.name}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant={cost.type === 'fixed' ? 'default' : 'secondary'}>
-                              {cost.type === 'fixed' ? 'Tetap' : 'Variabel'}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">
-                            Rp {(cost.type === 'fixed' ? cost.amount : (totals.materialCost * cost.percentage / 100)).toLocaleString()}
-                          </p>
-                        </div>
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">🤖 Otomatis Dihitung!</h4>
+                    <div className="space-y-2 text-sm text-blue-700 dark:text-blue-200">
+                      <div className="flex justify-between">
+                        <span>• Listrik, Gas, Air</span>
+                        <span className="font-medium">{OVERHEAD_PERCENTAGE}% dari bahan</span>
                       </div>
-                      
-                      {isEditingOverhead && (
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                          {cost.type === 'fixed' ? (
-                            <div>
-                              <Label className="text-xs">Jumlah (Rp)</Label>
-                              <Input
-                                type="number"
-                                value={cost.amount}
-                                onChange={(e) => updateOverheadCost(cost.id, 'amount', parseFloat(e.target.value) || 0)}
-                                className="h-8 text-sm"
-                              />
-                            </div>
-                          ) : (
-                            <div>
-                              <Label className="text-xs">Persentase (%)</Label>
-                              <Input
-                                type="number"
-                                value={cost.percentage}
-                                onChange={(e) => updateOverheadCost(cost.id, 'percentage', parseFloat(e.target.value) || 0)}
-                                className="h-8 text-sm"
-                                step="0.1"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="flex justify-between">
+                        <span>• Tenaga Kerja</span>
+                        <span className="font-medium">{LABOR_PERCENTAGE}% dari bahan</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2 font-medium">
+                        <span>Total Overhead:</span>
+                        <span>Rp {totals.overheadCost.toLocaleString()}</span>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    💡 Persentase ini sudah disesuaikan untuk UMKM bakery Indonesia
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -576,97 +546,102 @@ export default function HPPCalculatorPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Percent className="h-5 w-5" />
-                  Penetapan Harga
+                  Penetapan Harga Otomatis
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Recommended Price */}
+                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="font-medium text-green-900 dark:text-green-100">🎯 Harga Rekomendasi</h4>
+                      <p className="text-sm text-green-700 dark:text-green-200">Margin {RECOMMENDED_MARGIN}% - sudah aman!</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-green-600">Rp {totals.suggestedPrice?.toLocaleString()}</p>
+                      <Button 
+                        size="sm" 
+                        onClick={() => setCalculation(prev => ({ ...prev, sellingPrice: totals.suggestedPrice || 0 }))}
+                        className="mt-1"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Pakai Harga Ini
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Your Price */}
                 <div>
-                  <Label htmlFor="sellingPrice">Harga Jual per Porsi</Label>
+                  <Label htmlFor="sellingPrice">Atau Masukkan Harga Anda</Label>
                   <Input
                     id="sellingPrice"
                     type="number"
-                    placeholder="15000"
+                    placeholder={`Rekomendasi: ${totals.suggestedPrice?.toLocaleString()}`}
                     value={calculation.sellingPrice}
                     onChange={(e) => setCalculation(prev => ({ ...prev, sellingPrice: parseFloat(e.target.value) || 0 }))}
                   />
                 </div>
                 
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="text-center p-3 bg-muted rounded-lg">
-                    <p className="text-muted-foreground">HPP per Porsi</p>
-                    <p className="text-lg font-bold">
-                      Rp {totals.costPerServing.toLocaleString()}
-                    </p>
+                {calculation.sellingPrice > 0 && (
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <p className="text-muted-foreground">HPP per Porsi</p>
+                      <p className="text-lg font-bold">
+                        Rp {totals.costPerServing.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <p className="text-muted-foreground">Keuntungan</p>
+                      <p className={`text-lg font-bold ${
+                        totals.profitPerServing > 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        Rp {totals.profitPerServing.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <p className="text-muted-foreground">Margin</p>
+                      <p className={`text-lg font-bold ${
+                        totals.margin >= 40 ? 'text-green-600' : 
+                        totals.margin >= 20 ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {totals.margin.toFixed(1)}%
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-center p-3 bg-muted rounded-lg">
-                    <p className="text-muted-foreground">Keuntungan</p>
-                    <p className="text-lg font-bold text-green-600">
-                      Rp {totals.profitPerServing.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="text-center p-3 bg-muted rounded-lg">
-                    <p className="text-muted-foreground">Margin</p>
-                    <p className="text-lg font-bold text-blue-600">
-                      {totals.margin.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Smart Pricing Assistant */}
-            {calculation.recipeName && calculation.ingredients.length > 0 ? (
-              <SmartPricingAssistant 
-                recipe={{
-                  id: 'demo-recipe',
-                  name: calculation.recipeName,
-                description: 'Resep demo untuk testing pricing assistant',
-                prep_time: 30,
-                cook_time: 60,
-                servings: calculation.servings,
-                difficulty: 'medium',
-                category: 'bakery',
-                instructions: 'Demo instructions',
-                notes: null,
-                image_url: null,
-                is_active: true,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                recipe_ingredients: calculation.ingredients.map(ing => ({
-                  id: ing.id,
-                  recipe_id: 'demo-recipe',
-                  ingredient_id: ing.id,
-                  quantity: ing.quantity,
-                  unit: ing.unit,
-                  cost: ing.totalCost,
-                  notes: null,
-                  created_at: new Date().toISOString(),
-                  ingredient: {
-                    id: ing.id,
-                    name: ing.name,
-                    price_per_unit: ing.pricePerUnit,
-                    unit: ing.unit,
-                    current_stock: 100,
-                    min_stock: 10,
-                    category: 'ingredient',
-                    supplier: null,
-                    description: null,
-                    is_active: true,
-                    storage_requirements: null,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  }
-                }))
-              }}
-                onPriceUpdate={(price) => {
-                  setCalculation(prev => ({ ...prev, sellingPrice: price }))
-                }}
-              />
-            ) : (
-              <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                <p>Tambahkan nama resep dan bahan baku untuk menggunakan Smart Pricing Assistant</p>
-              </div>
-            )}
+            {/* Tips untuk UMKM */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="h-5 w-5" />
+                  💡 Tips Jitu untuk UMKM
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <h4 className="font-medium text-green-900 dark:text-green-100 mb-1">✅ Margin Sehat</h4>
+                  <p className="text-sm text-green-700 dark:text-green-200">
+                    Untuk bakery, margin 40-60% sudah bagus. Jangan terlalu rendah!
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">⚡ Otomatis Dihitung</h4>
+                  <p className="text-sm text-blue-700 dark:text-blue-200">
+                    Overhead dan tenaga kerja sudah otomatis dihitung {OVERHEAD_PERCENTAGE + LABOR_PERCENTAGE}% dari bahan baku
+                  </p>
+                </div>
+                <div className="p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                  <h4 className="font-medium text-orange-900 dark:text-orange-100 mb-1">🎯 Harga Bulat</h4>
+                  <p className="text-sm text-orange-700 dark:text-orange-200">
+                    Sistem otomatis membulatkan ke ribuan terdekat untuk kemudahan
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Summary Section */}
@@ -685,20 +660,33 @@ export default function HPPCalculatorPage() {
                     <span className="text-muted-foreground">Biaya Bahan Baku:</span>
                     <span className="font-medium">Rp {totals.materialCost.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Biaya Overhead:</span>
+                  <div className="flex justify-between text-sm text-blue-600">
+                    <span>Overhead Otomatis (+{OVERHEAD_PERCENTAGE + LABOR_PERCENTAGE}%):</span>
                     <span className="font-medium">Rp {totals.overheadCost.toLocaleString()}</span>
                   </div>
                   <hr />
-                  <div className="flex justify-between font-medium">
+                  <div className="flex justify-between font-medium text-lg">
                     <span>Total HPP:</span>
                     <span>Rp {totals.totalCost.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between font-medium text-lg">
+                  <div className="flex justify-between font-bold text-xl text-blue-600">
                     <span>HPP per Porsi:</span>
                     <span>Rp {totals.costPerServing.toLocaleString()}</span>
                   </div>
                 </div>
+
+                {/* Smart Recommendation */}
+                {totals.costPerServing > 0 && (
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp className="h-4 w-4 text-yellow-600" />
+                      <span className="font-medium text-yellow-900 dark:text-yellow-100">Saran Otomatis</span>
+                    </div>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-200">
+                      Jual dengan harga <strong>Rp {totals.suggestedPrice?.toLocaleString()}</strong> untuk margin {RECOMMENDED_MARGIN}% yang sehat!
+                    </p>
+                  </div>
+                )}
 
                 {calculation.sellingPrice > 0 && (
                   <div className="pt-4 border-t space-y-3">

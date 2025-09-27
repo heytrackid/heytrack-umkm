@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { RecipesPage as ModularRecipesPage } from '@/modules/recipes'
 import { RecipeWithIngredients } from '@/types/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -48,12 +47,8 @@ interface RecipeWithStats extends RecipeWithIngredients {
 }
 
 export default function RecipesPageWrapper() {
-  // Use the modular RecipesPage component
-  return (
-    <AppLayout>
-      <ModularRecipesPage userRole="manager" enableAdvancedFeatures={true} />
-    </AppLayout>
-  )
+  // Use the legacy implementation until modular version is fixed
+  return <LegacyRecipesPage />
 }
 
 // Keep the legacy implementation as backup
