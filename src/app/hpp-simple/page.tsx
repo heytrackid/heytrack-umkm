@@ -1,59 +1,98 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import AppLayout from '@/components/layout/app-layout'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/hooks/use-toast'
 import { 
   Calculator, 
   Plus, 
   Trash2, 
-  DollarSign,
-  Package,
+  Package, 
+  DollarSign, 
+  Save, 
+  Info,
   CheckCircle,
   AlertTriangle,
-  Save,
   Wand2,
-  TrendingUp,
-  Info
+  TrendingUp
 } from 'lucide-react'
+import AppLayout from '@/components/layout/app-layout'
+import { SmartPricingInsights } from '@/components/smart-pricing-insights'
+import { 
+  calculateSmartPricing, 
+  analyzeInventoryItem, 
+  generateBusinessInsights,
+  type SmartIngredient,
+  type PricingAnalysis
+} from '@/lib/smart-business'
+import { useToast } from '@/hooks/use-toast'
 
-interface SimpleIngredient {
-  id: string
-  name: string
-  quantity: number
-  unit: string
+interface SimpleIngredient extends Omit<SmartIngredient, 'pricePerUnit' | 'volatility' | 'alternatives' | 'nutritionScore'> {
   price: number
-  total: number
+  // Smart features made optional for simplicity
+  volatility?: 'low' | 'medium' | 'high'
+  alternatives?: string[]
+  seasonalPricing?: boolean
 }
 
 interface SimpleRecipe {
   name: string
   portions: number
   ingredients: SimpleIngredient[]
-  // Otomatis dihitung
+  // Smart pricing analysis
+  pricingAnalysis?: PricingAnalysis
+  // Legacy fields for compatibility
   totalCost: number
   costPerPortion: number
-  // Harga jual yang disarankan (otomatis)
   suggestedPrice: number
   suggestedMargin: number
-  // Harga jual actual (input user)
   sellingPrice: number
   actualMargin: number
   profit: number
 }
 
 const UNITS = ['gram', 'kg', 'ml', 'liter', 'butir', 'lembar', 'bungkus']
+const OVERHEAD_PERCENTAGE = 15
+const LABOR_PERCENTAGE = 20
+const RECOMMENDED_MARGIN = 50
+const MIN_MARGIN = 30
 
-// Konstanta untuk otomatisasi
-const OVERHEAD_PERCENTAGE = 15 // 15% untuk overhead (listrik, gas, dll)
-const LABOR_PERCENTAGE = 20    // 20% untuk tenaga kerja
-const MIN_MARGIN = 40          // Margin minimal 40%
-const RECOMMENDED_MARGIN = 60  // Margin rekomendasi 60%
+// Smart ingredient database with volatility and alternatives
+const SMART_INGREDIENTS_DB: Record<string, Partial<SmartIngredient>> = {
+  'tepung terigu': {
+    volatility: 'medium',
+    alternatives: ['tepung tapioka', 'tepung beras'],
+    seasonalPricing: false,
+    nutritionScore: 7
+  },
+  'mentega': {
+    volatility: 'high',
+    alternatives: ['margarin', 'minyak kelapa'],
+    seasonalPricing: true,
+    nutritionScore: 6
+  },
+  'telur': {
+    volatility: 'high',
+    alternatives: ['telur bebek', 'egg substitute'],
+    seasonalPricing: true,
+    nutritionScore: 9
+  },
+  'gula': {
+    volatility: 'medium',
+    alternatives: ['gula aren', 'madu', 'stevia'],
+    seasonalPricing: false,
+    nutritionScore: 3
+  },
+  'susu': {
+    volatility: 'medium',
+    alternatives: ['susu kental manis', 'santan'],
+    seasonalPricing: false,
+    nutritionScore: 8
+  }
+}
 
 export default function HPPSimplePage() {
   const { toast } = useToast()
@@ -68,8 +107,13 @@ export default function HPPSimplePage() {
     suggestedMargin: 0,
     sellingPrice: 0,
     actualMargin: 0,
-    profit: 0
+    profit: 0,
+    pricingAnalysis: undefined
   })
+  
+  // Smart insights state
+  const [smartInsights, setSmartInsights] = useState<any[]>([])
+  const [marketAnalysis, setMarketAnalysis] = useState<any>(null)
 
   const [newIngredient, setNewIngredient] = useState({
     name: '',
@@ -78,41 +122,73 @@ export default function HPPSimplePage() {
     price: ''
   })
 
-  // Otomatis hitung semua nilai ketika ada perubahan
+  // Smart calculation with business intelligence
   useEffect(() => {
-    calculateAll()
+    calculateSmartPricingAnalysis()
   }, [recipe.ingredients, recipe.portions, recipe.sellingPrice])
 
-  const calculateAll = () => {
-    // 1. Hitung total biaya bahan
-    const materialCost = recipe.ingredients.reduce((sum, ing) => sum + ing.total, 0)
-    
-    // 2. Otomatis tambahkan overhead dan tenaga kerja
-    const overheadCost = materialCost * (OVERHEAD_PERCENTAGE / 100)
-    const laborCost = materialCost * (LABOR_PERCENTAGE / 100)
-    
-    // 3. Total HPP
-    const totalCost = materialCost + overheadCost + laborCost
-    const costPerPortion = recipe.portions > 0 ? totalCost / recipe.portions : 0
-    
-    // 4. Otomatis hitung harga jual yang disarankan
-    const suggestedPrice = Math.ceil(costPerPortion * (1 + RECOMMENDED_MARGIN / 100) / 1000) * 1000 // Bulatkan ke ribuan
-    const suggestedMargin = costPerPortion > 0 ? ((suggestedPrice - costPerPortion) / costPerPortion * 100) : 0
-    
-    // 5. Hitung margin aktual jika ada harga jual
-    const actualMargin = costPerPortion > 0 && recipe.sellingPrice > 0 
-      ? ((recipe.sellingPrice - costPerPortion) / costPerPortion * 100) 
-      : 0
-    const profit = recipe.sellingPrice - costPerPortion
+  const calculateSmartPricingAnalysis = () => {
+    if (recipe.ingredients.length === 0) {
+      setSmartInsights([])
+      setMarketAnalysis(null)
+      return
+    }
 
+    // Convert to smart ingredients format
+    const smartIngredients: SmartIngredient[] = recipe.ingredients.map(ing => ({
+      ...ing,
+      pricePerUnit: ing.price,
+      // Auto-detect smart properties from database
+      ...SMART_INGREDIENTS_DB[ing.name.toLowerCase()],
+      volatility: SMART_INGREDIENTS_DB[ing.name.toLowerCase()]?.volatility || 'medium',
+      alternatives: SMART_INGREDIENTS_DB[ing.name.toLowerCase()]?.alternatives || [],
+      nutritionScore: SMART_INGREDIENTS_DB[ing.name.toLowerCase()]?.nutritionScore || 5
+    }))
+
+    // Get smart pricing analysis
+    const analysis = calculateSmartPricing(
+      smartIngredients,
+      recipe.portions,
+      {
+        // Mock market data - in real app this would come from API
+        averagePrice: recipe.costPerPortion * 1.5,
+        competitorPrices: [15000, 18000, 20000, 22000],
+        demandLevel: 0.8
+      }
+    )
+
+    // Generate smart insights from the analysis recommendations
+    const insights = analysis.recommendations.map((rec, index) => ({
+      type: rec.includes('⚠️') ? 'warning' : rec.includes('💡') ? 'opportunity' : 'info',
+      title: rec.includes('Margin') ? 'Analisis Margin' : rec.includes('fluktuasi') ? 'Volatilitas Harga' : 'Rekomendasi',
+      message: rec,
+      impact: rec.includes('menguntungkan') ? 'Tinggi' : rec.includes('rendah') ? 'Sedang' : undefined,
+      action: rec.includes('alternatif') ? 'Coba bahan alternatif untuk menghemat biaya' : undefined
+    }))
+    setSmartInsights(insights)
+    
+    // Generate market analysis from competitive analysis
+    const market = {
+      competitorRange: { min: 15000, max: 22000 },
+      marketPosition: analysis.competitiveAnalysis.position === 'cheap' ? 'below' : 
+                     analysis.competitiveAnalysis.position === 'premium' ? 'above' : 'within',
+      recommendedAdjustment: analysis.competitivePrice - analysis.recommendedPrice
+    }
+    setMarketAnalysis(market)
+
+    // Update recipe with smart analysis
     setRecipe(prev => ({
       ...prev,
-      totalCost,
-      costPerPortion,
-      suggestedPrice,
-      suggestedMargin,
-      actualMargin,
-      profit
+      pricingAnalysis: analysis,
+      // Update legacy fields for compatibility
+      totalCost: analysis.costPerPortion * recipe.portions,
+      costPerPortion: analysis.costPerPortion,
+      suggestedPrice: analysis.recommendedPrice,
+      suggestedMargin: analysis.profitMargin,
+      actualMargin: recipe.sellingPrice > 0 
+        ? ((recipe.sellingPrice - analysis.costPerPortion) / analysis.costPerPortion * 100)
+        : 0,
+      profit: recipe.sellingPrice - analysis.costPerPortion
     }))
   }
 
@@ -130,13 +206,20 @@ export default function HPPSimplePage() {
       return
     }
 
+    // Auto-detect smart properties from database
+    const smartProps = SMART_INGREDIENTS_DB[newIngredient.name.toLowerCase()] || {}
+    
     const ingredient: SimpleIngredient = {
       id: Date.now().toString(),
       name: newIngredient.name,
       quantity,
       unit: newIngredient.unit,
       price,
-      total: quantity * price
+      total: quantity * price,
+      // Smart features
+      volatility: smartProps.volatility || 'medium',
+      alternatives: smartProps.alternatives || [],
+      seasonalPricing: smartProps.seasonalPricing || false
     }
 
     setRecipe(prev => ({
@@ -145,7 +228,18 @@ export default function HPPSimplePage() {
     }))
 
     setNewIngredient({ name: '', quantity: '', unit: 'gram', price: '' })
-    toast({ title: 'Bahan ditambahkan!', description: `${ingredient.name} - Rp ${ingredient.total.toLocaleString()}` })
+    
+    // Show smart notification
+    const warningMsg = smartProps.volatility === 'high' 
+      ? ` (⚠️ Harga sering berubah)` 
+      : smartProps.alternatives?.length 
+        ? ` (💡 Ada ${smartProps.alternatives.length} alternatif)`
+        : ''
+    
+    toast({ 
+      title: 'Bahan ditambahkan!', 
+      description: `${ingredient.name} - Rp ${ingredient.total.toLocaleString()}${warningMsg}` 
+    })
   }
 
   const removeIngredient = (id: string) => {
@@ -173,8 +267,21 @@ export default function HPPSimplePage() {
   }
 
   const useRecommendedPrice = () => {
-    setRecipe(prev => ({ ...prev, sellingPrice: prev.suggestedPrice }))
-    toast({ title: 'Harga rekomendasi diterapkan!', description: `Rp ${recipe.suggestedPrice.toLocaleString()}` })
+    const price = recipe.pricingAnalysis?.recommendedPrice || recipe.suggestedPrice
+    setRecipe(prev => ({ ...prev, sellingPrice: price }))
+    toast({ 
+      title: '🧠 Harga cerdas diterapkan!', 
+      description: `Rp ${price.toLocaleString()} (margin ${recipe.pricingAnalysis?.profitMargin.toFixed(1)}%)` 
+    })
+  }
+
+  const useCompetitivePrice = () => {
+    if (!recipe.pricingAnalysis) return
+    setRecipe(prev => ({ ...prev, sellingPrice: recipe.pricingAnalysis!.competitivePrice }))
+    toast({ 
+      title: '🎯 Harga kompetitif diterapkan!', 
+      description: recipe.pricingAnalysis.competitiveAnalysis.message
+    })
   }
 
   const saveRecipe = () => {
@@ -193,10 +300,11 @@ export default function HPPSimplePage() {
   }
 
   const getMarginStatus = (margin: number) => {
-    if (margin >= RECOMMENDED_MARGIN) return { color: 'text-gray-600 dark:text-gray-400', status: 'Excellent', icon: CheckCircle }
-    if (margin >= MIN_MARGIN) return { color: 'text-gray-600 dark:text-gray-400', status: 'Good', icon: CheckCircle }
-    if (margin >= 20) return { color: 'text-gray-600 dark:text-gray-400', status: 'Low', icon: AlertTriangle }
-    return { color: 'text-gray-600 dark:text-gray-400', status: 'Too Low', icon: AlertTriangle }
+    if (margin >= 60) return { color: 'text-gray-700 dark:text-gray-300', status: 'Excellent', icon: CheckCircle }
+    if (margin >= 45) return { color: 'text-gray-600 dark:text-gray-400', status: 'Good', icon: CheckCircle }
+    if (margin >= 30) return { color: 'text-gray-500 dark:text-gray-500', status: 'Fair', icon: Info }
+    if (margin >= 20) return { color: 'text-gray-400 dark:text-gray-600', status: 'Low', icon: AlertTriangle }
+    return { color: 'text-gray-300 dark:text-gray-700', status: 'Too Low', icon: AlertTriangle }
   }
 
   const marginStatus = getMarginStatus(recipe.actualMargin || recipe.suggestedMargin)
@@ -473,26 +581,41 @@ export default function HPPSimplePage() {
               </CardContent>
             </Card>
 
-            {/* Quick Tips */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">💡 Tips Cerdas</CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm space-y-2">
-                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-blue-950 rounded-lg">
-                  <p className="font-medium text-blue-900 dark:text-blue-100">Margin Sehat:</p>
-                  <p className="text-blue-700 dark:text-blue-200">
-                    Untuk UMKM bakery, margin {MIN_MARGIN}-{RECOMMENDED_MARGIN}% sudah bagus
-                  </p>
-                </div>
-                <div className="p-3 bg-gray-100 dark:bg-gray-800 dark:bg-green-950 rounded-lg">
-                  <p className="font-medium text-green-900 dark:text-green-100">Overhead Otomatis:</p>
-                  <p className="text-green-700 dark:text-green-200">
-                    Sudah termasuk listrik, gas, dan biaya operasional lainnya
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Smart Pricing Insights */}
+            {recipe.ingredients.length > 0 && (
+              <SmartPricingInsights
+                ingredients={recipe.ingredients}
+                currentPrice={recipe.sellingPrice}
+                suggestedPrice={recipe.suggestedPrice}
+                totalCost={recipe.totalCost}
+                margin={recipe.actualMargin || recipe.suggestedMargin}
+                insights={smartInsights}
+                marketAnalysis={marketAnalysis}
+              />
+            )}
+
+            {/* Quick Tips - Only show if no smart insights */}
+            {!smartInsights.length && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">💡 Tips Cerdas</CardTitle>
+                </CardHeader>
+                <CardContent className="text-sm space-y-2">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium text-gray-700 dark:text-gray-300">Margin Sehat:</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Untuk UMKM bakery, margin {MIN_MARGIN}-{RECOMMENDED_MARGIN}% sudah bagus
+                    </p>
+                  </div>
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium text-gray-700 dark:text-gray-300">Overhead Otomatis:</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Sudah termasuk listrik, gas, dan biaya operasional lainnya
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Save Button */}
             <Button onClick={saveRecipe} className="w-full" size="lg">

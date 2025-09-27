@@ -8,6 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { SmartInventoryAutomation } from '@/components/smart-inventory-automation'
+import { 
+  enhanceInventoryWithIntelligence, 
+  generateInventoryInsights,
+  type SmartIngredientItem 
+} from '@/lib/smart-inventory-intelligence'
 import { 
   Package, 
   Plus, 
@@ -15,7 +21,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Search,
-  ShoppingCart
+  ShoppingCart,
+  Brain,
+  Zap
 } from 'lucide-react'
 
 interface SimpleBahan {
@@ -77,12 +85,45 @@ export default function BahanSimplePage() {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showSmartView, setShowSmartView] = useState(false)
+  
+  // Smart inventory features
+  const [smartItems, setSmartItems] = useState<SmartIngredientItem[]>([])
+  const [inventoryInsights, setInventoryInsights] = useState<string[]>([])
+
+  // Smart inventory intelligence
+  useEffect(() => {
+    const enhanced = enhanceInventoryWithIntelligence(bahan)
+    setSmartItems(enhanced)
+    
+    const insights = generateInventoryInsights(enhanced)
+    setInventoryInsights(insights)
+  }, [bahan])
 
   // Auto hitung status stok dan total
   const updateStatusStok = (stok: number, stokMinimal: number): 'aman' | 'rendah' | 'habis' => {
     if (stok === 0) return 'habis'
     if (stok <= stokMinimal) return 'rendah'
     return 'aman'
+  }
+  
+  // Smart automation handlers
+  const handleSmartReorder = (itemId: string, quantity: number) => {
+    const item = bahan.find(b => b.id === itemId)
+    if (item) {
+      updateStok(itemId, item.stok + quantity)
+      toast({ 
+        title: '🛒 Reorder Otomatis!', 
+        description: `${item.nama} ditambah ${quantity} ${item.satuan}` 
+      })
+    }
+  }
+  
+  const handleUpdateSmartItem = (itemId: string, updates: Partial<SmartIngredientItem>) => {
+    // Update the basic item if needed
+    setBahan(prev => prev.map(item => 
+      item.id === itemId ? { ...item, ...updates } : item
+    ))
   }
 
   const addBahan = () => {
@@ -182,15 +223,31 @@ export default function BahanSimplePage() {
             <p className="text-muted-foreground mt-1">
               Kelola stok bahan baku dengan mudah
             </p>
+            {inventoryInsights.length > 0 && (
+              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">🧠 Smart Insights: </span>
+                {inventoryInsights[0]}
+              </div>
+            )}
           </div>
 
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Tambah Bahan
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant={showSmartView ? "default" : "outline"}
+              onClick={() => setShowSmartView(!showSmartView)}
+              className="gap-2"
+            >
+              {showSmartView ? <Brain className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
+              {showSmartView ? 'Smart View' : 'Enable Smart'}
+            </Button>
+            
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Tambah Bahan
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Tambah Bahan Baru</DialogTitle>
@@ -256,6 +313,7 @@ export default function BahanSimplePage() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Stats */}
@@ -308,6 +366,15 @@ export default function BahanSimplePage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Smart Inventory Automation */}
+        {showSmartView && (
+          <SmartInventoryAutomation 
+            items={smartItems}
+            onReorder={handleSmartReorder}
+            onUpdateItem={handleUpdateSmartItem}
+          />
+        )}
 
         {/* Search */}
         <Card>
