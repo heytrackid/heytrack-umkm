@@ -10,6 +10,7 @@ import EnhancedSmartNotifications from '@/components/automation/enhanced-smart-n
 import AdvancedHPPCalculator from '@/components/automation/advanced-hpp-calculator'
 import ProductionPlanningDashboard from '@/components/automation/production-planning-dashboard'
 import InventoryAnalytics from '@/components/automation/inventory-analytics'
+import AutoReorderDashboard from '@/components/inventory/AutoReorderDashboard'
 import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
 import { useIngredients, useOrdersWithItems, useCustomers, useRecipesWithIngredients } from '@/hooks/useSupabaseData'
 import { useResponsive } from '@/hooks/use-mobile'
@@ -372,6 +373,9 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold text-foreground mb-2">Smart Automation Dashboard</h2>
             <p className="text-muted-foreground">Advanced analytics and intelligent business automation</p>
           </div>
+          
+          {/* Automated Reordering System */}
+          <AutoReorderDashboard onReorderTriggered={handleRefresh} />
           
           {/* Production Planning */}
           <ProductionPlanningDashboard />
