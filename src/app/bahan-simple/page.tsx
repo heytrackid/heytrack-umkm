@@ -277,7 +277,7 @@ export default function BahanSimplePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Stok Habis</p>
-                  <p className="text-2xl font-bold text-slate-700">
+                  <p className="text-2xl font-bold text-slate-700">{stats.bahanHabis}</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-red-600" />
               </div>
