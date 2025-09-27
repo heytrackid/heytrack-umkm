@@ -116,7 +116,31 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply h-full;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground h-full m-0 p-0;
+  }
+  
+  /* Full screen layout fixes */
+  #__next {
+    @apply h-full;
+  }
+  
+  /* Mobile viewport fixes */
+  .mobile-min-vh {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height */
+  }
+  
+  /* Container max width fix */
+  .container {
+    @apply w-full max-w-none;
+  }
+  
+  /* Sidebar layout fixes */
+  .sidebar-layout {
+    @apply h-full w-full;
   }
 }

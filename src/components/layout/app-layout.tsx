@@ -31,7 +31,7 @@ export default function AppLayout({
   return (
     <SidebarProvider>
       <div className={cn(
-        "flex bg-background",
+        "flex bg-background w-full sidebar-layout",
         isMobile ? "flex-col mobile-min-vh" : "h-screen"
       )}>
         {/* Desktop Sidebar */}
@@ -48,10 +48,10 @@ export default function AppLayout({
           />
         )}
 
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col w-full">
           {/* Desktop Header */}
           {!isMobile && (
-            <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6">
+            <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 w-full">
               <div className="flex items-center space-x-4">
                 <SidebarTrigger className="md:hidden" />
                 <div className="relative hidden sm:block">
@@ -75,7 +75,7 @@ export default function AppLayout({
 
           {/* Main Content */}
           <main className={cn(
-            "flex-1 overflow-auto bg-background",
+            "flex-1 overflow-auto bg-background w-full max-w-none",
             isMobile ? "p-4" : "p-6",
             // Add padding bottom for mobile bottom nav
             isMobile && showMobileBottomNav && "pb-20"

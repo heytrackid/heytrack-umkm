@@ -10,8 +10,8 @@ import EnhancedSmartNotifications from '@/components/automation/enhanced-smart-n
 import AdvancedHPPCalculator from '@/components/automation/advanced-hpp-calculator'
 import ProductionPlanningDashboard from '@/components/automation/production-planning-dashboard'
 import InventoryAnalytics from '@/components/automation/inventory-analytics'
-import AIInsightsPanel from '@/components/ai/AIInsightsPanel'
 import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
+import { useIngredients, useOrdersWithItems, useCustomers, useRecipesWithIngredients } from '@/hooks/useSupabaseData'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   PullToRefresh,
@@ -35,7 +35,8 @@ import {
   Plus,
   Edit,
   Trash2,
-  Star
+  Star,
+  Brain
 } from 'lucide-react'
 
 
@@ -54,14 +55,19 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 export default function Dashboard() {
   const { isMobile, isTablet } = useResponsive()
   
-  // Fetch real data from database
-  const { data: ingredients, loading: ingredientsLoading, refetch: refetchIngredients } = useSupabaseData('ingredients')
-  const { data: orders, loading: ordersLoading, refetch: refetchOrders } = useSupabaseData('orders', {
-    orderBy: { column: 'created_at', ascending: false },
-    limit: 5
-  })
-  const { data: customers, loading: customersLoading, refetch: refetchCustomers } = useSupabaseData('customers')
-  const { data: recipes, loading: recipesLoading, refetch: refetchRecipes } = useSupabaseData('recipes')
+  // Fetch real data from database with safe defaults
+  const { data: ingredientsRaw, loading: ingredientsLoading, refetch: refetchIngredients } = useIngredients()
+  const { data: ordersRaw, loading: ordersLoading, refetch: refetchOrders } = useOrdersWithItems()
+  const { customers: customersRaw, loading: customersLoading } = useCustomers()
+  const { data: recipesRaw, loading: recipesLoading, refetch: refetchRecipes } = useRecipesWithIngredients()
+  
+  // Ensure data is always arrays
+  const ingredients = Array.isArray(ingredientsRaw) ? ingredientsRaw : []
+  const orders = Array.isArray(ordersRaw) ? ordersRaw : []
+  const customers = Array.isArray(customersRaw) ? customersRaw : []
+  const recipes = Array.isArray(recipesRaw) ? recipesRaw : []
+  
+  const refetchCustomers = () => Promise.resolve()
   
   const [stats, setStats] = useState({
     totalSales: 0,
@@ -72,39 +78,39 @@ export default function Dashboard() {
 
   // Calculate real stats from data
   useEffect(() => {
-    if (!ordersLoading && orders) {
+    if (!ordersLoading && orders.length >= 0) {
       const today = new Date().toDateString()
       const todaysOrders = orders.filter(order => 
-        new Date(order.created_at).toDateString() === today
+        order.created_at && new Date(order.created_at).toDateString() === today
       )
       
       const totalSales = todaysOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
       const activeOrders = orders.filter(order => 
-        ['PENDING', 'IN_PROGRESS'].includes(order.status)
+        order.status && ['PENDING', 'IN_PROGRESS'].includes(order.status)
       ).length
       
       setStats({
         totalSales,
         activeOrders,
-        productsSold: todaysOrders.reduce((sum, order) => sum + 1, 0), // Simple count for now
-        newCustomers: customers?.length || 0
+        productsSold: todaysOrders.length,
+        newCustomers: customers.length
       })
     }
   }, [orders, ordersLoading, customers])
   
   // Low stock items
-  const lowStockItems = ingredients?.filter(ingredient => 
+  const lowStockItems = ingredients.filter(ingredient => 
     ingredient.current_stock <= ingredient.min_stock
-  ) || []
+  )
   
   // Chart data
-  const inventoryChartData = ingredients?.slice(0, 5).map(ingredient => ({
-    name: ingredient.name.substring(0, 10) + '...',
-    stock: ingredient.current_stock,
-    min: ingredient.min_stock
-  })) || []
+  const inventoryChartData = ingredients.slice(0, 5).map(ingredient => ({
+    name: ingredient.name?.substring(0, 10) + '...' || 'Unknown',
+    stock: ingredient.current_stock || 0,
+    min: ingredient.min_stock || 0
+  }))
   
-  const categoryData = ingredients?.reduce((acc, ingredient) => {
+  const categoryData = ingredients.reduce((acc, ingredient) => {
     const category = ingredient.category || 'Lainnya'
     acc[category] = (acc[category] || 0) + 1
     return acc
@@ -160,7 +166,7 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh}>
-        <div className="space-y-6">
+        <div className="space-y-6 w-full max-w-none">
           <div>
             <h1 className={`font-bold text-foreground ${
               isMobile ? 'text-2xl' : 'text-3xl'
@@ -386,30 +392,29 @@ export default function Dashboard() {
               />
             )}
           </div>
-          </div>
           
           {/* AI-Powered Insights Section */}
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2 flex items-center">
-              <span>🤖 AI Business Intelligence</span>
-            </h2>
-            <p className="text-muted-foreground mb-6">Powered by OpenRouter AI - Get intelligent insights for your bakery business</p>
-            
-            <AIInsightsPanel 
-              businessData={{
-                recipes: recipes || [],
-                ingredients: ingredients || [],
-                orders: orders || [],
-                customers: customers || []
-              }}
-              onInsightAction={(insight, action) => {
-                console.log('AI Insight Action:', insight, action)
-              }}
-            />
-          </div>
-        }
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span>🤖 AI Business Intelligence</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">Powered by OpenRouter AI - Get intelligent insights for your bakery business</p>
+              <Button 
+                onClick={() => window.location.href = '/ai'} 
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                Open AI Intelligence Hub
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Quick Actions */}
+        <Card>
           <CardHeader>
             <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>Aksi Cepat</CardTitle>
           </CardHeader>

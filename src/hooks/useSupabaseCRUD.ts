@@ -255,6 +255,9 @@ export function useSupabaseRecord<T extends keyof Tables>(
   return { data, loading, error, refetch };
 }
 
+// Main export alias for backward compatibility
+export const useSupabaseCRUD = useSupabaseMutation;
+
 // Specific hooks with combined data and mutations
 export const useIngredients = () => {
   const data = useSupabaseData('ingredients');

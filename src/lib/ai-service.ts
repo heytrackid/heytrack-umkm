@@ -540,6 +540,193 @@ export class AIService {
   }
 
   /**
+   * 💰 Financial Analysis & Forecasting
+   * Analyzes financial records and provides insights
+   */
+  async analyzeFinancial(data: {
+    records: Array<{
+      type: 'income' | 'expense'
+      amount: number
+      category: string
+      date: string
+      description?: string
+    }>
+    period: string
+    businessType: string
+  }) {
+    const totalIncome = data.records.filter(r => r.type === 'income').reduce((sum, r) => sum + r.amount, 0)
+    const totalExpenses = data.records.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0)
+    const netProfit = totalIncome - totalExpenses
+    
+    const prompt = `
+    Sebagai financial analyst untuk UMKM Indonesia, analisis kondisi keuangan berikut:
+    
+    PERIODE ANALISIS: ${data.period}
+    TIPE BISNIS: ${data.businessType}
+    
+    RINGKASAN KEUANGAN:
+    - Total Pendapatan: Rp ${totalIncome.toLocaleString()}
+    - Total Pengeluaran: Rp ${totalExpenses.toLocaleString()}
+    - Net Profit: Rp ${netProfit.toLocaleString()}
+    
+    TRANSAKSI DETAIL:
+    ${data.records.slice(0, 20).map(record => `
+    - ${record.type.toUpperCase()}: ${record.category}
+      Amount: Rp ${record.amount.toLocaleString()}
+      Date: ${record.date}
+      ${record.description ? `Desc: ${record.description}` : ''}
+    `).join('\n')}
+    
+    Berikan analisis dalam format JSON:
+    {
+      "insights": [
+        {
+          "category": "profitability|cashflow|expenses|revenue",
+          "title": "string",
+          "description": "string",
+          "severity": "critical|high|medium|low",
+          "actionRequired": boolean
+        }
+      ],
+      "summary": "string",
+      "healthScore": number,
+      "trends": {
+        "revenue": "increasing|stable|decreasing",
+        "expenses": "increasing|stable|decreasing",
+        "profitability": "improving|stable|declining"
+      },
+      "recommendations": [
+        {
+          "priority": "high|medium|low",
+          "category": "cost-reduction|revenue-growth|cashflow|efficiency",
+          "action": "string",
+          "expectedImpact": "string",
+          "timeframe": "immediate|1-month|3-months|6-months"
+        }
+      ],
+      "forecasting": {
+        "nextMonthRevenue": number,
+        "nextMonthExpenses": number,
+        "confidence": number
+      },
+      "alerts": [
+        {
+          "type": "cashflow|expense-spike|revenue-drop|margin-decline",
+          "message": "string",
+          "urgency": "high|medium|low"
+        }
+      ]
+    }
+    
+    Fokus pada konteks UMKM Indonesia: arus kas, efisiensi operasional, dan strategi pertumbuhan berkelanjutan.
+    `
+    
+    return this.callAI(prompt, 'financial-analysis')
+  }
+  
+  /**
+   * 👥 Customer Analytics & Segmentation
+   * Analyzes customer behavior and provides insights
+   */
+  async analyzeCustomer(data: {
+    customers: Array<{
+      id: string
+      name: string
+      totalOrders: number
+      totalSpent: number
+      lastOrderDate?: string
+      acquisitionDate?: string
+    }>
+    orders: Array<{
+      customerId: string
+      amount: number
+      date: string
+      products?: string[]
+    }>
+    period: string
+  }) {
+    const totalCustomers = data.customers.length
+    const totalRevenue = data.orders.reduce((sum, o) => sum + o.amount, 0)
+    const avgOrderValue = totalRevenue / data.orders.length || 0
+    const avgCustomerValue = totalRevenue / totalCustomers || 0
+    
+    const prompt = `
+    Sebagai customer analytics expert untuk bisnis F&B Indonesia, analisis perilaku pelanggan berikut:
+    
+    PERIODE ANALISIS: ${data.period}
+    
+    OVERVIEW:
+    - Total Pelanggan: ${totalCustomers}
+    - Total Transaksi: ${data.orders.length}
+    - Total Revenue: Rp ${totalRevenue.toLocaleString()}
+    - Average Order Value: Rp ${avgOrderValue.toLocaleString()}
+    - Customer Lifetime Value: Rp ${avgCustomerValue.toLocaleString()}
+    
+    CUSTOMER DATA:
+    ${data.customers.slice(0, 10).map(customer => `
+    - ${customer.name}:
+      * Total Orders: ${customer.totalOrders}
+      * Total Spent: Rp ${customer.totalSpent.toLocaleString()}
+      * Last Order: ${customer.lastOrderDate || 'N/A'}
+    `).join('\n')}
+    
+    ORDER PATTERNS:
+    ${data.orders.slice(0, 15).map(order => `
+    - Customer ${order.customerId}: Rp ${order.amount.toLocaleString()} on ${order.date}
+    `).join('\n')}
+    
+    Berikan analisis dalam format JSON:
+    {
+      "insights": [
+        {
+          "category": "retention|acquisition|value|behavior",
+          "title": "string",
+          "description": "string",
+          "impact": "high|medium|low"
+        }
+      ],
+      "summary": "string",
+      "customerSegments": [
+        {
+          "name": "string",
+          "description": "string",
+          "percentage": number,
+          "avgValue": number,
+          "characteristics": ["string"]
+        }
+      ],
+      "loyaltyAnalysis": {
+        "repeatCustomers": number,
+        "churnRisk": number,
+        "loyaltyScore": number,
+        "retentionRate": number
+      },
+      "recommendations": [
+        {
+          "type": "retention|acquisition|upselling|engagement",
+          "priority": "high|medium|low",
+          "strategy": "string",
+          "expectedResult": "string",
+          "implementation": "string"
+        }
+      ],
+      "opportunities": [
+        {
+          "segment": "string",
+          "potential": "string",
+          "action": "string",
+          "estimatedRevenue": number
+        }
+      ]
+    }
+    
+    Pertimbangkan preferensi konsumen Indonesia, pola belanja lokal, dan strategi marketing yang sesuai budaya.
+    `
+    
+    return this.callAI(prompt, 'customer-analytics')
+  }
+
+  /**
    * Generic AI API call handler
    */
   private async callAI(prompt: string, type: string): Promise<any> {

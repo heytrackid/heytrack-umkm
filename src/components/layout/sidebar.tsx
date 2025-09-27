@@ -35,7 +35,9 @@ import {
   X,
   Receipt,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Brain,
+  Sparkles
 } from 'lucide-react'
 
 interface NavigationGroup {
@@ -55,6 +57,16 @@ const navigationGroups: NavigationGroup[] = [
         name: 'Dashboard',
         href: '/',
         icon: LayoutDashboard,
+      }
+    ]
+  },
+  {
+    title: 'AI Intelligence',
+    items: [
+      {
+        name: 'AI Hub',
+        href: '/ai',
+        icon: Brain,
       }
     ]
   },

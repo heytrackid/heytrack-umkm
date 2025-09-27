@@ -166,6 +166,9 @@ export function useFinancialRecords(startDate?: string, endDate?: string) {
   return { records, loading, error }
 }
 
+// Main export alias for backward compatibility
+export const useSupabaseData = useRealtimeData;
+
 // Hook for creating/updating data
 export function useSupabaseMutations() {
   const [loading, setLoading] = useState(false)
