@@ -29,7 +29,10 @@ import {
 import { useResponsive } from '@/hooks/use-mobile'
 import { PullToRefresh } from '@/components/ui/mobile-gestures'
 import { MobileInput, MobileSelect, MobileTextarea, MobileForm } from '@/components/ui/mobile-forms'
-import { MiniChart } from '@/components/ui/mobile-charts'
+
+// Lazy loading imports
+import { MiniChartWithLoading } from '@/components/lazy/chart-features'
+import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
 
 const categories = ['Semua', 'Roti', 'Pastry', 'Donat', 'Kue', 'Cookies']
 const difficulties = ['Easy', 'Medium', 'Hard']
@@ -262,7 +265,7 @@ export default function RecipesPage() {
                   {recipes.filter(r => r.is_active).length} aktif
                 </p>
                 {recipes.length > 0 && (
-                  <MiniChart 
+                  <MiniChartWithLoading 
                     data={recipes.slice(0, 7).map((recipe, index) => ({
                       day: index + 1,
                       count: recipe.totalMade || 0
@@ -293,7 +296,7 @@ export default function RecipesPage() {
                   dari semua resep
                 </p>
                 {recipes.length > 0 && (
-                  <MiniChart 
+                  <MiniChartWithLoading 
                     data={recipes.slice(0, 7).map((recipe, index) => ({
                       day: index + 1,
                       margin: recipe.margin || 0

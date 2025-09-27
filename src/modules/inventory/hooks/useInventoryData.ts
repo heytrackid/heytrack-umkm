@@ -1,0 +1,160 @@
+import { useState, useEffect, useCallback } from 'react'
+import { InventoryService } from '../services/InventoryService'
+import { 
+  IngredientWithStats, 
+  InventoryStats, 
+  StockAlert, 
+  InventorySearchParams,
+  Ingredient
+} from '../types'
+
+export function useInventoryData(params?: InventorySearchParams) {
+  const [ingredients, setIngredients] = useState<Ingredient[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [totalCount, setTotalCount] = useState(0)
+
+  const fetchIngredients = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const result = await InventoryService.getIngredients(params)
+      setIngredients(result.data)
+      setTotalCount(result.count)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch ingredients')
+    } finally {
+      setLoading(false)
+    }
+  }, [params])
+
+  useEffect(() => {
+    fetchIngredients()
+  }, [fetchIngredients])
+
+  const refresh = useCallback(() => {
+    fetchIngredients()
+  }, [fetchIngredients])
+
+  const createIngredient = useCallback(async (ingredient: any) => {
+    try {
+      await InventoryService.createIngredient(ingredient)
+      refresh()
+    } catch (err) {
+      throw err
+    }
+  }, [refresh])
+
+  const updateIngredient = useCallback(async (id: string, updates: any) => {
+    try {
+      await InventoryService.updateIngredient(id, updates)
+      refresh()
+    } catch (err) {
+      throw err
+    }
+  }, [refresh])
+
+  const deleteIngredient = useCallback(async (id: string) => {
+    try {
+      await InventoryService.deleteIngredient(id)
+      refresh()
+    } catch (err) {
+      throw err
+    }
+  }, [refresh])
+
+  return {
+    ingredients,
+    loading,
+    error,
+    totalCount,
+    refresh,
+    createIngredient,
+    updateIngredient,
+    deleteIngredient
+  }
+}
+
+export function useInventoryStats() {
+  const [stats, setStats] = useState<InventoryStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchStats = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const statsData = await InventoryService.getInventoryStats()
+      setStats(statsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch inventory stats')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
+
+  return { stats, loading, error, refresh: fetchStats }
+}
+
+export function useInventoryAlerts() {
+  const [alerts, setAlerts] = useState<StockAlert[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchAlerts = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const alertsData = await InventoryService.getStockAlerts()
+      setAlerts(alertsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch stock alerts')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchAlerts()
+  }, [fetchAlerts])
+
+  return { alerts, loading, error, refresh: fetchAlerts }
+}
+
+export function useIngredientsWithStats() {
+  const [ingredients, setIngredients] = useState<IngredientWithStats[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchIngredientsWithStats = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const ingredientsData = await InventoryService.getIngredientsWithStats()
+      setIngredients(ingredientsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch ingredients with stats')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchIngredientsWithStats()
+  }, [fetchIngredientsWithStats])
+
+  return { 
+    ingredients, 
+    loading, 
+    error, 
+    refresh: fetchIngredientsWithStats 
+  }
+}

@@ -9,14 +9,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { SmartProductionPlanner } from '@/components/automation/smart-production-planner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Lazy loading imports
+import { SmartProductionPlannerWithLoading } from '@/components/lazy/automation-features'
+import { MiniChartWithLoading } from '@/components/lazy/chart-features'
+import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
 
 // Mobile UX imports
 import { useResponsive } from '@/hooks/use-mobile'
 import { PullToRefresh, SwipeActions } from '@/components/ui/mobile-gestures'
 import { MobileInput, MobileSelect, MobileTextarea } from '@/components/ui/mobile-forms'
-import { MiniChart } from '@/components/ui/mobile-charts'
 import { 
   Plus, 
   Search, 
@@ -469,7 +472,7 @@ export default function ProductionPage() {
                   isMobile ? 'text-xl' : 'text-2xl'
                 }`}>{stats.totalBatches}</div>
                 <p className="text-xs text-muted-foreground">semua batch</p>
-                <MiniChart 
+                <MiniChartWithLoading 
                   data={productions.slice(0, 7).map((prod, index) => ({
                     day: index + 1,
                     count: prod.status === 'COMPLETED' ? 1 : 0
@@ -537,7 +540,7 @@ export default function ProductionPage() {
                 }`}>{stats.avgEfficiency.toFixed(1)}%</div>
                 <p className="text-xs text-muted-foreground">target vs actual</p>
                 {productions.filter(p => p.status === 'COMPLETED').length > 0 && (
-                  <MiniChart 
+                  <MiniChartWithLoading 
                     data={productions.filter(p => p.status === 'COMPLETED').slice(0, 7).map((prod, index) => ({
                       day: index + 1,
                       efficiency: (prod.actualQuantity / prod.plannedQuantity * 100)
@@ -554,17 +557,26 @@ export default function ProductionPage() {
           </div>
 
           {/* Smart Production Planner */}
-          <div className={isMobile ? 'overflow-x-auto' : ''}>
-            <SmartProductionPlanner 
-              orders={sampleOrders}
-              recipes={sampleRecipes}
-              inventory={[
-                { id: '1', name: 'Tepung Terigu', current_stock: 25, min_stock: 10, unit: 'kg', price_per_unit: 12000, category: 'flour', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                { id: '2', name: 'Mentega', current_stock: 8, min_stock: 5, unit: 'kg', price_per_unit: 35000, category: 'dairy', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-                { id: '3', name: 'Telur Ayam', current_stock: 3, min_stock: 12, unit: 'kg', price_per_unit: 28000, category: 'protein', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
-              ]}
-            />
-          </div>
+          <ProgressiveLoader 
+            loadingMessage="Loading production planner..."
+            fallback={
+              <div className={isMobile ? 'overflow-x-auto' : ''}>
+                <div className="h-96 bg-muted animate-pulse rounded-lg"></div>
+              </div>
+            }
+          >
+            <div className={isMobile ? 'overflow-x-auto' : ''}>
+              <SmartProductionPlannerWithLoading 
+                orders={sampleOrders}
+                recipes={sampleRecipes}
+                inventory={[
+                  { id: '1', name: 'Tepung Terigu', current_stock: 25, min_stock: 10, unit: 'kg', price_per_unit: 12000, category: 'flour', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                  { id: '2', name: 'Mentega', current_stock: 8, min_stock: 5, unit: 'kg', price_per_unit: 35000, category: 'dairy', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                  { id: '3', name: 'Telur Ayam', current_stock: 3, min_stock: 12, unit: 'kg', price_per_unit: 28000, category: 'protein', supplier: null, description: null, is_active: true, storage_requirements: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
+                ]}
+              />
+            </div>
+          </ProgressiveLoader>
 
           {/* Filters and Search */}
           <Card>

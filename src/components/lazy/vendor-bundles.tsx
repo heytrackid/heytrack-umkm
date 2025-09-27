@@ -1,0 +1,190 @@
+'use client'
+
+import { lazy, Suspense, ComponentType, useState, useEffect } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card'
+
+// Loading fallbacks for different vendor libraries
+const VendorLoadingSkeleton = ({ name }: { name: string }) => (
+  <Card className="w-full">
+    <CardContent className="p-6 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <span className="ml-3 text-sm">Loading {name}...</span>
+    </CardContent>
+  </Card>
+)
+
+// Recharts Bundle (Heavy charting library)
+export const LazyRechartsBundle = {
+  LineChart: lazy(() => import('recharts').then(m => ({ default: m.LineChart }))),
+  BarChart: lazy(() => import('recharts').then(m => ({ default: m.BarChart }))),
+  AreaChart: lazy(() => import('recharts').then(m => ({ default: m.AreaChart }))),
+  PieChart: lazy(() => import('recharts').then(m => ({ default: m.PieChart }))),
+  RadarChart: lazy(() => import('recharts').then(m => ({ default: m.RadarChart }))),
+  ComposedChart: lazy(() => import('recharts').then(m => ({ default: m.ComposedChart }))),
+  
+  // Recharts components
+  XAxis: lazy(() => import('recharts').then(m => ({ default: m.XAxis }))),
+  YAxis: lazy(() => import('recharts').then(m => ({ default: m.YAxis }))),
+  CartesianGrid: lazy(() => import('recharts').then(m => ({ default: m.CartesianGrid }))),
+  Tooltip: lazy(() => import('recharts').then(m => ({ default: m.Tooltip }))),
+  Legend: lazy(() => import('recharts').then(m => ({ default: m.Legend }))),
+  ResponsiveContainer: lazy(() => import('recharts').then(m => ({ default: m.ResponsiveContainer }))),
+  
+  // Chart elements
+  Line: lazy(() => import('recharts').then(m => ({ default: m.Line }))),
+  Bar: lazy(() => import('recharts').then(m => ({ default: m.Bar }))),
+  Area: lazy(() => import('recharts').then(m => ({ default: m.Area }))),
+  Cell: lazy(() => import('recharts').then(m => ({ default: m.Cell }))),
+}
+
+// Radix UI Complex Components Bundle (yang tidak semua pages butuh)
+export const LazyRadixBundle = {
+  // Navigation & Menu
+  NavigationMenu: lazy(() => import('@radix-ui/react-navigation-menu').then(m => ({ default: m.Root }))),
+  Menubar: lazy(() => import('@radix-ui/react-menubar').then(m => ({ default: m.Root }))),
+  ContextMenu: lazy(() => import('@radix-ui/react-context-menu').then(m => ({ default: m.Root }))),
+  
+  // Layout & Container
+  ScrollArea: lazy(() => import('@radix-ui/react-scroll-area').then(m => ({ default: m.Root }))),
+  Separator: lazy(() => import('@radix-ui/react-separator').then(m => ({ default: m.Root }))),
+  AspectRatio: lazy(() => import('@radix-ui/react-aspect-ratio').then(m => ({ default: m.Root }))),
+  
+  // Advanced Inputs
+  Slider: lazy(() => import('@radix-ui/react-slider').then(m => ({ default: m.Root }))),
+  RadioGroup: lazy(() => import('@radix-ui/react-radio-group').then(m => ({ default: m.Root }))),
+  ToggleGroup: lazy(() => import('@radix-ui/react-toggle-group').then(m => ({ default: m.Root }))),
+  
+  // Overlay & Modal
+  HoverCard: lazy(() => import('@radix-ui/react-hover-card').then(m => ({ default: m.Root }))),
+  Popover: lazy(() => import('@radix-ui/react-popover').then(m => ({ default: m.Root }))),
+  Toast: lazy(() => import('@radix-ui/react-toast').then(m => ({ default: m.Root }))),
+}
+
+// React Hook Form Bundle (Form libraries)
+export const LazyFormBundle = {
+  ReactHookForm: lazy(() => import('react-hook-form')),
+  ZodResolver: lazy(() => import('@hookform/resolvers/zod').then(m => ({ default: m.zodResolver }))),
+  Zod: lazy(() => import('zod')),
+}
+
+// Date & Time Libraries Bundle
+export const LazyDateBundle = {
+  DateFns: lazy(() => import('date-fns')),
+  ReactDayPicker: lazy(() => import('react-day-picker').then(m => ({ default: m.DayPicker }))),
+}
+
+// Table Libraries Bundle
+export const LazyTableBundle = {
+  ReactTable: lazy(() => import('@tanstack/react-table')),
+}
+
+// Wrapper components untuk vendor libraries
+export const RechartsWithLoading = <T extends ComponentType<any>>(
+  ChartComponent: T,
+  chartName: string
+) => {
+  return (props: Parameters<T>[0]) => (
+    <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
+      <ChartComponent {...props} />
+    </Suspense>
+  )
+}
+
+export const RadixWithLoading = <T extends ComponentType<any>>(
+  RadixComponent: T,
+  componentName: string
+) => {
+  return (props: Parameters<T>[0]) => (
+    <Suspense fallback={<VendorLoadingSkeleton name={`${componentName} Component`} />}>
+      <RadixComponent {...props} />
+    </Suspense>
+  )
+}
+
+// Pre-wrapped common components
+export const LineChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.LineChart, 'Line')
+export const BarChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.BarChart, 'Bar')
+export const AreaChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.AreaChart, 'Area')
+export const PieChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.PieChart, 'Pie')
+
+export const NavigationMenuWithSuspense = RadixWithLoading(LazyRadixBundle.NavigationMenu, 'Navigation Menu')
+export const ScrollAreaWithSuspense = RadixWithLoading(LazyRadixBundle.ScrollArea, 'Scroll Area')
+export const HoverCardWithSuspense = RadixWithLoading(LazyRadixBundle.HoverCard, 'Hover Card')
+
+// Utility untuk conditional vendor loading
+export const loadVendorWhenNeeded = async (vendorName: string, componentName?: string) => {
+  switch (vendorName) {
+    case 'recharts':
+      return import('recharts')
+    case 'radix-navigation':
+      return import('@radix-ui/react-navigation-menu')
+    case 'radix-scroll':
+      return import('@radix-ui/react-scroll-area')
+    case 'react-hook-form':
+      return import('react-hook-form')
+    case 'zod':
+      return import('zod')
+    case 'date-fns':
+      return import('date-fns')
+    case 'react-table':
+      return import('@tanstack/react-table')
+    default:
+      throw new Error(`Unknown vendor: ${vendorName}`)
+  }
+}
+
+// Hook untuk lazy vendor loading dengan error handling
+export const useVendorLib = (vendorName: string) => {
+  const [lib, setLib] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    loadVendorWhenNeeded(vendorName)
+      .then(module => {
+        setLib(module)
+        setLoading(false)
+      })
+      .catch(err => {
+        setError(err)
+        setLoading(false)
+      })
+  }, [vendorName])
+
+  return { lib, loading, error }
+}
+
+// Progressive vendor loading strategy
+export const VendorLoadingStrategy = {
+  // Essential vendors (load immediately)
+  essential: ['react', 'react-dom', 'next'],
+  
+  // UI vendors (load on first UI interaction)
+  ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-button'],
+  
+  // Chart vendors (load when charts are needed)
+  charts: ['recharts'],
+  
+  // Form vendors (load when forms are opened)
+  forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+  
+  // Advanced vendors (load on demand)
+  advanced: ['@tanstack/react-table', '@radix-ui/react-navigation-menu'],
+  
+  // Mobile vendors (load on mobile detection)
+  mobile: ['vaul', 'embla-carousel-react'],
+}
+
+// Bundle size estimates (untuk monitoring)
+export const VendorBundleSizes = {
+  'recharts': '~180kb',
+  'react-hook-form': '~25kb',
+  'zod': '~50kb',
+  '@tanstack/react-table': '~90kb',
+  'date-fns': '~80kb',
+  '@radix-ui/react-navigation-menu': '~35kb',
+  '@radix-ui/react-scroll-area': '~15kb',
+  'vaul': '~20kb',
+  'embla-carousel-react': '~40kb',
+}

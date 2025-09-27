@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -67,6 +68,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.5.4",
     "@playwright/test": "^1.55.1",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^20",

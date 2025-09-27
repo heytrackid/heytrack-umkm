@@ -10,10 +10,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { SmartFinancialDashboard } from '@/components/automation/smart-financial-dashboard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FinancialTrendsChart } from '@/components/charts/financial-trends-chart'
 import { useFinancialRecords, useSupabaseMutations } from '@/hooks/useSupabaseData'
+
+// Lazy loading imports
+import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
+import { FinancialTrendsChartWithLoading } from '@/components/lazy/chart-features'
+import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
 
 // Mobile UX imports
 import { useResponsive } from '@/hooks/use-mobile'
@@ -386,7 +389,7 @@ export default function FinancePage() {
             </CardHeader>
             <CardContent>
               <div className={isMobile ? 'overflow-x-auto' : ''}>
-                <FinancialTrendsChart />
+                <FinancialTrendsChartWithLoading />
               </div>
             </CardContent>
           </Card>
@@ -411,19 +414,28 @@ export default function FinancePage() {
               </CardContent>
             </Card>
           ) : (
-            <div className={isMobile ? 'overflow-x-auto' : ''}>
-              <SmartFinancialDashboard 
-                data={{
-                  sales: financialRecords
-                    .filter(t => t.type === 'INCOME')
-                    .map(t => ({ amount: t.amount, cost: t.amount * 0.6, date: t.date })),
-                  expenses: financialRecords
-                    .filter(t => t.type === 'EXPENSE')
-                    .map(t => ({ amount: t.amount, category: t.category, date: t.date })),
-                  inventory: []
-                }} 
-              />
-            </div>
+            <ProgressiveLoader 
+              loadingMessage="Loading financial dashboard..."
+              fallback={
+                <div className={isMobile ? 'overflow-x-auto' : ''}>
+                  <div className="h-96 bg-muted animate-pulse rounded-lg"></div>
+                </div>
+              }
+            >
+              <div className={isMobile ? 'overflow-x-auto' : ''}>
+                <SmartFinancialDashboardWithLoading 
+                  data={{
+                    sales: financialRecords
+                      .filter(t => t.type === 'INCOME')
+                      .map(t => ({ amount: t.amount, cost: t.amount * 0.6, date: t.date })),
+                    expenses: financialRecords
+                      .filter(t => t.type === 'EXPENSE')
+                      .map(t => ({ amount: t.amount, category: t.category, date: t.date })),
+                    inventory: []
+                  }} 
+                />
+              </div>
+            </ProgressiveLoader>
           )}
 
           {/* Quick Analytics */}
@@ -834,69 +846,177 @@ export default function FinancePage() {
 // Finance Form Component
 function FinanceForm({ onClose }: { onClose: () => void }) {
   const [selectedType, setSelectedType] = useState('INCOME')
+  const [category, setCategory] = useState('')
+  const [amount, setAmount] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('')
+  const [date, setDate] = useState('')
+  const [reference, setReference] = useState('')
+  const [description, setDescription] = useState('')
+  const { isMobile } = useResponsive()
   
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid gap-4 ${
+        isMobile ? 'grid-cols-1' : 'grid-cols-2'
+      }`}>
         <div>
           <Label htmlFor="type">Tipe Transaksi</Label>
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih tipe transaksi" />
-            </SelectTrigger>
-            <SelectContent>
-              {transactionTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {isMobile ? (
+            <MobileSelect
+              value={selectedType}
+              onChange={setSelectedType}
+              placeholder="Pilih tipe transaksi"
+              options={transactionTypes.map(type => ({
+                value: type.value,
+                label: type.label
+              }))}
+            />
+          ) : (
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih tipe transaksi" />
+              </SelectTrigger>
+              <SelectContent>
+                {transactionTypes.map(type => (
+                  <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div>
           <Label htmlFor="category">Kategori</Label>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih kategori" />
-            </SelectTrigger>
-            <SelectContent>
-              {(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(category => (
-                <SelectItem key={category} value={category}>{category}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {isMobile ? (
+            <MobileSelect
+              value={category}
+              onChange={setCategory}
+              placeholder="Pilih kategori"
+              options={(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(cat => ({
+                value: cat,
+                label: cat
+              }))}
+            />
+          ) : (
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                {(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div>
           <Label htmlFor="amount">Jumlah</Label>
-          <Input id="amount" type="number" placeholder="1000000" />
+          {isMobile ? (
+            <MobileInput
+              value={amount}
+              onChange={setAmount}
+              placeholder="1000000"
+              type="number"
+            />
+          ) : (
+            <Input 
+              id="amount" 
+              type="number" 
+              placeholder="1000000" 
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          )}
         </div>
         <div>
           <Label htmlFor="paymentMethod">Metode Pembayaran</Label>
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih metode pembayaran" />
-            </SelectTrigger>
-            <SelectContent>
-              {paymentMethods.map(method => (
-                <SelectItem key={method} value={method}>{getPaymentMethodLabel(method)}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {isMobile ? (
+            <MobileSelect
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              placeholder="Pilih metode pembayaran"
+              options={paymentMethods.map(method => ({
+                value: method,
+                label: getPaymentMethodLabel(method)
+              }))}
+            />
+          ) : (
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih metode pembayaran" />
+              </SelectTrigger>
+              <SelectContent>
+                {paymentMethods.map(method => (
+                  <SelectItem key={method} value={method}>{getPaymentMethodLabel(method)}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div>
           <Label htmlFor="date">Tanggal</Label>
-          <Input id="date" type="date" />
+          {isMobile ? (
+            <MobileInput
+              value={date}
+              onChange={setDate}
+              placeholder="Pilih tanggal"
+              type="date"
+            />
+          ) : (
+            <Input 
+              id="date" 
+              type="date" 
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          )}
         </div>
         <div>
           <Label htmlFor="reference">Referensi</Label>
-          <Input id="reference" placeholder="SAL-20240125" />
+          {isMobile ? (
+            <MobileInput
+              value={reference}
+              onChange={setReference}
+              placeholder="SAL-20240125"
+            />
+          ) : (
+            <Input 
+              id="reference" 
+              placeholder="SAL-20240125" 
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+            />
+          )}
         </div>
       </div>
       <div>
         <Label htmlFor="description">Deskripsi</Label>
-        <Textarea id="description" placeholder="Deskripsi transaksi..." />
+        {isMobile ? (
+          <MobileInput
+            value={description}
+            onChange={setDescription}
+            placeholder="Deskripsi transaksi..."
+            multiline
+            rows={3}
+          />
+        ) : (
+          <Textarea 
+            id="description" 
+            placeholder="Deskripsi transaksi..." 
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        )}
       </div>
-      <div className="flex justify-end gap-2 pt-4">
-        <Button variant="outline" onClick={onClose}>Batal</Button>
-        <Button>Simpan Transaksi</Button>
+      <div className={`flex gap-2 pt-4 ${
+        isMobile ? 'flex-col' : 'justify-end'
+      }`}>
+        <Button variant="outline" onClick={onClose} className={isMobile ? 'w-full' : ''}>
+          Batal
+        </Button>
+        <Button className={isMobile ? 'w-full' : ''}>
+          Simpan Transaksi
+        </Button>
       </div>
     </div>
   )
@@ -904,6 +1024,8 @@ function FinanceForm({ onClose }: { onClose: () => void }) {
 
 // Transaction Detail View Component
 function TransactionDetailView({ transaction }: { transaction: any }) {
+  const { isMobile } = useResponsive()
+  
   const getTypeInfo = (type: string) => {
     return transactionTypes.find(t => t.value === type) || transactionTypes[0]
   }
@@ -912,19 +1034,27 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid gap-4 ${
+        isMobile ? 'grid-cols-1' : 'grid-cols-2'
+      }`}>
         <div>
-          <h3 className="font-medium">Informasi Transaksi</h3>
-          <div className="mt-2 space-y-2 text-sm">
+          <h3 className={`font-medium ${
+            isMobile ? 'text-base' : 'text-lg'
+          }`}>Informasi Transaksi</h3>
+          <div className={`mt-2 space-y-2 ${
+            isMobile ? 'text-sm' : 'text-sm'
+          }`}>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Tanggal:</span>
               <span>{transaction.date}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Referensi:</span>
-              <span className="font-mono">{transaction.reference}</span>
+              <span className="font-mono break-all">{transaction.reference}</span>
             </div>
-            <div className="flex justify-between">
+            <div className={`flex ${
+              isMobile ? 'flex-col space-y-1' : 'justify-between'
+            }`}>
               <span className="text-muted-foreground">Tipe:</span>
               <Badge className={typeInfo.color}>
                 {transaction.type === 'INCOME' ? (
@@ -935,22 +1065,32 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
                 {typeInfo.label}
               </Badge>
             </div>
-            <div className="flex justify-between">
+            <div className={`flex ${
+              isMobile ? 'flex-col space-y-1' : 'justify-between'
+            }`}>
               <span className="text-muted-foreground">Status:</span>
               <Badge variant="outline">{transaction.status}</Badge>
             </div>
           </div>
         </div>
         <div>
-          <h3 className="font-medium">Detail Keuangan</h3>
-          <div className="mt-2 space-y-2 text-sm">
+          <h3 className={`font-medium ${
+            isMobile ? 'text-base' : 'text-lg'
+          }`}>Detail Keuangan</h3>
+          <div className={`mt-2 space-y-2 ${
+            isMobile ? 'text-sm' : 'text-sm'
+          }`}>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Kategori:</span>
               <span>{transaction.category}</span>
             </div>
             <div className="flex justify-between font-medium">
               <span className="text-muted-foreground">Jumlah:</span>
-              <span className={transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'}>
+              <span className={`${
+                transaction.type === 'INCOME' ? 'text-green-600' : 'text-red-600'
+              } ${
+                isMobile ? 'text-lg' : 'text-xl'
+              }`}>
                 {transaction.type === 'INCOME' ? '+' : '-'}Rp {transaction.amount.toLocaleString()}
               </span>
             </div>
@@ -962,8 +1102,12 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
         </div>
       </div>
       <div>
-        <h3 className="font-medium">Deskripsi</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{transaction.description}</p>
+        <h3 className={`font-medium ${
+          isMobile ? 'text-base' : 'text-lg'
+        }`}>Deskripsi</h3>
+        <p className={`mt-1 text-muted-foreground ${
+          isMobile ? 'text-sm' : 'text-sm'
+        }`}>{transaction.description}</p>
       </div>
     </div>
   )

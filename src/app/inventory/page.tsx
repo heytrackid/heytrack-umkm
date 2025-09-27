@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,9 +9,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { SmartInventoryManager } from '@/components/automation/smart-inventory-manager'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { InventoryTrendsChart } from '@/components/charts/inventory-trends-chart'
+
+// Import lazy loading utilities
+import { ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
+
+// Import lazy-loaded inventory components
+import { 
+  LazySmartInventoryManager, 
+  LazyInventoryTrendsChart,
+  preloadInventoryComponents
+} from '@/modules/inventory/components/LazyComponents'
 import { useIngredients, useSupabaseMutations } from '@/hooks/useSupabaseData'
 import { useResponsive } from '@/hooks/use-mobile'
 import {
@@ -27,9 +35,9 @@ import {
 } from '@/components/ui/mobile-forms'
 import {
   MobileLineChart,
-  MobileAreaChart,
-  MiniChart
+  MobileAreaChart
 } from '@/components/ui/mobile-charts'
+import { MiniChartWithLoading } from '@/components/lazy/chart-features'
 import { 
   Plus, 
   Search, 
@@ -148,6 +156,11 @@ export default function InventoryPage() {
   const { data: ingredients, loading: ingredientsLoading, error: ingredientsError } = useIngredients()
   const { updateStock, loading: mutationLoading, error: mutationError } = useSupabaseMutations()
   
+  // Preload inventory components on mount
+  useCallback(() => {
+    preloadInventoryComponents()
+  }, [])
+  
   const [transactions, setTransactions] = useState(sampleTransactions)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
@@ -234,7 +247,7 @@ export default function InventoryPage() {
               }`}>{stats.totalTransactions}</div>
               <p className="text-xs text-muted-foreground">semua transaksi</p>
               {stats.totalTransactions > 0 && (
-                <MiniChart 
+                <MiniChartWithLoading
                   data={transactions.slice(-7).map((_, index) => ({
                     day: index + 1,
                     count: 1
@@ -306,7 +319,10 @@ export default function InventoryPage() {
             </CardHeader>
             <CardContent>
               <div className={isMobile ? 'overflow-x-auto' : ''}>
-                <InventoryTrendsChart />
+                {/* Using Suspense with lazy component */}
+                <Suspense fallback={<ComponentSkeletons.Chart height={400} />}>
+                  <LazyInventoryTrendsChart />
+                </Suspense>
               </div>
             </CardContent>
           </Card>
@@ -331,7 +347,9 @@ export default function InventoryPage() {
             </CardContent>
           </Card>
         ) : (
-          <SmartInventoryManager ingredients={ingredients} />
+          <Suspense fallback={<ComponentSkeletons.Dashboard />}>
+            <LazySmartInventoryManager ingredients={ingredients} />
+          </Suspense>
         )}
 
           {/* Filters */}

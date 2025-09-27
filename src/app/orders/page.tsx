@@ -15,7 +15,10 @@ import {
   PullToRefresh,
   SwipeActions
 } from '@/components/ui/mobile-gestures'
-import { MobileTable } from '@/components/ui/mobile-table'
+
+// Lazy loading imports
+import { MiniChartWithLoading } from '@/components/lazy/chart-features'
+import { ProgressiveLoader, StatsCardSkeleton } from '@/components/lazy/progressive-loading'
 import {
   MobileForm,
   MobileInput,
@@ -23,7 +26,7 @@ import {
   MobileNumberInput,
   MobileSelect
 } from '@/components/ui/mobile-forms'
-import { MiniChart } from '@/components/ui/mobile-charts'
+import { MobileTable } from '@/components/ui/mobile-table'
 import { 
   Plus, 
   Search, 
@@ -261,7 +264,7 @@ export default function OrdersPage() {
               }`}>{stats.totalOrders}</div>
               <p className="text-xs text-muted-foreground">semua pesanan</p>
               {stats.totalOrders > 0 && (
-                <MiniChart 
+                <MiniChartWithLoading 
                   data={orders.slice(-7).map((order, index) => ({
                     day: index + 1,
                     count: 1
