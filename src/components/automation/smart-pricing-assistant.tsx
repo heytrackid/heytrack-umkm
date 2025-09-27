@@ -41,12 +41,25 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
   const analyzePricing = async () => {
     setLoading(true)
     try {
+      // Validate recipe data before processing
+      if (!recipe?.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
+        console.warn('No ingredients found in recipe')
+        return
+      }
+      
       // Simulate API call - in real app, this would call your pricing API
       const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
-      setAnalysis(pricingAnalysis)
-      setCustomPrice(pricingAnalysis.pricing.standard.price)
+      
+      if (pricingAnalysis && pricingAnalysis.pricing) {
+        setAnalysis(pricingAnalysis)
+        setCustomPrice(pricingAnalysis.pricing.standard.price)
+      } else {
+        console.error('Invalid pricing analysis result')
+      }
     } catch (error) {
       console.error('Error analyzing pricing:', error)
+      // Set fallback analysis to prevent UI breaks
+      setAnalysis(null)
     } finally {
       setLoading(false)
     }
