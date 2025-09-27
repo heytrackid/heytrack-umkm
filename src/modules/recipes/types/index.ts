@@ -1,0 +1,76 @@
+// Recipe types - basic definitions for now
+export interface Recipe {
+  id: string
+  name: string
+  description?: string
+  category: string
+  servings: number
+  prep_time?: number
+  cook_time?: number
+  difficulty?: string
+  instructions?: string
+  notes?: string
+  cost_per_unit?: number
+  selling_price?: number
+  margin_percentage?: number
+  rating?: number
+  times_made?: number
+  image_url?: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface RecipeIngredient {
+  id: string
+  recipe_id: string
+  ingredient_id: string
+  quantity: number
+  unit: string
+  cost?: number
+  notes?: string
+  created_at: string
+}
+
+export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at'> {
+  recipe_ingredients?: Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>[]
+}
+
+export interface RecipeWithIngredients extends Recipe {
+  recipe_ingredients: (RecipeIngredient & {
+    ingredient: {
+      id: string
+      name: string
+      unit: string
+      price_per_unit: number
+    }
+  })[]
+}
+
+// HPP Calculation types
+export interface HPPCalculation {
+  recipe_id: string
+  total_ingredient_cost: number
+  labor_cost: number
+  overhead_cost: number
+  total_cost: number
+  cost_per_unit: number
+  suggested_price: number
+  margin_percentage: number
+  created_at: string
+}
+
+export interface PricingRecommendation {
+  standard: {
+    price: number
+    margin: number
+  }
+  premium: {
+    price: number
+    margin: number
+  }
+  economy: {
+    price: number
+    margin: number
+  }
+}

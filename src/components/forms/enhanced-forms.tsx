@@ -871,3 +871,14 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
     </Card>
   )
 }
+
+// Enhanced Forms bundle for lazy loading
+export const EnhancedForms = {
+  IngredientForm,
+  RecipeForm,
+  CustomerForm,
+  FinancialRecordForm
+}
+
+// Default export for lazy loading
+export default EnhancedForms

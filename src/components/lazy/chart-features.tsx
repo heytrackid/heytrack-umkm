@@ -61,10 +61,10 @@ const LazyMiniChart = lazy(
     .then(module => ({ default: module.MiniChart }))
 )
 
-// Recharts components (heavy library)
-const LazyRechartsBundle = lazy(
-  () => import('recharts').then(recharts => ({ default: recharts }))
-)
+// Recharts components (heavy library) - removed for now as it causes typing issues
+// const LazyRechartsBundle = lazy(
+//   () => import('recharts').then(recharts => ({ default: recharts }))
+// )
 
 // Chart wrapper components dengan loading states
 export const FinancialTrendsChartWithLoading = (props: any) => (

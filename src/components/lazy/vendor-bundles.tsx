@@ -61,30 +61,31 @@ export const LazyRadixBundle = {
   Toast: lazy(() => import('@radix-ui/react-toast').then(m => ({ default: m.Root }))),
 }
 
-// React Hook Form Bundle (Form libraries)
-export const LazyFormBundle = {
-  ReactHookForm: lazy(() => import('react-hook-form')),
-  ZodResolver: lazy(() => import('@hookform/resolvers/zod').then(m => ({ default: m.zodResolver }))),
-  Zod: lazy(() => import('zod')),
-}
+// React Hook Form Bundle (Form libraries) - Commented out due to TypeScript issues
+// These libraries export utilities, not React components
+// export const LazyFormBundle = {
+//   ReactHookForm: lazy(() => import('react-hook-form')),
+//   ZodResolver: lazy(() => import('@hookform/resolvers/zod').then(m => ({ default: m.zodResolver }))),
+//   Zod: lazy(() => import('zod')),
+// }
 
-// Date & Time Libraries Bundle
+// Date & Time Libraries Bundle - Fixed to only include React components
 export const LazyDateBundle = {
-  DateFns: lazy(() => import('date-fns')),
+  // DateFns: lazy(() => import('date-fns')), // Utility library, not a component
   ReactDayPicker: lazy(() => import('react-day-picker').then(m => ({ default: m.DayPicker }))),
 }
 
-// Table Libraries Bundle
-export const LazyTableBundle = {
-  ReactTable: lazy(() => import('@tanstack/react-table')),
-}
+// Table Libraries Bundle - Commented out as it exports utilities not components
+// export const LazyTableBundle = {
+//   ReactTable: lazy(() => import('@tanstack/react-table')),
+// }
 
 // Wrapper components untuk vendor libraries
 export const RechartsWithLoading = <T extends ComponentType<any>>(
   ChartComponent: T,
   chartName: string
 ) => {
-  return (props: Parameters<T>[0]) => (
+  return (props: any) => (
     <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
       <ChartComponent {...props} />
     </Suspense>
@@ -95,7 +96,7 @@ export const RadixWithLoading = <T extends ComponentType<any>>(
   RadixComponent: T,
   componentName: string
 ) => {
-  return (props: Parameters<T>[0]) => (
+  return (props: any) => (
     <Suspense fallback={<VendorLoadingSkeleton name={`${componentName} Component`} />}>
       <RadixComponent {...props} />
     </Suspense>

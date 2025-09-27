@@ -107,7 +107,7 @@ export const SmartChartLoader = ({
 
   return (
     <Suspense fallback={<ComponentSkeletons.Chart height={height} />}>
-      <ChartComponent data={data} height={height} {...props} />
+      <ChartComponent data={data} height={height} dataKey="value" {...props} />
     </Suspense>
   )
 }
@@ -145,7 +145,7 @@ export function ChartDashboardWithProgressiveLoading({
                 <LazyInventoryTrendsChart />
               )}
               {chart.type === 'mini' && (
-                <LazyMiniChart data={chart.data} />
+                <LazyMiniChart data={chart.data || []} dataKey="value" />
               )}
             </Suspense>
           </div>

@@ -61,7 +61,7 @@ export function InventoryPageWithProgressiveLoading() {
         </Suspense>
         
         <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-          <LazySmartInventoryManager />
+          <LazySmartInventoryManager ingredients={[]} />
         </Suspense>
       </div>
     </div>

@@ -58,7 +58,7 @@ export {
 export {
   useSupabaseCRUD,
   useResponsive,
-  useToast,
+  // useToast, // Available in hooks/use-toast.ts
   useDebounce
 } from './shared/hooks'
 

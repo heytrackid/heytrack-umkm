@@ -20,7 +20,7 @@ export const withLazyLoading = <T extends ComponentType<any>>(
 ) => {
   const LazyComponent = lazy(importFunc)
   
-  return (props: Parameters<T>[0]) => (
+  return (props: any) => (
     <Suspense fallback={<LoadingFallback height={fallbackHeight} />}>
       <LazyComponent {...props} />
     </Suspense>
@@ -80,9 +80,24 @@ export const LazySuppliersCRUD = withLazyLoading(
   "h-96"
 )
 
-// Enhanced forms
-export const LazyEnhancedForms = withLazyLoading(
-  () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.EnhancedForms })),
+// Enhanced forms - load individual forms instead of bundle
+export const LazyIngredientForm = withLazyLoading(
+  () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.IngredientForm })),
+  "h-64"
+)
+
+export const LazyRecipeForm = withLazyLoading(
+  () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.RecipeForm })),
+  "h-64"
+)
+
+export const LazyCustomerForm = withLazyLoading(
+  () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.CustomerForm })),
+  "h-64"
+)
+
+export const LazyFinancialRecordForm = withLazyLoading(
+  () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.FinancialRecordForm })),
   "h-64"
 )
 

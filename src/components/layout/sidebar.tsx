@@ -115,17 +115,17 @@ export default function AppSidebar() {
       width: 60,
       transition: { 
         duration: 0.2,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: "easeInOut" as const
       }
     },
     expanded: { 
       width: 240,
       transition: { 
         duration: 0.2,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: "easeInOut" as const
       }
     }
-  }
+  } as const
 
   const contentVariants = {
     hidden: { 
