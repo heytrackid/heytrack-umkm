@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         analysisType: 'ai-powered-pricing',
         timestamp: new Date().toISOString(),
-        model: 'claude-3.5-sonnet',
+        model: 'grok-4-fast-free',
         confidence: analysis.marginAnalysis?.optimalMargin ? 'high' : 'medium'
       }
     }

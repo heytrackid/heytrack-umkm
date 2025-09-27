@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         analysisType: 'ai-powered-inventory',
         timestamp: new Date().toISOString(),
-        model: 'claude-3.5-sonnet',
+        model: 'grok-4-fast-free',
         confidence: optimization.demandForecast?.confidence || 0.7
       }
     }

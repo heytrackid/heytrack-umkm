@@ -55,10 +55,10 @@ Add to your `.env.local` file:
 # AI-Powered Features
 OPENROUTER_API_KEY=your_api_key_here
 
-# Optional customization
-AI_MODEL=anthropic/claude-3.5-sonnet
-AI_TEMPERATURE=0.3
-AI_MAX_TOKENS=2000
+# Optional customization (optimized for Grok 4 Fast Free)
+AI_MODEL=x-ai/grok-4-fast:free
+AI_TEMPERATURE=0.2
+AI_MAX_TOKENS=1500
 ```
 
 ### Step 3: Enable AI Features
@@ -66,11 +66,12 @@ AI features are automatically available once the API key is configured. The syst
 
 ## 📊 AI Model Selection
 
-**Primary Model: Claude 3.5 Sonnet**
-- Excellent for business analysis and reasoning
-- Strong understanding of Indonesian business context
-- High accuracy for F&B industry recommendations
-- Cost: ~$0.003 per 1K input tokens, ~$0.015 per 1K output tokens
+**Primary Model: Grok 4 Fast (Free)**
+- Latest multimodal model from xAI with 2M token context window
+- Excellent cost-efficiency with FREE usage
+- Strong reasoning capabilities for business analysis
+- Optimized for Indonesian F&B industry recommendations
+- Cost: $0.00 per request (completely FREE!)
 
 **Alternative Models** (configurable via AI_MODEL env var):
 - `anthropic/claude-3-haiku` (faster, cheaper)
@@ -157,14 +158,14 @@ The AI system is specifically trained and prompted for Indonesian bakery busines
 ## 📈 Performance & Costs
 
 ### API Costs (Estimated)
-- **Pricing Analysis**: ~$0.05-0.10 per analysis
-- **Inventory Optimization**: ~$0.08-0.15 per analysis  
-- **Customer Analytics**: ~$0.10-0.20 per analysis
-- **Monthly Usage** (active bakery): ~$20-50
+- **Pricing Analysis**: $0.00 per analysis (FREE!)
+- **Inventory Optimization**: $0.00 per analysis (FREE!)
+- **Customer Analytics**: $0.00 per analysis (FREE!)
+- **Monthly Usage** (active bakery): $0.00 (completely FREE!)
 
 ### Response Times
-- **Average**: 3-8 seconds
-- **Complex analyses**: 8-15 seconds
+- **Average**: 2-6 seconds (Grok 4 Fast is optimized for speed)
+- **Complex analyses**: 5-12 seconds
 - **Cached insights**: < 1 second
 
 ### Accuracy

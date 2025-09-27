@@ -392,7 +392,7 @@ export function AIInsightsPanel({
               </div>
             </div>
             <CardDescription>
-              Powered by Claude 3.5 Sonnet via OpenRouter • Specialized for Indonesian F&B business
+              Powered by Grok 4 Fast (FREE) via OpenRouter • Specialized for Indonesian F&B business
             </CardDescription>
           </CardHeader>
           <CardContent>

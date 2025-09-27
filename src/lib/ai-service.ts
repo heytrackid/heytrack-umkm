@@ -558,19 +558,19 @@ export class AIService {
           'X-Title': 'Bakery Management AI Assistant'
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-3.5-sonnet', // High-quality model for business analysis
+          model: 'x-ai/grok-4-fast:free', // Free high-performance model with 2M context
           messages: [
             {
               role: 'system',
-              content: 'You are an expert business consultant specializing in Indonesian F&B businesses, particularly bakeries and UMKM. Provide practical, actionable insights that consider local market conditions, cultural factors, and business constraints. Always respond in valid JSON format as requested.'
+              content: 'You are an expert business consultant specializing in Indonesian F&B businesses, particularly bakeries and UMKM. You have deep knowledge of local market conditions, Indonesian business culture, and UMKM operational challenges. Provide practical, data-driven insights that consider: 1) Indonesian pricing strategies and purchasing power, 2) Local seasonal factors (Ramadan, Lebaran, regional holidays), 3) UMKM resource constraints and opportunities, 4) Traditional Indonesian business practices. Always respond in valid, well-structured JSON format exactly as requested. Be concise but comprehensive in your analysis.'
             },
             {
               role: 'user',
               content: prompt
             }
           ],
-          temperature: 0.3, // Lower temperature for more consistent business analysis
-          max_tokens: 2000
+          temperature: 0.2, // Even lower temperature for Grok consistency
+          max_tokens: 1500
         })
       })
 
