@@ -10,6 +10,7 @@ import EnhancedSmartNotifications from '@/components/automation/enhanced-smart-n
 import AdvancedHPPCalculator from '@/components/automation/advanced-hpp-calculator'
 import ProductionPlanningDashboard from '@/components/automation/production-planning-dashboard'
 import InventoryAnalytics from '@/components/automation/inventory-analytics'
+import AIInsightsPanel from '@/components/ai/AIInsightsPanel'
 import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
@@ -385,10 +386,30 @@ export default function Dashboard() {
               />
             )}
           </div>
-        </div>
+          </div>
+          
+          {/* AI-Powered Insights Section */}
+          <div>
+            <h2 className="text-2xl font-bold text-foreground mb-2 flex items-center">
+              <span>🤖 AI Business Intelligence</span>
+            </h2>
+            <p className="text-muted-foreground mb-6">Powered by OpenRouter AI - Get intelligent insights for your bakery business</p>
+            
+            <AIInsightsPanel 
+              businessData={{
+                recipes: recipes || [],
+                ingredients: ingredients || [],
+                orders: orders || [],
+                customers: customers || []
+              }}
+              onInsightAction={(insight, action) => {
+                console.log('AI Insight Action:', insight, action)
+              }}
+            />
+          </div>
+        }
 
         {/* Quick Actions */}
-        <Card>
           <CardHeader>
             <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>Aksi Cepat</CardTitle>
           </CardHeader>
