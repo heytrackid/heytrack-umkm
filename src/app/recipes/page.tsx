@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { RecipesPage as ModularRecipesPage } from '@/modules/recipes'
 import { RecipeWithIngredients } from '@/types/database'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -46,7 +47,17 @@ interface RecipeWithStats extends RecipeWithIngredients {
   totalMade?: number
 }
 
-export default function RecipesPage() {
+export default function RecipesPageWrapper() {
+  // Use the modular RecipesPage component
+  return (
+    <AppLayout>
+      <ModularRecipesPage userRole="manager" enableAdvancedFeatures={true} />
+    </AppLayout>
+  )
+}
+
+// Keep the legacy implementation as backup
+function LegacyRecipesPage() {
   const [recipes, setRecipes] = useState<RecipeWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
+import { OrdersPage as ModularOrdersPage } from '@/modules/orders'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -84,8 +85,17 @@ function getPriorityInfo(priority: string) {
 }
 
 
-// Main OrdersPage component
-export default function OrdersPage() {
+// Use modular OrdersPage component
+export default function OrdersPageWrapper() {
+  return (
+    <AppLayout>
+      <ModularOrdersPage userRole="manager" enableAdvancedFeatures={true} />
+    </AppLayout>
+  )
+}
+
+// Keep legacy implementation as backup
+function LegacyOrdersPage() {
   const { isMobile, isTablet } = useResponsive()
   
   const [orders, setOrders] = useState<any[]>([])

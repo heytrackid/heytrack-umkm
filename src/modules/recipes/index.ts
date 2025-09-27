@@ -17,33 +17,13 @@ export {
   useRecipeProgressiveLoading,
   SmartRecipeLoader
 } from './components/LazyComponents'
-export { default as RecipeDetailView } from './components/RecipeDetailView'
-export { default as RecipeCard } from './components/RecipeCard'
-export { default as HPPCalculator } from './components/HPPCalculator'
-export { default as RecipeIngredientsList } from './components/RecipeIngredientsList'
-export { default as RecipeSteps } from './components/RecipeSteps'
 
 // Hooks
 export { useRecipesData } from './hooks/useRecipesData'
-export { useRecipeIngredients } from './hooks/useRecipeIngredients'
 export { useHPPCalculation } from './hooks/useHPPCalculation'
-export { useRecipeAnalytics } from './hooks/useRecipeAnalytics'
 
 // Services
-export { RecipesService } from './services/RecipesService'
 export { HPPCalculationService } from './services/HPPCalculationService'
-export { RecipeOptimizationService } from './services/RecipeOptimizationService'
-
-// Types
-export type {
-  Recipe,
-  RecipeIngredient,
-  RecipeWithIngredients,
-  HPPCalculation,
-  RecipeStats,
-  RecipeFilters,
-  DifficultyLevel
-} from './types'
 
 // Utils
 export { 
@@ -52,8 +32,26 @@ export {
   calculateProfitMargin,
   formatRecipeServings,
   scaleRecipe,
-  validateRecipe
+  validateRecipe,
+  getDifficultyInfo,
+  getCategoryInfo,
+  formatRecipeTime,
+  calculateComplexityScore,
+  generateRecipeSummary
 } from './utils'
 
 // Constants
-export { RECIPE_CATEGORIES, DIFFICULTY_LEVELS, MEASUREMENT_UNITS } from './constants'
+export { 
+  RECIPE_CATEGORIES, 
+  DIFFICULTY_LEVELS, 
+  MEASUREMENT_UNITS,
+  MARGIN_PRESETS,
+  OVERHEAD_RATES,
+  LABOR_COSTS,
+  VALIDATION_RULES,
+  DEFAULT_RECIPE,
+  HPP_CONSTANTS
+} from './constants'
+
+// Types - export interfaces from utils for now
+export type { Recipe, RecipeIngredient } from './utils'
