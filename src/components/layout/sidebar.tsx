@@ -206,7 +206,7 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50",
+        "fixed inset-y-0 left-0 z-50 flex flex-col",
         "bg-white dark:bg-black",
         "border-r border-gray-200 dark:border-gray-800",
         "transform transition-transform duration-300 ease-in-out",
@@ -217,9 +217,9 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gray-800 dark:bg-gray-600 rounded-lg flex items-center justify-center">
               <Package className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -249,13 +249,13 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
               <div className={cn(
                 "px-3 py-2 rounded-lg",
                 section.isWorkflow 
-                  ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800" 
+                  ? "bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700" 
                   : ""
               )}>
                 <h3 className={cn(
                   "text-xs font-semibold uppercase tracking-wider",
                   section.isWorkflow 
-                    ? "text-blue-700 dark:text-blue-300" 
+                    ? "text-gray-700 dark:text-gray-300" 
                     : "text-gray-400 dark:text-gray-500"
                 )}>
                   {section.title}
@@ -291,8 +291,8 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
                           <div className={cn(
                             "absolute -ml-1 -mt-1 w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center z-10",
                             isActive
-                              ? "bg-blue-600 text-white"
-                              : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                              ? "bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900"
+                              : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                           )}>
                             {item.stepNumber}
                           </div>
@@ -310,18 +310,7 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
                           {/* Badges */}
                           <div className="flex items-center gap-1 ml-2">
                             {item.badge && (
-                              <span className={cn(
-                                "text-xs px-2 py-0.5 rounded-full font-semibold",
-                                item.badge === 'MULAI' && "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300",
-                                item.badge === 'PENTING' && "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300",
-                                item.badge === 'WAJIB' && "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300",
-                                item.badge === 'AUTO' && "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
-                                item.badge === 'PROFIT' && "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300",
-                                item.badge === 'HARIAN' && "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
-                                item.badge === 'CRM' && "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300",
-                                item.badge === 'ANALISA' && "bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300",
-                                item.badge === 'OPTIMASI' && "bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300"
-                              )}>
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                                 {item.badge}
                               </span>
                             )}
@@ -343,7 +332,7 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
                       
                       {/* Active indicator */}
                       {isActive && (
-                        <div className="w-1 bg-blue-500 rounded-full self-stretch ml-2" />
+                        <div className="w-1 bg-gray-700 dark:bg-gray-300 rounded-full self-stretch ml-2" />
                       )}
                     </Link>
                   )
@@ -360,9 +349,9 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
         className={cn(
           "fixed top-4 left-4 z-50 lg:hidden",
           "p-3 rounded-lg shadow-lg",
-          "bg-gradient-to-r from-blue-500 to-indigo-600",
+          "bg-gray-800 dark:bg-gray-600",
           "text-white",
-          "hover:from-blue-600 hover:to-indigo-700",
+          "hover:bg-gray-700 dark:hover:bg-gray-500",
           "transition-all duration-200",
           "hover:scale-105"
         )}
