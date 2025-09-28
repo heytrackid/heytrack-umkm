@@ -201,14 +201,25 @@ async function handleAPIProtection(request: NextRequest, response: NextResponse)
 }
 
 async function handlePageProtection(request: NextRequest, response: NextResponse): Promise<NextResponse> {
-  // For page protection, you might want to redirect to login
-  // This is a simplified version - you'd typically check session cookies
+  // Skip page protection for now since we don't have proper auth setup
+  // This allows the settings page to load without authentication
+  // In production, you should implement proper session checking
   const { pathname } = request.nextUrl
   
-  // Check for session cookie or auth token
-  const sessionCookie = request.cookies.get('supabase-auth-token')
+  // Check for Supabase auth token in cookies
+  // Supabase uses different cookie names like 'sb-{project-ref}-auth-token'
+  const authCookies = request.cookies.getAll().filter(cookie => 
+    cookie.name.includes('sb-') && cookie.name.includes('auth-token')
+  )
   
-  if (!sessionCookie) {
+  // For development, allow access to settings without auth
+  // Remove this condition for production
+  if (process.env.NODE_ENV === 'development') {
+    return response
+  }
+  
+  // In production, check for proper auth
+  if (authCookies.length === 0) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(loginUrl)
