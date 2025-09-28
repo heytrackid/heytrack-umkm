@@ -1,0 +1,303 @@
+/* Mobile-first responsive utilities and components */
+
+/* Touch-friendly tap targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile-optimized scrolling */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Safe area utilities for mobile devices */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Mobile-first container utilities */
+.container-mobile {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-mobile {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-mobile {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Responsive text utilities */
+.text-responsive {
+  font-size: 0.875rem; /* 14px */
+}
+
+@media (min-width: 640px) {
+  .text-responsive {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+.text-responsive-lg {
+  font-size: 1rem; /* 16px */
+}
+
+@media (min-width: 640px) {
+  .text-responsive-lg {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-responsive-lg {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
+/* Mobile-optimized form inputs */
+.input-mobile {
+  font-size: 16px; /* Prevents zoom on iOS */
+  min-height: 44px;
+}
+
+/* Responsive spacing utilities */
+.space-y-responsive > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .space-y-responsive > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .space-y-responsive > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 2rem;
+  }
+}
+
+/* Grid responsive utilities */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+.grid-responsive-4 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mobile-first button utilities */
+.btn-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  min-height: 44px;
+}
+
+@media (min-width: 640px) {
+  .btn-mobile {
+    width: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: auto;
+  }
+}
+
+/* Mobile drawer/modal utilities */
+.mobile-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: white;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.mobile-drawer.open {
+  transform: translateY(0);
+}
+
+@media (min-width: 640px) {
+  .mobile-drawer {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    transform: none;
+    transition: none;
+  }
+  
+  .mobile-drawer.open {
+    transform: none;
+  }
+}
+
+/* Responsive card utilities */
+.card-mobile {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (min-width: 640px) {
+  .card-mobile {
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Mobile-optimized table utilities */
+.table-mobile {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-mobile table {
+  min-width: 640px; /* Force horizontal scroll on small screens */
+}
+
+@media (min-width: 1024px) {
+  .table-mobile table {
+    min-width: 100%;
+  }
+}
+
+/* Mobile navigation utilities */
+.nav-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  padding: env(safe-area-inset-bottom);
+}
+
+@media (min-width: 768px) {
+  .nav-mobile {
+    position: static;
+    border-top: none;
+    padding: 0;
+  }
+}
+
+/* Responsive image utilities */
+.img-responsive {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Mobile-first typography scale */
+.heading-responsive {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+}
+
+@media (min-width: 640px) {
+  .heading-responsive {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .heading-responsive {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+}
+
+/* Mobile-optimized focus states */
+.focus-mobile:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+@media (min-width: 640px) {
+  .focus-mobile:focus {
+    outline-offset: 1px;
+  }
+}
+
+/* Responsive animation utilities */
+@media (prefers-reduced-motion: reduce) {
+  .animate-responsive {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Print utilities */
+@media print {
+  .print-hidden {
+    display: none !important;
+  }
+  
+  .print-visible {
+    display: block !important;
+  }
+}

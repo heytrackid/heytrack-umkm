@@ -1,4 +1,4 @@
-import { Database } from './supabase'
+import { Database } from '@/types/database'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -158,7 +158,7 @@ export class HPPCalculator {
     recipe.recipe_ingredients.forEach((recipeIngredient) => {
       const ingredient = recipeIngredient.ingredients
       const requiredQuantity = recipeIngredient.quantity * productionQuantity
-      const availableStock = ingredient.stock
+      const availableStock = ingredient.current_stock
 
       if (availableStock < requiredQuantity) {
         canProduce = false
@@ -191,7 +191,7 @@ export class HPPCalculator {
    * Calculate low stock ingredients that need restocking
    */
   static checkLowStockIngredients(ingredients: Ingredient[]): Ingredient[] {
-    return ingredients.filter(ingredient => ingredient.stock <= ingredient.min_stock)
+    return ingredients.filter(ingredient => ingredient.current_stock <= ingredient.min_stock)
   }
 
   /**
@@ -215,7 +215,7 @@ export class HPPCalculator {
     const monthlyDemand = averageUsagePerMonth
     const economicOrderQuantity = Math.sqrt(2 * monthlyDemand * 100 / (ingredient.price_per_unit * 0.2)) // Assuming 20% carrying cost
 
-    const suggestedOrder = Math.max(economicOrderQuantity, reorderPoint - ingredient.stock)
+    const suggestedOrder = Math.max(economicOrderQuantity, reorderPoint - ingredient.current_stock)
 
     return {
       reorderPoint,

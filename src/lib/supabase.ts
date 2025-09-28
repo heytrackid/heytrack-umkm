@@ -1,358 +1,186 @@
 import { createClient } from '@supabase/supabase-js'
-import { createClientComponentClient, createServerComponentClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { Database } from '@/types/database'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// For client-side usage
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables')
+}
 
-// For client components
-export const createClientSupabase = () => createClientComponentClient()
+// For client-side usage with typing
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+})
 
-// For server components
-export const createServerSupabase = () => createServerComponentClient({ cookies })
+// Export createClient function for API routes and server-side usage
+export const createSupabaseClient = () => {
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
+}
 
-// Database types (we'll define these based on our schema)
-export type Database = {
-  public: {
-    Tables: {
-      ingredients: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          unit: string
-          price_per_unit: number
-          stock: number
-          min_stock: number
-          supplier: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          unit: string
-          price_per_unit: number
-          stock?: number
-          min_stock?: number
-          supplier?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          unit?: string
-          price_per_unit?: number
-          stock?: number
-          min_stock?: number
-          supplier?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      recipes: {
-        Row: {
-          id: string
-          name: string
-          description: string | null
-          instructions: string | null
-          servings: number
-          prep_time: number | null
-          cook_time: number | null
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          description?: string | null
-          instructions?: string | null
-          servings?: number
-          prep_time?: number | null
-          cook_time?: number | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          description?: string | null
-          instructions?: string | null
-          servings?: number
-          prep_time?: number | null
-          cook_time?: number | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      recipe_ingredients: {
-        Row: {
-          id: string
-          recipe_id: string
-          ingredient_id: string
-          quantity: number
-          unit: string
-        }
-        Insert: {
-          id?: string
-          recipe_id: string
-          ingredient_id: string
-          quantity: number
-          unit: string
-        }
-        Update: {
-          id?: string
-          recipe_id?: string
-          ingredient_id?: string
-          quantity?: number
-          unit?: string
-        }
-      }
-      customers: {
-        Row: {
-          id: string
-          name: string
-          email: string | null
-          phone: string | null
-          address: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          email?: string | null
-          phone?: string | null
-          address?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          email?: string | null
-          phone?: string | null
-          address?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      orders: {
-        Row: {
-          id: string
-          order_no: string
-          customer_id: string | null
-          customer_name: string | null
-          status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED'
-          total_amount: number
-          paid_amount: number
-          discount: number
-          delivery_date: string | null
-          notes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          order_no: string
-          customer_id?: string | null
-          customer_name?: string | null
-          status?: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED'
-          total_amount?: number
-          paid_amount?: number
-          discount?: number
-          delivery_date?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          order_no?: string
-          customer_id?: string | null
-          customer_name?: string | null
-          status?: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED'
-          total_amount?: number
-          paid_amount?: number
-          discount?: number
-          delivery_date?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      order_items: {
-        Row: {
-          id: string
-          order_id: string
-          recipe_id: string
-          quantity: number
-          unit_price: number
-          total_price: number
-        }
-        Insert: {
-          id?: string
-          order_id: string
-          recipe_id: string
-          quantity: number
-          unit_price: number
-          total_price: number
-        }
-        Update: {
-          id?: string
-          order_id?: string
-          recipe_id?: string
-          quantity?: number
-          unit_price?: number
-          total_price?: number
-        }
-      }
-      productions: {
-        Row: {
-          id: string
-          recipe_id: string
-          quantity: number
-          cost_per_unit: number
-          total_cost: number
-          status: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-          started_at: string | null
-          completed_at: string | null
-          notes: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          recipe_id: string
-          quantity: number
-          cost_per_unit: number
-          total_cost: number
-          status?: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-          started_at?: string | null
-          completed_at?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          recipe_id?: string
-          quantity?: number
-          cost_per_unit?: number
-          total_cost?: number
-          status?: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-          started_at?: string | null
-          completed_at?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      stock_transactions: {
-        Row: {
-          id: string
-          ingredient_id: string
-          type: 'PURCHASE' | 'USAGE' | 'ADJUSTMENT' | 'WASTE'
-          quantity: number
-          unit_price: number | null
-          total_price: number | null
-          reference: string | null
-          notes: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          ingredient_id: string
-          type: 'PURCHASE' | 'USAGE' | 'ADJUSTMENT' | 'WASTE'
-          quantity: number
-          unit_price?: number | null
-          total_price?: number | null
-          reference?: string | null
-          notes?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          ingredient_id?: string
-          type?: 'PURCHASE' | 'USAGE' | 'ADJUSTMENT' | 'WASTE'
-          quantity?: number
-          unit_price?: number | null
-          total_price?: number | null
-          reference?: string | null
-          notes?: string | null
-          created_at?: string
-        }
-      }
-      payments: {
-        Row: {
-          id: string
-          order_id: string
-          amount: number
-          method: 'CASH' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'DIGITAL_WALLET' | 'OTHER'
-          reference: string | null
-          notes: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          order_id: string
-          amount: number
-          method: 'CASH' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'DIGITAL_WALLET' | 'OTHER'
-          reference?: string | null
-          notes?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          order_id?: string
-          amount?: number
-          method?: 'CASH' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'DIGITAL_WALLET' | 'OTHER'
-          reference?: string | null
-          notes?: string | null
-          created_at?: string
-        }
-      }
-      financial_records: {
-        Row: {
-          id: string
-          type: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
-          category: string
-          amount: number
-          description: string
-          reference: string | null
-          date: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          type: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
-          category: string
-          amount: number
-          description: string
-          reference?: string | null
-          date?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
-          category?: string
-          amount?: number
-          description?: string
-          reference?: string | null
-          date?: string
-          created_at?: string
-        }
-      }
+// Helper function for server-side operations with service role (server-only)
+export const createServerSupabaseAdmin = () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('createServerSupabaseAdmin should only be called server-side')
+  }
+  
+  return createClient<Database>(
+    supabaseUrl,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
     }
+  )
+}
+
+// Real-time subscription helper
+export const subscribeToTable = (
+  table: keyof Database['public']['Tables'],
+  callback: (payload: any) => void,
+  filter?: string
+) => {
+  const channel = supabase
+    .channel(`realtime_${table}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table,
+        filter,
+      },
+      callback
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
   }
 }
+
+// Database service helpers
+export const dbService = {
+  // Ingredients
+  async getIngredients() {
+    const { data, error } = await supabase
+      .from('ingredients')
+      .select('*')
+      .eq('is_active', true)
+      .order('name')
+    
+    if (error) throw error
+    return data
+  },
+
+  async addIngredient(ingredient: Database['public']['Tables']['ingredients']['Insert']) {
+    const { data, error } = await supabase
+      .from('ingredients')
+      .insert(ingredient as any)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  },
+
+  async updateIngredient(id: string, updates: Database['public']['Tables']['ingredients']['Update']) {
+    const { data, error } = await (supabase as any)
+      .from('ingredients')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single()
+    
+    if (error) throw error
+    return data as Database['public']['Tables']['ingredients']['Row']
+  },
+
+  // Recipes with ingredients
+  async getRecipesWithIngredients() {
+    const { data, error } = await supabase
+      .from('recipes')
+      .select(`
+        *,
+        recipe_ingredients (
+          *,
+          ingredient:ingredients(*)
+        )
+      `)
+      .eq('is_active', true)
+      .order('name')
+    
+    if (error) throw error
+    return data
+  },
+
+  // Orders with items
+  async getOrdersWithItems() {
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        *,
+        order_items (
+          *,
+          recipe:recipes(*)
+        ),
+        payments (*),
+        customer:customers(*)
+      `)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data
+  },
+
+  // Productions
+  async getProductions() {
+    const { data, error } = await supabase
+      .from('productions')
+      .select(`
+        *,
+        recipe:recipes(*)
+      `)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data
+  },
+
+  // Financial records
+  async getFinancialRecords(startDate?: string, endDate?: string) {
+    let query = supabase
+      .from('financial_records')
+      .select('*')
+      .order('date', { ascending: false })
+    
+    if (startDate) {
+      query = query.gte('date', startDate)
+    }
+    
+    if (endDate) {
+      query = query.lte('date', endDate)
+    }
+    
+    const { data, error } = await query
+    
+    if (error) throw error
+    return data
+  },
+}
+
