@@ -17,7 +17,8 @@ import {
   CheckCircle,
   AlertTriangle,
   Wand2,
-  TrendingUp
+  TrendingUp,
+  ChefHat
 } from 'lucide-react'
 import AppLayout from '@/components/layout/app-layout'
 import { SmartPricingInsights } from '@/components/smart-pricing-insights'
@@ -29,6 +30,7 @@ import {
   type PricingAnalysis
 } from '@/lib/smart-business'
 import { useToast } from '@/hooks/use-toast'
+import DateFilter from '@/components/ui/date-filter'
 
 interface SimpleIngredient extends Omit<SmartIngredient, 'pricePerUnit' | 'volatility' | 'alternatives' | 'nutritionScore'> {
   price: number
@@ -117,6 +119,12 @@ export default function HPPSimplePage() {
   // Smart insights state
   const [smartInsights, setSmartInsights] = useState<any[]>([])
   const [marketAnalysis, setMarketAnalysis] = useState<any>(null)
+  
+  // Recipe import and filter states
+  const [savedRecipes, setSavedRecipes] = useState<SimpleRecipe[]>([])
+  const [showRecipeList, setShowRecipeList] = useState(false)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
 
   const [newIngredient, setNewIngredient] = useState({
     name: '',
@@ -125,10 +133,66 @@ export default function HPPSimplePage() {
     price: ''
   })
 
+  // Load saved recipes on component mount
+  useEffect(() => {
+    loadSavedRecipes()
+  }, [])
+  
   // Smart calculation with business intelligence
   useEffect(() => {
     calculateSmartPricingAnalysis()
   }, [recipe.ingredients, recipe.portions, recipe.sellingPrice])
+  
+  const loadSavedRecipes = () => {
+    // Mock data - in real app, this would fetch from API or localStorage
+    const mockSavedRecipes: SimpleRecipe[] = [
+      {
+        name: 'Roti Tawar Premium',
+        portions: 2,
+        portionUnit: 'loaf',
+        ingredients: [
+          { id: '1', name: 'Tepung Terigu', quantity: 500, unit: 'gram', price: 15, total: 7500 },
+          { id: '2', name: 'Telur', quantity: 120, unit: 'gram', price: 28, total: 3360 },
+          { id: '3', name: 'Margarin', quantity: 100, unit: 'gram', price: 25, total: 2500 },
+          { id: '4', name: 'Gula', quantity: 80, unit: 'gram', price: 14, total: 1120 },
+        ],
+        totalCost: 14480,
+        costPerPortion: 7240,
+        suggestedPrice: 10500,
+        suggestedMargin: 45,
+        sellingPrice: 0,
+        actualMargin: 0,
+        profit: 0
+      },
+      {
+        name: 'Cupcake Coklat',
+        portions: 24,
+        portionUnit: 'pcs',
+        ingredients: [
+          { id: '1', name: 'Tepung Terigu', quantity: 200, unit: 'gram', price: 15, total: 3000 },
+          { id: '2', name: 'Coklat Bubuk', quantity: 50, unit: 'gram', price: 80, total: 4000 },
+          { id: '3', name: 'Telur', quantity: 100, unit: 'gram', price: 28, total: 2800 },
+        ],
+        totalCost: 9800,
+        costPerPortion: 408,
+        suggestedPrice: 750,
+        suggestedMargin: 84,
+        sellingPrice: 0,
+        actualMargin: 0,
+        profit: 0
+      }
+    ]
+    setSavedRecipes(mockSavedRecipes)
+  }
+  
+  const importRecipe = (savedRecipe: SimpleRecipe) => {
+    setRecipe(savedRecipe)
+    setShowRecipeList(false)
+    toast({ 
+      title: 'Resep berhasil diimport!', 
+      description: `${savedRecipe.name} siap untuk perhitungan HPP` 
+    })
+  }
 
   const calculateSmartPricingAnalysis = () => {
     if (recipe.ingredients.length === 0) {
@@ -317,24 +381,90 @@ export default function HPPSimplePage() {
     <AppLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2">
-            <Calculator className="h-8 w-8" />
-            Kalkulator HPP Otomatis
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Hitung HPP per pcs, per dozen, per kg, atau unit apapun dengan mudah
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Wand2 className="h-4 w-4" />
-              <span>Overhead otomatis +{OVERHEAD_PERCENTAGE}%</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <TrendingUp className="h-4 w-4" />
-              <span>Margin rekomendasi {RECOMMENDED_MARGIN}%</span>
+        <div>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2">
+              <Calculator className="h-8 w-8" />
+              Kalkulator HPP Otomatis
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Hitung HPP per pcs, per dozen, per kg, atau unit apapun dengan mudah
+            </p>
+            <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Wand2 className="h-4 w-4" />
+                <span>Overhead otomatis +{OVERHEAD_PERCENTAGE}%</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-4 w-4" />
+                <span>Margin rekomendasi {RECOMMENDED_MARGIN}%</span>
+              </div>
             </div>
           </div>
+          
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowRecipeList(!showRecipeList)}
+                className="flex items-center gap-2"
+              >
+                <ChefHat className="h-4 w-4" />
+                Import Resep ({savedRecipes.length})
+              </Button>
+            </div>
+            
+            <DateFilter
+              startDate={startDate}
+              endDate={endDate}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              onQuickFilter={(days) => {
+                // Could be used to filter saved recipes by date
+                console.log(`Filter last ${days} days`)
+              }}
+              className="flex-shrink-0"
+            />
+          </div>
+          
+          {/* Recipe Import List */}
+          {showRecipeList && (
+            <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <ChefHat className="h-5 w-5" />
+                Pilih Resep untuk Dihitung HPP
+              </h3>
+              <div className="grid gap-2">
+                {savedRecipes.length === 0 ? (
+                  <p className="text-muted-foreground text-sm py-4 text-center">
+                    Belum ada resep tersimpan. Buat resep di menu "Resep Produk" terlebih dahulu.
+                  </p>
+                ) : (
+                  savedRecipes.map((savedRecipe, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium">{savedRecipe.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {savedRecipe.portions} {savedRecipe.portionUnit} • {savedRecipe.ingredients.length} bahan • HPP: Rp {savedRecipe.costPerPortion.toLocaleString()}/{savedRecipe.portionUnit}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => importRecipe(savedRecipe)}
+                        className="ml-3"
+                      >
+                        Import
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -68,7 +68,6 @@ const navigationSections: NavigationSection[] = [
         href: '/bahan-simple',
         icon: Package,
         isSimple: true,
-        stepNumber: 1,
         badge: 'MULAI',
         description: 'Input harga & stok bahan'
       },
@@ -77,7 +76,6 @@ const navigationSections: NavigationSection[] = [
         href: '/resep-simple',
         icon: ChefHat,
         isSimple: true,
-        stepNumber: 2,
         badge: 'PENTING',
         description: 'Komposisi & takaran'
       },
@@ -86,7 +84,6 @@ const navigationSections: NavigationSection[] = [
         href: '/pengeluaran-simple',
         icon: Receipt,
         isSimple: true,
-        stepNumber: 3,
         badge: 'WAJIB',
         description: 'Listrik, gas, gaji, dll'
       },
@@ -102,7 +99,6 @@ const navigationSections: NavigationSection[] = [
         href: '/hpp-simple',
         icon: Calculator,
         isSimple: true,
-        stepNumber: 4,
         badge: 'AUTO',
         description: 'Hitung HPP otomatis'
       },
@@ -111,7 +107,6 @@ const navigationSections: NavigationSection[] = [
         href: '/hpp-simple#pricing',
         icon: Target,
         isSimple: true,
-        stepNumber: 5,
         badge: 'PROFIT',
         description: 'Set margin & harga jual'
       },
@@ -127,7 +122,6 @@ const navigationSections: NavigationSection[] = [
         href: '/pesanan-simple',
         icon: ShoppingCart,
         isSimple: true,
-        stepNumber: 6,
         badge: 'HARIAN',
         description: 'Terima & proses order'
       },
@@ -136,7 +130,6 @@ const navigationSections: NavigationSection[] = [
         href: '/pelanggan-simple',
         icon: Users,
         isSimple: true,
-        stepNumber: 7,
         badge: 'CRM',
         description: 'Database customer'
       },
@@ -152,7 +145,6 @@ const navigationSections: NavigationSection[] = [
         href: '/laporan-simple',
         icon: BarChart3,
         isSimple: true,
-        stepNumber: 8,
         badge: 'ANALISA',
         description: 'Track keuntungan harian'
       },
@@ -161,7 +153,6 @@ const navigationSections: NavigationSection[] = [
         href: '/hpp-simple#review',
         icon: TrendingUp,
         isSimple: true,
-        stepNumber: 9,
         badge: 'OPTIMASI',
         description: 'Evaluasi & tingkatkan'
       },
@@ -286,21 +277,7 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
                       )}
                     >
                       <div className="flex items-center justify-center mr-3 mt-0.5">
-                        {/* Step Number Circle */}
-                        {item.stepNumber && (
-                          <div className={cn(
-                            "absolute -ml-1 -mt-1 w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center z-10",
-                            isActive
-                              ? "bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900"
-                              : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-                          )}>
-                            {item.stepNumber}
-                          </div>
-                        )}
-                        <item.icon className={cn(
-                          "h-5 w-5 transition-transform group-hover:scale-110",
-                          item.stepNumber && "ml-2"
-                        )} />
+                        <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
