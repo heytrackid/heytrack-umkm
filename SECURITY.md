@@ -6,10 +6,10 @@ Sistem bakery management telah diperkuat dengan sistem keamanan berlapis yang ko
 
 ### 1. Row Level Security (RLS) Berbasis Peran
 
-#### Sistem Role & Business Unit
-- **User Role**: `super_admin`, `admin`, `manager`, `staff`, `viewer`
-- **Business Unit**: `kitchen`, `sales`, `inventory`, `finance`, `all`
-- **Tabel user_profiles**: Menyimpan informasi peran dan unit bisnis setiap user
+#### Sistem Role (Disederhanakan)
+- **User Role**: `admin`, `user`
+- **Business Unit**: `all` (disederhanakan untuk fleksibilitas)
+- **Tabel user_profiles**: Menyimpan informasi peran setiap user
 
 #### Kebijakan RLS untuk Setiap Tabel
 

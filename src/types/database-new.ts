@@ -1515,7 +1515,7 @@ export type Database = {
       }
     }
     Enums: {
-      business_unit: "kitchen" | "sales" | "inventory" | "finance" | "all"
+      business_unit: "all"
       order_status:
         | "PENDING"
         | "CONFIRMED"
@@ -1532,7 +1532,7 @@ export type Database = {
       production_status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       record_type: "INCOME" | "EXPENSE" | "INVESTMENT" | "WITHDRAWAL"
       transaction_type: "PURCHASE" | "USAGE" | "ADJUSTMENT" | "WASTE"
-      user_role: "super_admin" | "admin" | "manager" | "staff" | "viewer"
+      user_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1660,7 +1660,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      business_unit: ["kitchen", "sales", "inventory", "finance", "all"],
+      business_unit: ["all"],
       order_status: [
         "PENDING",
         "CONFIRMED",
@@ -1679,7 +1679,7 @@ export const Constants = {
       production_status: ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       record_type: ["INCOME", "EXPENSE", "INVESTMENT", "WITHDRAWAL"],
       transaction_type: ["PURCHASE", "USAGE", "ADJUSTMENT", "WASTE"],
-      user_role: ["super_admin", "admin", "manager", "staff", "viewer"],
+      user_role: ["admin", "user"],
     },
   },
 } as const
