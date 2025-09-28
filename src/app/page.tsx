@@ -5,24 +5,9 @@ import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { SmartNotificationCenter } from '@/components/automation/smart-notification-center'
-import EnhancedSmartNotifications from '@/components/automation/enhanced-smart-notifications'
-import AdvancedHPPCalculator from '@/components/automation/advanced-hpp-calculator'
-import ProductionPlanningDashboard from '@/components/automation/production-planning-dashboard'
-import InventoryAnalytics from '@/components/automation/inventory-analytics'
-import AutoReorderDashboard from '@/components/inventory/AutoReorderDashboard'
-import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
-import { useIngredients, useOrdersWithItems, useCustomers, useRecipesWithIngredients } from '@/hooks/useSupabaseData'
 import { useResponsive } from '@/hooks/use-mobile'
-import { 
-  PullToRefresh,
-  SwipeActions 
-} from '@/components/ui/mobile-gestures'
-import {
-  MobileBarChart,
-  MobilePieChart,
-  MiniChart
-} from '@/components/ui/mobile-charts'
+import Link from 'next/link'
+import NotificationCenter from '@/components/ui/notification-center'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -34,10 +19,14 @@ import {
   CheckCircle,
   BarChart3,
   Plus,
-  Edit,
-  Trash2,
+  ChefHat,
+  Calculator,
+  Receipt,
+  FileText,
+  ArrowRight,
+  Clock,
   Star,
-  Brain
+  Zap
 } from 'lucide-react'
 
 
@@ -53,440 +42,492 @@ const getStatusBadge = (status: string) => {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
 
-export default function Dashboard() {
-  const { isMobile, isTablet } = useResponsive()
-  
-  // Fetch real data from database with safe defaults
-  const { data: ingredientsRaw, loading: ingredientsLoading, refetch: refetchIngredients } = useIngredients()
-  const { data: ordersRaw, loading: ordersLoading, refetch: refetchOrders } = useOrdersWithItems()
-  const { customers: customersRaw, loading: customersLoading } = useCustomers()
-  const { data: recipesRaw, loading: recipesLoading, refetch: refetchRecipes } = useRecipesWithIngredients()
-  
-  // Ensure data is always arrays
-  const ingredients = Array.isArray(ingredientsRaw) ? ingredientsRaw : []
-  const orders = Array.isArray(ordersRaw) ? ordersRaw : []
-  const customers = Array.isArray(customersRaw) ? customersRaw : []
-  const recipes = Array.isArray(recipesRaw) ? recipesRaw : []
-  
-  const refetchCustomers = () => Promise.resolve()
-  
-  const [stats, setStats] = useState({
-    totalSales: 0,
-    activeOrders: 0,
-    productsSold: 0,
-    newCustomers: 0
-  })
+// Simple pages quick access data
+interface QuickActionCard {
+  title: string
+  href: string
+  icon: React.ElementType
+  description: string
+  stats?: { label: string; value: string | number }
+  color: string
+  bgGradient: string
+}
 
-  // Calculate real stats from data
-  useEffect(() => {
-    if (!ordersLoading && orders.length >= 0) {
-      const today = new Date().toDateString()
-      const todaysOrders = orders.filter(order => 
-        order.created_at && new Date(order.created_at).toDateString() === today
-      )
-      
-      const totalSales = todaysOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
-      const activeOrders = orders.filter(order => 
-        order.status && ['PENDING', 'IN_PROGRESS'].includes(order.status)
-      ).length
-      
-      setStats({
-        totalSales,
-        activeOrders,
-        productsSold: todaysOrders.length,
-        newCustomers: customers.length
-      })
-    }
-  }, [orders, ordersLoading, customers])
-  
-  // Low stock items
-  const lowStockItems = ingredients.filter(ingredient => 
-    ingredient.current_stock <= ingredient.min_stock
-  )
-  
-  // Chart data
-  const inventoryChartData = ingredients.slice(0, 5).map(ingredient => ({
-    name: ingredient.name?.substring(0, 10) + '...' || 'Unknown',
-    stock: ingredient.current_stock || 0,
-    min: ingredient.min_stock || 0
-  }))
-  
-  const categoryData = ingredients.reduce((acc, ingredient) => {
-    const category = ingredient.category || 'Lainnya'
-    acc[category] = (acc[category] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
-  
-  const pieData = categoryData ? Object.entries(categoryData).map(([category, count]) => ({
-    name: category,
-    value: count
-  })) : []
-
-  // Mobile pull-to-refresh handler
-  const handleRefresh = useCallback(async () => {
-    try {
-      await Promise.all([
-        refetchIngredients(),
-        refetchOrders(),
-        refetchCustomers(),
-        refetchRecipes()
-      ])
-    } catch (error) {
-      console.error('Error refreshing data:', error)
-    }
-  }, [refetchIngredients, refetchOrders, refetchCustomers, refetchRecipes])
-
-  // Chart data for mobile components
-  const salesTrendData = [
-    { name: 'Sen', sales: stats.totalSales * 0.7 },
-    { name: 'Sel', sales: stats.totalSales * 0.8 },
-    { name: 'Rab', sales: stats.totalSales * 0.9 },
-    { name: 'Kam', sales: stats.totalSales * 0.95 },
-    { name: 'Jum', sales: stats.totalSales * 1.1 },
-    { name: 'Sab', sales: stats.totalSales },
-    { name: 'Min', sales: stats.totalSales * 1.2 }
-  ]
-
-  // Swipe actions for order items
-  const orderSwipeActions = [
-    {
-      id: 'view',
-      label: 'Lihat',
-      icon: <Star className="h-4 w-4" />,
-      color: 'blue' as const,
-      onClick: () => console.log('View order')
+// Dynamic quick actions that use real-time stats
+const getQuickActions = (stats: any): QuickActionCard[] => [
+  {
+    title: 'Pesanan',
+    href: '/pesanan-simple',
+    icon: ShoppingCart,
+    description: 'Kelola pesanan pelanggan',
+    stats: { label: 'Active', value: stats?.orders?.active || 0 },
+    color: 'text-gray-900 dark:text-white',
+    bgGradient: 'bg-white dark:bg-black'
+  },
+  {
+    title: 'Bahan Baku',
+    href: '/bahan-simple',
+    icon: Package,
+    description: 'Stok & inventory management',
+    stats: { 
+      label: 'Low Stock', 
+      value: stats?.inventory?.lowStock || 0 
     },
-    {
-      id: 'edit',
-      label: 'Edit',
-      icon: <Edit className="h-4 w-4" />,
-      color: 'green' as const,
-      onClick: () => console.log('Edit order')
+    color: 'text-gray-900 dark:text-white',
+    bgGradient: 'bg-white dark:bg-black'
+  },
+  {
+    title: 'Pelanggan',
+    href: '/pelanggan-simple',
+    icon: Users,
+    description: 'Data pelanggan & riwayat',
+    stats: { label: 'Total', value: stats?.customers?.total || 0 },
+    color: 'text-gray-900 dark:text-white',
+    bgGradient: 'bg-white dark:bg-black'
+  },
+  {
+    title: 'Pengeluaran',
+    href: '/pengeluaran-simple',
+    icon: Receipt,
+    description: 'Catat biaya operasional',
+    stats: { 
+      label: 'Hari ini', 
+      value: `Rp ${(stats?.expenses?.today || 0).toLocaleString('id-ID')}` 
+    },
+    color: 'text-gray-900 dark:text-white',
+    bgGradient: 'bg-white dark:bg-black'
+  },
+  {
+    title: 'Resep',
+    href: '/resep-simple',
+    icon: ChefHat,
+    description: 'Koleksi resep & panduan',
+    stats: { label: 'Total', value: stats?.recipes?.total || 0 },
+    color: 'text-gray-900 dark:text-white',
+    bgGradient: 'bg-white dark:bg-black'
+  },
+  {
+    title: 'HPP Calculator',
+    href: '/hpp-simple',
+    icon: Calculator,
+    description: 'Hitung harga pokok produksi',
+    stats: { 
+      label: 'Profit', 
+      value: `Rp ${(stats?.expenses?.netProfit || 0).toLocaleString('id-ID')}` 
+    },
+    color: 'text-gray-900 dark:text-white',
+    bgGradient: 'bg-white dark:bg-black'
+  }
+]
+
+// Dynamic recent activities from real data
+const getRecentActivities = (stats: any) => {
+  const activities: any[] = []
+  
+  // Add recent orders
+  if (stats?.orders?.recent) {
+    stats.orders.recent.slice(0, 2).forEach((order: any) => {
+      activities.push({
+        icon: Plus,
+        text: `Pesanan baru dari ${order.customer} - Rp ${parseFloat(order.amount || 0).toLocaleString('id-ID')}`,
+        time: new Date(order.time).toLocaleString('id-ID', { 
+          timeStyle: 'short',
+          dateStyle: 'short' 
+        }),
+        color: 'text-gray-600'
+      })
+    })
+  }
+  
+  // Add inventory alerts
+  if (stats?.inventory?.lowStock > 0) {
+    activities.push({
+      icon: AlertTriangle,
+      text: `${stats.inventory.lowStock} bahan baku stok menipis`,
+      time: 'Real-time',
+      color: 'text-gray-600'
+    })
+  }
+  
+  // Add system updates
+  activities.push({
+    icon: CheckCircle,
+    text: `Dashboard diperbarui dengan ${stats?.orders?.total || 0} total pesanan`,
+    time: new Date(stats?.lastUpdated || Date.now()).toLocaleTimeString('id-ID'),
+    color: 'text-gray-600'
+  })
+  
+  // Add profit info if positive
+  if (stats?.expenses?.netProfit > 0) {
+    activities.push({
+      icon: TrendingUp,
+      text: `Profit hari ini: Rp ${stats.expenses.netProfit.toLocaleString('id-ID')}`,
+      time: 'Hari ini',
+      color: 'text-gray-600'
+    })
+  }
+  
+  return activities.slice(0, 4) // Max 4 activities
+}
+
+export default function Dashboard() {
+  const { isMobile } = useResponsive()
+  const [dashboardStats, setDashboardStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+
+  // Fetch real-time dashboard data
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const response = await fetch('/api/dashboard/stats')
+      const data = await response.json()
+      
+      if (response.ok) {
+        setDashboardStats(data)
+        setLastUpdated(new Date())
+      } else {
+        console.error('Error fetching dashboard data:', data.error)
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }, [])
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    fetchDashboardData()
+    const interval = setInterval(fetchDashboardData, 30000)
+    return () => clearInterval(interval)
+  }, [fetchDashboardData])
+
+  // Manual refresh handler
+  const handleRefresh = () => {
+    setLoading(true)
+    fetchDashboardData()
+  }
+
+  // Loading skeleton
+  if (loading && !dashboardStats) {
+    return (
+      <AppLayout>
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div className="text-center space-y-2">
+            <div className="h-8 bg-black rounded animate-pulse"></div>
+            <div className="h-4 bg-black rounded animate-pulse"></div>
+          </div>
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-2' : 'grid-cols-4'
+          }`}>
+            {[1,2,3,4].map(i => (
+              <div key={i} className="h-32 bg-black rounded animate-pulse"></div>
+            ))}
+          </div>
+        </div>
+      </AppLayout>
+    )
+  }
+
   return (
     <AppLayout>
-      <PullToRefresh onRefresh={handleRefresh}>
-        <div className="space-y-6 w-full max-w-none">
-          <div>
-            <h1 className={`font-bold text-foreground ${
-              isMobile ? 'text-2xl' : 'text-3xl'
-            }`}>Dashboard</h1>
-            <p className="text-muted-foreground">Selamat datang di sistem manajemen toko roti</p>
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className={`font-bold text-foreground ${
+            isMobile ? 'text-2xl' : 'text-4xl'
+          }`}>Dashboard</h1>
+          <p className="text-muted-foreground text-lg">
+            Selamat datang di HeyTrack Bakery Management
+          </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <CheckCircle className="h-4 w-4 text-gray-600" />
+              <span>Real-time Data</span>
+            </div>
+            <span>•</span>
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4 text-gray-600" />
+              <span>Update: {lastUpdated.toLocaleTimeString('id-ID')}</span>
+            </div>
+            <button
+              onClick={handleRefresh}
+              className="ml-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              disabled={loading}
+            >
+              <Zap className={`h-4 w-4 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
+        </div>
 
-          {/* Stats Cards */}
-          <div className={`grid gap-4 ${
-            isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-4'
-          }`}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Penjualan Hari Ini</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className={`font-bold ${
-                isMobile ? 'text-xl' : 'text-2xl'
-              }`}>Rp {stats.totalSales.toLocaleString('id-ID')}</div>
-              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3" />
-                <span>+12.5%</span>
-              </div>
-              {/* Mini trend chart */}
-              {stats.totalSales > 0 && (
-                <MiniChart 
-                  data={salesTrendData.slice(0, 4)}
-                  type="area"
-                  dataKey="sales"
-                  color="#10b981"
-                  className="mt-2"
-                  height={40}
-                />
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pesanan Aktif</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className={`font-bold ${
-                isMobile ? 'text-xl' : 'text-2xl'
-              }`}>{stats.activeOrders}</div>
-              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3" />
-                <span>+{stats.activeOrders > 0 ? '3' : '0'}</span>
+        {/* Quick Stats */}
+        <div className={`grid gap-4 ${
+          isMobile ? 'grid-cols-2' : 'grid-cols-4'
+        }`}>
+          <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Pendapatan Hari Ini</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Rp {dashboardStats?.revenue?.today?.toLocaleString('id-ID') || '0'}
+                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    {dashboardStats?.revenue?.trend === 'up' ? (
+                      <TrendingUp className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                    )}
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {dashboardStats?.revenue?.growth > 0 ? '+' : ''}{dashboardStats?.revenue?.growth || '0'}%
+                    </span>
+                  </div>
+                </div>
+                <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Bahan Baku</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className={`font-bold ${
-                isMobile ? 'text-xl' : 'text-2xl'
-              }`}>{ingredients?.length || 0}</div>
-              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <AlertTriangle className="h-3 w-3" />
-                <span>{lowStockItems.length} menipis</span>
+
+          <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Pesanan Aktif</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {dashboardStats?.orders?.active || 0}
+                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Clock className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {dashboardStats?.orders?.today || 0} hari ini
+                    </span>
+                  </div>
+                </div>
+                <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Resep</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className={`font-bold ${
-                isMobile ? 'text-xl' : 'text-2xl'
-              }`}>{recipes?.length || 0}</div>
-              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3" />
-                <span>+2</span>
+
+          <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Pelanggan</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {dashboardStats?.customers?.total || 0}
+                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {dashboardStats?.customers?.vip || 0} VIP
+                    </span>
+                  </div>
+                </div>
+                <Users className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Stok Menipis</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {dashboardStats?.inventory?.lowStock || 0}
+                  </p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <AlertTriangle className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {(dashboardStats?.inventory?.lowStock || 0) > 0 ? 'Perlu restok' : 'Stock OK'}
+                    </span>
+                  </div>
+                </div>
+                <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Enhanced Smart Notifications */}
-        <EnhancedSmartNotifications />
-
-        <div className={`grid gap-6 ${
-          isMobile ? 'grid-cols-1' : 'md:grid-cols-2'
-        }`}>
-          {/* Low Stock Alert */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5" />
-                <span>Stok Menipis ({lowStockItems.length})</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {lowStockItems.length > 0 ? (
-                  lowStockItems.slice(0, 5).map((item) => (
-                    <div key={item.id} className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Stok: {item.current_stock} {item.unit} / Min: {item.min_stock} {item.unit}
-                        </p>
-                      </div>
-                      <Badge variant={item.current_stock <= item.min_stock * 0.5 ? "destructive" : "secondary"}>
-                        {item.current_stock <= item.min_stock * 0.5 ? 'Kritis' : 'Rendah'}
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    <Package className="h-8 w-8 mx-auto mb-2" />
-                    <p>Semua stok dalam kondisi baik</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Orders */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                <span>Pesanan Terbaru</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {orders && orders.length > 0 ? (
-                  orders.slice(0, 5).map((order) => {
-                    const status = getStatusBadge(order.status)
-                    return (
-                      <SwipeActions key={order.id} actions={orderSwipeActions}>
-                        <div className={`flex items-center justify-between p-3 rounded-lg ${
-                          isMobile ? 'bg-muted/50' : ''
-                        }`}>
-                          <div>
-                            <p className="font-medium">{order.order_no}</p>
-                            <p className="text-sm text-muted-foreground">{order.customer_name || 'Walk-in customer'}</p>
+        {/* Quick Actions - Main Feature */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold">Quick Actions</h2>
+              <p className="text-muted-foreground">Akses cepat ke semua fitur utama dengan SimpleDataTable</p>
+            </div>
+          </div>
+          
+          <div className={`grid gap-4 ${
+            isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'
+          }`}>
+            {getQuickActions(dashboardStats).map((action) => {
+              const IconComponent = action.icon
+              return (
+                <Link key={action.href} href={action.href}>
+                  <Card className={`hover:shadow-lg transition-all duration-200 hover:scale-105 ${action.bgGradient} border-gray-200 dark:border-gray-800 cursor-pointer group`}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-2">
+                          <div className={`${action.color} group-hover:scale-110 transition-transform`}>
+                            <IconComponent className="h-8 w-8" />
                           </div>
-                          <div className="text-right">
-                            <Badge variant={status.variant}>{status.label}</Badge>
-                            <p className="text-sm font-medium mt-1">
-                              Rp {(order.total_amount || 0).toLocaleString('id-ID')}
+                          <div>
+                            <h3 className={`font-bold text-lg ${action.color}`}>
+                              {action.title}
+                            </h3>
+                            <p className={`text-sm ${action.color}`}>
+                              {action.description}
                             </p>
                           </div>
+                          {action.stats && (
+                            <div className={`text-xs ${action.color} bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full inline-block`}>
+                              {action.stats.label}: <span className="font-semibold">{action.stats.value}</span>
+                            </div>
+                          )}
                         </div>
-                      </SwipeActions>
+                        <ArrowRight className={`h-5 w-5 ${action.color} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Recent Activity & Notifications */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+                  <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  Aktivitas Terbaru
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {getRecentActivities(dashboardStats).map((activity, index) => {
+                    const IconComponent = activity.icon
+                    return (
+                      <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                        <div className="text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+                          <IconComponent className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{activity.text}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</p>
+                        </div>
+                      </div>
                     )
-                  })
-                ) : (
-                  <div className="text-center py-4 text-muted-foreground">
-                    <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
-                    <p>Belum ada pesanan</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Charts Section */}
-        <div className={`grid gap-6 ${
-          isMobile ? 'grid-cols-1' : 'md:grid-cols-2'
-        }`}>
-          {/* Inventory Stock Chart - Mobile Optimized */}
-          <MobileBarChart
-            title="Stok Bahan Baku"
-            description="Perbandingan stok saat ini dengan minimum"
-            data={inventoryChartData}
-            xKey="name"
-            bars={[
-              { key: 'stock', name: 'Stok Saat Ini', color: '#8884d8' },
-              { key: 'min', name: 'Minimum', color: '#ff7300' }
-            ]}
-            height={isMobile ? 200 : 250}
-            showGrid={!isMobile}
-          />
-
-          {/* Category Distribution - Mobile Optimized */}
-          <MobilePieChart
-            title="Kategori Bahan"
-            description="Distribusi bahan baku berdasarkan kategori"
-            data={pieData}
-            valueKey="value"
-            nameKey="name"
-            colors={COLORS}
-            height={isMobile ? 200 : 250}
-            innerRadius={isMobile ? 40 : 60}
-            showLabels={!isMobile}
-          />
-        </div>
-
-        {/* Enhanced Automation Section */}
-        <div className="space-y-6">
+          {/* Notifications */}
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Smart Automation Dashboard</h2>
-            <p className="text-muted-foreground">Advanced analytics and intelligent business automation</p>
+            <NotificationCenter showUnreadOnly={false} />
           </div>
-          
-          {/* Automated Reordering System */}
-          <AutoReorderDashboard onReorderTriggered={handleRefresh} />
-          
-          {/* Production Planning */}
-          <ProductionPlanningDashboard />
-          
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Inventory Analytics */}
-            <InventoryAnalytics />
-            
-            {/* Advanced HPP Calculator */}
-            {recipes && recipes.length > 0 && (
-              <AdvancedHPPCalculator 
-                recipeId={recipes[0].id}
-                recipeName={recipes[0].name}
-                onPriceUpdate={(price) => {
-                  console.log('Price updated to:', price)
-                  // Could add logic here to update recipe price in database
-                }}
-              />
-            )}
-          </div>
-          
-          {/* AI-Powered Insights Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span>🤖 AI Business Intelligence</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-4">Powered by OpenRouter AI - Get intelligent insights for your bakery business</p>
-              <Button 
-                onClick={() => window.location.href = '/ai'} 
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Brain className="h-4 w-4 mr-2" />
-                Open AI Intelligence Hub
-              </Button>
-            </CardContent>
-          </Card>
         </div>
-
-        {/* Quick Actions */}
-        <Card>
+        
+        {/* Quick Links */}
+        <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
           <CardHeader>
-            <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>Aksi Cepat</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <BarChart3 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              Laporan Cepat
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`grid gap-4 ${
-              isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-3' : 'md:grid-cols-4'
+              isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'
             }`}>
-              <Button 
-                variant="outline" 
-                className={`flex flex-col items-center space-y-2 h-auto ${
-                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
-                }`}
-                onClick={() => window.location.href = '/orders'}
-              >
-                <ShoppingCart className={`text-gray-600 dark:text-gray-400 ${
-                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
-                }`} />
-                <span className={`font-medium text-foreground ${
-                  isMobile ? 'text-sm' : 'text-base'
-                }`}>Pesanan Baru</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className={`flex flex-col items-center space-y-2 h-auto ${
-                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
-                }`}
-                onClick={() => window.location.href = '/recipes'}
-              >
-                <Package className={`text-gray-600 dark:text-gray-400 ${
-                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
-                }`} />
-                <span className={`font-medium text-foreground ${
-                  isMobile ? 'text-sm' : 'text-base'
-                }`}>Tambah Resep</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className={`flex flex-col items-center space-y-2 h-auto ${
-                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
-                }`}
-                onClick={() => window.location.href = '/hpp'}
-              >
-                <TrendingUp className={`text-gray-600 dark:text-gray-400 ${
-                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
-                }`} />
-                <span className={`font-medium text-foreground ${
-                  isMobile ? 'text-sm' : 'text-base'
-                }`}>Hitung HPP</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                className={`flex flex-col items-center space-y-2 h-auto ${
-                  isMobile ? 'p-4 min-h-[80px]' : 'p-4'
-                }`}
-                onClick={() => window.location.href = '/inventory'}
-              >
-                <CheckCircle className={`text-orange-500 ${
-                  isMobile ? 'h-6 w-6' : 'h-8 w-8'
-                }`} />
-                <span className={`font-medium text-foreground ${
-                  isMobile ? 'text-sm' : 'text-base'
-                }`}>Update Stok</span>
-              </Button>
+              <Link href="/laporan-simple" className="block">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-all group cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Laporan Harian</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Performa hari ini</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </div>
+              </Link>
+              
+              <Link href="/ingredients-simple" className="block">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-all group cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Inventory</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Kelola stok detail</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </div>
+              </Link>
+              
+              <Link href="/finance" className="block">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-all group cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Finance</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Analisa keuangan</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </div>
+              </Link>
+              
+              <Link href="/production" className="block">
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:shadow-md transition-all group cursor-pointer">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Production</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Jadwal produksi</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  </div>
+                </div>
+              </Link>
             </div>
           </CardContent>
         </Card>
-        </div>
-      </PullToRefresh>
+
+        {/* Pro Tips */}
+        <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-800">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-lg">
+                <Star className="h-5 w-5 text-yellow-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-bold text-gray-900 dark:text-white">Tips Produktivitas</h3>
+                <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-300">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                    <span>Gunakan <strong>Table View</strong> untuk data analysis</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                    <span>Switch ke <strong>Grid View</strong> untuk quick overview</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                    <span>Export data ke <strong>CSV</strong> untuk backup</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                    <span>Gunakan <strong>filters</strong> untuk mencari data cepat</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </AppLayout>
   )
 }

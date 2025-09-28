@@ -1,44 +1,121 @@
-import { NextResponse } from 'next/server';
-import { createSupabaseClient } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server'
+import { createSupabaseClient } from '@/lib/supabase'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const limit = searchParams.get('limit') || '50'
+  const offset = searchParams.get('offset') || '0'
+  const category = searchParams.get('category')
+  const startDate = searchParams.get('start_date')
+  const endDate = searchParams.get('end_date')
+
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseClient()
     
-    const { data: expenses, error } = await (supabase as any)
+    let query = (supabase as any)
       .from('expenses')
-      .select(`
-        *,
-        supplier:suppliers(name)
-      `)
-      .order('date', { ascending: false });
+      .select('*')
+      .order('expense_date', { ascending: false })
+      .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)
 
-    if (error) throw error;
+    if (category) {
+      query = query.eq('category', category)
+    }
 
-    return NextResponse.json(expenses);
+    if (startDate) {
+      query = query.gte('expense_date', startDate)
+    }
+
+    if (endDate) {
+      query = query.lte('expense_date', endDate)
+    }
+
+    const { data: expenses, error } = await query
+
+    if (error) throw error
+
+    // Get total count for pagination
+    const { count } = await (supabase as any)
+      .from('expenses')
+      .select('*', { count: 'exact', head: true })
+
+    // Get summary stats for dashboard
+    const today = new Date().toISOString().split('T')[0]
+    const thisMonth = new Date().toISOString().slice(0, 7)
+    
+    const { data: todayExpenses } = await (supabase as any)
+      .from('expenses')
+      .select('amount')
+      .eq('expense_date', today)
+    
+    const { data: monthExpenses } = await (supabase as any)
+      .from('expenses')
+      .select('amount, category')
+      .gte('expense_date', `${thisMonth}-01`)
+      .lte('expense_date', `${thisMonth}-31`)
+
+    const todayTotal = todayExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0) || 0
+    const monthTotal = monthExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount), 0) || 0
+    
+    // Category breakdown
+    const categoryBreakdown = monthExpenses?.reduce((acc: any, exp: any) => {
+      acc[exp.category] = (acc[exp.category] || 0) + parseFloat(exp.amount)
+      return acc
+    }, {}) || {}
+
+    return NextResponse.json({ 
+      data: expenses, 
+      count,
+      pagination: {
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        total: count
+      },
+      summary: {
+        today: todayTotal,
+        thisMonth: monthTotal,
+        categoryBreakdown
+      }
+    })
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error fetching expenses:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClient();
-    const body = await request.json();
+    const supabase = createSupabaseClient()
+    const body = await request.json()
 
     const { data: expense, error } = await (supabase as any)
       .from('expenses')
-      .insert([body])
-      .select(`
-        *,
-        supplier:suppliers(name)
-      `)
-      .single();
+      .insert([{
+        ...body,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
+      .select()
+      .single()
 
-    if (error) throw error;
+    if (error) throw error
 
-    return NextResponse.json(expense, { status: 201 });
+    // Create notification for large expenses
+    if (body.amount > 1000000) { // More than 1M IDR
+      await (supabase as any).from('notifications').insert([{
+        type: 'warning',
+        category: 'finance',
+        title: 'Large Expense Recorded',
+        message: `A large expense of Rp ${parseFloat(body.amount).toLocaleString('id-ID')} has been recorded for ${body.category}`,
+        entity_type: 'expense',
+        entity_id: expense.id,
+        priority: 'high'
+      }])
+    }
+
+    return NextResponse.json(expense, { status: 201 })
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error creating expense:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
