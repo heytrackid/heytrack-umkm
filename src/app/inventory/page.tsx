@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import Link from 'next/link'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useIngredients } from '@/hooks/useDatabase'
 import { useResponsive } from '@/hooks/use-mobile'
@@ -48,7 +49,6 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
   const [dateFilter, setDateFilter] = useState('')
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
@@ -105,20 +105,12 @@ export default function InventoryPage() {
             }`}>Inventory</h1>
             <p className="text-muted-foreground">Kelola transaksi stok dan inventory</p>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Transaksi Baru
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Buat Transaksi Inventory Baru</DialogTitle>
-              </DialogHeader>
-              <TransactionForm onClose={() => setIsAddDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          <Link href="/inventory/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Transaksi Baru
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Cards */}
@@ -237,10 +229,12 @@ export default function InventoryPage() {
                   <p className="text-muted-foreground mb-4">
                     Mulai dengan menambahkan bahan baku pertama
                   </p>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Bahan Baku
-                  </Button>
+                  <Link href="/inventory/new">
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Tambah Bahan Baku
+                    </Button>
+                  </Link>
                 </div>
               )}
             </CardContent>
