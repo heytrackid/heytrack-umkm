@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFinancialRecords, useSupabaseMutations } from '@/hooks/useSupabaseData'
 
 // Lazy loading imports
@@ -158,7 +157,6 @@ export default function FinancePage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  
   // Mobile responsive hooks
   const { isMobile, isTablet } = useResponsive()
   
@@ -1112,6 +1110,7 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
     </div>
   )
 }
+
 
 function getPaymentMethodLabel(method: string) {
   const methods: any = {

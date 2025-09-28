@@ -96,7 +96,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         name: 'HPP Calculator',
-        href: '/finance#hpp',
+        href: '/hpp',
         icon: Calculator,
         isSimple: true,
         badge: 'AUTO',
@@ -104,7 +104,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Target Harga',
-        href: '/finance#pricing',
+        href: '/pricing',
         icon: Target,
         isSimple: true,
         badge: 'PROFIT',
@@ -142,7 +142,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         name: 'Laporan Profit',
-        href: '/finance#reports',
+        href: '/reports',
         icon: BarChart3,
         isSimple: true,
         badge: 'ANALISA',
@@ -150,7 +150,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Review HPP',
-        href: '/finance#review',
+        href: '/review',
         icon: TrendingUp,
         isSimple: true,
         badge: 'OPTIMASI',
