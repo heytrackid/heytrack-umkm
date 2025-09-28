@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
@@ -26,12 +27,28 @@ const adminOnlyRoutes = [
   '/api/admin'
 ]
 
-export async function middleware(request: NextRequest) {
+// Define protected routes that require authentication
+const isProtectedRoute = createRouteMatcher([
+  '/dashboard(.*)',
+  '/recipes(.*)',
+  '/ingredients(.*)',
+  '/orders(.*)',
+  '/customers(.*)',
+  '/production(.*)',
+  '/inventory(.*)',
+  '/finance(.*)',
+  '/reports(.*)',
+  '/settings(.*)',
+  '/admin(.*)'
+])
+
+// Create the combined middleware
+export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl
   const userAgent = request.headers.get('user-agent') || ''
   const ip = getClientIP(request)
   
-  // Security Headers for all requests
+  // Apply security checks first
   const response = NextResponse.next()
   
   // Add security headers
@@ -56,18 +73,13 @@ export async function middleware(request: NextRequest) {
     })
   }
   
-  // API route protection
-  if (pathname.startsWith('/api/')) {
-    return await handleAPIProtection(request, response)
-  }
-  
-  // Page protection for sensitive areas
-  if (pathname.startsWith('/admin') || pathname.startsWith('/settings')) {
-    return await handlePageProtection(request, response)
+  // Clerk authentication for protected routes
+  if (isProtectedRoute(request)) {
+    await auth.protect()
   }
   
   return response
-}
+})
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
@@ -293,16 +305,9 @@ export function sanitizeSQL(input: string): string {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * 1. /api/auth (authentication endpoints)
-     * 2. /_next/static (static files)
-     * 3. /_next/image (image optimization files)
-     * 4. /favicon.ico (favicon file)
-     * 5. /manifest.json (PWA manifest)
-     * 6. /robots.txt (robots file)
-     * 7. /sitemap.xml (sitemap file)
-     */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|manifest.json|robots.txt|sitemap.xml).*)',
+    // Skip Next.js internals and all static files, unless found in search params
+    '/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 }

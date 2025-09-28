@@ -15,6 +15,13 @@ import {
   MoreVertical,
   User
 } from 'lucide-react'
+import { 
+  SignInButton, 
+  SignUpButton, 
+  SignedIn, 
+  SignedOut, 
+  UserButton 
+} from '@clerk/nextjs'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { 
   Sheet,
@@ -247,31 +254,42 @@ export default function MobileHeader({
             </div>
           )}
 
-          {/* Profile */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-2">
-                <User className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
-                <User className="h-4 w-4 mr-2" />
-                Profil
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                Pengaturan
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Bantuan
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-gray-600 dark:text-gray-400">
-                Keluar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Authentication */}
+          <SignedOut>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <SignInButton mode="modal">
+                    <div className="cursor-pointer">
+                      Sign In
+                    </div>
+                  </SignInButton>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <SignUpButton mode="modal">
+                    <div className="cursor-pointer">
+                      Sign Up
+                    </div>
+                  </SignUpButton>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SignedOut>
+          <SignedIn>
+            <UserButton 
+              appearance={{
+                elements: {
+                  avatarBox: "w-7 h-7"
+                }
+              }}
+            />
+          </SignedIn>
         </div>
       </div>
 

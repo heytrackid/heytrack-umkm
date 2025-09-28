@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ClerkProvider } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
@@ -28,26 +29,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning className="h-full">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <ClerkProvider>
+      <html lang="id" suppressHydrationWarning className="h-full">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
         >
-          <QueryProvider>
-            <SettingsProvider>
-              <ErrorBoundary>
-                {children}
-              </ErrorBoundary>
-              <Toaster />
-            </SettingsProvider>
-          </QueryProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <SettingsProvider>
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
+                <Toaster />
+              </SettingsProvider>
+            </QueryProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
