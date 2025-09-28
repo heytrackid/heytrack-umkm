@@ -72,20 +72,20 @@ const navigationSections: NavigationSection[] = [
         description: 'Input harga & stok bahan'
       },
       {
-        name: 'Resep Produk',
-        href: '/production',
-        icon: ChefHat,
-        isSimple: true,
-        badge: 'PENTING',
-        description: 'Komposisi & takaran'
-      },
-      {
         name: 'Biaya Operasional',
         href: '/finance',
         icon: Receipt,
         isSimple: true,
         badge: 'WAJIB',
         description: 'Listrik, gas, gaji, dll'
+      },
+      {
+        name: 'Resep Produk',
+        href: '/production',
+        icon: ChefHat,
+        isSimple: true,
+        badge: 'PENTING',
+        description: 'Komposisi & takaran'
       },
     ]
   },

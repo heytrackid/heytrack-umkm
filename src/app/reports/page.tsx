@@ -5,50 +5,61 @@ import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useResponsive } from '@/hooks/use-mobile'
+import { useFinancialAnalytics } from '@/hooks/useDatabase'
 import { 
   TrendingUp, 
   TrendingDown, 
   DollarSign, 
   BarChart3, 
   Download,
-  Calendar
+  Calendar,
+  RefreshCw,
+  Filter
 } from 'lucide-react'
-
-// Sample transaction data
-const sampleTransactions = [
-  { id: '1', type: 'INCOME', category: 'Penjualan', amount: 2450000, date: '2024-01-25' },
-  { id: '2', type: 'EXPENSE', category: 'Bahan Baku', amount: 600000, date: '2024-01-25' },
-  { id: '3', type: 'INCOME', category: 'Penjualan', amount: 1850000, date: '2024-01-24' },
-  { id: '4', type: 'EXPENSE', category: 'Operasional', amount: 300000, date: '2024-01-24' },
-  { id: '5', type: 'EXPENSE', category: 'Gaji', amount: 2500000, date: '2024-01-23' },
-]
-
-const incomeCategories = ['Penjualan', 'Investasi', 'Lain-lain']
-const expenseCategories = ['Bahan Baku', 'Gaji', 'Operasional', 'Equipment', 'Marketing', 'Transport']
 
 export default function FinancialReportsPage() {
   const { isMobile } = useResponsive()
-
-  // Calculate stats
-  const totalIncome = sampleTransactions
-    .filter(t => t.type === 'INCOME')
-    .reduce((sum, t) => sum + t.amount, 0)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   
-  const totalExpense = sampleTransactions
-    .filter(t => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + t.amount, 0)
+  // Set default date range (current month)
+  useEffect(() => {
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    
+    setStartDate(firstDay.toISOString().split('T')[0])
+    setEndDate(lastDay.toISOString().split('T')[0])
+  }, [])
   
-  const netProfit = totalIncome - totalExpense
-  const profitMargin = totalIncome > 0 ? (netProfit / totalIncome * 100) : 0
-  const totalTransactions = sampleTransactions.length
+  const { analytics: stats, loading, records } = useFinancialAnalytics(startDate, endDate)
 
-  const stats = {
-    totalIncome,
-    totalExpense,
-    netProfit,
-    profitMargin,
-    totalTransactions
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              Laporan Profit
+            </h1>
+            <p className="text-muted-foreground">
+              Ringkasan performa keuangan dan analisis bisnis
+            </p>
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="h-8 w-8 animate-spin text-primary mr-3" />
+                <span className={`${isMobile ? 'text-sm' : ''}`}>Memuat data laporan keuangan...</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    )
   }
 
   return (
@@ -65,9 +76,9 @@ export default function FinancialReportsPage() {
             </p>
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
-            <Button variant="outline" className={isMobile ? 'w-full' : ''}>
-              <Calendar className="h-4 w-4 mr-2" />
-              Filter Periode
+            <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
             </Button>
             <Button className={isMobile ? 'w-full' : ''}>
               <Download className="h-4 w-4 mr-2" />
@@ -75,6 +86,35 @@ export default function FinancialReportsPage() {
             </Button>
           </div>
         </div>
+
+        {/* Date Filter */}
+        <Card>
+          <CardHeader>
+            <CardTitle className={isMobile ? 'text-lg' : ''}>Filter Periode</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+              <div>
+                <Label htmlFor="start-date">Tanggal Mulai</Label>
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="end-date">Tanggal Akhir</Label>
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Summary Cards */}
         <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
@@ -200,76 +240,109 @@ export default function FinancialReportsPage() {
           </CardContent>
         </Card>
 
-        {/* Category Breakdown */}
-        <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+        {records.length === 0 ? (
           <Card>
-            <CardHeader>
-              <CardTitle className={isMobile ? 'text-lg' : ''}>Breakdown Pemasukan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {incomeCategories.map(category => {
-                  const amount = sampleTransactions
-                    .filter(t => t.type === 'INCOME' && t.category === category)
-                    .reduce((sum, t) => sum + t.amount, 0)
-                  const percentage = totalIncome > 0 ? (amount / totalIncome * 100) : 0
-                  
-                  return (
-                    <div key={category} className="space-y-2">
-                      <div className={`flex justify-between ${isMobile ? 'text-sm' : 'text-sm'}`}>
-                        <span>{category}</span>
-                        <div className="text-right">
-                          <div className="font-medium">Rp {amount.toLocaleString()}</div>
-                          <div className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</div>
-                        </div>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div 
-                          className="bg-green-600 h-2 rounded-full" 
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+            <CardContent className="py-12 text-center">
+              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                Belum ada data transaksi keuangan
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Silakan tambahkan transaksi keuangan terlebih dahulu di halaman Finance
+              </p>
+              <Button onClick={() => window.location.href = '/finance'}>
+                Ke Halaman Finance
+              </Button>
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className={isMobile ? 'text-lg' : ''}>Breakdown Pengeluaran</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {expenseCategories.slice(0, 4).map(category => {
-                  const amount = sampleTransactions
-                    .filter(t => t.type === 'EXPENSE' && t.category === category)
-                    .reduce((sum, t) => sum + t.amount, 0)
-                  const percentage = totalExpense > 0 ? (amount / totalExpense * 100) : 0
-                  
-                  return (
-                    <div key={category} className="space-y-2">
-                      <div className={`flex justify-between ${isMobile ? 'text-sm' : 'text-sm'}`}>
-                        <span>{category}</span>
-                        <div className="text-right">
-                          <div className="font-medium">Rp {amount.toLocaleString()}</div>
-                          <div className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</div>
-                        </div>
-                      </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div 
-                          className="bg-red-600 h-2 rounded-full" 
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        ) : (
+          <>
+            {/* Category Breakdown */}
+            <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className={isMobile ? 'text-lg' : ''}>Breakdown Pemasukan</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(stats.categoryBreakdown)
+                      .filter(([category]) => records.some(r => r.category === category && r.type === 'INCOME'))
+                      .map(([category, amount]) => {
+                        const incomeAmount = records
+                          .filter(r => r.type === 'INCOME' && r.category === category)
+                          .reduce((sum, r) => sum + r.amount, 0)
+                        const percentage = stats.totalIncome > 0 ? (incomeAmount / stats.totalIncome * 100) : 0
+                        
+                        return (
+                          <div key={category} className="space-y-2">
+                            <div className={`flex justify-between ${isMobile ? 'text-sm' : 'text-sm'}`}>
+                              <span>{category}</span>
+                              <div className="text-right">
+                                <div className="font-medium">Rp {incomeAmount.toLocaleString()}</div>
+                                <div className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</div>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                              <div 
+                                className="bg-green-600 h-2 rounded-full" 
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    {Object.keys(stats.categoryBreakdown).filter(category => 
+                      records.some(r => r.category === category && r.type === 'INCOME')
+                    ).length === 0 && (
+                      <p className="text-muted-foreground text-center py-4">Belum ada data pemasukan</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className={isMobile ? 'text-lg' : ''}>Breakdown Pengeluaran</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(stats.categoryBreakdown)
+                      .filter(([category]) => records.some(r => r.category === category && r.type === 'EXPENSE'))
+                      .map(([category, amount]) => {
+                        const expenseAmount = records
+                          .filter(r => r.type === 'EXPENSE' && r.category === category)
+                          .reduce((sum, r) => sum + r.amount, 0)
+                        const percentage = stats.totalExpense > 0 ? (expenseAmount / stats.totalExpense * 100) : 0
+                        
+                        return (
+                          <div key={category} className="space-y-2">
+                            <div className={`flex justify-between ${isMobile ? 'text-sm' : 'text-sm'}`}>
+                              <span>{category}</span>
+                              <div className="text-right">
+                                <div className="font-medium">Rp {expenseAmount.toLocaleString()}</div>
+                                <div className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</div>
+                              </div>
+                            </div>
+                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                              <div 
+                                className="bg-red-600 h-2 rounded-full" 
+                                style={{ width: `${percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    {Object.keys(stats.categoryBreakdown).filter(category => 
+                      records.some(r => r.category === category && r.type === 'EXPENSE')
+                    ).length === 0 && (
+                      <p className="text-muted-foreground text-center py-4">Belum ada data pengeluaran</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
 
         {/* Insights */}
         <Card>
