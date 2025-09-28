@@ -123,10 +123,10 @@ export default function HPPAndPricingPage() {
                 Belum ada data resep
               </h3>
               <p className="text-muted-foreground mb-4">
-                Silakan tambahkan resep terlebih dahulu di halaman Produksi
+                Silakan tambahkan resep terlebih dahulu di halaman Resep
               </p>
-              <Button onClick={() => window.location.href = '/production'}>
-                Ke Halaman Produksi
+              <Button onClick={() => window.location.href = '/resep'}>
+                Ke Halaman Resep
               </Button>
             </CardContent>
           </Card>
