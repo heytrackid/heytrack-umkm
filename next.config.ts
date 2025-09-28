@@ -97,44 +97,26 @@ const nextConfig: NextConfig = {
     ];
   },
   
-  // Bundle Optimization
+  // Bundle Optimization  
   experimental: {
-    optimizeCss: true,
-    optimizeServerReact: true,
+    // Temporarily disabled to fix build issues
+    // optimizeCss: true,
+    // optimizeServerReact: true,
     scrollRestoration: true,
   },
   
   // External packages for server components
-  serverExternalPackages: ['@supabase/supabase-js'],
+  serverExternalPackages: [
+    '@supabase/supabase-js',
+    '@supabase/realtime-js',
+    '@supabase/ssr'
+  ],
   
   // Output optimization for production
-  output: 'standalone',
+  // output: 'standalone', // Temporarily disabled
   
-  // Webpack optimizations
+  // Webpack optimizations - simplified to avoid build issues
   webpack: (config, { dev, isServer }) => {
-    // Production optimizations
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-            common: {
-              minChunks: 2,
-              priority: -10,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-    }
-    
     return config;
   },
 
@@ -157,8 +139,9 @@ const nextConfig: NextConfig = {
 };
 
 // Enable bundle analyzer when ANALYZE=true
-const configWithAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(nextConfig);
+// Temporarily disabled to fix build issues
+// const configWithAnalyzer = withBundleAnalyzer({
+//   enabled: process.env.ANALYZE === 'true',
+// })(nextConfig);
 
-export default configWithAnalyzer;
+export default nextConfig;

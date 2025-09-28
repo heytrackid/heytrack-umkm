@@ -9,7 +9,6 @@
 // Re-export everything from the new modular automation system
 export {
   AutomationEngine,
-  AutomationConfig,
   PricingAutomation,
   InventoryAutomation,
   ProductionAutomation,
@@ -18,8 +17,12 @@ export {
   defaultAutomationEngine
 } from './automation/index'
 
+// Re-export types separately
+export type { AutomationConfig } from './automation/types'
+
 // Import the default automation engine for backwards compatibility
-import { defaultAutomationEngine, AutomationConfig } from './automation/index'
+import { defaultAutomationEngine } from './automation/index'
+import type { AutomationConfig } from './automation/types'
 
 // Default configuration for Indonesian UMKM F&B (preserved for compatibility)
 export const UMKM_CONFIG: AutomationConfig = {

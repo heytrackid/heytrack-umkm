@@ -1,7 +1,38 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
-import { cacheManager } from './performance-simple'
 import { validateInput, sanitizeSQL } from '@/middleware'
+
+// Simple in-memory cache for server-side operations
+class SimpleCache {
+  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  
+  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl: ttlMs
+    })
+  }
+  
+  get<T = any>(key: string): T | null {
+    const item = this.cache.get(key)
+    
+    if (!item) return null
+    
+    if (Date.now() - item.timestamp > item.ttl) {
+      this.cache.delete(key)
+      return null
+    }
+    
+    return item.data
+  }
+  
+  clear(): void {
+    this.cache.clear()
+  }
+}
+
+const cacheManager = new SimpleCache()
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

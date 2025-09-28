@@ -11,9 +11,15 @@ export class PerformanceMonitor {
   }
   
   startTiming(label: string): () => void {
+    if (typeof performance === 'undefined') {
+      return () => {} // Return no-op function for server-side
+    }
+    
     const startTime = performance.now()
     
     return () => {
+      if (typeof performance === 'undefined') return
+      
       const endTime = performance.now()
       const duration = endTime - startTime
       
@@ -124,7 +130,7 @@ export const monitorMemoryUsage = (): void => {
 
 // Web Vitals monitoring (simplified)
 export const measureWebVitals = (): void => {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined' || typeof PerformanceObserver === 'undefined') return
   
   // Simple performance measurement
   const observer = new PerformanceObserver((list) => {

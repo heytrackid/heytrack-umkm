@@ -1,5 +1,6 @@
 import React, { ComponentType, lazy, memo, ReactNode, Suspense, useMemo, useCallback } from 'react'
-import { debounce, throttle } from 'lodash-es'
+// Temporarily disabled to fix build issues
+// import { debounce, throttle } from 'lodash-es'
 
 // Lazy loading utilities
 export function createLazyComponent<T extends ComponentType<any>>(
@@ -28,9 +29,15 @@ export class PerformanceMonitor {
   }
   
   startTiming(label: string): () => void {
+    if (typeof performance === 'undefined') {
+      return () => {} // Return no-op function for server-side
+    }
+    
     const startTime = performance.now()
     
     return () => {
+      if (typeof performance === 'undefined') return
+      
       const endTime = performance.now()
       const duration = endTime - startTime
       
@@ -66,6 +73,27 @@ export class PerformanceMonitor {
       this.metrics.clear()
     }
   }
+}
+
+// Simple debounce function
+function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
+  let timeoutId: ReturnType<typeof setTimeout>
+  return ((...args: Parameters<T>) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => func(...args), delay)
+  }) as T
+}
+
+// Simple throttle function
+function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T {
+  let inThrottle: boolean
+  return ((...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args)
+      inThrottle = true
+      setTimeout(() => (inThrottle = false), limit)
+    }
+  }) as T
 }
 
 // Optimized hooks
