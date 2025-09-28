@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, Suspense } from 'react'
+import { useState, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -17,54 +17,21 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-// Import lazy loading utilities
-import { ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
-
-// Import lazy-loaded inventory components
-import { 
-  LazySmartInventoryManager, 
-  LazyInventoryTrendsChart,
-  preloadInventoryComponents
-} from '@/modules/inventory/components/LazyComponents'
-import { useIngredients, useSupabaseMutations } from '@/hooks/useSupabaseData'
+import { useIngredients } from '@/hooks/useDatabase'
 import { useResponsive } from '@/hooks/use-mobile'
-import {
-  PullToRefresh,
-  SwipeActions
-} from '@/components/ui/mobile-gestures'
-import { MobileTable } from '@/components/ui/mobile-table'
-import {
-  MobileForm,
-  MobileInput,
-  MobileNumberInput,
-  MobileSelect
-} from '@/components/ui/mobile-forms'
-import {
-  MobileLineChart,
-  MobileAreaChart
-} from '@/components/ui/mobile-charts'
-import { MiniChartWithLoading } from '@/components/lazy/chart-features'
 import { 
   Plus, 
   Search, 
   Package, 
   AlertTriangle,
-  TrendingUp,
-  DollarSign,
   ArrowUp,
   ArrowDown,
   RotateCcw,
   Trash2,
-  Calendar,
   Eye,
   History,
-  ShoppingCart,
   Factory
 } from 'lucide-react'
-
-// No sample data - start with empty state
 
 const transactionTypes = [
   { value: 'PURCHASE', label: 'Pembelian', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300', icon: ArrowUp },
@@ -76,12 +43,6 @@ const transactionTypes = [
 export default function InventoryPage() {
   const { isMobile, isTablet } = useResponsive()
   const { data: ingredients, loading: ingredientsLoading, error: ingredientsError } = useIngredients()
-  const { updateStock, loading: mutationLoading, error: mutationError } = useSupabaseMutations()
-  
-  // Preload inventory components on mount
-  useCallback(() => {
-    preloadInventoryComponents()
-  }, [])
   
   const [transactions, setTransactions] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -92,9 +53,9 @@ export default function InventoryPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
 
   // Filter transactions
-  const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.ingredientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTransactions = transactions.filter((transaction: any) => {
+    const matchesSearch = transaction?.ingredientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction?.reference?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesType = typeFilter === 'Semua' || transaction.type === typeFilter
     const matchesDate = !dateFilter || transaction.date === dateFilter
     return matchesSearch && matchesType && matchesDate
@@ -104,53 +65,46 @@ export default function InventoryPage() {
     return transactionTypes.find(t => t.value === type) || transactionTypes[0]
   }
 
-  // Pull-to-refresh handler
-  const handleRefresh = useCallback(async () => {
-    // Simulate refresh - in real app, refetch data from API
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  }, [])
-
   // Calculate stats
   const stats = {
     totalTransactions: transactions.length,
     totalPurchaseValue: transactions
-      .filter(t => t.type === 'PURCHASE')
-      .reduce((sum, t) => sum + t.totalValue, 0),
+      .filter((t: any) => t.type === 'PURCHASE')
+      .reduce((sum: number, t: any) => sum + (t.totalValue || 0), 0),
     totalUsageValue: Math.abs(transactions
-      .filter(t => t.type === 'USAGE')
-      .reduce((sum, t) => sum + t.totalValue, 0)),
+      .filter((t: any) => t.type === 'USAGE')
+      .reduce((sum: number, t: any) => sum + (t.totalValue || 0), 0)),
     totalWasteValue: Math.abs(transactions
-      .filter(t => t.type === 'WASTE')
-      .reduce((sum, t) => sum + t.totalValue, 0))
+      .filter((t: any) => t.type === 'WASTE')
+      .reduce((sum: number, t: any) => sum + (t.totalValue || 0), 0))
   }
 
   return (
     <AppLayout>
-      <PullToRefresh onRefresh={handleRefresh}>
-        <div className="space-y-6">
-          {/* Breadcrumb */}
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Bahan Baku</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          
-          {/* Header */}
-          <div className={`flex gap-4 ${
-            isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'
-          }`}>
-            <div className={isMobile ? 'text-center' : ''}>
-              <h1 className={`font-bold text-foreground ${
-                isMobile ? 'text-2xl' : 'text-3xl'
-              }`}>Inventory</h1>
-              <p className="text-muted-foreground">Kelola transaksi stok dan inventory</p>
-            </div>
+      <div className="space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Bahan Baku</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        {/* Header */}
+        <div className={`flex gap-4 ${
+          isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'
+        }`}>
+          <div className={isMobile ? 'text-center' : ''}>
+            <h1 className={`font-bold text-foreground ${
+              isMobile ? 'text-2xl' : 'text-3xl'
+            }`}>Inventory</h1>
+            <p className="text-muted-foreground">Kelola transaksi stok dan inventory</p>
+          </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -167,10 +121,10 @@ export default function InventoryPage() {
           </Dialog>
         </div>
 
-          {/* Stats Cards */}
-          <div className={`grid gap-4 ${
-            isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-2' : 'md:grid-cols-4'
-          }`}>
+        {/* Stats Cards */}
+        <div className={`grid gap-4 ${
+          isMobile ? 'grid-cols-2' : isTablet ? 'grid-cols-2' : 'md:grid-cols-4'
+        }`}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Transaksi</CardTitle>
@@ -181,19 +135,6 @@ export default function InventoryPage() {
                 isMobile ? 'text-xl' : 'text-2xl'
               }`}>{stats.totalTransactions}</div>
               <p className="text-xs text-muted-foreground">semua transaksi</p>
-              {stats.totalTransactions > 0 && (
-                <MiniChartWithLoading
-                  data={transactions.slice(-7).map((_, index) => ({
-                    day: index + 1,
-                    count: 1
-                  }))}
-                  type="line"
-                  dataKey="count"
-                  color="#6b7280"
-                  className="mt-2"
-                  height={30}
-                />
-              )}
             </CardContent>
           </Card>
           <Card>
@@ -240,28 +181,6 @@ export default function InventoryPage() {
           </Card>
         </div>
 
-          {/* Inventory Trends Chart */}
-          <Card>
-            <CardHeader className={isMobile ? 'pb-2' : ''}>
-              <CardTitle className={isMobile ? 'text-lg' : ''}>
-                Tren Inventory
-              </CardTitle>
-              <p className={`text-muted-foreground ${
-                isMobile ? 'text-xs' : 'text-sm'
-              }`}>
-                Analisis pergerakan stok, pembelian, pemakaian, dan waste
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className={isMobile ? 'overflow-x-auto' : ''}>
-                {/* Using Suspense with lazy component */}
-                <Suspense fallback={<ComponentSkeletons.Chart height={400} />}>
-                  <LazyInventoryTrendsChart />
-                </Suspense>
-              </div>
-            </CardContent>
-          </Card>
-
         {/* Smart Inventory Manager */}
         {ingredientsLoading ? (
           <Card>
@@ -282,230 +201,163 @@ export default function InventoryPage() {
             </CardContent>
           </Card>
         ) : (
-          <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-            <LazySmartInventoryManager ingredients={ingredients} />
-          </Suspense>
+          <Card>
+            <CardHeader>
+              <CardTitle className={isMobile ? 'text-lg' : ''}>
+                Kelola Bahan Baku
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Daftar bahan baku yang tersedia
+              </p>
+            </CardHeader>
+            <CardContent>
+              {ingredients && ingredients.length > 0 ? (
+                <div className="space-y-4">
+                  {ingredients.map((ingredient: any) => (
+                    <div key={ingredient.id} className="flex justify-between items-center p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{ingredient.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {ingredient.current_stock} {ingredient.unit} tersedia
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">Rp {ingredient.price_per_unit?.toLocaleString()}/{ingredient.unit}</p>
+                        <Badge variant={ingredient.current_stock < ingredient.minimum_stock ? 'destructive' : 'secondary'}>
+                          {ingredient.current_stock < ingredient.minimum_stock ? 'Stok Rendah' : 'Stok Aman'}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="font-medium mb-2">Belum ada bahan baku</p>
+                  <p className="text-muted-foreground mb-4">
+                    Mulai dengan menambahkan bahan baku pertama
+                  </p>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Bahan Baku
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
 
-          {/* Filters */}
-          <Card>
-            <CardContent className={`pt-6 ${isMobile ? 'px-4' : ''}`}>
-              <div className={`flex gap-4 ${
-                isMobile ? 'flex-col space-y-4' : 'flex-col md:flex-row'
-              }`}>
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className={`absolute text-muted-foreground ${
-                      isMobile ? 'left-3 top-3 h-4 w-4' : 'left-2.5 top-2.5 h-4 w-4'
-                    }`} />
-                    {isMobile ? (
-                      <MobileInput
-                        placeholder="Cari bahan atau referensi..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e)}
-                        className="pl-10"
-                      />
-                    ) : (
-                      <Input
-                        placeholder="Cari bahan atau referensi..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-8"
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className={`flex gap-2 ${
-                  isMobile ? 'flex-col space-y-2' : 'flex-wrap'
-                }`}>
-                  {isMobile ? (
-                    <MobileSelect
-                      value={typeFilter}
-                      onChange={setTypeFilter}
-                      placeholder="Semua Tipe"
-                      options={[
-                        { value: "Semua", label: "Semua Tipe" },
-                        ...transactionTypes.map(type => ({
-                          value: type.value,
-                          label: type.label
-                        }))
-                      ]}
-                    />
-                  ) : (
-                    <Select value={typeFilter} onValueChange={setTypeFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Semua Tipe" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Semua">Semua Tipe</SelectItem>
-                        {transactionTypes.map(type => (
-                          <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {isMobile ? (
-                    <MobileInput
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e)}
-                      placeholder="Pilih tanggal"
-                    />
-                  ) : (
-                    <Input
-                      type="date"
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e.target.value)}
-                      className="w-40"
-                    />
-                  )}
+        {/* Filters */}
+        <Card>
+          <CardContent className={`pt-6 ${isMobile ? 'px-4' : ''}`}>
+            <div className={`flex gap-4 ${
+              isMobile ? 'flex-col space-y-4' : 'flex-col md:flex-row'
+            }`}>
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className={`absolute text-muted-foreground ${
+                    isMobile ? 'left-3 top-3 h-4 w-4' : 'left-2.5 top-2.5 h-4 w-4'
+                  }`} />
+                  <Input
+                    placeholder="Cari bahan atau referensi..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <div className={`flex gap-2 ${
+                isMobile ? 'flex-col space-y-2' : 'flex-wrap'
+              }`}>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Semua Tipe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Semua">Semua Tipe</SelectItem>
+                    {transactionTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="w-40"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Transactions List */}
-          <Card>
-            <CardContent className="p-0">
-              <MobileTable
-                data={filteredTransactions}
-                columns={[
-                  {
-                    key: 'date',
-                    label: 'Tanggal',
-                    accessor: 'date',
-                    render: (value, transaction) => (
-                      <div className="flex items-center gap-2">
-                        <Calendar className={`text-muted-foreground ${
-                          isMobile ? 'h-3 w-3' : 'h-4 w-4'
-                        }`} />
-                        <span className={isMobile ? 'text-sm' : ''}>{transaction.date}</span>
-                      </div>
-                    ),
-                    width: isMobile ? '100px' : '120px'
-                  },
-                  {
-                    key: 'ingredient',
-                    label: 'Bahan',
-                    accessor: 'ingredientName',
-                    render: (value, transaction) => (
-                      <div>
-                        <p className={`font-medium ${
-                          isMobile ? 'text-sm' : ''
-                        }`}>{transaction.ingredientName}</p>
-                        {transaction.supplier && (
-                          <p className={`text-muted-foreground ${
-                            isMobile ? 'text-xs' : 'text-sm'
-                          }`}>
-                            {transaction.supplier}
+        {/* Transactions List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Riwayat Transaksi</CardTitle>
+            <p className="text-muted-foreground">
+              Daftar transaksi inventory bahan baku
+            </p>
+          </CardHeader>
+          <CardContent>
+            {filteredTransactions.length > 0 ? (
+              <div className="space-y-4">
+                {filteredTransactions.map((transaction: any, index: number) => {
+                  const typeInfo = getTypeInfo(transaction.type)
+                  const Icon = typeInfo.icon
+                  return (
+                    <div key={index} className="flex justify-between items-center p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                         onClick={() => {
+                           setSelectedTransaction(transaction)
+                           setIsViewDialogOpen(true)
+                         }}>
+                      <div className="flex items-center gap-3">
+                        <Icon className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">{transaction.ingredientName}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {transaction.date} - {transaction.reference}
                           </p>
-                        )}
+                        </div>
                       </div>
-                    ),
-                    width: isMobile ? '120px' : '150px'
-                  },
-                  {
-                    key: 'type',
-                    label: 'Tipe',
-                    accessor: 'type',
-                    render: (value, transaction) => {
-                      const typeInfo = getTypeInfo(transaction.type)
-                      const Icon = typeInfo.icon
-                      return (
-                        <Badge className={`${typeInfo.color} ${
-                          isMobile ? 'text-xs px-2 py-0.5' : ''
-                        }`}>
-                          <Icon className={`mr-1 ${
-                            isMobile ? 'h-2.5 w-2.5' : 'h-3 w-3'
-                          }`} />
-                          {isMobile ? typeInfo.label.slice(0, 3) : typeInfo.label}
+                      <div className="text-right">
+                        <Badge className={typeInfo.color}>
+                          {typeInfo.label}
                         </Badge>
-                      )
-                    },
-                    width: isMobile ? '70px' : '100px'
-                  },
-                  {
-                    key: 'quantity',
-                    label: 'Qty',
-                    accessor: 'quantity',
-                    render: (value, transaction) => (
-                      <span className={`${
-                        transaction.quantity > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
-                      } ${isMobile ? 'text-sm' : ''}`}>
-                        {transaction.quantity > 0 ? '+' : ''}{transaction.quantity} {transaction.unit}
-                      </span>
-                    ),
-                    width: isMobile ? '80px' : '100px'
-                  },
-                  {
-                    key: 'unitPrice',
-                    label: 'Harga/Unit',
-                    accessor: 'unitPrice',
-                    render: (value, transaction) => (
-                      <span className={isMobile ? 'text-sm' : ''}>
-                        Rp {transaction.unitPrice.toLocaleString()}
-                      </span>
-                    ),
-                    width: isMobile ? '90px' : '120px'
-                  },
-                  {
-                    key: 'totalValue',
-                    label: 'Total',
-                    accessor: 'totalValue',
-                    render: (value, transaction) => (
-                      <span className={`font-medium ${
-                        transaction.totalValue > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
-                      } ${isMobile ? 'text-sm' : ''}`}>
-                        {transaction.totalValue > 0 ? '+' : ''}Rp {transaction.totalValue.toLocaleString()}
-                      </span>
-                    ),
-                    width: isMobile ? '100px' : '120px'
-                  },
-                  {
-                    key: 'reference',
-                    label: 'Ref',
-                    accessor: 'reference',
-                    render: (value, transaction) => (
-                      <span className={`font-mono ${
-                        isMobile ? 'text-xs' : 'text-sm'
-                      }`}>{transaction.reference}</span>
-                    ),
-                    width: isMobile ? '80px' : '100px'
-                  }
-                ]}
-                onRowClick={(transaction) => {
-                  setSelectedTransaction(transaction)
-                  setIsViewDialogOpen(true)
-                }}
-                actions={[
-                  {
-                    label: 'Lihat',
-                    icon: <Eye className="h-4 w-4" />,
-                    onClick: (transaction: any) => {
-                      setSelectedTransaction(transaction)
-                      setIsViewDialogOpen(true)
-                    }
-                  }
-                ]}
-                emptyMessage="Tidak ada transaksi ditemukan"
-              />
-            </CardContent>
-          </Card>
+                        <p className="text-sm mt-1">
+                          {transaction.quantity > 0 ? '+' : ''}{transaction.quantity} {transaction.unit}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="font-medium mb-2">Belum ada transaksi</p>
+                <p className="text-muted-foreground mb-4">
+                  Transaksi inventory akan muncul di sini
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Transaction Detail Dialog */}
-          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-            <DialogContent className={`max-w-2xl ${
-              isMobile ? 'w-full mx-4 rounded-lg' : ''
-            }`}>
-              <DialogHeader>
-                <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                  Detail Transaksi {selectedTransaction?.reference}
-                </DialogTitle>
-              </DialogHeader>
-              {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
-            </DialogContent>
-          </Dialog>
-        </div>
-      </PullToRefresh>
+        {/* Transaction Detail Dialog */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className={`max-w-2xl ${
+            isMobile ? 'w-full mx-4 rounded-lg' : ''
+          }`}>
+            <DialogHeader>
+              <DialogTitle className={isMobile ? 'text-lg' : ''}>
+                Detail Transaksi {selectedTransaction?.reference}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
+          </DialogContent>
+        </Dialog>
+      </div>
     </AppLayout>
   )
 }
@@ -621,12 +473,12 @@ function TransactionDetailView({ transaction }: { transaction: any }) {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Harga Satuan:</span>
-              <span>Rp {transaction.unitPrice.toLocaleString()}</span>
+              <span>Rp {transaction.unitPrice?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between font-medium">
               <span className="text-muted-foreground">Total Nilai:</span>
               <span className={transaction.totalValue > 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}>
-                {transaction.totalValue > 0 ? '+' : ''}Rp {transaction.totalValue.toLocaleString()}
+                {transaction.totalValue > 0 ? '+' : ''}Rp {transaction.totalValue?.toLocaleString()}
               </span>
             </div>
           </div>

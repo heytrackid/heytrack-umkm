@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   Plus, 
@@ -29,17 +30,28 @@ import {
   Eye,
   RefreshCw,
   BarChart3,
-  PieChart
+  PieChart,
+  ArrowLeft,
+  Save
 } from 'lucide-react'
 
 export default function CashFlowPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency, t } = useSettings()
   const [selectedPeriod, setSelectedPeriod] = useState('month') // 'day', 'week', 'month', 'year'
-  const [currentView, setCurrentView] = useState('overview') // 'overview', 'detail', 'chart'
+  const [currentView, setCurrentView] = useState('overview') // 'overview', 'detail', 'chart', 'add'
+  
+  // Form state for adding new transaction
+  const [newTransaction, setNewTransaction] = useState({
+    type: 'income', // 'income' or 'expense'
+    description: '',
+    category: '',
+    amount: '',
+    date: new Date().toISOString().split('T')[0] // Today's date
+  })
 
   // Mock cash flow data - replace with actual data fetching
-  const [cashFlowData] = useState({
+  const [cashFlowData, setCashFlowData] = useState({
     totalIncome: 15750000,
     totalExpenses: 8950000,
     netFlow: 6800000,
@@ -94,8 +106,29 @@ export default function CashFlowPage() {
         amount: -800000,
         type: 'expense'
       },
-    ]
+    ],
   })
+
+  // Categories for transactions
+  const incomeCategories = [
+    'Penjualan Produk',
+    'Jasa Catering',
+    'Pre-Order',
+    'Penjualan Online',
+    'Event & Wedding',
+    'Lainnya'
+  ]
+  
+  const expenseCategories = [
+    'Bahan Baku',
+    'Operasional',
+    'SDM',
+    'Utilities',
+    'Marketing',
+    'Transportasi',
+    'Peralatan',
+    'Lainnya'
+  ]
 
   const allTransactions = [
     ...cashFlowData.incomeTransactions,
@@ -111,7 +144,8 @@ export default function CashFlowPage() {
     
     if (currentView !== 'overview') {
       items.push({ 
-        label: currentView === 'detail' ? 'Detail Transaksi' : 'Grafik Analisis' 
+        label: currentView === 'detail' ? 'Detail Transaksi' : 
+               currentView === 'chart' ? 'Grafik Analisis' : 'Tambah Transaksi'
       })
     }
     
@@ -127,6 +161,216 @@ export default function CashFlowPage() {
       default: return 'Periode'
     }
   }
+
+  // Handle form submission
+  const handleAddTransaction = () => {
+    if (!newTransaction.description || !newTransaction.category || !newTransaction.amount) {
+      alert('Mohon lengkapi semua field')
+      return
+    }
+
+    const amount = parseFloat(newTransaction.amount)
+    if (isNaN(amount) || amount <= 0) {
+      alert('Jumlah harus berupa angka positif')
+      return
+    }
+
+    const transaction = {
+      id: Date.now(), // Simple ID generation
+      date: newTransaction.date,
+      description: newTransaction.description,
+      category: newTransaction.category,
+      amount: newTransaction.type === 'expense' ? -amount : amount,
+      type: newTransaction.type
+    }
+
+    // Update cash flow data
+    setCashFlowData(prev => {
+      const updatedData = { ...prev }
+      
+      if (newTransaction.type === 'income') {
+        updatedData.incomeTransactions = [...prev.incomeTransactions, transaction]
+        updatedData.totalIncome += amount
+      } else {
+        updatedData.expenseTransactions = [...prev.expenseTransactions, transaction]
+        updatedData.totalExpenses += amount
+      }
+      
+      updatedData.netFlow = updatedData.totalIncome - updatedData.totalExpenses
+      
+      return updatedData
+    })
+
+    // Reset form
+    setNewTransaction({
+      type: 'income',
+      description: '',
+      category: '',
+      amount: '',
+      date: new Date().toISOString().split('T')[0]
+    })
+
+    // Go back to overview
+    setCurrentView('overview')
+    alert('Transaksi berhasil ditambahkan!')
+  }
+
+  const AddTransactionForm = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCurrentView('overview')}
+          className="p-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <div>
+          <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>Tambah Transaksi</h2>
+          <p className="text-muted-foreground">Catat pemasukan atau pengeluaran baru</p>
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          {/* Transaction Type */}
+          <div className="space-y-2">
+            <Label>Jenis Transaksi</Label>
+            <Select 
+              value={newTransaction.type} 
+              onValueChange={(value) => setNewTransaction(prev => ({ ...prev, type: value, category: '' }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="income">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <span>Pemasukan</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="expense">
+                  <div className="flex items-center gap-2">
+                    <TrendingDown className="h-4 w-4 text-red-600" />
+                    <span>Pengeluaran</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Date */}
+          <div className="space-y-2">
+            <Label>Tanggal</Label>
+            <Input
+              type="date"
+              value={newTransaction.date}
+              onChange={(e) => setNewTransaction(prev => ({ ...prev, date: e.target.value }))}
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Label>Deskripsi</Label>
+            <Input
+              value={newTransaction.description}
+              onChange={(e) => setNewTransaction(prev => ({ ...prev, description: e.target.value }))}
+              placeholder={newTransaction.type === 'income' ? 'Contoh: Penjualan Roti Tawar Premium' : 'Contoh: Pembelian Tepung & Gula'}
+            />
+          </div>
+
+          {/* Category */}
+          <div className="space-y-2">
+            <Label>Kategori</Label>
+            <Select 
+              value={newTransaction.category} 
+              onValueChange={(value) => setNewTransaction(prev => ({ ...prev, category: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                {(newTransaction.type === 'income' ? incomeCategories : expenseCategories).map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Amount */}
+          <div className="space-y-2">
+            <Label>Jumlah (Rp)</Label>
+            <Input
+              type="number"
+              value={newTransaction.amount}
+              onChange={(e) => setNewTransaction(prev => ({ ...prev, amount: e.target.value }))}
+              placeholder="0"
+              min="0"
+              step="1000"
+            />
+            {newTransaction.amount && (
+              <p className="text-sm text-muted-foreground">
+                = {formatCurrency(parseFloat(newTransaction.amount) || 0)}
+              </p>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <Button onClick={handleAddTransaction} className="flex-1">
+              <Save className="h-4 w-4 mr-2" />
+              Simpan Transaksi
+            </Button>
+            <Button variant="outline" onClick={() => setCurrentView('overview')}>
+              Batal
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Add Suggestions */}
+      {newTransaction.type && (
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-lg">
+                {newTransaction.type === 'income' ? 
+                  <TrendingUp className="h-5 w-5 text-blue-600" /> : 
+                  <TrendingDown className="h-5 w-5 text-blue-600" />
+                }
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                  💡 Tips: {newTransaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran'} Umum
+                </h3>
+                <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex flex-wrap gap-2'}`}>
+                  {(newTransaction.type === 'income' ? [
+                    'Penjualan harian produk',
+                    'Order custom cake',
+                    'Catering event',
+                    'Pre-order weekend'
+                  ] : [
+                    'Belanja bahan baku',
+                    'Bayar listrik/gas',
+                    'Gaji karyawan',
+                    'Ongkos kirim'
+                  ]).map((tip, index) => (
+                    <Badge key={index} variant="outline" className="mr-1 mb-1">
+                      {tip}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
 
   const OverviewTab = () => (
     <div className="space-y-6">
@@ -224,10 +468,10 @@ export default function CashFlowPage() {
         <Button 
           variant="outline" 
           className="h-auto p-4 flex flex-col items-center gap-2"
-          onClick={() => window.location.href = '/operational-costs'}
+          onClick={() => setCurrentView('add')}
         >
           <Plus className="h-5 w-5" />
-          <span>Tambah Pengeluaran</span>
+          <span>Tambah Transaksi</span>
         </Button>
       </div>
 
@@ -372,6 +616,7 @@ export default function CashFlowPage() {
         {currentView === 'overview' && <OverviewTab />}
         {currentView === 'detail' && <DetailTab />}
         {currentView === 'chart' && <ChartTab />}
+        {currentView === 'add' && <AddTransactionForm />}
       </div>
     </AppLayout>
   )
