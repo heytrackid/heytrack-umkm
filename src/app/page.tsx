@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress'
 import { useResponsive } from '@/hooks/use-mobile'
 import Link from 'next/link'
 import NotificationCenter from '@/components/ui/notification-center'
+import { useDashboardStats, useWeeklySales, useTopProducts } from '@/hooks/api/useDashboard'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -37,7 +38,8 @@ import {
   Target,
   Flame,
   Calendar,
-  Percent
+  Percent,
+  RefreshCw
 } from 'lucide-react'
 
 
@@ -165,56 +167,44 @@ const getRecentActivities = (stats: any) => {
 
 export default function Dashboard() {
   const { isMobile } = useResponsive()
-  const [dashboardStats, setDashboardStats] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
-
-  // Fetch real-time dashboard data
-  const fetchDashboardData = useCallback(async () => {
-    try {
-      const response = await fetch('/api/dashboard/stats')
-      const data = await response.json()
-      
-      if (response.ok) {
-        setDashboardStats(data)
-        setLastUpdated(new Date())
-      } else {
-        console.error('Error fetching dashboard data:', data.error)
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  // Auto-refresh every 30 seconds
-  useEffect(() => {
-    fetchDashboardData()
-    const interval = setInterval(fetchDashboardData, 30000)
-    return () => clearInterval(interval)
-  }, [fetchDashboardData])
+  
+  // Use TanStack Query for data fetching
+  const { 
+    data: dashboardStats, 
+    isLoading, 
+    error: statsError, 
+    refetch: refetchStats 
+  } = useDashboardStats()
+  
+  const { 
+    data: weeklySales, 
+    isLoading: isLoadingWeeklySales 
+  } = useWeeklySales()
+  
+  const { 
+    data: topProducts, 
+    isLoading: isLoadingTopProducts 
+  } = useTopProducts()
 
   // Manual refresh handler
-  const handleRefresh = () => {
-    setLoading(true)
-    fetchDashboardData()
-  }
+  const handleRefresh = useCallback(() => {
+    refetchStats()
+  }, [refetchStats])
 
   // Loading skeleton
-  if (loading && !dashboardStats) {
+  if (isLoading && !dashboardStats) {
     return (
       <AppLayout>
         <div className="space-y-6 max-w-7xl mx-auto">
           <div className="text-center space-y-2">
-            <div className="h-8 bg-black rounded animate-pulse"></div>
-            <div className="h-4 bg-black rounded animate-pulse"></div>
+            <div className="h-8 bg-muted rounded animate-pulse"></div>
+            <div className="h-4 bg-muted rounded animate-pulse"></div>
           </div>
           <div className={`grid gap-4 ${
             isMobile ? 'grid-cols-2' : 'grid-cols-4'
           }`}>
             {[1,2,3,4].map(i => (
-              <div key={i} className="h-32 bg-black rounded animate-pulse"></div>
+              <div key={i} className="h-32 bg-muted rounded animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -249,15 +239,15 @@ export default function Dashboard() {
             </div>
             <span>•</span>
             <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4 text-gray-600" />
-              <span>Update: {lastUpdated.toLocaleTimeString('id-ID')}</span>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>Update: {new Date(dashboardStats?.lastUpdated || Date.now()).toLocaleTimeString('id-ID')}</span>
             </div>
             <button
               onClick={handleRefresh}
-              className="ml-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              disabled={loading}
+              className="ml-2 p-1 rounded-full hover:bg-muted transition-colors"
+              disabled={isLoading}
             >
-              <Zap className={`h-4 w-4 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 text-muted-foreground ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -400,77 +390,79 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[
-                  { day: 'Sen', revenue: 1200000, isToday: false },
-                  { day: 'Sel', revenue: 1850000, isToday: false },
-                  { day: 'Rab', revenue: 950000, isToday: false },
-                  { day: 'Kam', revenue: 2100000, isToday: false },
-                  { day: 'Jum', revenue: 2400000, isToday: false },
-                  { day: 'Sab', revenue: 2800000, isToday: false },
-                  { day: 'Min', revenue: 1600000, isToday: true }
-                ].map((data, index) => {
-                  const maxRevenue = 3000000
-                  const percentage = Math.max((data.revenue / maxRevenue) * 100, 5) // Minimum 5% width
+              {isLoadingWeeklySales ? (
+                <div className="space-y-4">
+                  {[1,2,3,4,5,6,7].map(i => (
+                    <div key={i} className="h-8 bg-muted rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {(weeklySales || []).map((data, index) => {
+                    const maxRevenue = Math.max(...(weeklySales || []).map(d => d.revenue), 1000000)
+                    const percentage = Math.max((data.revenue / maxRevenue) * 100, 5) // Minimum 5% width
                   
-                  return (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className={`w-10 text-sm font-medium ${
-                        data.isToday ? 'text-primary' : 'text-muted-foreground'
-                      }`}>
-                        {data.day}
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 bg-secondary/30 rounded-lg h-8 relative overflow-hidden">
-                            <div 
-                              className={`h-full rounded-lg transition-all duration-700 flex items-center px-3 ${
-                                data.isToday 
-                                  ? 'bg-gradient-to-r from-primary to-primary/80' 
-                                  : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                              }`}
-                              style={{ width: `${percentage}%` }}
-                            >
-                              {percentage > 20 && (
-                                <span className="text-xs font-bold text-white">
-                                  Rp {Math.round(data.revenue / 1000)}k
-                                </span>
-                              )}
+                    return (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className={`w-10 text-sm font-medium ${
+                          data.isToday ? 'text-primary' : 'text-muted-foreground'
+                        }`}>
+                          {data.day}
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 bg-secondary/30 rounded-lg h-8 relative overflow-hidden">
+                              <div 
+                                className={`h-full rounded-lg transition-all duration-700 flex items-center px-3 ${
+                                  data.isToday 
+                                    ? 'bg-gradient-to-r from-primary to-primary/80' 
+                                    : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                                }`}
+                                style={{ width: `${percentage}%` }}
+                              >
+                                {percentage > 20 && data.revenue > 0 && (
+                                  <span className="text-xs font-bold text-white">
+                                    Rp {Math.round(data.revenue / 1000)}k
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          <div className="ml-3 min-w-[80px] text-right">
-                            <span className="text-sm font-medium">
-                              Rp {Math.round(data.revenue / 1000)}k
-                            </span>
+                            <div className="ml-3 min-w-[80px] text-right">
+                              <span className="text-sm font-medium">
+                                {data.revenue > 0 ? `Rp ${Math.round(data.revenue / 1000)}k` : 'Rp 0'}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    )
+                  })}
+                </div>
+              )}
+              {!isLoadingWeeklySales && weeklySales && weeklySales.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-border">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Total 7 hari:</span>
+                      <div className="font-bold text-lg">
+                        Rp {weeklySales.reduce((sum, day) => sum + day.revenue, 0).toLocaleString('id-ID')}
+                      </div>
                     </div>
-                  )
-                })}
-              </div>
-              <div className="mt-6 pt-4 border-t border-border">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Total 7 hari:</span>
-                    <div className="font-bold text-lg">
-                      Rp {(12900000).toLocaleString('id-ID')}
+                    <div>
+                      <span className="text-muted-foreground">Rata-rata:</span>
+                      <div className="font-bold text-lg">
+                        Rp {Math.round(weeklySales.reduce((sum, day) => sum + day.revenue, 0) / 7 / 1000)}k/hari
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <span className="text-muted-foreground">Rata-rata:</span>
-                    <div className="font-bold text-lg">
-                      Rp {Math.round(12900000 / 7 / 1000)}k/hari
-                    </div>
+                  <div className="mt-3 text-xs text-muted-foreground flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary"></div>
+                    <span>Hari ini</span>
+                    <div className="w-2 h-2 rounded-full bg-blue-500 ml-4"></div>
+                    <span>Hari sebelumnya</span>
                   </div>
                 </div>
-                <div className="mt-3 text-xs text-muted-foreground flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  <span>Hari ini</span>
-                  <div className="w-2 h-2 rounded-full bg-blue-500 ml-4"></div>
-                  <span>Hari sebelumnya</span>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
@@ -483,50 +475,58 @@ export default function Dashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {[
-                  { name: 'Roti Tawar', sold: 85, revenue: 850000, color: 'from-orange-500 to-orange-600' },
-                  { name: 'Kue Lapis', sold: 62, revenue: 1240000, color: 'from-red-500 to-red-600' },
-                  { name: 'Donat Coklat', sold: 48, revenue: 480000, color: 'from-yellow-500 to-yellow-600' },
-                  { name: 'Brownies', sold: 35, revenue: 525000, color: 'from-purple-500 to-purple-600' },
-                  { name: 'Croissant', sold: 28, revenue: 560000, color: 'from-green-500 to-green-600' }
-                ].map((product, index) => {
-                  const maxSold = 85
-                  const percentage = Math.max((product.sold / maxSold) * 100, 10) // Minimum 10% width
+              {isLoadingTopProducts ? (
+                <div className="space-y-4">
+                  {[1,2,3,4,5].map(i => (
+                    <div key={i} className="h-16 bg-muted rounded animate-pulse"></div>
+                  ))}
+                </div>
+              ) : topProducts && topProducts.length > 0 ? (
+                <div className="space-y-4">
+                  {topProducts.map((product, index) => {
+                    const maxSold = Math.max(...topProducts.map(p => p.sold), 1)
+                    const percentage = Math.max((product.sold / maxSold) * 100, 10) // Minimum 10% width
                   
-                  return (
-                    <div key={index} className="p-3 rounded-lg bg-secondary/20 border border-border/50">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
-                          #{index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-sm">{product.name}</span>
-                            <div className="text-right">
-                              <div className="text-sm font-medium">{product.sold} unit</div>
-                              <div className="text-xs text-muted-foreground">
-                                Rp {Math.round(product.revenue / 1000)}k
+                    return (
+                      <div key={index} className="p-3 rounded-lg bg-secondary/20 border border-border/50">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                            #{index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-semibold text-sm">{product.name}</span>
+                              <div className="text-right">
+                                <div className="text-sm font-medium">{product.sold} unit</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Rp {Math.round(product.revenue / 1000)}k
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 bg-secondary/50 rounded-full h-3 overflow-hidden">
-                              <div 
-                                className={`bg-gradient-to-r ${product.color} h-full rounded-full transition-all duration-700 shadow-sm`}
-                                style={{ width: `${percentage}%` }}
-                              />
+                            <div className="flex items-center gap-3">
+                              <div className="flex-1 bg-secondary/50 rounded-full h-3 overflow-hidden">
+                                <div 
+                                  className={`bg-gradient-to-r ${product.color} h-full rounded-full transition-all duration-700 shadow-sm`}
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-medium text-muted-foreground min-w-[35px] text-right">
+                                {Math.round(percentage)}%
+                              </span>
                             </div>
-                            <span className="text-xs font-medium text-muted-foreground min-w-[35px] text-right">
-                              {Math.round(percentage)}%
-                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Belum ada data produk terlaris</p>
+                  <p className="text-sm">Data akan muncul setelah ada pesanan</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
