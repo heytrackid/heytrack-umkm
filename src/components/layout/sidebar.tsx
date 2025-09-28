@@ -20,7 +20,8 @@ import {
   Settings,
   FileText,
   Target,
-  CheckCircle
+  CheckCircle,
+  Tags
 } from 'lucide-react'
 
 interface NavigationItem {
@@ -73,7 +74,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Biaya Operasional',
-        href: '/finance',
+        href: '/operational-costs',
         icon: Receipt,
         isSimple: true,
         badge: 'WAJIB',
@@ -127,7 +128,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Data Pelanggan',
-        href: '/settings#customers',
+        href: '/customers',
         icon: Users,
         isSimple: true,
         badge: 'CRM',
@@ -161,6 +162,12 @@ const navigationSections: NavigationSection[] = [
   {
     title: '⚙️ LAINNYA',
     items: [
+      {
+        name: 'Kategori Produk',
+        href: '/categories',
+        icon: Tags,
+        description: 'Kelola kategori produk'
+      },
       {
         name: 'Settings',
         href: '/settings',
@@ -218,7 +225,7 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
                 HeyTrack
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                UMKM HPP Calculator
+                UMKM Kuliner HPP
               </p>
             </div>
           </div>

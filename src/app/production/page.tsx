@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import categoriesData from '@/data/categories.json'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useRecipesWithIngredients, useIngredients } from '@/hooks/useDatabase'
 import { 
@@ -36,22 +37,14 @@ export default function ProductionPage() {
   const [newRecipe, setNewRecipe] = useState({
     name: '',
     description: '',
-    category: 'Roti',
+    category: 'makanan-utama',
     ingredients: [] as any[]
   })
   
   // Quick add common ingredients based on category
-  const getCommonIngredientsByCategory = (category: string) => {
-    const commonIngredients: Record<string, string[]> = {
-      'Roti': ['Tepung Terigu', 'Ragi', 'Gula', 'Garam', 'Mentega', 'Telur', 'Susu'],
-      'Kue Basah': ['Tepung Terigu', 'Telur', 'Gula', 'Mentega', 'Baking Powder', 'Susu', 'Vanilla'],
-      'Kue Kering': ['Tepung Terigu', 'Mentega', 'Gula Halus', 'Telur', 'Vanilla'],
-      'Pastry': ['Tepung Terigu', 'Mentega', 'Air', 'Garam', 'Telur'],
-      'Donat': ['Tepung Terigu', 'Ragi', 'Gula', 'Telur', 'Mentega', 'Susu'],
-      'Cake': ['Tepung Terigu', 'Telur', 'Gula', 'Mentega', 'Baking Powder', 'Vanilla'],
-      'Minuman': ['Air', 'Gula', 'Es Batu'],
-    }
-    return commonIngredients[category] || []
+  const getCommonIngredientsByCategory = (categoryId: string) => {
+    const category = categoriesData.categories.find(cat => cat.id === categoryId || cat.name === categoryId)
+    return category?.commonIngredients || []
   }
 
   const handleAddIngredient = () => {
@@ -90,16 +83,12 @@ export default function ProductionPage() {
   
   const getDefaultQuantityByIngredient = (name: string) => {
     const lowerName = name.toLowerCase()
-    // Smart defaults based on common usage
-    if (lowerName.includes('tepung')) return 500
-    if (lowerName.includes('telur')) return 3
-    if (lowerName.includes('mentega') || lowerName.includes('margarin')) return 250
-    if (lowerName.includes('gula')) return 200
-    if (lowerName.includes('susu')) return 200
-    if (lowerName.includes('air')) return 300
-    if (lowerName.includes('ragi') || lowerName.includes('baking')) return 10
-    if (lowerName.includes('garam')) return 5
-    if (lowerName.includes('vanilla')) return 5
+    // Check JSON data first
+    for (const [key, config] of Object.entries(categoriesData.defaultIngredientQuantities)) {
+      if (lowerName.includes(key.toLowerCase())) {
+        return config.quantity
+      }
+    }
     return 100 // Default fallback
   }
 
@@ -111,6 +100,13 @@ export default function ProductionPage() {
   }, [newRecipe.category])
 
   const handleAddIngredient = () => {
+    setNewRecipe(prev => ({
+      ...prev,
+      ingredients: [...prev.ingredients, { ingredient_id: '', quantity: 0, unit: 'gram' }]
+    }))
+  }
+  
+  const handleRemoveIngredient = (index: number) => {
     setNewRecipe(prev => ({
       ...prev,
       ingredients: prev.ingredients.filter((_, i) => i !== index)
@@ -130,7 +126,7 @@ export default function ProductionPage() {
     setNewRecipe({
       name: '',
       description: '',
-      category: 'Roti',
+      category: 'makanan-utama',
       ingredients: []
     })
   }
@@ -250,14 +246,11 @@ export default function ProductionPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Roti">🍞 Roti (Tawar, Manis, dll)</SelectItem>
-                <SelectItem value="Kue Basah">🧁 Kue Basah (Puding, Bolu, dll)</SelectItem>
-                <SelectItem value="Kue Kering">🍪 Kue Kering (Cookies, Nastar)</SelectItem>
-                <SelectItem value="Pastry">🥐 Pastry & Croissant</SelectItem>
-                <SelectItem value="Donat">🍩 Donat & Muffin</SelectItem>
-                <SelectItem value="Cake">🎂 Cake & Tart</SelectItem>
-                <SelectItem value="Minuman">🥤 Minuman</SelectItem>
-                <SelectItem value="Lainnya">📦 Lainnya</SelectItem>
+                {categoriesData.categories.map(category => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.icon} {category.name} ({category.description})
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
