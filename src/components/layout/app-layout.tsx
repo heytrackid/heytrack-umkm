@@ -10,13 +10,14 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
-import { 
-  SignInButton, 
-  SignUpButton, 
-  SignedIn, 
-  SignedOut, 
-  UserButton 
-} from '@clerk/nextjs'
+// Clerk removed for development
+// import { 
+//   SignInButton, 
+//   SignUpButton, 
+//   SignedIn, 
+//   SignedOut, 
+//   UserButton 
+// } from '@clerk/nextjs'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -79,29 +80,11 @@ export default function AppLayout({
             <div className="flex items-center space-x-4">
               <SmartNotifications />
               <ThemeToggle />
-              <SignedOut>
-                <div className="flex items-center space-x-2">
-                  <SignInButton mode="modal">
-                    <Button variant="ghost" size="sm">
-                      Sign In
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <Button variant="default" size="sm">
-                      Sign Up
-                    </Button>
-                  </SignUpButton>
-                </div>
-              </SignedOut>
-              <SignedIn>
-                <UserButton 
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8"
-                    }
-                  }}
-                />
-              </SignedIn>
+              {/* Simple user menu for development */}
+              <Button variant="ghost" size="sm">
+                <User className="h-4 w-4 mr-2" />
+                User
+              </Button>
             </div>
           </header>
         )}

@@ -1,12 +1,11 @@
 'use client'
 
 import { createClient } from '@supabase/supabase-js'
-import { useSession } from '@clerk/nextjs'
 import { useMemo } from 'react'
 import type { Database } from '@/types/database'
 
 export function useSupabaseClient() {
-  const { session } = useSession()
+  // const { session } = useSession() // Disabled for development
 
   return useMemo(() => {
     return createClient<Database>(
@@ -14,20 +13,17 @@ export function useSupabaseClient() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         global: {
-          // Pass Clerk session token to Supabase
-          headers: async () => {
-            const token = await session?.getToken()
-            return token ? { Authorization: `Bearer ${token}` } : {}
-          },
+          // Temporarily disabled Clerk token integration
+          headers: {},
         },
         auth: {
-          // Disable Supabase auth since we're using Clerk
-          persistSession: false,
-          autoRefreshToken: false,
+          // Use normal Supabase auth during development
+          persistSession: true,
+          autoRefreshToken: true,
         },
       }
     )
-  }, [session])
+  }, [])
 }
 
 // For server-side usage

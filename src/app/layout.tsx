@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider, SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import QueryProvider from '@/providers/QueryProvider';
-import SupabaseProvider from '@/providers/SupabaseProvider';
+// import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,47 +29,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="id" suppressHydrationWarning className="h-full">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
+    <html lang="id" suppressHydrationWarning className="h-full">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <SupabaseProvider>
-              <QueryProvider>
-                <SettingsProvider>
-                  <ErrorBoundary>
-                    <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                      <SignedOut>
-                        <SignInButton>
-                          <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm h-10 px-4 cursor-pointer transition-colors">
-                            Sign In
-                          </button>
-                        </SignInButton>
-                        <SignUpButton>
-                          <button className="bg-[#6c47ff] hover:bg-[#5a3ad1] text-white rounded-lg font-medium text-sm h-10 px-4 cursor-pointer transition-colors">
-                            Sign Up
-                          </button>
-                        </SignUpButton>
-                      </SignedOut>
-                      <SignedIn>
-                        <UserButton />
-                      </SignedIn>
-                    </header>
-                    {children}
-                  </ErrorBoundary>
-                  <Toaster />
-                </SettingsProvider>
-              </QueryProvider>
-            </SupabaseProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+          <QueryProvider>
+            <SettingsProvider>
+              <ErrorBoundary>
+                {/* Header temporarily disabled during development */}
+                {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                  <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                    🚧 Development Mode - Auth Disabled
+                  </div>
+                </header> */}
+                {children}
+              </ErrorBoundary>
+              <Toaster />
+            </SettingsProvider>
+          </QueryProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }
