@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
-import { validateInput, sanitizeSQL } from '@/middleware'
+import { validateInput, sanitizeSQL } from '@/lib/validation'
 
 // Simple in-memory cache for server-side operations
 class SimpleCache {
