@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import "./globals.css";
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bakery Management System",
-  description: "Comprehensive bakery management system with HPP calculation, inventory, orders, and financial tracking",
+  title: "HeyTrack UMKM - Kuliner Management System",
+  description: "Comprehensive culinary business management system with COGS calculation, inventory, orders, and financial tracking for Indonesian SMEs",
 };
 
 export default function RootLayout({
@@ -36,10 +37,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
-          <Toaster />
+          <SettingsProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+            <Toaster />
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

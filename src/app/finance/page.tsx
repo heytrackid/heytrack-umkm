@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useFinancialRecords, useSupabaseMutations } from '@/hooks/useSupabaseData'
+import { useFinancialRecords } from '@/hooks/useDatabase'
 
 // Lazy loading imports
 import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
@@ -145,10 +145,8 @@ const expenseCategories = ['Bahan Baku', 'Gaji', 'Operasional', 'Equipment', 'Ma
 const paymentMethods = ['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']
 
 export default function FinancePage() {
-  const { records: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
-  const { addFinancialRecord, loading: mutationLoading, error: mutationError } = useSupabaseMutations()
+  const { data: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
   
-  const [transactions, setTransactions] = useState(sampleTransactions)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
   const [categoryFilter, setCategoryFilter] = useState('Semua')
@@ -163,16 +161,20 @@ export default function FinancePage() {
   // Pull-to-refresh handler
   const handleRefresh = async () => {
     await new Promise(resolve => setTimeout(resolve, 1000))
-    // In real app, refetch financial data
-    setTransactions([...sampleTransactions])
+    // Data will automatically refresh via real-time subscription
+    window.location.reload()
   }
+  
+  // Use real financial records or fallback to empty array
+  const transactions = financialRecords || []
+  
   // Filter transactions
   const filteredTransactions = transactions.filter(transaction => {
-    const matchesSearch = transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = (transaction.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (transaction.reference_number || '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchesType = typeFilter === 'Semua' || transaction.type === typeFilter
     const matchesCategory = categoryFilter === 'Semua' || transaction.category === categoryFilter
-    const matchesDate = !dateFilter || transaction.date === dateFilter
+    const matchesDate = !dateFilter || transaction.transaction_date === dateFilter
     return matchesSearch && matchesType && matchesCategory && matchesDate
   })
 
@@ -193,11 +195,11 @@ export default function FinancePage() {
   // Calculate stats
   const totalIncome = transactions
     .filter(t => t.type === 'INCOME')
-    .reduce((sum, t) => sum + t.amount, 0)
+    .reduce((sum, t) => sum + (t.amount || 0), 0)
   
   const totalExpense = transactions
     .filter(t => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + t.amount, 0)
+    .reduce((sum, t) => sum + (t.amount || 0), 0)
   
   const netProfit = totalIncome - totalExpense
   const profitMargin = totalIncome > 0 ? (netProfit / totalIncome * 100) : 0

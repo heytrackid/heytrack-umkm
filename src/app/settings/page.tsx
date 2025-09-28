@@ -3,6 +3,15 @@
 import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSettings, currencies, languages } from '@/contexts/settings-context'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -43,6 +52,7 @@ import {
 } from 'lucide-react'
 
 export default function SettingsPage() {
+  const { settings: globalSettings, updateCurrency, updateLanguage, formatCurrency, t } = useSettings()
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
   const [isUnsavedChanges, setIsUnsavedChanges] = useState(false)
@@ -129,6 +139,19 @@ export default function SettingsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Pengaturan</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -638,12 +661,23 @@ export default function SettingsPage() {
                   <select 
                     id="language"
                     className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.ui.language}
-                    onChange={(e) => handleSettingChange('ui', 'language', e.target.value)}
+                    value={globalSettings.language.code}
+                    onChange={(e) => {
+                      const selectedLanguage = languages.find(lang => lang.code === e.target.value)
+                      if (selectedLanguage) {
+                        updateLanguage(selectedLanguage)
+                      }
+                    }}
                   >
-                    <option value="id">Bahasa Indonesia</option>
-                    <option value="en">English</option>
+                    {languages.map(lang => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.flag} {lang.name}
+                      </option>
+                    ))}
                   </select>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Bahasa akan berubah setelah refresh halaman
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -710,13 +744,23 @@ export default function SettingsPage() {
                   <select 
                     id="uiCurrency"
                     className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.ui.currency}
-                    onChange={(e) => handleSettingChange('ui', 'currency', e.target.value)}
+                    value={globalSettings.currency.code}
+                    onChange={(e) => {
+                      const selectedCurrency = currencies.find(curr => curr.code === e.target.value)
+                      if (selectedCurrency) {
+                        updateCurrency(selectedCurrency)
+                      }
+                    }}
                   >
-                    <option value="IDR">Rp (Rupiah)</option>
-                    <option value="USD">$ (Dollar)</option>
-                    <option value="EUR">€ (Euro)</option>
+                    {currencies.map(currency => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.symbol} ({currency.name})
+                      </option>
+                    ))}
                   </select>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Contoh: {formatCurrency(123456)}
+                  </p>
                 </div>
               </CardContent>
             </Card>

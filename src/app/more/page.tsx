@@ -38,7 +38,7 @@ const menuSections = [
     items: [
       {
         name: 'Resep',
-        href: '/production',
+        href: '/resep',
         icon: ChefHat,
         description: 'Kelola resep dan formula produk dengan mudah',
         isSimple: true,
@@ -70,17 +70,17 @@ const menuSections = [
       },
       {
         name: 'Pelanggan',
-        href: '/settings#customers',
+        href: '/customers',
         icon: Users,
         description: 'Database pelanggan dan riwayat pembelian',
         isSimple: true,
         color: 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
       },
       {
-        name: 'Pengeluaran',
-        href: '/finance',
+        name: 'Biaya Operasional',
+        href: '/operational-costs',
         icon: Receipt,
-        description: 'Catat pengeluaran harian dengan mudah',
+        description: 'Catat biaya operasional harian',
         isSimple: true,
         color: 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
       },
@@ -124,7 +124,7 @@ export default function MorePage() {
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold">HeyTrack UMKM</h1>
           <p className="text-muted-foreground text-lg">
-            Sistem manajemen bakery yang mudah dan lengkap
+            Sistem manajemen kuliner yang mudah dan lengkap
           </p>
         </div>
 
@@ -184,10 +184,10 @@ export default function MorePage() {
         {/* Footer */}
         <div className="text-center py-8 space-y-2">
           <p className="text-sm text-muted-foreground">
-            💡 Sistem manajemen bakery yang <strong>mudah</strong> dan <strong>lengkap</strong> untuk UMKM Indonesia
+            💡 Sistem manajemen kuliner yang <strong>mudah</strong> dan <strong>lengkap</strong> untuk UMKM Indonesia
           </p>
           <p className="text-xs text-muted-foreground">
-            HeyTrack UMKM - Bakery Management System Simple
+            HeyTrack UMKM - Kuliner Management System Simple
           </p>
         </div>
       </div>

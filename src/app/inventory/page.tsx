@@ -3,6 +3,14 @@
 import { useState, useCallback, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -56,93 +64,7 @@ import {
   Factory
 } from 'lucide-react'
 
-// Sample data
-const sampleTransactions = [
-  {
-    id: '1',
-    ingredientId: 'ING-001',
-    ingredientName: 'Tepung Terigu Premium',
-    type: 'PURCHASE',
-    quantity: 50,
-    unit: 'kg',
-    unitPrice: 12000,
-    totalValue: 600000,
-    date: '2024-01-25',
-    reference: 'PO-2024-001',
-    supplier: 'CV. Bahan Berkah',
-    notes: 'Pembelian rutin mingguan'
-  },
-  {
-    id: '2',
-    ingredientId: 'ING-001',
-    ingredientName: 'Tepung Terigu Premium',
-    type: 'USAGE',
-    quantity: -25,
-    unit: 'kg',
-    unitPrice: 12000,
-    totalValue: -300000,
-    date: '2024-01-25',
-    reference: 'BATCH-20240125-001',
-    supplier: null,
-    notes: 'Digunakan untuk produksi roti tawar'
-  },
-  {
-    id: '3',
-    ingredientId: 'ING-002',
-    ingredientName: 'Mentega Premium',
-    type: 'PURCHASE',
-    quantity: 10,
-    unit: 'kg',
-    unitPrice: 35000,
-    totalValue: 350000,
-    date: '2024-01-24',
-    reference: 'PO-2024-002',
-    supplier: 'PT. Dairy Fresh',
-    notes: 'Mentega berkualitas tinggi'
-  },
-  {
-    id: '4',
-    ingredientId: 'ING-003',
-    ingredientName: 'Telur Ayam',
-    type: 'USAGE',
-    quantity: -5,
-    unit: 'kg',
-    unitPrice: 28000,
-    totalValue: -140000,
-    date: '2024-01-24',
-    reference: 'BATCH-20240124-004',
-    supplier: null,
-    notes: 'Produksi croissant dan roti'
-  },
-  {
-    id: '5',
-    ingredientId: 'ING-004',
-    ingredientName: 'Gula Pasir',
-    type: 'ADJUSTMENT',
-    quantity: -1.2,
-    unit: 'kg',
-    unitPrice: 15000,
-    totalValue: -18000,
-    date: '2024-01-23',
-    reference: 'ADJ-001',
-    supplier: null,
-    notes: 'Stock opname - selisih minus'
-  },
-  {
-    id: '6',
-    ingredientId: 'ING-005',
-    ingredientName: 'Cokelat Batang',
-    type: 'WASTE',
-    quantity: -0.5,
-    unit: 'kg',
-    unitPrice: 85000,
-    totalValue: -42500,
-    date: '2024-01-22',
-    reference: 'WASTE-001',
-    supplier: null,
-    notes: 'Cokelat rusak karena penyimpanan'
-  }
-]
+// No sample data - start with empty state
 
 const transactionTypes = [
   { value: 'PURCHASE', label: 'Pembelian', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300', icon: ArrowUp },
@@ -161,7 +83,7 @@ export default function InventoryPage() {
     preloadInventoryComponents()
   }, [])
   
-  const [transactions, setTransactions] = useState(sampleTransactions)
+  const [transactions, setTransactions] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
   const [dateFilter, setDateFilter] = useState('')
@@ -206,6 +128,19 @@ export default function InventoryPage() {
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="space-y-6">
+          {/* Breadcrumb */}
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Bahan Baku</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
           {/* Header */}
           <div className={`flex gap-4 ${
             isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'

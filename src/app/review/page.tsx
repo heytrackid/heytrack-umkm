@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useResponsive } from '@/hooks/use-mobile'
+import { useHPPReview } from '@/hooks/useDatabase'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -13,79 +14,14 @@ import {
   CheckCircle,
   Target,
   Calculator,
-  ArrowRight
+  ArrowRight,
+  RefreshCw,
+  Package
 } from 'lucide-react'
-
-// Sample HPP review data
-const hppReviewData = [
-  {
-    id: '1',
-    productName: 'Roti Tawar',
-    currentHPP: 15000,
-    currentPrice: 25000,
-    currentMargin: 40,
-    suggestedHPP: 13500,
-    suggestedPrice: 23000,
-    suggestedMargin: 41.3,
-    status: 'optimize',
-    reasons: [
-      'Harga tepung turun 10%',
-      'Efisiensi proses produksi meningkat',
-      'Volume produksi lebih tinggi'
-    ]
-  },
-  {
-    id: '2',
-    productName: 'Croissant',
-    currentHPP: 8000,
-    currentPrice: 15000,
-    currentMargin: 46.7,
-    suggestedHPP: 9200,
-    suggestedPrice: 17000,
-    suggestedMargin: 45.9,
-    status: 'adjust',
-    reasons: [
-      'Harga mentega naik 15%',
-      'Biaya listrik meningkat',
-      'Inflasi bahan baku'
-    ]
-  },
-  {
-    id: '3',
-    productName: 'Donat Coklat',
-    currentHPP: 12000,
-    currentPrice: 20000,
-    currentMargin: 40,
-    suggestedHPP: 12000,
-    suggestedPrice: 20000,
-    suggestedMargin: 40,
-    status: 'maintain',
-    reasons: [
-      'HPP sudah optimal',
-      'Margin sesuai target',
-      'Kompetitif di pasar'
-    ]
-  },
-  {
-    id: '4',
-    productName: 'Kue Cubit',
-    currentHPP: 5000,
-    currentPrice: 10000,
-    currentMargin: 50,
-    suggestedHPP: 4500,
-    suggestedPrice: 12000,
-    suggestedMargin: 62.5,
-    status: 'opportunity',
-    reasons: [
-      'Permintaan tinggi',
-      'Competitor harga lebih tinggi',
-      'Bisa naik harga'
-    ]
-  },
-]
 
 export default function HPPReviewPage() {
   const { isMobile } = useResponsive()
+  const { reviewData, loading, summaryStats } = useHPPReview()
 
   const getStatusInfo = (status: string) => {
     switch (status) {
@@ -127,24 +63,51 @@ export default function HPPReviewPage() {
     }
   }
 
-  const summaryStats = {
-    totalProducts: hppReviewData.length,
-    needAdjustment: hppReviewData.filter(item => item.status === 'adjust').length,
-    canOptimize: hppReviewData.filter(item => item.status === 'optimize').length,
-    opportunities: hppReviewData.filter(item => item.status === 'opportunity').length,
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <div className={`${isMobile ? 'text-center' : ''}`}>
+            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              Review HPP
+            </h1>
+            <p className="text-muted-foreground">
+              Evaluasi dan tingkatkan harga pokok produksi berdasarkan perubahan pasar
+            </p>
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="h-8 w-8 animate-spin text-primary mr-3" />
+                <span className={`${isMobile ? 'text-sm' : ''}`}>Menganalisis HPP produk...</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    )
   }
 
   return (
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className={`${isMobile ? 'text-center' : ''}`}>
-          <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-            Review HPP
-          </h1>
-          <p className="text-muted-foreground">
-            Evaluasi dan tingkatkan harga pokok produksi berdasarkan perubahan pasar
-          </p>
+        <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
+          <div className={isMobile ? 'text-center' : ''}>
+            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+              Review HPP
+            </h1>
+            <p className="text-muted-foreground">
+              Evaluasi dan tingkatkan harga pokok produksi berdasarkan perubahan pasar
+            </p>
+          </div>
+          <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
+            <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Analisis
+            </Button>
+          </div>
         </div>
 
         {/* Summary Cards */}
@@ -194,9 +157,25 @@ export default function HPPReviewPage() {
           </Card>
         </div>
 
-        {/* Review Cards */}
-        <div className="space-y-4">
-          {hppReviewData.map((item) => {
+        {reviewData.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                Belum ada data produk untuk direview
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Silakan tambahkan resep produk terlebih dahulu untuk mulai analisis HPP
+              </p>
+              <Button onClick={() => window.location.href = '/hpp'}>
+                Ke HPP Calculator
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          /* Review Cards */
+          <div className="space-y-4">
+            {reviewData.map((item) => {
             const statusInfo = getStatusInfo(item.status)
             const hppChange = item.suggestedHPP - item.currentHPP
             const priceChange = item.suggestedPrice - item.currentPrice
@@ -299,18 +278,19 @@ export default function HPPReviewPage() {
                 </CardContent>
               </Card>
             )
-          })}
-        </div>
-
-        {/* Action Buttons */}
-        <div className={`flex gap-4 pt-4 ${isMobile ? 'flex-col' : 'justify-center'}`}>
-          <Button variant="outline" className={isMobile ? 'w-full' : ''}>
-            Export Review
-          </Button>
-          <Button className={isMobile ? 'w-full' : ''}>
-            Terapkan Semua Saran
-          </Button>
-        </div>
+            })}
+            
+            {/* Action Buttons */}
+            <div className={`flex gap-4 pt-4 ${isMobile ? 'flex-col' : 'justify-center'}`}>
+              <Button variant="outline" className={isMobile ? 'w-full' : ''}>
+                Export Review
+              </Button>
+              <Button className={isMobile ? 'w-full' : ''}>
+                Terapkan Semua Saran
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </AppLayout>
   )

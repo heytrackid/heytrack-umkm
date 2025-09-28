@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbPage
+} from '@/components/ui/breadcrumb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useResponsive } from '@/hooks/use-mobile'
@@ -56,64 +62,46 @@ interface QuickActionCard {
 // Dynamic quick actions that use real-time stats
 const getQuickActions = (stats: any): QuickActionCard[] => [
   {
-    title: 'Pesanan',
-    href: '/pesanan-simple',
-    icon: ShoppingCart,
-    description: 'Kelola pesanan pelanggan',
-    stats: { label: 'Active', value: stats?.orders?.active || 0 },
-    color: 'text-gray-900 dark:text-white',
-    bgGradient: 'bg-white dark:bg-black'
-  },
-  {
     title: 'Bahan Baku',
-    href: '/bahan-simple',
+    href: '/inventory',
     icon: Package,
     description: 'Stok & inventory management',
     stats: { 
-      label: 'Low Stock', 
-      value: stats?.inventory?.lowStock || 0 
+      label: 'Items', 
+      value: 0
     },
     color: 'text-gray-900 dark:text-white',
     bgGradient: 'bg-white dark:bg-black'
   },
   {
-    title: 'Pelanggan',
-    href: '/pelanggan-simple',
-    icon: Users,
-    description: 'Data pelanggan & riwayat',
-    stats: { label: 'Total', value: stats?.customers?.total || 0 },
-    color: 'text-gray-900 dark:text-white',
-    bgGradient: 'bg-white dark:bg-black'
-  },
-  {
-    title: 'Pengeluaran',
-    href: '/pengeluaran-simple',
+    title: 'Biaya Operasional',
+    href: '/operational-costs',
     icon: Receipt,
     description: 'Catat biaya operasional',
     stats: { 
       label: 'Hari ini', 
-      value: `Rp ${(stats?.expenses?.today || 0).toLocaleString('id-ID')}` 
+      value: 0
     },
     color: 'text-gray-900 dark:text-white',
     bgGradient: 'bg-white dark:bg-black'
   },
   {
     title: 'Resep',
-    href: '/resep-simple',
+    href: '/resep',
     icon: ChefHat,
     description: 'Koleksi resep & panduan',
-    stats: { label: 'Total', value: stats?.recipes?.total || 0 },
+    stats: { label: 'Total', value: 0 },
     color: 'text-gray-900 dark:text-white',
     bgGradient: 'bg-white dark:bg-black'
   },
   {
     title: 'HPP Calculator',
-    href: '/hpp-simple',
+    href: '/hpp',
     icon: Calculator,
     description: 'Hitung harga pokok produksi',
     stats: { 
-      label: 'Profit', 
-      value: `Rp ${(stats?.expenses?.netProfit || 0).toLocaleString('id-ID')}` 
+      label: 'Ready', 
+      value: '✓'
     },
     color: 'text-gray-900 dark:text-white',
     bgGradient: 'bg-white dark:bg-black'
@@ -232,6 +220,15 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Dashboard</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className={`font-bold text-foreground ${

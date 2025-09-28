@@ -320,7 +320,7 @@ export function MobileLineChart({
             tick={{ fontSize: isMobile ? 10 : 12 }}
             width={isMobile ? 40 : 60}
           />
-          <MobileTooltip />
+          <Tooltip content={<MobileTooltip />} />
           {showLegend && (
             <Legend 
               wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }}
@@ -417,7 +417,7 @@ export function MobileAreaChart({
             tick={{ fontSize: isMobile ? 10 : 12 }}
             width={isMobile ? 40 : 60}
           />
-          <MobileTooltip />
+          <Tooltip content={<MobileTooltip />} />
           {areas.map((area, index) => (
             <Area
               key={area.key}
@@ -489,7 +489,7 @@ export function MobileBarChart({
             tick={{ fontSize: isMobile ? 10 : 12 }}
             width={horizontal ? (isMobile ? 60 : 80) : (isMobile ? 40 : 60)}
           />
-          <MobileTooltip />
+          <Tooltip content={<MobileTooltip />} />
           {bars.map((bar, index) => (
             <Bar
               key={bar.key}
@@ -570,7 +570,7 @@ export function MobilePieChart({
               />
             ))}
           </Pie>
-          <MobileTooltip />
+          <Tooltip content={<MobileTooltip />} />
           <Legend 
             wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }}
           />
