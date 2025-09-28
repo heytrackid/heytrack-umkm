@@ -1,0 +1,313 @@
+import React, { ComponentType, lazy, memo, ReactNode, Suspense, useMemo, useCallback } from 'react'
+import { debounce, throttle } from 'lodash-es'
+
+// Lazy loading utilities
+export function createLazyComponent<T extends ComponentType<any>>(
+  importFn: () => Promise<{ default: T }>,
+  fallback?: ReactNode
+) {
+  const LazyComponent = lazy(importFn)
+  
+  return memo((props: Parameters<T>[0]) => 
+    React.createElement(Suspense, { 
+      fallback: fallback || React.createElement('div', { className: 'animate-pulse bg-muted h-32 rounded' }) 
+    }, React.createElement(LazyComponent, props))
+  )
+}
+
+// Performance monitoring
+export class PerformanceMonitor {
+  private static instance: PerformanceMonitor
+  private metrics: Map<string, number[]> = new Map()
+  
+  static getInstance(): PerformanceMonitor {
+    if (!PerformanceMonitor.instance) {
+      PerformanceMonitor.instance = new PerformanceMonitor()
+    }
+    return PerformanceMonitor.instance
+  }
+  
+  startTiming(label: string): () => void {
+    const startTime = performance.now()
+    
+    return () => {
+      const endTime = performance.now()
+      const duration = endTime - startTime
+      
+      if (!this.metrics.has(label)) {
+        this.metrics.set(label, [])
+      }
+      
+      this.metrics.get(label)!.push(duration)
+      
+      // Log slow operations (>100ms)
+      if (duration > 100) {
+        console.warn(`⚠️ Slow operation detected: ${label} took ${duration.toFixed(2)}ms`)
+      }
+    }
+  }
+  
+  getMetrics(label: string): { avg: number; min: number; max: number; count: number } | null {
+    const measurements = this.metrics.get(label)
+    if (!measurements || measurements.length === 0) return null
+    
+    return {
+      avg: measurements.reduce((a, b) => a + b, 0) / measurements.length,
+      min: Math.min(...measurements),
+      max: Math.max(...measurements),
+      count: measurements.length
+    }
+  }
+  
+  clearMetrics(label?: string): void {
+    if (label) {
+      this.metrics.delete(label)
+    } else {
+      this.metrics.clear()
+    }
+  }
+}
+
+// Optimized hooks
+export const useDebounce = <T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number
+): T => {
+  return useMemo(
+    () => debounce(callback, delay),
+    [callback, delay]
+  ) as T
+}
+
+export const useThrottle = <T extends (...args: any[]) => any>(
+  callback: T,
+  limit: number
+): T => {
+  return useMemo(
+    () => throttle(callback, limit),
+    [callback, limit]
+  ) as T
+}
+
+// Memoized callback with performance monitoring
+export const usePerformantCallback = <T extends (...args: any[]) => any>(
+  callback: T,
+  deps: React.DependencyList,
+  label?: string
+): T => {
+  return useCallback((...args: Parameters<T>) => {
+    if (label) {
+      const endTiming = PerformanceMonitor.getInstance().startTiming(label)
+      const result = callback(...args)
+      endTiming()
+      return result
+    }
+    return callback(...args)
+  }, deps) as T
+}
+
+// Intersection Observer for lazy loading
+export const useIntersectionObserver = (
+  callback: (entries: IntersectionObserverEntry[]) => void,
+  options: IntersectionObserverInit = {}
+): React.RefCallback<Element> => {
+  const observer = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    
+    return new IntersectionObserver(callback, {
+      threshold: 0.1,
+      rootMargin: '50px',
+      ...options
+    })
+  }, [callback, options])
+  
+  return useCallback((element: Element | null) => {
+    if (!observer || !element) return
+    
+    observer.observe(element)
+    
+    return () => {
+      observer.unobserve(element)
+    }
+  }, [observer])
+}
+
+// Virtual scrolling helper
+export class VirtualScroller {
+  private container: HTMLElement
+  private items: any[]
+  private itemHeight: number
+  private containerHeight: number
+  
+  constructor(
+    container: HTMLElement,
+    items: any[],
+    itemHeight: number,
+    containerHeight: number
+  ) {
+    this.container = container
+    this.items = items
+    this.itemHeight = itemHeight
+    this.containerHeight = containerHeight
+  }
+  
+  getVisibleRange(scrollTop: number): { start: number; end: number } {
+    const start = Math.floor(scrollTop / this.itemHeight)
+    const visibleCount = Math.ceil(this.containerHeight / this.itemHeight)
+    const end = Math.min(start + visibleCount + 2, this.items.length) // +2 for buffer
+    
+    return { start: Math.max(0, start - 1), end } // -1 for buffer
+  }
+  
+  getTotalHeight(): number {
+    return this.items.length * this.itemHeight
+  }
+}
+
+// Image loading optimization
+export const preloadImage = (src: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve()
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+export const preloadImages = async (urls: string[]): Promise<void> => {
+  await Promise.all(urls.map(preloadImage))
+}
+
+// Bundle size analyzer helper
+export const analyzeBundleSize = (): void => {
+  if (typeof window === 'undefined') return
+  
+  const scripts = Array.from(document.querySelectorAll('script[src]'))
+  const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+  
+  let totalSize = 0
+  
+  const analyzeResources = async () => {
+    for (const script of scripts) {
+      try {
+        const response = await fetch((script as HTMLScriptElement).src)
+        const size = parseInt(response.headers.get('content-length') || '0')
+        totalSize += size
+        console.log(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
+      } catch (error) {
+        console.warn('Failed to analyze script:', (script as HTMLScriptElement).src)
+      }
+    }
+    
+    console.log(`📊 Total JavaScript bundle size: ${(totalSize / 1024).toFixed(2)}KB`)
+  }
+  
+  if (process.env.NODE_ENV === 'development') {
+    analyzeResources()
+  }
+}
+
+// Memory usage monitoring
+export const monitorMemoryUsage = (): void => {
+  if (typeof window === 'undefined' || !(performance as any).memory) return
+  
+  setInterval(() => {
+    const memory = (performance as any).memory
+    const used = (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
+    const limit = (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)
+    
+    console.log(`🧠 Memory usage: ${used}MB / ${limit}MB`)
+    
+    // Warn if memory usage is high
+    if (memory.usedJSHeapSize / memory.jsHeapSizeLimit > 0.8) {
+      console.warn('⚠️ High memory usage detected!')
+    }
+  }, 30000) // Check every 30 seconds
+}
+
+// Service Worker registration
+export const registerServiceWorker = async (): Promise<void> => {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
+    return
+  }
+  
+  try {
+    const registration = await navigator.serviceWorker.register('/sw.js')
+    console.log('✅ Service Worker registered:', registration)
+    
+    registration.addEventListener('updatefound', () => {
+      console.log('🔄 New Service Worker version available')
+    })
+  } catch (error) {
+    console.error('❌ Service Worker registration failed:', error)
+  }
+}
+
+// Cache utilities
+export class CacheManager {
+  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  
+  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl: ttlMs
+    })
+  }
+  
+  get<T = any>(key: string): T | null {
+    const item = this.cache.get(key)
+    
+    if (!item) return null
+    
+    if (Date.now() - item.timestamp > item.ttl) {
+      this.cache.delete(key)
+      return null
+    }
+    
+    return item.data
+  }
+  
+  clear(): void {
+    this.cache.clear()
+  }
+  
+  size(): number {
+    return this.cache.size
+  }
+  
+  // Clean expired items
+  cleanup(): void {
+    const now = Date.now()
+    for (const [key, item] of this.cache.entries()) {
+      if (now - item.timestamp > item.ttl) {
+        this.cache.delete(key)
+      }
+    }
+  }
+}
+
+export const cacheManager = new CacheManager()
+
+// Auto-cleanup every 5 minutes
+if (typeof window !== 'undefined') {
+  setInterval(() => {
+    cacheManager.cleanup()
+  }, 5 * 60 * 1000)
+}
+
+// Web Vitals monitoring
+export const measureWebVitals = (): void => {
+  if (typeof window === 'undefined') return
+  
+  // Import web-vitals dynamically to avoid SSR issues
+  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+    getCLS((metric) => console.log('📊 CLS:', metric))
+    getFID((metric) => console.log('📊 FID:', metric))
+    getFCP((metric) => console.log('📊 FCP:', metric))
+    getLCP((metric) => console.log('📊 LCP:', metric))
+    getTTFB((metric) => console.log('📊 TTFB:', metric))
+  }).catch(() => {
+    console.warn('web-vitals not available')
+  })
+}

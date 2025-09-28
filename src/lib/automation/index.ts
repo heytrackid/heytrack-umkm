@@ -7,7 +7,6 @@ import { NotificationSystem } from './notification-system'
 
 // Export all types
 export * from './types'
-export type { AutomationConfig } from './types'
 
 // Export individual modules
 export { PricingAutomation } from './pricing-automation'

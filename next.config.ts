@@ -102,8 +102,10 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     optimizeServerReact: true,
     scrollRestoration: true,
-    serverComponentsExternalPackages: ['@supabase/supabase-js'],
   },
+  
+  // External packages for server components
+  serverExternalPackages: ['@supabase/supabase-js'],
   
   // Output optimization for production
   output: 'standalone',

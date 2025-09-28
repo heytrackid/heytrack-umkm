@@ -97,20 +97,12 @@ const navigationSections: NavigationSection[] = [
     isWorkflow: true,
     items: [
       {
-        name: 'HPP Calculator',
+        name: 'HPP & Pricing',
         href: '/hpp',
         icon: Calculator,
         isSimple: true,
-        badge: 'AUTO',
-        description: 'Hitung HPP otomatis'
-      },
-      {
-        name: 'Target Harga',
-        href: '/pricing',
-        icon: Target,
-        isSimple: true,
-        badge: 'PROFIT',
-        description: 'Set margin & harga jual'
+        badge: 'ALL-IN-ONE',
+        description: 'HPP otomatis + strategi pricing'
       },
     ]
   },

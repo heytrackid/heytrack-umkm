@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
+import { cacheManager } from './performance-simple'
+import { validateInput, sanitizeSQL } from '@/middleware'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -8,15 +10,35 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
+// Validate environment variables format
+if (!supabaseUrl.startsWith('https://') || !supabaseUrl.includes('.supabase.co')) {
+  throw new Error('Invalid Supabase URL format')
+}
+
+if (supabaseAnonKey.length < 100) {
+  throw new Error('Invalid Supabase anonymous key format')
+}
+
 // For client-side usage with typing
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce', // Use PKCE flow for better security
+    debug: process.env.NODE_ENV === 'development',
   },
   realtime: {
     params: {
       eventsPerSecond: 10,
+    },
+  },
+  db: {
+    schema: 'public'
+  },
+  global: {
+    headers: {
+      'x-client-info': 'bakery-management-app',
     },
   },
 })
@@ -74,40 +96,116 @@ export const subscribeToTable = (
   }
 }
 
-// Database service helpers
+// Enhanced validation rules
+const validationRules = {
+  ingredient: {
+    name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
+    price_per_unit: { required: true, type: 'number', min: 0 },
+    unit: { required: true, type: 'string', minLength: 1, maxLength: 20 },
+    current_stock: { required: true, type: 'number', min: 0 },
+    minimum_stock: { required: true, type: 'number', min: 0 },
+  },
+  order: {
+    customer_name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
+    total_amount: { required: true, type: 'number', min: 0 },
+    order_date: { required: true, type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ },
+  },
+  recipe: {
+    name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
+    description: { type: 'string', maxLength: 500 },
+    category: { required: true, type: 'string', minLength: 2, maxLength: 50 },
+  }
+}
+
+// Secure database service helpers with input validation and caching
 export const dbService = {
-  // Ingredients
+  // Ingredients with caching and validation
   async getIngredients() {
+    const cacheKey = 'ingredients_active'
+    const cached = cacheManager.get(cacheKey)
+    if (cached) return cached
+    
     const { data, error } = await supabase
       .from('ingredients')
       .select('*')
       .eq('is_active', true)
       .order('name')
     
-    if (error) throw error
+    if (error) {
+      console.error('Database error in getIngredients:', error)
+      throw new Error('Failed to fetch ingredients')
+    }
+    
+    // Cache for 5 minutes
+    cacheManager.set(cacheKey, data, 5 * 60 * 1000)
     return data
   },
 
   async addIngredient(ingredient: Database['public']['Tables']['ingredients']['Insert']) {
+    // Validate input
+    const validation = validateInput(ingredient, validationRules.ingredient)
+    if (!validation.isValid) {
+      throw new Error(`Validation failed: ${validation.errors.join(', ')}`)
+    }
+    
+    // Sanitize string inputs
+    const sanitizedIngredient = {
+      ...ingredient,
+      name: typeof ingredient.name === 'string' ? sanitizeSQL(ingredient.name) : ingredient.name,
+      unit: typeof ingredient.unit === 'string' ? sanitizeSQL(ingredient.unit) : ingredient.unit,
+    }
+    
     const { data, error } = await supabase
       .from('ingredients')
-      .insert(ingredient as any)
+      .insert(sanitizedIngredient as any)
       .select()
       .single()
     
-    if (error) throw error
+    if (error) {
+      console.error('Database error in addIngredient:', error)
+      throw new Error('Failed to add ingredient')
+    }
+    
+    // Clear cache
+    cacheManager.clear()
     return data
   },
 
   async updateIngredient(id: string, updates: Database['public']['Tables']['ingredients']['Update']) {
-    const { data, error } = await (supabase as any)
+    // Validate UUID
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      throw new Error('Invalid ingredient ID format')
+    }
+    
+    // Validate updates
+    const validation = validateInput(updates, validationRules.ingredient)
+    if (!validation.isValid) {
+      throw new Error(`Validation failed: ${validation.errors.join(', ')}`)
+    }
+    
+    // Sanitize string inputs
+    const sanitizedUpdates = { ...updates }
+    if (sanitizedUpdates.name && typeof sanitizedUpdates.name === 'string') {
+      sanitizedUpdates.name = sanitizeSQL(sanitizedUpdates.name)
+    }
+    if (sanitizedUpdates.unit && typeof sanitizedUpdates.unit === 'string') {
+      sanitizedUpdates.unit = sanitizeSQL(sanitizedUpdates.unit)
+    }
+    
+    const { data, error } = await supabase
       .from('ingredients')
-      .update(updates)
+      .update(sanitizedUpdates)
       .eq('id', id)
       .select('*')
       .single()
     
-    if (error) throw error
+    if (error) {
+      console.error('Database error in updateIngredient:', error)
+      throw new Error('Failed to update ingredient')
+    }
+    
+    // Clear cache
+    cacheManager.clear()
     return data as Database['public']['Tables']['ingredients']['Row']
   },
 
