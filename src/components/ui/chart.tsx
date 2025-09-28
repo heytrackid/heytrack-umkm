@@ -37,7 +37,31 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed"
     }
 >(
-  ({ className, hideLabel = false, hideIndicator = false, indicator = "dot", ...props }, ref) => {
+  ({ 
+    className, 
+    hideLabel = false, 
+    hideIndicator = false, 
+    indicator = "dot",
+    // Filter out recharts-specific props that shouldn't be passed to DOM
+    active,
+    payload,
+    label,
+    allowEscapeViewBox,
+    animationDuration,
+    animationEasing,
+    axisId,
+    contentStyle,
+    filterNull,
+    isAnimationActive,
+    itemSorter,
+    itemStyle,
+    labelStyle,
+    reverseDirection,
+    useTranslate3d,
+    wrapperStyle,
+    accessibilityLayer,
+    ...validDOMProps 
+  }, ref) => {
     return (
       <div
         ref={ref}
@@ -45,7 +69,7 @@ const ChartTooltipContent = React.forwardRef<
           "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
           className
         )}
-        {...props}
+        {...validDOMProps}
       />
     )
   }
