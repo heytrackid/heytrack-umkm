@@ -163,12 +163,6 @@ const navigationSections: NavigationSection[] = [
     title: '⚙️ LAINNYA',
     items: [
       {
-        name: 'Kategori Produk',
-        href: '/categories',
-        icon: Tags,
-        description: 'Kelola kategori produk'
-      },
-      {
         name: 'Settings',
         href: '/settings',
         icon: Settings,

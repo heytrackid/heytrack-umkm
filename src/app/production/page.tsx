@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useSettings } from '@/contexts/settings-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,11 +24,13 @@ import {
   BookOpen,
   ArrowLeft,
   Home,
-  ChevronRight
+  ChevronRight,
+  Tags
 } from 'lucide-react'
 
 export default function ProductionPage() {
   const { isMobile } = useResponsive()
+  const { formatCurrency, t } = useSettings()
   const { data: recipes, loading, refetch } = useRecipesWithIngredients()
   const { data: ingredients } = useIngredients()
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
@@ -334,7 +337,7 @@ export default function ProductionPage() {
                     <SelectContent>
                       {ingredients?.map(ing => (
                         <SelectItem key={ing.id} value={ing.id}>
-                          {ing.name} (Rp {ing.price_per_unit.toLocaleString()}/{ing.unit})
+                          {ing.name} ({formatCurrency(ing.price_per_unit)}/{ing.unit})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -395,6 +398,10 @@ export default function ProductionPage() {
           <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
+          </Button>
+          <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => window.location.href = '/categories'}>
+            <Tags className="h-4 w-4 mr-2" />
+            Kelola Kategori
           </Button>
           <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
             <Plus className="h-4 w-4 mr-2" />
