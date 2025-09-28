@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useIngredients } from '@/hooks/useSupabaseCRUD';
-import { DataTable } from '@/components/ui/data-table';
+import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
@@ -175,17 +175,16 @@ export function IngredientsCRUD() {
 
   return (
     <div className="space-y-6">
-      <DataTable
-        data={ingredients}
+      <SimpleDataTable
+        data={ingredients || []}
         columns={columns}
-        loading={loading}
+        searchPlaceholder="Search ingredients..."
+        onAdd={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onCreate={handleCreate}
-        title="Ingredients"
-        createButtonText="Add Ingredient"
+        addButtonText="Add Ingredient"
         emptyMessage="No ingredients found. Add your first ingredient to get started."
-        searchable={true}
+        exportData={true}
       />
 
       {/* Create Modal */}
