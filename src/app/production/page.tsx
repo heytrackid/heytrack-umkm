@@ -39,6 +39,20 @@ export default function ProductionPage() {
     category: 'Roti',
     ingredients: [] as any[]
   })
+  
+  // Quick add common ingredients based on category
+  const getCommonIngredientsByCategory = (category: string) => {
+    const commonIngredients: Record<string, string[]> = {
+      'Roti': ['Tepung Terigu', 'Ragi', 'Gula', 'Garam', 'Mentega', 'Telur', 'Susu'],
+      'Kue Basah': ['Tepung Terigu', 'Telur', 'Gula', 'Mentega', 'Baking Powder', 'Susu', 'Vanilla'],
+      'Kue Kering': ['Tepung Terigu', 'Mentega', 'Gula Halus', 'Telur', 'Vanilla'],
+      'Pastry': ['Tepung Terigu', 'Mentega', 'Air', 'Garam', 'Telur'],
+      'Donat': ['Tepung Terigu', 'Ragi', 'Gula', 'Telur', 'Mentega', 'Susu'],
+      'Cake': ['Tepung Terigu', 'Telur', 'Gula', 'Mentega', 'Baking Powder', 'Vanilla'],
+      'Minuman': ['Air', 'Gula', 'Es Batu'],
+    }
+    return commonIngredients[category] || []
+  }
 
   const handleAddIngredient = () => {
     setNewRecipe(prev => ({
@@ -46,8 +60,57 @@ export default function ProductionPage() {
       ingredients: [...prev.ingredients, { ingredient_id: '', quantity: 0, unit: 'gram' }]
     }))
   }
+  
+  const handleQuickAddIngredients = () => {
+    if (!ingredients) return
+    
+    const commonIngredientNames = getCommonIngredientsByCategory(newRecipe.category)
+    const availableIngredients = commonIngredientNames
+      .map(name => ingredients.find(ing => 
+        ing.name.toLowerCase().includes(name.toLowerCase()) ||
+        name.toLowerCase().includes(ing.name.toLowerCase())
+      ))
+      .filter(Boolean)
+      
+    // Avoid duplicate ingredients
+    const existingIngredientIds = new Set(newRecipe.ingredients.map(ing => ing.ingredient_id))
+    const newIngredients = availableIngredients
+      .filter(ing => !existingIngredientIds.has(ing!.id))
+      .map(ing => ({
+        ingredient_id: ing!.id,
+        quantity: getDefaultQuantityByIngredient(ing!.name), // Smart default quantity
+        unit: ing!.unit
+      }))
+    
+    setNewRecipe(prev => ({
+      ...prev,
+      ingredients: [...prev.ingredients, ...newIngredients]
+    }))
+  }
+  
+  const getDefaultQuantityByIngredient = (name: string) => {
+    const lowerName = name.toLowerCase()
+    // Smart defaults based on common usage
+    if (lowerName.includes('tepung')) return 500
+    if (lowerName.includes('telur')) return 3
+    if (lowerName.includes('mentega') || lowerName.includes('margarin')) return 250
+    if (lowerName.includes('gula')) return 200
+    if (lowerName.includes('susu')) return 200
+    if (lowerName.includes('air')) return 300
+    if (lowerName.includes('ragi') || lowerName.includes('baking')) return 10
+    if (lowerName.includes('garam')) return 5
+    if (lowerName.includes('vanilla')) return 5
+    return 100 // Default fallback
+  }
 
-  const handleRemoveIngredient = (index: number) => {
+  // Auto-populate ingredients when category changes
+  React.useEffect(() => {
+    if (newRecipe.category && newRecipe.category !== '' && ingredients && newRecipe.ingredients.length === 0) {
+      handleQuickAddIngredients()
+    }
+  }, [newRecipe.category])
+
+  const handleAddIngredient = () => {
     setNewRecipe(prev => ({
       ...prev,
       ingredients: prev.ingredients.filter((_, i) => i !== index)
@@ -212,17 +275,55 @@ export default function ProductionPage() {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <Label>Komposisi Bahan</Label>
-              <Button size="sm" onClick={handleAddIngredient}>
-                <Plus className="h-4 w-4 mr-1" />
-                Tambah Bahan
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleQuickAddIngredients}
+                  disabled={!ingredients || ingredients.length === 0}
+                >
+                  <PackageOpen className="h-4 w-4 mr-1" />
+                  Auto Tambah
+                </Button>
+                <Button size="sm" onClick={handleAddIngredient}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Tambah Manual
+                </Button>
+              </div>
             </div>
             
-            {newRecipe.ingredients.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+            {/* Quick add helper */}
+            {newRecipe.ingredients.length === 0 && ingredients && ingredients.length > 0 && (
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-green-100 dark:bg-green-800/50 p-1.5 rounded">
+                    <PackageOpen className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-green-900 dark:text-green-100 mb-1">
+                      💡 Fitur Auto-Populate Aktif!
+                    </h4>
+                    <p className="text-sm text-green-800 dark:text-green-200 mb-2">
+                      Bahan akan otomatis ditambahkan saat memilih kategori, atau klik "Auto Tambah" untuk menambah lebih banyak bahan untuk <strong>{newRecipe.category}</strong>
+                    </p>
+                    <div className="text-xs text-green-700 dark:text-green-300">
+                      Bahan yang akan ditambah: {getCommonIngredientsByCategory(newRecipe.category).slice(0, 4).join(', ')}
+                      {getCommonIngredientsByCategory(newRecipe.category).length > 4 && `, dan ${getCommonIngredientsByCategory(newRecipe.category).length - 4} lainnya`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {newRecipe.ingredients.length === 0 && (!ingredients || ingredients.length === 0) && (
+              <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
                 <PackageOpen className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>Belum ada bahan yang ditambahkan</p>
-                <p className="text-sm">Klik tombol "Tambah Bahan" untuk mulai</p>
+                <p className="font-medium">Belum ada data bahan baku</p>
+                <p className="text-sm mb-3">Silakan tambahkan bahan baku terlebih dahulu</p>
+                <Button size="sm" variant="outline" onClick={() => window.location.href = '/inventory'}>
+                  <PackageOpen className="h-4 w-4 mr-2" />
+                  Kelola Bahan Baku
+                </Button>
               </div>
             )}
             
