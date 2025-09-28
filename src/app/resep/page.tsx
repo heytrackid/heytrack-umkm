@@ -57,13 +57,6 @@ export default function ProductionPage() {
     return category?.commonIngredients || []
   }
 
-  const handleAddIngredient = () => {
-    setNewRecipe(prev => ({
-      ...prev,
-      ingredients: [...prev.ingredients, { ingredient_id: '', quantity: 0, unit: 'gram' }]
-    }))
-  }
-  
   const handleQuickAddIngredients = () => {
     if (!ingredients) return
     
@@ -107,7 +100,7 @@ export default function ProductionPage() {
     if (newRecipe.category && newRecipe.category !== '' && ingredients && newRecipe.ingredients.length === 0) {
       handleQuickAddIngredients()
     }
-  }, [newRecipe.category])
+  }, [newRecipe.category, ingredients, newRecipe.ingredients.length])
 
   const handleAddIngredient = () => {
     setNewRecipe(prev => ({

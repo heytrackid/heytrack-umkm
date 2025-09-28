@@ -21,7 +21,8 @@ import {
   FileText,
   Target,
   CheckCircle,
-  Tags
+  Tags,
+  DollarSign
 } from 'lucide-react'
 
 interface NavigationItem {
@@ -141,6 +142,14 @@ const navigationSections: NavigationSection[] = [
     description: 'Pantau performa & profit',
     isWorkflow: true,
     items: [
+      {
+        name: 'Arus Kas',
+        href: '/cash-flow',
+        icon: DollarSign,
+        isSimple: true,
+        badge: 'REALTIME',
+        description: 'Monitor pemasukan & pengeluaran'
+      },
       {
         name: 'Laporan Profit',
         href: '/reports',
