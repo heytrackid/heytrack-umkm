@@ -401,50 +401,74 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[0,1,2,3,4,5,6].map((dayIndex) => {
-                  const day = new Date()
-                  day.setDate(day.getDate() - (6 - dayIndex))
-                  const dayName = day.toLocaleDateString('id-ID', { weekday: 'short' })
-                  const revenue = Math.floor(Math.random() * 2000000) + 500000 // Mock data
-                  const maxRevenue = 2500000
-                  const percentage = (revenue / maxRevenue) * 100
+                {[
+                  { day: 'Sen', revenue: 1200000, isToday: false },
+                  { day: 'Sel', revenue: 1850000, isToday: false },
+                  { day: 'Rab', revenue: 950000, isToday: false },
+                  { day: 'Kam', revenue: 2100000, isToday: false },
+                  { day: 'Jum', revenue: 2400000, isToday: false },
+                  { day: 'Sab', revenue: 2800000, isToday: false },
+                  { day: 'Min', revenue: 1600000, isToday: true }
+                ].map((data, index) => {
+                  const maxRevenue = 3000000
+                  const percentage = Math.max((data.revenue / maxRevenue) * 100, 5) // Minimum 5% width
                   
                   return (
-                    <div key={dayIndex} className="flex items-center gap-4">
-                      <div className="w-12 text-sm font-medium text-muted-foreground">
-                        {dayName}
+                    <div key={index} className="flex items-center gap-3">
+                      <div className={`w-10 text-sm font-medium ${
+                        data.isToday ? 'text-primary' : 'text-muted-foreground'
+                      }`}>
+                        {data.day}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="flex-1 bg-muted rounded-full h-6 relative overflow-hidden">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 bg-secondary/30 rounded-lg h-8 relative overflow-hidden">
                             <div 
-                              className="bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2"
-                              style={{ width: `${Math.max(percentage, 10)}%` }}
+                              className={`h-full rounded-lg transition-all duration-700 flex items-center px-3 ${
+                                data.isToday 
+                                  ? 'bg-gradient-to-r from-primary to-primary/80' 
+                                  : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                              }`}
+                              style={{ width: `${percentage}%` }}
                             >
-                              {percentage > 25 && (
-                                <span className="text-xs font-medium text-white">
-                                  Rp {(revenue / 1000).toFixed(0)}k
+                              {percentage > 20 && (
+                                <span className="text-xs font-bold text-white">
+                                  Rp {Math.round(data.revenue / 1000)}k
                                 </span>
                               )}
                             </div>
                           </div>
-                        </div>
-                        {percentage <= 25 && (
-                          <div className="text-xs text-muted-foreground">
-                            Rp {revenue.toLocaleString('id-ID')}
+                          <div className="ml-3 min-w-[80px] text-right">
+                            <span className="text-sm font-medium">
+                              Rp {Math.round(data.revenue / 1000)}k
+                            </span>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   )
                 })}
               </div>
-              <div className="mt-4 pt-4 border-t">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Total 7 hari:</span>
-                  <span className="font-bold">
-                    Rp {((dashboardStats?.revenue?.weekly || 0)).toLocaleString('id-ID')}
-                  </span>
+              <div className="mt-6 pt-4 border-t border-border">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Total 7 hari:</span>
+                    <div className="font-bold text-lg">
+                      Rp {(12900000).toLocaleString('id-ID')}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Rata-rata:</span>
+                    <div className="font-bold text-lg">
+                      Rp {Math.round(12900000 / 7 / 1000)}k/hari
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-muted-foreground flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                  <span>Hari ini</span>
+                  <div className="w-2 h-2 rounded-full bg-blue-500 ml-4"></div>
+                  <span>Hari sebelumnya</span>
                 </div>
               </div>
             </CardContent>
@@ -461,37 +485,42 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { name: 'Roti Tawar', sold: 85, revenue: 850000 },
-                  { name: 'Kue Lapis', sold: 62, revenue: 1240000 },
-                  { name: 'Donat Coklat', sold: 48, revenue: 480000 },
-                  { name: 'Brownies', sold: 35, revenue: 525000 },
-                  { name: 'Croissant', sold: 28, revenue: 560000 }
+                  { name: 'Roti Tawar', sold: 85, revenue: 850000, color: 'from-orange-500 to-orange-600' },
+                  { name: 'Kue Lapis', sold: 62, revenue: 1240000, color: 'from-red-500 to-red-600' },
+                  { name: 'Donat Coklat', sold: 48, revenue: 480000, color: 'from-yellow-500 to-yellow-600' },
+                  { name: 'Brownies', sold: 35, revenue: 525000, color: 'from-purple-500 to-purple-600' },
+                  { name: 'Croissant', sold: 28, revenue: 560000, color: 'from-green-500 to-green-600' }
                 ].map((product, index) => {
                   const maxSold = 85
-                  const percentage = (product.sold / maxSold) * 100
+                  const percentage = Math.max((product.sold / maxSold) * 100, 10) // Minimum 10% width
                   
                   return (
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-sm">{product.name}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {product.sold} terjual
-                          </span>
+                    <div key={index} className="p-3 rounded-lg bg-secondary/20 border border-border/50">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                          #{index + 1}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-muted rounded-full h-2">
-                            <div 
-                              className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all duration-500"
-                              style={{ width: `${percentage}%` }}
-                            />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-sm">{product.name}</span>
+                            <div className="text-right">
+                              <div className="text-sm font-medium">{product.sold} unit</div>
+                              <div className="text-xs text-muted-foreground">
+                                Rp {Math.round(product.revenue / 1000)}k
+                              </div>
+                            </div>
                           </div>
-                          <span className="text-xs font-medium text-muted-foreground">
-                            Rp {(product.revenue / 1000).toFixed(0)}k
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 bg-secondary/50 rounded-full h-3 overflow-hidden">
+                              <div 
+                                className={`bg-gradient-to-r ${product.color} h-full rounded-full transition-all duration-700 shadow-sm`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                            <span className="text-xs font-medium text-muted-foreground min-w-[35px] text-right">
+                              {Math.round(percentage)}%
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
