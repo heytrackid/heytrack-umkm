@@ -81,8 +81,8 @@ const navigationSections: NavigationSection[] = [
         description: 'Listrik, gas, gaji, dll'
       },
       {
-        name: 'Resep Produk',
-        href: '/production',
+        name: 'Resep',
+        href: '/resep',
         icon: ChefHat,
         isSimple: true,
         badge: 'PENTING',

@@ -38,7 +38,7 @@ const menuSections = [
     items: [
       {
         name: 'Resep',
-        href: '/production',
+        href: '/resep',
         icon: ChefHat,
         description: 'Kelola resep dan formula produk dengan mudah',
         isSimple: true,

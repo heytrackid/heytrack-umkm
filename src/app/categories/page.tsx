@@ -3,6 +3,14 @@
 import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,7 +25,6 @@ import {
   X,
   Tags,
   ArrowLeft,
-  ChevronRight,
   Home
 } from 'lucide-react'
 import categoriesData from '@/data/categories.json'
@@ -102,38 +109,21 @@ export default function CategoriesPage() {
   }
 
   // Breadcrumb component
-  const Breadcrumb = () => (
-    <nav className="flex items-center space-x-2 text-sm">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => window.location.href = '/'}
-        className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-      >
-        <Home className="h-4 w-4 mr-1" />
-        Dashboard
-      </Button>
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      {currentView === 'list' ? (
-        <span className="font-medium">Kategori Produk</span>
-      ) : (
-        <>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentView('list')}
-            className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-          >
-            Kategori Produk
-          </Button>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">
-            {currentView === 'add' ? 'Tambah Kategori' : 'Edit Kategori'}
-          </span>
-        </>
-      )}
-    </nav>
-  )
+  const getBreadcrumbItems = () => {
+    const items = [
+      { label: 'Dashboard', href: '/' },
+      { label: 'Resep', href: '/resep' },
+      { label: 'Kategori Produk', href: currentView === 'list' ? undefined : '/categories' }
+    ]
+    
+    if (currentView !== 'list') {
+      items.push({ 
+        label: currentView === 'add' ? 'Tambah Kategori' : 'Edit Kategori' 
+      })
+    }
+    
+    return items
+  }
 
   // Form Component
   const CategoryForm = () => (
@@ -343,7 +333,24 @@ export default function CategoriesPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumb />
+        <Breadcrumb>
+          <BreadcrumbList>
+            {getBreadcrumbItems().map((item, index) => (
+              <React.Fragment key={index}>
+                <BreadcrumbItem>
+                  {item.href ? (
+                    <BreadcrumbLink href={item.href}>
+                      {item.label}
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {index < getBreadcrumbItems().length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
         {currentView === 'list' ? <CategoryList /> : <CategoryForm />}
       </div>
     </AppLayout>

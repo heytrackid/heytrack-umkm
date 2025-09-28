@@ -4,6 +4,14 @@ import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -65,28 +73,7 @@ const frequencies = [
 export default function OperationalCostsPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
-  const [costs, setCosts] = useState<OperationalCost[]>([
-    {
-      id: '1',
-      name: 'Listrik',
-      category: 'utilities',
-      amount: 500000,
-      frequency: 'monthly',
-      description: 'Biaya listrik bulanan',
-      isFixed: false,
-      icon: '⚡'
-    },
-    {
-      id: '2', 
-      name: 'Sewa Tempat',
-      category: 'rent',
-      amount: 2000000,
-      frequency: 'monthly',
-      description: 'Sewa kios/warung',
-      isFixed: true,
-      icon: '🏢'
-    }
-  ])
+  const [costs, setCosts] = useState<OperationalCost[]>([])
   
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [editingCost, setEditingCost] = useState<OperationalCost | null>(null)
@@ -161,38 +148,20 @@ export default function OperationalCostsPage() {
   }
 
   // Breadcrumb component
-  const Breadcrumb = () => (
-    <nav className="flex items-center space-x-2 text-sm">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => window.location.href = '/'}
-        className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-      >
-        <Home className="h-4 w-4 mr-1" />
-        Dashboard
-      </Button>
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      {currentView === 'list' ? (
-        <span className="font-medium">Biaya Operasional</span>
-      ) : (
-        <>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentView('list')}
-            className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-          >
-            Biaya Operasional
-          </Button>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">
-            {currentView === 'add' ? 'Tambah Biaya' : 'Edit Biaya'}
-          </span>
-        </>
-      )}
-    </nav>
-  )
+  const getBreadcrumbItems = () => {
+    const items = [
+      { label: 'Dashboard', href: '/' },
+      { label: 'Biaya Operasional', href: currentView === 'list' ? undefined : '/operational-costs' }
+    ]
+    
+    if (currentView !== 'list') {
+      items.push({ 
+        label: currentView === 'add' ? 'Tambah Biaya' : 'Edit Biaya' 
+      })
+    }
+    
+    return items
+  }
 
   // Form Component
   const CostForm = () => (
@@ -471,7 +440,24 @@ export default function OperationalCostsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumb />
+        <Breadcrumb>
+          <BreadcrumbList>
+            {getBreadcrumbItems().map((item, index) => (
+              <React.Fragment key={index}>
+                <BreadcrumbItem>
+                  {item.href ? (
+                    <BreadcrumbLink href={item.href}>
+                      {item.label}
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {index < getBreadcrumbItems().length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
         {currentView === 'list' ? <CostList /> : <CostForm />}
       </div>
     </AppLayout>

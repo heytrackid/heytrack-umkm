@@ -4,6 +4,14 @@ import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,7 +32,6 @@ import {
   BookOpen,
   ArrowLeft,
   Home,
-  ChevronRight,
   Tags
 } from 'lucide-react'
 
@@ -180,38 +187,20 @@ export default function ProductionPage() {
   }
 
   // Breadcrumb component
-  const Breadcrumb = () => (
-    <nav className="flex items-center space-x-2 text-sm">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => window.location.href = '/'}
-        className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-      >
-        <Home className="h-4 w-4 mr-1" />
-        Dashboard
-      </Button>
-      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      {currentView === 'list' ? (
-        <span className="font-medium">Resep Produk</span>
-      ) : (
-        <>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentView('list')}
-            className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-          >
-            Resep Produk
-          </Button>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">
-            {currentView === 'add' ? 'Tambah Resep' : 'Edit Resep'}
-          </span>
-        </>
-      )}
-    </nav>
-  )
+  const getBreadcrumbItems = () => {
+    const items = [
+      { label: 'Dashboard', href: '/' },
+      { label: 'Resep', href: currentView === 'list' ? undefined : '/resep' }
+    ]
+    
+    if (currentView !== 'list') {
+      items.push({ 
+        label: currentView === 'add' ? 'Tambah Resep' : 'Edit Resep' 
+      })
+    }
+    
+    return items
+  }
 
   // Add Recipe Form Component
   const AddRecipeForm = () => (
@@ -388,7 +377,7 @@ export default function ProductionPage() {
       <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
         <div className={isMobile ? 'text-center' : ''}>
           <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-            Resep Produk
+            Resep
           </h1>
           <p className="text-muted-foreground">
             Buat dan kelola resep untuk menghitung HPP otomatis
@@ -591,7 +580,24 @@ export default function ProductionPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumb />
+        <Breadcrumb>
+          <BreadcrumbList>
+            {getBreadcrumbItems().map((item, index) => (
+              <React.Fragment key={index}>
+                <BreadcrumbItem>
+                  {item.href ? (
+                    <BreadcrumbLink href={item.href}>
+                      {item.label}
+                    </BreadcrumbLink>
+                  ) : (
+                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                  )}
+                </BreadcrumbItem>
+                {index < getBreadcrumbItems().length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
+            ))}
+          </BreadcrumbList>
+        </Breadcrumb>
         {currentView === 'list' && <RecipeList />}
         {currentView === 'add' && <AddRecipeForm />}
         {currentView === 'edit' && <AddRecipeForm />}
