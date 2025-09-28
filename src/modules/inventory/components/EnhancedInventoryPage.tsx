@@ -471,7 +471,7 @@ export default function EnhancedInventoryPage() {
             </CardHeader>
             <CardContent className="text-blue-700 text-sm space-y-2">
               <p>🔄 <strong>Setiap kali beli bahan:</strong> Harga berubah dari pembelian sebelumnya</p>
-              <p>📈 <strong>Harga naik >10%:</strong> Perlu update price list dan harga jual</p>
+              <p>📈 <strong>Harga naik &gt;10%:</strong> Perlu update price list dan harga jual</p>
               <p>⚠️ <strong>Stock tinggal sedikit:</strong> Pastikan harga untuk pembelian berikutnya</p>
               <p>📊 <strong>Sebelum bikin HPP:</strong> Gunakan harga rata-rata terbaru</p>
             </CardContent>
