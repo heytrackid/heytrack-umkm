@@ -180,12 +180,119 @@ const navigationSections: NavigationSection[] = [
 ]
 
 interface SidebarProps {
-  isOpen: boolean
-  onToggle: () => void
+  isOpen?: boolean
+  onToggle?: () => void
+  isMobile?: boolean
 }
 
-export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
+export default function SimpleSidebar({ isOpen = false, onToggle, isMobile = false }: SidebarProps) {
   const pathname = usePathname()
+
+  // If it's mobile mode (used within Sheet), render simplified version
+  if (isMobile) {
+    return (
+      <div className="h-full flex flex-col bg-background">
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Package className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">
+                HeyTrack
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                UMKM Kuliner HPP
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+          {navigationSections.map((section) => (
+            <div key={section.title} className="space-y-2">
+              {/* Section Title */}
+              <div className={cn(
+                "px-3 py-2 rounded-lg",
+                section.isWorkflow 
+                  ? "bg-muted/50 border border-border" 
+                  : ""
+              )}>
+                <h3 className={cn(
+                  "text-xs font-semibold uppercase tracking-wider",
+                  section.isWorkflow 
+                    ? "text-foreground" 
+                    : "text-muted-foreground"
+                )}>
+                  {section.title}
+                </h3>
+                {section.description && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {section.description}
+                  </p>
+                )}
+              </div>
+              
+              {/* Section Items */}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || 
+                    (item.href.includes('#') && pathname === item.href.split('#')[0])
+                  
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                        "hover:scale-[1.02]",
+                        isActive 
+                          ? "bg-primary/10 text-primary border border-primary/20" 
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <div className="flex items-center justify-center mr-3 mt-0.5">
+                        <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium truncate">{item.name}</span>
+                          
+                          {/* Badges */}
+                          <div className="flex items-center gap-1 ml-2">
+                            {item.badge && (
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-secondary text-secondary-foreground">
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Description */}
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Active indicator */}
+                      {isActive && (
+                        <div className="w-1 bg-primary rounded-full self-stretch ml-2" />
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -322,21 +429,23 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
         </nav>
       </aside>
 
-      {/* Mobile toggle button */}
-      <button
-        onClick={onToggle}
-        className={cn(
-          "fixed top-4 left-4 z-50 lg:hidden",
-          "p-3 rounded-lg shadow-lg",
-          "bg-gray-800 dark:bg-gray-600",
-          "text-white",
-          "hover:bg-gray-700 dark:hover:bg-gray-500",
-          "transition-all duration-200",
-          "hover:scale-105"
-        )}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </button>
+      {/* Mobile toggle button - Only show if not using mobile header */}
+      {!isMobile && (
+        <button
+          onClick={onToggle}
+          className={cn(
+            "fixed top-4 left-4 z-50 lg:hidden",
+            "p-3 rounded-lg shadow-lg",
+            "bg-gray-800 dark:bg-gray-600",
+            "text-white",
+            "hover:bg-gray-700 dark:hover:bg-gray-500",
+            "transition-all duration-200",
+            "hover:scale-105"
+          )}
+        >
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      )}
     </>
   )
 }

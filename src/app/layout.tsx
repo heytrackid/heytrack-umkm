@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
+import QueryProvider from '@/providers/QueryProvider';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,12 +38,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SettingsProvider>
-            <ErrorBoundary>
-              {children}
-            </ErrorBoundary>
-            <Toaster />
-          </SettingsProvider>
+          <QueryProvider>
+            <SettingsProvider>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
+              <Toaster />
+            </SettingsProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import SimpleSidebar from './sidebar'
 import MobileHeader from './mobile-header'
 import { Search, User } from 'lucide-react'
@@ -10,7 +10,6 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -25,29 +24,36 @@ export default function AppLayout({
 }: AppLayoutProps) {
   const { isMobile } = useMobileFirst()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const toggle = () => setSidebarOpen(!sidebarOpen)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   return (
     <div className={cn(
       "flex bg-background w-full sidebar-layout",
       isMobile ? "flex-col mobile-min-vh" : "h-screen"
     )}>
-      {/* Sidebar - Always show, works on mobile and desktop */}
-      <SimpleSidebar 
-        isOpen={sidebarOpen} 
-        onToggle={toggle}
-      />
+      {/* Desktop Sidebar */}
+      {!isMobile && (
+        <SimpleSidebar 
+          isOpen={sidebarOpen} 
+          onToggle={toggleSidebar}
+        />
+      )}
       
-      {/* Mobile Header - Disabled for now, using sidebar */}
-      {/* {isMobile && showMobileHeader && (
+      {/* Mobile Header */}
+      {isMobile && showMobileHeader && (
         <MobileHeader 
           title={pageTitle}
+          sidebarOpen={mobileMenuOpen}
+          onMenuToggle={toggleMobileMenu}
           notification={{
             count: 3,
             onClick: () => console.log('Mobile notifications')
           }}
         />
-      )} */}
+      )}
 
       <div className="flex flex-1 flex-col w-full">
         {/* Desktop Header */}
@@ -76,7 +82,7 @@ export default function AppLayout({
         {/* Main Content */}
         <main className={cn(
           "flex-1 overflow-auto bg-background",
-          isMobile ? "p-4" : "p-6"
+          isMobile ? "pt-0 p-4" : "p-6"
         )}>
           <div className={cn(
             "w-full mx-auto",

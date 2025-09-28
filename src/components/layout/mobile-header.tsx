@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { 
   Search, 
   Bell, 
@@ -30,6 +31,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
+import SimpleSidebar from './sidebar'
 
 interface MobileHeaderProps {
   title?: string
@@ -44,6 +46,8 @@ interface MobileHeaderProps {
     onClick: () => void
   }
   className?: string
+  onMenuToggle?: () => void
+  sidebarOpen?: boolean
 }
 
 export default function MobileHeader({
@@ -55,7 +59,9 @@ export default function MobileHeader({
   searchPlaceholder = "Cari...",
   onSearch,
   notification,
-  className
+  className,
+  onMenuToggle,
+  sidebarOpen
 }: MobileHeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -98,14 +104,15 @@ export default function MobileHeader({
   return (
     <header 
       className={cn(
-        "sticky top-0 z-40",
-        "bg-white/95 backdrop-blur-sm border-b border-border",
+        "sticky top-0 z-50",
+        "bg-background/95 backdrop-blur-sm border-b border-border",
         "transition-transform duration-300 ease-in-out",
+        "supports-[backdrop-filter]:bg-background/60",
         className
       )}
     >
       {/* Main Header */}
-      <div className="flex items-center justify-between h-14 px-4">
+      <div className="flex items-center justify-between h-16 px-4">
         {/* Left Section */}
         <div className="flex items-center space-x-2 flex-1">
           {showBackButton ? (
@@ -113,29 +120,20 @@ export default function MobileHeader({
               variant="ghost"
               size="sm"
               onClick={onBackClick}
-              className="p-2"
+              className="p-2 h-10 w-10"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           ) : (
-            <Sheet>
+            <Sheet open={sidebarOpen} onOpenChange={onMenuToggle}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button variant="ghost" size="sm" className="p-2 h-10 w-10">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <SheetHeader>
-                  <SheetTitle>HeyTrack UMKM</SheetTitle>
-                  <SheetDescription>
-                    Bakery Management System
-                  </SheetDescription>
-                </SheetHeader>
-                {/* Mobile navigation menu content */}
-                <div className="py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Menu navigasi akan ditampilkan di sini
-                  </p>
+              <SheetContent side="left" className="w-80 p-0">
+                <div className="h-full">
+                  <SimpleSidebar isMobile={true} />
                 </div>
               </SheetContent>
             </Sheet>
@@ -195,6 +193,9 @@ export default function MobileHeader({
 
         {/* Right Section - Actions */}
         <div className="flex items-center space-x-1">
+          {/* Dark/Light Mode Toggle */}
+          <ThemeToggle />
+          
           {/* Notification */}
           {notification && (
             <Button
