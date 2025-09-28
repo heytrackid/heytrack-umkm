@@ -14,37 +14,33 @@ Sistem bakery management telah diperkuat dengan sistem keamanan berlapis yang ko
 #### Kebijakan RLS untuk Setiap Tabel
 
 **Customers (Pelanggan)**
-- `SELECT`: Sales staff dan admin dapat melihat pelanggan
-- `INSERT/UPDATE`: Sales staff dan admin dapat mengelola data pelanggan
-- `DELETE`: Hanya admin dan super_admin
+- `SELECT/INSERT/UPDATE`: Semua user yang terautentikasi
+- `DELETE`: Hanya admin
 
 **Ingredients (Bahan Baku)**
-- `SELECT`: Staff inventory, kitchen, dan admin
-- `INSERT`: Manager dan admin
-- `UPDATE`: Manager dan admin (staff inventory untuk stock level)
-- `DELETE`: Hanya admin dan super_admin
+- `SELECT/UPDATE`: Semua user yang terautentikasi
+- `INSERT/DELETE`: Hanya admin
 
 **Recipes (Resep)**
-- `SELECT`: Kitchen staff dan admin
-- `INSERT/UPDATE`: Manager dan admin
-- `DELETE`: Hanya admin dan super_admin
+- `SELECT/INSERT/UPDATE`: Semua user yang terautentikasi
+- `DELETE`: Hanya admin
 
 **Orders (Pesanan)**
-- `SELECT/INSERT/UPDATE`: Sales staff dan admin
-- `DELETE`: Manager dan admin
+- `SELECT/INSERT/UPDATE`: Semua user yang terautentikasi
+- `DELETE`: Hanya admin
 
 **Stock Transactions (Transaksi Stok)**
-- `SELECT/INSERT`: Inventory staff dan admin
-- `UPDATE/DELETE`: Manager dan admin
+- `SELECT/INSERT/UPDATE`: Semua user yang terautentikasi
+- `DELETE`: Hanya admin
 
 **Financial Records (Catatan Keuangan)**
-- `SELECT/INSERT`: Finance staff dan admin
-- `UPDATE/DELETE`: Manager dan admin
+- `SELECT/INSERT`: Semua user yang terautentikasi
+- `UPDATE/DELETE`: Hanya admin
 
 #### Helper Functions
-- `get_user_role()`: Mendapatkan peran user saat ini
-- `user_has_permission()`: Mengecek permission spesifik
-- `user_has_business_unit_access()`: Mengecek akses unit bisnis
+- `get_user_role()`: Mendapatkan peran user saat ini (admin atau user)
+- `is_admin()`: Mengecek apakah user memiliki peran admin
+- `user_has_permission()`: Mengecek permission spesifik (masih tersedia untuk fleksibilitas)
 
 ### 2. Audit Trail & Tracking
 
@@ -153,7 +149,7 @@ Berdasarkan Supabase security advisor, ada beberapa functions yang perlu diperba
 
 #### Langkah Selanjutnya
 1. **Fix Function Security**: Update semua functions dengan search_path yang aman
-2. **Create Initial Super Admin**: Buat user super_admin pertama setelah deployment
+2. **Create Initial Admin**: Buat user admin pertama setelah deployment
 3. **Environment Security**: Pastikan environment variables aman di production
 4. **Regular Security Audit**: Jalankan security advisor secara berkala
 
@@ -179,11 +175,11 @@ NEXTAUTH_URL=your_app_url
    # - 002_enhanced_security_rls.sql
    ```
 
-2. Create initial super admin user:
+2. Create initial admin user:
    ```sql
    -- Setelah user pertama sign up melalui Supabase Auth
    INSERT INTO user_profiles (user_id, email, full_name, role, business_unit)
-   VALUES ('user-uuid-here', 'admin@yourdomain.com', 'Super Admin', 'super_admin', 'all');
+   VALUES ('user-uuid-here', 'admin@yourdomain.com', 'Administrator', 'admin', 'all');
    ```
 
 ### 9. Security Compliance
