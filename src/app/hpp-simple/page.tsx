@@ -41,6 +41,7 @@ interface SimpleIngredient extends Omit<SmartIngredient, 'pricePerUnit' | 'volat
 interface SimpleRecipe {
   name: string
   portions: number
+  portionUnit: string // NEW: unit untuk porsi (pcs, loaf, dozen, kg, etc)
   ingredients: SimpleIngredient[]
   // Smart pricing analysis
   pricingAnalysis?: PricingAnalysis
@@ -55,6 +56,7 @@ interface SimpleRecipe {
 }
 
 const UNITS = ['gram', 'kg', 'ml', 'liter', 'butir', 'lembar', 'bungkus']
+const PORTION_UNITS = ['pcs', 'buah', 'loaf', 'dozen', 'lusin', 'kg', 'ons', 'bungkus', 'porsi', 'slice']
 const OVERHEAD_PERCENTAGE = 15
 const LABOR_PERCENTAGE = 20
 const RECOMMENDED_MARGIN = 50
@@ -100,6 +102,7 @@ export default function HPPSimplePage() {
   const [recipe, setRecipe] = useState<SimpleRecipe>({
     name: '',
     portions: 1,
+    portionUnit: 'pcs', // Default to pieces
     ingredients: [],
     totalCost: 0,
     costPerPortion: 0,
@@ -320,7 +323,7 @@ export default function HPPSimplePage() {
             Kalkulator HPP Otomatis
           </h1>
           <p className="text-muted-foreground mt-2">
-            Hitung harga pokok produksi dengan mudah dan otomatis
+            Hitung HPP per pcs, per dozen, per kg, atau unit apapun dengan mudah
           </p>
           <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -355,15 +358,30 @@ export default function HPPSimplePage() {
                     onChange={(e) => setRecipe(prev => ({ ...prev, name: e.target.value }))}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="portions">Jumlah Porsi</Label>
-                  <Input
-                    id="portions"
-                    type="number"
-                    min="1"
-                    value={recipe.portions}
-                    onChange={(e) => setRecipe(prev => ({ ...prev, portions: parseInt(e.target.value) || 1 }))}
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="portions">Jumlah</Label>
+                    <Input
+                      id="portions"
+                      type="number"
+                      min="1"
+                      value={recipe.portions}
+                      onChange={(e) => setRecipe(prev => ({ ...prev, portions: parseInt(e.target.value) || 1 }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="portionUnit">Satuan</Label>
+                    <select
+                      id="portionUnit"
+                      className="w-full p-2 border border-input rounded-md bg-background"
+                      value={recipe.portionUnit}
+                      onChange={(e) => setRecipe(prev => ({ ...prev, portionUnit: e.target.value }))}
+                    >
+                      {PORTION_UNITS.map(unit => (
+                        <option key={unit} value={unit}>{unit}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -554,7 +572,7 @@ export default function HPPSimplePage() {
                     <span>Rp {recipe.totalCost.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between font-medium text-lg text-gray-600 dark:text-gray-400">
-                    <span>HPP per Porsi:</span>
+                    <span>HPP per {recipe.portionUnit}:</span>
                     <span>Rp {recipe.costPerPortion.toLocaleString()}</span>
                   </div>
                 </div>
@@ -580,6 +598,81 @@ export default function HPPSimplePage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Unit Conversion Calculator */}
+            {recipe.costPerPortion > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Calculator className="h-4 w-4" />
+                    💡 Konversi HPP ke Unit Lain
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="text-xs text-muted-foreground mb-3">
+                    HPP dasar: Rp {recipe.costPerPortion.toLocaleString()} per {recipe.portionUnit}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {recipe.portionUnit !== 'pcs' && (
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="font-medium">Per Pcs</div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          {recipe.portionUnit === 'dozen' || recipe.portionUnit === 'lusin' 
+                            ? `Rp ${Math.round(recipe.costPerPortion / 12).toLocaleString()}` 
+                            : recipe.portionUnit === 'kg' 
+                              ? `Rp ${Math.round(recipe.costPerPortion / 40).toLocaleString()} (≈40 pcs/kg)`
+                              : `Rp ${recipe.costPerPortion.toLocaleString()} (1:1)`}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {recipe.portionUnit !== 'dozen' && recipe.portionUnit !== 'lusin' && (
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="font-medium">Per Dozen</div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          {recipe.portionUnit === 'pcs' 
+                            ? `Rp ${Math.round(recipe.costPerPortion * 12).toLocaleString()}` 
+                            : recipe.portionUnit === 'kg' 
+                              ? `Rp ${Math.round(recipe.costPerPortion * 12 / 40).toLocaleString()} (≈12 pcs)`
+                              : `Rp ${Math.round(recipe.costPerPortion * 12).toLocaleString()}`}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {recipe.portionUnit !== 'kg' && (
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="font-medium">Per Kg</div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          {recipe.portionUnit === 'pcs' 
+                            ? `Rp ${Math.round(recipe.costPerPortion * 40).toLocaleString()} (≈40 pcs/kg)`
+                            : recipe.portionUnit === 'ons' 
+                              ? `Rp ${Math.round(recipe.costPerPortion * 10).toLocaleString()}`
+                              : `Rp ${Math.round(recipe.costPerPortion * 1000).toLocaleString()}`}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {recipe.portionUnit !== 'ons' && (
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="font-medium">Per Ons</div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          {recipe.portionUnit === 'kg' 
+                            ? `Rp ${Math.round(recipe.costPerPortion / 10).toLocaleString()}`
+                            : recipe.portionUnit === 'pcs' 
+                              ? `Rp ${Math.round(recipe.costPerPortion * 4).toLocaleString()} (≈4 pcs/ons)`
+                              : `Rp ${Math.round(recipe.costPerPortion / 100).toLocaleString()}`}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-xs text-gray-500 dark:text-gray-400 pt-2 border-t">
+                    💡 Tips: Konversi ini perkiraan. Sesuaikan dengan ukuran produk Anda.
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Smart Pricing Insights */}
             {recipe.ingredients.length > 0 && (
