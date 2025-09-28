@@ -496,7 +496,7 @@ export default function EnhancedInventoryPage() {
                   <AlertDescription className="text-yellow-800">
                     <strong>Cara Baca:</strong> Bandingkan semua metode di bawah. 
                     Untuk HPP yang akurat, pakai <strong>Moving Average</strong> (hijau). 
-                    Jika ada selisih >5% dari harga list, pertimbangkan update harga jual.
+                    Jika ada selisih &gt;5% dari harga list, pertimbangkan update harga jual.
                   </AlertDescription>
                 </Alert>
 
