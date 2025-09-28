@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
         *,
         order_items (
           id,
+          recipe_id,
           product_name,
           quantity,
           unit_price,
@@ -42,7 +43,13 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(data)
+    // Map data to match our interface (order_items -> items)
+    const mappedData = data?.map(order => ({
+      ...order,
+      items: order.order_items || []
+    }))
+
+    return NextResponse.json(mappedData)
   } catch (error) {
     console.error('Error in GET /api/orders:', error)
     return NextResponse.json(
@@ -74,6 +81,7 @@ export async function POST(request: NextRequest) {
         order_no: body.order_no,
         customer_id: body.customer_id,
         customer_name: body.customer_name,
+        customer_phone: body.customer_phone,
         status: body.status || 'PENDING',
         order_date: body.order_date || new Date().toISOString().split('T')[0],
         delivery_date: body.delivery_date,
@@ -99,11 +107,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If order items provided, create them
-    if (body.order_items && body.order_items.length > 0) {
-      const orderItems = body.order_items.map((item: any) => ({
-        ...item,
-        order_id: orderData.id
+    // If order items provided, create them (handle both order_items and items field names)
+    const itemsData = body.items || body.order_items
+    if (itemsData && itemsData.length > 0) {
+      const orderItems = itemsData.map((item: any) => ({
+        order_id: orderData.id,
+        recipe_id: item.recipe_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price || (item.quantity * item.unit_price),
+        special_requests: item.special_requests
       }))
       
       const { error: itemsError } = await (supabase as any)
