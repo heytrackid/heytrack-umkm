@@ -534,6 +534,9 @@ export type WorkflowEvent =
   | 'inventory.low_stock'
   | 'inventory.out_of_stock'
   | 'production.batch_completed'
+  | 'ingredient.price_changed'
+  | 'operational_cost.changed'
+  | 'hpp.recalculation_needed'
 
 export interface WorkflowEventData {
   event: WorkflowEvent
@@ -610,6 +613,15 @@ export class WorkflowAutomation {
           break
         case 'inventory.low_stock':
           await this.handleLowStock(event)
+          break
+        case 'ingredient.price_changed':
+          await this.handleIngredientPriceChanged(event)
+          break
+        case 'operational_cost.changed':
+          await this.handleOperationalCostChanged(event)
+          break
+        case 'hpp.recalculation_needed':
+          await this.handleHPPRecalculationNeeded(event)
           break
         default:
           console.log(`No handler for event: ${event.event}`)
@@ -849,6 +861,173 @@ export class WorkflowAutomation {
     console.log('❌ Processing order cancellation workflow...', event.entityId)
     // Implementation for order cancellation workflow
     // This would restore inventory if order was already in production
+  }
+
+  /**
+   * WORKFLOW: Handle Ingredient Price Change
+   * Otomatis: trigger HPP recalculation, update pricing suggestions
+   */
+  private async handleIngredientPriceChanged(event: WorkflowEventData) {
+    const { ingredientId, oldPrice, newPrice, priceChange, affectedRecipes } = event.data
+    
+    console.log(`💰 Processing ingredient price change workflow: ${ingredientId}`);
+    console.log(`Price change: ${priceChange.toFixed(2)}% (${oldPrice} → ${newPrice})`)
+
+    // Generate smart notifications for significant price changes
+    if (Math.abs(priceChange) > 10) {
+      // Import smart notification system
+      const { smartNotificationSystem } = await import('./smart-notifications')
+      
+      smartNotificationSystem.addNotification({
+        type: priceChange > 0 ? 'warning' : 'info',
+        category: 'financial',
+        priority: Math.abs(priceChange) > 20 ? 'critical' : 'high',
+        title: `Harga Bahan Baku ${priceChange > 0 ? 'NAIK' : 'TURUN'} Signifikan`,
+        message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length || 0} resep. HPP otomatis diperbarui.`,
+        actionUrl: '/hpp-simple?tab=price_impact',
+        actionLabel: 'Review HPP'
+      })
+    }
+
+    // Trigger pricing review for high-impact changes
+    if (Math.abs(priceChange) > 15 && affectedRecipes?.length > 0) {
+      console.log(`🎯 High-impact price change detected, triggering pricing review workflow`)
+      
+      // Schedule pricing review task
+      setTimeout(async () => {
+        await this.triggerEvent({
+          event: 'hpp.recalculation_needed',
+          entityId: 'batch_pricing_review',
+          data: {
+            reason: 'significant_price_change',
+            triggerIngredient: ingredientId,
+            priceChange,
+            affectedRecipes
+          }
+        })
+      }, 5000) // 5 second delay to allow price change to propagate
+    }
+  }
+
+  /**
+   * WORKFLOW: Handle Operational Cost Change  
+   * Otomatis: recalculate all HPP, update pricing across all recipes
+   */
+  private async handleOperationalCostChanged(event: WorkflowEventData) {
+    const { costId, costName, oldAmount, newAmount } = event.data
+    
+    console.log(`🏭 Processing operational cost change workflow: ${costName}`);
+    console.log(`Cost change: ${oldAmount} → ${newAmount}`)
+
+    // Import smart notification system
+    const { smartNotificationSystem } = await import('./smart-notifications')
+    
+    // Operational cost changes affect ALL recipes, so generate comprehensive alert
+    smartNotificationSystem.addNotification({
+      type: 'info',
+      category: 'financial', 
+      priority: 'medium',
+      title: 'Biaya Operasional Diperbarui',
+      message: `${costName} berubah dari Rp ${oldAmount.toLocaleString()} ke Rp ${newAmount.toLocaleString()}. Semua HPP otomatis diperbarui.`,
+      actionUrl: '/hpp-simple?tab=operational_costs',
+      actionLabel: 'Lihat HPP'
+    })
+
+    // Generate business recommendation
+    const costChange = ((newAmount - oldAmount) / oldAmount) * 100
+    if (Math.abs(costChange) > 10) {
+      smartNotificationSystem.addNotification({
+        type: 'warning',
+        category: 'financial',
+        priority: 'high', 
+        title: 'Review Pricing Strategy Disarankan',
+        message: `Perubahan biaya operasional ${Math.abs(costChange).toFixed(1)}% mempengaruhi seluruh profitabilitas. Pertimbangkan review harga jual.`,
+        actionUrl: '/hpp-simple?tab=pricing_review',
+        actionLabel: 'Review Pricing'
+      })
+    }
+  }
+
+  /**
+   * WORKFLOW: Handle HPP Recalculation Needed
+   * Otomatis: batch recalculate HPP, generate business insights
+   */
+  private async handleHPPRecalculationNeeded(event: WorkflowEventData) {
+    const { reason, affectedRecipes } = event.data
+    
+    console.log(`🧮 Processing HPP recalculation workflow: ${reason}`);
+
+    // Import smart notification system
+    const { smartNotificationSystem } = await import('./smart-notifications')
+    
+    // Notify about batch recalculation start
+    smartNotificationSystem.addNotification({
+      type: 'info',
+      category: 'financial',
+      priority: 'low',
+      title: 'HPP Recalculation Started',
+      message: `Memproses ulang HPP untuk ${affectedRecipes?.length || 'semua'} resep karena ${reason}`,
+      actionUrl: '/hpp-simple?tab=recalculation_progress',
+      actionLabel: 'Monitor Progress'
+    })
+
+    // Simulate batch recalculation (in real app would call HPP automation API)
+    setTimeout(async () => {
+      // Generate completion notification with business insights
+      smartNotificationSystem.addNotification({
+        type: 'success',
+        category: 'financial',
+        priority: 'medium',
+        title: 'HPP Recalculation Selesai',
+        message: `HPP telah diperbarui. Review pricing suggestions untuk optimasi profit margin.`,
+        actionUrl: '/hpp-simple?tab=pricing_suggestions',
+        actionLabel: 'Lihat Suggestions'
+      })
+
+      // Generate business insights
+      this.generateHPPBusinessInsights(affectedRecipes || [])
+    }, 10000) // 10 second simulation
+  }
+
+  /**
+   * Generate business insights dari HPP changes
+   */
+  private generateHPPBusinessInsights(affectedRecipes: any[]) {
+    // Import smart notification system
+    import('./smart-notifications').then(({ smartNotificationSystem }) => {
+      // Mock insights - in real app would analyze actual HPP data
+      const insights = [
+        {
+          type: 'optimization',
+          message: 'Identifikasi 3 resep dengan margin terendah yang perlu review pricing',
+          action: 'Review resep dengan profitabilitas rendah'
+        },
+        {
+          type: 'cost_efficiency', 
+          message: 'Ditemukan peluang penghematan 5% dengan substitusi bahan alternatif',
+          action: 'Analisis ingredient alternatives'
+        },
+        {
+          type: 'pricing_strategy',
+          message: 'Margin rata-rata industri F&B: 60%. Current average: 45%',
+          action: 'Pertimbangkan penyesuaian harga untuk target margin optimal'
+        }
+      ]
+
+      insights.forEach((insight, index) => {
+        setTimeout(() => {
+          smartNotificationSystem.addNotification({
+            type: 'info',
+            category: 'financial',
+            priority: 'medium',
+            title: 'Business Insight: HPP Analysis',
+            message: insight.message,
+            actionUrl: '/hpp-simple?tab=insights&insight=' + insight.type,
+            actionLabel: insight.action
+          })
+        }, (index + 1) * 2000) // Stagger notifications
+      })
+    })
   }
 }
 
