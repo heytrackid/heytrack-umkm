@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { SimpleDataTable } from '@/components/ui/simple-data-table'
 import { 
   Users, 
   Plus, 
@@ -20,7 +21,10 @@ import {
   DollarSign,
   Calendar,
   Star,
-  MessageCircle
+  MessageCircle,
+  Grid3X3,
+  List,
+  Mail
 } from 'lucide-react'
 
 interface SimplePelanggan {
@@ -91,6 +95,7 @@ export default function PelangganSimplePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [kategoriFilter, setKategoriFilter] = useState('semua')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const addPelanggan = () => {
     if (!newPelanggan.nama || !newPelanggan.nomorTelepon) {
@@ -188,6 +193,129 @@ export default function PelangganSimplePage() {
     totalRevenue: pelanggan.reduce((sum, p) => sum + p.totalBelanja, 0)
   }
 
+  // Handle edit pelanggan
+  const handleEditPelanggan = (item: SimplePelanggan) => {
+    // Set form with existing data
+    setNewPelanggan({
+      nama: item.nama,
+      nomorTelepon: item.nomorTelepon,
+      alamat: item.alamat,
+      email: item.email || '',
+      catatan: item.catatan
+    })
+    setShowAddDialog(true)
+  }
+
+  // Table columns definition
+  const tableColumns = [
+    {
+      key: 'nama' as keyof SimplePelanggan,
+      header: 'Pelanggan',
+      sortable: true,
+      render: (value: string, item: SimplePelanggan) => (
+        <div className="space-y-1">
+          <div className="font-medium">{value}</div>
+          <div className="text-sm text-muted-foreground flex items-center gap-1">
+            <Phone className="h-3 w-3" />
+            {item.nomorTelepon}
+          </div>
+          {item.email && (
+            <div className="text-sm text-muted-foreground flex items-center gap-1">
+              <Mail className="h-3 w-3" />
+              {item.email}
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'alamat' as keyof SimplePelanggan,
+      header: 'Alamat',
+      hideOnMobile: true,
+      render: (value: string) => (
+        <div className="text-sm max-w-[200px] truncate" title={value}>
+          {value || '-'}
+        </div>
+      )
+    },
+    {
+      key: 'kategori' as keyof SimplePelanggan,
+      header: 'Kategori',
+      filterable: true,
+      filterOptions: [
+        { label: 'Baru', value: 'baru' },
+        { label: 'Reguler', value: 'reguler' },
+        { label: 'VIP', value: 'vip' }
+      ],
+      render: (value: string) => {
+        const colors = {
+          baru: 'bg-gray-100 text-gray-800',
+          reguler: 'bg-blue-100 text-blue-800',
+          vip: 'bg-yellow-100 text-yellow-800'
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            colors[value as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+          }`}>
+            {value.toUpperCase()}
+          </span>
+        )
+      }
+    },
+    {
+      key: 'totalPesanan' as keyof SimplePelanggan,
+      header: 'Pesanan',
+      sortable: true,
+      render: (value: number) => (
+        <div className="text-center font-medium">{value}</div>
+      )
+    },
+    {
+      key: 'totalBelanja' as keyof SimplePelanggan,
+      header: 'Total Belanja',
+      sortable: true,
+      render: (value: number) => (
+        <div className="font-medium text-right">Rp {value.toLocaleString()}</div>
+      )
+    },
+    {
+      key: 'rating' as keyof SimplePelanggan,
+      header: 'Rating',
+      sortable: true,
+      render: (value: number) => (
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((rating) => (
+            <Star 
+              key={rating}
+              className={`h-3 w-3 ${rating <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+            />
+          ))}
+          <span className="text-sm ml-1">({value})</span>
+        </div>
+      )
+    },
+    {
+      key: 'tanggalDaftar' as keyof SimplePelanggan,
+      header: 'Bergabung',
+      sortable: true,
+      hideOnMobile: true,
+      render: (value: string) => {
+        const date = new Date(value)
+        return <div className="text-sm">{date.toLocaleDateString('id-ID')}</div>
+      }
+    },
+    {
+      key: 'pesananTerakhir' as keyof SimplePelanggan,
+      header: 'Aktivitas Terakhir',
+      hideOnMobile: true,
+      render: (value: string) => {
+        if (value === '-') return <span className="text-muted-foreground">-</span>
+        const date = new Date(value)
+        return <div className="text-sm">{date.toLocaleDateString('id-ID')}</div>
+      }
+    }
+  ]
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -203,7 +331,30 @@ export default function PelangganSimplePage() {
             </p>
           </div>
 
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg">
+              <Button 
+                variant={viewMode === 'grid' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none gap-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </Button>
+              <Button 
+                variant={viewMode === 'table' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-l-none gap-2"
+              >
+                <List className="h-4 w-4" />
+                Tabel
+              </Button>
+            </div>
+
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -274,7 +425,8 @@ export default function PelangganSimplePage() {
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {/* Stats */}
@@ -350,39 +502,56 @@ export default function PelangganSimplePage() {
           </Card>
         </div>
 
-        {/* Search and Filter */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Cari nama, telepon, atau alamat..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <select 
-                className="w-full p-2 border border-input rounded-md bg-background"
-                value={kategoriFilter}
-                onChange={(e) => setKategoriFilter(e.target.value)}
-              >
-                <option value="semua">Semua Kategori</option>
-                <option value="baru">Pelanggan Baru</option>
-                <option value="reguler">Pelanggan Reguler</option>
-                <option value="vip">Pelanggan VIP</option>
-              </select>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Data Table or Grid View */}
+        {viewMode === 'table' ? (
+          <SimpleDataTable
+            title="Daftar Pelanggan"
+            description="Kelola data pelanggan dan riwayat pembelian"
+            data={pelanggan}
+            columns={tableColumns}
+            searchPlaceholder="Cari nama, telepon, atau alamat..."
+            onAdd={() => setShowAddDialog(true)}
+            onEdit={handleEditPelanggan}
+            onDelete={(item) => deletePelanggan(item.id)}
+            addButtonText="Tambah Pelanggan"
+            emptyMessage="Belum ada data pelanggan. Tambah pelanggan pertama!"
+            exportData={true}
+          />
+        ) : (
+          <>
+            {/* Search and Filter untuk Grid View */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari nama, telepon, atau alamat..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="pt-6">
+                  <select 
+                    className="w-full p-2 border border-input rounded-md bg-background"
+                    value={kategoriFilter}
+                    onChange={(e) => setKategoriFilter(e.target.value)}
+                  >
+                    <option value="semua">Semua Kategori</option>
+                    <option value="baru">Pelanggan Baru</option>
+                    <option value="reguler">Pelanggan Reguler</option>
+                    <option value="vip">Pelanggan VIP</option>
+                  </select>
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Pelanggan List */}
+            {/* Pelanggan Grid */}
         <div className="grid gap-4 md:grid-cols-2">
           {filteredPelanggan.map((item) => (
             <Card key={item.id} className="hover:shadow-md transition-shadow">
@@ -547,6 +716,8 @@ export default function PelangganSimplePage() {
               </Button>
             </CardContent>
           </Card>
+        )}
+          </>
         )}
 
         {/* Tips */}

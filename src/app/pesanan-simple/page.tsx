@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { SimpleDataTable } from '@/components/ui/simple-data-table'
 import { 
   ShoppingCart, 
   Plus, 
@@ -21,7 +22,9 @@ import {
   Clock,
   AlertCircle,
   DollarSign,
-  Package
+  Package,
+  Grid3X3,
+  List
 } from 'lucide-react'
 
 interface SimplePesanan {
@@ -117,6 +120,7 @@ export default function PesananSimplePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('semua')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const addPesanan = () => {
     if (!newPesanan.namaPelanggan || !newPesanan.nomorTelepon || newPesanan.items.some(i => !i.nama || i.jumlah <= 0)) {
@@ -245,6 +249,139 @@ export default function PesananSimplePage() {
     sum + (item.jumlah * item.hargaSatuan), 0
   )
 
+  // Handle edit pesanan
+  const handleEditPesanan = (item: SimplePesanan) => {
+    // Set form with existing data
+    setNewPesanan({
+      namaPelanggan: item.namaPelanggan,
+      nomorTelepon: item.nomorTelepon,
+      items: item.items.map(i => ({ nama: i.nama, jumlah: i.jumlah, hargaSatuan: i.hargaSatuan })),
+      tanggalAmbil: item.tanggalAmbil,
+      catatan: item.catatan,
+      metodeBayar: item.metodeBayar,
+      statusBayar: item.statusBayar
+    })
+    setShowAddDialog(true)
+  }
+
+  // Table columns definition
+  const tableColumns = [
+    {
+      key: 'id' as keyof SimplePesanan,
+      header: 'ID',
+      render: (value: string) => <span className="font-mono text-sm">{value}</span>
+    },
+    {
+      key: 'namaPelanggan' as keyof SimplePesanan,
+      header: 'Pelanggan',
+      sortable: true,
+      render: (value: string, item: SimplePesanan) => (
+        <div className="space-y-1">
+          <div className="font-medium">{value}</div>
+          <div className="text-sm text-muted-foreground">{item.nomorTelepon}</div>
+        </div>
+      )
+    },
+    {
+      key: 'tanggal' as keyof SimplePesanan,
+      header: 'Tanggal Pesan',
+      sortable: true,
+      hideOnMobile: true,
+      render: (value: string) => {
+        const date = new Date(value)
+        return <div className="text-sm">{date.toLocaleDateString('id-ID')}</div>
+      }
+    },
+    {
+      key: 'tanggalAmbil' as keyof SimplePesanan,
+      header: 'Tanggal Ambil',
+      sortable: true,
+      render: (value: string) => {
+        const date = new Date(value)
+        return <div className="text-sm">{date.toLocaleDateString('id-ID')}</div>
+      }
+    },
+    {
+      key: 'items' as keyof SimplePesanan,
+      header: 'Items',
+      render: (value: PesananItem[]) => (
+        <div className="space-y-1">
+          {value.slice(0, 2).map((item, idx) => (
+            <div key={idx} className="text-sm">
+              {item.nama} x{item.jumlah}
+            </div>
+          ))}
+          {value.length > 2 && (
+            <div className="text-xs text-muted-foreground">+{value.length - 2} lainnya</div>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'totalHarga' as keyof SimplePesanan,
+      header: 'Total',
+      sortable: true,
+      render: (value: number) => (
+        <div className="font-medium text-right">Rp {value.toLocaleString()}</div>
+      )
+    },
+    {
+      key: 'status' as keyof SimplePesanan,
+      header: 'Status',
+      filterable: true,
+      filterOptions: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Proses', value: 'proses' },
+        { label: 'Selesai', value: 'selesai' },
+        { label: 'Batal', value: 'batal' }
+      ],
+      render: (value: string) => {
+        const colors = {
+          pending: 'bg-yellow-100 text-yellow-800',
+          proses: 'bg-blue-100 text-blue-800',
+          selesai: 'bg-green-100 text-green-800',
+          batal: 'bg-red-100 text-red-800'
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            colors[value as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+          }`}>
+            {getStatusIcon(value)} {value}
+          </span>
+        )
+      }
+    },
+    {
+      key: 'statusBayar' as keyof SimplePesanan,
+      header: 'Status Bayar',
+      filterable: true,
+      filterOptions: [
+        { label: 'Belum Bayar', value: 'belum' },
+        { label: 'DP/Uang Muka', value: 'dp' },
+        { label: 'Lunas', value: 'lunas' }
+      ],
+      render: (value: string) => {
+        const colors = {
+          belum: 'bg-red-100 text-red-800',
+          dp: 'bg-yellow-100 text-yellow-800',
+          lunas: 'bg-green-100 text-green-800'
+        }
+        const labels = {
+          belum: 'Belum',
+          dp: 'DP',
+          lunas: 'Lunas'
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            colors[value as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+          }`}>
+            {labels[value as keyof typeof labels] || value}
+          </span>
+        )
+      }
+    }
+  ]
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -260,13 +397,36 @@ export default function PesananSimplePage() {
             </p>
           </div>
 
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Pesanan Baru
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg">
+              <Button 
+                variant={viewMode === 'grid' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none gap-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                Grid
               </Button>
-            </DialogTrigger>
+              <Button 
+                variant={viewMode === 'table' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-l-none gap-2"
+              >
+                <List className="h-4 w-4" />
+                Tabel
+              </Button>
+            </div>
+
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Pesanan Baru
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Tambah Pesanan Baru</DialogTitle>
@@ -439,7 +599,8 @@ export default function PesananSimplePage() {
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {/* Stats */}
@@ -501,40 +662,57 @@ export default function PesananSimplePage() {
           </Card>
         </div>
 
-        {/* Search and Filter */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Cari nama, telepon, atau produk..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <select 
-                className="w-full p-2 border border-input rounded-md bg-background"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="semua">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="proses">Dalam Proses</option>
-                <option value="selesai">Selesai</option>
-                <option value="batal">Dibatal</option>
-              </select>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Data Table or Grid View */}
+        {viewMode === 'table' ? (
+          <SimpleDataTable
+            title="Daftar Pesanan"
+            description="Kelola pesanan pelanggan dengan fitur pencarian dan filter"
+            data={pesanan}
+            columns={tableColumns}
+            searchPlaceholder="Cari nama pelanggan, telepon, atau produk..."
+            onAdd={() => setShowAddDialog(true)}
+            onEdit={handleEditPesanan}
+            onDelete={(item) => deletePesanan(item.id)}
+            addButtonText="Pesanan Baru"
+            emptyMessage="Belum ada pesanan. Buat pesanan pertama!"
+            exportData={true}
+          />
+        ) : (
+          <>
+            {/* Search and Filter untuk Grid View */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari nama, telepon, atau produk..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="pt-6">
+                  <select 
+                    className="w-full p-2 border border-input rounded-md bg-background"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <option value="semua">Semua Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="proses">Dalam Proses</option>
+                    <option value="selesai">Selesai</option>
+                    <option value="batal">Dibatal</option>
+                  </select>
+                </CardContent>
+              </Card>
+            </div>
 
-        {/* Pesanan List */}
+            {/* Pesanan Grid */}
         <div className="space-y-4">
           {filteredPesanan.map((item) => (
             <Card key={item.id} className="hover:shadow-md transition-shadow">
@@ -660,6 +838,8 @@ export default function PesananSimplePage() {
               </Button>
             </CardContent>
           </Card>
+        )}
+          </>
         )}
 
         {/* Tips */}

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { SimpleDataTable } from '@/components/ui/simple-data-table'
 import { 
   ChefHat, 
   Plus, 
@@ -18,7 +19,9 @@ import {
   Search,
   BookOpen,
   Star,
-  DollarSign
+  DollarSign,
+  Grid3X3,
+  List
 } from 'lucide-react'
 
 interface SimpleResep {
@@ -123,6 +126,7 @@ export default function ResepSimplePage() {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const addResep = () => {
     if (!newResep.nama || newResep.bahan.some(b => !b.trim()) || newResep.langkah.some(l => !l.trim())) {
@@ -241,6 +245,126 @@ export default function ResepSimplePage() {
   const kategoriTerfavorit = Object.entries(stats.kategoriTerbanyak)
     .sort(([,a], [,b]) => b - a)[0]?.[0] || 'Belum ada'
 
+  // Handle edit resep
+  const handleEditResep = (item: SimpleResep) => {
+    // Set form with existing data
+    setNewResep({
+      nama: item.nama,
+      kategori: item.kategori,
+      porsi: item.porsi,
+      waktuMasak: item.waktuMasak,
+      tingkatKesulitan: item.tingkatKesulitan,
+      bahan: [...item.bahan],
+      langkah: [...item.langkah],
+      hargaJual: item.hargaJual,
+      catatan: item.catatan
+    })
+    setShowAddDialog(true)
+  }
+
+  // Table columns definition
+  const tableColumns = [
+    {
+      key: 'nama' as keyof SimpleResep,
+      header: 'Nama Resep',
+      sortable: true,
+      render: (value: string, item: SimpleResep) => (
+        <div className="space-y-1">
+          <div className="font-medium flex items-center gap-2">
+            {value}
+            {item.favorite && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+          </div>
+          <div className="text-sm text-muted-foreground">{item.kategori}</div>
+        </div>
+      )
+    },
+    {
+      key: 'tingkatKesulitan' as keyof SimpleResep,
+      header: 'Kesulitan',
+      filterable: true,
+      filterOptions: [
+        { label: 'Mudah', value: 'mudah' },
+        { label: 'Sedang', value: 'sedang' },
+        { label: 'Sulit', value: 'sulit' }
+      ],
+      render: (value: string) => {
+        const colors = {
+          mudah: 'bg-green-100 text-green-800',
+          sedang: 'bg-yellow-100 text-yellow-800',
+          sulit: 'bg-red-100 text-red-800'
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            colors[value as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+          }`}>
+            {value.charAt(0).toUpperCase() + value.slice(1)}
+          </span>
+        )
+      }
+    },
+    {
+      key: 'porsi' as keyof SimpleResep,
+      header: 'Porsi',
+      sortable: true,
+      render: (value: number) => (
+        <div className="flex items-center gap-1 text-sm">
+          <Users className="h-3 w-3" />
+          <span>{value}</span>
+        </div>
+      )
+    },
+    {
+      key: 'waktuMasak' as keyof SimpleResep,
+      header: 'Waktu',
+      sortable: true,
+      render: (value: number) => (
+        <div className="flex items-center gap-1 text-sm">
+          <Clock className="h-3 w-3" />
+          <span>{value}m</span>
+        </div>
+      )
+    },
+    {
+      key: 'hargaJual' as keyof SimpleResep,
+      header: 'Harga Jual',
+      sortable: true,
+      render: (value: number) => (
+        <div className="font-medium text-right text-green-600">Rp {value.toLocaleString()}</div>
+      )
+    },
+    {
+      key: 'rating' as keyof SimpleResep,
+      header: 'Rating',
+      sortable: true,
+      hideOnMobile: true,
+      render: (value: number) => (
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((rating) => (
+            <Star 
+              key={rating}
+              className={`h-3 w-3 ${rating <= value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+            />
+          ))}
+          <span className="text-sm ml-1">({value})</span>
+        </div>
+      )
+    },
+    {
+      key: 'bahan' as keyof SimpleResep,
+      header: 'Bahan',
+      hideOnMobile: true,
+      render: (value: string[]) => (
+        <div className="text-sm">
+          <div>{value.length} bahan</div>
+          <div className="text-xs text-muted-foreground truncate max-w-[150px]">
+            {value.slice(0, 2).join(', ')}
+            {value.length > 2 && '...'}
+          </div>
+        </div>
+      )
+    }
+  ]
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -256,7 +380,30 @@ export default function ResepSimplePage() {
             </p>
           </div>
 
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg">
+              <Button 
+                variant={viewMode === 'grid' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none gap-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </Button>
+              <Button 
+                variant={viewMode === 'table' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-l-none gap-2"
+              >
+                <List className="h-4 w-4" />
+                Tabel
+              </Button>
+            </div>
+
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -423,7 +570,8 @@ export default function ResepSimplePage() {
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {/* Stats */}
@@ -485,22 +633,39 @@ export default function ResepSimplePage() {
           </Card>
         </div>
 
-        {/* Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari resep atau kategori..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Data Table or Grid View */}
+        {viewMode === 'table' ? (
+          <SimpleDataTable
+            title="Daftar Resep"
+            description="Koleksi resep praktis untuk produksi harian"
+            data={resep}
+            columns={tableColumns}
+            searchPlaceholder="Cari nama resep atau kategori..."
+            onAdd={() => setShowAddDialog(true)}
+            onEdit={handleEditResep}
+            onDelete={(item) => deleteResep(item.id)}
+            addButtonText="Tambah Resep"
+            emptyMessage="Belum ada resep. Mulai tambahkan resep favorit!"
+            exportData={true}
+          />
+        ) : (
+          <>
+            {/* Search untuk Grid View */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari resep atau kategori..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Resep List */}
+            {/* Resep Grid */}
         <div className="grid gap-4 md:grid-cols-2">
           {filteredResep.map((item) => (
             <Card key={item.id} className="hover:shadow-md transition-shadow">
@@ -613,6 +778,8 @@ export default function ResepSimplePage() {
               </Button>
             </CardContent>
           </Card>
+        )}
+          </>
         )}
 
         {/* Tips */}

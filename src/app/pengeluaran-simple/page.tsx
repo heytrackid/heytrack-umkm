@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { SimpleDataTable } from '@/components/ui/simple-data-table'
 import { 
   Receipt, 
   Plus, 
@@ -18,7 +19,9 @@ import {
   Building,
   Zap,
   Users,
-  Car
+  Car,
+  Grid3X3,
+  List
 } from 'lucide-react'
 
 interface SimplePengeluaran {
@@ -78,6 +81,7 @@ export default function PengeluaranSimplePage() {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const addPengeluaran = () => {
     if (!newPengeluaran.deskripsi || !newPengeluaran.jumlah) {
@@ -144,6 +148,91 @@ export default function PengeluaranSimplePage() {
       : 0
   }
 
+  // Handle edit pengeluaran
+  const handleEditPengeluaran = (item: SimplePengeluaran) => {
+    // Set form with existing data
+    setNewPengeluaran({
+      tanggal: item.tanggal,
+      kategori: item.kategori,
+      deskripsi: item.deskripsi,
+      jumlah: item.jumlah.toString(),
+      metode: item.metode
+    })
+    setShowAddDialog(true)
+  }
+
+  // Table columns definition
+  const tableColumns = [
+    {
+      key: 'tanggal' as keyof SimplePengeluaran,
+      header: 'Tanggal',
+      sortable: true,
+      render: (value: string) => {
+        const date = new Date(value)
+        return <div className="text-sm font-medium">{date.toLocaleDateString('id-ID')}</div>
+      }
+    },
+    {
+      key: 'kategori' as keyof SimplePengeluaran,
+      header: 'Kategori',
+      filterable: true,
+      filterOptions: KATEGORI_UMKM.map(k => ({ label: k.label, value: k.value })),
+      render: (value: string) => {
+        const kategoriInfo = getKategoriInfo(value)
+        const IconComponent = kategoriInfo.icon
+        return (
+          <div className="flex items-center gap-2">
+            <div className={`p-1 rounded ${kategoriInfo.color}`}>
+              <IconComponent className="h-4 w-4" />
+            </div>
+            <span className="text-sm">{kategoriInfo.label}</span>
+          </div>
+        )
+      }
+    },
+    {
+      key: 'deskripsi' as keyof SimplePengeluaran,
+      header: 'Deskripsi',
+      sortable: true,
+      render: (value: string) => (
+        <div className="font-medium">{value}</div>
+      )
+    },
+    {
+      key: 'jumlah' as keyof SimplePengeluaran,
+      header: 'Jumlah',
+      sortable: true,
+      render: (value: number) => (
+        <div className="font-bold text-right text-red-600">-Rp {value.toLocaleString()}</div>
+      )
+    },
+    {
+      key: 'metode' as keyof SimplePengeluaran,
+      header: 'Metode Bayar',
+      filterable: true,
+      filterOptions: [
+        { label: 'Tunai', value: 'tunai' },
+        { label: 'Transfer', value: 'transfer' },
+        { label: 'Kartu', value: 'kartu' }
+      ],
+      hideOnMobile: true,
+      render: (value: string) => {
+        const colors = {
+          tunai: 'bg-green-100 text-green-800',
+          transfer: 'bg-blue-100 text-blue-800',
+          kartu: 'bg-purple-100 text-purple-800'
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            colors[value as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+          }`}>
+            {value.charAt(0).toUpperCase() + value.slice(1)}
+          </span>
+        )
+      }
+    }
+  ]
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -159,7 +248,30 @@ export default function PengeluaranSimplePage() {
             </p>
           </div>
 
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg">
+              <Button 
+                variant={viewMode === 'grid' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none gap-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </Button>
+              <Button 
+                variant={viewMode === 'table' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-l-none gap-2"
+              >
+                <List className="h-4 w-4" />
+                Tabel
+              </Button>
+            </div>
+
+            <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -236,7 +348,8 @@ export default function PengeluaranSimplePage() {
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         </div>
 
         {/* Stats */}
@@ -298,22 +411,39 @@ export default function PengeluaranSimplePage() {
           </Card>
         </div>
 
-        {/* Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari pengeluaran..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Data Table or Grid View */}
+        {viewMode === 'table' ? (
+          <SimpleDataTable
+            title="Daftar Pengeluaran"
+            description="Catat dan kelola semua pengeluaran bisnis"
+            data={pengeluaran}
+            columns={tableColumns}
+            searchPlaceholder="Cari deskripsi atau kategori pengeluaran..."
+            onAdd={() => setShowAddDialog(true)}
+            onEdit={handleEditPengeluaran}
+            onDelete={(item) => deletePengeluaran(item.id)}
+            addButtonText="Catat Pengeluaran"
+            emptyMessage="Belum ada pengeluaran. Mulai catat pengeluaran harian!"
+            exportData={true}
+          />
+        ) : (
+          <>
+            {/* Search untuk Grid View */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari pengeluaran..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Pengeluaran List */}
+            {/* Pengeluaran Grid */}
         <div className="space-y-3">
           {filteredPengeluaran.map((item) => {
             const kategoriInfo = getKategoriInfo(item.kategori)
@@ -378,6 +508,8 @@ export default function PengeluaranSimplePage() {
               </Button>
             </CardContent>
           </Card>
+        )}
+          </>
         )}
 
         {/* Tips */}

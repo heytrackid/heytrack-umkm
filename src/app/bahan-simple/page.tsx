@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { SmartInventoryAutomation } from '@/components/smart-inventory-automation'
+import { SimpleDataTable } from '@/components/ui/simple-data-table'
 import { 
   enhanceInventoryWithIntelligence, 
   generateInventoryInsights,
@@ -23,7 +24,9 @@ import {
   Search,
   ShoppingCart,
   Brain,
-  Zap
+  Zap,
+  Grid3X3,
+  List
 } from 'lucide-react'
 
 interface SimpleBahan {
@@ -86,6 +89,7 @@ export default function BahanSimplePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showSmartView, setShowSmartView] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   
   // Smart inventory features
   const [smartItems, setSmartItems] = useState<SmartIngredientItem[]>([])
@@ -105,6 +109,19 @@ export default function BahanSimplePage() {
     if (stok === 0) return 'habis'
     if (stok <= stokMinimal) return 'rendah'
     return 'aman'
+  }
+
+  // Handle edit bahan
+  const handleEditBahan = (item: SimpleBahan) => {
+    // Set form with existing data
+    setNewBahan({
+      nama: item.nama,
+      stok: item.stok.toString(),
+      satuan: item.satuan,
+      harga: item.harga.toString(),
+      stokMinimal: item.stokMinimal.toString()
+    })
+    setShowAddDialog(true)
   }
   
   // Smart automation handlers
@@ -210,6 +227,72 @@ export default function BahanSimplePage() {
     totalNilai: bahan.reduce((sum, b) => sum + b.total, 0)
   }
 
+  // Table columns definition
+  const tableColumns = [
+    {
+      key: 'nama' as keyof SimpleBahan,
+      header: 'Nama Bahan',
+      sortable: true,
+      render: (value: string) => <span className="font-medium">{value}</span>
+    },
+    {
+      key: 'stok' as keyof SimpleBahan,
+      header: 'Stok Saat Ini',
+      sortable: true,
+      render: (value: number, item: SimpleBahan) => (
+        <span className={`font-medium ${
+          item.statusStok === 'habis' ? 'text-red-600' :
+          item.statusStok === 'rendah' ? 'text-yellow-600' : 'text-green-600'
+        }`}>
+          {value} {item.satuan}
+        </span>
+      )
+    },
+    {
+      key: 'stokMinimal' as keyof SimpleBahan,
+      header: 'Stok Minimal',
+      hideOnMobile: true,
+      render: (value: number, item: SimpleBahan) => `${value} ${item.satuan}`
+    },
+    {
+      key: 'harga' as keyof SimpleBahan,
+      header: 'Harga/Unit',
+      sortable: true,
+      hideOnMobile: true,
+      render: (value: number) => `Rp ${value.toLocaleString()}`
+    },
+    {
+      key: 'total' as keyof SimpleBahan,
+      header: 'Total Nilai',
+      sortable: true,
+      render: (value: number) => `Rp ${value.toLocaleString()}`
+    },
+    {
+      key: 'statusStok' as keyof SimpleBahan,
+      header: 'Status',
+      filterable: true,
+      filterOptions: [
+        { label: 'Aman', value: 'aman' },
+        { label: 'Rendah', value: 'rendah' },
+        { label: 'Habis', value: 'habis' }
+      ],
+      render: (value: string) => {
+        const colors = {
+          aman: 'bg-green-100 text-green-800',
+          rendah: 'bg-yellow-100 text-yellow-800', 
+          habis: 'bg-red-100 text-red-800'
+        }
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+            colors[value as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+          }`}>
+            {getStatusIcon(value as any)} {value}
+          </span>
+        )
+      }
+    }
+  ]
+
   return (
     <AppLayout>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -232,6 +315,28 @@ export default function BahanSimplePage() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg">
+              <Button 
+                variant={viewMode === 'grid' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none gap-2"
+              >
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </Button>
+              <Button 
+                variant={viewMode === 'table' ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-l-none gap-2"
+              >
+                <List className="h-4 w-4" />
+                Tabel
+              </Button>
+            </div>
+            
             <Button 
               variant={showSmartView ? "default" : "outline"}
               onClick={() => setShowSmartView(!showSmartView)}
@@ -376,150 +481,169 @@ export default function BahanSimplePage() {
           />
         )}
 
-        {/* Search */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari bahan..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Bahan List */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredBahan.map((item) => (
-            <Card key={item.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                    <span className="font-semibold">{item.nama}</span>
-                  </div>
-                  <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${getStatusColor(item.statusStok)}`}>
-                    {getStatusIcon(item.statusStok)}
-                    <span className="capitalize">{item.statusStok}</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Stok Saat Ini</p>
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="number"
-                        value={item.stok}
-                        onChange={(e) => updateStok(item.id, parseFloat(e.target.value) || 0)}
-                        className="h-8 text-sm"
-                      />
-                      <span className="text-xs text-muted-foreground">{item.satuan}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Harga/Unit</p>
-                    <p className="font-medium">Rp {item.harga.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Stok Minimal</p>
-                    <p className="font-medium">{item.stokMinimal} {item.satuan}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Total Nilai</p>
-                    <p className="font-medium text-gray-700 dark:text-gray-300">Rp {item.total.toLocaleString()}</p>
-                  </div>
-                </div>
-
-                {/* Peringatan stok */}
-                {item.statusStok === 'habis' && (
-                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">
-                      ⚠️ Stok habis! Segera beli lagi
-                    </p>
-                  </div>
-                )}
-
-                {item.statusStok === 'rendah' && (
-                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                    <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">
-                      ⚡ Stok rendah! Perlu diisi ulang
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => updateStok(item.id, item.stok + 1)}
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Tambah
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => deleteBahan(item.id)}
-                    className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+        {/* Data Table or Grid View */}
+        {viewMode === 'table' ? (
+          <SimpleDataTable
+            title="Daftar Bahan Baku"
+            description="Kelola stok bahan dengan fitur pencarian dan filter"
+            data={bahan}
+            columns={tableColumns}
+            searchPlaceholder="Cari nama bahan..."
+            onAdd={() => setShowAddDialog(true)}
+            onEdit={handleEditBahan}
+            onDelete={(item) => deleteBahan(item.id)}
+            addButtonText="Tambah Bahan"
+            emptyMessage="Belum ada bahan. Tambah bahan pertama!"
+            exportData={true}
+          />
+        ) : (
+          <>
+            {/* Search untuk Grid View */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari bahan..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+    
+            {/* Bahan Grid */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredBahan.map((item) => (
+                <Card key={item.id} className="hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        <span className="font-semibold">{item.nama}</span>
+                      </div>
+                      <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs ${getStatusColor(item.statusStok)}`}>
+                        {getStatusIcon(item.statusStok)}
+                        <span className="capitalize">{item.statusStok}</span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Stok Saat Ini</p>
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            value={item.stok}
+                            onChange={(e) => updateStok(item.id, parseFloat(e.target.value) || 0)}
+                            className="h-8 text-sm"
+                          />
+                          <span className="text-xs text-muted-foreground">{item.satuan}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Harga/Unit</p>
+                        <p className="font-medium">Rp {item.harga.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Stok Minimal</p>
+                        <p className="font-medium">{item.stokMinimal} {item.satuan}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Total Nilai</p>
+                        <p className="font-medium text-gray-700 dark:text-gray-300">Rp {item.total.toLocaleString()}</p>
+                      </div>
+                    </div>
 
-        {filteredBahan.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Tidak ada bahan</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? 'Tidak ditemukan bahan yang dicari' : 'Mulai dengan menambah bahan pertama'}
-              </p>
-              <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Bahan
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                    {/* Peringatan stok */}
+                    {item.statusStok === 'habis' && (
+                      <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                          ⚠️ Stok habis! Segera beli lagi
+                        </p>
+                      </div>
+                    )}
 
-        {/* Tips */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">💡 Tips Kelola Stok</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-2">
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <p className="font-medium text-gray-800 dark:text-gray-200">🎯 Stok Minimal</p>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Set stok minimal yang realistis agar tidak kehabisan
-                </p>
-              </div>
-              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <p className="font-medium text-gray-800 dark:text-gray-200">📱 Update Real-time</p>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Klik angka stok untuk update langsung saat pakai bahan
-                </p>
-              </div>
-              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                <p className="font-medium text-gray-800 dark:text-gray-200">⚡ Alert Otomatis</p>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Sistem akan peringati jika stok menipis atau habis
-                </p>
-              </div>
+                    {item.statusStok === 'rendah' && (
+                      <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <p className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                          ⚡ Stok rendah! Perlu diisi ulang
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => updateStok(item.id, item.stok + 1)}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Tambah
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => deleteBahan(item.id)}
+                        className="text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+
+            {filteredBahan.length === 0 && (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Tidak ada bahan</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm ? 'Tidak ditemukan bahan yang dicari' : 'Mulai dengan menambah bahan pertama'}
+                  </p>
+                  <Button onClick={() => setShowAddDialog(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Bahan
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Tips */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">💡 Tips Kelola Stok</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm space-y-2">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium text-gray-800 dark:text-gray-200">🎯 Stok Minimal</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Set stok minimal yang realistis agar tidak kehabisan
+                    </p>
+                  </div>
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium text-gray-800 dark:text-gray-200">📱 Update Real-time</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Klik angka stok untuk update langsung saat pakai bahan
+                    </p>
+                  </div>
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <p className="font-medium text-gray-800 dark:text-gray-200">⚡ Alert Otomatis</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Sistem akan peringati jika stok menipis atau habis
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
     </AppLayout>
   )
