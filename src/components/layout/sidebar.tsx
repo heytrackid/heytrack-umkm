@@ -65,7 +65,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         name: 'Bahan Baku',
-        href: '/bahan-simple',
+        href: '/inventory',
         icon: Package,
         isSimple: true,
         badge: 'MULAI',
@@ -73,7 +73,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Resep Produk',
-        href: '/resep-simple',
+        href: '/production',
         icon: ChefHat,
         isSimple: true,
         badge: 'PENTING',
@@ -81,7 +81,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Biaya Operasional',
-        href: '/pengeluaran-simple',
+        href: '/finance',
         icon: Receipt,
         isSimple: true,
         badge: 'WAJIB',
@@ -96,7 +96,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         name: 'HPP Calculator',
-        href: '/hpp-simple',
+        href: '/finance#hpp',
         icon: Calculator,
         isSimple: true,
         badge: 'AUTO',
@@ -104,7 +104,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Target Harga',
-        href: '/hpp-simple#pricing',
+        href: '/finance#pricing',
         icon: Target,
         isSimple: true,
         badge: 'PROFIT',
@@ -119,7 +119,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         name: 'Kelola Pesanan',
-        href: '/pesanan-simple',
+        href: '/orders',
         icon: ShoppingCart,
         isSimple: true,
         badge: 'HARIAN',
@@ -127,7 +127,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Data Pelanggan',
-        href: '/pelanggan-simple',
+        href: '/settings#customers',
         icon: Users,
         isSimple: true,
         badge: 'CRM',
@@ -142,7 +142,7 @@ const navigationSections: NavigationSection[] = [
     items: [
       {
         name: 'Laporan Profit',
-        href: '/laporan-simple',
+        href: '/finance#reports',
         icon: BarChart3,
         isSimple: true,
         badge: 'ANALISA',
@@ -150,7 +150,7 @@ const navigationSections: NavigationSection[] = [
       },
       {
         name: 'Review HPP',
-        href: '/hpp-simple#review',
+        href: '/finance#review',
         icon: TrendingUp,
         isSimple: true,
         badge: 'OPTIMASI',

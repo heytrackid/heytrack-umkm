@@ -35,19 +35,19 @@ const mainNavItems: BottomNavItem[] = [
   },
   {
     name: 'Pesanan',
-    href: '/pesanan-simple',
+    href: '/orders',
     icon: ShoppingCart,
     color: 'text-gray-600 dark:text-gray-400'
   },
   {
     name: 'Bahan',
-    href: '/bahan-simple',
+    href: '/inventory',
     icon: Package,
     color: 'text-gray-600 dark:text-gray-400'
   },
   {
     name: 'Biaya',
-    href: '/pengeluaran-simple',
+    href: '/finance',
     icon: Receipt,
     color: 'text-gray-600 dark:text-gray-400'
   },
@@ -137,7 +137,7 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
       {/* Floating Action Button (FAB) */}
       <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
         <Link
-          href="/pesanan-simple"
+          href="/orders"
           className={cn(
             "flex items-center justify-center",
             "w-14 h-14 rounded-full",

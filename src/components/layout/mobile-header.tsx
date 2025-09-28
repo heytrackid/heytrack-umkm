@@ -14,7 +14,7 @@ import {
   MoreVertical,
   User
 } from 'lucide-react'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useMobileFirst } from '@/hooks/use-responsive'
 import { 
   Sheet,
   SheetContent,
@@ -59,7 +59,7 @@ export default function MobileHeader({
 }: MobileHeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const { shouldCollapseHeader, isMobile } = useResponsive()
+  const { isMobile } = useMobileFirst()
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,7 +101,6 @@ export default function MobileHeader({
         "sticky top-0 z-40",
         "bg-white/95 backdrop-blur-sm border-b border-border",
         "transition-transform duration-300 ease-in-out",
-        shouldCollapseHeader ? "-translate-y-full" : "translate-y-0",
         className
       )}
     >
@@ -276,19 +275,19 @@ export default function MobileHeader({
       </div>
 
       {/* Quick Actions Bar - Optional */}
-      <div className="border-t border-border bg-gray-50/50 px-4 py-2">
-        <div className="flex items-center space-x-2 overflow-x-auto">
-          <Button variant="outline" size="sm">
-            Tambah Pesanan
+      <div className="border-t border-border bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
+            + Pesanan
           </Button>
-          <Button variant="outline" size="sm">
-            Stok Rendah
+          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
+            📦 Stok
           </Button>
-          <Button variant="outline" size="sm">
-            HPP
+          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
+            💰 HPP
           </Button>
-          <Button variant="outline" size="sm">
-            Laporan Hari Ini
+          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
+            📊 Laporan
           </Button>
         </div>
       </div>

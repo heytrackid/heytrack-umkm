@@ -38,7 +38,7 @@ const menuSections = [
     items: [
       {
         name: 'Resep',
-        href: '/resep-simple',
+        href: '/production',
         icon: ChefHat,
         description: 'Kelola resep dan formula produk dengan mudah',
         isSimple: true,
@@ -46,7 +46,7 @@ const menuSections = [
       },
       {
         name: 'HPP Cepat',
-        href: '/hpp-simple',
+        href: '/finance#hpp',
         icon: Calculator,
         description: 'Hitung harga pokok produksi dengan cepat',
         isSimple: true,
@@ -54,7 +54,7 @@ const menuSections = [
       },
       {
         name: 'Bahan Baku',
-        href: '/bahan-simple',
+        href: '/inventory',
         icon: Package,
         description: 'Kelola stok bahan baku sederhana',
         isSimple: true,
@@ -62,7 +62,7 @@ const menuSections = [
       },
       {
         name: 'Pesanan',
-        href: '/pesanan-simple',
+        href: '/orders',
         icon: ShoppingCart,
         description: 'Kelola pesanan pelanggan dengan mudah',
         isSimple: true,
@@ -70,7 +70,7 @@ const menuSections = [
       },
       {
         name: 'Pelanggan',
-        href: '/pelanggan-simple',
+        href: '/settings#customers',
         icon: Users,
         description: 'Database pelanggan dan riwayat pembelian',
         isSimple: true,
@@ -78,7 +78,7 @@ const menuSections = [
       },
       {
         name: 'Pengeluaran',
-        href: '/pengeluaran-simple',
+        href: '/finance',
         icon: Receipt,
         description: 'Catat pengeluaran harian dengan mudah',
         isSimple: true,
@@ -86,7 +86,7 @@ const menuSections = [
       },
       {
         name: 'Laporan',
-        href: '/laporan-simple',
+        href: '/finance#reports',
         icon: BarChart3,
         description: 'Analisis keuangan dan performa bisnis',
         isSimple: true,

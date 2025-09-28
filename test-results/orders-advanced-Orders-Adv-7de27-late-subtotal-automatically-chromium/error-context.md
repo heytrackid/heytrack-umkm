@@ -1,0 +1,362 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - complementary:
+      - generic:
+        - generic:
+          - generic:
+            - img
+          - generic:
+            - heading [level=1]: HeyTrack
+            - paragraph: UMKM HPP Calculator
+      - navigation:
+        - generic:
+          - generic:
+            - heading [level=3]: Dashboard
+          - generic:
+            - link:
+              - /url: /
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Dashboard
+                - paragraph: Overview & analytics
+            - link:
+              - /url: /ai
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: AI Hub
+                - paragraph: Smart assistant
+        - generic:
+          - generic:
+            - heading [level=3]: "🚀 STEP 1: DATA MASTER"
+            - paragraph: Setup data dasar untuk HPP
+          - generic:
+            - link:
+              - /url: /bahan-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Bahan Baku
+                  - generic:
+                    - generic: MULAI
+                - paragraph: Input harga & stok bahan
+            - link:
+              - /url: /resep-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Resep Produk
+                  - generic:
+                    - generic: PENTING
+                - paragraph: Komposisi & takaran
+            - link:
+              - /url: /pengeluaran-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Biaya Operasional
+                  - generic:
+                    - generic: WAJIB
+                - paragraph: Listrik, gas, gaji, dll
+        - generic:
+          - generic:
+            - heading [level=3]: "🧮 STEP 2: HITUNG HPP"
+            - paragraph: Kalkulasi harga pokok produksi
+          - generic:
+            - link:
+              - /url: /hpp-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: HPP Calculator
+                  - generic:
+                    - generic: AUTO
+                - paragraph: Hitung HPP otomatis
+            - link:
+              - /url: /hpp-simple#pricing
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Target Harga
+                  - generic:
+                    - generic: PROFIT
+                - paragraph: Set margin & harga jual
+        - generic:
+          - generic:
+            - heading [level=3]: "📊 STEP 3: OPERASIONAL"
+            - paragraph: Jalankan bisnis dengan data akurat
+          - generic:
+            - link:
+              - /url: /pesanan-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Kelola Pesanan
+                  - generic:
+                    - generic: HARIAN
+                - paragraph: Terima & proses order
+            - link:
+              - /url: /pelanggan-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Data Pelanggan
+                  - generic:
+                    - generic: CRM
+                - paragraph: Database customer
+        - generic:
+          - generic:
+            - heading [level=3]: "📈 STEP 4: MONITORING"
+            - paragraph: Pantau performa & profit
+          - generic:
+            - link:
+              - /url: /laporan-simple
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Laporan Profit
+                  - generic:
+                    - generic: ANALISA
+                - paragraph: Track keuntungan harian
+            - link:
+              - /url: /hpp-simple#review
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Review HPP
+                  - generic:
+                    - generic: OPTIMASI
+                - paragraph: Evaluasi & tingkatkan
+        - generic:
+          - generic:
+            - heading [level=3]: ⚙️ LAINNYA
+          - generic:
+            - link:
+              - /url: /settings
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: Settings
+                - paragraph: Pengaturan aplikasi
+            - link:
+              - /url: /more
+              - generic:
+                - img
+              - generic:
+                - generic:
+                  - generic: More Features
+                - paragraph: Fitur tambahan
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - img
+            - searchbox
+        - generic:
+          - generic:
+            - button:
+              - img
+              - generic: "1"
+          - button:
+            - img
+            - generic: Toggle theme
+          - button:
+            - img
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - heading [level=1]:
+                  - img
+                  - text: Pesanan
+                - paragraph: Kelola pesanan pelanggan dengan sistem terintegrasi
+              - generic:
+                - generic:
+                  - button:
+                    - img
+                    - text: Grid
+                  - button:
+                    - img
+                    - text: Tabel
+                - button [expanded]:
+                  - img
+                  - text: Pesanan Baru
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: Total Pesanan
+                      - paragraph: "1"
+                    - img
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: Hari Ini
+                      - paragraph: "0"
+                    - img
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: Pendapatan
+                      - paragraph: Rp 0
+                    - img
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: Pending
+                      - paragraph: "1"
+                    - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                    - textbox
+              - generic:
+                - generic:
+                  - combobox:
+                    - generic: Semua Status
+                    - img
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img
+                        - text: Manual Test Customer
+                        - generic: ORD-TEST-001
+                      - generic:
+                        - generic:
+                          - img
+                          - text: "08199887766"
+                        - generic:
+                          - img
+                          - text: "Order: 27/9/2025"
+                        - generic:
+                          - img
+                          - text: "Selesai: 1/1/1970"
+                    - generic:
+                      - generic:
+                        - img
+                        - text: Menunggu
+                      - generic: Belum Bayar
+                      - button:
+                        - img
+                - generic:
+                  - generic:
+                    - generic:
+                      - heading [level=4]:
+                        - img
+                        - text: "Item Pesanan:"
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: Chocolate Chip Cookies x 1
+                          - generic: Rp 25,000
+                    - generic:
+                      - generic:
+                        - generic: "Total:"
+                        - generic: Rp 50,000
+                      - generic: CASH
+                    - generic:
+                      - combobox:
+                        - generic: Menunggu
+                        - img
+                      - combobox:
+                        - generic: Belum Bayar
+                        - img
+  - list
+  - button "Open Next.js Dev Tools" [ref=e6] [cursor=pointer]:
+    - img [ref=e7] [cursor=pointer]
+  - alert
+  - dialog "Tambah Pesanan Baru" [ref=e11]:
+    - heading "Tambah Pesanan Baru" [level=2] [ref=e13]
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: Pelanggan
+          - combobox [ref=e18]:
+            - generic: Pilih pelanggan
+            - img
+          - textbox "Atau ketik nama baru" [ref=e19]
+        - generic [ref=e20]:
+          - generic [ref=e21]: Nomor Telepon
+          - textbox "08123456789" [ref=e22]
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]: Tanggal Selesai
+          - textbox [ref=e26]: 2025-09-28
+        - generic [ref=e27]:
+          - generic [ref=e28]: Metode Bayar
+          - combobox [ref=e29]:
+            - generic: Tunai
+            - img
+        - generic [ref=e30]:
+          - generic [ref=e31]: Status Pembayaran
+          - combobox [ref=e32]:
+            - generic: Belum Bayar
+            - img
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e35]: Item Pesanan
+          - button "Tambah Item" [ref=e36]:
+            - img
+            - text: Tambah Item
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: "Item #1"
+            - button [disabled]:
+              - img
+          - generic [ref=e42]:
+            - generic [ref=e43]: Resep/Produk
+            - combobox [ref=e44]:
+              - generic: Pilih resep
+              - img
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: Jumlah
+              - spinbutton [ref=e48]: "2"
+            - generic [ref=e49]:
+              - generic [ref=e50]: Harga Satuan
+              - spinbutton [active] [ref=e51]: "10000"
+            - generic [ref=e52]:
+              - generic [ref=e53]: Subtotal
+              - generic [ref=e54]: Rp 20,000
+          - generic [ref=e55]:
+            - generic [ref=e56]: Catatan Khusus
+            - 'textbox "Misal: tanpa gula, extra manis, dll" [ref=e57]'
+        - generic [ref=e59]:
+          - generic [ref=e60]: "Total Pesanan:"
+          - generic [ref=e61]: Rp 20,000
+      - generic [ref=e62]:
+        - generic [ref=e63]: Catatan Pesanan
+        - textbox "Catatan khusus untuk pesanan..." [ref=e64]
+      - generic [ref=e65]:
+        - button "Batal" [ref=e66]
+        - button "Buat Pesanan" [ref=e67]
+    - button "Close" [ref=e68]:
+      - img
+      - generic [ref=e69]: Close
+```

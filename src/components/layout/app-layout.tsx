@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 
@@ -23,7 +23,7 @@ export default function AppLayout({
   pageTitle,
   showMobileHeader = true
 }: AppLayoutProps) {
-  const { isMobile } = useResponsive()
+  const { isMobile } = useMobileFirst()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const toggle = () => setSidebarOpen(!sidebarOpen)
 
@@ -38,8 +38,8 @@ export default function AppLayout({
         onToggle={toggle}
       />
       
-      {/* Mobile Header */}
-      {isMobile && showMobileHeader && (
+      {/* Mobile Header - Disabled for now, using sidebar */}
+      {/* {isMobile && showMobileHeader && (
         <MobileHeader 
           title={pageTitle}
           notification={{
@@ -47,7 +47,7 @@ export default function AppLayout({
             onClick: () => console.log('Mobile notifications')
           }}
         />
-      )}
+      )} */}
 
       <div className="flex flex-1 flex-col w-full">
         {/* Desktop Header */}

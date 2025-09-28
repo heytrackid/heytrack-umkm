@@ -1,0 +1,245 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e7]
+        - generic [ref=e11]:
+          - heading "HeyTrack" [level=1] [ref=e12]
+          - paragraph [ref=e13]: UMKM HPP Calculator
+      - navigation [ref=e14]:
+        - generic [ref=e15]:
+          - heading "Dashboard" [level=3] [ref=e17]
+          - generic [ref=e18]:
+            - link "Dashboard Overview & analytics" [ref=e19] [cursor=pointer]:
+              - /url: /
+              - img [ref=e21] [cursor=pointer]
+              - generic [ref=e26] [cursor=pointer]:
+                - generic [ref=e28] [cursor=pointer]: Dashboard
+                - paragraph [ref=e29] [cursor=pointer]: Overview & analytics
+            - link "AI Hub Smart assistant" [ref=e30] [cursor=pointer]:
+              - /url: /ai
+              - img [ref=e32] [cursor=pointer]
+              - generic [ref=e40] [cursor=pointer]:
+                - generic [ref=e42] [cursor=pointer]: AI Hub
+                - paragraph [ref=e43] [cursor=pointer]: Smart assistant
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - 'heading "🚀 STEP 1: DATA MASTER" [level=3] [ref=e46]'
+            - paragraph [ref=e47]: Setup data dasar untuk HPP
+          - generic [ref=e48]:
+            - link "Bahan Baku MULAI Input harga & stok bahan" [ref=e49] [cursor=pointer]:
+              - /url: /bahan-simple
+              - img [ref=e51] [cursor=pointer]
+              - generic [ref=e55] [cursor=pointer]:
+                - generic [ref=e56] [cursor=pointer]:
+                  - generic [ref=e57] [cursor=pointer]: Bahan Baku
+                  - generic [ref=e59] [cursor=pointer]: MULAI
+                - paragraph [ref=e60] [cursor=pointer]: Input harga & stok bahan
+            - link "Resep Produk PENTING Komposisi & takaran" [ref=e61] [cursor=pointer]:
+              - /url: /resep-simple
+              - img [ref=e63] [cursor=pointer]
+              - generic [ref=e65] [cursor=pointer]:
+                - generic [ref=e66] [cursor=pointer]:
+                  - generic [ref=e67] [cursor=pointer]: Resep Produk
+                  - generic [ref=e69] [cursor=pointer]: PENTING
+                - paragraph [ref=e70] [cursor=pointer]: Komposisi & takaran
+            - link "Biaya Operasional WAJIB Listrik, gas, gaji, dll" [ref=e71] [cursor=pointer]:
+              - /url: /pengeluaran-simple
+              - img [ref=e73] [cursor=pointer]
+              - generic [ref=e76] [cursor=pointer]:
+                - generic [ref=e77] [cursor=pointer]:
+                  - generic [ref=e78] [cursor=pointer]: Biaya Operasional
+                  - generic [ref=e80] [cursor=pointer]: WAJIB
+                - paragraph [ref=e81] [cursor=pointer]: Listrik, gas, gaji, dll
+        - generic [ref=e82]:
+          - generic [ref=e83]:
+            - 'heading "🧮 STEP 2: HITUNG HPP" [level=3] [ref=e84]'
+            - paragraph [ref=e85]: Kalkulasi harga pokok produksi
+          - generic [ref=e86]:
+            - link "HPP Calculator AUTO Hitung HPP otomatis" [ref=e87] [cursor=pointer]:
+              - /url: /hpp-simple
+              - img [ref=e89] [cursor=pointer]
+              - generic [ref=e91] [cursor=pointer]:
+                - generic [ref=e92] [cursor=pointer]:
+                  - generic [ref=e93] [cursor=pointer]: HPP Calculator
+                  - generic [ref=e95] [cursor=pointer]: AUTO
+                - paragraph [ref=e96] [cursor=pointer]: Hitung HPP otomatis
+            - link "Target Harga PROFIT Set margin & harga jual" [ref=e97] [cursor=pointer]:
+              - /url: /hpp-simple#pricing
+              - img [ref=e99] [cursor=pointer]
+              - generic [ref=e103] [cursor=pointer]:
+                - generic [ref=e104] [cursor=pointer]:
+                  - generic [ref=e105] [cursor=pointer]: Target Harga
+                  - generic [ref=e107] [cursor=pointer]: PROFIT
+                - paragraph [ref=e108] [cursor=pointer]: Set margin & harga jual
+        - generic [ref=e109]:
+          - generic [ref=e110]:
+            - 'heading "📊 STEP 3: OPERASIONAL" [level=3] [ref=e111]'
+            - paragraph [ref=e112]: Jalankan bisnis dengan data akurat
+          - generic [ref=e113]:
+            - link "Kelola Pesanan HARIAN Terima & proses order" [ref=e114] [cursor=pointer]:
+              - /url: /pesanan-simple
+              - img [ref=e116] [cursor=pointer]
+              - generic [ref=e120] [cursor=pointer]:
+                - generic [ref=e121] [cursor=pointer]:
+                  - generic [ref=e122] [cursor=pointer]: Kelola Pesanan
+                  - generic [ref=e124] [cursor=pointer]: HARIAN
+                - paragraph [ref=e125] [cursor=pointer]: Terima & proses order
+            - link "Data Pelanggan CRM Database customer" [ref=e127] [cursor=pointer]:
+              - /url: /pelanggan-simple
+              - img [ref=e129] [cursor=pointer]
+              - generic [ref=e134] [cursor=pointer]:
+                - generic [ref=e135] [cursor=pointer]:
+                  - generic [ref=e136] [cursor=pointer]: Data Pelanggan
+                  - generic [ref=e138] [cursor=pointer]: CRM
+                - paragraph [ref=e139] [cursor=pointer]: Database customer
+        - generic [ref=e140]:
+          - generic [ref=e141]:
+            - 'heading "📈 STEP 4: MONITORING" [level=3] [ref=e142]'
+            - paragraph [ref=e143]: Pantau performa & profit
+          - generic [ref=e144]:
+            - link "Laporan Profit ANALISA Track keuntungan harian" [ref=e145] [cursor=pointer]:
+              - /url: /laporan-simple
+              - img [ref=e147] [cursor=pointer]
+              - generic [ref=e149] [cursor=pointer]:
+                - generic [ref=e150] [cursor=pointer]:
+                  - generic [ref=e151] [cursor=pointer]: Laporan Profit
+                  - generic [ref=e153] [cursor=pointer]: ANALISA
+                - paragraph [ref=e154] [cursor=pointer]: Track keuntungan harian
+            - link "Review HPP OPTIMASI Evaluasi & tingkatkan" [ref=e155] [cursor=pointer]:
+              - /url: /hpp-simple#review
+              - img [ref=e157] [cursor=pointer]
+              - generic [ref=e160] [cursor=pointer]:
+                - generic [ref=e161] [cursor=pointer]:
+                  - generic [ref=e162] [cursor=pointer]: Review HPP
+                  - generic [ref=e164] [cursor=pointer]: OPTIMASI
+                - paragraph [ref=e165] [cursor=pointer]: Evaluasi & tingkatkan
+        - generic [ref=e166]:
+          - heading "⚙️ LAINNYA" [level=3] [ref=e168]
+          - generic [ref=e169]:
+            - link "Settings Pengaturan aplikasi" [ref=e170] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e172] [cursor=pointer]
+              - generic [ref=e175] [cursor=pointer]:
+                - generic [ref=e177] [cursor=pointer]: Settings
+                - paragraph [ref=e178] [cursor=pointer]: Pengaturan aplikasi
+            - link "More Features Fitur tambahan" [ref=e179] [cursor=pointer]:
+              - /url: /more
+              - img [ref=e181] [cursor=pointer]
+              - generic [ref=e184] [cursor=pointer]:
+                - generic [ref=e186] [cursor=pointer]: More Features
+                - paragraph [ref=e187] [cursor=pointer]: Fitur tambahan
+    - generic [ref=e188]:
+      - banner [ref=e189]:
+        - generic [ref=e191]:
+          - img [ref=e192]
+          - searchbox "Cari resep, bahan, pesanan..." [ref=e195]
+        - generic [ref=e196]:
+          - button "1" [ref=e198]:
+            - img
+            - generic [ref=e199]: "1"
+          - button "Toggle theme" [ref=e201]:
+            - img
+            - generic [ref=e202]: Toggle theme
+          - button [ref=e203]:
+            - img
+      - main [ref=e204]:
+        - generic [ref=e206]:
+          - generic [ref=e207]:
+            - generic [ref=e208]:
+              - heading "Pesanan" [level=1] [ref=e209]:
+                - img [ref=e210]
+                - text: Pesanan
+              - paragraph [ref=e214]: Kelola pesanan pelanggan dengan sistem terintegrasi
+            - generic [ref=e215]:
+              - generic [ref=e216]:
+                - button "Grid" [ref=e217]:
+                  - img
+                  - text: Grid
+                - button "Tabel" [ref=e218]:
+                  - img
+                  - text: Tabel
+              - button "Pesanan Baru" [ref=e219]:
+                - img
+                - text: Pesanan Baru
+          - generic [ref=e220]:
+            - generic [ref=e223]:
+              - generic [ref=e224]:
+                - paragraph [ref=e225]: Total Pesanan
+                - paragraph [ref=e226]: "1"
+              - img [ref=e227]
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - paragraph [ref=e235]: Hari Ini
+                - paragraph [ref=e236]: "0"
+              - img [ref=e237]
+            - generic [ref=e241]:
+              - generic [ref=e242]:
+                - paragraph [ref=e243]: Pendapatan
+                - paragraph [ref=e244]: Rp 0
+              - img [ref=e245]
+            - generic [ref=e249]:
+              - generic [ref=e250]:
+                - paragraph [ref=e251]: Pending
+                - paragraph [ref=e252]: "1"
+              - img [ref=e253]
+          - generic [ref=e256]:
+            - generic [ref=e259]:
+              - img [ref=e260]
+              - textbox "Cari nama, telepon, atau produk..." [ref=e263]
+            - combobox [ref=e266]:
+              - generic: Semua Status
+              - img
+          - generic [ref=e268]:
+            - generic [ref=e270]:
+              - generic [ref=e271]:
+                - generic [ref=e272]:
+                  - img [ref=e273]
+                  - text: Manual Test Customer
+                  - generic [ref=e276]: ORD-TEST-001
+                - generic [ref=e277]:
+                  - generic [ref=e278]:
+                    - img [ref=e279]
+                    - text: "08199887766"
+                  - generic [ref=e281]:
+                    - img [ref=e282]
+                    - text: "Order: 27/9/2025"
+                  - generic [ref=e284]:
+                    - img [ref=e285]
+                    - text: "Selesai: 1/1/1970"
+              - generic [ref=e287]:
+                - generic [ref=e288]:
+                  - img [ref=e289]
+                  - text: Menunggu
+                - generic [ref=e292]: Belum Bayar
+                - button [ref=e293]:
+                  - img
+            - generic [ref=e295]:
+              - generic [ref=e296]:
+                - heading "Item Pesanan:" [level=4] [ref=e297]:
+                  - img [ref=e298]
+                  - text: "Item Pesanan:"
+                - generic [ref=e303]:
+                  - generic [ref=e305]: Chocolate Chip Cookies x 1
+                  - generic [ref=e306]: Rp 25,000
+              - generic [ref=e307]:
+                - generic [ref=e308]:
+                  - generic [ref=e309]: "Total:"
+                  - generic [ref=e310]: Rp 50,000
+                - generic [ref=e311]: CASH
+              - generic [ref=e312]:
+                - combobox [ref=e313]:
+                  - generic: Menunggu
+                  - img
+                - combobox [ref=e314]:
+                  - generic: Belum Bayar
+                  - img
+  - region "Notifications (F8)":
+    - list
+  - button "Open Next.js Dev Tools" [ref=e320] [cursor=pointer]:
+    - img [ref=e321] [cursor=pointer]
+  - alert [ref=e324]
+```
