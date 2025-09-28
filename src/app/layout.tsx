@@ -6,6 +6,7 @@ import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import QueryProvider from '@/providers/QueryProvider';
+import SupabaseProvider from '@/providers/SupabaseProvider';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,14 +41,33 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <QueryProvider>
-              <SettingsProvider>
-                <ErrorBoundary>
-                  {children}
-                </ErrorBoundary>
-                <Toaster />
-              </SettingsProvider>
-            </QueryProvider>
+            <SupabaseProvider>
+              <QueryProvider>
+                <SettingsProvider>
+                  <ErrorBoundary>
+                    <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                      <SignedOut>
+                        <SignInButton>
+                          <button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm h-10 px-4 cursor-pointer transition-colors">
+                            Sign In
+                          </button>
+                        </SignInButton>
+                        <SignUpButton>
+                          <button className="bg-[#6c47ff] hover:bg-[#5a3ad1] text-white rounded-lg font-medium text-sm h-10 px-4 cursor-pointer transition-colors">
+                            Sign Up
+                          </button>
+                        </SignUpButton>
+                      </SignedOut>
+                      <SignedIn>
+                        <UserButton />
+                      </SignedIn>
+                    </header>
+                    {children}
+                  </ErrorBoundary>
+                  <Toaster />
+                </SettingsProvider>
+              </QueryProvider>
+            </SupabaseProvider>
           </ThemeProvider>
         </body>
       </html>
