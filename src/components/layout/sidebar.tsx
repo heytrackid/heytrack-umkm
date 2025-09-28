@@ -14,7 +14,13 @@ import {
   BarChart3,
   Menu,
   X,
-  Brain
+  Brain,
+  ClipboardCheck,
+  TrendingUp,
+  Settings,
+  FileText,
+  Target,
+  CheckCircle
 } from 'lucide-react'
 
 interface NavigationItem {
@@ -22,73 +28,159 @@ interface NavigationItem {
   href: string
   icon: any
   isSimple?: boolean
+  badge?: string
+  stepNumber?: number
+  description?: string
 }
 
 interface NavigationSection {
   title: string
   items: NavigationItem[]
+  description?: string
+  isWorkflow?: boolean
 }
 
 const navigationSections: NavigationSection[] = [
   {
-    title: 'Main',
+    title: 'Dashboard',
     items: [
       {
         name: 'Dashboard',
         href: '/',
         icon: LayoutDashboard,
+        description: 'Overview & analytics'
       },
       {
         name: 'AI Hub',
         href: '/ai',
         icon: Brain,
+        description: 'Smart assistant'
       },
     ]
   },
   {
-    title: 'UMKM Simple',
+    title: '🚀 STEP 1: DATA MASTER',
+    description: 'Setup data dasar untuk HPP',
+    isWorkflow: true,
     items: [
-      {
-        name: 'Resep',
-        href: '/resep-simple',
-        icon: ChefHat,
-        isSimple: true
-      },
-      {
-        name: 'HPP Cepat',
-        href: '/hpp-simple',
-        icon: Calculator,
-        isSimple: true
-      },
       {
         name: 'Bahan Baku',
         href: '/bahan-simple',
         icon: Package,
-        isSimple: true
+        isSimple: true,
+        stepNumber: 1,
+        badge: 'MULAI',
+        description: 'Input harga & stok bahan'
       },
       {
-        name: 'Pesanan',
-        href: '/pesanan-simple',
-        icon: ShoppingCart,
-        isSimple: true
+        name: 'Resep Produk',
+        href: '/resep-simple',
+        icon: ChefHat,
+        isSimple: true,
+        stepNumber: 2,
+        badge: 'PENTING',
+        description: 'Komposisi & takaran'
       },
       {
-        name: 'Pelanggan',
-        href: '/pelanggan-simple',
-        icon: Users,
-        isSimple: true
-      },
-      {
-        name: 'Pengeluaran',
+        name: 'Biaya Operasional',
         href: '/pengeluaran-simple',
         icon: Receipt,
-        isSimple: true
+        isSimple: true,
+        stepNumber: 3,
+        badge: 'WAJIB',
+        description: 'Listrik, gas, gaji, dll'
+      },
+    ]
+  },
+  {
+    title: '🧮 STEP 2: HITUNG HPP',
+    description: 'Kalkulasi harga pokok produksi',
+    isWorkflow: true,
+    items: [
+      {
+        name: 'HPP Calculator',
+        href: '/hpp-simple',
+        icon: Calculator,
+        isSimple: true,
+        stepNumber: 4,
+        badge: 'AUTO',
+        description: 'Hitung HPP otomatis'
       },
       {
-        name: 'Laporan',
+        name: 'Target Harga',
+        href: '/hpp-simple#pricing',
+        icon: Target,
+        isSimple: true,
+        stepNumber: 5,
+        badge: 'PROFIT',
+        description: 'Set margin & harga jual'
+      },
+    ]
+  },
+  {
+    title: '📊 STEP 3: OPERASIONAL',
+    description: 'Jalankan bisnis dengan data akurat',
+    isWorkflow: true,
+    items: [
+      {
+        name: 'Kelola Pesanan',
+        href: '/pesanan-simple',
+        icon: ShoppingCart,
+        isSimple: true,
+        stepNumber: 6,
+        badge: 'HARIAN',
+        description: 'Terima & proses order'
+      },
+      {
+        name: 'Data Pelanggan',
+        href: '/pelanggan-simple',
+        icon: Users,
+        isSimple: true,
+        stepNumber: 7,
+        badge: 'CRM',
+        description: 'Database customer'
+      },
+    ]
+  },
+  {
+    title: '📈 STEP 4: MONITORING',
+    description: 'Pantau performa & profit',
+    isWorkflow: true,
+    items: [
+      {
+        name: 'Laporan Profit',
         href: '/laporan-simple',
         icon: BarChart3,
-        isSimple: true
+        isSimple: true,
+        stepNumber: 8,
+        badge: 'ANALISA',
+        description: 'Track keuntungan harian'
+      },
+      {
+        name: 'Review HPP',
+        href: '/hpp-simple#review',
+        icon: TrendingUp,
+        isSimple: true,
+        stepNumber: 9,
+        badge: 'OPTIMASI',
+        description: 'Evaluasi & tingkatkan'
+      },
+    ]
+  },
+  {
+    title: '⚙️ LAINNYA',
+    items: [
+      {
+        name: 'Settings',
+        href: '/settings',
+        icon: Settings,
+        description: 'Pengaturan aplikasi'
+      },
+      {
+        name: 'More Features',
+        href: '/more',
+        icon: FileText,
+        description: 'Fitur tambahan'
       },
     ]
   }
@@ -114,61 +206,144 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64",
+        "fixed inset-y-0 left-0 z-50",
         "bg-white dark:bg-black",
         "border-r border-gray-200 dark:border-gray-800",
         "transform transition-transform duration-300 ease-in-out",
         "lg:translate-x-0 lg:static lg:inset-0",
+        // Mobile: full screen width on small screens, 80% on larger mobile
+        "w-full sm:w-80 lg:w-72",
+        // Animation
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-              <Package className="h-5 w-5 text-gray-900 dark:text-white" />
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
+              <Package className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
                 HeyTrack
               </h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                UMKM Management
+                UMKM HPP Calculator
               </p>
             </div>
           </div>
+          
+          {/* Mobile close button */}
+          <button
+            onClick={onToggle}
+            className="lg:hidden p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-4 space-y-6 overflow-y-auto">
+        <nav className="flex-1 px-3 lg:px-4 py-4 space-y-4 lg:space-y-6 overflow-y-auto">
           {navigationSections.map((section) => (
-            <div key={section.title} className="space-y-1">
+            <div key={section.title} className="space-y-2">
               {/* Section Title */}
-              <h3 className="px-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                {section.title}
-              </h3>
+              <div className={cn(
+                "px-3 py-2 rounded-lg",
+                section.isWorkflow 
+                  ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800" 
+                  : ""
+              )}>
+                <h3 className={cn(
+                  "text-xs font-semibold uppercase tracking-wider",
+                  section.isWorkflow 
+                    ? "text-blue-700 dark:text-blue-300" 
+                    : "text-gray-400 dark:text-gray-500"
+                )}>
+                  {section.title}
+                </h3>
+                {section.description && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {section.description}
+                  </p>
+                )}
+              </div>
               
               {/* Section Items */}
               <div className="space-y-1">
                 {section.items.map((item) => {
-                  const isActive = pathname === item.href
+                  const isActive = pathname === item.href || 
+                    (item.href.includes('#') && pathname === item.href.split('#')[0])
                   
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                        "hover:scale-[1.02] hover:shadow-sm",
                         isActive 
-                          ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" 
+                          ? "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 shadow-sm" 
                           : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white"
                       )}
                     >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span>{item.name}</span>
-                      {item.isSimple && (
-                        <span className="ml-auto text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">
-                          SIMPLE
-                        </span>
+                      <div className="flex items-center justify-center mr-3 mt-0.5">
+                        {/* Step Number Circle */}
+                        {item.stepNumber && (
+                          <div className={cn(
+                            "absolute -ml-1 -mt-1 w-5 h-5 text-xs font-bold rounded-full flex items-center justify-center z-10",
+                            isActive
+                              ? "bg-blue-600 text-white"
+                              : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                          )}>
+                            {item.stepNumber}
+                          </div>
+                        )}
+                        <item.icon className={cn(
+                          "h-5 w-5 transition-transform group-hover:scale-110",
+                          item.stepNumber && "ml-2"
+                        )} />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium truncate">{item.name}</span>
+                          
+                          {/* Badges */}
+                          <div className="flex items-center gap-1 ml-2">
+                            {item.badge && (
+                              <span className={cn(
+                                "text-xs px-2 py-0.5 rounded-full font-semibold",
+                                item.badge === 'MULAI' && "bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300",
+                                item.badge === 'PENTING' && "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300",
+                                item.badge === 'WAJIB' && "bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300",
+                                item.badge === 'AUTO' && "bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300",
+                                item.badge === 'PROFIT' && "bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300",
+                                item.badge === 'HARIAN' && "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300",
+                                item.badge === 'CRM' && "bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300",
+                                item.badge === 'ANALISA' && "bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300",
+                                item.badge === 'OPTIMASI' && "bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300"
+                              )}>
+                                {item.badge}
+                              </span>
+                            )}
+                            {item.isSimple && !item.badge && (
+                              <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full font-medium">
+                                SIMPLE
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Description */}
+                        {item.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Active indicator */}
+                      {isActive && (
+                        <div className="w-1 bg-blue-500 rounded-full self-stretch ml-2" />
                       )}
                     </Link>
                   )
@@ -184,15 +359,15 @@ export default function SimpleSidebar({ isOpen, onToggle }: SidebarProps) {
         onClick={onToggle}
         className={cn(
           "fixed top-4 left-4 z-50 lg:hidden",
-          "p-2 rounded-md",
-          "bg-white dark:bg-black",
-          "border border-gray-200 dark:border-gray-800",
-          "text-gray-600 dark:text-gray-400",
-          "hover:text-gray-900 dark:hover:text-white",
-          "hover:bg-gray-50 dark:hover:bg-gray-900"
+          "p-3 rounded-lg shadow-lg",
+          "bg-gradient-to-r from-blue-500 to-indigo-600",
+          "text-white",
+          "hover:from-blue-600 hover:to-indigo-700",
+          "transition-all duration-200",
+          "hover:scale-105"
         )}
       >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
     </>
   )

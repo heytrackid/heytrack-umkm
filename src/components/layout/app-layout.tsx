@@ -2,9 +2,8 @@
 
 import { ReactNode } from 'react'
 import SimpleSidebar from './sidebar'
-import MobileBottomNav from './mobile-bottom-nav'
 import MobileHeader from './mobile-header'
-import { Search, User, Menu } from 'lucide-react'
+import { Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -17,16 +16,14 @@ interface AppLayoutProps {
   children: ReactNode
   pageTitle?: string
   showMobileHeader?: boolean
-  showMobileBottomNav?: boolean
 }
 
 export default function AppLayout({ 
   children, 
   pageTitle,
-  showMobileHeader = true,
-  showMobileBottomNav = true 
+  showMobileHeader = true
 }: AppLayoutProps) {
-  const { isMobile, shouldShowSidebar } = useResponsive()
+  const { isMobile } = useResponsive()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const toggle = () => setSidebarOpen(!sidebarOpen)
 
@@ -35,13 +32,11 @@ export default function AppLayout({
       "flex bg-background w-full sidebar-layout",
       isMobile ? "flex-col mobile-min-vh" : "h-screen"
     )}>
-      {/* Sidebar */}
-      {shouldShowSidebar && (
-        <SimpleSidebar 
-          isOpen={sidebarOpen} 
-          onToggle={toggle}
-        />
-      )}
+      {/* Sidebar - Always show, works on mobile and desktop */}
+      <SimpleSidebar 
+        isOpen={sidebarOpen} 
+        onToggle={toggle}
+      />
       
       {/* Mobile Header */}
       {isMobile && showMobileHeader && (
@@ -85,19 +80,12 @@ export default function AppLayout({
         )}>
           <div className={cn(
             "w-full mx-auto",
-            isMobile ? "max-w-none" : "max-w-7xl",
-            // Add padding bottom for mobile bottom nav
-            isMobile && showMobileBottomNav && "pb-20"
+            isMobile ? "max-w-none" : "max-w-7xl"
           )}>
             {children}
           </div>
         </main>
       </div>
-
-      {/* Mobile Bottom Navigation */}
-      {isMobile && showMobileBottomNav && (
-        <MobileBottomNav />
-      )}
     </div>
   )
 }
