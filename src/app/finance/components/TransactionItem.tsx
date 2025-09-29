@@ -1,10 +1,11 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { SwipeActions } from '@/components/ui/mobile-gestures'
-import { Calendar, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+// Swipe actions component removed for simplicity
+import { ArrowDownRight, ArrowUpRight, Calendar } from 'lucide-react'
+import { useSettings } from '@/contexts/settings-context'
 
 interface TransactionItemProps {
   transaction: any
@@ -28,80 +29,72 @@ export function TransactionItem({
   getPaymentMethodLabel,
   transactionTypes
 }: TransactionItemProps) {
+  const { formatCurrency } = useSettings()
   const typeInfo = transactionTypes.find(t => t.value === transaction.type) || transactionTypes[0]
 
   if (isMobile) {
     return (
-      <SwipeActions
-        actions={[
-          {
-            id: 'view',
-            label: 'Lihat',
-            icon: <span>👁️</span>,
-            color: 'blue',
-            onClick: () => onView(transaction)
-          },
-          {
-            id: 'edit',
-            label: 'Edit',
-            icon: <span>✏️</span>,
-            color: 'yellow',
-            onClick: onEdit
-          },
-          {
-            id: 'delete',
-            label: 'Hapus',
-            icon: <span>🗑️</span>,
-            color: 'red',
-            onClick: onDelete
-          }
-        ]}
-      >
-        <Card className="cursor-pointer transition-shadow" onClick={() => onView(transaction)}>
-          <CardContent className="p-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-start">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{transaction.description}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{transaction.date}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1 ml-2">
-                  <Badge className={`${typeInfo.color} text-xs`}>
-                    {transaction.type === 'INCOME' ? (
-                      <ArrowUpRight className="h-2.5 w-2.5 mr-1" />
-                    ) : (
-                      <ArrowDownRight className="h-2.5 w-2.5 mr-1" />
-                    )}
-                    {typeInfo.label}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {transaction.category}
-                  </Badge>
-                </div>
+      <Card className="cursor-pointer transition-shadow" onClick={() => onView(transaction)}>
+        <CardContent className="p-4">
+          <div className="space-y-3">
+            <div className="flex justify-between items-start">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{transaction.description}</p>
+                <p className="text-xs text-muted-foreground mt-1">{transaction.date}</p>
               </div>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-xs text-muted-foreground">Jumlah</p>
-                  <p className={`font-bold text-lg ${
-                    transaction.type === 'INCOME' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
-                  }`}>
-                    {transaction.type === 'INCOME' ? '+' : '-'}Rp {transaction.amount.toLocaleString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Via</p>
-                  <p className="text-sm font-medium">{getPaymentMethodLabel(transaction.paymentMethod)}</p>
-                </div>
-              </div>
-
-              <div className="pt-1 border-t border-border">
-                <p className="text-xs text-muted-foreground font-mono">{transaction.reference}</p>
+              <div className="flex flex-col items-end gap-1 ml-2">
+                <Badge className={`${typeInfo.color} text-xs`}>
+                  {transaction.type === 'INCOME' ? (
+                    <ArrowUpRight className="h-2.5 w-2.5 mr-1" />
+                  ) : (
+                    <ArrowDownRight className="h-2.5 w-2.5 mr-1" />
+                  )}
+                  {typeInfo.label}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  {transaction.category}
+                </Badge>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </SwipeActions>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-xs text-muted-foreground">Jumlah</p>
+                <p className={`font-bold text-lg ${
+                  transaction.type === 'INCOME' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'
+                }`}>
+                  {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Via</p>
+                <p className="text-sm font-medium">{getPaymentMethodLabel(transaction.paymentMethod)}</p>
+              </div>
+            </div>
+
+            <div className="pt-1 border-t border-border">
+              <p className="text-xs text-muted-foreground font-mono">{transaction.reference}</p>
+            </div>
+
+            {/* Mobile action buttons */}
+            <div className="flex gap-2 pt-2 border-t border-border">
+              <Button variant="ghost" size="sm" onClick={() => onView(transaction)} className="flex-1">
+                👁️ Lihat
+              </Button>
+              {onEdit && (
+                <Button variant="ghost" size="sm" onClick={onEdit} className="flex-1">
+                  ✏️ Edit
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="ghost" size="sm" onClick={onDelete} className="flex-1 text-gray-600 dark:text-gray-400">
+                  🗑️ Hapus
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -133,7 +126,7 @@ export function TransactionItem({
       </td>
       <td className="p-4">
         <span className={`font-medium ${transaction.type === 'INCOME' ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'}`}>
-          {transaction.type === 'INCOME' ? '+' : '-'}Rp {transaction.amount.toLocaleString()}
+          {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}
         </span>
       </td>
       <td className="p-4">

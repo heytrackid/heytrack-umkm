@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Calculator, Package } from 'lucide-react'
 import type { PricingMethod } from '../services/EnhancedHPPCalculationService'
 import { UMKMTooltip } from './UMKMTooltip'
+import { useSettings } from '@/contexts/settings-context'
 
 // Method descriptions for UMKM
 const getPricingMethodDescription = (method: PricingMethod) => {
@@ -72,6 +73,7 @@ export function SettingsPanel({
   onIncludeOperationalCostsChange
 }: SettingsPanelProps) {
   const methodInfo = getPricingMethodDescription(selectedPricingMethod)
+  const { formatCurrency } = useSettings()
 
   return (
     <div className="lg:col-span-1 space-y-6">
@@ -129,7 +131,7 @@ export function SettingsPanel({
           <div>
             <UMKMTooltip
               title="Target Keuntungan"
-              content="Berapa persen keuntungan yang Anda inginkan? 30% artinya jika HPP Rp10.000, harga jual jadi Rp13.000"
+              content={`Berapa persen keuntungan yang Anda inginkan? 30% artinya jika HPP ${formatCurrency(10000)}, harga jual jadi ${formatCurrency(13000)}`}
             >
               <Label className="text-sm font-medium">Target Keuntungan (%)</Label>
             </UMKMTooltip>

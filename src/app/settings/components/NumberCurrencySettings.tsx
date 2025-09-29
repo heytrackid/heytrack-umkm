@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
-import { useSettings } from '@/contexts/settings-context'
+import { useSettings, currencies } from '@/contexts/settings-context'
 import { useI18n } from '@/providers/I18nProvider'
 
 interface NumberCurrencySettingsProps {
@@ -15,7 +15,7 @@ interface NumberCurrencySettingsProps {
  * Number and currency format settings component
  */
 export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurrencySettingsProps) {
-  const { updateCurrency, formatCurrency } = useSettings()
+  const { settings: currentSettings, updateCurrency, formatCurrency } = useSettings()
   const { t } = useI18n()
 
   return (
@@ -45,15 +45,19 @@ export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurr
           <select
             id="uiCurrency"
             className="w-full p-2 border border-input rounded-md bg-background"
-            value="IDR"
+            value={currentSettings.currency.code}
             onChange={(e) => {
-              const selectedCurrency = { code: e.target.value, name: 'Indonesian Rupiah', symbol: 'Rp' }
-              updateCurrency(selectedCurrency)
+              const selectedCurrency = currencies.find(c => c.code === e.target.value)
+              if (selectedCurrency) {
+                updateCurrency(selectedCurrency)
+              }
             }}
           >
-            <option value="IDR">Rp (Indonesian Rupiah)</option>
-            <option value="USD">$ (US Dollar)</option>
-            <option value="EUR">€ (Euro)</option>
+            {currencies.map(currency => (
+              <option key={currency.code} value={currency.code}>
+                {currency.symbol} ({currency.name})
+              </option>
+            ))}
           </select>
           <p className="text-sm text-muted-foreground mt-1">
             Contoh: {formatCurrency(123456)}

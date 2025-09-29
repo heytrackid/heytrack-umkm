@@ -51,7 +51,7 @@ export function InventoryTable({
           </div>
           <UMKMTooltip
             title="Kenapa Perlu Analisis Harga?"
-            content="Harga bahan baku berubah-ubah. Misalnya tepung beli minggu lalu Rp14.500/kg, minggu ini Rp15.800/kg. Pakai harga mana buat HPP? Sistem ini bantu Anda dapat harga rata-rata yang paling akurat!"
+            content={`Harga bahan baku berubah-ubah. Misalnya tepung beli minggu lalu ${formatCurrency(14500)}/kg, minggu ini ${formatCurrency(15800)}/kg. Pakai harga mana buat HPP? Sistem ini bantu Anda dapat harga rata-rata yang paling akurat!`}
           >
             <BookOpen className="h-5 w-5 text-gray-500" />
           </UMKMTooltip>

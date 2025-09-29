@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { whatsappService, WhatsAppTemplate, OrderData } from '@/lib/whatsapp-service';
 import { toast } from 'react-hot-toast';
+import { useSettings } from '@/contexts/settings-context';
 
 interface WhatsAppFollowUpProps {
   order: {
@@ -38,6 +39,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
   businessName = 'Bakery UMKM',
   onSent 
 }) => {
+  const { formatCurrency } = useSettings();
   const [selectedTemplate, setSelectedTemplate] = useState<string>('order_confirmation');
   const [customMessage, setCustomMessage] = useState('');
   const [generatedMessage, setGeneratedMessage] = useState('');
@@ -273,7 +275,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                   <div><strong>ID:</strong> {order.id}</div>
                   <div><strong>Customer:</strong> {order.customer_name}</div>
                   <div><strong>Phone:</strong> {order.customer_phone}</div>
-                  <div><strong>Total:</strong> Rp {order.total_amount.toLocaleString('id-ID')}</div>
+                  <div><strong>Total:</strong> {formatCurrency(order.total_amount)}</div>
                   <div><strong>Status:</strong> 
                     <Badge className="ml-2" variant={
                       order.status === 'COMPLETED' ? 'default' :

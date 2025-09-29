@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useResponsive } from '@/shared/hooks'
+import { useSettings } from '@/contexts/settings-context'
 import Link from 'next/link'
 import { 
   ArrowLeft,
@@ -53,6 +54,7 @@ const categories = [
 export default function NewIngredientPage() {
   const router = useRouter()
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useSettings()
   
   // Form state
   const [formData, setFormData] = useState({
@@ -130,7 +132,7 @@ Bahan baku"${formData.name}" berhasil ditambahkan!
 • Nama: ${formData.name}
 • Kategori: ${categories.find(c => c.value === formData.category)?.label}
 • Satuan: ${formData.unit}
-• Harga: Rp ${parseFloat(formData.price_per_unit).toLocaleString()}
+• Harga: ${formatCurrency(parseFloat(formData.price_per_unit))}
 • Stock awal: ${formData.current_stock} ${formData.unit}
 
 Anda akan kembali ke halaman inventory.`)
@@ -384,7 +386,7 @@ Anda akan kembali ke halaman inventory.`)
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Harga:</span>
                       <span className="font-medium">
-                        Rp {parseFloat(formData.price_per_unit).toLocaleString()} / {formData.unit}
+                        {formatCurrency(parseFloat(formData.price_per_unit))} / {formData.unit}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">

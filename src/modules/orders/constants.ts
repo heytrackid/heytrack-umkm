@@ -1,4 +1,5 @@
 import { OrderStatus, PaymentStatus, PaymentMethod, DeliveryMethod } from './types'
+import { formatCurrentCurrency } from '@/lib/currency'
 
 // Order Configuration Constants
 export const ORDER_CONFIG = {
@@ -12,7 +13,7 @@ export const ORDER_CONFIG = {
   DEFAULT_DELIVERY_METHOD: 'pickup' as const,
   
   // Business rules
-  MIN_ORDER_AMOUNT: 10000, // Minimum Rp 10k
+  MIN_ORDER_AMOUNT: 10000, // Minimum order amount
   MAX_ORDER_ITEMS: 50,
   DEFAULT_DUE_DATE_DAYS: 3, // 3 days from order date
   
@@ -21,8 +22,8 @@ export const ORDER_CONFIG = {
   FULL_PAYMENT_DAYS: 7, // Full payment due in 7 days
   
   // Delivery
-  FREE_DELIVERY_THRESHOLD: 500000, // Free delivery above Rp 500k
-  DEFAULT_DELIVERY_FEE: 15000, // Rp 15k default delivery fee
+  FREE_DELIVERY_THRESHOLD: 500000, // Free delivery threshold amount
+  DEFAULT_DELIVERY_FEE: 15000, // Default delivery fee
   MAX_DELIVERY_RADIUS: 10, // 10km radius
 } as const
 
@@ -329,6 +330,13 @@ export const NOTIFICATION_TEMPLATES = {
     type: 'warning'
   }
 } as const
+
+// Currency helper functions for order constants
+export const getFormattedOrderAmounts = () => ({
+  minOrderAmount: formatCurrentCurrency(ORDER_CONFIG.MIN_ORDER_AMOUNT),
+  freeDeliveryThreshold: formatCurrentCurrency(ORDER_CONFIG.FREE_DELIVERY_THRESHOLD),
+  defaultDeliveryFee: formatCurrentCurrency(ORDER_CONFIG.DEFAULT_DELIVERY_FEE)
+})
 
 // Export all for easy access
 export {

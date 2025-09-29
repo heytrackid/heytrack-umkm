@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
 import { useI18n } from '@/providers/I18nProvider';
+import { useSettings } from '@/contexts/settings-context';
 import { Database } from '@/types/database';
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row'];
@@ -39,6 +40,7 @@ const validationRules = {
 
 export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: any[] }) {
   const { t } = useI18n();
+  const { formatCurrency, settings } = useSettings();
   const { data: ingredients, loading, error, create, update, remove } = useIngredients({ initial: initialIngredients, refetchOnMount: false });
   
   // Unit options using i18n
@@ -90,7 +92,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     {
       key: 'price_per_unit',
       header: 'Price per Unit',
-      render: (value: number) => `Rp ${value.toLocaleString()}`,
+      render: (value: number) => formatCurrency(value),
       hideOnMobile: true,
     },
     {
@@ -242,7 +244,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             description="Set stock levels and cost information"
           >
             <FormField
-              label="Price per Unit (Rp)"
+              label={`Price per Unit (${settings.currency.symbol})`}
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -252,7 +254,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               required
               min={0}
               step={0.01}
-              hint="Enter price in Rupiah"
+              hint={`Enter price in ${settings.currency.name}`}
             />
 
             <FormGrid cols={2}>
@@ -355,7 +357,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             description="Update stock levels and cost information"
           >
             <FormField
-              label="Price per Unit (Rp)"
+              label={`Price per Unit (${settings.currency.symbol})`}
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
