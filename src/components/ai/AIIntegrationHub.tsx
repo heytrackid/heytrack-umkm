@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -68,7 +68,8 @@ export const AIIntegrationHub: React.FC = () => {
   const financialConfidence = aiPowered.financial.confidence || 85
 
   // Run comprehensive AI analysis
-  const runComprehensiveAnalysis = async () => {
+  const runComprehensiveAnalysis = useCallback(async () => {
+  const runComprehensiveAnalysis = useCallback(async () => {
     setIsAnalyzing(true)
     setAnalysisProgress(0)
     const newInsights: AIInsight[] = []
@@ -191,7 +192,7 @@ export const AIIntegrationHub: React.FC = () => {
     if (ingredients && recipes && financialRecords && !isAnalyzing) {
       runComprehensiveAnalysis()
     }
-  }, [ingredients, recipes, financialRecords])
+  }, [runComprehensiveAnalysis, isAnalyzing])
 
   const getInsightIcon = (type: string) => {
     switch (type) {
