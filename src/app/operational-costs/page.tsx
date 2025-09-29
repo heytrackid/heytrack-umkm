@@ -38,8 +38,14 @@ import {
   Phone,
   ShieldCheck,
   Wrench,
-  RefreshCw
+  RefreshCw,
+  MoreHorizontal,
+  Search,
+  Eye
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 interface OperationalCost {
   id: string
@@ -77,6 +83,8 @@ export default function OperationalCostsPage() {
   
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [editingCost, setEditingCost] = useState<OperationalCost | null>(null)
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [newCost, setNewCost] = useState<OperationalCost>({
     id: '',
     name: '',
@@ -145,6 +153,69 @@ export default function OperationalCostsPage() {
 
   const getTotalMonthlyCosts = (): number => {
     return costs.reduce((total, cost) => total + calculateMonthlyCost(cost), 0)
+  }
+
+  // Filter costs based on search term
+  const filteredCosts = costs.filter(cost =>
+    cost.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cost.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (cost.description && cost.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
+  // Bulk action handlers
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredCosts.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filteredCosts.map(cost => cost.id))
+    }
+  }
+
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    )
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
+    const costNames = selectedCosts.map(cost => cost.name).join(', ')
+    
+    const confirmed = window.confirm(
+      `⚠️ Yakin ingin menghapus ${selectedItems.length} biaya operasional berikut?\n\n${costNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      setCosts(costs.filter(cost => !selectedItems.includes(cost.id)))
+      setSelectedItems([])
+      alert(`✅ ${selectedItems.length} biaya operasional berhasil dihapus!`)
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
+    const costNames = selectedCosts.map(cost => cost.name).join(', ')
+    
+    // TODO: Open bulk edit modal
+    console.log('Bulk editing costs:', selectedItems)
+    
+    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} biaya operasional akan segera tersedia!\n\nBiaya yang dipilih:\n${costNames}`)
+  }
+
+  // Individual action handlers
+  const handleViewCost = (cost: OperationalCost) => {
+    console.log('View cost details:', cost)
+    alert(`👁️ Detail biaya "${cost.name}" akan segera tersedia!`)
+  }
+
+  const getCategoryInfo = (categoryId: string) => {
+    return costCategories.find(cat => cat.id === categoryId) || costCategories[0]
   }
 
   // Breadcrumb component
@@ -357,83 +428,199 @@ export default function OperationalCostsPage() {
         </CardContent>
       </Card>
 
-      {/* Costs by Category */}
-      {costCategories.map(category => {
-        const categoryCosts = costs.filter(cost => cost.category === category.id)
-        if (categoryCosts.length === 0) return null
+      {/* Search and Filters */}
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Cari biaya berdasarkan nama, kategori, atau deskripsi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
 
-        return (
-          <Card key={category.id}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <span className="text-xl">{category.icon}</span>
-                {category.name}
-                <Badge variant="outline">{categoryCosts.length}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {categoryCosts.map(cost => (
-                  <div key={cost.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{cost.name}</h4>
-                        {cost.isFixed && (
-                          <Badge variant="secondary" className="text-xs">
-                            TETAP
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        {formatCurrency(cost.amount)} / {frequencies.find(f => f.value === cost.frequency)?.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        ~{formatCurrency(calculateMonthlyCost(cost))}/bulan
-                      </p>
-                      {cost.description && (
-                        <p className="text-xs text-muted-foreground mt-1">{cost.description}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-1 ml-4">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleEditCost(cost)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteCost(cost.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )
-      })}
+        {/* Bulk Actions */}
+        {selectedItems.length > 0 && (
+          <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-900">
+                {selectedItems.length} biaya operasional dipilih
+              </span>
+              <span className="text-xs text-gray-500">
+                ({filteredCosts.filter(cost => selectedItems.includes(cost.id)).map(cost => cost.name).slice(0, 2).join(', ')}
+                {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+              </span>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedItems([])}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Batal
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkEdit}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Semua
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Hapus Semua
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
 
-      {costs.length === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Receipt className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="font-medium text-lg mb-2">Belum Ada Biaya Operasional</h3>
-            <p className="text-muted-foreground mb-4">
-              Mulai tambahkan biaya operasional seperti listrik, sewa, gaji karyawan, dll.
-            </p>
-            <Button onClick={() => setCurrentView('add')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Biaya Pertama
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* Operational Costs Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Receipt className="h-5 w-5" />
+            Daftar Biaya Operasional
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Kelola biaya operasional dengan mudah
+          </p>
+        </CardHeader>
+        <CardContent>
+          {filteredCosts.length > 0 ? (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedItems.length === filteredCosts.length && filteredCosts.length > 0}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>Nama & Kategori</TableHead>
+                    <TableHead>Jumlah & Frekuensi</TableHead>
+                    <TableHead>Biaya/Bulan</TableHead>
+                    <TableHead>Tipe</TableHead>
+                    <TableHead className="w-32">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCosts.map((cost) => {
+                    const categoryInfo = getCategoryInfo(cost.category)
+                    const frequencyLabel = frequencies.find(f => f.value === cost.frequency)?.label || 'Bulanan'
+                    
+                    return (
+                      <TableRow key={cost.id} className="hover:bg-gray-50">
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedItems.includes(cost.id)}
+                            onCheckedChange={() => handleSelectItem(cost.id)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-semibold">{cost.name}</span>
+                            <div className="flex items-center gap-1 mt-1">
+                              <span className="text-sm">{categoryInfo.icon}</span>
+                              <span className="text-xs text-gray-500">{categoryInfo.name}</span>
+                            </div>
+                            {cost.description && (
+                              <span className="text-xs text-gray-400 mt-1">{cost.description}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{formatCurrency(cost.amount)}</span>
+                            <span className="text-xs text-gray-500">per {frequencyLabel}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-medium text-green-600">
+                            {formatCurrency(calculateMonthlyCost(cost))}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {cost.isFixed ? (
+                            <Badge variant="default" className="text-xs">
+                              TETAP
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">
+                              VARIABEL
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewCost(cost)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleEditCost(cost)}>
+                                  <Edit2 className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-red-600"
+                                  onClick={() => handleDeleteCost(cost.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Hapus
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada biaya operasional'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm 
+                  ? 'Coba kata kunci lain untuk menemukan biaya operasional'
+                  : 'Mulai dengan menambahkan biaya operasional seperti listrik, sewa, gaji karyawan, dll'
+                }
+              </p>
+              {!searchTerm && (
+                <Button onClick={() => setCurrentView('add')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah Biaya Pertama
+                </Button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 

@@ -55,7 +55,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
         const orders = Array.isArray(ordersData) ? ordersData : []
         
         // Generate smart notifications using automation engine
-        const smartNotifications = automationEngine.generateSmartNotifications(
+        const smartNotifications = automationEngine.notifications.generateSmartNotifications(
           ingredients,
           orders,
           { grossMargin: 45, netMargin: 25 } // Mock financial metrics for now

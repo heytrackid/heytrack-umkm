@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,9 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useFinancialRecords } from '@/hooks/useDatabase'
 
 // Lazy loading imports
+import { ChartSkeleton, CardSkeleton } from '@/components/lazy/LazyWrapper'
 import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
 import { FinancialTrendsChartWithLoading } from '@/components/lazy/chart-features'
 import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
+
+// Lazy load heavy components
+const LazyFinancialChart = lazy(() => import('@/components/lazy/chart-features').then(m => ({ default: m.FinancialTrendsChartWithLoading })))
 
 // Mobile UX imports
 import { useResponsive } from '@/hooks/use-mobile'

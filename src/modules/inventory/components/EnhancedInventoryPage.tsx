@@ -616,3 +616,4 @@ export default function EnhancedInventoryPage() {
       </div>
     </AppLayout>
   )
+}
