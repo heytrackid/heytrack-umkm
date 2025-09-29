@@ -50,10 +50,12 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useI18n } from '@/providers/I18nProvider'
 
 export default function ProductionPage() {
   const { isMobile } = useResponsive()
-  const { formatCurrency, t } = useSettings()
+  const { formatCurrency } = useSettings()
+  const { t } = useI18n()
   const { data: recipes, loading, refetch } = useRecipesWithIngredients()
   const { data: ingredients } = useIngredients()
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
@@ -218,7 +220,7 @@ export default function ProductionPage() {
     const recipeNames = selectedRecipes.map(recipe => recipe.name).join(', ')
     
     const confirmed = window.confirm(
-      `⚠️ Yakin ingin menghapus ${selectedItems.length} resep berikut?\n\n${recipeNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+      t('messages.confirmation.bulkDelete', { count: selectedItems.length, type: 'resep', names: recipeNames })
     )
     
     if (confirmed) {
@@ -226,7 +228,7 @@ export default function ProductionPage() {
       console.log('Deleting recipes:', selectedItems)
       
       // Show success message (in real app, this would be API call)
-      alert(`✅ ${selectedItems.length} resep berhasil dihapus!`)
+      alert(t('messages.success.bulkDeleted', { count: selectedItems.length, type: 'resep' }))
       
       // Clear selection and refresh
       setSelectedItems([])
@@ -243,24 +245,24 @@ export default function ProductionPage() {
     // TODO: Open bulk edit modal
     console.log('Bulk editing recipes:', selectedItems)
     
-    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} resep akan segera tersedia!\n\nResep yang dipilih:\n${recipeNames}`)
+    alert(t('messages.info.bulkEditFeature', { count: selectedItems.length, type: 'resep', names: recipeNames }))
   }
 
   // Individual action handlers
   const handleViewRecipe = (recipe: any) => {
     console.log('View recipe details:', recipe)
-    alert(`👁️ Detail resep"${recipe.name}" akan segera tersedia!`)
+    alert(t('messages.info.detailFeature', { type: 'resep', name: recipe.name }))
   }
 
   const handleDeleteRecipe = (recipe: any) => {
     const confirmed = window.confirm(
-      `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus resep:\n"${recipe.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
+      t('messages.confirmation.singleDelete', { type: 'resep', name: recipe.name })
     )
     
     if (confirmed) {
       // TODO: Implement actual API call to delete recipe
       console.log('Deleting recipe:', recipe.id)
-      alert(`✅ Resep"${recipe.name}" berhasil dihapus dari sistem.`)
+      alert(t('messages.success.singleDeleted', { type: 'Resep', name: recipe.name }))
       refetch()
     }
   }
@@ -272,17 +274,17 @@ export default function ProductionPage() {
         <div className="space-y-6">
           <div className={`${isMobile ? 'text-center' : ''}`}>
             <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              Resep Produk
+              {t('recipes.pageTitle')}
             </h1>
             <p className="text-muted-foreground">
-              Buat dan kelola resep untuk menghitung HPP
+              {t('recipes.pageDescription')}
             </p>
           </div>
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-center py-8">
                 <RefreshCw className="h-8 w-8 animate-spin text-primary mr-3" />
-                <span className={`${isMobile ? 'text-sm' : ''}`}>Memuat data resep...</span>
+                <span className={`${isMobile ? 'text-sm' : ''}`}>{t('messages.info.loadingSpecific', { type: 'resep' })}</span>
               </div>
             </CardContent>
           </Card>
@@ -294,13 +296,13 @@ export default function ProductionPage() {
   // Breadcrumb component
   const getBreadcrumbItems = () => {
     const items = [
-      { label: 'Dashboard', href: '/' },
-      { label: 'Resep', href: currentView === 'list' ? undefined : '/resep' }
+      { label: t('navigation.dashboard.title'), href: '/' },
+      { label: t('recipes.title'), href: currentView === 'list' ? undefined : '/resep' }
     ]
     
     if (currentView !== 'list') {
       items.push({ 
-        label: currentView === 'add' ? 'Tambah Resep' : 'Edit Resep' 
+        label: currentView === 'add' ? t('recipes.addRecipe') : t('recipes.editRecipe')
       })
     }
     
@@ -320,24 +322,24 @@ export default function ProductionPage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>Tambah Resep Baru</h2>
-          <p className="text-muted-foreground">Buat resep produk untuk perhitungan HPP</p>
+          <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>{t('recipes.addNewRecipe')}</h2>
+          <p className="text-muted-foreground">{t('recipes.createRecipeDesc')}</p>
         </div>
       </div>
 
       <Card>
         <CardContent className="p-6 space-y-4">
           <div className="space-y-2">
-            <Label>Nama Produk</Label>
+            <Label>{t('recipes.productName')}</Label>
             <Input
               value={newRecipe.name}
               onChange={(e) => setNewRecipe(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Contoh: Roti Tawar Premium"
+              placeholder={t('recipes.productNamePlaceholder')}
             />
           </div>
           
           <div className="space-y-2">
-            <Label>Kategori</Label>
+            <Label>{t('forms.labels.category')}</Label>
             <Select value={newRecipe.category} onValueChange={(value) => setNewRecipe(prev => ({ ...prev, category: value }))}>
               <SelectTrigger>
                 <SelectValue />
@@ -353,18 +355,18 @@ export default function ProductionPage() {
           </div>
 
           <div className="space-y-2">
-            <Label>Deskripsi</Label>
+            <Label>{t('forms.labels.description')}</Label>
             <Textarea
               value={newRecipe.description}
               onChange={(e) => setNewRecipe(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Deskripsi singkat tentang produk..."
+              placeholder={t('recipes.descriptionPlaceholder')}
               rows={2}
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <Label>Komposisi Bahan</Label>
+              <Label>{t('recipes.ingredientComposition')}</Label>
               <div className="flex gap-2">
                 <Button 
                   size="sm" 
@@ -373,11 +375,11 @@ export default function ProductionPage() {
                   disabled={!ingredients || ingredients.length === 0}
                 >
                   <PackageOpen className="h-4 w-4 mr-1" />
-                  Auto Tambah
+                  {t('recipes.autoAdd')}
                 </Button>
                 <Button size="sm" onClick={handleAddIngredient}>
                   <Plus className="h-4 w-4 mr-1" />
-                  Tambah Manual
+                  {t('recipes.manualAdd')}
                 </Button>
               </div>
             </div>
@@ -391,13 +393,13 @@ export default function ProductionPage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium text-green-900 dark:text-green-100 mb-1">
-                      💡 Fitur Auto-Populate Aktif!
+                      {t('messages.features.autoPopulateTitle')}
                     </h4>
                     <p className="text-sm text-green-800 dark:text-green-200 mb-2">
-                      Bahan akan otomatis ditambahkan saat memilih kategori, atau klik"Auto Tambah" untuk menambah lebih banyak bahan untuk <strong>{newRecipe.category}</strong>
+                      {t('messages.features.autoPopulateDesc', { category: newRecipe.category })}
                     </p>
                     <div className="text-xs text-green-700 dark:text-green-300">
-                      Bahan yang akan ditambah: {getCommonIngredientsByCategory(newRecipe.category).slice(0, 4).join(', ')}
+                      {t('messages.features.ingredientsToAdd', { ingredients: getCommonIngredientsByCategory(newRecipe.category).slice(0, 4).join(', ') })}
                       {getCommonIngredientsByCategory(newRecipe.category).length > 4 && `, dan ${getCommonIngredientsByCategory(newRecipe.category).length - 4} lainnya`}
                     </div>
                   </div>
@@ -408,11 +410,11 @@ export default function ProductionPage() {
             {newRecipe.ingredients.length === 0 && (!ingredients || ingredients.length === 0) && (
               <div className="text-center py-8 text-muted-foreground border border-dashed rounded-lg">
                 <PackageOpen className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="font-medium">Belum ada data bahan baku</p>
-                <p className="text-sm mb-3">Silakan tambahkan bahan baku terlebih dahulu</p>
+                <p className="font-medium">{t('recipes.noIngredientData')}</p>
+                <p className="text-sm mb-3">{t('recipes.addIngredientsFirst')}</p>
                 <Button size="sm" variant="outline" onClick={() => window.location.href = '/inventory'}>
                   <PackageOpen className="h-4 w-4 mr-2" />
-                  Kelola Bahan Baku
+                  {t('recipes.manageIngredients')}
                 </Button>
               </div>
             )}
@@ -420,13 +422,13 @@ export default function ProductionPage() {
             {newRecipe.ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 items-end p-3 border rounded-lg">
                 <div className="flex-1">
-                  <Label className="text-xs">Bahan</Label>
+                  <Label className="text-xs">{t('recipes.ingredient')}</Label>
                   <Select 
                     value={ingredient.ingredient_id} 
                     onValueChange={(value) => handleUpdateIngredient(index, 'ingredient_id', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih bahan" />
+                      <SelectValue placeholder={t('recipes.selectIngredient')} />
                     </SelectTrigger>
                     <SelectContent>
                       {ingredients?.map(ing => (
@@ -438,7 +440,7 @@ export default function ProductionPage() {
                   </Select>
                 </div>
                 <div className="w-24">
-                  <Label className="text-xs">Jumlah</Label>
+                  <Label className="text-xs">{t('recipes.quantity')}</Label>
                   <Input
                     type="number"
                     value={ingredient.quantity}
@@ -461,13 +463,13 @@ export default function ProductionPage() {
           <div className="flex gap-3 pt-4">
             <Button onClick={handleSaveRecipe} className="flex-1">
               <ChefHat className="h-4 w-4 mr-2" />
-              Simpan Resep
+              {t('recipes.saveRecipe')}
             </Button>
             <Button variant="outline" onClick={() => {
               resetForm()
               setCurrentView('list')
             }}>
-              Batal
+              {t('common.actions.cancel')}
             </Button>
           </div>
         </CardContent>
@@ -482,24 +484,24 @@ export default function ProductionPage() {
       <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
         <div className={isMobile ? 'text-center' : ''}>
           <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-            Resep
+            {t('recipes.title')}
           </h1>
           <p className="text-muted-foreground">
-            Buat dan kelola resep untuk menghitung HPP otomatis
+            {t('recipes.mainPageDescription')}
           </p>
         </div>
         <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
           <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+            {t('common.actions.refresh')}
           </Button>
           <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => window.location.href = '/categories'}>
             <Tags className="h-4 w-4 mr-2" />
-            Kelola Kategori
+            {t('recipes.manageCategories')}
           </Button>
           <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
             <Plus className="h-4 w-4 mr-2" />
-            Tambah Resep
+            {t('recipes.addRecipe')}
           </Button>
         </div>
       </div>
@@ -513,13 +515,13 @@ export default function ProductionPage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  💡 Tips: Cara Mudah Buat Resep
+                  {t('recipes.tips.title')}
                 </h3>
                 <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex items-center gap-4'}`}>
-                  <span>• Input nama produk (contoh:"Roti Tawar")</span>
-                  <span>• Pilih bahan dari daftar</span>
-                  <span>• Masukkan takaran (gram/ml/pcs)</span>
-                  <span>• HPP akan dihitung otomatis!</span>
+                  <span>{t('recipes.tips.step1')}</span>
+                  <span>{t('recipes.tips.step2')}</span>
+                  <span>{t('recipes.tips.step3')}</span>
+                  <span>{t('recipes.tips.step4')}</span>
                 </div>
               </div>
             </div>
@@ -541,7 +543,7 @@ export default function ProductionPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {recipes.length}
               </div>
-              <p className="text-sm text-muted-foreground">Total Resep</p>
+              <p className="text-sm text-muted-foreground">{t('recipes.totalRecipesLabel')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -550,7 +552,7 @@ export default function ProductionPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {ingredients?.length || 0}
               </div>
-              <p className="text-sm text-muted-foreground">Bahan Tersedia</p>
+              <p className="text-sm text-muted-foreground">{t('recipes.availableIngredients')}</p>
             </CardContent>
           </Card>
           <Card>
@@ -559,7 +561,7 @@ export default function ProductionPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {recipes.filter(r => r.recipe_ingredients?.length > 0).length}
               </div>
-              <p className="text-sm text-muted-foreground">Siap Hitung HPP</p>
+              <p className="text-sm text-muted-foreground">{t('recipes.readyForHPP')}</p>
             </CardContent>
           </Card>
           </div>
@@ -574,7 +576,7 @@ export default function ProductionPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Cari resep berdasarkan nama, deskripsi, atau kategori..."
+                placeholder={t('recipes.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -587,11 +589,11 @@ export default function ProductionPage() {
             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">
-                  {selectedItems.length} resep dipilih
+                  {t('recipes.selectedRecipes', { count: selectedItems.length })}
                 </span>
                 <span className="text-xs text-gray-500">
                   ({filteredRecipes.filter(recipe => selectedItems.includes(recipe.id.toString())).map(recipe => recipe.name).slice(0, 2).join(', ')}
-                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                  {selectedItems.length > 2 ? ` ${t('recipes.otherRecipes', { count: selectedItems.length - 2 })}` : ''})
                 </span>
               </div>
               <div className="ml-auto flex items-center gap-2">
@@ -601,7 +603,7 @@ export default function ProductionPage() {
                   onClick={() => setSelectedItems([])}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  Batal
+                  {t('common.actions.cancel')}
                 </Button>
                 <Button
                   variant="outline"
@@ -609,7 +611,7 @@ export default function ProductionPage() {
                   onClick={handleBulkEdit}
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Semua
+                  {t('tables.bulk.editAll')}
                 </Button>
                 <Button
                   variant="outline"
@@ -618,7 +620,7 @@ export default function ProductionPage() {
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus Semua
+                  {t('tables.bulk.deleteAll')}
                 </Button>
               </div>
             </div>
@@ -632,14 +634,14 @@ export default function ProductionPage() {
             <CardContent className="py-12 text-center">
               <PackageOpen className="h-12 w-12 text-orange-500 mx-auto mb-4" />
               <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'} text-orange-900 dark:text-orange-100`}>
-                Belum ada data bahan baku
+                {t('recipes.empty.noIngredients')}
               </h3>
               <p className="text-orange-700 dark:text-orange-200 mb-4">
-                Sebelum membuat resep, Anda perlu menambahkan bahan baku terlebih dahulu
+                {t('recipes.empty.addIngredientsBeforeRecipes')}
               </p>
               <Button onClick={() => window.location.href = '/inventory'} className="bg-orange-600 hover:bg-orange-700">
                 <PackageOpen className="h-4 w-4 mr-2" />
-                Ke Data Bahan Baku
+                {t('recipes.empty.goToIngredients')}
               </Button>
             </CardContent>
           </Card>
@@ -648,10 +650,10 @@ export default function ProductionPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ChefHat className="h-5 w-5" />
-                Daftar Resep
+                {t('recipes.table.recipeList')}
               </CardTitle>
               <p className="text-sm text-gray-600">
-                Kelola resep produk dengan mudah
+                {t('recipes.table.manageRecipesEasily')}
               </p>
             </CardHeader>
             <CardContent>
@@ -668,11 +670,11 @@ export default function ProductionPage() {
                             onCheckedChange={handleSelectAll}
                           />
                         </TableHead>
-                        <TableHead>Nama & Kategori</TableHead>
-                        <TableHead>HPP Estimasi</TableHead>
-                        <TableHead>Jumlah Bahan</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="w-32">Aksi</TableHead>
+                        <TableHead>{t('recipes.table.nameCategory')}</TableHead>
+                        <TableHead>{t('recipes.table.hppEstimate')}</TableHead>
+                        <TableHead>{t('recipes.table.ingredientCount')}</TableHead>
+                        <TableHead>{t('tables.headers.status')}</TableHead>
+                        <TableHead className="w-32">{t('tables.headers.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -709,18 +711,18 @@ export default function ProductionPage() {
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <Badge variant={ingredientCount > 0 ? 'default' : 'destructive'} className="text-xs">
-                                  {ingredientCount} bahan
+                                  {t('recipes.table.ingredients', { count: ingredientCount })}
                                 </Badge>
                               </div>
                             </TableCell>
                             <TableCell>
                               {ingredientCount > 0 ? (
                                 <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-                                  SIAP HPP
+                                  {t('recipes.table.readyHPP')}
                                 </Badge>
                               ) : (
                                 <Badge variant="destructive" className="text-xs">
-                                  PERLU BAHAN
+                                  {t('recipes.table.needIngredients')}
                                 </Badge>
                               )}
                             </TableCell>
@@ -745,21 +747,21 @@ export default function ProductionPage() {
                                       setCurrentView('edit')
                                     }}>
                                       <Edit2 className="h-4 w-4 mr-2" />
-                                      Edit
+                                      {t('common.actions.edit')}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       onClick={() => window.location.href = '/hpp'}
                                       disabled={ingredientCount === 0}
                                     >
                                       <Calculator className="h-4 w-4 mr-2" />
-                                      Hitung HPP
+                                      {t('recipes.table.calculateHPP')}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem 
                                       className="text-red-600"
                                       onClick={() => handleDeleteRecipe(recipe)}
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />
-                                      Hapus
+                                      {t('common.actions.delete')}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -775,18 +777,18 @@ export default function ProductionPage() {
                 <div className="py-12 text-center">
                   <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                    {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada resep'}
+                    {searchTerm ? t('recipes.empty.noResults') : t('recipes.empty.noRecipes')}
                   </h3>
                   <p className="text-muted-foreground mb-4">
                     {searchTerm 
-                      ? 'Coba kata kunci lain untuk menemukan resep'
-                      : 'Mulai dengan menambahkan resep pertama untuk produk Anda'
+                      ? t('recipes.empty.tryDifferentKeyword')
+                      : t('recipes.empty.startAddingRecipes')
                     }
                   </p>
                   {!searchTerm && (
                     <Button onClick={() => setCurrentView('add')}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Tambah Resep Pertama
+                      {t('recipes.empty.addFirstRecipe')}
                     </Button>
                   )}
                 </div>

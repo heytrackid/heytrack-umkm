@@ -8,19 +8,20 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // 1 minute
-      gcTime: 5 * 60 * 1000, // 5 minutes (garbage collection time)
-      retry: 3,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: true,
-      refetchOnMount: true,
+      // Bias towards fewer refetches for better perceived performance
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 15 * 60 * 1000, // 15 minutes
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 20000),
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
       refetchOnReconnect: true,
       // Only refetch if data is stale
       refetchInterval: false,
     },
     mutations: {
-      retry: 3,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retry: 2,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 20000),
     },
   },
 })

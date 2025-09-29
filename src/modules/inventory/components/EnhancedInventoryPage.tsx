@@ -46,11 +46,11 @@ import {
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-export default function EnhancedInventoryPage() {
+export default function EnhancedInventoryPage({ initialIngredients = [] }: { initialIngredients?: any[] }) {
   const { isMobile, isTablet } = useResponsive()
   
-  // Use real data instead of sample data
-  const { ingredients, loading, error, refresh } = useInventoryData()
+  // Use real data instead of sample data (hydrate with initial data from server when available)
+const { ingredients, loading, error, refresh } = useInventoryData(undefined, { initial: initialIngredients as any, refetchOnMount: false })
   const { alerts } = useInventoryAlerts()
   
   // Skeleton loading management

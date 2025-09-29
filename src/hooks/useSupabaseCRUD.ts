@@ -36,10 +36,13 @@ function useSupabaseDataInternal<T = any>(
     filter?: Record<string, any>;
     orderBy?: { column: string; ascending?: boolean };
     limit?: number;
+    initial?: any[];
+    refetchOnMount?: boolean; // default true unless initial provided
+    realtime?: boolean; // default true
   }
 ) {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any[]>(options?.initial ?? []);
+  const [loading, setLoading] = useState(!options?.initial);
   const [error, setError] = useState<string | null>(null);
 
   const refetch = useCallback(async () => {
@@ -84,43 +87,48 @@ function useSupabaseDataInternal<T = any>(
     const supabase = createSupabaseClient();
     const actualTable = getActualTableName(table as any);
     
-    // Initial fetch
-    refetch();
+    // Initial fetch – skip if we have initial and refetchOnMount === false
+    if (!(options?.initial && options.initial.length > 0 && options?.refetchOnMount === false)) {
+      refetch();
+    }
 
-    // Set up real-time subscription
-    const channel = supabase
-      .channel(`${actualTable}-changes`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: actualTable,
-        },
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setData((prev) => [payload.new as any, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setData((prev) =>
-              prev.map((item) =>
-                (item as any).id === (payload.new as any).id
-                  ? (payload.new as any)
-                  : item
-              )
-            );
-          } else if (payload.eventType === 'DELETE') {
-            setData((prev) =>
-              prev.filter((item) => (item as any).id !== (payload.old as any).id)
-            );
+    // Set up real-time subscription unless disabled
+    let channel: any | null = null;
+    if (options?.realtime !== false) {
+      channel = supabase
+        .channel(`${actualTable}-changes`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: actualTable,
+          },
+          (payload) => {
+            if (payload.eventType === 'INSERT') {
+              setData((prev) => [payload.new as any, ...prev]);
+            } else if (payload.eventType === 'UPDATE') {
+              setData((prev) =>
+                prev.map((item) =>
+                  (item as any).id === (payload.new as any).id
+                    ? (payload.new as any)
+                    : item
+                )
+              );
+            } else if (payload.eventType === 'DELETE') {
+              setData((prev) =>
+                prev.filter((item) => (item as any).id !== (payload.old as any).id)
+              );
+            }
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
-  }, [table, refetch]);
+  }, [table, refetch, options?.initial, options?.refetchOnMount, options?.realtime]);
 
   return { data, loading, error, refetch };
 }
@@ -316,8 +324,8 @@ export function useSupabaseCRUD<T = any, TInsert = any, TUpdate = any>(
 }
 
 // Specific hooks with combined data and mutations
-export const useIngredients = () => {
-  const data = useSupabaseData('ingredients');
+export const useIngredients = (options?: { initial?: any[] }) => {
+  const data = useSupabaseData('ingredients', options);
   const mutations = useSupabaseMutation('ingredients', data.refetch);
   return { ...data, ...mutations };
 };

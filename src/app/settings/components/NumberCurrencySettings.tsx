@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface NumberCurrencySettingsProps {
   settings: any
@@ -15,18 +16,19 @@ interface NumberCurrencySettingsProps {
  */
 export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurrencySettingsProps) {
   const { updateCurrency, formatCurrency } = useSettings()
+  const { t } = useI18n()
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
-          Format Angka & Mata Uang
+          {t('settings.numberCurrency.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="numberFormat">Format Angka</Label>
+          <Label htmlFor="numberFormat">{t('settings.numberCurrency.numberFormat')}</Label>
           <select
             id="numberFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
@@ -39,7 +41,7 @@ export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurr
           </select>
         </div>
         <div>
-          <Label htmlFor="uiCurrency">Mata Uang Display</Label>
+          <Label htmlFor="uiCurrency">{t('settings.numberCurrency.currency')}</Label>
           <select
             id="uiCurrency"
             className="w-full p-2 border border-input rounded-md bg-background"

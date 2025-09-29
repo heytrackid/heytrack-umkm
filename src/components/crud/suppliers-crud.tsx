@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSuppliers } from '@/hooks/useSupabaseCRUD';
-import { DataTable } from '@/components/ui/data-table';
+import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
@@ -178,7 +178,7 @@ export function SuppliersCRUD() {
 
   return (
     <div className="space-y-6">
-      <DataTable
+      <SimpleDataTable
         data={suppliers}
         columns={columns}
         loading={loading}

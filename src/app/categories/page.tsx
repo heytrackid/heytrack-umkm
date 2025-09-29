@@ -33,6 +33,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useI18n } from '@/providers/I18nProvider'
+import { useSettings } from '@/contexts/settings-context'
 import categoriesData from '@/data/categories.json'
 
 interface Category {
@@ -45,7 +47,9 @@ interface Category {
 
 export default function CategoriesPage() {
   const { isMobile } = useResponsive()
-  const [categories, setCategories] = useState<Category[]>(categoriesData.categories)
+  const { formatCurrency } = useSettings()
+  const { t } = useI18n()
+  const [categoryList, setCategoryList] = useState<Category[]>(categoriesData.categories)
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
@@ -73,9 +77,9 @@ export default function CategoriesPage() {
     if (currentView === 'add') {
       const id = newCategory.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       const categoryToAdd = { ...newCategory, id }
-      setCategories([...categories, categoryToAdd])
+      setCategoryList([...categoryList, categoryToAdd])
     } else if (currentView === 'edit' && editingCategory) {
-      setCategories(categories.map(cat => 
+      setCategoryList(categoryList.map(cat => 
         cat.id === editingCategory.id ? { ...newCategory, id: editingCategory.id } : cat
       ))
     }
@@ -91,12 +95,12 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = (categoryId: string) => {
     if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-      setCategories(categories.filter(cat => cat.id !== categoryId))
+      setCategoryList(categoryList.filter(cat => cat.id !== categoryId))
     }
   }
 
   // Filter categories based on search term
-  const filteredCategories = categories.filter(category =>
+  const filteredCategories = categoryList.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -125,13 +129,13 @@ export default function CategoriesPage() {
     const categoryNames = selectedCategories.map(category => category.name).join(', ')
     
     const confirmed = window.confirm(
-      `⚠️ Yakin ingin menghapus ${selectedItems.length} kategori berikut?\n\n${categoryNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+      t('messages.confirmation.bulkDelete', { count: selectedItems.length, type: 'kategori', names: categoryNames })
     )
     
     if (confirmed) {
-      setCategories(categories.filter(cat => !selectedItems.includes(cat.id)))
+      setCategoryList(categoryList.filter(cat => !selectedItems.includes(cat.id)))
       setSelectedItems([])
-      alert(`✅ ${selectedItems.length} kategori berhasil dihapus!`)
+      alert(t('messages.success.bulkDeleted', { count: selectedItems.length, type: 'kategori' }))
     }
   }
 
@@ -144,13 +148,13 @@ export default function CategoriesPage() {
     // TODO: Open bulk edit modal
     console.log('Bulk editing categories:', selectedItems)
     
-    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} kategori akan segera tersedia!\n\nKategori yang dipilih:\n${categoryNames}`)
+    alert(t('messages.info.bulkEditFeature', { count: selectedItems.length, type: 'kategori', names: categoryNames }))
   }
 
   // Individual action handlers
   const handleViewCategory = (category: Category) => {
     console.log('View category details:', category)
-    alert(`👁️ Detail kategori"${category.name}" akan segera tersedia!`)
+    alert(t('messages.info.detailFeature', { type: 'kategori', name: category.name }))
   }
 
   const handleAddIngredient = () => {
@@ -177,14 +181,14 @@ export default function CategoriesPage() {
   // Breadcrumb component
   const getBreadcrumbItems = () => {
     const items = [
-      { label: 'Dashboard', href: '/' },
-      { label: 'Resep', href: '/resep' },
-      { label: 'Kategori Produk', href: currentView === 'list' ? undefined : '/categories' }
+      { label: t('navigation.dashboard.title'), href: '/' },
+      { label: t('recipes.title'), href: '/resep' },
+      { label: t('categories.productCategory'), href: currentView === 'list' ? undefined : '/categories' }
     ]
     
     if (currentView !== 'list') {
       items.push({ 
-        label: currentView === 'add' ? 'Tambah Kategori' : 'Edit Kategori' 
+        label: currentView === 'add' ? t('categories.addCategory') : t('categories.editCategory')
       })
     }
     
@@ -208,10 +212,10 @@ export default function CategoriesPage() {
         </Button>
         <div>
           <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {currentView === 'add' ? 'Tambah' : 'Edit'} Kategori
+            {currentView === 'add' ? t('common.actions.add') : t('common.actions.edit')} {t('categories.title')}
           </h2>
           <p className="text-muted-foreground">
-            {currentView === 'add' ? 'Buat kategori produk baru' : 'Edit kategori produk'}
+            {currentView === 'add' ? t('categories.createNewCategory') : t('categories.editCategoryDesc')}
           </p>
         </div>
       </div>
@@ -220,16 +224,16 @@ export default function CategoriesPage() {
         <CardContent className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Nama Kategori</Label>
+              <Label>{t('categories.categoryName')}</Label>
               <Input
                 value={newCategory.name}
                 onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Contoh: Makanan Utama"
+                placeholder={t('categories.categoryNamePlaceholder')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Icon</Label>
+              <Label>{t('categories.categoryIcon')}</Label>
               <Input
                 value={newCategory.icon}
                 onChange={(e) => setNewCategory(prev => ({ ...prev, icon: e.target.value }))}
@@ -240,20 +244,20 @@ export default function CategoriesPage() {
           </div>
 
           <div className="space-y-2">
-            <Label>Deskripsi</Label>
+            <Label>{t('categories.categoryDescription')}</Label>
             <Input
               value={newCategory.description}
               onChange={(e) => setNewCategory(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Contoh: Nasi, mie, pasta, dll"
+              placeholder={t('categories.categoryDescPlaceholder')}
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex justify-between items-center">
-              <Label>Bahan Baku Umum</Label>
+              <Label>{t('categories.commonIngredients')}</Label>
               <Button size="sm" onClick={handleAddIngredient}>
                 <Plus className="h-4 w-4 mr-1" />
-                Tambah Bahan
+                {t('categories.addIngredient')}
               </Button>
             </div>
             
@@ -263,7 +267,7 @@ export default function CategoriesPage() {
                   <Input
                     value={ingredient}
                     onChange={(e) => handleUpdateIngredient(index, e.target.value)}
-                    placeholder="Nama bahan (contoh: tepung terigu)"
+                    placeholder={t('categories.ingredientPlaceholder')}
                     className="flex-1"
                   />
                   <Button
@@ -279,7 +283,7 @@ export default function CategoriesPage() {
               
               {newCategory.commonIngredients.length === 0 && (
                 <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded">
-                  Belum ada bahan baku. Klik"Tambah Bahan" untuk menambahkan.
+                  {t('categories.noIngredientsYet')}
                 </p>
               )}
             </div>
@@ -288,7 +292,7 @@ export default function CategoriesPage() {
           <div className="flex gap-3 pt-4">
             <Button onClick={handleSaveCategory} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
-              Simpan Kategori
+              {t('categories.saveCategory')}
             </Button>
             <Button variant="outline" onClick={() => {
               resetForm()

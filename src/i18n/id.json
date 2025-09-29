@@ -206,9 +206,63 @@
     "title": "Resep",
     "subtitle": "Kelola resep produk",
     "addRecipe": "Tambah Resep",
+    "editRecipe": "Edit Resep",
     "totalRecipes": "Total Resep",
     "readyForCOGS": "Siap HPP",
-    "needsIngredients": "Perlu Bahan"
+    "needsIngredients": "Perlu Bahan",
+    "pageTitle": "Resep Produk",
+    "pageDescription": "Buat dan kelola resep untuk menghitung HPP",
+    "addNewRecipe": "Tambah Resep Baru",
+    "createRecipeDesc": "Buat resep produk untuk perhitungan HPP",
+    "productName": "Nama Produk",
+    "productNamePlaceholder": "Contoh: Roti Tawar Premium",
+    "descriptionPlaceholder": "Deskripsi singkat tentang produk...",
+    "ingredientComposition": "Komposisi Bahan",
+    "autoAdd": "Auto Tambah",
+    "manualAdd": "Tambah Manual",
+    "mainPageDescription": "Buat dan kelola resep untuk menghitung HPP otomatis",
+    "manageCategories": "Kelola Kategori",
+    "totalRecipesLabel": "Total Resep",
+    "availableIngredients": "Bahan Tersedia",
+    "readyForHPP": "Siap Hitung HPP",
+    "searchPlaceholder": "Cari resep berdasarkan nama, deskripsi, atau kategori...",
+    "selectedRecipes": "{{count}} resep dipilih",
+    "otherRecipes": "+{{count}} lainnya",
+    "saveRecipe": "Simpan Resep",
+    "noIngredientData": "Belum ada data bahan baku",
+    "addIngredientsFirst": "Silakan tambahkan bahan baku terlebih dahulu",
+    "manageIngredients": "Kelola Bahan Baku",
+    "ingredient": "Bahan",
+    "selectIngredient": "Pilih bahan",
+    "quantity": "Jumlah",
+    "tips": {
+      "title": "💡 Tips: Cara Mudah Buat Resep",
+      "step1": "• Input nama produk (contoh:\"Roti Tawar\")",
+      "step2": "• Pilih bahan dari daftar",
+      "step3": "• Masukkan takaran (gram/ml/pcs)",
+      "step4": "• HPP akan dihitung otomatis!"
+    },
+    "table": {
+      "recipeList": "Daftar Resep",
+      "manageRecipesEasily": "Kelola resep produk dengan mudah",
+      "nameCategory": "Nama & Kategori",
+      "hppEstimate": "HPP Estimasi",
+      "ingredientCount": "Jumlah Bahan",
+      "readyHPP": "SIAP HPP",
+      "needIngredients": "PERLU BAHAN",
+      "ingredients": "{{count}} bahan",
+      "calculateHPP": "Hitung HPP"
+    },
+    "empty": {
+      "noIngredients": "Belum ada data bahan baku",
+      "addIngredientsBeforeRecipes": "Sebelum membuat resep, Anda perlu menambahkan bahan baku terlebih dahulu",
+      "goToIngredients": "Ke Data Bahan Baku",
+      "noResults": "Tidak ada hasil pencarian",
+      "noRecipes": "Belum ada resep",
+      "tryDifferentKeyword": "Coba kata kunci lain untuk menemukan resep",
+      "startAddingRecipes": "Mulai dengan menambahkan resep pertama untuk produk Anda",
+      "addFirstRecipe": "Tambah Resep Pertama"
+    }
   },
   "orders": {
     "title": "Pesanan",
@@ -216,15 +270,87 @@
     "addOrder": "Tambah Pesanan",
     "totalOrders": "Total Pesanan",
     "pendingOrders": "Pesanan Menunggu",
-    "completedOrders": "Pesanan Selesai"
+    "completedOrders": "Pesanan Selesai",
+    "totalRevenue": "Total Revenue",
+    "averageOrderValue": "Rata-rata Nilai",
+    "pendingPayment": "Menunggu Bayar",
+    "perOrder": "per pesanan",
+    "pendingPaymentLabel": "pending payment",
+    "growthFromPrevious": "dari periode sebelumnya",
+    "searchPlaceholder": "Cari customer atau nomor pesanan...",
+    "allStatus": "Semua Status",
+    "fromDate": "Dari tanggal",
+    "toDate": "Sampai tanggal",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Dikonfirmasi",
+      "in_production": "Sedang Diproduksi",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan"
+    },
+    "paymentStatus": {
+      "unpaid": "Belum Dibayar",
+      "partial": "Dibayar Sebagian",
+      "paid": "Lunas"
+    },
+    "table": {
+      "order": "Order",
+      "orderCode": "Kode Pesanan",
+      "customer": "Customer",
+      "customerName": "Pelanggan",
+      "status": "Status",
+      "date": "Tanggal",
+      "dueDate": "Jatuh Tempo",
+      "payment": "Pembayaran",
+      "total": "Total",
+      "actions": "Actions",
+      "due": "Due"
+    },
+    "exportData": "Export Data"
   },
   "customers": {
     "title": "Pelanggan",
     "subtitle": "Kelola data pelanggan",
     "addCustomer": "Tambah Pelanggan",
+    "editCustomer": "Edit Pelanggan",
     "totalCustomers": "Total Pelanggan",
     "activeCustomers": "Pelanggan Aktif",
-    "newCustomers": "Pelanggan Baru"
+    "newCustomers": "Pelanggan Baru",
+    "customerData": "Data Pelanggan",
+    "customerDatabaseDesc": "Kelola database pelanggan dan riwayat pembelian",
+    "averageSpending": "Rata-rata Belanja",
+    "averageOrders": "Rata-rata Order",
+    "searchCustomersPlaceholder": "Cari pelanggan berdasarkan nama, email, atau nomor telepon...",
+    "customerList": "Daftar Pelanggan",
+    "manageCustomerData": "Kelola data pelanggan dengan mudah",
+    "selectedCustomers": "{{count}} pelanggan dipilih",
+    "otherCustomers": "+{{count}} lainnya",
+    "bulkActions": {
+      "editAll": "Edit Semua",
+      "deleteAll": "Hapus Semua"
+    },
+    "table": {
+      "nameStatus": "Nama & Status",
+      "contact": "Kontak",
+      "totalSpending": "Total Belanja",
+      "totalOrders": "Total Order",
+      "lastOrder": "Terakhir Order",
+      "actions": "Aksi"
+    },
+    "empty": {
+      "noResults": "Tidak ada hasil pencarian",
+      "noCustomers": "Belum ada data pelanggan",
+      "tryDifferentKeyword": "Coba kata kunci lain untuk menemukan pelanggan",
+      "startAddingCustomers": "Mulai dengan menambahkan data pelanggan pertama",
+      "addFirstCustomer": "Tambah Pelanggan Pertama"
+    },
+    "tips": {
+      "title": "💡 Tips: Manfaatkan Data Pelanggan",
+      "trackPurchaseHistory": "• Lacak riwayat pembelian",
+      "analyzeBestCustomers": "• Analisa pelanggan terbaik",
+      "personalizeOffers": "• Personalisasi penawaran",
+      "followUpOrders": "• Follow up order berkala"
+    }
   },
   "settings": {
     "title": "Pengaturan",
@@ -234,7 +360,43 @@
       "profile": "Profil",
       "notifications": "Notifikasi",
       "system": "Sistem",
-      "appearance": "Tampilan"
+      "appearance": "Tampilan",
+      "ui": "Tampilan"
+    },
+    "actions": {
+      "reset": "Reset",
+      "saving": "Menyimpan...",
+      "unsaved": "Belum Tersimpan"
+    },
+    "messages": {
+      "loadError": "Gagal memuat pengaturan",
+      "saveSuccess": "Pengaturan berhasil disimpan!",
+      "saveError": "Gagal menyimpan pengaturan. Silakan coba lagi."
+    },
+    "dateTime": {
+      "title": "Format Tanggal & Waktu",
+      "dateFormat": "Format Tanggal",
+      "timeFormat": "Format Waktu",
+      "formats": {
+        "24h": "24 Jam",
+        "12h": "12 Jam (AM/PM)"
+      }
+    },
+    "numberCurrency": {
+      "title": "Format Angka & Mata Uang",
+      "currency": "Mata Uang",
+      "numberFormat": "Format Angka"
+    },
+    "uiTheme": {
+      "title": "Tampilan & Tema",
+      "theme": "Tema",
+      "language": "Bahasa",
+      "themes": {
+        "light": "Terang",
+        "dark": "Gelap",
+        "system": "Mengikuti Sistem"
+      },
+      "languageNote": "Bahasa akan berubah setelah refresh halaman"
     }
   },
   "forms": {
@@ -250,7 +412,191 @@
       "enterPhone": "Masukkan nomor telepon",
       "enterAddress": "Masukkan alamat",
       "selectOption": "Pilih opsi",
-      "enterDescription": "Masukkan deskripsi"
+      "enterDescription": "Masukkan deskripsi",
+      "searchPlaceholder": "Cari berdasarkan nama, kategori, atau deskripsi...",
+      "enterAmount": "Masukkan jumlah",
+      "enterQuantity": "Masukkan kuantitas",
+      "enterPrice": "Masukkan harga"
+    },
+    "labels": {
+      "name": "Nama",
+      "email": "Email",
+      "phone": "Telepon",
+      "address": "Alamat",
+      "description": "Deskripsi",
+      "category": "Kategori",
+      "amount": "Jumlah",
+      "quantity": "Kuantitas",
+      "price": "Harga",
+      "date": "Tanggal",
+      "time": "Waktu",
+      "status": "Status",
+      "notes": "Catatan"
     }
+  },
+  "tables": {
+    "headers": {
+      "name": "Nama",
+      "category": "Kategori",
+      "price": "Harga",
+      "quantity": "Kuantitas",
+      "amount": "Jumlah",
+      "date": "Tanggal",
+      "status": "Status",
+      "actions": "Aksi",
+      "description": "Deskripsi",
+      "type": "Tipe",
+      "frequency": "Frekuensi"
+    },
+    "actions": {
+      "viewDetails": "Lihat Detail",
+      "editItem": "Edit Item",
+      "deleteItem": "Hapus Item",
+      "duplicate": "Duplikat",
+      "archive": "Arsip"
+    },
+    "bulk": {
+      "selected": "{{count}} item dipilih",
+      "editAll": "Edit Semua",
+      "deleteAll": "Hapus Semua",
+      "exportAll": "Export Semua"
+    },
+    "empty": {
+      "noData": "Tidak ada data",
+      "noResults": "Tidak ada hasil pencarian",
+      "addFirst": "Tambah item pertama",
+      "tryDifferentSearch": "Coba kata kunci pencarian lain"
+    }
+  },
+  "messages": {
+    "success": {
+      "saved": "Berhasil disimpan!",
+      "updated": "Berhasil diupdate!",
+      "deleted": "Berhasil dihapus!",
+      "created": "Berhasil dibuat!",
+      "exported": "Berhasil diexport!",
+      "imported": "Berhasil diimport!",
+      "bulkDeleted": "✅ {{count}} {{type}} berhasil dihapus!",
+      "singleDeleted": "✅ {{type}} \"{{name}}\" berhasil dihapus dari sistem."
+    },
+    "error": {
+      "saveFailed": "Gagal menyimpan. Silakan coba lagi.",
+      "updateFailed": "Gagal mengupdate. Silakan coba lagi.",
+      "deleteFailed": "Gagal menghapus. Silakan coba lagi.",
+      "loadFailed": "Gagal memuat data. Silakan coba lagi.",
+      "networkError": "Error jaringan. Periksa koneksi Anda.",
+      "unexpectedError": "Terjadi error yang tidak terduga."
+    },
+    "confirmation": {
+      "deleteItem": "Apakah Anda yakin ingin menghapus item ini?",
+      "deleteItems": "Apakah Anda yakin ingin menghapus {{count}} item?",
+      "bulkDelete": "⚠️ Yakin ingin menghapus {{count}} {{type}} berikut?\n\n{{names}}\n\n❗ Tindakan ini tidak bisa dibatalkan!",
+      "singleDelete": "⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus {{type}}:\n\"{{name}}\"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!",
+      "unsavedChanges": "Anda memiliki perubahan yang belum disimpan. Ingin menyimpannya?",
+      "confirmAction": "Apakah Anda yakin ingin melakukan aksi ini?"
+    },
+    "info": {
+      "loading": "Memuat data...",
+      "loadingSpecific": "Memuat data {{type}}...",
+      "saving": "Menyimpan...",
+      "processing": "Memproses...",
+      "noChanges": "Tidak ada perubahan terdeteksi",
+      "dataUpdated": "Data telah diupdate",
+      "bulkEditFeature": "📝 Fitur bulk edit untuk {{count}} {{type}} akan segera tersedia!\n\n{{type}} yang dipilih:\n{{names}}",
+      "detailFeature": "👁️ Detail {{type}} \"{{name}}\" akan segera tersedia!",
+      "customerDetailFeature": "👤 Detail {{type}} \"{{name}}\" akan segera tersedia!"
+    },
+    "features": {
+      "autoPopulateTitle": "💡 Fitur Auto-Populate Aktif!",
+      "autoPopulateDesc": "Bahan akan otomatis ditambahkan saat memilih kategori, atau klik \"Auto Tambah\" untuk menambah lebih banyak bahan untuk {{category}}",
+      "ingredientsToAdd": "Bahan yang akan ditambah: {{ingredients}}"
+    }
+  },
+  "buttons": {
+    "primary": {
+      "addNew": "Tambah Baru",
+      "saveChanges": "Simpan Perubahan",
+      "submitForm": "Kirim Form",
+      "confirmAction": "Konfirmasi",
+      "proceedAction": "Lanjutkan"
+    },
+    "secondary": {
+      "editItem": "Edit",
+      "viewDetails": "Lihat Detail",
+      "duplicate": "Duplikat",
+      "exportData": "Export",
+      "importData": "Import"
+    }
+  },
+  "categories": {
+    "title": "Kategori",
+    "subtitle": "Kelola kategori produk",
+    "addCategory": "Tambah Kategori",
+    "editCategory": "Edit Kategori",
+    "deleteCategory": "Hapus Kategori",
+    "totalCategories": "Total Kategori",
+    "activeCategories": "Kategori Aktif",
+    "categoryName": "Nama Kategori",
+    "categoryIcon": "Icon",
+    "categoryDescription": "Deskripsi",
+    "categoryNamePlaceholder": "Contoh: Makanan Utama",
+    "categoryDescPlaceholder": "Contoh: Nasi, mie, pasta, dll",
+    "commonIngredients": "Bahan Baku Umum",
+    "addIngredient": "Tambah Bahan",
+    "ingredientPlaceholder": "Nama bahan (contoh: tepung terigu)",
+    "noIngredientsYet": "Belum ada bahan baku. Klik \"Tambah Bahan\" untuk menambahkan.",
+    "saveCategory": "Simpan Kategori",
+    "productCategory": "Kategori Produk",
+    "createNewCategory": "Buat kategori produk baru",
+    "editCategoryDesc": "Edit kategori produk"
+  },
+  "finance": {
+    "title": "Keuangan",
+    "subtitle": "Kelola keuangan lengkap",
+    "description": "Kelola pemasukan, pengeluaran dan laporan keuangan",
+    "income": "Pemasukan",
+    "expense": "Pengeluaran",
+    "profit": "Keuntungan",
+    "loss": "Kerugian",
+    "balance": "Saldo",
+    "revenue": "Pendapatan",
+    "costs": "Biaya",
+    "cashFlow": "Arus Kas",
+    "monthlyReport": "Laporan Bulanan",
+    "yearlyReport": "Laporan Tahunan",
+    "newTransaction": "Transaksi Baru",
+    "createNewTransaction": "Buat Transaksi Keuangan Baru",
+    "transactionDetail": "Detail Transaksi",
+    "financialTrends": "Tren Keuangan",
+    "financialTrendsDesc": "Analisis pendapatan, pengeluaran, keuntungan, dan HPP",
+    "loadingFinancialData": "Memuat data keuangan...",
+    "loadingFinancialDashboard": "Loading financial dashboard...",
+    "transactionTypes": {
+      "income": "Pemasukan",
+      "expense": "Pengeluaran"
+    },
+    "categories": {
+      "income": ["Penjualan", "Investasi", "Lain-lain"],
+      "expense": ["Bahan Baku", "Gaji", "Operasional", "Equipment", "Marketing", "Transport"]
+    },
+    "paymentMethods": {
+      "cash": "Tunai",
+      "bankTransfer": "Transfer Bank",
+      "creditCard": "Kartu Kredit",
+      "digitalWallet": "E-Wallet"
+    },
+    "all": "Semua"
+  },
+  "hpp": {
+    "title": "Perhitungan HPP",
+    "subtitle": "Hitung Harga Pokok Produksi",
+    "calculate": "Hitung HPP",
+    "recalculate": "Hitung Ulang",
+    "materialCosts": "Biaya Bahan",
+    "laborCosts": "Biaya Tenaga Kerja",
+    "overheadCosts": "Biaya Overhead",
+    "totalCOGS": "Total HPP",
+    "suggestedPrice": "Harga Saran",
+    "profitMargin": "Margin Keuntungan"
   }
 }

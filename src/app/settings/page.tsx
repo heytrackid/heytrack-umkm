@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useSettings, currencies, languages } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/useLoading'
+import { useI18n } from '@/providers/I18nProvider'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
@@ -56,7 +57,8 @@ const LOADING_KEYS = {
 } as const
 
 export default function SettingsPage() {
-  const { settings: globalSettings, updateCurrency, updateLanguage, formatCurrency, t } = useSettings()
+  const { settings: globalSettings, updateCurrency, updateLanguage, formatCurrency } = useSettings()
+  const { t } = useI18n()
   const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
@@ -138,7 +140,7 @@ export default function SettingsPage() {
       
       if (error) {
         console.error('Error loading settings:', error)
-        toast.error('Gagal memuat pengaturan')
+        toast.error(t('settings.messages.loadError'))
         return
       }
       
@@ -149,7 +151,7 @@ export default function SettingsPage() {
       
     } catch (error) {
       console.error('Error loading settings:', error)
-      toast.error('Gagal memuat pengaturan')
+      toast.error(t('settings.messages.loadError'))
     } finally {
       stopLoading(LOADING_KEYS.LOAD_SETTINGS)
     }
@@ -190,11 +192,11 @@ export default function SettingsPage() {
       
       console.log('✅ Settings saved successfully:', data)
       setIsUnsavedChanges(false)
-      toast.success('Pengaturan berhasil disimpan!')
+      toast.success(t('settings.messages.saveSuccess'))
       
     } catch (error) {
       console.error('❌ Error saving settings:', error)
-      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.')
+      toast.error(t('settings.messages.saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -214,11 +216,11 @@ export default function SettingsPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/">{t('navigation.dashboard.title')}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Pengaturan</BreadcrumbPage>
+              <BreadcrumbPage>{t('settings.title')}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -226,23 +228,23 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Pengaturan</h1>
-            <p className="text-muted-foreground">Kelola preferensi aplikasi dan pengaturan bisnis</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('settings.title')}</h1>
+            <p className="text-muted-foreground">{t('settings.subtitle')}</p>
           </div>
           <div className="flex gap-2">
             <ExcelExportButton variant="outline" className="mr-2" />
             {isUnsavedChanges && (
               <Badge variant="outline" className="text-orange-600 border-orange-600">
-                Belum Tersimpan
+                {t('settings.actions.unsaved')}
               </Badge>
             )}
             <Button variant="outline" onClick={handleReset}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
+              {t('settings.actions.reset')}
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
               <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Menyimpan...' : 'Simpan'}
+              {isSaving ? t('settings.actions.saving') : t('common.actions.save')}
             </Button>
           </div>
         </div>
@@ -284,11 +286,11 @@ export default function SettingsPage() {
             {/* Settings Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="general">Umum</TabsTrigger>
-                <TabsTrigger value="profile">Profil</TabsTrigger>
-                <TabsTrigger value="notifications">Notifikasi</TabsTrigger>
-                <TabsTrigger value="system">Sistem</TabsTrigger>
-                <TabsTrigger value="ui">Tampilan</TabsTrigger>
+                <TabsTrigger value="general">{t('settings.tabs.general')}</TabsTrigger>
+                <TabsTrigger value="profile">{t('settings.tabs.profile')}</TabsTrigger>
+                <TabsTrigger value="notifications">{t('settings.tabs.notifications')}</TabsTrigger>
+                <TabsTrigger value="system">{t('settings.tabs.system')}</TabsTrigger>
+                <TabsTrigger value="ui">{t('settings.tabs.ui')}</TabsTrigger>
               </TabsList>
 
               {/* General Settings */}

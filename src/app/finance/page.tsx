@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useFinancialRecords } from '@/hooks/useDatabase'
+import { useI18n } from '@/providers/I18nProvider'
 
 // Lazy loading imports
 import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
@@ -16,36 +18,79 @@ import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
 import { useResponsive } from '@/hooks/use-mobile'
 import { PullToRefresh } from '@/components/ui/mobile-gestures'
 
-// Extracted components
-import { FinancialSummaryCards } from './components/FinancialSummaryCards'
-import { FinancialFilters } from './components/FinancialFilters'
-import { QuickAnalytics } from './components/QuickAnalytics'
-import { TransactionList } from './components/TransactionList'
-import { FinanceForm } from './components/FinanceForm'
-import { TransactionDetailView } from './components/TransactionDetailView'
+// Dynamically load heavy sections with skeleton fallbacks
+const FinancialSummaryCards = dynamic(() => import('./components/FinancialSummaryCards').then(m => m.FinancialSummaryCards), {
+  loading: () => (
+    <div className="grid gap-4 md:grid-cols-4">
+      {Array.from({ length: 4 }, (_, i) => (
+        <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
+      ))}
+    </div>
+  ),
+})
+
+const FinancialFilters = dynamic(() => import('./components/FinancialFilters').then(m => m.FinancialFilters), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="h-10 rounded bg-muted animate-pulse mb-3" />
+        <div className="h-10 rounded bg-muted animate-pulse" />
+      </CardContent>
+    </Card>
+  ),
+})
+
+const QuickAnalytics = dynamic(() => import('./components/QuickAnalytics').then(m => m.QuickAnalytics), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="h-24 rounded bg-muted animate-pulse" />
+      </CardContent>
+    </Card>
+  ),
+})
+
+const TransactionList = dynamic(() => import('./components/TransactionList').then(m => m.TransactionList), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="h-64 rounded bg-muted animate-pulse" />
+      </CardContent>
+    </Card>
+  ),
+})
+
+const FinanceForm = dynamic(() => import('./components/FinanceForm').then(m => m.FinanceForm), {
+  loading: () => <div className="h-64 rounded bg-muted animate-pulse" />,
+})
+
+const TransactionDetailView = dynamic(() => import('./components/TransactionDetailView').then(m => m.TransactionDetailView), {
+  loading: () => <div className="h-32 rounded bg-muted animate-pulse" />,
+})
 
 import { Plus, Download, AlertTriangle } from 'lucide-react'
 
 // Sample data removed - now using real data from API
 // const sampleTransactions = [...]
 
-const transactionTypes = [
-  { value: 'INCOME', label: 'Pemasukan', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
-  { value: 'EXPENSE', label: 'Pengeluaran', color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
-]
-
-const incomeCategories = ['Penjualan', 'Investasi', 'Lain-lain']
-const expenseCategories = ['Bahan Baku', 'Gaji', 'Operasional', 'Equipment', 'Marketing', 'Transport']
-const paymentMethods = ['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']
-
 export default function FinancePage() {
   const { data: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
+  const { t } = useI18n()
+  
+  const transactionTypes = [
+    { value: 'INCOME', label: t('finance.transactionTypes.income'), color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
+    { value: 'EXPENSE', label: t('finance.transactionTypes.expense'), color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
+  ]
+  
+  const incomeCategories = ['Penjualan', 'Investasi', 'Lain-lain']
+  const expenseCategories = ['Bahan Baku', 'Gaji', 'Operasional', 'Equipment', 'Marketing', 'Transport']
+  const paymentMethods = ['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']
   
   const [searchTerm, setSearchTerm] = useState('')
-  const [typeFilter, setTypeFilter] = useState('Semua')
-  const [categoryFilter, setCategoryFilter] = useState('Semua')
+  const [typeFilter, setTypeFilter] = useState(t('finance.all'))
+  const [categoryFilter, setCategoryFilter] = useState(t('finance.all'))
   const [dateFilter, setDateFilter] = useState('')
-  const [paymentMethodFilter, setPaymentMethodFilter] = useState('Semua')
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState(t('finance.all'))
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -66,8 +111,8 @@ export default function FinancePage() {
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = (transaction.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (transaction.reference_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = typeFilter === 'Semua' || transaction.type === typeFilter
-    const matchesCategory = categoryFilter === 'Semua' || transaction.category === categoryFilter
+    const matchesType = typeFilter === t('finance.all') || transaction.type === typeFilter
+    const matchesCategory = categoryFilter === t('finance.all') || transaction.category === categoryFilter
     const matchesDate = !dateFilter || transaction.transaction_date === dateFilter
     return matchesSearch && matchesType && matchesCategory && matchesDate
   })
@@ -76,15 +121,6 @@ export default function FinancePage() {
     return transactionTypes.find(t => t.value === type) || transactionTypes[0]
   }
 
-  const getPaymentMethodLabel = (method: string) => {
-    const methods: any = {
-      'CASH': 'Tunai',
-      'BANK_TRANSFER': 'Transfer Bank',
-      'CREDIT_CARD': 'Kartu Kredit',
-      'DIGITAL_WALLET': 'E-Wallet'
-    }
-    return methods[method] || method
-  }
 
   // Calculate stats
   const totalIncome = transactions
@@ -124,21 +160,21 @@ export default function FinancePage() {
             <div className={isMobile ? 'text-center' : ''}>
               <h1 className={`font-bold text-foreground ${
                 isMobile ? 'text-2xl' : 'text-3xl'
-              }`}>Keuangan</h1>
-              <p className="text-muted-foreground">Kelola pemasukan, pengeluaran dan laporan keuangan</p>
+              }`}>{t('finance.title')}</h1>
+              <p className="text-muted-foreground">{t('finance.description')}</p>
             </div>
             <div className={`flex gap-2 ${
               isMobile ? 'w-full flex-col' : ''
             }`}>
               <Button variant="outline" className={isMobile ? 'w-full' : ''}>
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                {t('common.actions.export')}
               </Button>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className={isMobile ? 'w-full' : ''}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Transaksi Baru
+                    {t('finance.newTransaction')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className={`max-w-2xl ${
@@ -146,32 +182,42 @@ export default function FinancePage() {
                 }`}>
                   <DialogHeader>
                     <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                      Buat Transaksi Keuangan Baru
+                      {t('finance.createNewTransaction')}
                     </DialogTitle>
                   </DialogHeader>
-                  <FinanceForm onClose={() => setIsAddDialogOpen(false)} />
+                  <Suspense fallback={<div className="h-64 rounded bg-muted animate-pulse" />}>
+                    <FinanceForm onClose={() => setIsAddDialogOpen(false)} />
+                  </Suspense>
                 </DialogContent>
               </Dialog>
             </div>
           </div>
 
-          {/* Financial Summary Cards */}
-          <FinancialSummaryCards
-            stats={stats}
-            isMobile={isMobile}
-            transactions={transactions}
-          />
+          {/* Financial Summary Cards (Suspense) */}
+          <Suspense fallback={
+            <div className="grid gap-4 md:grid-cols-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
+              ))}
+            </div>
+          }>
+            <FinancialSummaryCards
+              stats={stats}
+              isMobile={isMobile}
+              transactions={transactions}
+            />
+          </Suspense>
 
-          {/* Financial Trends Chart */}
+          {/* Financial Trends Chart (already lazy) */}
           <Card>
             <CardHeader className={isMobile ? 'pb-2' : ''}>
               <CardTitle className={isMobile ? 'text-lg' : ''}>
-                Tren Keuangan
+                {t('finance.financialTrends')}
               </CardTitle>
               <p className={`text-muted-foreground ${
                 isMobile ? 'text-xs' : 'text-sm'
               }`}>
-                Analisis pendapatan, pengeluaran, keuntungan, dan HPP
+                {t('finance.financialTrendsDesc')}
               </p>
             </CardHeader>
             <CardContent>
@@ -187,7 +233,7 @@ export default function FinancePage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className={`ml-3 ${isMobile ? 'text-sm' : ''}`}>Memuat data keuangan...</span>
+                  <span className={`ml-3 ${isMobile ? 'text-sm' : ''}`}>{t('finance.loadingFinancialData')}</span>
                 </div>
               </CardContent>
             </Card>
@@ -202,7 +248,7 @@ export default function FinancePage() {
             </Card>
           ) : (
             <ProgressiveLoader 
-              loadingMessage="Loading financial dashboard..."
+              loadingMessage={t('finance.loadingFinancialDashboard')}
               fallback={
                 <div className={isMobile ? 'overflow-x-auto' : ''}>
                   <div className="h-96 bg-muted animate-pulse rounded-lg"></div>
@@ -218,23 +264,38 @@ export default function FinancePage() {
                     expenses: financialRecords
                       .filter(t => t.type === 'EXPENSE')
                       .map(t => ({ amount: t.amount, category: t.category, date: t.date })),
-                    inventory: []
-                  }} 
+                  }}
                 />
               </div>
             </ProgressiveLoader>
           )}
 
-          {/* Quick Analytics */}
-          <QuickAnalytics
+          {/* Quick Analytics (Suspense) */}
+          <Suspense fallback={
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-24 rounded bg-muted animate-pulse" />
+              </CardContent>
+            </Card>
+          }>
+            <QuickAnalytics
             incomeCategories={incomeCategories}
             expenseCategories={expenseCategories}
             transactions={transactions}
             isMobile={isMobile}
           />
+          </Suspense>
 
-          {/* Filters */}
-          <FinancialFilters
+          {/* Filters (Suspense) */}
+          <Suspense fallback={
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-10 rounded bg-muted animate-pulse mb-3" />
+                <div className="h-10 rounded bg-muted animate-pulse" />
+              </CardContent>
+            </Card>
+          }>
+            <FinancialFilters
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             typeFilter={typeFilter}
@@ -250,9 +311,17 @@ export default function FinancePage() {
             incomeCategories={incomeCategories}
             expenseCategories={expenseCategories}
           />
+          </Suspense>
 
-          {/* Transactions List */}
-          <TransactionList
+          {/* Transactions List (Suspense) */}
+          <Suspense fallback={
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-64 rounded bg-muted animate-pulse" />
+              </CardContent>
+            </Card>
+          }>
+            <TransactionList
             transactions={filteredTransactions}
             isMobile={isMobile}
             onViewTransaction={(transaction) => {
@@ -265,9 +334,10 @@ export default function FinancePage() {
               console.log('Bulk action:', action, 'for transactions:', transactionIds)
               // TODO: Implement bulk actions (export, delete)
             }}
-            getPaymentMethodLabel={getPaymentMethodLabel}
+            getPaymentMethodLabel={(method: string) => getPaymentMethodLabel(method, t)}
             transactionTypes={transactionTypes}
           />
+          </Suspense>
 
           {/* Transaction Detail Dialog */}
           <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
@@ -276,7 +346,7 @@ export default function FinancePage() {
             }`}>
               <DialogHeader>
                 <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                  Detail Transaksi {selectedTransaction?.reference}
+                  {t('finance.transactionDetail')} {selectedTransaction?.reference}
                 </DialogTitle>
               </DialogHeader>
               {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
@@ -288,12 +358,12 @@ export default function FinancePage() {
   )
 }
 
-function getPaymentMethodLabel(method: string) {
+function getPaymentMethodLabel(method: string, t: any) {
   const methods: any = {
-    'CASH': 'Tunai',
-    'BANK_TRANSFER': 'Transfer Bank',
-    'CREDIT_CARD': 'Kartu Kredit',
-    'DIGITAL_WALLET': 'E-Wallet'
+    'CASH': t('finance.paymentMethods.cash'),
+    'BANK_TRANSFER': t('finance.paymentMethods.bankTransfer'),
+    'CREDIT_CARD': t('finance.paymentMethods.creditCard'),
+    'DIGITAL_WALLET': t('finance.paymentMethods.digitalWallet')
   }
   return methods[method] || method
 }

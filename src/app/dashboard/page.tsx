@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +11,9 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
 import ExcelExportButton from '@/components/export/ExcelExportButton'
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { useI18n } from '@/providers/I18nProvider'
+import { usePagePreloading } from '@/providers/PreloadingProvider'
+import { SmartLink, SmartActionButton, SmartQuickActions } from '@/components/navigation/SmartNavigation'
 import { 
   StatsCardSkeleton,
   DashboardHeaderSkeleton,
@@ -32,6 +36,18 @@ import {
   Target,
   Zap
 } from 'lucide-react'
+
+const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection'), {
+  loading: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }, (_, i) => (
+        <StatsCardSkeleton key={i} />
+      ))}
+    </div>
+  ),
+})
+const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
+const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
 
 // Sample data removed - now using real data from API
 // const sampleStats = {
@@ -64,12 +80,16 @@ const lowStockItems: any[] = []
 export default function Dashboard() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
+  const { t } = useI18n()
   const [currentTime, setCurrentTime] = useState(new Date())
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
     [LOADING_KEYS.RECENT_ORDERS]: true,
     [LOADING_KEYS.STOCK_ALERTS]: true
   })
+  
+  // Enable smart preloading for dashboard
+  usePagePreloading('dashboard')
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -119,7 +139,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                Dashboard HeyTrack
+                {t('dashboard.title')} HeyTrack
               </h1>
               <p className="text-muted-foreground mt-1">
                 {currentTime.toLocaleDateString('id-ID', { 
@@ -137,7 +157,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Stats Cards */}
+        {/* Stats Cards (Suspense + dynamic) */}
         {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }, (_, i) => (
@@ -145,114 +165,34 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Penjualan</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(placeholderStats.totalSales)}</div>
-              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                <TrendingUp className="h-3 w-3 mr-1" />
-               {placeholderStats.salesGrowth}% dari bulan lalu
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{placeholderStats.totalOrders}</div>
-              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                <TrendingUp className="h-3 w-3 mr-1" />
-               {placeholderStats.ordersGrowth}% dari bulan lalu
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Pelanggan</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{placeholderStats.totalCustomers}</div>
-              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                <TrendingUp className="h-3 w-3 mr-1" />
-               {placeholderStats.customersGrowth}% dari bulan lalu
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Bahan Baku</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{placeholderStats.totalIngredients}</div>
-              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                {placeholderStats.ingredientsLow} stok menipis
-              </div>
-            </CardContent>
-          </Card>
-          </div>
+          <Suspense fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <StatsCardSkeleton key={i} />
+              ))}
+            </div>
+          }>
+            <StatsCardsSection t={t} formatCurrency={formatCurrency} stats={placeholderStats} />
+          </Suspense>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Orders */}
+          {/* Recent Orders (Suspense + dynamic) */}
           {isLoading(LOADING_KEYS.RECENT_ORDERS) ? (
             <RecentOrdersSkeleton />
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingCart className="h-5 w-5" />
-                  Pesanan Terbaru
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
-                  <p>Belum ada pesanan terbaru</p>
-                  <p className="text-sm">Pesanan akan muncul di sini ketika ada data</p>
-                </div>
-                <Button variant="outline" className="w-full">
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Lihat Semua Pesanan
-                </Button>
-              </CardContent>
-            </Card>
+            <Suspense fallback={<RecentOrdersSkeleton />}>
+              <RecentOrdersSection />
+            </Suspense>
           )}
 
-          {/* Low Stock Alert */}
+          {/* Low Stock Alert (Suspense + dynamic) */}
           {isLoading(LOADING_KEYS.STOCK_ALERTS) ? (
             <StockAlertSkeleton />
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5" />
-                  Peringatan Stok
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-                  <p>Monitoring stok aktif</p>
-                  <p className="text-sm">Peringatan akan muncul jika ada stok menipis</p>
-                </div>
-                <Button variant="outline" className="w-full">
-                  <Package className="h-4 w-4 mr-2" />
-                  Kelola Inventory
-                </Button>
-              </CardContent>
-            </Card>
+            <Suspense fallback={<StockAlertSkeleton />}>
+              <StockAlertsSection />
+            </Suspense>
           )}
         </div>
 
@@ -261,7 +201,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Aksi Cepat
+              {t('dashboard.quickActions')}
             </CardTitle>
           </CardHeader>
           <CardContent>

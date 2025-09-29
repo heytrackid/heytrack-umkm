@@ -103,7 +103,7 @@ export const LazyFinancialRecordForm = withLazyLoading(
 
 // Data table (heavy due to @tanstack/react-table)
 export const LazyDataTable = withLazyLoading(
-  () => import('@/components/ui/data-table').then(m => ({ default: m.DataTable })),
+  () => import('@/components/ui/simple-data-table').then(m => ({ default: m.SimpleDataTable })),
  "h-64"
 )
 

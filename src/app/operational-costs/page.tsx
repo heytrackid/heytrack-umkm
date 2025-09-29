@@ -8,6 +8,7 @@ import { useLoading } from '@/hooks/useLoading'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
+import { useI18n } from '@/providers/I18nProvider'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -50,7 +51,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface OperationalCost {
   id: string
@@ -89,8 +89,8 @@ const LOADING_KEYS = {
 export default function OperationalCostsPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
-  const { t } = useI18n()
   const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
+  const { t } = useI18n()
   const [costs, setCosts] = useState<OperationalCost[]>([])
   
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
@@ -356,16 +356,16 @@ export default function OperationalCostsPage() {
         <CardContent className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Nama Biaya</Label>
+              <Label>{t('operationalCosts.form.name')}</Label>
               <Input
                 value={newCost.name}
                 onChange={(e) => setNewCost(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Contoh: Listrik"
+                placeholder={t('forms.placeholders.enterName')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Kategori</Label>
+              <Label>{t('operationalCosts.form.category')}</Label>
               <Select 
                 value={newCost.category} 
                 onValueChange={(value) => setNewCost(prev => ({ ...prev, category: value }))}
@@ -386,17 +386,17 @@ export default function OperationalCostsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Jumlah Biaya</Label>
+              <Label>{t('operationalCosts.form.amount')}</Label>
               <Input
                 type="number"
                 value={newCost.amount}
                 onChange={(e) => setNewCost(prev => ({ ...prev, amount: Number(e.target.value) }))}
-                placeholder="0"
+                placeholder={t('forms.placeholders.enterAmount')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Frekuensi</Label>
+              <Label>{t('operationalCosts.form.frequency')}</Label>
               <Select 
                 value={newCost.frequency} 
                 onValueChange={(value: any) => setNewCost(prev => ({ ...prev, frequency: value }))}
@@ -441,13 +441,13 @@ export default function OperationalCostsPage() {
           <div className="flex gap-3 pt-4">
             <Button onClick={handleSaveCost} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
-              Simpan Biaya
+              {t('buttons.primary.saveChanges')}
             </Button>
             <Button variant="outline" onClick={() => {
               resetForm()
               setCurrentView('list')
             }}>
-              Batal
+              {t('common.actions.cancel')}
             </Button>
           </div>
         </CardContent>
@@ -499,14 +499,14 @@ export default function OperationalCostsPage() {
 
     return (
       <div className="space-y-6">
-        {/* Header */}
+      {/* Header */}
       <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
         <div className={isMobile ? 'text-center' : ''}>
           <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
             {t('operationalCosts.title')}
           </h1>
           <p className="text-muted-foreground">
-            Kelola biaya operasional bisnis untuk perhitungan HPP yang akurat
+            {t('operationalCosts.subtitle')}
           </p>
         </div>
         <div className={`flex ${isMobile ? 'w-full flex-col gap-2' : 'items-center gap-2'}`}>
@@ -518,7 +518,7 @@ export default function OperationalCostsPage() {
             variant="outline" 
             className={isMobile ? 'w-full' : ''}
             onClick={handleQuickSetup}
-            title="Tambahkan biaya operasional standar secara otomatis"
+            title={t('operationalCosts.quickSetup')}
           >
             <Zap className="h-4 w-4 mr-2" />
             {t('operationalCosts.quickSetup')}

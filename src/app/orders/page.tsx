@@ -1,14 +1,17 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { useI18n } from '@/providers/I18nProvider'
 import { 
   StatsCardSkeleton,
   DashboardHeaderSkeleton
@@ -30,14 +33,6 @@ import {
   MessageCircle,
   Package
 } from 'lucide-react'
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 
 // Mock data
 const mockOrders = [
@@ -67,19 +62,67 @@ const mockOrders = [
   }
 ]
 
-const ORDER_STATUS_CONFIG = {
-  pending: { label: 'Pending', color: 'bg-gray-100 text-gray-800' },
-  confirmed: { label: 'Dikonfirmasi', color: 'bg-gray-200 text-gray-900' },
-  in_production: { label: 'Sedang Diproduksi', color: 'bg-gray-300 text-gray-900' },
-  completed: { label: 'Selesai', color: 'bg-gray-400 text-white' },
-  cancelled: { label: 'Dibatalkan', color: 'bg-gray-500 text-white' }
-}
+// We'll define these inside the component to use t() function
+// const ORDER_STATUS_CONFIG = ...
+// const PAYMENT_STATUS_CONFIG = ...
 
-const PAYMENT_STATUS_CONFIG = {
-  unpaid: { label: 'Belum Dibayar', color: 'bg-gray-100 text-gray-800' },
-  partial: { label: 'Dibayar Sebagian', color: 'bg-gray-200 text-gray-900' },
-  paid: { label: 'Lunas', color: 'bg-gray-300 text-gray-900' }
-}
+// Stats component inline
+const OrdersStatsSection = ({ totalOrders, totalRevenue, averageOrderValue, pendingRevenue, formatCurrency, t }: any) => (
+  <div className="grid gap-4 md:grid-cols-4">
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{t('orders.totalOrders')}</p>
+            <p className="text-2xl font-bold">{totalOrders}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+             18.7% {t('orders.growthFromPrevious')}
+            </p>
+          </div>
+          <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{t('orders.totalRevenue')}</p>
+            <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+             23.2% {t('orders.growthFromPrevious')}
+            </p>
+          </div>
+          <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{t('orders.averageOrderValue')}</p>
+            <p className="text-2xl font-bold">{formatCurrency(averageOrderValue)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('orders.perOrder')}</p>
+          </div>
+          <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{t('orders.pendingPayment')}</p>
+            <p className="text-2xl font-bold">{formatCurrency(pendingRevenue)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('orders.pendingPaymentLabel')}</p>
+          </div>
+          <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+)
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState(mockOrders)
@@ -88,9 +131,25 @@ export default function OrdersPage() {
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const { formatCurrency } = useCurrency()
+  const { t } = useI18n()
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_ORDERS]: true
   })
+
+  // Status configurations using i18n
+  const ORDER_STATUS_CONFIG = {
+    pending: { label: t('orders.status.pending'), color: 'bg-gray-100 text-gray-800' },
+    confirmed: { label: t('orders.status.confirmed'), color: 'bg-gray-200 text-gray-900' },
+    in_production: { label: t('orders.status.in_production'), color: 'bg-gray-300 text-gray-900' },
+    completed: { label: t('orders.status.completed'), color: 'bg-gray-400 text-white' },
+    cancelled: { label: t('orders.status.cancelled'), color: 'bg-gray-500 text-white' }
+  }
+
+  const PAYMENT_STATUS_CONFIG = {
+    unpaid: { label: t('orders.paymentStatus.unpaid'), color: 'bg-gray-100 text-gray-800' },
+    partial: { label: t('orders.paymentStatus.partial'), color: 'bg-gray-200 text-gray-900' },
+    paid: { label: t('orders.paymentStatus.paid'), color: 'bg-gray-300 text-gray-900' }
+  }
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -133,19 +192,19 @@ export default function OrdersPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <ShoppingCart className="h-8 w-8" />
-              Order Management
+              {t('orders.title')}
             </h1>
             <p className="text-muted-foreground">
-              Kelola pesanan dan penjualan dengan sistem terintegrasi
+              {t('orders.subtitle')}
             </p>
           </div>
           <Button onClick={() => window.location.href = '/orders/new'}>
             <Plus className="h-4 w-4 mr-2" />
-            Pesanan Baru
+            {t('orders.addOrder')}
           </Button>
         </div>
         
-        {/* Stats Cards */}
+        {/* Stats Cards (Suspense boundary) */}
         {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
           <div className="grid gap-4 md:grid-cols-4">
             {Array.from({ length: 4 }, (_, i) => (
@@ -153,63 +212,22 @@ export default function OrdersPage() {
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
-                  <p className="text-2xl font-bold">{totalOrders}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                   18.7% dari periode sebelumnya
-                  </p>
-                </div>
-                <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                  <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                   23.2% dari periode sebelumnya
-                  </p>
-                </div>
-                <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Rata-rata Nilai</p>
-                  <p className="text-2xl font-bold">{formatCurrency(averageOrderValue)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">per pesanan</p>
-                </div>
-                <Package className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending Revenue</p>
-                  <p className="text-2xl font-bold">{formatCurrency(pendingRevenue)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
-                </div>
-                <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
-              </div>
-            </CardContent>
-          </Card>
-          </div>
+          <Suspense fallback={
+            <div className="grid gap-4 md:grid-cols-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <StatsCardSkeleton key={i} />
+              ))}
+            </div>
+          }>
+            <OrdersStatsSection
+              totalOrders={totalOrders}
+              totalRevenue={totalRevenue}
+              averageOrderValue={averageOrderValue}
+              pendingRevenue={pendingRevenue}
+              formatCurrency={formatCurrency}
+              t={t}
+            />
+          </Suspense>
         )}
         
         {/* Quick Actions */}
@@ -223,7 +241,7 @@ export default function OrdersPage() {
                 className="flex items-center gap-2"
               >
                 <MessageCircle className="h-4 w-4" />
-                Kelola Template WhatsApp
+                WhatsApp Templates
               </Button>
               <Button
                 variant="outline"
@@ -232,7 +250,7 @@ export default function OrdersPage() {
                 className="flex items-center gap-2"
               >
                 <Package className="h-4 w-4" />
-                Export Data
+                {t('orders.exportData')}
               </Button>
             </div>
           </CardContent>
@@ -249,7 +267,7 @@ export default function OrdersPage() {
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Cari customer atau nomor pesanan..."
+                      placeholder={t('orders.searchPlaceholder')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-8"
@@ -259,10 +277,10 @@ export default function OrdersPage() {
                 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Semua Status" />
+                    <SelectValue placeholder={t('orders.allStatus')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Semua Status</SelectItem>
+                    <SelectItem value="all">{t('orders.allStatus')}</SelectItem>
                     {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => (
                       <SelectItem key={status} value={status}>
                         {config.label}
@@ -275,7 +293,7 @@ export default function OrdersPage() {
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <Input
                     type="date"
-                    placeholder="Dari tanggal"
+                    placeholder={t('orders.fromDate')}
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
                     className="w-[140px]"
@@ -283,7 +301,7 @@ export default function OrdersPage() {
                   <span className="text-muted-foreground">-</span>
                   <Input
                     type="date"
-                    placeholder="Sampai tanggal"
+                    placeholder={t('orders.toDate')}
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
                     className="w-[140px]"
@@ -299,69 +317,64 @@ export default function OrdersPage() {
           <OrdersTableSkeleton rows={5} />
         ) : (
           <Card>
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total Amount</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.order_number}</TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{order.customer_name}</div>
-                      <div className="text-sm text-muted-foreground">{formatDate(order.order_date)}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {order.items.map(item => `${item.quantity} produk (${item.quantity} qty)`).join(', ')}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{formatCurrency(order.total_amount)}</TableCell>
-                  <TableCell>{formatDate(order.due_date)}</TableCell>
-                  <TableCell>
-                    <Badge className={ORDER_STATUS_CONFIG[order.status].color}>
-                      {ORDER_STATUS_CONFIG[order.status].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={PAYMENT_STATUS_CONFIG[order.payment_status].color}>
-                      {PAYMENT_STATUS_CONFIG[order.payment_status].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Select defaultValue={order.status}>
-                        <SelectTrigger className="w-[140px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => (
-                            <SelectItem key={status} value={status}>
-                              {config.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            </Table>
+            <CardContent className="p-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('orders.table.order')}</TableHead>
+                    <TableHead>{t('orders.table.customer')}</TableHead>
+                    <TableHead>{t('orders.table.status')}</TableHead>
+                    <TableHead>{t('orders.table.date')}</TableHead>
+                    <TableHead>{t('orders.table.total')}</TableHead>
+                    <TableHead>{t('orders.table.actions')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{order.order_number}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {order.items.map(item => item.name).join(', ')}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{order.customer_name}</div>
+                          <div className="text-sm text-muted-foreground">{order.customer_phone}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG].color}>
+                          {ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG].label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{formatDate(order.order_date)}</div>
+                          <div className="text-muted-foreground">{t('orders.table.due')}: {formatDate(order.due_date)}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{formatCurrency(order.total_amount)}</div>
+                          <Badge className={PAYMENT_STATUS_CONFIG[order.payment_status as keyof typeof PAYMENT_STATUS_CONFIG].color}>
+                            {PAYMENT_STATUS_CONFIG[order.payment_status as keyof typeof PAYMENT_STATUS_CONFIG].label}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
           </Card>
         )}
       </div>

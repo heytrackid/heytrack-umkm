@@ -43,8 +43,8 @@ const unitOptions = [
   { value: 'dozen', label: 'Dozen' },
 ];
 
-export function IngredientsCRUD() {
-  const { data: ingredients, loading, error, create, update, remove } = useIngredients();
+export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: any[] }) {
+  const { data: ingredients, loading, error, create, update, remove } = useIngredients({ initial: initialIngredients, refetchOnMount: false });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);

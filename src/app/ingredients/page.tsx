@@ -1,11 +1,81 @@
-'use client'
+export const revalidate = 600
 
+import 'server-only'
+import { Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
-import { IngredientsCRUD } from '@/components/crud/ingredients-crud'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 
-export default function IngredientsPage() {
+// Dynamically import the heavy CRUD component
+const IngredientsCRUD = dynamic(() => import('@/components/crud/ingredients-crud').then(m => ({ default: m.IngredientsCRUD })), {
+  loading: () => (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <div>
+            <Skeleton className="h-6 w-48 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Search and filter skeletons */}
+          <div className="flex gap-4">
+            <Skeleton className="h-10 flex-1" />
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          
+          {/* Table skeleton */}
+          <div className="border rounded-lg">
+            <div className="p-4 border-b">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            </div>
+            {Array.from({ length: 10 }, (_, i) => (
+              <div key={i} className="p-4 border-b last:border-b-0">
+                <div className="grid grid-cols-6 gap-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ),
+})
+import { createServerSupabaseAdmin } from '@/lib/supabase'
+
+async function fetchInitialIngredients() {
+  try {
+    const admin = createServerSupabaseAdmin()
+    const { data, error } = await (admin as any)
+      .from('ingredients')
+      .select('id,name,unit,price_per_unit,current_stock,minimum_stock,category')
+      .order('name', { ascending: true })
+      .limit(50)
+    if (error) throw error
+    return data || []
+  } catch {
+    return []
+  }
+}
+
+export default async function IngredientsPage() {
+  const initialIngredients = await fetchInitialIngredients()
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -37,7 +107,44 @@ export default function IngredientsPage() {
         </div>
 
         {/* Main Content - Ingredients CRUD */}
-        <IngredientsCRUD />
+        <Suspense fallback={
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <Skeleton className="h-6 w-48 mb-2" />
+                  <Skeleton className="h-4 w-96" />
+                </div>
+                <Skeleton className="h-10 w-32" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 w-32" />
+                  <Skeleton className="h-10 w-32" />
+                </div>
+                <div className="border rounded-lg">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <div key={i} className="p-4 border-b last:border-b-0">
+                      <div className="grid grid-cols-6 gap-4">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        }>
+          <IngredientsCRUD initialIngredients={initialIngredients} />
+        </Suspense>
       </div>
     </AppLayout>
   )

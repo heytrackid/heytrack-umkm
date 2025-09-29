@@ -1,7 +1,8 @@
 'use client'
 
+import React, { useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
@@ -49,6 +50,15 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  // Prefetch next likely routes to reduce navigation latency
+  useEffect(() => {
+    const routesToPrefetch = ['/', '/orders', '/inventory', '/hpp', '/finance', '/resep', '/customers']
+    routesToPrefetch.forEach((r) => {
+      try { router.prefetch(r) } catch {}
+    })
+  }, [router])
   const { t } = useI18n()
 
   const navigationSections: NavigationSection[] = [
@@ -255,6 +265,7 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onMouseEnter={() => { try { router.prefetch(item.href) } catch {} }}
                       className={cn(
                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
                        "hover:scale-[1.02]",
@@ -388,6 +399,7 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                     <Link
                       key={item.href}
                       href={item.href}
+                      onMouseEnter={() => { try { router.prefetch(item.href) } catch {} }}
                       className={cn(
                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
                        "hover:scale-[1.02]",

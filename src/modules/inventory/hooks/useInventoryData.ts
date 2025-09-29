@@ -8,9 +8,9 @@ import {
   Ingredient
 } from '../types'
 
-export function useInventoryData(params?: InventorySearchParams) {
-  const [ingredients, setIngredients] = useState<Ingredient[]>([])
-  const [loading, setLoading] = useState(true)
+export function useInventoryData(params?: InventorySearchParams, options?: { initial?: Ingredient[]; refetchOnMount?: boolean }) {
+  const [ingredients, setIngredients] = useState<Ingredient[]>(options?.initial ?? [])
+  const [loading, setLoading] = useState(options?.initial ? false : true)
   const [error, setError] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState(0)
 
@@ -30,8 +30,12 @@ export function useInventoryData(params?: InventorySearchParams) {
   }, [params])
 
   useEffect(() => {
+    // If we already have initial data and refetchOnMount is false, skip initial refetch
+    if (options?.initial && options.initial.length > 0 && options?.refetchOnMount === false) {
+      return
+    }
     fetchIngredients()
-  }, [fetchIngredients])
+  }, [fetchIngredients, options?.refetchOnMount, options?.initial])
 
   const refresh = useCallback(() => {
     fetchIngredients()
