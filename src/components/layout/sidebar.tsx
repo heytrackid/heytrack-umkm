@@ -3,25 +3,23 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  LayoutDashboard, 
-  ChefHat, 
-  Package, 
-  ShoppingCart, 
-  Users, 
+import {
+  LayoutDashboard,
+  ChefHat,
+  Package,
+  ShoppingCart,
+  Users,
   Calculator,
   Receipt,
   BarChart3,
-  Menu,
-  X,
-  ClipboardCheck,
   TrendingUp,
   Settings,
-  FileText,
   Target,
-  CheckCircle,
-  Tags,
-  DollarSign
+  DollarSign,
+  Layers,
+  Banknote,
+  X,
+  Menu
 } from 'lucide-react'
 
 interface NavigationItem {
@@ -55,7 +53,6 @@ const navigationSections: NavigationSection[] = [
   },
   {
     title: '🚀 STEP 1: DATA MASTER',
-    description: 'Setup data dasar untuk HPP',
     isWorkflow: true,
     items: [
       {
@@ -65,6 +62,14 @@ const navigationSections: NavigationSection[] = [
         isSimple: true,
         badge: 'MULAI',
         description: 'Input harga & stok bahan'
+      },
+      {
+        name: 'Kategori Produk',
+        href: '/categories',
+        icon: Layers,
+        isSimple: true,
+        badge: 'ORGANIZE',
+        description: 'Klasifikasi produk'
       },
       {
         name: 'Biaya Operasional',
@@ -81,148 +86,373 @@ const navigationSections: NavigationSection[] = [
         isSimple: true,
         badge: 'PENTING',
         description: 'Komposisi & takaran'
-      }
+      },
     ]
   },
   {
-    title: '🎯 STEP 2: SALES & ORDERS',
-    description: 'Kelola penjualan',
+    title: '🧮 STEP 2: HITUNG HPP',
+    description: 'Kalkulasi harga pokok produksi',
     isWorkflow: true,
     items: [
       {
-        name: 'Pesanan',
-        href: '/orders',
-        icon: ShoppingCart,
-        description: 'Kelola pesanan masuk'
+        name: 'HPP & Pricing',
+        href: '/hpp',
+        icon: Calculator,
+        isSimple: true,
+        badge: 'ALL-IN-ONE',
+        description: 'HPP otomatis + strategi pricing'
       },
       {
-        name: 'Pelanggan',
+        name: 'HPP Enhanced',
+        href: '/hpp-enhanced',
+        icon: Target,
+        isSimple: true,
+        badge: 'ADVANCED',
+        description: 'HPP dengan fitur lanjutan'
+      },
+    ]
+  },
+  {
+    title: '📊 STEP 3: OPERASIONAL',
+    description: 'Jalankan bisnis dengan data akurat',
+    isWorkflow: true,
+    items: [
+      {
+        name: 'Kelola Pesanan',
+        href: '/orders',
+        icon: ShoppingCart,
+        isSimple: true,
+        badge: 'HARIAN',
+        description: 'Terima & proses order'
+      },
+      {
+        name: 'Data Pelanggan',
         href: '/customers',
         icon: Users,
-        description: 'Database pelanggan'
-      }
+        isSimple: true,
+        badge: 'CRM',
+        description: 'Database customer'
+      },
+    ]
+  },
+  {
+    title: '📈 STEP 4: MONITORING',
+    description: 'Pantau performa & profit',
+    isWorkflow: true,
+    items: [
+      {
+        name: 'Arus Kas',
+        href: '/cash-flow',
+        icon: DollarSign,
+        isSimple: true,
+        badge: 'REALTIME',
+        description: 'Monitor pemasukan & pengeluaran'
+      },
+      {
+        name: 'Finance',
+        href: '/finance',
+        icon: Banknote,
+        isSimple: true,
+        badge: 'KOMPREHENSIF',
+        description: 'Kelola keuangan lengkap'
+      },
+      {
+        name: 'Laporan Profit',
+        href: '/reports',
+        icon: BarChart3,
+        isSimple: true,
+        badge: 'ANALISA',
+        description: 'Track keuntungan harian'
+      },
+      {
+        name: 'Review HPP',
+        href: '/review',
+        icon: TrendingUp,
+        isSimple: true,
+        badge: 'OPTIMASI',
+        description: 'Evaluasi & tingkatkan'
+      },
     ]
   },
   {
     title: '⚙️ LAINNYA',
     items: [
       {
-        name: 'Keuangan',
-        href: '/finance',
-        icon: DollarSign,
-        description: 'Laporan keuangan'
-      },
-      {
-        name: 'Pengaturan',
+        name: 'Settings',
         href: '/settings',
         icon: Settings,
-        description: 'Konfigurasi sistem'
-      }
+        description: 'Pengaturan aplikasi'
+      },
     ]
   }
 ]
 
 interface SidebarProps {
-  isOpen: boolean
-  onToggle: () => void
-  isMobile: boolean
+  isOpen?: boolean
+  onToggle?: () => void
+  isMobile?: boolean
 }
 
-export default function SimpleSidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
+export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
   const pathname = usePathname()
 
-  const isActivePath = (href: string) => {
-    if (href === '/') {
-      return pathname === '/'
-    }
-    return pathname.startsWith(href)
-  }
-
-  const renderNavigationItem = (item: NavigationItem) => {
-    const isActive = isActivePath(item.href)
-    const Icon = item.icon
-
+  // If it's mobile mode (used within Sheet), render simplified version
+  if (isMobile) {
     return (
-      <Link
-        key={item.href}
-        href={item.href}
-        className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-          isActive
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted"
-        )}
-        onClick={isMobile ? onToggle : undefined}
-      >
-        <Icon className="h-4 w-4" />
-        <span className="flex-1">{item.name}</span>
-        {item.badge && (
-          <span className="px-2 py-0.5 text-xs bg-orange-100 text-orange-800 rounded-full">
-            {item.badge}
-          </span>
-        )}
-      </Link>
+      <div className="h-full flex flex-col bg-background">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+              <Package className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground">
+                HeyTrack
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                UMKM Kuliner HPP
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+          {navigationSections.map((section) => (
+            <div key={section.title} className="space-y-2">
+              {/* Section Title */}
+              <div className={cn(
+                "px-3 py-2 rounded-lg",
+                section.isWorkflow 
+                  ? "bg-muted/50 border border-border" 
+                  : ""
+              )}>
+                <h3 className={cn(
+                  "text-xs font-semibold uppercase tracking-wider",
+                  section.isWorkflow 
+                    ? "text-foreground" 
+                    : "text-muted-foreground"
+                )}>
+                  {section.title}
+                </h3>
+                {section.description && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {section.description}
+                  </p>
+                )}
+              </div>
+              
+              {/* Section Items */}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || 
+                    (item.href.includes('#') && pathname === item.href.split('#')[0])
+                  
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                        "hover:scale-[1.02]",
+                        isActive 
+                          ? "bg-primary/10 text-primary border border-primary/20" 
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <div className="flex items-center justify-center mr-3 mt-0.5">
+                        <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium truncate">{item.name}</span>
+                          
+                          {/* Badges */}
+                          <div className="flex items-center gap-1 ml-2">
+                            {item.badge && (
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-secondary text-secondary-foreground">
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Description */}
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Active indicator */}
+                      {isActive && (
+                        <div className="w-1 bg-primary rounded-full self-stretch ml-2" />
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+      </div>
     )
   }
 
-  const renderNavigationSection = (section: NavigationSection) => (
-    <div key={section.title} className="space-y-2">
-      <div className="px-3 py-2">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          {section.title}
-        </h3>
-        {section.description && (
-          <p className="text-xs text-muted-foreground mt-1">
-            {section.description}
-          </p>
-        )}
-      </div>
-      <div className="space-y-1">
-        {section.items.map(renderNavigationItem)}
-      </div>
-    </div>
-  )
-
   return (
     <>
-      {/* Mobile Overlay */}
-      {isMobile && isOpen && (
-        <div
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div 
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
 
       {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 bg-background border-r transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto",
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 flex flex-col",
+        "bg-white dark:bg-black",
+        "border-r border-gray-200 dark:border-gray-800",
+        "transform transition-transform duration-300 ease-in-out",
+        "lg:translate-x-0 lg:static lg:inset-0",
+        // Mobile: full screen width on small screens, 80% on larger mobile
+        "w-full sm:w-80 lg:w-72",
+        // Animation
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <ChefHat className="h-4 w-4 text-primary-foreground" />
+        <div className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gray-800 dark:bg-gray-600 rounded-lg flex items-center justify-center">
+              <Package className="h-6 w-6 text-white" />
             </div>
-            <span className="font-semibold text-lg">HeyTrack</span>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                HeyTrack
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                UMKM Kuliner HPP
+              </p>
+            </div>
           </div>
-          {isMobile && (
-            <button
-              onClick={onToggle}
-              className="p-2 hover:bg-muted rounded-lg"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+          
+          {/* Mobile close button */}
+          <button
+            onClick={onToggle}
+            className="lg:hidden p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            <X className="h-6 w-6" />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
-          {navigationSections.map(renderNavigationSection)}
+        <nav className="flex-1 px-3 lg:px-4 py-4 space-y-4 lg:space-y-6 overflow-y-auto">
+          {navigationSections.map((section) => (
+            <div key={section.title} className="space-y-2">
+              {/* Section Title */}
+              <div className={cn(
+                "px-3 py-2 rounded-lg",
+                section.isWorkflow 
+                  ? "bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700" 
+                  : ""
+              )}>
+                <h3 className={cn(
+                  "text-xs font-semibold uppercase tracking-wider",
+                  section.isWorkflow 
+                    ? "text-gray-700 dark:text-gray-300" 
+                    : "text-gray-400 dark:text-gray-500"
+                )}>
+                  {section.title}
+                </h3>
+                {section.description && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {section.description}
+                  </p>
+                )}
+              </div>
+              
+              {/* Section Items */}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive = pathname === item.href || 
+                    (item.href.includes('#') && pathname === item.href.split('#')[0])
+                  
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                        "hover:scale-[1.02] hover:shadow-sm",
+                        isActive 
+                          ? "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 shadow-sm" 
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white"
+                      )}
+                    >
+                      <div className="flex items-center justify-center mr-3 mt-0.5">
+                        <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium truncate">{item.name}</span>
+                          
+                          {/* Badges */}
+                          <div className="flex items-center gap-1 ml-2">
+                            {item.badge && (
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                {item.badge}
+                              </span>
+                            )}
+                            {item.isSimple && !item.badge && (
+                              <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full font-medium">
+                                SIMPLE
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Description */}
+                        {item.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Active indicator */}
+                      {isActive && (
+                        <div className="w-1 bg-gray-700 dark:bg-gray-300 rounded-full self-stretch ml-2" />
+                      )}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </aside>
+
+      {/* Mobile toggle button - Only show if not using mobile header */}
+      {!isMobile && (
+        <button
+          onClick={onToggle}
+          className={cn(
+            "fixed top-4 left-4 z-50 lg:hidden",
+            "p-3 rounded-lg shadow-lg",
+            "bg-gray-800 dark:bg-gray-600",
+            "text-white",
+            "hover:bg-gray-700 dark:hover:bg-gray-500",
+            "transition-all duration-200",
+            "hover:scale-105"
+          )}
+        >
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      )}
     </>
   )
 }

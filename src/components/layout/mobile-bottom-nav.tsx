@@ -7,16 +7,11 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { 
   LayoutDashboard, 
-  ChefHat, 
   Package, 
   ShoppingCart, 
-  CreditCard,
-  BarChart3,
   Plus,
   MoreHorizontal,
-  Calculator,
-  Receipt,
-  Zap
+  Receipt
 } from 'lucide-react'
 
 interface BottomNavItem {
@@ -52,8 +47,8 @@ const mainNavItems: BottomNavItem[] = [
     color: 'text-gray-600 dark:text-gray-400'
   },
   {
-    name: 'Lainnya',
-    href: '/more',
+    name: 'Settings',
+    href: '/settings',
     icon: MoreHorizontal,
     color: 'text-gray-600'
   }

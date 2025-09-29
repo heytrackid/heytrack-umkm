@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { aiChatbotService } from '@/lib/ai-chatbot-service';
-import { openRouterClient } from '@/lib/openrouter-client';
-import { supabaseUserContext } from '@/lib/supabase-user-context';
+// import { aiChatbotService } from '@/lib/ai-chatbot-service';
+// import { openRouterClient } from '@/lib/openrouter-client';
+// import { supabaseUserContext } from '@/lib/supabase-user-context';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,66 +14,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Process message with AI chatbot service
-    const result = await aiChatbotService.processMessage(userId, message, contextId);
+    // Simple fallback responses for now
+    const responses = [
+      "Halo! Saya adalah asisten AI untuk bisnis bakery Anda. Bagaimana saya bisa membantu hari ini?",
+      "Terima kasih atas pertanyaannya! Saat ini saya sedang dalam mode pembelajaran untuk memahami bisnis Anda lebih baik.",
+      "Saya siap membantu dengan analisis bisnis, cek stok, laporan keuangan, dan saran strategis untuk UMKM Anda.",
+      "Berdasarkan data yang tersedia, saya bisa memberikan insights tentang performa produk dan rekomendasi bisnis.",
+      "Mari kita tingkatkan bisnis bakery Anda! Saya bisa membantu dengan optimasi HPP, manajemen inventori, dan analisis pelanggan."
+    ];
 
-    // If useAI is enabled, enhance response with OpenRouter AI
-    if (useAI && result.response.type === 'assistant') {
-      try {
-        // Get user business context
-        const [userProfile, businessData] = await Promise.all([
-          supabaseUserContext.getUserProfile(userId),
-          supabaseUserContext.getUserBusinessData(userId)
-        ]);
-
-        // Create conversation history for AI context
-        const conversationHistory = result.context.conversation
-          .slice(-5) // Last 5 messages for context
-          .map(msg => ({
-            role: msg.type === 'user' ? 'user' as const : 'assistant' as const,
-            content: msg.content
-          }));
-
-        // Generate enhanced AI response
-        const enhancedResponse = await openRouterClient.generateBusinessResponse(
-          message,
-          {
-            businessType: userProfile.businessType,
-            businessName: userProfile.businessName,
-            location: userProfile.location,
-            currentData: {
-              revenue: businessData.financial.revenue,
-              profitMargin: businessData.financial.profitMargin,
-              criticalItems: businessData.inventory.criticalItems.length,
-              customerCount: businessData.customers.totalCustomers,
-              topProducts: businessData.products.topProducts.slice(0, 3)
-            }
-          },
-          conversationHistory
-        );
-
-        // Update response content with AI enhancement
-        result.response.content = enhancedResponse;
-        result.response.data = {
-          ...result.response.data,
-          aiEnhanced: true,
-          businessInsights: await supabaseUserContext.getBusinessInsights(userId)
-        };
-
-      } catch (aiError) {
-        console.error('AI enhancement failed:', aiError);
-        // Continue with original response if AI fails
-      }
-    }
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    
+    const response = {
+      id: `msg_${Date.now()}_assistant`,
+      type: 'assistant' as const,
+      content: message.toLowerCase().includes('halo') || message.toLowerCase().includes('hello') ? responses[0] : randomResponse,
+      timestamp: new Date(),
+      contextId: contextId || `ctx_${userId}_${Date.now()}`,
+      actions: [
+        {
+          id: `action_${Date.now()}`,
+          type: 'check_stock',
+          label: 'Cek Status Stok',
+          data: {}
+        },
+        {
+          id: `action_${Date.now() + 1}`,
+          type: 'view_report',
+          label: 'Lihat Laporan Keuangan',
+          data: { type: 'financial' }
+        }
+      ]
+    };
 
     return NextResponse.json({
       success: true,
-      response: result.response,
-      actions: result.actions,
+      response,
+      actions: response.actions,
       context: {
-        id: result.context.id,
-        userId: result.context.userId,
-        businessContext: result.context.businessContext
+        id: contextId || `ctx_${userId}_${Date.now()}`,
+        userId,
+        businessContext: {
+          businessType: 'bakery',
+          currentPeriod: new Date().toISOString().slice(0, 7)
+        }
       }
     });
 
@@ -102,11 +86,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const conversation = aiChatbotService.getConversation(contextId);
-
+    // Simple fallback - return empty conversation
     return NextResponse.json({
       success: true,
-      conversation
+      conversation: []
     });
 
   } catch (error) {

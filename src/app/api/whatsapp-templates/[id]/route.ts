@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createSupabaseClient()
     
     const { data, error } = await supabase
       .from('whatsapp_templates')
@@ -36,7 +36,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createSupabaseClient()
     const body = await request.json()
     
     const { name, description, category, template_content, variables, is_active, is_default } = body
@@ -88,7 +88,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = createSupabaseClient()
     
     const { data, error } = await supabase
       .from('whatsapp_templates')

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createSupabaseClient()
     const { searchParams } = new URL(request.url)
     
     const category = searchParams.get('category')
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createSupabaseClient()
     const body = await request.json()
     
     const { name, description, category, template_content, variables, is_active, is_default } = body

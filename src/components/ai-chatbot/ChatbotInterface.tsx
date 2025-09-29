@@ -359,7 +359,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   return (
     <Card className={`fixed bottom-4 right-4 w-96 h-[600px] shadow-2xl border-2 flex flex-col ${className}`}>
       {/* Header */}
-      <CardHeader className="p-4 bg-blue-500 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0">
+      <CardHeader className="p-4 bg-gray-700 dark:bg-gray-800 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0">
         <div className="flex items-center space-x-2">
           <Bot className="h-5 w-5" />
           <h3 className="font-semibold">Asisten UMKM AI</h3>
@@ -370,7 +370,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             variant="ghost"
             size="sm"
             onClick={onToggleMinimize}
-            className="text-white hover:bg-blue-600 h-8 w-8 p-0"
+            className="text-white hover:bg-gray-600 dark:hover:bg-gray-700 h-8 w-8 p-0"
           >
             <Minimize2 className="h-4 w-4" />
           </Button>

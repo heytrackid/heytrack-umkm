@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageCircle, X, Sparkles } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ChatbotInterface from './ChatbotInterface';
@@ -41,15 +41,12 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
           <Button
             onClick={toggleChatbot}
             size="lg"
-            className="h-14 w-14 rounded-full shadow-2xl bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 border-2 border-white relative overflow-hidden group"
+            className="h-14 w-14 rounded-full shadow-2xl bg-gray-700 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 border-2 border-white dark:border-gray-300 relative overflow-hidden group"
           >
-            {/* Sparkle animation background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             {/* Icon */}
             <div className="relative z-10 flex items-center justify-center">
               <MessageCircle className="h-6 w-6 text-white" />
-              <Sparkles className="h-3 w-3 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
             </div>
 
             {/* Notification badge */}
@@ -64,9 +61,9 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
           </Button>
 
           {/* Tooltip */}
-          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
             Chat dengan Asisten AI
-            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900" />
+            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-100" />
           </div>
         </div>
       )}

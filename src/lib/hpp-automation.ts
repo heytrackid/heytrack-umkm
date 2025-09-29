@@ -452,19 +452,12 @@ export class HPPAutomationSystem {
     }
   }
 
-  // Utility methods
   private async getLatestIngredientPrice(ingredientId: string): Promise<number> {
-    // Mock - in real app would fetch from database
-        // TODO: Implement real price fetching from database
-      'ing_1': 15000, // Tepung per kg
-      'ing_2': 28000  // Telur per butir
-    }
-        // TODO: Implement real price fetching
+    // TODO: Implement real price fetching from database
     throw new Error('Ingredient price fetching not implemented yet')
   }
 
-  private getUnitMultiplier(unit: string): number {
-    const multipliers: Record<string, number> = {
+  private getUnitMultiplier(unit: string): number {    const multipliers: Record<string, number> = {
       'g': 1000, // per kg
       'gram': 1000,
       'ml': 1000, // per liter

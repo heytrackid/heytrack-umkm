@@ -80,9 +80,9 @@ export default function Dashboard() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-      case 'processing': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-      case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+      case 'completed': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+      case 'processing': return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
+      case 'pending': return 'bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
     }
   }
@@ -107,7 +107,7 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+            <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
               <Zap className="h-3 w-3 mr-1" />
               Development Mode
             </Badge>
@@ -123,7 +123,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(placeholderStats.totalSales)}</div>
-              <div className="flex items-center text-xs text-green-600">
+              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +{placeholderStats.salesGrowth}% dari bulan lalu
               </div>
@@ -137,7 +137,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{placeholderStats.totalOrders}</div>
-              <div className="flex items-center text-xs text-green-600">
+              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +{placeholderStats.ordersGrowth}% dari bulan lalu
               </div>
@@ -151,7 +151,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{placeholderStats.totalCustomers}</div>
-              <div className="flex items-center text-xs text-green-600">
+              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
                 +{placeholderStats.customersGrowth}% dari bulan lalu
               </div>
@@ -165,7 +165,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{placeholderStats.totalIngredients}</div>
-              <div className="flex items-center text-xs text-red-600">
+              <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 {placeholderStats.ingredientsLow} stok menipis
               </div>
