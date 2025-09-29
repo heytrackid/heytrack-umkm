@@ -94,8 +94,8 @@
   --accent: oklch(0.15 0 0);
   --accent-foreground: oklch(0.9 0 0);
   --destructive: oklch(0.6 0 0);
-  --border: oklch(0.25 0 0); /* Lebih terang untuk dark mode */
-  --input: oklch(0.25 0 0); /* Lebih terang untuk dark mode */
+  --border: oklch(0.15 0 0);
+  --input: oklch(0.15 0 0);
   --ring: oklch(0.5 0 0);
   --chart-1: oklch(0.4 0 0);
   --chart-2: oklch(0.5 0 0);
@@ -108,7 +108,7 @@
   --sidebar-primary-foreground: oklch(0.95 0 0);
   --sidebar-accent: oklch(0.15 0 0);
   --sidebar-accent-foreground: oklch(0.9 0 0);
-  --sidebar-border: oklch(0.25 0 0); /* Lebih terang untuk dark mode */
+  --sidebar-border: oklch(0.15 0 0);
   --sidebar-ring: oklch(0.5 0 0);
 }
 
@@ -183,66 +183,4 @@
     background-color: hsl(var(--muted-foreground) / 0.5);
   }
 
-  /* Remove all shadows for flat design */
-  .shadow-sm,
-  .shadow,
-  .shadow-md,
-  .shadow-lg,
-  .shadow-xl,
-  .shadow-2xl,
-  .shadow-inner,
-  .drop-shadow,
-  .drop-shadow-sm,
-  .drop-shadow-md,
-  .drop-shadow-lg,
-  .drop-shadow-xl,
-  .drop-shadow-2xl {
-    box-shadow: none !important;
-    filter: none !important;
-  }
-
-  /* Enhanced borders for better visibility in dark mode */
-  .border,
-  .border-t,
-  .border-r,
-  .border-b,
-  .border-l {
-    border-color: hsl(var(--border));
-  }
-
-  /* Component-specific border enhancements */
-  .card,
-  .table,
-  .input,
-  .button {
-    border: 1px solid hsl(var(--border));
-  }
-
-  /* Table specific borders */
-  table {
-    border-collapse: collapse;
-  }
-  
-  table th,
-  table td {
-    border: 1px solid hsl(var(--border));
-  }
-
-  /* Button variants with clear borders */
-  .btn-outline {
-    border: 1px solid hsl(var(--border));
-    background: transparent;
-  }
-  
-  .btn-outline:hover {
-    background: hsl(var(--accent));
-    border-color: hsl(var(--border));
-  }
-
-  /* Dropdown and select items */
-  [data-radix-collection-item],
-  .select-item,
-  .dropdown-menu-item {
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
-  }
 }

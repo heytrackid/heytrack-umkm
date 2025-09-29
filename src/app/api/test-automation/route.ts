@@ -219,16 +219,9 @@ async function testSmartNotifications() {
 async function testProductionPlanning() {
   console.log('🏭 Testing Production Planning Automation...')
   
-  // Mock production planning data
-  const mockOrders = [
-    { recipeId: 'croissant', quantity: 20, deliveryDate: new Date(Date.now() + 24 * 60 * 60 * 1000) },
-    { recipeId: 'danish', quantity: 15, deliveryDate: new Date(Date.now() + 48 * 60 * 60 * 1000) }
-  ]
-  
-  const mockInventory = [
-    { id: 'flour-001', name: 'Tepung Terigu', current_stock: 45, min_stock: 20, unit: 'kg' },
-    { id: 'butter-001', name: 'Butter', current_stock: 8, min_stock: 10, unit: 'kg' }
-  ]
+  // Empty test data arrays
+  const testOrders = []
+  const testInventory = []
   
   // Simulate production planning trigger
   const automation = WorkflowAutomation.getInstance()
@@ -248,9 +241,9 @@ async function testProductionPlanning() {
   return {
     workflow: 'production.batch_completed',
     status: 'triggered',
-    mockData: {
-      pendingOrders: mockOrders.length,
-      availableIngredients: mockInventory.length
+    testData: {
+      pendingOrders: testOrders.length,
+      availableIngredients: testInventory.length
     },
     expectedActions: [
       'production_schedule_updated',

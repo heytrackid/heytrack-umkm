@@ -34,110 +34,6 @@ import {
   BarChart3
 } from 'lucide-react'
 
-// Sample data
-const sampleRecipe = {
-  id: 'recipe-1',
-  name: 'Brownies Cokelat Premium',
-  servings: 12
-}
-
-const sampleRecipeIngredients = [
-  {
-    id: 'ri-1',
-    recipe_id: 'recipe-1',
-    ingredient_id: 'ing-1',
-    quantity: 0.5,
-    unit: 'kg',
-    ingredient: {
-      id: 'ing-1',
-      name: 'Tepung Terigu Premium',
-      unit: 'kg',
-      current_stock: 45,
-      price_per_unit: 15000
-    }
-  },
-  {
-    id: 'ri-2',
-    recipe_id: 'recipe-1', 
-    ingredient_id: 'ing-2',
-    quantity: 0.3,
-    unit: 'kg',
-    ingredient: {
-      id: 'ing-2',
-      name: 'Gula Pasir',
-      unit: 'kg',
-      current_stock: 25,
-      price_per_unit: 18000
-    }
-  },
-  {
-    id: 'ri-3',
-    recipe_id: 'recipe-1',
-    ingredient_id: 'ing-3', 
-    quantity: 0.2,
-    unit: 'kg',
-    ingredient: {
-      id: 'ing-3',
-      name: 'Mentega',
-      unit: 'kg',
-      current_stock: 8,
-      price_per_unit: 45000
-    }
-  },
-  {
-    id: 'ri-4',
-    recipe_id: 'recipe-1',
-    ingredient_id: 'ing-4',
-    quantity: 0.15,
-    unit: 'kg',
-    ingredient: {
-      id: 'ing-4',
-      name: 'Cokelat Bubuk',
-      unit: 'kg',
-      current_stock: 5,
-      price_per_unit: 65000
-    }
-  }
-]
-
-const sampleOperationalCosts = [
-  {
-    id: 'op-1',
-    name: 'Listrik & Gas',
-    amount: 150000,
-    type: 'monthly' as const
-  },
-  {
-    id: 'op-2', 
-    name: 'Gaji Karyawan',
-    amount: 2500000,
-    type: 'monthly' as const
-  },
-  {
-    id: 'op-3',
-    name: 'Packaging & Label',
-    amount: 25000,
-    type: 'per_batch' as const
-  }
-]
-
-const sampleStockTransactions = [
-  // Tepung transactions
-  { id: 't-1', ingredient_id: 'ing-1', type: 'PURCHASE', quantity: 25, unit_price: 14500, created_at: '2024-01-15' },
-  { id: 't-2', ingredient_id: 'ing-1', type: 'PURCHASE', quantity: 30, unit_price: 15200, created_at: '2024-01-25' },
-  { id: 't-3', ingredient_id: 'ing-1', type: 'PURCHASE', quantity: 20, unit_price: 15800, created_at: '2024-02-05' },
-  
-  // Gula transactions
-  { id: 't-4', ingredient_id: 'ing-2', type: 'PURCHASE', quantity: 20, unit_price: 17500, created_at: '2024-01-20' },
-  { id: 't-5', ingredient_id: 'ing-2', type: 'PURCHASE', quantity: 15, unit_price: 18500, created_at: '2024-02-01' },
-  
-  // Mentega transactions - stable price
-  { id: 't-6', ingredient_id: 'ing-3', type: 'PURCHASE', quantity: 10, unit_price: 45000, created_at: '2024-01-10' },
-  
-  // Cokelat transactions - volatile
-  { id: 't-7', ingredient_id: 'ing-4', type: 'PURCHASE', quantity: 5, unit_price: 60000, created_at: '2024-01-12' },
-  { id: 't-8', ingredient_id: 'ing-4', type: 'PURCHASE', quantity: 3, unit_price: 70000, created_at: '2024-02-03' }
-]
 
 // Tooltip edukasi untuk UMKM
 const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: React.ReactNode }) => (
@@ -222,11 +118,18 @@ export default function EnhancedHPPCalculator() {
     setIsCalculating(true)
     
     try {
+      // Empty data for now - will be populated with real data later
+      const emptyRecipe = {
+        id: 'temp-recipe',
+        name: 'Pilih resep untuk kalkulasi',
+        servings: 0
+      }
+      
       const result = await EnhancedHPPCalculationService.calculateHPP(
-        sampleRecipe,
-        sampleRecipeIngredients,
-        sampleOperationalCosts,
-        sampleStockTransactions,
+        emptyRecipe,
+        [],
+        [],
+        [],
         {
           pricingMethod: selectedPricingMethod,
           includeOperationalCosts,
@@ -238,6 +141,7 @@ export default function EnhancedHPPCalculator() {
       setCalculationResult(result)
     } catch (error) {
       console.error('Error calculating HPP:', error)
+      setCalculationResult(null)
     } finally {
       setIsCalculating(false)
     }
@@ -388,16 +292,11 @@ export default function EnhancedHPPCalculator() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <h3 className="font-semibold">{sampleRecipe.name}</h3>
-                <p className="text-sm text-gray-600">Hasil: {sampleRecipe.servings} porsi</p>
+                <h3 className="font-semibold">Pilih resep untuk kalkulasi</h3>
+                <p className="text-sm text-gray-600">Hasil: - porsi</p>
                 <div className="space-y-1">
                   <p className="text-xs font-medium">Bahan-bahan:</p>
-                  {sampleRecipeIngredients.map(ingredient => (
-                    <div key={ingredient.id} className="text-xs text-gray-600 flex justify-between">
-                      <span>{ingredient.ingredient?.name}</span>
-                      <span>{ingredient.quantity} {ingredient.unit}</span>
-                    </div>
-                  ))}
+                  <p className="text-xs text-gray-500 italic">Tidak ada resep yang dipilih</p>
                 </div>
               </div>
             </CardContent>
