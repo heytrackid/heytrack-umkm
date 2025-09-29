@@ -14,7 +14,6 @@ import {
   BarChart3,
   Menu,
   X,
-  Brain,
   ClipboardCheck,
   TrendingUp,
   Settings,
@@ -53,11 +52,6 @@ const navigationSections: NavigationSection[] = [
         description: 'Overview & analytics'
       },
       {
-        name: 'AI Hub',
-        href: '/ai',
-        icon: Brain,
-        description: 'Smart assistant'
-      },
     ]
   },
   {
