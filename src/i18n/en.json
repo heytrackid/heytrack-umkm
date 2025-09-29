@@ -9,16 +9,248 @@
     },
     "actions": {
       "add": "Add",
-      "quickSetup": "Quick Setup"
+      "quickSetup": "Quick Setup",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "submit": "Submit",
+      "reset": "Reset",
+      "clear": "Clear",
+      "refresh": "Refresh",
+      "export": "Export",
+      "import": "Import",
+      "print": "Print",
+      "download": "Download",
+      "upload": "Upload",
+      "view": "View",
+      "close": "Close"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "draft": "Draft",
+      "published": "Published"
     },
     "notifications": {
-      "title": "Notifications"
+      "title": "Notifications",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Information"
+    },
+    "time": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisYear": "This Year",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "loading": "Loading...",
+    "noData": "No data available",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "grandTotal": "Grand Total"
+  },
+  "navigation": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Overview & analytics"
+    },
+    "dataManager": {
+      "title": "🚀 STEP 1: DATA MASTER",
+      "rawMaterials": {
+        "title": "Raw Materials",
+        "badge": "START",
+        "description": "Input prices & stock of materials"
+      },
+      "categories": {
+        "title": "Product Categories",
+        "badge": "ORGANIZE", 
+        "description": "Product classification"
+      },
+      "operationalCosts": {
+        "title": "Operational Costs",
+        "badge": "REQUIRED",
+        "description": "Electricity, gas, salary, etc"
+      },
+      "recipes": {
+        "title": "Recipes",
+        "badge": "IMPORTANT",
+        "description": "Composition & measurements"
+      }
+    },
+    "calculation": {
+      "title": "🧮 STEP 2: CALCULATE COGS",
+      "description": "Cost of goods sold calculation",
+      "hppPricing": {
+        "title": "COGS & Pricing",
+        "badge": "ALL-IN-ONE",
+        "description": "Automatic COGS + pricing strategy"
+      },
+      "hppEnhanced": {
+        "title": "Enhanced COGS",
+        "badge": "ADVANCED",
+        "description": "COGS with advanced features"
+      }
+    },
+    "operations": {
+      "title": "📊 STEP 3: OPERATIONS",
+      "description": "Run business with accurate data",
+      "orders": {
+        "title": "Manage Orders",
+        "badge": "DAILY",
+        "description": "Receive & process orders"
+      },
+      "customers": {
+        "title": "Customer Data",
+        "badge": "CRM",
+        "description": "Customer database"
+      }
+    },
+    "monitoring": {
+      "title": "📈 STEP 4: MONITORING",
+      "description": "Monitor performance & profit",
+      "cashFlow": {
+        "title": "Cash Flow",
+        "badge": "REALTIME",
+        "description": "Monitor income & expenses"
+      },
+      "finance": {
+        "title": "Finance",
+        "badge": "COMPREHENSIVE",
+        "description": "Complete financial management"
+      },
+      "reports": {
+        "title": "Profit Reports",
+        "badge": "ANALYSIS",
+        "description": "Track daily profits"
+      },
+      "review": {
+        "title": "COGS Review",
+        "badge": "OPTIMIZATION",
+        "description": "Evaluate & improve"
+      }
+    },
+    "others": {
+      "title": "⚙️ OTHERS",
+      "settings": {
+        "title": "Settings",
+        "description": "Application settings"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Business Overview",
+    "welcome": "Welcome back!",
+    "stats": {
+      "totalRevenue": "Total Revenue",
+      "totalOrders": "Total Orders",
+      "totalCustomers": "Total Customers",
+      "totalProducts": "Total Products",
+      "monthlyGrowth": "Monthly Growth",
+      "averageOrder": "Average Order Value"
     }
   },
   "operationalCosts": {
     "title": "Operational Costs",
+    "subtitle": "Manage operational business costs for accurate COGS calculation",
     "addCost": "Add Cost",
     "quickSetup": "Quick Setup",
-    "totalPerMonth": "Total/Month"
+    "totalPerMonth": "Total/Month",
+    "totalCosts": "Total Costs",
+    "fixedCosts": "Fixed Costs",
+    "variableCosts": "Variable Costs",
+    "categories": {
+      "utilities": "Utilities",
+      "rent": "Rent & Property",
+      "staff": "Employee Salary",
+      "transport": "Transportation & Logistics",
+      "communication": "Communication",
+      "insurance": "Insurance & Security",
+      "maintenance": "Maintenance",
+      "other": "Others"
+    },
+    "form": {
+      "name": "Cost Name",
+      "category": "Category",
+      "amount": "Cost Amount",
+      "frequency": "Frequency",
+      "description": "Description (Optional)",
+      "isFixed": "Fixed cost (doesn't change each period)"
+    },
+    "messages": {
+      "whyImportant": "💡 Why are Operational Costs Important?",
+      "whyImportantDesc": "Operational costs are used to calculate accurate COGS. The more complete the cost data, the more accurate your product selling price calculation."
+    }
+  },
+  "inventory": {
+    "title": "Raw Materials",
+    "subtitle": "Manage raw materials inventory",
+    "addMaterial": "Add Material",
+    "totalItems": "Total Items",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "stockValue": "Stock Value"
+  },
+  "recipes": {
+    "title": "Recipes",
+    "subtitle": "Manage product recipes",
+    "addRecipe": "Add Recipe",
+    "totalRecipes": "Total Recipes",
+    "readyForCOGS": "Ready for COGS",
+    "needsIngredients": "Needs Ingredients"
+  },
+  "orders": {
+    "title": "Orders",
+    "subtitle": "Manage customer orders",
+    "addOrder": "Add Order",
+    "totalOrders": "Total Orders",
+    "pendingOrders": "Pending Orders",
+    "completedOrders": "Completed Orders"
+  },
+  "customers": {
+    "title": "Customers",
+    "subtitle": "Manage customer data",
+    "addCustomer": "Add Customer",
+    "totalCustomers": "Total Customers",
+    "activeCustomers": "Active Customers",
+    "newCustomers": "New Customers"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage application preferences and business settings",
+    "tabs": {
+      "general": "General",
+      "profile": "Profile",
+      "notifications": "Notifications",
+      "system": "System",
+      "appearance": "Appearance"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Invalid email format",
+      "minLength": "Minimum {{length}} characters",
+      "maxLength": "Maximum {{length}} characters"
+    },
+    "placeholders": {
+      "enterName": "Enter name",
+      "enterEmail": "Enter email",
+      "enterPhone": "Enter phone number",
+      "enterAddress": "Enter address",
+      "selectOption": "Select option",
+      "enterDescription": "Enter description"
+    }
   }
 }

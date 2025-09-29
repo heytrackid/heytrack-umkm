@@ -9,16 +9,248 @@
     },
     "actions": {
       "add": "Tambah",
-      "quickSetup": "Setup Cepat"
+      "quickSetup": "Setup Cepat",
+      "edit": "Edit",
+      "delete": "Hapus",
+      "save": "Simpan",
+      "cancel": "Batal",
+      "confirm": "Konfirmasi",
+      "submit": "Kirim",
+      "reset": "Reset",
+      "clear": "Bersihkan",
+      "refresh": "Refresh",
+      "export": "Export",
+      "import": "Import",
+      "print": "Print",
+      "download": "Download",
+      "upload": "Upload",
+      "view": "Lihat",
+      "close": "Tutup"
+    },
+    "status": {
+      "active": "Aktif",
+      "inactive": "Tidak Aktif",
+      "pending": "Menunggu",
+      "completed": "Selesai",
+      "cancelled": "Dibatalkan",
+      "draft": "Draft",
+      "published": "Dipublikasi"
     },
     "notifications": {
-      "title": "Notifikasi"
+      "title": "Notifikasi",
+      "success": "Sukses",
+      "error": "Error",
+      "warning": "Peringatan",
+      "info": "Informasi"
+    },
+    "time": {
+      "today": "Hari Ini",
+      "yesterday": "Kemarin",
+      "thisWeek": "Minggu Ini",
+      "thisMonth": "Bulan Ini",
+      "thisYear": "Tahun Ini",
+      "daily": "Harian",
+      "weekly": "Mingguan",
+      "monthly": "Bulanan",
+      "yearly": "Tahunan"
+    },
+    "loading": "Memuat...",
+    "noData": "Tidak ada data",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "grandTotal": "Grand Total"
+  },
+  "navigation": {
+    "dashboard": {
+      "title": "Dashboard",
+      "description": "Overview & analytics"
+    },
+    "dataManager": {
+      "title": "🚀 STEP 1: DATA MASTER",
+      "rawMaterials": {
+        "title": "Bahan Baku",
+        "badge": "MULAI",
+        "description": "Input harga & stok bahan"
+      },
+      "categories": {
+        "title": "Kategori Produk",
+        "badge": "ORGANIZE",
+        "description": "Klasifikasi produk"
+      },
+      "operationalCosts": {
+        "title": "Biaya Operasional",
+        "badge": "WAJIB",
+        "description": "Listrik, gas, gaji, dll"
+      },
+      "recipes": {
+        "title": "Resep",
+        "badge": "PENTING",
+        "description": "Komposisi & takaran"
+      }
+    },
+    "calculation": {
+      "title": "🧮 STEP 2: HITUNG HPP",
+      "description": "Kalkulasi harga pokok produksi",
+      "hppPricing": {
+        "title": "HPP & Pricing",
+        "badge": "ALL-IN-ONE",
+        "description": "HPP otomatis + strategi pricing"
+      },
+      "hppEnhanced": {
+        "title": "HPP Enhanced",
+        "badge": "ADVANCED",
+        "description": "HPP dengan fitur lanjutan"
+      }
+    },
+    "operations": {
+      "title": "📊 STEP 3: OPERASIONAL",
+      "description": "Jalankan bisnis dengan data akurat",
+      "orders": {
+        "title": "Kelola Pesanan",
+        "badge": "HARIAN",
+        "description": "Terima & proses order"
+      },
+      "customers": {
+        "title": "Data Pelanggan",
+        "badge": "CRM",
+        "description": "Database customer"
+      }
+    },
+    "monitoring": {
+      "title": "📈 STEP 4: MONITORING",
+      "description": "Pantau performa & profit",
+      "cashFlow": {
+        "title": "Arus Kas",
+        "badge": "REALTIME",
+        "description": "Monitor pemasukan & pengeluaran"
+      },
+      "finance": {
+        "title": "Finance",
+        "badge": "KOMPREHENSIF",
+        "description": "Kelola keuangan lengkap"
+      },
+      "reports": {
+        "title": "Laporan Profit",
+        "badge": "ANALISA",
+        "description": "Track keuntungan harian"
+      },
+      "review": {
+        "title": "Review HPP",
+        "badge": "OPTIMASI",
+        "description": "Evaluasi & tingkatkan"
+      }
+    },
+    "others": {
+      "title": "⚙️ LAINNYA",
+      "settings": {
+        "title": "Settings",
+        "description": "Pengaturan aplikasi"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview Bisnis",
+    "welcome": "Selamat datang kembali!",
+    "stats": {
+      "totalRevenue": "Total Pendapatan",
+      "totalOrders": "Total Pesanan",
+      "totalCustomers": "Total Pelanggan",
+      "totalProducts": "Total Produk",
+      "monthlyGrowth": "Pertumbuhan Bulanan",
+      "averageOrder": "Rata-rata Nilai Pesanan"
     }
   },
   "operationalCosts": {
     "title": "Biaya Operasional",
+    "subtitle": "Kelola biaya operasional bisnis untuk perhitungan HPP yang akurat",
     "addCost": "Tambah Biaya",
     "quickSetup": "Setup Cepat",
-    "totalPerMonth": "Total/Bulan"
+    "totalPerMonth": "Total/Bulan",
+    "totalCosts": "Total Biaya",
+    "fixedCosts": "Biaya Tetap",
+    "variableCosts": "Biaya Variabel",
+    "categories": {
+      "utilities": "Utilitas",
+      "rent": "Sewa & Properti",
+      "staff": "Gaji Karyawan",
+      "transport": "Transport & Logistik",
+      "communication": "Komunikasi",
+      "insurance": "Asuransi & Keamanan",
+      "maintenance": "Perawatan",
+      "other": "Lainnya"
+    },
+    "form": {
+      "name": "Nama Biaya",
+      "category": "Kategori",
+      "amount": "Jumlah Biaya",
+      "frequency": "Frekuensi",
+      "description": "Deskripsi (Opsional)",
+      "isFixed": "Biaya tetap (tidak berubah setiap periode)"
+    },
+    "messages": {
+      "whyImportant": "💡 Mengapa Biaya Operasional Penting?",
+      "whyImportantDesc": "Biaya operasional digunakan untuk menghitung HPP yang akurat. Semakin lengkap data biaya, semakin tepat perhitungan harga jual produk Anda."
+    }
+  },
+  "inventory": {
+    "title": "Bahan Baku",
+    "subtitle": "Kelola inventori bahan baku",
+    "addMaterial": "Tambah Bahan",
+    "totalItems": "Total Item",
+    "lowStock": "Stok Menipis",
+    "outOfStock": "Stok Habis",
+    "stockValue": "Nilai Stok"
+  },
+  "recipes": {
+    "title": "Resep",
+    "subtitle": "Kelola resep produk",
+    "addRecipe": "Tambah Resep",
+    "totalRecipes": "Total Resep",
+    "readyForCOGS": "Siap HPP",
+    "needsIngredients": "Perlu Bahan"
+  },
+  "orders": {
+    "title": "Pesanan",
+    "subtitle": "Kelola pesanan pelanggan",
+    "addOrder": "Tambah Pesanan",
+    "totalOrders": "Total Pesanan",
+    "pendingOrders": "Pesanan Menunggu",
+    "completedOrders": "Pesanan Selesai"
+  },
+  "customers": {
+    "title": "Pelanggan",
+    "subtitle": "Kelola data pelanggan",
+    "addCustomer": "Tambah Pelanggan",
+    "totalCustomers": "Total Pelanggan",
+    "activeCustomers": "Pelanggan Aktif",
+    "newCustomers": "Pelanggan Baru"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "subtitle": "Kelola preferensi aplikasi dan pengaturan bisnis",
+    "tabs": {
+      "general": "Umum",
+      "profile": "Profil",
+      "notifications": "Notifikasi",
+      "system": "Sistem",
+      "appearance": "Tampilan"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "Field ini wajib diisi",
+      "invalidEmail": "Format email tidak valid",
+      "minLength": "Minimal {{length}} karakter",
+      "maxLength": "Maksimal {{length}} karakter"
+    },
+    "placeholders": {
+      "enterName": "Masukkan nama",
+      "enterEmail": "Masukkan email",
+      "enterPhone": "Masukkan nomor telepon",
+      "enterAddress": "Masukkan alamat",
+      "selectOption": "Pilih opsi",
+      "enterDescription": "Masukkan deskripsi"
+    }
   }
 }

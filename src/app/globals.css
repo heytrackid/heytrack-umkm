@@ -186,11 +186,13 @@
   /* Toast specific positioning */
   [data-radix-toast-viewport] {
     position: fixed !important;
-    bottom: 0 !important;
-    right: 0 !important;
+    top: 1rem !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     z-index: 9999 !important;
     max-width: 420px !important;
-    padding: 1rem !important;
+    width: 100% !important;
+    padding: 0 1rem !important;
   }
   
   /* Ensure toast appears above mobile nav and chatbot */
@@ -224,5 +226,14 @@
   .dark .border-prominent {
     border-color: oklch(0.4 0 0);
   }
-
+  
+  /* Consistent vertical spacing between label and control */
+  label[data-slot="label"] + * {
+    margin-top: 0.375rem; /* mb-1.5 */
+  }
+  /* Avoid double spacing when using shadcn FormItem (already has gap) */
+  [data-slot="form-item"] > label[data-slot="label"] + * {
+    margin-top: 0rem;
+  }
+  
 }

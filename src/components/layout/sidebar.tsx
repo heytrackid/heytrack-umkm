@@ -22,6 +22,7 @@ import {
   Menu
 } from 'lucide-react'
 import ExcelExportButton from '@/components/export/ExcelExportButton'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface NavigationItem {
   name: string
@@ -40,154 +41,6 @@ interface NavigationSection {
   isWorkflow?: boolean
 }
 
-const navigationSections: NavigationSection[] = [
-  {
-    title: 'Dashboard',
-    items: [
-      {
-        name: 'Dashboard',
-        href: '/',
-        icon: LayoutDashboard,
-        description: 'Overview & analytics'
-      }
-    ]
-  },
-  {
-    title: '🚀 STEP 1: DATA MASTER',
-    isWorkflow: true,
-    items: [
-      {
-        name: 'Bahan Baku',
-        href: '/inventory',
-        icon: Package,
-        isSimple: true,
-        badge: 'MULAI',
-        description: 'Input harga & stok bahan'
-      },
-      {
-        name: 'Kategori Produk',
-        href: '/categories',
-        icon: Layers,
-        isSimple: true,
-        badge: 'ORGANIZE',
-        description: 'Klasifikasi produk'
-      },
-      {
-        name: 'Biaya Operasional',
-        href: '/operational-costs',
-        icon: Receipt,
-        isSimple: true,
-        badge: 'WAJIB',
-        description: 'Listrik, gas, gaji, dll'
-      },
-      {
-        name: 'Resep',
-        href: '/resep',
-        icon: ChefHat,
-        isSimple: true,
-        badge: 'PENTING',
-        description: 'Komposisi & takaran'
-      },
-    ]
-  },
-  {
-    title: '🧮 STEP 2: HITUNG HPP',
-    description: 'Kalkulasi harga pokok produksi',
-    isWorkflow: true,
-    items: [
-      {
-        name: 'HPP & Pricing',
-        href: '/hpp',
-        icon: Calculator,
-        isSimple: true,
-        badge: 'ALL-IN-ONE',
-        description: 'HPP otomatis + strategi pricing'
-      },
-      {
-        name: 'HPP Enhanced',
-        href: '/hpp-enhanced',
-        icon: Target,
-        isSimple: true,
-        badge: 'ADVANCED',
-        description: 'HPP dengan fitur lanjutan'
-      },
-    ]
-  },
-  {
-    title: '📊 STEP 3: OPERASIONAL',
-    description: 'Jalankan bisnis dengan data akurat',
-    isWorkflow: true,
-    items: [
-      {
-        name: 'Kelola Pesanan',
-        href: '/orders',
-        icon: ShoppingCart,
-        isSimple: true,
-        badge: 'HARIAN',
-        description: 'Terima & proses order'
-      },
-      {
-        name: 'Data Pelanggan',
-        href: '/customers',
-        icon: Users,
-        isSimple: true,
-        badge: 'CRM',
-        description: 'Database customer'
-      },
-    ]
-  },
-  {
-    title: '📈 STEP 4: MONITORING',
-    description: 'Pantau performa & profit',
-    isWorkflow: true,
-    items: [
-      {
-        name: 'Arus Kas',
-        href: '/cash-flow',
-        icon: DollarSign,
-        isSimple: true,
-        badge: 'REALTIME',
-        description: 'Monitor pemasukan & pengeluaran'
-      },
-      {
-        name: 'Finance',
-        href: '/finance',
-        icon: Banknote,
-        isSimple: true,
-        badge: 'KOMPREHENSIF',
-        description: 'Kelola keuangan lengkap'
-      },
-      {
-        name: 'Laporan Profit',
-        href: '/reports',
-        icon: BarChart3,
-        isSimple: true,
-        badge: 'ANALISA',
-        description: 'Track keuntungan harian'
-      },
-      {
-        name: 'Review HPP',
-        href: '/review',
-        icon: TrendingUp,
-        isSimple: true,
-        badge: 'OPTIMASI',
-        description: 'Evaluasi & tingkatkan'
-      },
-    ]
-  },
-  {
-    title: '⚙️ LAINNYA',
-    items: [
-      {
-        name: 'Settings',
-        href: '/settings',
-        icon: Settings,
-        description: 'Pengaturan aplikasi'
-      },
-    ]
-  }
-]
-
 interface SidebarProps {
   isOpen?: boolean
   onToggle?: () => void
@@ -196,6 +49,155 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
   const pathname = usePathname()
+  const { t } = useI18n()
+
+  const navigationSections: NavigationSection[] = [
+    {
+      title: t('navigation.dashboard.title'),
+      items: [
+        {
+          name: t('navigation.dashboard.title'),
+          href: '/',
+          icon: LayoutDashboard,
+          description: t('navigation.dashboard.description')
+        }
+      ]
+    },
+    {
+      title: t('navigation.dataManager.title'),
+      isWorkflow: true,
+      items: [
+        {
+          name: t('navigation.dataManager.rawMaterials.title'),
+          href: '/inventory',
+          icon: Package,
+          isSimple: true,
+          badge: t('navigation.dataManager.rawMaterials.badge'),
+          description: t('navigation.dataManager.rawMaterials.description')
+        },
+        {
+          name: t('navigation.dataManager.categories.title'),
+          href: '/categories',
+          icon: Layers,
+          isSimple: true,
+          badge: t('navigation.dataManager.categories.badge'),
+          description: t('navigation.dataManager.categories.description')
+        },
+        {
+          name: t('navigation.dataManager.operationalCosts.title'),
+          href: '/operational-costs',
+          icon: Receipt,
+          isSimple: true,
+          badge: t('navigation.dataManager.operationalCosts.badge'),
+          description: t('navigation.dataManager.operationalCosts.description')
+        },
+        {
+          name: t('navigation.dataManager.recipes.title'),
+          href: '/resep',
+          icon: ChefHat,
+          isSimple: true,
+          badge: t('navigation.dataManager.recipes.badge'),
+          description: t('navigation.dataManager.recipes.description')
+        },
+      ]
+    },
+    {
+      title: t('navigation.calculation.title'),
+      description: t('navigation.calculation.description'),
+      isWorkflow: true,
+      items: [
+        {
+          name: t('navigation.calculation.hppPricing.title'),
+          href: '/hpp',
+          icon: Calculator,
+          isSimple: true,
+          badge: t('navigation.calculation.hppPricing.badge'),
+          description: t('navigation.calculation.hppPricing.description')
+        },
+        {
+          name: t('navigation.calculation.hppEnhanced.title'),
+          href: '/hpp-enhanced',
+          icon: Target,
+          isSimple: true,
+          badge: t('navigation.calculation.hppEnhanced.badge'),
+          description: t('navigation.calculation.hppEnhanced.description')
+        },
+      ]
+    },
+    {
+      title: t('navigation.operations.title'),
+      description: t('navigation.operations.description'),
+      isWorkflow: true,
+      items: [
+        {
+          name: t('navigation.operations.orders.title'),
+          href: '/orders',
+          icon: ShoppingCart,
+          isSimple: true,
+          badge: t('navigation.operations.orders.badge'),
+          description: t('navigation.operations.orders.description')
+        },
+        {
+          name: t('navigation.operations.customers.title'),
+          href: '/customers',
+          icon: Users,
+          isSimple: true,
+          badge: t('navigation.operations.customers.badge'),
+          description: t('navigation.operations.customers.description')
+        },
+      ]
+    },
+    {
+      title: t('navigation.monitoring.title'),
+      description: t('navigation.monitoring.description'),
+      isWorkflow: true,
+      items: [
+        {
+          name: t('navigation.monitoring.cashFlow.title'),
+          href: '/cash-flow',
+          icon: DollarSign,
+          isSimple: true,
+          badge: t('navigation.monitoring.cashFlow.badge'),
+          description: t('navigation.monitoring.cashFlow.description')
+        },
+        {
+          name: t('navigation.monitoring.finance.title'),
+          href: '/finance',
+          icon: Banknote,
+          isSimple: true,
+          badge: t('navigation.monitoring.finance.badge'),
+          description: t('navigation.monitoring.finance.description')
+        },
+        {
+          name: t('navigation.monitoring.reports.title'),
+          href: '/reports',
+          icon: BarChart3,
+          isSimple: true,
+          badge: t('navigation.monitoring.reports.badge'),
+          description: t('navigation.monitoring.reports.description')
+        },
+        {
+          name: t('navigation.monitoring.review.title'),
+          href: '/review',
+          icon: TrendingUp,
+          isSimple: true,
+          badge: t('navigation.monitoring.review.badge'),
+          description: t('navigation.monitoring.review.description')
+        },
+      ]
+    },
+    {
+      title: t('navigation.others.title'),
+      items: [
+        {
+          name: t('navigation.others.settings.title'),
+          href: '/settings',
+          icon: Settings,
+          description: t('navigation.others.settings.description')
+        },
+      ]
+    }
+  ]
 
   // If it's mobile mode (used within Sheet), render simplified version
   if (isMobile) {
