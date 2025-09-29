@@ -288,15 +288,8 @@ export default function EnhancedInventoryPage() {
   const handleAddNewIngredient = () => {
     console.log('🆕 Tambah Bahan Baku button clicked')
     
-    // For now, show a simple modal or navigate to existing page
-    const choice = window.confirm(
-      `🆕 TAMBAH BAHAN BAKU BARU\n\nPilih cara menambah bahan baku:\n\n✅ OK - Buka form tambah bahan baku\n❌ Cancel - Batalkan`
-    )
-    
-    if (choice) {
-      // Navigate to the working inventory/new page for now
-      window.location.href = '/inventory/new'
-    }
+    // Navigate directly to the new ingredients page
+    window.location.href = '/ingredients/new'
   }
 
   // Get stock alert level with neutral colors
