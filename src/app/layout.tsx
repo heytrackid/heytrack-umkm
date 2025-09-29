@@ -6,6 +6,7 @@ import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as HotToaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
+import ChatbotFAB from '@/components/ai-chatbot/ChatbotFAB';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import "./globals.css";
 
@@ -20,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HeyTrack UMKM - Kuliner Management System",
-  description: "Comprehensive culinary business management system with COGS calculation, inventory, orders, and financial tracking for Indonesian SMEs",
+  title: "HeyTrack UMKM - Smart Culinary Management System",
+  description: "Comprehensive culinary business management system with AI Assistant, COGS calculation, inventory management, orders tracking, and financial analytics for Indonesian SMEs",
 };
 
 export default function RootLayout({
@@ -75,6 +76,8 @@ export default function RootLayout({
                   },
                 }}
               />
+              {/* AI Chatbot Assistant */}
+              <ChatbotFAB userId="demo-user" />
             </SettingsProvider>
           </QueryProvider>
         </ThemeProvider>
