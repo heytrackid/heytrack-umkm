@@ -69,7 +69,6 @@ export const AIIntegrationHub: React.FC = () => {
 
   // Run comprehensive AI analysis
   const runComprehensiveAnalysis = useCallback(async () => {
-  const runComprehensiveAnalysis = useCallback(async () => {
     setIsAnalyzing(true)
     setAnalysisProgress(0)
     const newInsights: AIInsight[] = []
@@ -187,7 +186,7 @@ export const AIIntegrationHub: React.FC = () => {
     }
   }
 
-  // Auto-run analysis on component mount and data changes
+  }, [aiPowered, pricingConfidence, inventoryConfidence, financialConfidence])  // Auto-run analysis on component mount and data changes
   useEffect(() => {
     if (ingredients && recipes && financialRecords && !isAnalyzing) {
       runComprehensiveAnalysis()
