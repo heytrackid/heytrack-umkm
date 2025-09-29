@@ -261,6 +261,10 @@ export default function FinancePage() {
             }}
             onEditTransaction={() => {}}
             onDeleteTransaction={() => {}}
+            onBulkAction={(action, transactionIds) => {
+              console.log('Bulk action:', action, 'for transactions:', transactionIds)
+              // TODO: Implement bulk actions (export, delete)
+            }}
             getPaymentMethodLabel={getPaymentMethodLabel}
             transactionTypes={transactionTypes}
           />
