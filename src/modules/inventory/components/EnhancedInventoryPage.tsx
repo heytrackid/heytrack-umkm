@@ -281,7 +281,7 @@ export default function EnhancedInventoryPage() {
               Kelola stok dan hitung harga yang tepat untuk HPP
             </p>
           </div>
-          <Link href="/inventory/new">
+          <Link href="/inventory/ingredients/new">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Tambah Bahan Baku
