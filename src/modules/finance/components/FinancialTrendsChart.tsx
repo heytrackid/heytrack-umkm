@@ -35,7 +35,8 @@ interface FinancialDataPoint {
   margin: number
 }
 
-const mockData: FinancialDataPoint[] = [
+// TODO: Replace with real financial data fetching
+const placeholderData: FinancialDataPoint[] = [
   { month: 'Jan', revenue: 35000000, expenses: 25000000, profit: 10000000, margin: 28.6 },
   { month: 'Feb', revenue: 38000000, expenses: 27000000, profit: 11000000, margin: 28.9 },
   { month: 'Mar', revenue: 42000000, expenses: 30000000, profit: 12000000, margin: 28.6 },
@@ -54,7 +55,7 @@ export default function FinancialTrendsChart() {
 
   const renderChart = () => {
     const commonProps = {
-      data: mockData,
+      data: placeholderData,
       margin: { top: 5, right: 30, left: 20, bottom: 5 }
     }
 

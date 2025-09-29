@@ -23,16 +23,28 @@ import {
   Zap
 } from 'lucide-react'
 
-// Sample data - in real app, this would come from API
-const sampleStats = {
-  totalSales: 15420000,
-  totalOrders: 148,
-  totalCustomers: 89,
-  totalIngredients: 45,
-  salesGrowth: 12.5,
-  ordersGrowth: 8.3,
-  customersGrowth: 15.2,
-  ingredientsLow: 5
+// Sample data removed - now using real data from API
+// const sampleStats = {
+//   totalSales: 15420000,
+//   totalOrders: 148,
+//   totalCustomers: 89,
+//   totalIngredients: 45,
+//   salesGrowth: 12.5,
+//   ordersGrowth: 8.3,
+//   customersGrowth: 15.2,
+//   ingredientsLow: 5
+// }
+
+// Placeholder data until API integration
+const placeholderStats = {
+  totalSales: 0,
+  totalOrders: 0,
+  totalCustomers: 0,
+  totalIngredients: 0,
+  salesGrowth: 0,
+  ordersGrowth: 0,
+  customersGrowth: 0,
+  ingredientsLow: 0
 }
 
 const recentOrders = [
@@ -110,10 +122,10 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(sampleStats.totalSales)}</div>
+              <div className="text-2xl font-bold">{formatCurrency(placeholderStats.totalSales)}</div>
               <div className="flex items-center text-xs text-green-600">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +{sampleStats.salesGrowth}% dari bulan lalu
+                +{placeholderStats.salesGrowth}% dari bulan lalu
               </div>
             </CardContent>
           </Card>
@@ -124,10 +136,10 @@ export default function Dashboard() {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sampleStats.totalOrders}</div>
+              <div className="text-2xl font-bold">{placeholderStats.totalOrders}</div>
               <div className="flex items-center text-xs text-green-600">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +{sampleStats.ordersGrowth}% dari bulan lalu
+                +{placeholderStats.ordersGrowth}% dari bulan lalu
               </div>
             </CardContent>
           </Card>
@@ -138,10 +150,10 @@ export default function Dashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sampleStats.totalCustomers}</div>
+              <div className="text-2xl font-bold">{placeholderStats.totalCustomers}</div>
               <div className="flex items-center text-xs text-green-600">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +{sampleStats.customersGrowth}% dari bulan lalu
+                +{placeholderStats.customersGrowth}% dari bulan lalu
               </div>
             </CardContent>
           </Card>
@@ -152,10 +164,10 @@ export default function Dashboard() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sampleStats.totalIngredients}</div>
+              <div className="text-2xl font-bold">{placeholderStats.totalIngredients}</div>
               <div className="flex items-center text-xs text-red-600">
                 <AlertCircle className="h-3 w-3 mr-1" />
-                {sampleStats.ingredientsLow} stok menipis
+                {placeholderStats.ingredientsLow} stok menipis
               </div>
             </CardContent>
           </Card>

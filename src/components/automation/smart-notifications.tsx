@@ -58,7 +58,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
         const smartNotifications = automationEngine.notifications.generateSmartNotifications(
           ingredients,
           orders,
-          { grossMargin: 45, netMargin: 25 } // Mock financial metrics for now
+          {} // TODO: Implement real financial metrics fetching
         )
 
         // Convert to our notification format
