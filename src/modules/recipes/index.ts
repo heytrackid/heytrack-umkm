@@ -8,6 +8,14 @@ export { default as RecipesPage } from './components/RecipesPage'
 export { default as AdvancedHPPCalculator } from './components/AdvancedHPPCalculator'
 export { default as SmartPricingAssistant } from './components/SmartPricingAssistant'
 
+// Extracted HPP calculator components
+export { UMKMTooltip } from './components/UMKMTooltip'
+export { SettingsPanel } from './components/SettingsPanel'
+export { MainResultsCard } from './components/MainResultsCard'
+export { MethodComparisonCard } from './components/MethodComparisonCard'
+export { RecommendationsCard } from './components/RecommendationsCard'
+export { EducationalFooter } from './components/EducationalFooter'
+
 // Lazy loaded recipe components
 export { 
   LazyAdvancedHPPCalculator,

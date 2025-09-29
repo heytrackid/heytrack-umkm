@@ -7,7 +7,16 @@
 export { default as InventoryPage } from './components/InventoryPage'
 export { default as SmartInventoryManager } from './components/SmartInventoryManager'
 export { default as InventoryTrendsChart } from './components/InventoryTrendsChart'
-// Note: Other components will be added as they are migrated
+export { default as EnhancedInventoryPage } from './components/EnhancedInventoryPage'
+
+// Extracted Smart Inventory Manager components
+export { InventoryStatsCards } from './components/InventoryStatsCards'
+export { InventoryAlerts } from './components/InventoryAlerts'
+export { InventoryFilters } from './components/InventoryFilters'
+export { InventoryGrid } from './components/InventoryGrid'
+export { AlertsTab } from './components/AlertsTab'
+export { ReorderTab } from './components/ReorderTab'
+export { InsightsTab } from './components/InsightsTab'
 
 // Lazy loaded components
 export { 
