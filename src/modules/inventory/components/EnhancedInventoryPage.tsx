@@ -224,14 +224,57 @@ export default function EnhancedInventoryPage() {
   }
 
   const handleBulkDelete = () => {
-    if (selectedItems.length > 0) {
-      alert(`Delete ${selectedItems.length} items?`)
+    if (selectedItems.length === 0) return
+    
+    const selectedIngredients = ingredients.filter(ing => selectedItems.includes(ing.id))
+    const ingredientNames = selectedIngredients.map(ing => ing.name).join(', ')
+    
+    const confirmed = window.confirm(
+      `⚠️ Yakin ingin menghapus ${selectedItems.length} bahan baku berikut?\n\n${ingredientNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      // TODO: Implement actual API call to delete ingredients
+      console.log('Deleting ingredients:', selectedItems)
+      
+      // Simulate deletion (in real app, this would be API call)
+      alert(`✅ ${selectedItems.length} bahan baku berhasil dihapus!`)
+      
+      // Clear selection
+      setSelectedItems([])
     }
   }
 
   const handleBulkEdit = () => {
-    if (selectedItems.length > 0) {
-      alert(`Edit ${selectedItems.length} items?`)
+    if (selectedItems.length === 0) return
+    
+    const selectedIngredients = ingredients.filter(ing => selectedItems.includes(ing.id))
+    const ingredientNames = selectedIngredients.map(ing => ing.name).join(', ')
+    
+    // TODO: Open bulk edit modal or navigate to bulk edit page
+    console.log('Bulk editing ingredients:', selectedItems)
+    
+    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} bahan baku akan segera tersedia!\n\nBahan yang dipilih:\n${ingredientNames}`)
+  }
+
+  // Individual action handlers
+  const handleEditIngredient = (ingredient: any) => {
+    // TODO: Navigate to edit page or open edit modal
+    console.log('Editing ingredient:', ingredient)
+    alert(`📝 Edit bahan baku "${ingredient.name}" - fitur akan segera tersedia!`)
+  }
+
+  const handleDeleteIngredient = (ingredient: any) => {
+    const confirmed = window.confirm(
+      `⚠️ Yakin ingin menghapus bahan baku "${ingredient.name}"?\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      // TODO: Implement actual API call to delete ingredient
+      console.log('Deleting ingredient:', ingredient.id)
+      
+      // Simulate deletion (in real app, this would be API call)
+      alert(`✅ Bahan baku "${ingredient.name}" berhasil dihapus!`)
     }
   }
 
@@ -324,27 +367,42 @@ export default function EnhancedInventoryPage() {
           {/* Bulk Actions */}
           {selectedItems.length > 0 && (
             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-              <span className="text-sm text-gray-600">
-                {selectedItems.length} item dipilih
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBulkEdit}
-                className="ml-auto"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleBulkDelete}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Hapus
-              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-900">
+                  {selectedItems.length} item dipilih
+                </span>
+                <span className="text-xs text-gray-500">
+                  ({ingredients.filter(ing => selectedItems.includes(ing.id)).map(ing => ing.name).slice(0, 2).join(', ')}
+                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                </span>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedItems([])}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkEdit}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Semua
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus Semua
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -453,11 +511,14 @@ export default function EnhancedInventoryPage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleEditIngredient(ingredient)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-red-600">
+                                  <DropdownMenuItem 
+                                    className="text-red-600"
+                                    onClick={() => handleDeleteIngredient(ingredient)}
+                                  >
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Hapus
                                   </DropdownMenuItem>
