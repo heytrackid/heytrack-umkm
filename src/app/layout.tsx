@@ -3,8 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as HotToaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
 import ChatbotFAB from '@/components/ai-chatbot/ChatbotFAB';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
@@ -52,15 +51,16 @@ export default function RootLayout({
                 </header> */}
                 {children}
               </ErrorBoundary>
-              <Toaster />
-              <HotToaster
-                position="top-right"
+              <Toaster
+                position="bottom-right"
                 toastOptions={{
                   duration: 4000,
                   style: {
                     background: 'hsl(var(--background))',
                     color: 'hsl(var(--foreground))',
                     border: '1px solid hsl(var(--border))',
+                    borderRadius: '0.625rem',
+                    zIndex: 9999,
                   },
                   success: {
                     iconTheme: {

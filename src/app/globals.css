@@ -182,5 +182,20 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.5);
   }
+  
+  /* Toast specific positioning */
+  [data-radix-toast-viewport] {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    max-width: 420px !important;
+    padding: 1rem !important;
+  }
+  
+  /* Ensure toast appears above mobile nav and chatbot */
+  [data-radix-toast-viewport] [data-radix-toast] {
+    z-index: 9999 !important;
+  }
 
 }
