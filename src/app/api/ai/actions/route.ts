@@ -60,10 +60,18 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Action execution error:', error);
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
     return NextResponse.json(
       { 
         error: 'Action execution failed',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : error) : undefined
       },
       { status: 500 }
     );
