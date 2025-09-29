@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { inventoryCache, CACHE_PATTERNS } from '@/lib/api-cache'
 import { 
   Ingredient, 
   StockTransaction, 
@@ -17,10 +18,13 @@ import {
 
 export class InventoryService {
   /**
-   * Get all ingredients dengan pagination dan filtering
+   * Get all ingredients dengan pagination dan filtering (dengan caching)
    */
   static async getIngredients(params?: InventorySearchParams) {
-    let query = supabase.from('ingredients').select('*')
+    return await inventoryCache.cachedFetch(
+      'ingredients',
+      async () => {
+        let query = supabase.from('ingredients').select('*')
     
     // Apply filters
     if (params?.filters.category) {
@@ -66,29 +70,40 @@ export class InventoryService {
       query = query.range(from, to)
     }
     
-    const { data, error, count } = await query
-    
-    if (error) throw error
-    
-    return { data: data || [], count: count || 0 }
+        const { data, error, count } = await query
+        
+        if (error) throw error
+        
+        return { data: data || [], count: count || 0 }
+      },
+      params, // Use params as cache key
+      { ttl: 10 * 60 * 1000 } // 10 minutes cache
+    )
   }
   
   /**
-   * Get single ingredient by ID
+   * Get single ingredient by ID (với caching)
    */
   static async getIngredient(id: string): Promise<Ingredient | null> {
-    const { data, error } = await supabase
-      .from('ingredients')
-      .select('*')
-      .eq('id', id)
-      .single()
-    
-    if (error) throw error
-    return data
+    return await inventoryCache.cachedFetch(
+      `ingredient/${id}`,
+      async () => {
+        const { data, error } = await supabase
+          .from('ingredients')
+          .select('*')
+          .eq('id', id)
+          .single()
+        
+        if (error) throw error
+        return data
+      },
+      undefined,
+      { ttl: 15 * 60 * 1000 } // 15 minutes cache for individual items
+    )
   }
   
   /**
-   * Create new ingredient
+   * Create new ingredient (invalidate cache)
    */
   static async createIngredient(ingredient: InsertIngredient): Promise<Ingredient> {
     const { data, error } = await supabase
@@ -98,11 +113,15 @@ export class InventoryService {
       .single()
     
     if (error) throw error
+    
+    // Invalidate related caches
+    inventoryCache.invalidate(CACHE_PATTERNS.INVENTORY)
+    
     return data
   }
   
   /**
-   * Update ingredient
+   * Update ingredient (invalidate cache)
    */
   static async updateIngredient(id: string, updates: UpdateIngredient): Promise<Ingredient> {
     const { data, error } = await supabase
@@ -113,6 +132,11 @@ export class InventoryService {
       .single()
     
     if (error) throw error
+    
+    // Invalidate specific ingredient cache and general inventory cache
+    inventoryCache.invalidate(`ingredient/${id}`)
+    inventoryCache.invalidate(CACHE_PATTERNS.INVENTORY)
+    
     return data
   }
   

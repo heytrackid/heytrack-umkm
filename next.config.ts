@@ -99,10 +99,18 @@ const nextConfig: NextConfig = {
   
   // Bundle Optimization  
   experimental: {
-    // Temporarily disabled to fix build issues
-    // optimizeCss: true,
-    // optimizeServerReact: true,
+    // optimizeCss: true, // Temporarily disabled due to critters dependency issue
+    optimizeServerReact: true,
     scrollRestoration: true,
+    webVitalsAttribution: ['CLS', 'LCP'],
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
   },
   
   // External packages for server components
@@ -113,10 +121,47 @@ const nextConfig: NextConfig = {
   ],
   
   // Output optimization for production
-  // output: 'standalone', // Temporarily disabled
+  output: 'standalone',
   
-  // Webpack optimizations - simplified to avoid build issues
+  // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          cacheGroups: {
+            ...config.optimization.splitChunks?.cacheGroups,
+            // Vendor chunk for common libraries
+            vendor: {
+              test: /[\\/]node_modules[\\/](react|react-dom|@radix-ui|lucide-react)[\\/]/,
+              name: 'vendor',
+              chunks: 'all',
+              priority: 10,
+            },
+            // Chart libraries separate chunk
+            charts: {
+              test: /[\\/]node_modules[\\/](recharts|d3)[\\/]/,
+              name: 'charts',
+              chunks: 'all',
+              priority: 8,
+            },
+            // UI components chunk
+            ui: {
+              test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
+              name: 'ui-components',
+              chunks: 'all',
+              priority: 6,
+            },
+          },
+        },
+      };
+    }
+
+    // Bundle size optimization (removed problematic aliases)
+    // Note: React aliases can cause module resolution issues in Next.js 15+
+
     return config;
   },
 
@@ -139,9 +184,8 @@ const nextConfig: NextConfig = {
 };
 
 // Enable bundle analyzer when ANALYZE=true
-// Temporarily disabled to fix build issues
-// const configWithAnalyzer = withBundleAnalyzer({
-//   enabled: process.env.ANALYZE === 'true',
-// })(nextConfig);
+const configWithAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+})(nextConfig);
 
-export default nextConfig;
+export default configWithAnalyzer;

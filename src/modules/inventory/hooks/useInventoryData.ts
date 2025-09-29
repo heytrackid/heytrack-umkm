@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { InventoryService } from '../services/InventoryService'
 import { 
   IngredientWithStats, 
@@ -8,18 +8,36 @@ import {
   Ingredient
 } from '../types'
 
+// Memoized params comparison to prevent unnecessary re-fetches
+function useStableParams(params?: InventorySearchParams) {
+  return useMemo(() => {
+    if (!params) return params
+    return {
+      search: params.search || '',
+      category: params.category || '',
+      sortBy: params.sortBy || 'name',
+      sortOrder: params.sortOrder || 'asc',
+      page: params.page || 1,
+      limit: params.limit || 50,
+    }
+  }, [params?.search, params?.category, params?.sortBy, params?.sortOrder, params?.page, params?.limit])
+}
+
 export function useInventoryData(params?: InventorySearchParams, options?: { initial?: Ingredient[]; refetchOnMount?: boolean }) {
-  const [ingredients, setIngredients] = useState<Ingredient[]>(options?.initial ?? [])
-  const [loading, setLoading] = useState(options?.initial ? false : true)
+  const stableParams = useStableParams(params)
+  
+  const [ingredients, setIngredients] = useState<Ingredient[]>(() => options?.initial ?? [])
+  const [loading, setLoading] = useState(() => options?.initial ? false : true)
   const [error, setError] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState(0)
 
+  // Memoized fetch function to prevent unnecessary recreations
   const fetchIngredients = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
       
-      const result = await InventoryService.getIngredients(params)
+      const result = await InventoryService.getIngredients(stableParams)
       setIngredients(result.data)
       setTotalCount(result.count)
     } catch (err) {
@@ -27,7 +45,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
     } finally {
       setLoading(false)
     }
-  }, [params])
+  }, [stableParams])
 
   useEffect(() => {
     // If we already have initial data and refetchOnMount is false, skip initial refetch
