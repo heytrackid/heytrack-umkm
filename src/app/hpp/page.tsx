@@ -21,13 +21,13 @@ export default function HPPAndPricingPage() {
   const { update: updateRecipe } = useRecipes()
   
   // Pricing states
-  const [selectedRecipeId, setSelectedRecipeId] = useState<string>('')
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string>('placeholder')
   const [targetMargin, setTargetMargin] = useState(40)
   const [productCost, setProductCost] = useState(0)
   const [recommendedPrice, setRecommendedPrice] = useState(0)
   const [isUpdating, setIsUpdating] = useState(false)
   
-  const selectedRecipe = recipes.find(r => r.id === selectedRecipeId)
+  const selectedRecipe = recipes.find(r => r.id === selectedRecipeId && selectedRecipeId !== 'placeholder')
 
   // Update product cost when recipe changes
   useEffect(() => {
@@ -331,11 +331,18 @@ export default function HPPAndPricingPage() {
                     <div className="space-y-4">
                       <div>
                         <Label>Pilih Resep</Label>
-                        <Select value={selectedRecipeId} onValueChange={setSelectedRecipeId}>
+                        <Select value={selectedRecipeId} onValueChange={(value) => {
+                          if (value !== 'placeholder') {
+                            setSelectedRecipeId(value)
+                          }
+                        }}>
                           <SelectTrigger>
                             <SelectValue placeholder="Pilih resep untuk kalkulasi harga" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="placeholder" disabled>
+                              Pilih resep untuk kalkulasi harga
+                            </SelectItem>
                             {recipes.map(recipe => (
                               <SelectItem key={recipe.id} value={recipe.id}>
                                 {recipe.name} - HPP: Rp {Math.round(recipe.hpp).toLocaleString()}

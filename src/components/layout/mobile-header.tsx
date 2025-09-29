@@ -15,13 +15,14 @@ import {
   MoreVertical,
   User
 } from 'lucide-react'
-import { 
-  SignInButton, 
-  SignUpButton, 
-  SignedIn, 
-  SignedOut, 
-  UserButton 
-} from '@clerk/nextjs'
+// Clerk removed for development
+// import { 
+//   SignInButton, 
+//   SignUpButton, 
+//   SignedIn, 
+//   SignedOut, 
+//   UserButton 
+// } from '@clerk/nextjs'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { 
   Sheet,
@@ -254,42 +255,10 @@ export default function MobileHeader({
             </div>
           )}
 
-          {/* Authentication */}
-          <SignedOut>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild>
-                  <SignInButton mode="modal">
-                    <div className="cursor-pointer">
-                      Sign In
-                    </div>
-                  </SignInButton>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <SignUpButton mode="modal">
-                    <div className="cursor-pointer">
-                      Sign Up
-                    </div>
-                  </SignUpButton>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SignedOut>
-          <SignedIn>
-            <UserButton 
-              appearance={{
-                elements: {
-                  avatarBox: "w-7 h-7"
-                }
-              }}
-            />
-          </SignedIn>
+          {/* Simple User Menu for Development */}
+          <Button variant="ghost" size="sm" className="p-2">
+            <User className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 

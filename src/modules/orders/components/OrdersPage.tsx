@@ -613,8 +613,8 @@ export default function OrdersPage({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={order.status} disabled>
-                            {ORDER_STATUS_LABELS[order.status]}
+                          <SelectItem value={order.status || 'PENDING'} disabled>
+                            {ORDER_STATUS_LABELS[order.status] || 'Status Tidak Diketahui'}
                           </SelectItem>
                           {ORDER_STATUSES[order.status].nextStatuses.map(status => (
                             <SelectItem key={status} value={status}>

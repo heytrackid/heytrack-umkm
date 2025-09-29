@@ -97,7 +97,7 @@ export default function OrderForm({
     setFormData(prev => ({
       ...prev,
       order_items: [...prev.order_items, {
-        recipe_id: '',
+        recipe_id: 'placeholder',
         product_name: '',
         quantity: 1,
         price: 0,
@@ -123,6 +123,8 @@ export default function OrderForm({
   }
 
   const handleRecipeSelect = (index: number, recipeId: string) => {
+    if (recipeId === 'placeholder') return // Ignore placeholder selection
+    
     const recipe = recipes.find(r => r.id === recipeId)
     if (recipe) {
       updateOrderItem(index, 'recipe_id', recipeId)
@@ -317,6 +319,9 @@ export default function OrderForm({
                           <SelectValue placeholder="Pilih produk" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="placeholder" disabled>
+                            Pilih produk
+                          </SelectItem>
                           {recipes.map((recipe) => (
                             <SelectItem key={recipe.id} value={recipe.id}>
                               {recipe.name}

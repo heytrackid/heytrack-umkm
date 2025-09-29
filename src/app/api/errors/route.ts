@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateInput } from '@/middleware'
+import { validateInput } from '@/lib/validation'
 
 // Simple in-memory error store (in production, use a real database/service)
 const errorStore: Array<{
