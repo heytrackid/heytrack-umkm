@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,6 +19,7 @@ import { OrderStatus, PaymentStatus, Priority, Order } from './types'
 import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
 import { useCurrency } from '@/hooks/useCurrency'
+import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 
 interface OrdersListProps {
   orders: Order[]
@@ -39,10 +40,29 @@ export default function OrdersList({
 }: OrdersListProps) {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
+  const pageSizeOptions = useMemo(() => [10, 25, 50], [])
+  const [rowsPerPage, setRowsPerPage] = useState<number>(pageSizeOptions[0])
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const totalOrders = orders.length
+  const totalPages = Math.max(1, Math.ceil(totalOrders / rowsPerPage))
+  const pageStart = totalOrders === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1
+  const pageEnd = totalOrders === 0 ? 0 : Math.min(pageStart + rowsPerPage - 1, totalOrders)
+  const paginatedOrders = totalOrders === 0 ? [] : orders.slice(pageStart - 1, pageEnd)
 
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
     onUpdateStatus(orderId, newStatus)
   }
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [orders, rowsPerPage])
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
 
   if (loading) {
     return (
@@ -76,7 +96,7 @@ export default function OrdersList({
   if (isMobile) {
     return (
       <div className="space-y-4">
-        {orders.map((order) => (
+        {paginatedOrders.map((order) => (
           <SwipeActions
             key={order.id}
             leftActions={[
@@ -149,6 +169,22 @@ export default function OrdersList({
             </Card>
           </SwipeActions>
         ))}
+
+        <TablePaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          pageSize={rowsPerPage}
+          onPageSizeChange={(size) => {
+            setRowsPerPage(size)
+            setCurrentPage(1)
+          }}
+          totalItems={totalOrders}
+          pageStart={pageStart}
+          pageEnd={pageEnd}
+          pageSizeOptions={pageSizeOptions}
+          className="border-t"
+        />
       </div>
     )
   }
@@ -160,98 +196,116 @@ export default function OrdersList({
         <CardTitle>Daftar Pesanan ({orders.length})</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2">No. Order</th>
-                <th className="text-left py-2">Pelanggan</th>
-                <th className="text-left py-2">Tanggal</th>
-                <th className="text-left py-2">Total</th>
-                <th className="text-left py-2">Status</th>
-                <th className="text-left py-2">Prioritas</th>
-                <th className="text-left py-2">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id} className="border-b hover:bg-muted/50">
-                  <td className="py-3">
-                    <div>
-                      <div className="font-medium">{order.order_no}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {order.order_items?.length || 0} item
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3">
-                    <div>
-                      <div className="font-medium">{order.customer_name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {order.customer_phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3">
-                    <div>
-                      <div>{new Date(order.delivery_date).toLocaleDateString('id-ID')}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(order.delivery_date).toLocaleTimeString('id-ID', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3">
-                    <div className="font-medium">
-                      {formatCurrency(order.total_amount || 0)}
-                    </div>
-                    <Badge className={getPaymentInfo(order.payment_status).color} variant="outline">
-                      {getPaymentInfo(order.payment_status).label}
-                    </Badge>
-                  </td>
-                  <td className="py-3">
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
-                      className="bg-transparent border border-input rounded px-2 py-1 text-sm"
-                    >
-                      <option value="PENDING">Menunggu</option>
-                      <option value="CONFIRMED">Dikonfirmasi</option>
-                      <option value="IN_PROGRESS">Dalam Proses</option>
-                      <option value="READY">Siap</option>
-                      <option value="DELIVERED">Terkirim</option>
-                      <option value="CANCELLED">Dibatalkan</option>
-                    </select>
-                  </td>
-                  <td className="py-3">
-                    <Badge className={getPriorityInfo(order.priority).color}>
-                      {getPriorityInfo(order.priority).label}
-                    </Badge>
-                  </td>
-                  <td className="py-3">
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => onViewOrder(order)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => onEditOrder(order)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        onClick={() => onDeleteOrder(order.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </td>
+        <div className="space-y-4">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2">No. Order</th>
+                  <th className="text-left py-2">Pelanggan</th>
+                  <th className="text-left py-2">Tanggal</th>
+                  <th className="text-left py-2">Total</th>
+                  <th className="text-left py-2">Status</th>
+                  <th className="text-left py-2">Prioritas</th>
+                  <th className="text-left py-2">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {paginatedOrders.map((order) => (
+                  <tr key={order.id} className="border-b hover:bg-muted/50">
+                    <td className="py-3">
+                      <div>
+                        <div className="font-medium">{order.order_no}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {order.order_items?.length || 0} item
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <div>
+                        <div className="font-medium">{order.customer_name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {order.customer_phone}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <div>
+                        <div>{new Date(order.delivery_date).toLocaleDateString('id-ID')}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(order.delivery_date).toLocaleTimeString('id-ID', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <div className="font-medium">
+                        {formatCurrency(order.total_amount || 0)}
+                      </div>
+                      <Badge className={getPaymentInfo(order.payment_status).color} variant="outline">
+                        {getPaymentInfo(order.payment_status).label}
+                      </Badge>
+                    </td>
+                    <td className="py-3">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                        className="bg-transparent border border-input rounded px-2 py-1 text-sm"
+                      >
+                        <option value="PENDING">Menunggu</option>
+                        <option value="CONFIRMED">Dikonfirmasi</option>
+                        <option value="IN_PROGRESS">Dalam Proses</option>
+                        <option value="READY">Siap</option>
+                        <option value="DELIVERED">Terkirim</option>
+                        <option value="CANCELLED">Dibatalkan</option>
+                      </select>
+                    </td>
+                    <td className="py-3">
+                      <Badge className={getPriorityInfo(order.priority).color}>
+                        {getPriorityInfo(order.priority).label}
+                      </Badge>
+                    </td>
+                    <td className="py-3">
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => onViewOrder(order)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => onEditOrder(order)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => onDeleteOrder(order.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <TablePaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            pageSize={rowsPerPage}
+            onPageSizeChange={(size) => {
+              setRowsPerPage(size)
+              setCurrentPage(1)
+            }}
+            totalItems={totalOrders}
+            pageStart={pageStart}
+            pageEnd={pageEnd}
+            pageSizeOptions={pageSizeOptions}
+            className="border-t"
+          />
         </div>
       </CardContent>
     </Card>
