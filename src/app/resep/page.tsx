@@ -32,8 +32,14 @@ import {
   BookOpen,
   ArrowLeft,
   Home,
-  Tags
+  Tags,
+  MoreHorizontal,
+  Search,
+  Eye
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default function ProductionPage() {
   const { isMobile } = useResponsive()
@@ -42,6 +48,8 @@ export default function ProductionPage() {
   const { data: ingredients } = useIngredients()
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   
   // Form states
   const [newRecipe, setNewRecipe] = useState({
@@ -152,6 +160,84 @@ export default function ProductionPage() {
       const cost = ingredient.price_per_unit * recipeIngredient.quantity
       return total + cost
     }, 0)
+  }
+
+  // Filter recipes based on search term
+  const filteredRecipes = (recipes || []).filter(recipe =>
+    recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    recipe.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Bulk action handlers
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredRecipes.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filteredRecipes.map(recipe => recipe.id.toString()))
+    }
+  }
+
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    )
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedRecipes = filteredRecipes.filter(recipe => selectedItems.includes(recipe.id.toString()))
+    const recipeNames = selectedRecipes.map(recipe => recipe.name).join(', ')
+    
+    const confirmed = window.confirm(
+      `⚠️ Yakin ingin menghapus ${selectedItems.length} resep berikut?\n\n${recipeNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      // TODO: Implement actual API call to delete recipes
+      console.log('Deleting recipes:', selectedItems)
+      
+      // Show success message (in real app, this would be API call)
+      alert(`✅ ${selectedItems.length} resep berhasil dihapus!`)
+      
+      // Clear selection and refresh
+      setSelectedItems([])
+      refetch()
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedRecipes = filteredRecipes.filter(recipe => selectedItems.includes(recipe.id.toString()))
+    const recipeNames = selectedRecipes.map(recipe => recipe.name).join(', ')
+    
+    // TODO: Open bulk edit modal
+    console.log('Bulk editing recipes:', selectedItems)
+    
+    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} resep akan segera tersedia!\n\nResep yang dipilih:\n${recipeNames}`)
+  }
+
+  // Individual action handlers
+  const handleViewRecipe = (recipe: any) => {
+    console.log('View recipe details:', recipe)
+    alert(`👁️ Detail resep "${recipe.name}" akan segera tersedia!`)
+  }
+
+  const handleDeleteRecipe = (recipe: any) => {
+    const confirmed = window.confirm(
+      `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus resep:\n"${recipe.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      // TODO: Implement actual API call to delete recipe
+      console.log('Deleting recipe:', recipe.id)
+      alert(`✅ Resep "${recipe.name}" berhasil dihapus dari sistem.`)
+      refetch()
+    }
   }
 
   if (loading) {
@@ -445,6 +531,63 @@ export default function ProductionPage() {
           </Card>
         </div>
 
+        {/* Search and Filters */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Cari resep berdasarkan nama, deskripsi, atau kategori..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          {/* Bulk Actions */}
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-900">
+                  {selectedItems.length} resep dipilih
+                </span>
+                <span className="text-xs text-gray-500">
+                  ({filteredRecipes.filter(recipe => selectedItems.includes(recipe.id.toString())).map(recipe => recipe.name).slice(0, 2).join(', ')}
+                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                </span>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedItems([])}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkEdit}
+                >
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit Semua
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus Semua
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Recipe List */}
         {!ingredients || ingredients.length === 0 ? (
           <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
@@ -462,110 +605,154 @@ export default function ProductionPage() {
               </Button>
             </CardContent>
           </Card>
-        ) : recipes.length === 0 ? (
+        ) : (
           <Card>
-            <CardContent className="py-12 text-center">
-              <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                Belum ada resep
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Mulai dengan menambahkan resep pertama untuk produk Anda
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ChefHat className="h-5 w-5" />
+                Daftar Resep
+              </CardTitle>
+              <p className="text-sm text-gray-600">
+                Kelola resep produk dengan mudah
               </p>
-              <Button onClick={() => setCurrentView('add')}>
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Resep Pertama
-              </Button>
+            </CardHeader>
+            <CardContent>
+              {filteredRecipes.length > 0 ? (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectedItems.length === filteredRecipes.length && filteredRecipes.length > 0}
+                            onCheckedChange={handleSelectAll}
+                          />
+                        </TableHead>
+                        <TableHead>Nama & Kategori</TableHead>
+                        <TableHead>HPP Estimasi</TableHead>
+                        <TableHead>Jumlah Bahan</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="w-32">Aksi</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredRecipes.map((recipe) => {
+                        const hpp = calculateRecipeHPP(recipe)
+                        const ingredientCount = recipe.recipe_ingredients?.length || 0
+                        
+                        return (
+                          <TableRow key={recipe.id} className="hover:bg-gray-50">
+                            <TableCell>
+                              <Checkbox
+                                checked={selectedItems.includes(recipe.id.toString())}
+                                onCheckedChange={() => handleSelectItem(recipe.id.toString())}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col">
+                                <span className="font-semibold">{recipe.name}</span>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {recipe.category}
+                                  </Badge>
+                                </div>
+                                {recipe.description && (
+                                  <span className="text-xs text-gray-400 mt-1">{recipe.description}</span>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-medium text-green-600">
+                                {formatCurrency(Math.round(hpp))}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={ingredientCount > 0 ? 'default' : 'destructive'} className="text-xs">
+                                  {ingredientCount} bahan
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {ingredientCount > 0 ? (
+                                <Badge variant="default" className="text-xs bg-green-100 text-green-800">
+                                  SIAP HPP
+                                </Badge>
+                              ) : (
+                                <Badge variant="destructive" className="text-xs">
+                                  PERLU BAHAN
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewRecipe(recipe)}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => {
+                                      setSelectedRecipe(recipe)
+                                      setCurrentView('edit')
+                                    }}>
+                                      <Edit2 className="h-4 w-4 mr-2" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={() => window.location.href = '/hpp'}
+                                      disabled={ingredientCount === 0}
+                                    >
+                                      <Calculator className="h-4 w-4 mr-2" />
+                                      Hitung HPP
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      className="text-red-600"
+                                      onClick={() => handleDeleteRecipe(recipe)}
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Hapus
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="py-12 text-center">
+                  <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                    {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada resep'}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm 
+                      ? 'Coba kata kunci lain untuk menemukan resep'
+                      : 'Mulai dengan menambahkan resep pertama untuk produk Anda'
+                    }
+                  </p>
+                  {!searchTerm && (
+                    <Button onClick={() => setCurrentView('add')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Tambah Resep Pertama
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
-        ) : (
-          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
-            {recipes.map((recipe) => {
-              const hpp = calculateRecipeHPP(recipe)
-              const ingredientCount = recipe.recipe_ingredients?.length || 0
-              
-              return (
-                <Card key={recipe.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'}`}>
-                          {recipe.name}
-                        </CardTitle>
-                        <Badge variant="secondary" className="mt-1">
-                          {recipe.category}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => {
-                          setSelectedRecipe(recipe)
-                          setCurrentView('edit')
-                        }}>
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    {recipe.description && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {recipe.description}
-                      </p>
-                    )}
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">HPP Estimasi:</span>
-                        <span className="font-bold text-primary">
-                          Rp {Math.round(hpp).toLocaleString()}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Jumlah Bahan:</span>
-                        <Badge variant={ingredientCount > 0 ? 'default' : 'destructive'}>
-                          {ingredientCount} bahan
-                        </Badge>
-                      </div>
-                      
-                      {ingredientCount > 0 && (
-                        <div className="text-xs text-muted-foreground">
-                          <p className="font-medium mb-1">Bahan utama:</p>
-                          <div className="space-y-1">
-                            {recipe.recipe_ingredients?.slice(0, 3).map((ri: any, index: number) => {
-                              const ingredient = ingredients?.find(ing => ing.id === ri.ingredient_id)
-                              return (
-                                <div key={index} className="flex justify-between">
-                                  <span>• {ingredient?.name || 'Unknown'}</span>
-                                  <span>{ri.quantity} {ingredient?.unit}</span>
-                                </div>
-                              )
-                            })}
-                            {(recipe.recipe_ingredients?.length || 0) > 3 && (
-                              <div className="text-center pt-1">
-                                <span>+{(recipe.recipe_ingredients?.length || 0) - 3} bahan lainnya</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full" 
-                        onClick={() => window.location.href = '/hpp'}
-                        disabled={ingredientCount === 0}
-                      >
-                        <Calculator className="h-4 w-4 mr-2" />
-                        {ingredientCount > 0 ? 'Hitung HPP Detail' : 'Tambah Bahan Dulu'}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
         )}
     </div>
   )

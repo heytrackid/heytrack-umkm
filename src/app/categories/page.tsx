@@ -25,8 +25,14 @@ import {
   X,
   Tags,
   ArrowLeft,
-  Home
+  Home,
+  MoreHorizontal,
+  Search,
+  Eye
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import categoriesData from '@/data/categories.json'
 
 interface Category {
@@ -42,6 +48,8 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>(categoriesData.categories)
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
   const [newCategory, setNewCategory] = useState<Category>({
     id: '',
     name: '',
@@ -85,6 +93,64 @@ export default function CategoriesPage() {
     if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
       setCategories(categories.filter(cat => cat.id !== categoryId))
     }
+  }
+
+  // Filter categories based on search term
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Bulk action handlers
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredCategories.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filteredCategories.map(category => category.id))
+    }
+  }
+
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    )
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCategories = filteredCategories.filter(category => selectedItems.includes(category.id))
+    const categoryNames = selectedCategories.map(category => category.name).join(', ')
+    
+    const confirmed = window.confirm(
+      `⚠️ Yakin ingin menghapus ${selectedItems.length} kategori berikut?\n\n${categoryNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      setCategories(categories.filter(cat => !selectedItems.includes(cat.id)))
+      setSelectedItems([])
+      alert(`✅ ${selectedItems.length} kategori berhasil dihapus!`)
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCategories = filteredCategories.filter(category => selectedItems.includes(category.id))
+    const categoryNames = selectedCategories.map(category => category.name).join(', ')
+    
+    // TODO: Open bulk edit modal
+    console.log('Bulk editing categories:', selectedItems)
+    
+    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} kategori akan segera tersedia!\n\nKategori yang dipilih:\n${categoryNames}`)
+  }
+
+  // Individual action handlers
+  const handleViewCategory = (category: Category) => {
+    console.log('View category details:', category)
+    alert(`👁️ Detail kategori "${category.name}" akan segera tersedia!`)
   }
 
   const handleAddIngredient = () => {
@@ -275,58 +341,186 @@ export default function CategoriesPage() {
         </CardContent>
       </Card>
 
-      {/* Categories Grid */}
-      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
-        {categories.map((category) => (
-          <Card key={category.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{category.icon}</span>
-                  <div>
-                    <CardTitle className="text-lg">{category.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{category.description}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleEditCategory(category)}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDeleteCategory(category.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Bahan Baku Umum:</p>
-                <div className="flex flex-wrap gap-1">
-                  {category.commonIngredients.slice(0, 4).map((ingredient, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {ingredient}
-                    </Badge>
-                  ))}
-                  {category.commonIngredients.length > 4 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{category.commonIngredients.length - 4} lainnya
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Search and Filters */}
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Cari kategori berdasarkan nama atau deskripsi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        {/* Bulk Actions */}
+        {selectedItems.length > 0 && (
+          <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-900">
+                {selectedItems.length} kategori dipilih
+              </span>
+              <span className="text-xs text-gray-500">
+                ({filteredCategories.filter(category => selectedItems.includes(category.id)).map(category => category.name).slice(0, 2).join(', ')}
+                {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+              </span>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedItems([])}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Batal
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkEdit}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Semua
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Hapus Semua
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Categories Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Tags className="h-5 w-5" />
+            Daftar Kategori Produk
+          </CardTitle>
+          <p className="text-sm text-gray-600">
+            Kelola kategori produk dengan mudah
+          </p>
+        </CardHeader>
+        <CardContent>
+          {filteredCategories.length > 0 ? (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={selectedItems.length === filteredCategories.length && filteredCategories.length > 0}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>Kategori</TableHead>
+                    <TableHead>Deskripsi</TableHead>
+                    <TableHead>Bahan Baku Umum</TableHead>
+                    <TableHead className="w-32">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCategories.map((category) => (
+                    <TableRow key={category.id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedItems.includes(category.id)}
+                          onCheckedChange={() => handleSelectItem(category.id)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{category.icon}</span>
+                          <div>
+                            <span className="font-semibold">{category.name}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-600">
+                          {category.description}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1 max-w-48">
+                          {category.commonIngredients.slice(0, 3).map((ingredient, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {ingredient}
+                            </Badge>
+                          ))}
+                          {category.commonIngredients.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{category.commonIngredients.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewCategory(category)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => handleEditCategory(category)}>
+                                <Edit2 className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => handleDeleteCategory(category.id)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Hapus
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="py-12 text-center">
+              <Tags className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada kategori produk'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm 
+                  ? 'Coba kata kunci lain untuk menemukan kategori'
+                  : 'Mulai dengan menambahkan kategori produk pertama'
+                }
+              </p>
+              {!searchTerm && (
+                <Button onClick={() => setCurrentView('add')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah Kategori Pertama
+                </Button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 

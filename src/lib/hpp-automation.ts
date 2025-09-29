@@ -323,29 +323,11 @@ export class HPPAutomationSystem {
   }
 
   private async getRecipeData(recipeId: string) {
-    // Mock recipe data - in real app would fetch from database
-    return {
-      id: recipeId,
-      name: 'Roti Tawar Premium',
-      servings: 2,
-      prepTime: 60, // minutes
-      cookTime: 45,  // minutes
-      estimatedDuration: 105,
-      ingredients: [
-        { ingredientId: 'ing_1', name: 'Tepung Terigu', quantity: 500, unit: 'g' },
-        { ingredientId: 'ing_2', name: 'Telur', quantity: 2, unit: 'butir' }
-      ],
-      packaging: [
-        { name: 'Plastik Wrap', quantity: 1, unit: 'lembar', costPerUnit: 500 }
-      ]
-    }
+    // TODO: Implement real recipe data fetching from database
+    throw new Error('Recipe data fetching not implemented yet')
   }
 
-  private async calculateIngredientCosts(ingredients: any[]) {
-    let total = 0
-    const items = []
-
-    for (const ing of ingredients) {
+  private async calculateIngredientCosts(ingredients: any[]) {    for (const ing of ingredients) {
       // Get latest price from database/cache
       const pricePerUnit = await this.getLatestIngredientPrice(ing.ingredientId)
       const totalCost = (ing.quantity * pricePerUnit) / this.getUnitMultiplier(ing.unit)
@@ -470,18 +452,12 @@ export class HPPAutomationSystem {
     }
   }
 
-  // Utility methods
   private async getLatestIngredientPrice(ingredientId: string): Promise<number> {
-    // Mock - in real app would fetch from database
-    const mockPrices: Record<string, number> = {
-      'ing_1': 15000, // Tepung per kg
-      'ing_2': 28000  // Telur per butir
-    }
-    return mockPrices[ingredientId] || 0
+    // TODO: Implement real price fetching from database
+    throw new Error('Ingredient price fetching not implemented yet')
   }
 
-  private getUnitMultiplier(unit: string): number {
-    const multipliers: Record<string, number> = {
+  private getUnitMultiplier(unit: string): number {    const multipliers: Record<string, number> = {
       'g': 1000, // per kg
       'gram': 1000,
       'ml': 1000, // per liter

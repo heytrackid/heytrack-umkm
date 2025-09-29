@@ -27,14 +27,20 @@ import {
   UserPlus,
   Edit2,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  MoreHorizontal,
+  Eye
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default function CustomersPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency, t } = useSettings()
   const [searchTerm, setSearchTerm] = useState('')
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
 
   // Mock customer data - replace with actual data fetching
   const [customers] = useState([
@@ -67,6 +73,81 @@ export default function CustomersPage() {
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone.includes(searchTerm)
   )
+
+  // Bulk action handlers
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredCustomers.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
+    }
+  }
+
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    )
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
+    const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
+    
+    const confirmed = window.confirm(
+      `⚠️ Yakin ingin menghapus ${selectedItems.length} pelanggan berikut?\n\n${customerNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      // TODO: Implement actual API call to delete customers
+      console.log('Deleting customers:', selectedItems)
+      
+      // Show success message (in real app, this would be API call)
+      alert(`✅ ${selectedItems.length} pelanggan berhasil dihapus!`)
+      
+      // Clear selection
+      setSelectedItems([])
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
+    const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
+    
+    // TODO: Open bulk edit modal
+    console.log('Bulk editing customers:', selectedItems)
+    
+    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} pelanggan akan segera tersedia!\n\nPelanggan yang dipilih:\n${customerNames}`)
+  }
+
+  // Individual action handlers
+  const handleEditCustomer = (customer: any) => {
+    console.log('Edit customer:', customer)
+    setCurrentView('edit')
+  }
+
+  const handleDeleteCustomer = (customer: any) => {
+    const confirmed = window.confirm(
+      `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus pelanggan:\n"${customer.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
+    )
+    
+    if (confirmed) {
+      // TODO: Implement actual API call to delete customer
+      console.log('Deleting customer:', customer.id)
+      alert(`✅ Pelanggan "${customer.name}" berhasil dihapus dari sistem.`)
+    }
+  }
+
+  const handleViewCustomer = (customer: any) => {
+    console.log('View customer details:', customer)
+    // TODO: Open customer detail modal or navigate to customer detail page
+    alert(`👤 Detail pelanggan "${customer.name}" akan segera tersedia!`)
+  }
 
   // Breadcrumb component
   const getBreadcrumbItems = () => {
@@ -169,11 +250,11 @@ export default function CustomersPage() {
           </Card>
         </div>
 
-        {/* Search */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        {/* Search and Filters */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Cari pelanggan berdasarkan nama, email, atau nomor telepon..."
                 value={searchTerm}
@@ -181,93 +262,184 @@ export default function CustomersPage() {
                 className="pl-10"
               />
             </div>
+          </div>
+
+          {/* Bulk Actions */}
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-900">
+                  {selectedItems.length} pelanggan dipilih
+                </span>
+                <span className="text-xs text-gray-500">
+                  ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
+                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                </span>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedItems([])}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Batal
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkEdit}
+                >
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit Semua
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus Semua
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Customers Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Daftar Pelanggan
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              Kelola data pelanggan dengan mudah
+            </p>
+          </CardHeader>
+          <CardContent>
+            {filteredCustomers.length > 0 ? (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedItems.length === filteredCustomers.length && filteredCustomers.length > 0}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </TableHead>
+                      <TableHead>Nama & Status</TableHead>
+                      <TableHead>Kontak</TableHead>
+                      <TableHead>Total Belanja</TableHead>
+                      <TableHead>Total Order</TableHead>
+                      <TableHead>Terakhir Order</TableHead>
+                      <TableHead className="w-32">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCustomers.map((customer) => (
+                      <TableRow key={customer.id} className="hover:bg-gray-50">
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedItems.includes(customer.id.toString())}
+                            onCheckedChange={() => handleSelectItem(customer.id.toString())}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-semibold">{customer.name}</span>
+                            <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
+                              {customer.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-1 text-sm">
+                              <Mail className="h-3 w-3 text-gray-400" />
+                              <span className="truncate max-w-32">{customer.email}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-sm">
+                              <Phone className="h-3 w-3 text-gray-400" />
+                              <span>{customer.phone}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-medium text-green-600">
+                            {formatCurrency(customer.totalSpent)}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-medium">
+                            {customer.totalOrders}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-gray-600">
+                            {customer.lastOrderDate}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewCustomer(customer)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleEditCustomer(customer)}>
+                                  <Edit2 className="h-4 w-4 mr-2" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-red-600"
+                                  onClick={() => handleDeleteCustomer(customer)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Hapus
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+                  {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada data pelanggan'}
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  {searchTerm 
+                    ? 'Coba kata kunci lain untuk menemukan pelanggan'
+                    : 'Mulai dengan menambahkan data pelanggan pertama'
+                  }
+                </p>
+                {!searchTerm && (
+                  <Button onClick={() => setCurrentView('add')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Pelanggan Pertama
+                  </Button>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
-
-        {/* Customer List */}
-        {filteredCustomers.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada data pelanggan'}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm 
-                  ? 'Coba kata kunci lain untuk menemukan pelanggan'
-                  : 'Mulai dengan menambahkan data pelanggan pertama'
-                }
-              </p>
-              {!searchTerm && (
-                <Button onClick={() => setCurrentView('add')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Tambah Pelanggan Pertama
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
-            {filteredCustomers.map((customer) => (
-              <Card key={customer.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'}`}>
-                        {customer.name}
-                      </CardTitle>
-                      <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="mt-1">
-                        {customer.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
-                      </Badge>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="ghost">
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="truncate">{customer.email}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{customer.phone}</span>
-                    </div>
-                    
-                    <div className="flex items-start gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <span className="line-clamp-2">{customer.address}</span>
-                    </div>
-                    
-                    <div className="pt-2 border-t space-y-2">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">Total Belanja:</span>
-                        <span className="font-medium">{formatCurrency(customer.totalSpent)}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">Total Order:</span>
-                        <span className="font-medium">{customer.totalOrders}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-muted-foreground">Terakhir Order:</span>
-                        <span className="font-medium">{customer.lastOrderDate}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
 
         {/* Info Card */}
         <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">

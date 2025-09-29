@@ -5,7 +5,11 @@ import { createClient } from '@supabase/supabase-js'
 import { toast } from 'react-hot-toast'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useSettings, currencies, languages } from '@/contexts/settings-context'
+
+// Breadcrumb components
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -14,44 +18,27 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+
+// Tabs components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
-import { 
-  Settings,
-  User,
-  Building,
-  Bell,
-  Shield,
-  Palette,
-  Database,
-  Wifi,
-  Printer,
-  Mail,
-  Phone,
-  MapPin,
-  Clock,
-  Calendar,
-  DollarSign,
-  Percent,
-  Save,
-  RotateCcw,
-  Download,
-  Upload,
-  Trash2,
-  AlertTriangle,
-  CheckCircle,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock
-} from 'lucide-react'
+
+// Icons
+import { Settings, RotateCcw, Save } from 'lucide-react'
+
+// Extracted components
+import { SettingsQuickLinks } from './components/SettingsQuickLinks'
+import { BusinessInfoSettings } from './components/BusinessInfoSettings'
+import { RegionalSettings } from './components/RegionalSettings'
+import { ProfileSettings } from './components/ProfileSettings'
+import { SecuritySettings } from './components/SecuritySettings'
+import { NotificationSettings } from './components/NotificationSettings'
+import { BackupSettings } from './components/BackupSettings'
+import { BusinessSettings } from './components/BusinessSettings'
+import { DangerZone } from './components/DangerZone'
+import { UIThemeSettings } from './components/UIThemeSettings'
+import { DateTimeSettings } from './components/DateTimeSettings'
+import { NumberCurrencySettings } from './components/NumberCurrencySettings'
+import { UnsavedChangesPrompt } from './components/UnsavedChangesPrompt'
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -270,6 +257,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        <SettingsQuickLinks />
+
         {/* Settings Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-5">
@@ -282,609 +271,42 @@ export default function SettingsPage() {
 
           {/* General Settings */}
           <TabsContent value="general" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5" />
-                  Informasi Bisnis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="businessName">Nama Bisnis</Label>
-                    <Input
-                      id="businessName"
-                      value={settings.general.businessName}
-                      onChange={(e) => handleSettingChange('general', 'businessName', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="businessType">Jenis Bisnis</Label>
-                    <select 
-                      className="w-full p-2 border border-input rounded-md bg-background"
-                      value={settings.general.businessType}
-                      onChange={(e) => handleSettingChange('general', 'businessType', e.target.value)}
-                    >
-                      <option value="bakery">Bakery</option>
-                      <option value="cafe">Cafe</option>
-                      <option value="restaurant">Restaurant</option>
-                      <option value="food-truck">Food Truck</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="address">Alamat</Label>
-                  <Textarea
-                    id="address"
-                    value={settings.general.address}
-                    onChange={(e) => handleSettingChange('general', 'address', e.target.value)}
-                    rows={2}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone">Telepon</Label>
-                    <Input
-                      id="phone"
-                      value={settings.general.phone}
-                      onChange={(e) => handleSettingChange('general', 'phone', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={settings.general.email}
-                      onChange={(e) => handleSettingChange('general', 'email', e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={settings.general.website}
-                      onChange={(e) => handleSettingChange('general', 'website', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="taxNumber">NPWP</Label>
-                    <Input
-                      id="taxNumber"
-                      value={settings.general.taxNumber}
-                      onChange={(e) => handleSettingChange('general', 'taxNumber', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Pengaturan Regional
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="currency">Mata Uang</Label>
-                    <select 
-                      className="w-full p-2 border border-input rounded-md bg-background"
-                      value={settings.general.currency}
-                      onChange={(e) => handleSettingChange('general', 'currency', e.target.value)}
-                    >
-                      <option value="IDR">Indonesian Rupiah (IDR)</option>
-                      <option value="USD">US Dollar (USD)</option>
-                      <option value="EUR">Euro (EUR)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <Label htmlFor="timezone">Zona Waktu</Label>
-                    <select 
-                      className="w-full p-2 border border-input rounded-md bg-background"
-                      value={settings.general.timezone}
-                      onChange={(e) => handleSettingChange('general', 'timezone', e.target.value)}
-                    >
-                      <option value="Asia/Jakarta">Jakarta (UTC+7)</option>
-                      <option value="Asia/Makassar">Makassar (UTC+8)</option>
-                      <option value="Asia/Jayapura">Jayapura (UTC+9)</option>
-                    </select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <BusinessInfoSettings settings={settings} onSettingChange={handleSettingChange} />
+            <RegionalSettings settings={settings} onSettingChange={handleSettingChange} />
           </TabsContent>
 
           {/* Profile Settings */}
           <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Profil Pengguna
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <Button variant="outline" size="sm">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Foto
-                    </Button>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      JPG, PNG max 2MB
-                    </p>
-                  </div>
-                </div>
-                <Separator />
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="fullName">Nama Lengkap</Label>
-                    <Input
-                      id="fullName"
-                      value={settings.user.fullName}
-                      onChange={(e) => handleSettingChange('user', 'fullName', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="role">Jabatan</Label>
-                    <select 
-                      className="w-full p-2 border border-input rounded-md bg-background"
-                      value={settings.user.role}
-                      onChange={(e) => handleSettingChange('user', 'role', e.target.value)}
-                    >
-                      <option value="Owner">Owner</option>
-                      <option value="Manager">Manager</option>
-                      <option value="Staff">Staff</option>
-                      <option value="Admin">Admin</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="userEmail">Email</Label>
-                    <Input
-                      id="userEmail"
-                      type="email"
-                      value={settings.user.email}
-                      onChange={(e) => handleSettingChange('user', 'email', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="userPhone">Telepon</Label>
-                    <Input
-                      id="userPhone"
-                      value={settings.user.phone}
-                      onChange={(e) => handleSettingChange('user', 'phone', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="h-5 w-5" />
-                  Keamanan
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword">Password Saat Ini</Label>
-                  <div className="relative">
-                    <Input
-                      id="currentPassword"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan password saat ini"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="newPassword">Password Baru</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    placeholder="Masukkan password baru"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Konfirmasi password baru"
-                  />
-                </div>
-                <Button>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Update Password
-                </Button>
-              </CardContent>
-            </Card>
+            <ProfileSettings settings={settings} onSettingChange={handleSettingChange} />
+            <SecuritySettings />
           </TabsContent>
 
           {/* Notifications Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Pengaturan Notifikasi
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-muted-foreground">Terima notifikasi melalui email</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.emailNotifications}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'emailNotifications', checked)}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Push Notifications</p>
-                    <p className="text-sm text-muted-foreground">Notifikasi push di browser</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.pushNotifications}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'pushNotifications', checked)}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Peringatan Stok Rendah</p>
-                    <p className="text-sm text-muted-foreground">Notifikasi ketika stok hampir habis</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.lowStockAlert}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'lowStockAlert', checked)}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Update Pesanan</p>
-                    <p className="text-sm text-muted-foreground">Notifikasi perubahan status pesanan</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.orderUpdates}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'orderUpdates', checked)}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Laporan Harian</p>
-                    <p className="text-sm text-muted-foreground">Ringkasan penjualan harian</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.dailyReports}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'dailyReports', checked)}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Laporan Mingguan</p>
-                    <p className="text-sm text-muted-foreground">Ringkasan penjualan mingguan</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.weeklyReports}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'weeklyReports', checked)}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Laporan Bulanan</p>
-                    <p className="text-sm text-muted-foreground">Ringkasan penjualan bulanan</p>
-                  </div>
-                  <Switch 
-                    checked={settings.notifications.monthlyReports}
-                    onCheckedChange={(checked) => handleSettingChange('notifications', 'monthlyReports', checked)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <NotificationSettings settings={settings} onSettingChange={handleSettingChange} />
           </TabsContent>
 
           {/* System Settings */}
           <TabsContent value="system" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5" />
-                  Backup & Data
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Auto Backup</p>
-                    <p className="text-sm text-muted-foreground">Backup otomatis data aplikasi</p>
-                  </div>
-                  <Switch 
-                    checked={settings.system.autoBackup}
-                    onCheckedChange={(checked) => handleSettingChange('system', 'autoBackup', checked)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="backupFrequency">Frekuensi Backup</Label>
-                  <select 
-                    id="backupFrequency"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.system.backupFrequency}
-                    onChange={(e) => handleSettingChange('system', 'backupFrequency', e.target.value)}
-                  >
-                    <option value="daily">Harian</option>
-                    <option value="weekly">Mingguan</option>
-                    <option value="monthly">Bulanan</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="dataRetention">Retensi Data (hari)</Label>
-                  <Input
-                    id="dataRetention"
-                    type="number"
-                    value={settings.system.dataRetention}
-                    onChange={(e) => handleSettingChange('system', 'dataRetention', e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Data akan disimpan selama periode ini sebelum dihapus otomatis
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
-                    Backup Sekarang
-                  </Button>
-                  <Button variant="outline">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Restore Data
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Pengaturan Bisnis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="defaultTax">Pajak Default (%)</Label>
-                  <Input
-                    id="defaultTax"
-                    type="number"
-                    value={settings.system.defaultTax}
-                    onChange={(e) => handleSettingChange('system', 'defaultTax', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lowStockThreshold">Threshold Stok Rendah</Label>
-                  <Input
-                    id="lowStockThreshold"
-                    type="number"
-                    value={settings.system.lowStockThreshold}
-                    onChange={(e) => handleSettingChange('system', 'lowStockThreshold', e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Alert akan muncul ketika stok di bawah angka ini
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                  <AlertTriangle className="h-5 w-5" />
-                  Danger Zone
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border border-red-200 dark:border-red-800 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-2">Reset Aplikasi</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Menghapus semua data dan mengembalikan ke pengaturan awal.
-                    Tindakan ini tidak dapat dibatalkan.
-                  </p>
-                  <Button variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Reset Aplikasi
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <BackupSettings settings={settings} onSettingChange={handleSettingChange} />
+            <BusinessSettings settings={settings} onSettingChange={handleSettingChange} />
+            <DangerZone />
           </TabsContent>
 
           {/* UI Settings */}
           <TabsContent value="ui" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="h-5 w-5" />
-                  Tampilan & Tema
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="theme">Tema</Label>
-                  <select 
-                    id="theme"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.ui.theme}
-                    onChange={(e) => handleSettingChange('ui', 'theme', e.target.value)}
-                  >
-                    <option value="light">Terang</option>
-                    <option value="dark">Gelap</option>
-                    <option value="system">Mengikuti Sistem</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="language">Bahasa</Label>
-                  <select 
-                    id="language"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={globalSettings.language.code}
-                    onChange={(e) => {
-                      const selectedLanguage = languages.find(lang => lang.code === e.target.value)
-                      if (selectedLanguage) {
-                        updateLanguage(selectedLanguage)
-                      }
-                    }}
-                  >
-                    {languages.map(lang => (
-                      <option key={lang.code} value={lang.code}>
-                        {lang.flag} {lang.name}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Bahasa akan berubah setelah refresh halaman
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Format Tanggal & Waktu
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="dateFormat">Format Tanggal</Label>
-                  <select 
-                    id="dateFormat"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.ui.dateFormat}
-                    onChange={(e) => handleSettingChange('ui', 'dateFormat', e.target.value)}
-                  >
-                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="timeFormat">Format Waktu</Label>
-                  <select 
-                    id="timeFormat"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.ui.timeFormat}
-                    onChange={(e) => handleSettingChange('ui', 'timeFormat', e.target.value)}
-                  >
-                    <option value="24h">24 Jam</option>
-                    <option value="12h">12 Jam (AM/PM)</option>
-                  </select>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Format Angka & Mata Uang
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="numberFormat">Format Angka</Label>
-                  <select 
-                    id="numberFormat"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={settings.ui.numberFormat}
-                    onChange={(e) => handleSettingChange('ui', 'numberFormat', e.target.value)}
-                  >
-                    <option value="1.234.567,89">1.234.567,89 (Indonesia)</option>
-                    <option value="1,234,567.89">1,234,567.89 (US)</option>
-                    <option value="1 234 567,89">1 234 567,89 (Europe)</option>
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="uiCurrency">Mata Uang Display</Label>
-                  <select 
-                    id="uiCurrency"
-                    className="w-full p-2 border border-input rounded-md bg-background"
-                    value={globalSettings.currency.code}
-                    onChange={(e) => {
-                      const selectedCurrency = currencies.find(curr => curr.code === e.target.value)
-                      if (selectedCurrency) {
-                        updateCurrency(selectedCurrency)
-                      }
-                    }}
-                  >
-                    {currencies.map(currency => (
-                      <option key={currency.code} value={currency.code}>
-                        {currency.symbol} ({currency.name})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Contoh: {formatCurrency(123456)}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <UIThemeSettings settings={settings} onSettingChange={handleSettingChange} />
+            <DateTimeSettings settings={settings} onSettingChange={handleSettingChange} />
+            <NumberCurrencySettings settings={settings} onSettingChange={handleSettingChange} />
           </TabsContent>
         </Tabs>
 
-        {/* Save Prompt */}
-        {isUnsavedChanges && (
-          <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-orange-600" />
-                  <p className="font-medium text-orange-600">
-                    Ada perubahan yang belum disimpan
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleReset}>
-                    Batal
-                  </Button>
-                  <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Menyimpan...' : 'Simpan Sekarang'}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <UnsavedChangesPrompt
+          isUnsavedChanges={isUnsavedChanges}
+          onReset={() => setIsUnsavedChanges(false)}
+          onSave={handleSave}
+          isSaving={isSaving}
+        />
       </div>
     </AppLayout>
   )

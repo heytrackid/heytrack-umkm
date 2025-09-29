@@ -3,26 +3,23 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  LayoutDashboard, 
-  ChefHat, 
-  Package, 
-  ShoppingCart, 
-  Users, 
+import {
+  LayoutDashboard,
+  ChefHat,
+  Package,
+  ShoppingCart,
+  Users,
   Calculator,
   Receipt,
   BarChart3,
-  Menu,
-  X,
-  Brain,
-  ClipboardCheck,
   TrendingUp,
   Settings,
-  FileText,
   Target,
-  CheckCircle,
-  Tags,
-  DollarSign
+  DollarSign,
+  Layers,
+  Banknote,
+  X,
+  Menu
 } from 'lucide-react'
 
 interface NavigationItem {
@@ -51,18 +48,11 @@ const navigationSections: NavigationSection[] = [
         href: '/',
         icon: LayoutDashboard,
         description: 'Overview & analytics'
-      },
-      {
-        name: 'AI Hub',
-        href: '/ai',
-        icon: Brain,
-        description: 'Smart assistant'
-      },
+      }
     ]
   },
   {
     title: '🚀 STEP 1: DATA MASTER',
-    description: 'Setup data dasar untuk HPP',
     isWorkflow: true,
     items: [
       {
@@ -72,6 +62,14 @@ const navigationSections: NavigationSection[] = [
         isSimple: true,
         badge: 'MULAI',
         description: 'Input harga & stok bahan'
+      },
+      {
+        name: 'Kategori Produk',
+        href: '/categories',
+        icon: Layers,
+        isSimple: true,
+        badge: 'ORGANIZE',
+        description: 'Klasifikasi produk'
       },
       {
         name: 'Biaya Operasional',
@@ -103,6 +101,14 @@ const navigationSections: NavigationSection[] = [
         isSimple: true,
         badge: 'ALL-IN-ONE',
         description: 'HPP otomatis + strategi pricing'
+      },
+      {
+        name: 'HPP Enhanced',
+        href: '/hpp-enhanced',
+        icon: Target,
+        isSimple: true,
+        badge: 'ADVANCED',
+        description: 'HPP dengan fitur lanjutan'
       },
     ]
   },
@@ -143,6 +149,14 @@ const navigationSections: NavigationSection[] = [
         description: 'Monitor pemasukan & pengeluaran'
       },
       {
+        name: 'Finance',
+        href: '/finance',
+        icon: Banknote,
+        isSimple: true,
+        badge: 'KOMPREHENSIF',
+        description: 'Kelola keuangan lengkap'
+      },
+      {
         name: 'Laporan Profit',
         href: '/reports',
         icon: BarChart3,
@@ -169,12 +183,6 @@ const navigationSections: NavigationSection[] = [
         icon: Settings,
         description: 'Pengaturan aplikasi'
       },
-      {
-        name: 'More Features',
-        href: '/more',
-        icon: FileText,
-        description: 'Fitur tambahan'
-      },
     ]
   }
 ]
@@ -185,14 +193,13 @@ interface SidebarProps {
   isMobile?: boolean
 }
 
-export default function SimpleSidebar({ isOpen = false, onToggle, isMobile = false }: SidebarProps) {
+export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
   const pathname = usePathname()
 
   // If it's mobile mode (used within Sheet), render simplified version
   if (isMobile) {
     return (
       <div className="h-full flex flex-col bg-background">
-        {/* Mobile Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">

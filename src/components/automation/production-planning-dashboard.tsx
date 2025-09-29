@@ -163,7 +163,8 @@ function ProductionPlanningDashboard() {
       // Assuming order_items contain recipe references
       // Temporarily disabled until order_items relation is properly set up
       // return order.order_items?.some((item: any) => item.recipe_id === recipeId)
-      return Math.random() > 0.5 // Mock data for now
+          // TODO: Implement real order checking logic
+    return false // Placeholder until order_items relation is set up
     })
 
     return Math.max(recipeOrders.length * 2, 3) // minimum 3 units

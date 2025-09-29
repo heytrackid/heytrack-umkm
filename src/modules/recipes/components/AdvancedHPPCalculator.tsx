@@ -4,23 +4,17 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Calculator, 
-  DollarSign, 
-  TrendingUp, 
-  AlertTriangle,
-  CheckCircle,
-  Package,
-  BarChart3,
-  Lightbulb,
-  Target,
-  RefreshCw,
-  Info
-} from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Calculator, RefreshCw, AlertTriangle } from 'lucide-react'
 import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
+
+// Extracted components
+import { CostBreakdownCard } from './CostBreakdownCard'
+import { PricingAnalysisCard } from './PricingAnalysisCard'
+import { PricingSuggestionsComponent } from './PricingSuggestions'
+import { StockAvailability } from './StockAvailability'
+import { AnalysisInsights } from './AnalysisInsights'
 
 interface HPPResult {
   hpp_breakdown: {
@@ -229,354 +223,44 @@ export default function AdvancedHPPCalculator({
           {/* Cost Breakdown Tab */}
           <TabsContent value="breakdown" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Cost Breakdown */}
-              <Card className="p-4">
-                <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  Cost Breakdown
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Ingredient Cost:</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.ingredient_cost.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Overhead (15%):</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.overhead_cost.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Labor Cost (20%):</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.labor_cost.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Packaging (5%):</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.packaging_cost.toLocaleString()}</span>
-                  </div>
-                  <hr />
-                  <div className="flex justify-between font-medium">
-                    <span>Total Cost:</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.total_cost.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between font-medium text-gray-600 dark:text-gray-400">
-                    <span>Cost per Serving:</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.cost_per_serving.toLocaleString()}</span>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Current Pricing Analysis */}
-              <Card className="p-4">
-                <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <BarChart3 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  Current Pricing
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Current Price:</span>
-                    <span className="font-mono">Rp {hppResult.pricing_analysis.current_price.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Current Margin:</span>
-                    <span className={`font-mono ${getMarginColor(hppResult.pricing_analysis.current_margin)}`}>
-                      {hppResult.pricing_analysis.current_margin.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Break-even Price:</span>
-                    <span className="font-mono">Rp {hppResult.pricing_analysis.break_even_price.toLocaleString()}</span>
-                  </div>
-                  <hr />
-                  <div className="text-xs text-muted-foreground">
-                    <div className="flex justify-between">
-                      <span>Competitor Range:</span>
-                      <span>Rp {hppResult.pricing_analysis.competitor_price_range.min.toLocaleString()} - {hppResult.pricing_analysis.competitor_price_range.max.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Risk Assessment */}
-                <div className="mt-4 p-3 rounded-lg bg-gray-50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className={`h-4 w-4 ${getRiskLevelColor(hppResult.margin_analysis.risk_level)}`} />
-                    <span className="font-medium text-sm">
-                      Risk Level: {hppResult.margin_analysis.risk_level}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {hppResult.margin_analysis.is_profitable 
-                      ? 'Recipe is profitable with current pricing'
-                      : 'Recipe needs price adjustment to be profitable'
-                    }
-                  </p>
-                </div>
-              </Card>
+              <CostBreakdownCard hppBreakdown={hppResult.hpp_breakdown} />
+              <PricingAnalysisCard
+                pricingAnalysis={hppResult.pricing_analysis}
+                marginAnalysis={hppResult.margin_analysis}
+                getMarginColor={getMarginColor}
+                getRiskLevelColor={getRiskLevelColor}
+              />
             </div>
           </TabsContent>
 
           {/* Pricing Suggestions Tab */}
           <TabsContent value="pricing" className="space-y-4">
-            <div className="grid grid-cols-1 gap-4">
-              {/* Pricing Tiers */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(['economy', 'standard', 'premium'] as const).map((tier) => {
-                  const suggestion = hppResult.pricing_suggestions[tier]
-                  return (
-                    <Card 
-                      key={tier}
-                      className={`p-4 cursor-pointer transition-colors ${
-                        selectedPricing === tier ? 'ring-2 ring-blue-500 bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => applyPricingSuggestion(tier)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium capitalize">{tier}</h4>
-                        <Badge variant={tier === 'premium' ? 'default' : 'outline'}>
-                          {suggestion.margin}% margin
-                        </Badge>
-                      </div>
-                      <div className="text-2xl font-bold mb-2">
-                        Rp {suggestion.price.toLocaleString()}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {suggestion.rationale}
-                      </p>
-                      <Button 
-                        variant={selectedPricing === tier ? 'default' : 'outline'} 
-                        size="sm" 
-                        className="w-full mt-3"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          applyPricingSuggestion(tier)
-                        }}
-                      >
-                        {selectedPricing === tier ? 'Selected' : 'Apply Price'}
-                      </Button>
-                    </Card>
-                  )
-                })}
-              </div>
-
-              {/* Custom Pricing */}
-              <Card className="p-4">
-                <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <Target className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  Custom Pricing
-                </h4>
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1">
-                    <Label htmlFor="customPrice" className="text-sm">Custom Price</Label>
-                    <Input
-                      id="customPrice"
-                      type="number"
-                      placeholder="Enter custom price"
-                      value={customPrice}
-                      onChange={(e) => handleCustomPriceChange(e.target.value)}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label className="text-sm">Calculated Margin</Label>
-                    <div className="p-2 border rounded-md bg-gray-50 mt-1">
-                      {customPrice && !isNaN(parseFloat(customPrice)) ? (
-                        <span className={`font-mono ${getMarginColor(
-                          ((parseFloat(customPrice) - hppResult.hpp_breakdown.cost_per_serving) / parseFloat(customPrice)) * 100
-                        )}`}>
-                          {(((parseFloat(customPrice) - hppResult.hpp_breakdown.cost_per_serving) / parseFloat(customPrice)) * 100).toFixed(1)}%
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
+            <PricingSuggestionsComponent
+              pricingSuggestions={hppResult.pricing_suggestions}
+              selectedPricing={selectedPricing}
+              customPrice={customPrice}
+              costPerServing={hppResult.hpp_breakdown.cost_per_serving}
+              onSelectPricing={applyPricingSuggestion}
+              onCustomPriceChange={handleCustomPriceChange}
+              getMarginColor={getMarginColor}
+            />
           </TabsContent>
 
           {/* Stock Availability Tab */}
           <TabsContent value="availability" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Production Capacity */}
-              <Card className="p-4">
-                <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  Production Status
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    {hppResult.availability.can_produce ? (
-                      <CheckCircle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    ) : (
-                      <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                    )}
-                    <span className="font-medium">
-                      {hppResult.availability.can_produce ? 'Can Produce' : 'Cannot Produce'}
-                    </span>
-                  </div>
-                  
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Max Batches: </span>
-                    <span className="font-mono font-medium">{hppResult.availability.production_capacity}</span>
-                  </div>
-
-                  {!hppResult.availability.can_produce && (
-                    <div className="p-3 bg-gray-100 dark:bg-gray-800 border border-red-200 rounded">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1">Production Blocked</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        Insufficient ingredients to produce this recipe
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-
-              {/* Stock Issues */}
-              <Card className="p-4">
-                <h4 className="flex items-center gap-2 font-medium mb-3">
-                  <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  Stock Alerts
-                </h4>
-                <div className="space-y-2">
-                  {hppResult.availability.limiting_ingredients.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Insufficient Stock:</p>
-                      <ul className="text-sm space-y-1">
-                        {hppResult.availability.limiting_ingredients.map((ingredient, idx) => (
-                          <li key={idx} className="flex items-center gap-2">
-                            <span className="h-1 w-1 bg-gray-100 dark:bg-gray-8000 rounded-full"></span>
-                            {ingredient}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {hppResult.availability.stock_warnings.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Stock Warnings:</p>
-                      <ul className="text-sm space-y-1">
-                        {hppResult.availability.stock_warnings.map((warning, idx) => (
-                          <li key={idx} className="flex items-center gap-2">
-                            <span className="h-1 w-1 bg-gray-100 dark:bg-gray-8000 rounded-full"></span>
-                            {warning}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {hppResult.availability.limiting_ingredients.length === 0 && 
-                   hppResult.availability.stock_warnings.length === 0 && (
-                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                      <CheckCircle className="h-4 w-4" />
-                      <span className="text-sm">All ingredients available</span>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </div>
+            <StockAvailability availability={hppResult.availability} />
           </TabsContent>
 
           {/* Analysis & Insights Tab */}
           <TabsContent value="analysis" className="space-y-4">
-            <Card className="p-4">
-              <h4 className="flex items-center gap-2 font-medium mb-4">
-                <Lightbulb className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                Smart Insights & Recommendations
-              </h4>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Profitability Analysis */}
-                <div className="space-y-3">
-                  <h5 className="font-medium text-sm">Profitability Analysis</h5>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${
-                        hppResult.margin_analysis.is_profitable ? 'bg-gray-100 dark:bg-gray-8000' : 'bg-gray-100 dark:bg-gray-8000'
-                      }`}></div>
-                      <span>
-                        {hppResult.margin_analysis.is_profitable 
-                          ? 'Recipe is profitable at current price' 
-                          : 'Recipe needs price adjustment'
-                        }
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Current Margin:</span>
-                      <span className={getMarginColor(hppResult.margin_analysis.current_margin)}>
-                        {hppResult.margin_analysis.current_margin.toFixed(1)}%
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Target Margin:</span>
-                      <span>{hppResult.margin_analysis.recommended_margin}%</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Market Positioning */}
-                <div className="space-y-3">
-                  <h5 className="font-medium text-sm">Market Positioning</h5>
-                  <div className="space-y-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Competitive Range:</span>
-                      <div className="mt-1">
-                        <div className="flex justify-between text-xs">
-                          <span>Min</span>
-                          <span>Current</span>
-                          <span>Max</span>
-                        </div>
-                        <div className="h-2 bg-gray-200 rounded-full relative mt-1">
-                          <div 
-                            className="absolute h-full bg-gray-100 dark:bg-gray-8000 rounded-full"
-                            style={{
-                              left: `${((hppResult.pricing_analysis.current_price - hppResult.pricing_analysis.competitor_price_range.min) / 
-                                (hppResult.pricing_analysis.competitor_price_range.max - hppResult.pricing_analysis.competitor_price_range.min)) * 100}%`,
-                              width: '4px'
-                            }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs mt-1">
-                          <span>Rp {hppResult.pricing_analysis.competitor_price_range.min.toLocaleString()}</span>
-                          <span>Rp {hppResult.pricing_analysis.competitor_price_range.max.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Recommendations */}
-              <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 border border-blue-200 rounded-lg">
-                <h5 className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2">Recommended Actions:</h5>
-                <ul className="space-y-1 text-sm text-blue-700">
-                  {!hppResult.margin_analysis.is_profitable && (
-                    <li className="flex items-center gap-2">
-                      <span className="h-1 w-1 bg-blue-600 rounded-full"></span>
-                      Increase selling price to at least Rp {hppResult.pricing_analysis.break_even_price.toLocaleString()}
-                    </li>
-                  )}
-                  {hppResult.margin_analysis.current_margin < hppResult.margin_analysis.recommended_margin && (
-                    <li className="flex items-center gap-2">
-                      <span className="h-1 w-1 bg-blue-600 rounded-full"></span>
-                      Consider pricing at Rp {hppResult.pricing_suggestions.standard.price.toLocaleString()} for optimal margin
-                    </li>
-                  )}
-                  {!hppResult.availability.can_produce && (
-                    <li className="flex items-center gap-2">
-                      <span className="h-1 w-1 bg-blue-600 rounded-full"></span>
-                      Restock limiting ingredients before production
-                    </li>
-                  )}
-                  <li className="flex items-center gap-2">
-                    <span className="h-1 w-1 bg-blue-600 rounded-full"></span>
-                    Monitor ingredient costs for HPP optimization opportunities
-                  </li>
-                </ul>
-              </div>
-            </Card>
+            <AnalysisInsights
+              marginAnalysis={hppResult.margin_analysis}
+              pricingAnalysis={hppResult.pricing_analysis}
+              hppBreakdown={hppResult.hpp_breakdown}
+              pricingSuggestions={hppResult.pricing_suggestions}
+              availability={hppResult.availability}
+              getMarginColor={getMarginColor}
+            />
           </TabsContent>
         </Tabs>
       </CardContent>
