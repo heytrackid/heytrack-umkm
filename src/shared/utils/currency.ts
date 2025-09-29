@@ -87,11 +87,27 @@ export const SUPPORTED_CURRENCIES: Record<string, CurrencyConfig> = {
 export const DEFAULT_CURRENCY = 'IDR'
 
 /**
+ * Get current currency from user settings
+ */
+function getCurrentCurrency(): string {
+  try {
+    const savedSettings = localStorage.getItem('heytrack-settings')
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings)
+      return parsed.currency?.code || DEFAULT_CURRENCY
+    }
+  } catch (error) {
+    console.error('Error loading currency settings:', error)
+  }
+  return DEFAULT_CURRENCY
+}
+
+/**
  * Format amount according to currency configuration
  */
 export function formatCurrency(
   amount: number, 
-  currencyCode: string = DEFAULT_CURRENCY,
+  currencyCode?: string,
   options: {
     showSymbol?: boolean
     showCode?: boolean
@@ -99,7 +115,8 @@ export function formatCurrency(
     maximumFractionDigits?: number
   } = {}
 ): string {
-  const currency = SUPPORTED_CURRENCIES[currencyCode] || SUPPORTED_CURRENCIES[DEFAULT_CURRENCY]
+  const actualCurrencyCode = currencyCode || getCurrentCurrency()
+  const currency = SUPPORTED_CURRENCIES[actualCurrencyCode] || SUPPORTED_CURRENCIES[DEFAULT_CURRENCY]
   const {
     showSymbol = true,
     showCode = false,

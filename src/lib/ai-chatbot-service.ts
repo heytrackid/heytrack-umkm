@@ -107,7 +107,7 @@ class BusinessIntelligence {
       }
 
       return {
-        summary: `Total inventori: Rp ${inventory.totalValue.toLocaleString('id-ID')}. ${critical.length} item kritis, ${lowStockItems.length} item perlu restock.`,
+      summary: `Total inventori bernilai ${inventory.totalValue}. ${critical.length} item kritis, ${lowStockItems.length} item perlu restock.`,
         alerts: critical.map(item => `${item.name}: Stok tinggal ${item.current_stock} ${item.unit}`),
         recommendations,
         criticalItems: critical,
@@ -178,7 +178,7 @@ class BusinessIntelligence {
     }
 
     return {
-      summary: `Periode ${period}: Revenue Rp ${revenue.toLocaleString('id-ID')}, Profit Rp ${profit.toLocaleString('id-ID')}, Margin ${profitMargin.toFixed(1)}%`,
+      summary: `Periode ${period}: Revenue ${revenue}, Profit ${profit}, Margin ${profitMargin.toFixed(1)}%`,
       profitMargin,
       revenue,
       costs,
@@ -212,7 +212,7 @@ class BusinessIntelligence {
     }
 
     return {
-      summary: `${topRecipes.length} produk terlaris menghasilkan revenue total Rp ${topRecipes.reduce((sum, r) => sum + (r.total_revenue || 0), 0).toLocaleString('id-ID')}`,
+      summary: `${topRecipes.length} produk terlaris menghasilkan revenue total ${topRecipes.reduce((sum, r) => sum + (r.total_revenue || 0), 0)}`,
       topRecipes,
       recommendations
     };
@@ -254,7 +254,7 @@ class BusinessIntelligence {
     }
 
     return {
-      summary: `${totalCustomers} total pelanggan, ${activeCustomers} aktif (${retentionRate.toFixed(1)}%), AOV: Rp ${avgOrderValue.toLocaleString('id-ID')}`,
+      summary: `${totalCustomers} total pelanggan, ${activeCustomers} aktif (${retentionRate.toFixed(1)}%), AOV: ${avgOrderValue}`,
       insights,
       recommendations,
       topCustomers
@@ -310,7 +310,7 @@ class ActionExecutor {
     return {
       success: true,
       orderId: 'ORD-' + Date.now(),
-      message: `Pesanan untuk ${data.customerName} berhasil ditambahkan dengan total Rp ${data.total.toLocaleString('id-ID')}`
+      message: `Pesanan untuk ${data.customerName} berhasil ditambahkan dengan total ${data.total}`
     };
   }
 

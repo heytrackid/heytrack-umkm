@@ -81,7 +81,7 @@ export class SupabaseUserContext {
         location: 'Jakarta, Indonesia',
         targetMargin: 30,
         preferences: {
-          currency: 'IDR',
+          currency: 'IDR', // This will be overridden by user settings
           language: 'id',
           notifications: true
         },
@@ -379,7 +379,7 @@ export class SupabaseUserContext {
       })),
       ...(transactions.data || []).map(trans => ({
         type: 'transaction',
-        description: `${trans.type}: ${trans.description} - Rp ${trans.amount?.toLocaleString('id-ID')}`,
+        description: `${trans.type}: ${trans.description}`,
         timestamp: trans.created_at,
         amount: trans.amount
       }))
@@ -420,7 +420,7 @@ export class SupabaseUserContext {
         ...(businessData.products.topProducts.length > 0 ? 
           [`Fokus marketing pada ${businessData.products.topProducts[0].name} yang paling laris`] : []),
         ...(businessData.customers.avgOrderValue < 100000 ? 
-          [`AOV saat ini ${businessData.customers.avgOrderValue.toLocaleString('id-ID')}, bisa ditingkatkan dengan upselling`] : []),
+          [`AOV saat ini dapat ditingkatkan dengan upselling`] : []),
         ...(businessData.inventory.lowStockItems.length > 0 ? 
           [`Optimasi inventory untuk ${businessData.inventory.lowStockItems.length} item yang sering low stock`] : [])
       ],

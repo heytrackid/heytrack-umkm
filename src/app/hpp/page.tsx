@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useHPPCalculations, useRecipes } from '@/hooks/useDatabase'
+import { useCurrency } from '@/hooks/useCurrency'
 import { AlertTriangle, RefreshCw, Calculator, TrendingUp, Target, DollarSign } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,6 +20,7 @@ export default function HPPAndPricingPage() {
   const { isMobile } = useResponsive()
   const { recipes, loading, calculateHPP } = useHPPCalculations()
   const { update: updateRecipe } = useRecipes()
+  const { formatCurrency } = useCurrency()
   
   // Pricing states
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>('placeholder')
@@ -258,18 +260,18 @@ export default function HPPAndPricingPage() {
                                   <div className="space-y-2">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground text-sm">HPP:</span>
-                                      <span className="font-medium">Rp {Math.round(recipe.hpp).toLocaleString()}</span>
+                                      <span className="font-medium">{formatCurrency(Math.round(recipe.hpp))}</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground text-sm">Harga Jual:</span>
-                                      <span className="font-medium">Rp {(recipe.selling_price || 0).toLocaleString()}</span>
+                                      <span className="font-medium">{formatCurrency(recipe.selling_price || 0)}</span>
                                     </div>
                                   </div>
                                   <div className="space-y-2">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground text-sm">Keuntungan:</span>
                                       <span className="font-medium text-green-600">
-                                        Rp {Math.round(recipe.profit).toLocaleString()}
+                                        {formatCurrency(Math.round(recipe.profit))}
                                       </span>
                                     </div>
                                     <div className="flex justify-between">
@@ -345,7 +347,7 @@ export default function HPPAndPricingPage() {
                             </SelectItem>
                             {recipes.map(recipe => (
                               <SelectItem key={recipe.id} value={recipe.id}>
-                                {recipe.name} - HPP: Rp {Math.round(recipe.hpp).toLocaleString()}
+                                {recipe.name} - HPP: {formatCurrency(Math.round(recipe.hpp))}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -362,11 +364,11 @@ export default function HPPAndPricingPage() {
                             </div>
                             <div>
                               <span className="text-muted-foreground">HPP Saat Ini:</span>
-                              <span className="ml-2 font-medium">Rp {Math.round(selectedRecipe.hpp).toLocaleString()}</span>
+                              <span className="ml-2 font-medium">{formatCurrency(Math.round(selectedRecipe.hpp))}</span>
                             </div>
                             <div>
                               <span className="text-muted-foreground">Harga Jual Saat Ini:</span>
-                              <span className="ml-2 font-medium">Rp {(selectedRecipe.selling_price || 0).toLocaleString()}</span>
+                              <span className="ml-2 font-medium">{formatCurrency(selectedRecipe.selling_price || 0)}</span>
                             </div>
                             <div>
                               <span className="text-muted-foreground">Margin Saat Ini:</span>
@@ -392,7 +394,7 @@ export default function HPPAndPricingPage() {
                       <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
                         <div className="space-y-4">
                           <div>
-                            <Label htmlFor="cost">HPP Produk (Rp)</Label>
+                            <Label htmlFor="cost">HPP Produk</Label>
                             <Input
                               id="cost"
                               type="number"
@@ -430,18 +432,18 @@ export default function HPPAndPricingPage() {
                                 <div className="text-center">
                                   <p className="text-sm text-muted-foreground">Harga Jual Rekomendasi</p>
                                   <p className={`font-bold text-primary ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-                                    Rp {recommendedPrice.toLocaleString()}
+                                    {formatCurrency(recommendedPrice)}
                                   </p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 pt-2 border-t">
                                   <div className="text-center">
                                     <p className="text-xs text-muted-foreground">HPP</p>
-                                    <p className="font-medium">Rp {productCost.toLocaleString()}</p>
+                                    <p className="font-medium">{formatCurrency(productCost)}</p>
                                   </div>
                                   <div className="text-center">
                                     <p className="text-xs text-muted-foreground">Keuntungan</p>
                                     <p className="font-medium text-green-600">
-                                      Rp {(recommendedPrice - productCost).toLocaleString()}
+                                      {formatCurrency(recommendedPrice - productCost)}
                                     </p>
                                   </div>
                                 </div>

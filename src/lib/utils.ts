@@ -5,17 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency: string = 'IDR'): string {
-  if (currency === 'IDR') {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
-  
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-  }).format(amount)
+// Deprecated: Use formatCurrentCurrency from @/lib/currency or useCurrency hook instead
+export function formatCurrency(amount: number): string {
+  // Import dynamically to avoid circular dependencies
+  const { formatCurrentCurrency } = require('@/lib/currency')
+  return formatCurrentCurrency(amount)
 }
