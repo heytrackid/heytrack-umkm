@@ -121,48 +121,61 @@ export class SupabaseUserContext {
 
   // Financial analytics for user
   private async getFinancialData(userId: string) {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [ordersResult, expensesResult] = await Promise.all([
-      supabaseServer
-        .from('orders')
-        .select('*')
-        .gte('created_at', thirtyDaysAgo.toISOString())
-        .eq('status', 'COMPLETED')
-        .order('created_at', { ascending: false }),
+      const [ordersResult, expensesResult] = await Promise.all([
+        supabaseServer
+          .from('orders')
+          .select('*')
+          .gte('created_at', thirtyDaysAgo.toISOString())
+          .eq('status', 'COMPLETED')
+          .order('created_at', { ascending: false }),
+        
+        supabaseServer
+          .from('financial_records')
+          .select('*')
+          .eq('type', 'EXPENSE')
+          .gte('created_at', thirtyDaysAgo.toISOString())
+          .order('created_at', { ascending: false })
+      ]);
+
+      const orders = ordersResult.data || [];
+      const expenses = expensesResult.data || [];
       
-      supabaseServer
-        .from('financial_records')
-        .select('*')
-        .eq('type', 'EXPENSE')
-        .gte('created_at', thirtyDaysAgo.toISOString())
-        .order('created_at', { ascending: false })
-    ]);
+      const revenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
+      const costs = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+      const profitMargin = revenue > 0 ? ((revenue - costs) / revenue) * 100 : 0;
 
-    const orders = ordersResult.data || [];
-    const expenses = expensesResult.data || [];
-    
-    const revenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
-    const costs = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-    const profitMargin = revenue > 0 ? ((revenue - costs) / revenue) * 100 : 0;
+      // Calculate monthly growth (simplified)
+      const currentMonthRevenue = revenue;
+      const monthlyGrowth = 5.2; // Placeholder - would calculate from previous month data
 
-    // Calculate monthly growth (simplified)
-    const currentMonthRevenue = revenue;
-    const monthlyGrowth = 5.2; // Placeholder - would calculate from previous month data
-
-    return {
-      revenue,
-      costs,
-      profitMargin,
-      monthlyGrowth,
-      transactions: [...orders, ...expenses].slice(0, 10)
-    };
+      return {
+        revenue,
+        costs,
+        profitMargin,
+        monthlyGrowth,
+        transactions: [...orders, ...expenses].slice(0, 10)
+      };
+    } catch (error) {
+      console.error('Error in getFinancialData:', error);
+      // Return default data on error
+      return {
+        revenue: 0,
+        costs: 0,
+        profitMargin: 0,
+        monthlyGrowth: 0,
+        transactions: []
+      };
+    }
   }
 
   // Inventory analytics for user
   private async getInventoryData(userId: string) {
-    const [ingredientsResult, lowStockResult] = await Promise.all([
+    try {
+      const [ingredientsResult, lowStockResult] = await Promise.all([
       supabaseServer
         .from('ingredients')
         .select('*')
@@ -190,18 +203,29 @@ export class SupabaseUserContext {
       .sort((a, b) => (b.current_stock * b.price_per_unit) - (a.current_stock * a.price_per_unit))
       .slice(0, 5);
 
-    return {
-      totalItems: allIngredients.length,
-      criticalItems,
-      lowStockItems,
-      totalValue,
-      topIngredients
-    };
+      return {
+        totalItems: allIngredients.length,
+        criticalItems,
+        lowStockItems,
+        totalValue,
+        topIngredients
+      };
+    } catch (error) {
+      console.error('Error in getInventoryData:', error);
+      return {
+        totalItems: 0,
+        criticalItems: [],
+        lowStockItems: [],
+        totalValue: 0,
+        topIngredients: []
+      };
+    }
   }
 
   // Customer analytics for user
   private async getCustomerData(userId: string) {
-    const thirtyDaysAgo = new Date();
+    try {
+      const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const [customersResult, recentOrdersResult] = await Promise.all([
@@ -234,19 +258,31 @@ export class SupabaseUserContext {
     const totalSpent = customers.reduce((sum, customer) => sum + (customer.total_spent || 0), 0);
     const avgOrderValue = totalCustomers > 0 ? totalSpent / totalCustomers : 0;
 
-    return {
-      totalCustomers,
-      activeCustomers,
-      topCustomers,
-      retentionRate,
-      avgOrderValue,
-      recentOrders: recentOrders.slice(0, 10)
-    };
+      return {
+        totalCustomers,
+        activeCustomers,
+        topCustomers,
+        retentionRate,
+        avgOrderValue,
+        recentOrders: recentOrders.slice(0, 10)
+      };
+    } catch (error) {
+      console.error('Error in getCustomerData:', error);
+      return {
+        totalCustomers: 0,
+        activeCustomers: 0,
+        topCustomers: [],
+        retentionRate: 0,
+        avgOrderValue: 0,
+        recentOrders: []
+      };
+    }
   }
 
   // Product analytics for user
   private async getProductData(userId: string) {
-    const [recipesResult, productionResult] = await Promise.all([
+    try {
+      const [recipesResult, productionResult] = await Promise.all([
       supabaseServer
         .from('recipes')
         .select('*')
@@ -281,13 +317,23 @@ export class SupabaseUserContext {
       .sort((a, b) => b.margin - a.margin)
       .slice(0, 5);
 
-    return {
-      totalProducts,
-      topProducts,
-      totalRevenue,
-      bestPerforming,
-      trends: productions.slice(0, 10)
-    };
+      return {
+        totalProducts,
+        topProducts,
+        totalRevenue,
+        bestPerforming,
+        trends: productions.slice(0, 10)
+      };
+    } catch (error) {
+      console.error('Error in getProductData:', error);
+      return {
+        totalProducts: 0,
+        topProducts: [],
+        totalRevenue: 0,
+        bestPerforming: [],
+        trends: []
+      };
+    }
   }
 
   // Get recent business activities

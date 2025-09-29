@@ -275,10 +275,10 @@ class ActionExecutor {
           return await this.checkStock(action.data, context);
         
         case 'view_report':
-          return await this.generateReport(action.data);
+          return await this.generateReport(action.data, context);
         
         case 'analysis':
-          return await this.performAnalysis(action.data);
+          return await this.performAnalysis(action.data, context);
         
         case 'recommendation':
           return await this.generateRecommendations(action.data, context);
@@ -329,15 +329,16 @@ class ActionExecutor {
     }
   }
 
-  private static async generateReport(data: any) {
+  private static async generateReport(data: any, context?: ChatContext) {
     const { type, period } = data;
+    const userId = context?.userId || 'default-user';
     
     switch (type) {
       case 'financial':
         return await BusinessIntelligence.analyzeFinancialPerformance(period);
       
       case 'inventory':
-        return await BusinessIntelligence.analyzeInventoryStatus();
+        return await BusinessIntelligence.analyzeInventoryStatus(userId);
       
       case 'products':
         return await BusinessIntelligence.analyzeBestSellingRecipes();
@@ -353,11 +354,12 @@ class ActionExecutor {
     }
   }
 
-  private static async performAnalysis(data: any) {
+  private static async performAnalysis(data: any, context?: ChatContext) {
     // Comprehensive business analysis
+    const userId = context?.userId || 'default-user';
     const [financial, inventory, recipes, customers] = await Promise.all([
       BusinessIntelligence.analyzeFinancialPerformance(),
-      BusinessIntelligence.analyzeInventoryStatus(),
+      BusinessIntelligence.analyzeInventoryStatus(userId),
       BusinessIntelligence.analyzeBestSellingRecipes(),
       BusinessIntelligence.analyzeCustomerBehavior()
     ]);
@@ -380,7 +382,7 @@ class ActionExecutor {
     // Get current business metrics
     const [financial, inventory] = await Promise.all([
       BusinessIntelligence.analyzeFinancialPerformance(),
-      BusinessIntelligence.analyzeInventoryStatus()
+      BusinessIntelligence.analyzeInventoryStatus(context.userId)
     ]);
 
     const recommendations = [];
@@ -847,32 +849,39 @@ export class AIChatbotService {
 
   // Execute action
   async executeAction(actionId: string, contextId: string): Promise<any> {
-    const context = this.contexts.get(contextId);
-    if (!context) {
-      throw new Error('Context not found');
+    try {
+      const context = this.contexts.get(contextId);
+      if (!context) {
+        throw new Error(`Context not found: ${contextId}`);
+      }
+
+      const action = context.activeActions.find(a => a.id === actionId);
+      if (!action) {
+        throw new Error(`Action not found: ${actionId}`);
+      }
+
+      console.log(`Executing action: ${action.type} for user: ${context.userId}`);
+      const result = await ActionExecutor.executeAction(action, context);
+      
+      action.executed = true;
+      action.result = result;
+
+      // Add system message about action execution
+      const systemMessage: ChatMessage = {
+        id: `msg_${Date.now()}_system`,
+        type: 'system',
+        content: `Aksi "${action.label}" telah dijalankan.`,
+        timestamp: new Date(),
+        contextId: context.id,
+        data: result
+      };
+      context.conversation.push(systemMessage);
+
+      return result;
+    } catch (error) {
+      console.error('Error in executeAction:', error);
+      throw error;
     }
-
-    const action = context.activeActions.find(a => a.id === actionId);
-    if (!action) {
-      throw new Error('Action not found');
-    }
-
-    const result = await ActionExecutor.executeAction(action, context);
-    action.executed = true;
-    action.result = result;
-
-    // Add system message about action execution
-    const systemMessage: ChatMessage = {
-      id: `msg_${Date.now()}_system`,
-      type: 'system',
-      content: `Aksi "${action.label}" telah dijalankan.`,
-      timestamp: new Date(),
-      contextId: context.id,
-      data: result
-    };
-    context.conversation.push(systemMessage);
-
-    return result;
   }
 
   // Get or create context
