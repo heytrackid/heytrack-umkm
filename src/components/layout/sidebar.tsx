@@ -45,19 +45,14 @@ const navigationSections: NavigationSection[] = [
   {
     title: 'Dashboard',
     items: [
-      {
-        name: 'Dashboard',
         href: '/',
         icon: LayoutDashboard,
         description: 'Overview & analytics'
-      },
-      {
+      }
     ]
   },
   {
-    title: '🚀 STEP 1: DATA MASTER',
-    description: 'Setup data dasar untuk HPP',
-    isWorkflow: true,
+    title: '🚀 STEP 1: DATA MASTER',    isWorkflow: true,
     items: [
       {
         name: 'Bahan Baku',
@@ -67,7 +62,6 @@ const navigationSections: NavigationSection[] = [
         badge: 'MULAI',
         description: 'Input harga & stok bahan'
       },
-      {
         name: 'Biaya Operasional',
         href: '/operational-costs',
         icon: Receipt,
@@ -75,7 +69,6 @@ const navigationSections: NavigationSection[] = [
         badge: 'WAJIB',
         description: 'Listrik, gas, gaji, dll'
       },
-      {
         name: 'Resep',
         href: '/resep',
         icon: ChefHat,
@@ -85,12 +78,10 @@ const navigationSections: NavigationSection[] = [
       },
     ]
   },
-  {
     title: '🧮 STEP 2: HITUNG HPP',
     description: 'Kalkulasi harga pokok produksi',
     isWorkflow: true,
     items: [
-      {
         name: 'HPP & Pricing',
         href: '/hpp',
         icon: Calculator,
@@ -100,12 +91,10 @@ const navigationSections: NavigationSection[] = [
       },
     ]
   },
-  {
     title: '📊 STEP 3: OPERASIONAL',
     description: 'Jalankan bisnis dengan data akurat',
     isWorkflow: true,
     items: [
-      {
         name: 'Kelola Pesanan',
         href: '/orders',
         icon: ShoppingCart,
@@ -113,7 +102,6 @@ const navigationSections: NavigationSection[] = [
         badge: 'HARIAN',
         description: 'Terima & proses order'
       },
-      {
         name: 'Data Pelanggan',
         href: '/customers',
         icon: Users,
@@ -123,12 +111,10 @@ const navigationSections: NavigationSection[] = [
       },
     ]
   },
-  {
     title: '📈 STEP 4: MONITORING',
     description: 'Pantau performa & profit',
     isWorkflow: true,
     items: [
-      {
         name: 'Arus Kas',
         href: '/cash-flow',
         icon: DollarSign,
@@ -136,7 +122,6 @@ const navigationSections: NavigationSection[] = [
         badge: 'REALTIME',
         description: 'Monitor pemasukan & pengeluaran'
       },
-      {
         name: 'Laporan Profit',
         href: '/reports',
         icon: BarChart3,
@@ -144,7 +129,6 @@ const navigationSections: NavigationSection[] = [
         badge: 'ANALISA',
         description: 'Track keuntungan harian'
       },
-      {
         name: 'Review HPP',
         href: '/review',
         icon: TrendingUp,
@@ -154,16 +138,13 @@ const navigationSections: NavigationSection[] = [
       },
     ]
   },
-  {
     title: '⚙️ LAINNYA',
     items: [
-      {
         name: 'Settings',
         href: '/settings',
         icon: Settings,
         description: 'Pengaturan aplikasi'
       },
-      {
         name: 'More Features',
         href: '/more',
         icon: FileText,
@@ -173,20 +154,16 @@ const navigationSections: NavigationSection[] = [
   }
 ]
 
-interface SidebarProps {
   isOpen?: boolean
   onToggle?: () => void
   isMobile?: boolean
 }
 
-export default function SimpleSidebar({ isOpen = false, onToggle, isMobile = false }: SidebarProps) {
   const pathname = usePathname()
 
   // If it's mobile mode (used within Sheet), render simplified version
-  if (isMobile) {
     return (
       <div className="h-full flex flex-col bg-background">
-        {/* Mobile Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border flex-shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
