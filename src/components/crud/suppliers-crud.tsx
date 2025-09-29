@@ -371,7 +371,7 @@ export function SuppliersCRUD() {
         onClose={closeModals}
         onConfirm={handleConfirmDelete}
         title="Delete Supplier"
-        message={`Are you sure you want to delete "${selectedSupplier?.name}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete"${selectedSupplier?.name}"? This action cannot be undone.`}
         confirmText="Delete"
         type="danger"
       />

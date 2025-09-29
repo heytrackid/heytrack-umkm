@@ -870,7 +870,7 @@ export class AIChatbotService {
       const systemMessage: ChatMessage = {
         id: `msg_${Date.now()}_system`,
         type: 'system',
-        content: `Aksi "${action.label}" telah dijalankan.`,
+        content: `Aksi"${action.label}" telah dijalankan.`,
         timestamp: new Date(),
         contextId: context.id,
         data: result

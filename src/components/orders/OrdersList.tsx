@@ -18,6 +18,7 @@ import {
 import { OrderStatus, PaymentStatus, Priority, Order } from './types'
 import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface OrdersListProps {
   orders: Order[]
@@ -37,6 +38,7 @@ export default function OrdersList({
   loading = false
 }: OrdersListProps) {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
 
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
     onUpdateStatus(orderId, newStatus)
@@ -100,7 +102,7 @@ export default function OrdersList({
               }
             ]}
           >
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover: transition-shadow">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -128,7 +130,7 @@ export default function OrdersList({
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span className="font-medium">
-                      Rp {order.total_amount?.toLocaleString()}
+                      {formatCurrency(order.total_amount || 0)}
                     </span>
                   </div>
                 </div>
@@ -203,7 +205,7 @@ export default function OrdersList({
                   </td>
                   <td className="py-3">
                     <div className="font-medium">
-                      Rp {order.total_amount?.toLocaleString()}
+                      {formatCurrency(order.total_amount || 0)}
                     </div>
                     <Badge className={getPaymentInfo(order.payment_status).color} variant="outline">
                       {getPaymentInfo(order.payment_status).label}

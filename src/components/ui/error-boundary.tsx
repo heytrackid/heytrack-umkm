@@ -135,7 +135,7 @@ export function ErrorFallback({
 
 // Loading Error State Component
 export function LoadingError({ 
-  message = "Gagal memuat data",
+  message ="Gagal memuat data",
   onRetry,
   isRetrying = false
 }: { 

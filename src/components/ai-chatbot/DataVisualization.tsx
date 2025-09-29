@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users, Calendar } from 'lucide-react';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface DataVisualizationProps {
   type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis';
@@ -14,15 +15,8 @@ interface DataVisualizationProps {
 }
 
 const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compact = false }) => {
+  const { formatCurrency } = useCurrency();
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
-
-  const formatCurrency = (value: number) => 
-    new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
 
   const formatNumber = (value: number) =>
     new Intl.NumberFormat('id-ID').format(value);
@@ -150,7 +144,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                   ))}
                   {data.criticalItems.length > 3 && (
                     <div className="text-sm text-red-600 font-medium">
-                      +{data.criticalItems.length - 3} more items
+                     {data.criticalItems.length - 3} more items
                     </div>
                   )}
                 </div>

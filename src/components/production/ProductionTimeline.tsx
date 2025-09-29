@@ -202,7 +202,7 @@ export default function ProductionTimeline({
                 size="sm"
                 onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
               >
-                +
+               
               </Button>
               
               <Separator orientation="vertical" className="h-6" />
@@ -347,7 +347,7 @@ export default function ProductionTimeline({
                                     STATUS_COLORS[batch.status]
                                   } ${
                                     selectedBatch === batch.id 
-                                      ? 'border-primary shadow-lg scale-105' 
+                                      ? 'border-primary  scale-105' 
                                       : 'border-transparent hover:border-primary/50'
                                   }`}
                                   style={{

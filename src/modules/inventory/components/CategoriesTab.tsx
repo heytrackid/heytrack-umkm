@@ -53,7 +53,7 @@ export function CategoriesTab() {
       <Alert className="border-gray-200 bg-gray-50">
         <Lightbulb className="h-4 w-4 text-gray-600" />
         <AlertDescription className="text-gray-700">
-          💡 <strong>Tips Kategori:</strong> Kelompokkan bahan dengan sifat serupa. Misalnya: semua tepung dalam "Tepung & Biji-bijian", semua dairy dalam "Dairy & Lemak". Ini memudahkan pencarian dan analisis cost per kategori!
+          💡 <strong>Tips Kategori:</strong> Kelompokkan bahan dengan sifat serupa. Misalnya: semua tepung dalam"Tepung & Biji-bijian", semua dairy dalam"Dairy & Lemak". Ini memudahkan pencarian dan analisis cost per kategori!
         </AlertDescription>
       </Alert>
     </>

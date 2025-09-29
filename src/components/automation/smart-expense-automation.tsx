@@ -26,6 +26,7 @@ import {
   BarChart3,
   Plus
 } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface AutomationRule {
   id: string
@@ -168,6 +169,7 @@ const sampleAlerts: ExpenseAlert[] = [
 ]
 
 export function SmartExpenseAutomation() {
+  const { formatCurrency } = useCurrency()
   const [automationRules, setAutomationRules] = useState(sampleAutomationRules)
   const [alerts, setAlerts] = useState(sampleAlerts)
   const [automationStats, setAutomationStats] = useState({
@@ -248,7 +250,7 @@ export function SmartExpenseAutomation() {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                Rp {automationStats.costSaved.toLocaleString()}
+                {formatCurrency(automationStats.costSaved)}
               </div>
               <p className="text-xs text-muted-foreground">Cost Saved</p>
             </div>
@@ -295,7 +297,7 @@ export function SmartExpenseAutomation() {
                             </Badge>
                             {alert.amount && (
                               <Badge variant="secondary" className="text-xs">
-                                Rp {alert.amount.toLocaleString()}
+                                {formatCurrency(alert.amount)}
                               </Badge>
                             )}
                           </div>
@@ -367,7 +369,7 @@ export function SmartExpenseAutomation() {
                         {rule.config.amount && (
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-3 w-3" />
-                            Rp {rule.config.amount.toLocaleString()}
+                            {formatCurrency(rule.config.amount)}
                           </span>
                         )}
                       </div>
@@ -427,9 +429,9 @@ export function SmartExpenseAutomation() {
                     <div className="text-right">
                       <div className="font-medium">
                         <span className={isOverBudget ? 'text-gray-600 dark:text-gray-400' : 'text-foreground'}>
-                          Rp {item.spent.toLocaleString()}
+                          {formatCurrency(item.spent)}
                         </span>
-                        <span className="text-muted-foreground"> / Rp {item.budget.toLocaleString()}</span>
+                        <span className="text-muted-foreground"> / {formatCurrency(item.budget)}</span>
                       </div>
                       <div className={`text-sm ${isOverBudget ? 'text-gray-600 dark:text-gray-400' : 'text-muted-foreground'}`}>
                         {percentage.toFixed(1)}%
@@ -442,7 +444,7 @@ export function SmartExpenseAutomation() {
                   />
                   {isOverBudget && (
                     <p className="text-xs text-gray-600 dark:text-gray-400">
-                      ⚠️ Over budget by Rp {(item.spent - item.budget).toLocaleString()}
+                      ⚠️ Over budget by {formatCurrency(item.spent - item.budget)}
                     </p>
                   )}
                 </div>

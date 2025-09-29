@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ShoppingCart, CheckCircle } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface InventoryItem {
   ingredient: any
@@ -23,6 +24,7 @@ interface ReorderTabProps {
  * Reorder tab component showing reorder recommendations
  */
 export function ReorderTab({ items, onReorderTriggered }: ReorderTabProps) {
+  const { formatCurrency } = useCurrency()
   const reorderItems = items.filter(item => item.reorderRecommendation.shouldReorder)
 
   return (
@@ -55,7 +57,7 @@ export function ReorderTab({ items, onReorderTriggered }: ReorderTabProps) {
               </div>
               <div className="text-right">
                 <div className="font-medium">
-                  Rp {item.reorderRecommendation.estimatedCost.toLocaleString()}
+                  {formatCurrency(item.reorderRecommendation.estimatedCost)}
                 </div>
                 <Button
                   size="sm"

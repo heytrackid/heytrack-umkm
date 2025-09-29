@@ -142,7 +142,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         const result = apiResult.result;
         
         // Create system message with enhanced content
-        let content = result.message || `Aksi "${action.label}" berhasil dijalankan.`;
+        let content = result.message || `Aksi"${action.label}" berhasil dijalankan.`;
         
         // Add AI recommendations if available
         if (result.aiRecommendations) {
@@ -329,7 +329,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
 
   if (isMinimized) {
     return (
-      <Card className={`fixed bottom-4 right-4 w-80 shadow-2xl border-2 ${className}`}>
+      <Card className={`fixed bottom-4 right-4 w-80  border-2 ${className}`}>
         <CardHeader className="p-4 bg-blue-500 text-white rounded-t-lg flex flex-row items-center justify-between">
           <div className="flex items-center space-x-2">
             <Bot className="h-5 w-5" />
@@ -357,7 +357,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   }
 
   return (
-    <Card className={`fixed bottom-4 right-4 w-96 h-[600px] shadow-2xl border-2 flex flex-col ${className}`}>
+    <Card className={`fixed bottom-4 right-4 w-96 h-[600px]  border-2 flex flex-col ${className}`}>
       {/* Header */}
       <CardHeader className="p-4 bg-gray-700 dark:bg-gray-800 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0">
         <div className="flex items-center space-x-2">

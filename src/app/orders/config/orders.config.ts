@@ -46,7 +46,7 @@ export interface OrdersModuleConfig {
   
   // Invoice and numbering
   invoice: {
-    number_format: string // e.g., "INV-{YYYY}-{MM}-{###}"
+    number_format: string // e.g.,"INV-{YYYY}-{MM}-{###}"
     auto_generate: boolean
     include_company_info: boolean
     show_hpp_details: boolean // whether to show cost breakdown

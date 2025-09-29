@@ -7,6 +7,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { 
+  StatsCardSkeleton,
+  DashboardHeaderSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
+import { 
+  OrdersTableSkeleton,
+  DataGridSkeleton
+} from '@/components/ui/skeletons/table-skeletons'
+import { SearchFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { 
   ShoppingCart,
   Plus,
@@ -76,10 +87,10 @@ export default function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
-  
-  const formatCurrency = (amount: number) => {
-    return `Rp ${amount.toLocaleString('id-ID')}`
-  }
+  const { formatCurrency } = useCurrency()
+  const { loading, setLoading, isLoading } = useLoading({
+    [LOADING_KEYS.FETCH_ORDERS]: true
+  })
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -98,6 +109,15 @@ export default function OrdersPage() {
     
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo
   })
+  
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(LOADING_KEYS.FETCH_ORDERS, false)
+    }, 2000)
+    
+    return () => clearTimeout(timer)
+  }, [])
   
   // Stats calculations
   const totalOrders = orders.length
@@ -126,7 +146,14 @@ export default function OrdersPage() {
         </div>
         
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -134,7 +161,7 @@ export default function OrdersPage() {
                   <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
                   <p className="text-2xl font-bold">{totalOrders}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    +18.7% dari periode sebelumnya
+                   18.7% dari periode sebelumnya
                   </p>
                 </div>
                 <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -149,7 +176,7 @@ export default function OrdersPage() {
                   <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                   <p className="text-2xl font-bold">{formatCurrency(totalRevenue)}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    +23.2% dari periode sebelumnya
+                   23.2% dari periode sebelumnya
                   </p>
                 </div>
                 <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -182,7 +209,8 @@ export default function OrdersPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
         
         {/* Quick Actions */}
         <Card>
@@ -211,60 +239,67 @@ export default function OrdersPage() {
         </Card>
         
         {/* Filters */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex gap-4 flex-wrap">
-              <div className="flex-1 min-w-[200px]">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
+          <SearchFormSkeleton />
+        ) : (
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex gap-4 flex-wrap">
+                <div className="flex-1 min-w-[200px]">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Cari customer atau nomor pesanan..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-8"
+                    />
+                  </div>
+                </div>
+                
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Semua Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Status</SelectItem>
+                    {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => (
+                      <SelectItem key={status} value={status}>
+                        {config.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Cari customer atau nomor pesanan..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
+                    type="date"
+                    placeholder="Dari tanggal"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-[140px]"
+                  />
+                  <span className="text-muted-foreground">-</span>
+                  <Input
+                    type="date"
+                    placeholder="Sampai tanggal"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-[140px]"
                   />
                 </div>
               </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Semua Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => (
-                    <SelectItem key={status} value={status}>
-                      {config.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="date"
-                  placeholder="Dari tanggal"
-                  value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-[140px]"
-                />
-                <span className="text-muted-foreground">-</span>
-                <Input
-                  type="date"
-                  placeholder="Sampai tanggal"
-                  value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
-                  className="w-[140px]"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Orders Table */}
-        <Card>
-          <Table>
+        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
+          <OrdersTableSkeleton rows={5} />
+        ) : (
+          <Card>
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Order ID</TableHead>
@@ -326,8 +361,9 @@ export default function OrdersPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </Card>
+            </Table>
+          </Card>
+        )}
       </div>
     </AppLayout>
   )

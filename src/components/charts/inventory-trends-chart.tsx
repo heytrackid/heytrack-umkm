@@ -1,50 +1,50 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from"recharts"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from"@/components/ui/chart"
 
 const inventoryData = [
   {
-    month: "Jan",
+    month:"Jan",
     stockIn: 4000,
     stockOut: 2400,
     waste: 240,
     remaining: 3760,
   },
   {
-    month: "Feb",
+    month:"Feb",
     stockIn: 3000,
     stockOut: 1398,
     waste: 221,
     remaining: 5141,
   },
   {
-    month: "Mar",
+    month:"Mar",
     stockIn: 2000,
     stockOut: 9800,
     waste: 329,
     remaining: 2812,
   },
   {
-    month: "Apr",
+    month:"Apr",
     stockIn: 2780,
     stockOut: 3908,
     waste: 200,
     remaining: 1672,
   },
   {
-    month: "May",
+    month:"May",
     stockIn: 1890,
     stockOut: 4800,
     waste: 181,
     remaining: 4581,
   },
   {
-    month: "Jun",
+    month:"Jun",
     stockIn: 2390,
     stockOut: 3800,
     waste: 250,
@@ -54,20 +54,20 @@ const inventoryData = [
 
 const chartConfig = {
   stockIn: {
-    label: "Stok Masuk",
-    color: "hsl(var(--chart-1))",
+    label:"Stok Masuk",
+    color:"hsl(var(--chart-1))",
   },
   stockOut: {
-    label: "Stok Keluar",
-    color: "hsl(var(--chart-2))",
+    label:"Stok Keluar",
+    color:"hsl(var(--chart-2))",
   },
   waste: {
-    label: "Waste",
-    color: "hsl(var(--destructive))",
+    label:"Waste",
+    color:"hsl(var(--destructive))",
   },
   remaining: {
-    label: "Sisa Stok",
-    color: "hsl(var(--chart-4))",
+    label:"Sisa Stok",
+    color:"hsl(var(--chart-4))",
   },
 }
 

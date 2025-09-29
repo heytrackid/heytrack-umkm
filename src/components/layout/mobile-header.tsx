@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import LanguageToggle from '@/components/ui/language-toggle'
 import { 
   Search, 
   Bell, 
@@ -15,6 +16,7 @@ import {
   MoreVertical,
   User
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 // Clerk removed for development
 // import { 
 //   SignInButton, 
@@ -31,14 +33,15 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
+} from"@/components/ui/sheet"
+import NotificationCenter from '@/components/ui/notification-center'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu"
+} from"@/components/ui/dropdown-menu"
 import SimpleSidebar from './sidebar'
 
 interface MobileHeaderProps {
@@ -64,7 +67,7 @@ export default function MobileHeader({
   onBackClick,
   actions,
   showSearch = true,
-  searchPlaceholder = "Cari...",
+  searchPlaceholder ="Cari...",
   onSearch,
   notification,
   className,
@@ -73,7 +76,9 @@ export default function MobileHeader({
 }: MobileHeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const { isMobile } = useMobileFirst()
+  const router = useRouter()
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -112,10 +117,10 @@ export default function MobileHeader({
   return (
     <header 
       className={cn(
-        "sticky top-0 z-50",
-        "bg-background/95 backdrop-blur-sm border-b border-border",
-        "transition-transform duration-300 ease-in-out",
-        "supports-[backdrop-filter]:bg-background/60",
+       "sticky top-0 z-50",
+       "bg-background/95 backdrop-blur-sm border-b border-border",
+       "transition-transform duration-300 ease-in-out",
+       "supports-[backdrop-filter]:bg-background/60",
         className
       )}
     >
@@ -140,6 +145,9 @@ export default function MobileHeader({
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-80 p-0">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Menu Navigasi</SheetTitle>
+                </SheetHeader>
                 <div className="h-full">
                   <SimpleSidebar isMobile={true} />
                 </div>
@@ -159,8 +167,8 @@ export default function MobileHeader({
         {showSearch && (
           <div 
             className={cn(
-              "flex items-center transition-all duration-300",
-              isSearchExpanded ? "flex-1 mx-2" : ""
+             "flex items-center transition-all duration-300",
+              isSearchExpanded ?"flex-1 mx-2" :""
             )}
             data-search-container
           >
@@ -202,33 +210,38 @@ export default function MobileHeader({
         {/* Right Section - Actions */}
         <div className="flex items-center space-x-1">
           {/* Dark/Light Mode Toggle */}
+          <LanguageToggle />
           <ThemeToggle />
           
           {/* Notification */}
-          {notification && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={notification.onClick}
-              className="p-2 relative"
-            >
-              <Bell className="h-5 w-5" />
-              {notification.count > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className={cn(
-                    "absolute -top-0 -right-0",
-                    "h-4 w-4 p-0",
-                    "flex items-center justify-center",
-                    "text-xs font-bold",
-                    "min-w-4"
-                  )}
-                >
-                  {notification.count > 99 ? '99+' : notification.count}
-                </Badge>
-              )}
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              // Open in-app notification drawer
+              setIsNotifOpen(true)
+              // Preserve existing external onClick if provided
+              if (notification?.onClick) notification.onClick()
+            }}
+            className="p-2 relative"
+            aria-label="Open notifications"
+          >
+            <Bell className="h-5 w-5" />
+            {notification?.count && notification.count > 0 && (
+              <Badge 
+                variant="destructive" 
+                className={cn(
+                 "absolute -top-0 -right-0",
+                 "h-4 w-4 p-0",
+                 "flex items-center justify-center",
+                 "text-xs font-bold",
+                 "min-w-4"
+                )}
+              >
+                {notification.count > 99 ? '99+' : notification.count}
+              </Badge>
+            )}
+          </Button>
 
           {/* Custom Actions */}
           {actions && actions.length > 0 && (
@@ -256,29 +269,26 @@ export default function MobileHeader({
           )}
 
           {/* Simple User Menu for Development */}
-          <Button variant="ghost" size="sm" className="p-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="p-2"
+            onClick={() => router.push('/settings')}
+            aria-label="Open settings"
+          >
             <User className="h-5 w-5" />
           </Button>
         </div>
       </div>
 
-      {/* Quick Actions Bar - Optional */}
-      <div className="border-t border-border bg-gray-50/50 dark:bg-gray-900/50 px-3 py-2">
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
-            + Pesanan
-          </Button>
-          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
-            📦 Stok
-          </Button>
-          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
-            💰 HPP
-          </Button>
-          <Button variant="outline" size="sm" className="whitespace-nowrap text-xs px-3 py-1.5 h-auto">
-            📊 Laporan
-          </Button>
-        </div>
-      </div>
+      {/* Notifications Drawer */}
+      <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
+        <SheetContent side="right" className="w-96 max-w-full">
+          <div className="h-full overflow-y-auto py-4">
+            <NotificationCenter />
+          </div>
+        </SheetContent>
+      </Sheet>
     </header>
   )
 }

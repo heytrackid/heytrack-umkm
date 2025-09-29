@@ -23,7 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu"
+} from"@/components/ui/dropdown-menu"
 import { useResponsive } from '@/hooks/use-mobile'
 import { Input } from './input'
 
@@ -68,9 +68,9 @@ export function MobileTable<T extends Record<string, any>>({
   actions = [],
   onRowClick,
   loading = false,
-  emptyMessage = "Tidak ada data",
+  emptyMessage ="Tidak ada data",
   searchable = false,
-  searchPlaceholder = "Cari...",
+  searchPlaceholder ="Cari...",
   onSearch,
   sortable = false,
   onSort,
@@ -116,8 +116,8 @@ export function MobileTable<T extends Record<string, any>>({
         <Card 
           key={index}
           className={cn(
-            "transition-colors",
-            onRowClick && "cursor-pointer hover:bg-accent"
+           "transition-colors",
+            onRowClick &&"cursor-pointer hover:bg-accent"
           )}
           onClick={() => onRowClick?.(item)}
         >
@@ -188,9 +188,9 @@ export function MobileTable<T extends Record<string, any>>({
               <th
                 key={index}
                 className={cn(
-                  "h-12 px-4 text-left align-middle font-medium text-muted-foreground",
+                 "h-12 px-4 text-left align-middle font-medium text-muted-foreground",
                   column.className,
-                  column.sortable && sortable && "cursor-pointer hover:text-foreground"
+                  column.sortable && sortable &&"cursor-pointer hover:text-foreground"
                 )}
                 style={{ width: column.width }}
                 onClick={() => {
@@ -229,8 +229,8 @@ export function MobileTable<T extends Record<string, any>>({
             <tr
               key={index}
               className={cn(
-                "border-b transition-colors hover:bg-muted/50",
-                onRowClick && "cursor-pointer"
+               "border-b transition-colors hover:bg-muted/50",
+                onRowClick &&"cursor-pointer"
               )}
               onClick={() => onRowClick?.(item)}
             >
@@ -238,7 +238,7 @@ export function MobileTable<T extends Record<string, any>>({
                 <td
                   key={colIndex}
                   className={cn(
-                    "p-4 align-middle",
+                   "p-4 align-middle",
                     column.className
                   )}
                 >
@@ -353,8 +353,8 @@ export const TableRenderers = {
   },
   
   boolean: (value: boolean) => (
-    <Badge variant={value ? "default" : "secondary"}>
-      {value ? "Ya" : "Tidak"}
+    <Badge variant={value ?"default" :"secondary"}>
+      {value ?"Ya" :"Tidak"}
     </Badge>
   ),
   

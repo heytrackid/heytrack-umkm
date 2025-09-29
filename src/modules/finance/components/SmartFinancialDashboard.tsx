@@ -83,7 +83,7 @@ export default function SmartFinancialDashboard() {
               <div className="flex justify-between items-center">
                 <span>Monthly Growth</span>
                 <Badge variant="default" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                  +{financialData.monthlyGrowth}%
+                 {financialData.monthlyGrowth}%
                 </Badge>
               </div>
               <div className="flex justify-between items-center">

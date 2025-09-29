@@ -335,8 +335,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                           onClick={() => setSelectedTemplateId(template.id)}
                           className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
                             selectedTemplateId === template.id
-                              ? 'border-blue-500 bg-blue-50 text-blue-900 shadow-md'
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-sm'
+                              ? 'border-blue-500 bg-blue-50 text-blue-900 '
+                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
                           }`}
                         >
                           <div className="flex items-center gap-3">
@@ -365,8 +365,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         onClick={() => setSelectedTemplateId('custom')}
                         className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
                           selectedTemplateId === 'custom'
-                            ? 'border-blue-500 bg-blue-50 text-blue-900 shadow-md'
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-sm'
+                            ? 'border-blue-500 bg-blue-50 text-blue-900 '
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
                         }`}
                       >
                         <div className="flex items-center gap-3">

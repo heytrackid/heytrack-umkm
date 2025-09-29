@@ -379,7 +379,7 @@ export function SmartNotificationCenter({
           .map((notification) => (
             <Card 
               key={notification.id} 
-              className={`transition-all hover:shadow-md ${getTypeColor(notification.type)} ${
+              className={`transition-all hover: ${getTypeColor(notification.type)} ${
                 !notification.read ? 'border-l-4 border-l-primary' : 'opacity-75'
               }`}
             >

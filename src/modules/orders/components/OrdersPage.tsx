@@ -45,6 +45,7 @@ import {
   ORDER_PRIORITIES,
   ORDER_CONFIG 
 } from '../constants'
+import { useCurrency } from '@/hooks/useCurrency'
 
 
 interface OrdersPageProps {
@@ -56,6 +57,8 @@ export default function OrdersPage({
   userRole = 'manager', 
   enableAdvancedFeatures = true 
 }: OrdersPageProps) {
+  const { formatCurrency } = useCurrency()
+  
   // State management
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -241,9 +244,6 @@ export default function OrdersPage({
     return `${config.color} ${config.bgColor}`
   }
 
-  const formatCurrency = (amount: number) => {
-    return `Rp ${amount.toLocaleString('id-ID')}`
-  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -348,7 +348,7 @@ export default function OrdersPage({
                 <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
                 <p className="text-2xl font-bold">{stats.total_orders}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  +{stats.order_growth}% dari periode sebelumnya
+                 {stats.order_growth}% dari periode sebelumnya
                 </p>
               </div>
               <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -363,7 +363,7 @@ export default function OrdersPage({
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  +{stats.revenue_growth}% dari periode sebelumnya
+                 {stats.revenue_growth}% dari periode sebelumnya
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -584,7 +584,7 @@ export default function OrdersPage({
           {/* Orders List */}
           <div className="space-y-4">
             {orders.map((order) => (
-              <Card key={order.id} className="hover:shadow-md transition-shadow">
+              <Card key={order.id} className="hover: transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="space-y-1">

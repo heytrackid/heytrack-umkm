@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 // Chart loading skeleton
 const ChartLoadingSkeleton = ({ 
   title, 
-  height = "h-64" 
+  height ="h-64" 
 }: { 
   title: string;
   height?: string;

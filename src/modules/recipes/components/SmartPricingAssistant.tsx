@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
 import { RecipeWithIngredients } from '@/types/database'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface SmartPricingAssistantProps {
   recipe: RecipeWithIngredients
@@ -27,6 +28,7 @@ interface SmartPricingAssistantProps {
 }
 
 export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAssistantProps) {
+  const { formatCurrency } = useCurrency()
   const [analysis, setAnalysis] = useState<any>(null)
   const [selectedTier, setSelectedTier] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)
@@ -109,13 +111,13 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                Rp {analysis.breakdown.totalCost.toLocaleString()}
+                {formatCurrency(analysis.breakdown.totalCost)}
               </div>
               <div className="text-xs text-muted-foreground">Total HPP</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                Rp {analysis.pricing.standard.price.toLocaleString()}
+                {formatCurrency(analysis.pricing.standard.price)}
               </div>
               <div className="text-xs text-muted-foreground">Harga Optimal</div>
             </div>
@@ -127,7 +129,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                Rp {(analysis.pricing.standard.price - analysis.breakdown.totalCost).toLocaleString()}
+                {formatCurrency(analysis.pricing.standard.price - analysis.breakdown.totalCost)}
               </div>
               <div className="text-xs text-muted-foreground">Profit per Unit</div>
             </div>
@@ -148,7 +150,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
             {Object.entries(analysis.pricing).map(([tier, data]: [string, any]) => (
               <Card 
                 key={tier}
-                className={`cursor-pointer transition-all hover:shadow-md ${
+                className={`cursor-pointer transition-all hover: ${
                   selectedTier === tier ? 'ring-2 ring-primary' : ''
                 }`}
                 onClick={() => setSelectedTier(tier as any)}
@@ -163,7 +165,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold mb-2">
-                    Rp {data.price.toLocaleString()}
+                    {formatCurrency(data.price)}
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">
                     {data.positioning}
@@ -172,7 +174,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                     <div className="flex justify-between">
                       <span>Profit:</span>
                       <span className="font-medium text-gray-600 dark:text-gray-400">
-                        Rp {(data.price - analysis.breakdown.totalCost).toLocaleString()}
+                        {formatCurrency(data.price - analysis.breakdown.totalCost)}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -224,7 +226,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                         {((customPrice - analysis.breakdown.totalCost) / customPrice * 100).toFixed(1)}%
                       </span></div>
                       <div>Profit: <span className="font-medium text-gray-600 dark:text-gray-400">
-                        Rp {(customPrice - analysis.breakdown.totalCost).toLocaleString()}
+                        {formatCurrency(customPrice - analysis.breakdown.totalCost)}
                       </span></div>
                     </>
                   )}
@@ -268,19 +270,19 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b">
                   <span>Biaya Bahan Baku</span>
-                  <span className="font-medium">Rp {analysis.breakdown.ingredientCost.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(analysis.breakdown.ingredientCost)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <span>Overhead (15%)</span>
-                  <span className="font-medium">Rp {analysis.breakdown.overheadCost.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(analysis.breakdown.overheadCost)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b font-bold text-lg">
                   <span>Total HPP</span>
-                  <span>Rp {analysis.breakdown.totalCost.toLocaleString()}</span>
+                  <span>{formatCurrency(analysis.breakdown.totalCost)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span>HPP per Porsi</span>
-                  <span className="font-medium">Rp {analysis.breakdown.costPerServing.toLocaleString()}</span>
+                  <span className="font-medium">{formatCurrency(analysis.breakdown.costPerServing)}</span>
                 </div>
               </div>
             </CardContent>
@@ -306,10 +308,10 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                           </Badge>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {ri.quantity} {ri.unit} × Rp {ri.ingredient.price_per_unit.toLocaleString()}
+                          {ri.quantity} {ri.unit} × {formatCurrency(ri.ingredient.price_per_unit)}
                         </div>
                       </div>
-                      <span className="font-medium">Rp {cost.toLocaleString()}</span>
+                      <span className="font-medium">{formatCurrency(cost)}</span>
                     </div>
                   )
                 })}

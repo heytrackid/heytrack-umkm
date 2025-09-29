@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { useCurrency } from '@/hooks/useCurrency'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -67,6 +68,7 @@ interface OrderFormData {
 
 export default function NewOrderPage() {
   const router = useRouter()
+  const { formatCurrency } = useCurrency()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('customer')
@@ -479,7 +481,7 @@ export default function NewOrderPage() {
                         <div className="text-center py-8 text-muted-foreground">
                           <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
                           <p>Belum ada item ditambahkan</p>
-                          <p className="text-sm">Klik "Tambah Item" untuk memulai</p>
+                          <p className="text-sm">Klik"Tambah Item" untuk memulai</p>
                         </div>
                       ) : (
                         <div className="space-y-4">
@@ -671,7 +673,7 @@ export default function NewOrderPage() {
                         </div>
 
                         <div>
-                          <Label htmlFor="discount_amount">Diskon (Rp)</Label>
+                          <Label htmlFor="discount_amount">Diskon</Label>
                           <Input
                             id="discount_amount"
                             type="number"
@@ -715,23 +717,23 @@ export default function NewOrderPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span>Subtotal:</span>
-                        <span>Rp {subtotal.toLocaleString()}</span>
+                        <span>{formatCurrency(subtotal)}</span>
                       </div>
                       
                       <div className="flex justify-between">
                         <span>Diskon:</span>
-                        <span>- Rp {formData.discount_amount.toLocaleString()}</span>
+                        <span>- {formatCurrency(formData.discount_amount)}</span>
                       </div>
                       
                       <div className="flex justify-between">
                         <span>Pajak ({formData.tax_rate}%):</span>
-                        <span>Rp {taxAmount.toLocaleString()}</span>
+                        <span>{formatCurrency(taxAmount)}</span>
                       </div>
                       
                       {formData.delivery_method === 'delivery' && (
                         <div className="flex justify-between">
                           <span>Biaya Kirim:</span>
-                          <span>Rp {formData.delivery_fee.toLocaleString()}</span>
+                          <span>{formatCurrency(formData.delivery_fee)}</span>
                         </div>
                       )}
                       
@@ -739,7 +741,7 @@ export default function NewOrderPage() {
                       
                       <div className="flex justify-between text-lg font-bold">
                         <span>Total:</span>
-                        <span>Rp {totalAmount.toLocaleString()}</span>
+                        <span>{formatCurrency(totalAmount)}</span>
                       </div>
                     </div>
 

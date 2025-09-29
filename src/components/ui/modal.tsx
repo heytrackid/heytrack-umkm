@@ -98,7 +98,7 @@ export const Modal: React.FC<ModalProps> = ({
           ref={modalRef}
           tabIndex={-1}
           className={`
-            relative inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:align-middle
+            relative inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-bottom  transition-all sm:my-8 sm:align-middle
             ${fullScreenOnMobile 
               ? 'h-full sm:h-auto sm:max-h-[90vh]' 
               : 'max-h-[90vh] sm:max-h-[85vh]'
@@ -215,7 +215,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
         <div 
           ref={drawerRef}
           className={`
-            relative bg-white shadow-xl transform transition-all
+            relative bg-white  transform transition-all
             ${positionClasses[position].panel}
           `}
           onClick={(e) => e.stopPropagation()}

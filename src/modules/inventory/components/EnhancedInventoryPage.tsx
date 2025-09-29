@@ -1,9 +1,18 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { 
+  StatsCardSkeleton,
+  DashboardHeaderSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
+import { 
+  InventoryTableSkeleton,
+  SearchFormSkeleton
+} from '@/components/ui/skeletons/table-skeletons'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import AppLayout from '@/components/layout/app-layout'
@@ -43,6 +52,11 @@ export default function EnhancedInventoryPage() {
   // Use real data instead of sample data
   const { ingredients, loading, error, refresh } = useInventoryData()
   const { alerts } = useInventoryAlerts()
+  
+  // Skeleton loading management
+  const { loading: skeletonLoading, setLoading: setSkeletonLoading, isLoading: isSkeletonLoading } = useLoading({
+    [LOADING_KEYS.FETCH_INVENTORY]: true
+  })
   
   const [selectedIngredient, setSelectedIngredient] = useState<any>(null)
   const [showPricingAnalysis, setShowPricingAnalysis] = useState(false)
@@ -142,7 +156,7 @@ export default function EnhancedInventoryPage() {
       console.log('✅ User confirmed deletion for ingredient:', ingredient.id)
 
       // Show success message (in real app, this would be API call)
-      alert(`✅ BERHASIL!\n\nBahan baku "${ingredient.name}" berhasil dihapus dari sistem.`)
+      alert(`✅ BERHASIL!\n\nBahan baku"${ingredient.name}" berhasil dihapus dari sistem.`)
     } else {
       console.log('❌ User cancelled deletion for ingredient:', ingredient.name)
     }
@@ -168,7 +182,16 @@ export default function EnhancedInventoryPage() {
     return { level: 'safe', color: 'bg-gray-400', text: 'Stock Aman' }
   }
 
-  if (loading) {
+  // Simulate skeleton loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY, false)
+    }, 2000)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (loading && !isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY)) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-screen">
@@ -255,27 +278,41 @@ export default function EnhancedInventoryPage() {
           </TabsList>
 
           <TabsContent value="ingredients" className="space-y-4">
-            <IngredientsTab
-              filteredIngredients={filteredIngredients}
-              selectedItems={selectedItems}
-              searchTerm={searchTerm}
-              typeFilter={typeFilter}
-              onSearchChange={setSearchTerm}
-              onTypeFilterChange={setTypeFilter}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
-              onClearSelection={() => setSelectedItems([])}
-              onBulkEdit={handleBulkEdit}
-              onBulkDelete={handleBulkDelete}
-              onEditIngredient={handleEditIngredient}
-              onDeleteIngredient={handleDeleteIngredient}
-              onShowPricingAnalysis={handleShowPricingAnalysis}
-              getStockAlertLevel={getStockAlertLevel}
-            />
+            {isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY) ? (
+              <div className="space-y-4">
+                <SearchFormSkeleton />
+                <InventoryTableSkeleton rows={8} />
+              </div>
+            ) : (
+              <IngredientsTab
+                filteredIngredients={filteredIngredients}
+                selectedItems={selectedItems}
+                searchTerm={searchTerm}
+                typeFilter={typeFilter}
+                onSearchChange={setSearchTerm}
+                onTypeFilterChange={setTypeFilter}
+                onSelectAll={handleSelectAll}
+                onSelectItem={handleSelectItem}
+                onClearSelection={() => setSelectedItems([])}
+                onBulkEdit={handleBulkEdit}
+                onBulkDelete={handleBulkDelete}
+                onEditIngredient={handleEditIngredient}
+                onDeleteIngredient={handleDeleteIngredient}
+                onShowPricingAnalysis={handleShowPricingAnalysis}
+                getStockAlertLevel={getStockAlertLevel}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-4">
-            <CategoriesTab />
+            {isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY) ? (
+              <div className="space-y-4">
+                <SearchFormSkeleton />
+                <InventoryTableSkeleton rows={5} />
+              </div>
+            ) : (
+              <CategoriesTab />
+            )}
           </TabsContent>
         </Tabs>
 

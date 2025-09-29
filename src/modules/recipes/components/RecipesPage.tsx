@@ -292,7 +292,7 @@ export default function RecipesPage({
             {filteredRecipes.map((recipe) => (
               <Card 
                 key={recipe.id}
-                className={`cursor-pointer transition-all hover:shadow-md ${
+                className={`cursor-pointer transition-all hover: ${
                   selectedRecipe?.id === recipe.id ? 'ring-2 ring-primary' : ''
                 }`}
                 onClick={() => setSelectedRecipe(recipe)}

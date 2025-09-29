@@ -7,17 +7,11 @@ import { Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import LanguageToggle from '@/components/ui/language-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
-// Clerk removed for development
-// import { 
-//   SignInButton, 
-//   SignUpButton, 
-//   SignedIn, 
-//   SignedOut, 
-//   UserButton 
-// } from '@clerk/nextjs'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -31,6 +25,7 @@ export default function AppLayout({
   showMobileHeader = true
 }: AppLayoutProps) {
   const { isMobile } = useMobileFirst()
+  const { t } = useI18n()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
@@ -39,8 +34,8 @@ export default function AppLayout({
 
   return (
     <div className={cn(
-      "flex bg-background w-full sidebar-layout",
-      isMobile ? "flex-col mobile-min-vh" : "h-screen"
+     "flex bg-background w-full sidebar-layout overflow-hidden",
+      isMobile ?"flex-col mobile-min-vh" :"h-screen"
     )}>
       {/* Desktop Sidebar */}
       {!isMobile && (
@@ -63,24 +58,25 @@ export default function AppLayout({
         />
       )}
 
-      <div className="flex flex-1 flex-col w-full">
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         {/* Desktop Header */}
         {!isMobile && (
-          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 w-full">
+          <header className="flex h-16 items-center justify-between bg-card border-b border-border px-6 flex-shrink-0">
             <div className="flex items-center space-x-4">
               <div className="relative hidden sm:block">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Cari resep, bahan, pesanan..."
+                  placeholder={t('common.search.placeholder')}
                   className="w-64 pl-8"
                 />
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <SmartNotifications />
+              <LanguageToggle />
               <ThemeToggle />
-              {/* Simple user menu for development */}
+              {/* User menu */}
               <Button variant="ghost" size="sm">
                 <User className="h-4 w-4 mr-2" />
                 User
@@ -91,12 +87,12 @@ export default function AppLayout({
 
         {/* Main Content */}
         <main className={cn(
-          "flex-1 overflow-auto bg-background",
-          isMobile ? "pt-0 p-4" : "p-6"
+         "flex-1 overflow-auto bg-background min-w-0",
+          isMobile ?"pt-0 p-4" :"p-6"
         )}>
           <div className={cn(
-            "w-full mx-auto",
-            isMobile ? "max-w-none" : "max-w-7xl"
+           "w-full mx-auto min-w-0",
+            isMobile ?"max-w-none" :"max-w-7xl"
           )}>
             {children}
           </div>

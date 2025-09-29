@@ -1,0 +1,24 @@
+{
+  "common": {
+    "language": {
+      "id": "Indonesian",
+      "en": "English"
+    },
+    "search": {
+      "placeholder": "Search recipes, ingredients, orders..."
+    },
+    "actions": {
+      "add": "Add",
+      "quickSetup": "Quick Setup"
+    },
+    "notifications": {
+      "title": "Notifications"
+    }
+  },
+  "operationalCosts": {
+    "title": "Operational Costs",
+    "addCost": "Add Cost",
+    "quickSetup": "Quick Setup",
+    "totalPerMonth": "Total/Month"
+  }
+}

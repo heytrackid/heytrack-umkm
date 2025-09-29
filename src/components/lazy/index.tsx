@@ -4,7 +4,7 @@ import { lazy, Suspense, ComponentType, ReactNode } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 
 // Loading fallback component
-const LoadingFallback = ({ height = "h-32" }: { height?: string }) => (
+const LoadingFallback = ({ height ="h-32" }: { height?: string }) => (
   <Card className={`${height} w-full`}>
     <CardContent className="flex items-center justify-center h-full">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -30,99 +30,99 @@ export const withLazyLoading = <T extends ComponentType<any>>(
 // Chart components (heavy due to Recharts)
 export const LazyFinancialTrendsChart = withLazyLoading(
   () => import('@/components/charts/financial-trends-chart').then(m => ({ default: m.FinancialTrendsChart })),
-  "h-64"
+ "h-64"
 )
 
 export const LazyInventoryTrendsChart = withLazyLoading(
   () => import('@/components/charts/inventory-trends-chart').then(m => ({ default: m.InventoryTrendsChart })),
-  "h-64"
+ "h-64"
 )
 
 // Automation components (heavy business logic)
 export const LazySmartExpenseAutomation = withLazyLoading(
   () => import('@/components/automation/smart-expense-automation').then(m => ({ default: m.SmartExpenseAutomation })),
-  "h-96"
+ "h-96"
 )
 
 export const LazySmartFinancialDashboard = withLazyLoading(
   () => import('@/components/automation/smart-financial-dashboard').then(m => ({ default: m.SmartFinancialDashboard })),
-  "h-96"
+ "h-96"
 )
 
 export const LazySmartProductionPlanner = withLazyLoading(
   () => import('@/components/automation/smart-production-planner').then(m => ({ default: m.SmartProductionPlanner })),
-  "h-96"
+ "h-96"
 )
 
 export const LazySmartInventoryManager = withLazyLoading(
   () => import('@/components/automation/smart-inventory-manager').then(m => ({ default: m.SmartInventoryManager })),
-  "h-96"
+ "h-96"
 )
 
 export const LazyAdvancedHPPCalculator = withLazyLoading(
   () => import('@/components/automation/advanced-hpp-calculator').then(m => ({ default: m.AdvancedHPPCalculator })),
-  "h-96"
+ "h-96"
 )
 
 export const LazySmartNotificationCenter = withLazyLoading(
   () => import('@/components/automation/smart-notification-center').then(m => ({ default: m.SmartNotificationCenter })),
-  "h-48"
+ "h-48"
 )
 
 // Complex CRUD components
 export const LazyIngredientsCRUD = withLazyLoading(
   () => import('@/components/crud/ingredients-crud').then(m => ({ default: m.IngredientsCRUD })),
-  "h-96"
+ "h-96"
 )
 
 export const LazySuppliersCRUD = withLazyLoading(
   () => import('@/components/crud/suppliers-crud').then(m => ({ default: m.SuppliersCRUD })),
-  "h-96"
+ "h-96"
 )
 
 // Enhanced forms - load individual forms instead of bundle
 export const LazyIngredientForm = withLazyLoading(
   () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.IngredientForm })),
-  "h-64"
+ "h-64"
 )
 
 export const LazyRecipeForm = withLazyLoading(
   () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.RecipeForm })),
-  "h-64"
+ "h-64"
 )
 
 export const LazyCustomerForm = withLazyLoading(
   () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.CustomerForm })),
-  "h-64"
+ "h-64"
 )
 
 export const LazyFinancialRecordForm = withLazyLoading(
   () => import('@/components/forms/enhanced-forms').then(m => ({ default: m.FinancialRecordForm })),
-  "h-64"
+ "h-64"
 )
 
 // Data table (heavy due to @tanstack/react-table)
 export const LazyDataTable = withLazyLoading(
   () => import('@/components/ui/data-table').then(m => ({ default: m.DataTable })),
-  "h-64"
+ "h-64"
 )
 
 // Chart component (heavy due to Recharts)
 export const LazyChart = withLazyLoading(
   () => import('@/components/ui/chart').then(m => ({ default: m.Chart })),
-  "h-48"
+ "h-48"
 )
 
 // Mobile components (optional on desktop)
 export const LazyMobileBottomNav = withLazyLoading(
   () => import('@/components/layout/mobile-bottom-nav').then(m => ({ default: m.MobileBottomNav })),
-  "h-16"
+ "h-16"
 )
 
 // Skeleton component untuk custom loading states
 export const ComponentSkeleton = ({ 
-  height = "h-32", 
-  className = "" 
+  height ="h-32", 
+  className ="" 
 }: { 
   height?: string;
   className?: string;
@@ -134,7 +134,7 @@ export const ComponentSkeleton = ({
 export const LazyWrapper = ({ 
   children, 
   fallback,
-  height = "h-32"
+  height ="h-32"
 }: { 
   children: ReactNode;
   fallback?: ReactNode;

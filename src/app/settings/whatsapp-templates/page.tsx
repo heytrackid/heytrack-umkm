@@ -318,7 +318,7 @@ export default function WhatsAppTemplatesPage() {
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                       <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
                       <p>Belum ada template WhatsApp</p>
-                      <p className="text-sm">Klik "Tambah Template" untuk membuat yang pertama</p>
+                      <p className="text-sm">Klik"Tambah Template" untuk membuat yang pertama</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -355,7 +355,7 @@ export default function WhatsAppTemplatesPage() {
                           ))}
                           {template.variables.length > 3 && (
                             <Badge variant="secondary" className="text-xs">
-                              +{template.variables.length - 3} more
+                             {template.variables.length - 3} more
                             </Badge>
                           )}
                         </div>

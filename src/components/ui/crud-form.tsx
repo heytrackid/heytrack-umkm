@@ -358,7 +358,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
   const submitButtonClasses = `
     ${buttonBaseClasses}
     text-white bg-indigo-600 border border-transparent hover:bg-indigo-700 focus:ring-indigo-500
-    active:bg-indigo-800 shadow-sm
+    active:bg-indigo-800 
     ${loading ? 'cursor-wait' : ''}
   `;
 
@@ -426,7 +426,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={onClose} />
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="relative bg-white rounded-lg  max-w-md w-full">
           <div className="p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">{title}</h3>
             <p className="text-sm text-gray-600 mb-6">{message}</p>

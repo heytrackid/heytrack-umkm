@@ -52,7 +52,7 @@ export function validateInput(data: any, rules: Record<string, any>): { isValid:
 // SQL injection prevention
 export function sanitizeSQL(input: string): string {
   return input
-    .replace(/'/g, "''")
+    .replace(/'/g,"''")
     .replace(/;/g, '')
     .replace(/--/g, '')
     .replace(/\/\*/g, '')

@@ -445,12 +445,12 @@ export class QueryPerformanceMonitor {
       times.push(duration);
       this.queryTimes.set(queryName, times.slice(-100)); // Keep last 100 measurements
       
-      console.log(`Query "${queryName}" took ${duration.toFixed(2)}ms`);
+      console.log(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
       
       return { result, duration };
     } catch (error) {
       const duration = performance.now() - startTime;
-      console.error(`Query "${queryName}" failed after ${duration.toFixed(2)}ms:`, error);
+      console.error(`Query"${queryName}" failed after ${duration.toFixed(2)}ms:`, error);
       throw error;
     }
   }

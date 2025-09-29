@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { UMKMTooltip } from './UMKMTooltip'
-import { formatCurrency } from '@/shared/utils'
+import { useCurrency } from '@/hooks/useCurrency'
 import { Calculator, Package, BookOpen, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
 
 interface InventoryTableProps {
@@ -34,6 +34,8 @@ export function InventoryTable({
   onShowPricingAnalysis,
   getStockAlertLevel
 }: InventoryTableProps) {
+  const { formatCurrency } = useCurrency()
+  
   return (
     <Card>
       <CardHeader>
@@ -44,7 +46,7 @@ export function InventoryTable({
               Daftar Bahan Baku
             </CardTitle>
             <p className="text-sm text-gray-600 mt-1">
-              Klik "Analisis Harga" untuk melihat harga rata-rata yang tepat
+              Klik"Analisis Harga" untuk melihat harga rata-rata yang tepat
             </p>
           </div>
           <UMKMTooltip

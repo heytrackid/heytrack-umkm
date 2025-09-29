@@ -420,7 +420,7 @@ export function IngredientsCRUD() {
         onClose={closeModals}
         onConfirm={handleConfirmDelete}
         title="Delete Ingredient"
-        message={`Are you sure you want to delete "${selectedIngredient?.name}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete"${selectedIngredient?.name}"? This action cannot be undone.`}
         confirmText="Delete"
         type="danger"
       />

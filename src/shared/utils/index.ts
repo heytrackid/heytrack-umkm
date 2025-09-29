@@ -7,12 +7,8 @@
 export { cn } from './cn'
 
 // Format Utilities - implemented inline for now
-export const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR'
-  }).format(amount)
-}
+// NOTE: formatCurrency removed - use useCurrency hook instead for dynamic currency
+// export const formatCurrency = (amount: number) => { ... } // DEPRECATED
 
 export const formatDate = (date: Date | string) => {
   return new Intl.DateTimeFormat('id-ID').format(new Date(date))

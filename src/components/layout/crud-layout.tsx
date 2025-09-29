@@ -197,7 +197,7 @@ export const CrudSection: React.FC<{
     backgroundClasses[background],
     padding ? 'p-4 sm:p-6 lg:p-8' : '',
     rounded ? 'rounded-lg sm:rounded-xl' : '',
-    shadow && background !== 'transparent' ? 'shadow-sm sm:shadow-md' : '',
+    shadow && background !== 'transparent' ? ' sm:' : '',
     className,
   ].filter(Boolean).join(' ');
 

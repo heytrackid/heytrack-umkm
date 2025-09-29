@@ -29,7 +29,7 @@ import {
 } from 'lucide-react'
 
 import { useAIPowered } from '@/hooks/useAIPowered'
-import { formatCurrency } from '@/lib/utils'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface AIInsightsPanelProps {
   businessData: {
@@ -48,6 +48,7 @@ export function AIInsightsPanel({
   onInsightAction,
   className 
 }: AIInsightsPanelProps) {
+  const { formatCurrency } = useCurrency()
   const ai = useAIPowered()
   const [activeTab, setActiveTab] = useState('overview')
   const [autoRefresh, setAutoRefresh] = useState(false)
@@ -400,7 +401,7 @@ export function AIInsightsPanel({
               <div className="text-center py-8">
                 <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground mb-4">
-                  Click "Generate Insights" to get AI-powered business recommendations
+                  Click"Generate Insights" to get AI-powered business recommendations
                 </p>
                 <p className="text-sm text-muted-foreground">
                   AI akan menganalisis recipes, ingredients, dan data bisnis lainnya untuk memberikan insights yang actionable

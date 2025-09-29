@@ -1,0 +1,24 @@
+{
+  "common": {
+    "language": {
+      "id": "Indonesia",
+      "en": "Inggris"
+    },
+    "search": {
+      "placeholder": "Cari resep, bahan, pesanan..."
+    },
+    "actions": {
+      "add": "Tambah",
+      "quickSetup": "Setup Cepat"
+    },
+    "notifications": {
+      "title": "Notifikasi"
+    }
+  },
+  "operationalCosts": {
+    "title": "Biaya Operasional",
+    "addCost": "Tambah Biaya",
+    "quickSetup": "Setup Cepat",
+    "totalPerMonth": "Total/Bulan"
+  }
+}

@@ -7,6 +7,7 @@ import {
   TrendingDown,
   BarChart3
 } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface InventoryStatsProps {
   stats: {
@@ -22,6 +23,7 @@ interface InventoryStatsProps {
  * Inventory overview statistics cards
  */
 export function InventoryStatsCards({ stats }: InventoryStatsProps) {
+  const { formatCurrency } = useCurrency()
   return (
     <div className="grid gap-4 md:grid-cols-5">
       <Card>
@@ -68,7 +70,7 @@ export function InventoryStatsCards({ stats }: InventoryStatsProps) {
         <CardContent className="pt-4">
           <div className="flex items-center space-x-2">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            <div className="text-lg font-bold">Rp {(stats.totalValue / 1000000).toFixed(1)}M</div>
+            <div className="text-lg font-bold">{formatCurrency(stats.totalValue)}</div>
           </div>
           <p className="text-xs text-muted-foreground">Inventory Value</p>
         </CardContent>

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useHPPReview } from '@/hooks/useDatabase'
+import { useCurrency } from '@/hooks/useCurrency'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -21,6 +22,7 @@ import {
 
 export default function HPPReviewPage() {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
   const { reviewData, loading, summaryStats } = useHPPReview()
 
   const getStatusInfo = (status: string) => {
@@ -208,11 +210,11 @@ export default function HPPReviewPage() {
                         <div className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-sm">HPP:</span>
-                            <span className="font-medium">Rp {item.currentHPP.toLocaleString()}</span>
+                            <span className="font-medium">{formatCurrency(item.currentHPP)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm">Harga Jual:</span>
-                            <span className="font-medium">Rp {item.currentPrice.toLocaleString()}</span>
+                            <span className="font-medium">{formatCurrency(item.currentPrice)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-sm">Margin:</span>
@@ -228,10 +230,10 @@ export default function HPPReviewPage() {
                           <div className="flex justify-between">
                             <span className="text-sm">HPP:</span>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">Rp {item.suggestedHPP.toLocaleString()}</span>
+                              <span className="font-medium">{formatCurrency(item.suggestedHPP)}</span>
                               {hppChange !== 0 && (
                                 <Badge variant={hppChange < 0 ? 'default' : 'destructive'} className="text-xs">
-                                  {hppChange > 0 ? '+' : ''}Rp {hppChange.toLocaleString()}
+                                  {hppChange > 0 ? '+' : ''}{formatCurrency(hppChange)}
                                 </Badge>
                               )}
                             </div>
@@ -239,10 +241,10 @@ export default function HPPReviewPage() {
                           <div className="flex justify-between">
                             <span className="text-sm">Harga Jual:</span>
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">Rp {item.suggestedPrice.toLocaleString()}</span>
+                              <span className="font-medium">{formatCurrency(item.suggestedPrice)}</span>
                               {priceChange !== 0 && (
                                 <Badge variant={priceChange > 0 ? 'default' : 'destructive'} className="text-xs">
-                                  {priceChange > 0 ? '+' : ''}Rp {priceChange.toLocaleString()}
+                                  {priceChange > 0 ? '+' : ''}{formatCurrency(priceChange)}
                                 </Badge>
                               )}
                             </div>

@@ -161,7 +161,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
             {Object.entries(analysis.pricing).map(([tier, data]: [string, any]) => (
               <Card 
                 key={tier}
-                className={`cursor-pointer transition-all hover:shadow-md ${
+                className={`cursor-pointer transition-all hover: ${
                   selectedTier === tier ? 'ring-2 ring-primary' : ''
                 }`}
                 onClick={() => setSelectedTier(tier as any)}

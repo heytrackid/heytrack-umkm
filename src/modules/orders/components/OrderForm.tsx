@@ -10,8 +10,10 @@ import { Plus, Trash2, Package, Users, Phone, MapPin, DollarSign, TrendingUp, Al
 import { OrderFormProps, Order, OrderItem } from '../types'
 import { ORDER_PRIORITIES, ORDER_CONFIG } from '../constants'
 import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
+import { useCurrency } from '@/hooks/useCurrency'
 
 export function OrderForm({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) {
+  const { formatCurrency } = useCurrency()
   const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
   const [availableCustomers, setAvailableCustomers] = useState<any[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
@@ -230,7 +232,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                   className="mt-1"
                 />
                 {customerSearch && (
-                  <div className="absolute z-10 w-full bg-background border rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg">
+                  <div className="absolute z-10 w-full bg-background border rounded-md mt-1 max-h-40 overflow-y-auto">
                     {availableCustomers
                       .filter(customer =>
                         customer.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
@@ -326,7 +328,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             <div className="text-center py-8 text-muted-foreground">
               <Package className="h-8 w-8 mx-auto mb-2" />
               <p>Belum ada item yang ditambahkan</p>
-              <p className="text-sm">Klik "Tambah Item" untuk memulai</p>
+              <p className="text-sm">Klik"Tambah Item" untuk memulai</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -375,7 +377,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                           <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                           <Input
                             className="text-sm font-medium mt-1 bg-gray-50"
-                            value={`Rp ${item.total_price.toLocaleString()}`}
+                            value={formatCurrency(item.total_price)}
                             readOnly
                           />
                         </div>
@@ -436,7 +438,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         <Label className="text-xs font-medium text-muted-foreground">Total</Label>
                         <Input
                           className="text-sm font-medium mt-1 bg-gray-50"
-                          value={`Rp ${item.total_price.toLocaleString()}`}
+                          value={formatCurrency(item.total_price)}
                           readOnly
                         />
                       </div>
@@ -457,7 +459,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center text-sm font-medium">
                   <span>Subtotal:</span>
-                  <span>Rp {subtotal.toLocaleString()}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </div>
               </div>
             </div>
@@ -538,7 +540,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               </select>
             </div>
             <div>
-              <Label htmlFor="discount" className="text-sm font-medium">Diskon (Rp)</Label>
+              <Label htmlFor="discount" className="text-sm font-medium">Diskon</Label>
               <Input
                 id="discount"
                 type="number"
@@ -581,33 +583,33 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>Rp {subtotal.toLocaleString()}</span>
+                <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Diskon:</span>
-                <span>- Rp {formData.discount.toLocaleString()}</span>
+                <span>- {formatCurrency(formData.discount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Pajak ({formData.tax_amount}%):</span>
-                <span>Rp {taxAmount.toLocaleString()}</span>
+                <span>{formatCurrency(taxAmount)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Biaya Kirim:</span>
-                <span>Rp {formData.delivery_fee.toLocaleString()}</span>
+                <span>{formatCurrency(formData.delivery_fee)}</span>
               </div>
               <hr />
               <div className="flex justify-between font-medium">
                 <span>Total:</span>
-                <span>Rp {totalAmount.toLocaleString()}</span>
+                <span>{formatCurrency(totalAmount)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
                 <span>Dibayar:</span>
-                <span>Rp {formData.paid_amount.toLocaleString()}</span>
+                <span>{formatCurrency(formData.paid_amount)}</span>
               </div>
               {totalAmount > formData.paid_amount && (
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Sisa:</span>
-                  <span>Rp {(totalAmount - formData.paid_amount).toLocaleString()}</span>
+                  <span>{formatCurrency(totalAmount - formData.paid_amount)}</span>
                 </div>
               )}
             </div>

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MiniChart } from '@/components/ui/mobile-charts'
 import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface FinancialSummaryCardsProps {
   stats: {
@@ -20,6 +21,7 @@ interface FinancialSummaryCardsProps {
  * Financial summary cards component showing key metrics
  */
 export function FinancialSummaryCards({ stats, isMobile, transactions }: FinancialSummaryCardsProps) {
+  const { formatCurrency } = useCurrency()
   return (
     <div className={`grid gap-4 ${
       isMobile ? 'grid-cols-2' : 'md:grid-cols-4'
@@ -35,7 +37,7 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
           <div className={`font-bold text-gray-600 dark:text-gray-400 ${
             isMobile ? 'text-xl' : 'text-2xl'
           }`}>
-            Rp {stats.totalIncome.toLocaleString()}
+            {formatCurrency(stats.totalIncome)}
           </div>
           <p className="text-xs text-muted-foreground">bulan ini</p>
           <MiniChart
@@ -63,7 +65,7 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
           <div className={`font-bold text-gray-600 dark:text-gray-400 ${
             isMobile ? 'text-xl' : 'text-2xl'
           }`}>
-            Rp {stats.totalExpense.toLocaleString()}
+            {formatCurrency(stats.totalExpense)}
           </div>
           <p className="text-xs text-muted-foreground">bulan ini</p>
           <MiniChart
@@ -91,7 +93,7 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
           <div className={`font-bold ${stats.netProfit >= 0 ? 'text-gray-600 dark:text-gray-400' : 'text-gray-600 dark:text-gray-400'} ${
             isMobile ? 'text-xl' : 'text-2xl'
           }`}>
-            Rp {stats.netProfit.toLocaleString()}
+            {formatCurrency(stats.netProfit)}
           </div>
           <p className="text-xs text-muted-foreground">
             Margin: {stats.profitMargin.toFixed(1)}%

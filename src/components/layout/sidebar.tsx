@@ -21,6 +21,7 @@ import {
   X,
   Menu
 } from 'lucide-react'
+import ExcelExportButton from '@/components/export/ExcelExportButton'
 
 interface NavigationItem {
   name: string
@@ -222,16 +223,16 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
             <div key={section.title} className="space-y-2">
               {/* Section Title */}
               <div className={cn(
-                "px-3 py-2 rounded-lg",
+               "px-3 py-2 rounded-lg",
                 section.isWorkflow 
-                  ? "bg-muted/50 border border-border" 
-                  : ""
+                  ?"bg-muted/50 border border-border" 
+                  :""
               )}>
                 <h3 className={cn(
-                  "text-xs font-semibold uppercase tracking-wider",
+                 "text-xs font-semibold uppercase tracking-wider",
                   section.isWorkflow 
-                    ? "text-foreground" 
-                    : "text-muted-foreground"
+                    ?"text-foreground" 
+                    :"text-muted-foreground"
                 )}>
                   {section.title}
                 </h3>
@@ -253,11 +254,11 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
-                        "hover:scale-[1.02]",
+                       "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                       "hover:scale-[1.02]",
                         isActive 
-                          ? "bg-primary/10 text-primary border border-primary/20" 
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                          ?"bg-primary/10 text-primary border border-primary/20" 
+                          :"text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
                     >
                       <div className="flex items-center justify-center mr-3 mt-0.5">
@@ -313,15 +314,16 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 flex flex-col",
-        "bg-white dark:bg-black",
-        "border-r border-gray-200 dark:border-gray-800",
-        "transform transition-transform duration-300 ease-in-out",
-        "lg:translate-x-0 lg:static lg:inset-0",
-        // Mobile: full screen width on small screens, 80% on larger mobile
-        "w-full sm:w-80 lg:w-72",
+       "fixed inset-y-0 left-0 z-50 flex flex-col",
+       "bg-white dark:bg-black",
+       "border-r border-gray-200 dark:border-gray-800",
+       "transform transition-transform duration-300 ease-in-out",
+       "lg:translate-x-0 lg:static lg:inset-0",
+       "overflow-hidden",
+        // Fixed width for consistency
+       "w-80 lg:w-72",
         // Animation
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        isOpen ?"translate-x-0" :"-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
@@ -354,16 +356,16 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
             <div key={section.title} className="space-y-2">
               {/* Section Title */}
               <div className={cn(
-                "px-3 py-2 rounded-lg",
+               "px-3 py-2 rounded-lg",
                 section.isWorkflow 
-                  ? "bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700" 
-                  : ""
+                  ?"bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700" 
+                  :""
               )}>
                 <h3 className={cn(
-                  "text-xs font-semibold uppercase tracking-wider",
+                 "text-xs font-semibold uppercase tracking-wider",
                   section.isWorkflow 
-                    ? "text-gray-700 dark:text-gray-300" 
-                    : "text-gray-400 dark:text-gray-500"
+                    ?"text-gray-700 dark:text-gray-300" 
+                    :"text-gray-400 dark:text-gray-500"
                 )}>
                   {section.title}
                 </h3>
@@ -385,11 +387,11 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
-                        "hover:scale-[1.02] hover:shadow-sm",
+                       "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                       "hover:scale-[1.02]",
                         isActive 
-                          ? "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 shadow-sm" 
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white"
+                          ?"bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700" 
+                          :"text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white"
                       )}
                     >
                       <div className="flex items-center justify-center mr-3 mt-0.5">
@@ -397,18 +399,18 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium truncate">{item.name}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium truncate flex-1">{item.name}</span>
                           
                           {/* Badges */}
-                          <div className="flex items-center gap-1 ml-2">
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             {item.badge && (
-                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                                 {item.badge}
                               </span>
                             )}
                             {item.isSimple && !item.badge && (
-                              <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full font-medium">
+                              <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full font-medium whitespace-nowrap">
                                 SIMPLE
                               </span>
                             )}
@@ -417,7 +419,7 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                         
                         {/* Description */}
                         {item.description && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed break-words">
                             {item.description}
                           </p>
                         )}
@@ -434,6 +436,20 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
             </div>
           ))}
         </nav>
+        
+        {/* Footer with Export Button */}
+        <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
+          <ExcelExportButton 
+            variant="outline" 
+            size="sm" 
+            className="w-full text-xs"
+          />
+          <div className="mt-2 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              © 2024 HeyTrack
+            </p>
+          </div>
+        </div>
       </aside>
 
       {/* Mobile toggle button - Only show if not using mobile header */}
@@ -441,13 +457,13 @@ export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
         <button
           onClick={onToggle}
           className={cn(
-            "fixed top-4 left-4 z-50 lg:hidden",
-            "p-3 rounded-lg shadow-lg",
-            "bg-gray-800 dark:bg-gray-600",
-            "text-white",
-            "hover:bg-gray-700 dark:hover:bg-gray-500",
-            "transition-all duration-200",
-            "hover:scale-105"
+           "fixed top-4 left-4 z-50 lg:hidden",
+           "p-3 rounded-lg",
+           "bg-gray-800 dark:bg-gray-600",
+           "text-white",
+           "hover:bg-gray-700 dark:hover:bg-gray-500",
+           "transition-all duration-200",
+           "hover:scale-105"
           )}
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

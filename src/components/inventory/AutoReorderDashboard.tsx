@@ -32,6 +32,7 @@ import {
 
 import { autoReorderService, ReorderSummary, ReorderAlert, PurchaseOrder, ReorderRule } from '@/services/inventory/AutoReorderService'
 import { useResponsive } from '@/hooks/use-mobile'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface AutoReorderDashboardProps {
   onReorderTriggered?: () => void
@@ -39,6 +40,7 @@ interface AutoReorderDashboardProps {
 
 export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorderDashboardProps) {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
   
   const [summary, setSummary] = useState<ReorderSummary | null>(null)
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([])
@@ -200,7 +202,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
                 <DollarSign className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Estimated Cost</p>
-                  <p className="text-2xl font-bold">Rp {summary.total_estimated_cost.toLocaleString('id-ID')}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(summary.total_estimated_cost)}</p>
                 </div>
               </div>
             </CardContent>
@@ -266,7 +268,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
                         </div>
                         
                         <div className="text-right">
-                          <p className="font-semibold">Rp {alert.estimated_cost.toLocaleString('id-ID')}</p>
+                          <p className="font-semibold">{formatCurrency(alert.estimated_cost)}</p>
                           {alert.auto_reorder_enabled ? (
                             <Badge variant="secondary">Auto Enabled</Badge>
                           ) : (
@@ -323,7 +325,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
                             {po.status.toUpperCase()}
                           </Badge>
                           <p className="font-semibold mt-1">
-                            Rp {po.total_amount.toLocaleString('id-ID')}
+                            {formatCurrency(po.total_amount)}
                           </p>
                         </div>
                       </div>

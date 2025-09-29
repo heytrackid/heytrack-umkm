@@ -8,12 +8,14 @@ import { Button } from '@/components/ui/button'
 import { Phone, MapPin, Users, Package, Truck, DollarSign } from 'lucide-react'
 import { Order } from '../types'
 import { getStatusInfo, getPriorityInfo } from '../utils/helpers'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface OrderDetailViewProps {
   order: any // Using any for now to match the legacy structure
 }
 
 export function OrderDetailView({ order }: OrderDetailViewProps) {
+  const { formatCurrency } = useCurrency()
   const statusInfo = getStatusInfo(order.status)
   const priorityInfo = getPriorityInfo(order.priority)
 
@@ -61,33 +63,33 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
               <div className="mt-2 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal:</span>
-                  <span>Rp {((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0)).toLocaleString()}</span>
+                  <span>{formatCurrency((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Diskon:</span>
-                  <span>- Rp {(order.discount || 0).toLocaleString()}</span>
+                  <span>- {formatCurrency(order.discount || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Pajak:</span>
-                  <span>Rp {(order.tax_amount || 0).toLocaleString()}</span>
+                  <span>{formatCurrency(order.tax_amount || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Biaya Kirim:</span>
-                  <span>Rp {(order.delivery_fee || 0).toLocaleString()}</span>
+                  <span>{formatCurrency(order.delivery_fee || 0)}</span>
                 </div>
                 <hr />
                 <div className="flex justify-between font-medium">
                   <span>Total:</span>
-                  <span>Rp {(order.total_amount || 0).toLocaleString()}</span>
+                  <span>{formatCurrency(order.total_amount || 0)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Dibayar:</span>
-                  <span>Rp {(order.paid_amount || 0).toLocaleString()}</span>
+                  <span>{formatCurrency(order.paid_amount || 0)}</span>
                 </div>
                 {(order.total_amount || 0) > (order.paid_amount || 0) && (
                   <div className="flex justify-between text-gray-600 dark:text-gray-400">
                     <span>Sisa:</span>
-                    <span>Rp {((order.total_amount || 0) - (order.paid_amount || 0)).toLocaleString()}</span>
+                    <span>{formatCurrency((order.total_amount || 0) - (order.paid_amount || 0))}</span>
                   </div>
                 )}
               </div>
@@ -110,11 +112,11 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
               <div>
                 <p className="font-medium">{item.product_name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {item.quantity} x Rp {(item.unit_price || 0).toLocaleString()}
+                  {item.quantity} x {formatCurrency(item.unit_price || 0)}
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-medium">Rp {(item.total_price || 0).toLocaleString()}</p>
+                <p className="font-medium">{formatCurrency(item.total_price || 0)}</p>
               </div>
             </div>
           )) || (
@@ -126,7 +128,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
         <div className="pt-4 border-t">
           <div className="flex justify-between items-center font-medium">
             <span>Total Item: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}</span>
-            <span>Subtotal: Rp {((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0)).toLocaleString()}</span>
+            <span>Subtotal: {formatCurrency((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0))}</span>
           </div>
         </div>
       </TabsContent>

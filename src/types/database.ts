@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion:"13.0.5"
   }
   public: {
     Tables: {
@@ -125,17 +125,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "daily_sales_summary_top_selling_recipe_id_fkey"
+            foreignKeyName:"daily_sales_summary_top_selling_recipe_id_fkey"
             columns: ["top_selling_recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_availability"
+            referencedRelation:"recipe_availability"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "daily_sales_summary_top_selling_recipe_id_fkey"
+            foreignKeyName:"daily_sales_summary_top_selling_recipe_id_fkey"
             columns: ["top_selling_recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipes"
+            referencedRelation:"recipes"
             referencedColumns: ["id"]
           },
         ]
@@ -353,17 +353,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_alerts_ingredient_id_fkey"
+            foreignKeyName:"inventory_alerts_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "ingredients"
+            referencedRelation:"ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inventory_alerts_ingredient_id_fkey"
+            foreignKeyName:"inventory_alerts_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "inventory_status"
+            referencedRelation:"inventory_status"
             referencedColumns: ["id"]
           },
         ]
@@ -413,17 +413,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "inventory_stock_logs_ingredient_id_fkey"
+            foreignKeyName:"inventory_stock_logs_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "ingredients"
+            referencedRelation:"ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inventory_stock_logs_ingredient_id_fkey"
+            foreignKeyName:"inventory_stock_logs_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "inventory_status"
+            referencedRelation:"inventory_status"
             referencedColumns: ["id"]
           },
         ]
@@ -515,31 +515,31 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "order_items_order_id_fkey"
+            foreignKeyName:"order_items_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "order_summary"
+            referencedRelation:"order_summary"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "order_items_order_id_fkey"
+            foreignKeyName:"order_items_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "orders"
+            referencedRelation:"orders"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "order_items_recipe_id_fkey"
+            foreignKeyName:"order_items_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_availability"
+            referencedRelation:"recipe_availability"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "order_items_recipe_id_fkey"
+            foreignKeyName:"order_items_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipes"
+            referencedRelation:"recipes"
             referencedColumns: ["id"]
           },
         ]
@@ -625,10 +625,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "orders_customer_id_fkey"
+            foreignKeyName:"orders_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "customers"
+            referencedRelation:"customers"
             referencedColumns: ["id"]
           },
         ]
@@ -663,17 +663,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "payments_order_id_fkey"
+            foreignKeyName:"payments_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "order_summary"
+            referencedRelation:"order_summary"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "payments_order_id_fkey"
+            foreignKeyName:"payments_order_id_fkey"
             columns: ["order_id"]
             isOneToOne: false
-            referencedRelation: "orders"
+            referencedRelation:"orders"
             referencedColumns: ["id"]
           },
         ]
@@ -738,17 +738,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "production_schedules_recipe_id_fkey"
+            foreignKeyName:"production_schedules_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_availability"
+            referencedRelation:"recipe_availability"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "production_schedules_recipe_id_fkey"
+            foreignKeyName:"production_schedules_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipes"
+            referencedRelation:"recipes"
             referencedColumns: ["id"]
           },
         ]
@@ -801,17 +801,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "productions_recipe_id_fkey"
+            foreignKeyName:"productions_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_availability"
+            referencedRelation:"recipe_availability"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "productions_recipe_id_fkey"
+            foreignKeyName:"productions_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipes"
+            referencedRelation:"recipes"
             referencedColumns: ["id"]
           },
         ]
@@ -840,31 +840,31 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "recipe_ingredients_ingredient_id_fkey"
+            foreignKeyName:"recipe_ingredients_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "ingredients"
+            referencedRelation:"ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recipe_ingredients_ingredient_id_fkey"
+            foreignKeyName:"recipe_ingredients_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "inventory_status"
+            referencedRelation:"inventory_status"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            foreignKeyName:"recipe_ingredients_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipe_availability"
+            referencedRelation:"recipe_availability"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            foreignKeyName:"recipe_ingredients_recipe_id_fkey"
             columns: ["recipe_id"]
             isOneToOne: false
-            referencedRelation: "recipes"
+            referencedRelation:"recipes"
             referencedColumns: ["id"]
           },
         ]
@@ -989,17 +989,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "stock_transactions_ingredient_id_fkey"
+            foreignKeyName:"stock_transactions_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "ingredients"
+            referencedRelation:"ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "stock_transactions_ingredient_id_fkey"
+            foreignKeyName:"stock_transactions_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "inventory_status"
+            referencedRelation:"inventory_status"
             referencedColumns: ["id"]
           },
         ]
@@ -1040,24 +1040,24 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "supplier_ingredients_ingredient_id_fkey"
+            foreignKeyName:"supplier_ingredients_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "ingredients"
+            referencedRelation:"ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "supplier_ingredients_ingredient_id_fkey"
+            foreignKeyName:"supplier_ingredients_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "inventory_status"
+            referencedRelation:"inventory_status"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "supplier_ingredients_supplier_id_fkey"
+            foreignKeyName:"supplier_ingredients_supplier_id_fkey"
             columns: ["supplier_id"]
             isOneToOne: false
-            referencedRelation: "suppliers"
+            referencedRelation:"suppliers"
             referencedColumns: ["id"]
           },
         ]
@@ -1239,17 +1239,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "usage_analytics_ingredient_id_fkey"
+            foreignKeyName:"usage_analytics_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "ingredients"
+            referencedRelation:"ingredients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "usage_analytics_ingredient_id_fkey"
+            foreignKeyName:"usage_analytics_ingredient_id_fkey"
             columns: ["ingredient_id"]
             isOneToOne: false
-            referencedRelation: "inventory_status"
+            referencedRelation:"inventory_status"
             referencedColumns: ["id"]
           },
         ]
@@ -1409,10 +1409,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "orders_customer_id_fkey"
+            foreignKeyName:"orders_customer_id_fkey"
             columns: ["customer_id"]
             isOneToOne: false
-            referencedRelation: "customers"
+            referencedRelation:"customers"
             referencedColumns: ["id"]
           },
         ]
@@ -1515,24 +1515,24 @@ export type Database = {
       }
     }
     Enums: {
-      business_unit: "all"
+      business_unit:"all"
       order_status:
-        | "PENDING"
-        | "CONFIRMED"
-        | "IN_PROGRESS"
-        | "READY"
-        | "DELIVERED"
-        | "CANCELLED"
+        |"PENDING"
+        |"CONFIRMED"
+        |"IN_PROGRESS"
+        |"READY"
+        |"DELIVERED"
+        |"CANCELLED"
       payment_method:
-        | "CASH"
-        | "BANK_TRANSFER"
-        | "CREDIT_CARD"
-        | "DIGITAL_WALLET"
-        | "OTHER"
-      production_status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
-      record_type: "INCOME" | "EXPENSE" | "INVESTMENT" | "WITHDRAWAL"
-      transaction_type: "PURCHASE" | "USAGE" | "ADJUSTMENT" | "WASTE"
-      user_role: "admin" | "user"
+        |"CASH"
+        |"BANK_TRANSFER"
+        |"CREDIT_CARD"
+        |"DIGITAL_WALLET"
+        |"OTHER"
+      production_status:"PLANNED" |"IN_PROGRESS" |"COMPLETED" |"CANCELLED"
+      record_type:"INCOME" |"EXPENSE" |"INVESTMENT" |"WITHDRAWAL"
+      transaction_type:"PURCHASE" |"USAGE" |"ADJUSTMENT" |"WASTE"
+      user_role:"admin" |"user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1540,9 +1540,9 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database,"__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database,"public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
@@ -1662,24 +1662,24 @@ export const Constants = {
     Enums: {
       business_unit: ["all"],
       order_status: [
-        "PENDING",
-        "CONFIRMED",
-        "IN_PROGRESS",
-        "READY",
-        "DELIVERED",
-        "CANCELLED",
+       "PENDING",
+       "CONFIRMED",
+       "IN_PROGRESS",
+       "READY",
+       "DELIVERED",
+       "CANCELLED",
       ],
       payment_method: [
-        "CASH",
-        "BANK_TRANSFER",
-        "CREDIT_CARD",
-        "DIGITAL_WALLET",
-        "OTHER",
+       "CASH",
+       "BANK_TRANSFER",
+       "CREDIT_CARD",
+       "DIGITAL_WALLET",
+       "OTHER",
       ],
-      production_status: ["PLANNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
-      record_type: ["INCOME", "EXPENSE", "INVESTMENT", "WITHDRAWAL"],
-      transaction_type: ["PURCHASE", "USAGE", "ADJUSTMENT", "WASTE"],
-      user_role: ["admin", "user"],
+      production_status: ["PLANNED","IN_PROGRESS","COMPLETED","CANCELLED"],
+      record_type: ["INCOME","EXPENSE","INVESTMENT","WITHDRAWAL"],
+      transaction_type: ["PURCHASE","USAGE","ADJUSTMENT","WASTE"],
+      user_role: ["admin","user"],
     },
   },
 } as const

@@ -7,6 +7,16 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useResponsive } from '@/hooks/use-mobile'
+import { useCurrency } from '@/hooks/useCurrency'
+import ExcelExportButton from '@/components/export/ExcelExportButton'
+import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { 
+  StatsCardSkeleton,
+  DashboardHeaderSkeleton,
+  RecentOrdersSkeleton,
+  StockAlertSkeleton,
+  QuickActionsSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -47,36 +57,48 @@ const placeholderStats = {
   ingredientsLow: 0
 }
 
-const recentOrders = [
-  { id: 1, customer: 'Budi Santoso', items: ['Roti Coklat', 'Kue Ulang Tahun'], total: 350000, status: 'completed' },
-  { id: 2, customer: 'Sari Dewi', items: ['Croissant', 'Coffee Cake'], total: 180000, status: 'processing' },
-  { id: 3, customer: 'Ahmad Rahman', items: ['Birthday Cake Custom'], total: 750000, status: 'pending' },
-  { id: 4, customer: 'Lisa Putri', items: ['Donat Glazed', 'Muffin Blueberry'], total: 120000, status: 'completed' },
-]
+const recentOrders: any[] = []
 
-const lowStockItems = [
-  { name: 'Tepung Terigu', current: 5, minimum: 10, unit: 'kg', status: 'critical' },
-  { name: 'Gula Pasir', current: 12, minimum: 15, unit: 'kg', status: 'warning' },
-  { name: 'Telur Ayam', current: 18, minimum: 20, unit: 'butir', status: 'warning' },
-  { name: 'Mentega', current: 2, minimum: 8, unit: 'kg', status: 'critical' },
-]
+const lowStockItems: any[] = []
 
 export default function Dashboard() {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
   const [currentTime, setCurrentTime] = useState(new Date())
+  const { loading, setLoading, isLoading } = useLoading({
+    [LOADING_KEYS.DASHBOARD_STATS]: true,
+    [LOADING_KEYS.RECENT_ORDERS]: true,
+    [LOADING_KEYS.STOCK_ALERTS]: true
+  })
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
+  // Simulate loading states
+  useEffect(() => {
+    // Simulate dashboard stats loading
+    const statsTimer = setTimeout(() => {
+      setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
+    }, 1500)
+
+    // Simulate recent orders loading
+    const ordersTimer = setTimeout(() => {
+      setLoading(LOADING_KEYS.RECENT_ORDERS, false)
+    }, 2000)
+
+    // Simulate stock alerts loading  
+    const stockTimer = setTimeout(() => {
+      setLoading(LOADING_KEYS.STOCK_ALERTS, false)
+    }, 1800)
+
+    return () => {
+      clearTimeout(statsTimer)
+      clearTimeout(ordersTimer)
+      clearTimeout(stockTimer)
+    }
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -91,31 +113,39 @@ export default function Dashboard() {
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Dashboard HeyTrack
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {currentTime.toLocaleDateString('id-ID', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </p>
+        {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
+          <DashboardHeaderSkeleton />
+        ) : (
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                Dashboard HeyTrack
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {currentTime.toLocaleDateString('id-ID', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <ExcelExportButton size="sm" variant="outline" />
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800">
-              <Zap className="h-3 w-3 mr-1" />
-              Development Mode
-            </Badge>
-          </div>
-        </div>
+        )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Penjualan</CardTitle>
@@ -125,7 +155,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold">{formatCurrency(placeholderStats.totalSales)}</div>
               <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +{placeholderStats.salesGrowth}% dari bulan lalu
+               {placeholderStats.salesGrowth}% dari bulan lalu
               </div>
             </CardContent>
           </Card>
@@ -139,7 +169,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold">{placeholderStats.totalOrders}</div>
               <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +{placeholderStats.ordersGrowth}% dari bulan lalu
+               {placeholderStats.ordersGrowth}% dari bulan lalu
               </div>
             </CardContent>
           </Card>
@@ -153,7 +183,7 @@ export default function Dashboard() {
               <div className="text-2xl font-bold">{placeholderStats.totalCustomers}</div>
               <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                +{placeholderStats.customersGrowth}% dari bulan lalu
+               {placeholderStats.customersGrowth}% dari bulan lalu
               </div>
             </CardContent>
           </Card>
@@ -171,75 +201,59 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Orders */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                Pesanan Terbaru
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="font-medium">{order.customer}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {order.items.join(', ')}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-semibold">{formatCurrency(order.total)}</div>
-                    <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                      {order.status === 'completed' ? 'Selesai' : 
-                       order.status === 'processing' ? 'Diproses' : 'Pending'}
-                    </Badge>
-                  </div>
+          {isLoading(LOADING_KEYS.RECENT_ORDERS) ? (
+            <RecentOrdersSkeleton />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Pesanan Terbaru
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center py-8 text-muted-foreground">
+                  <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
+                  <p>Belum ada pesanan terbaru</p>
+                  <p className="text-sm">Pesanan akan muncul di sini ketika ada data</p>
                 </div>
-              ))}
-              <Button variant="outline" className="w-full">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Lihat Semua Pesanan
-              </Button>
-            </CardContent>
-          </Card>
+                <Button variant="outline" className="w-full">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Lihat Semua Pesanan
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Low Stock Alert */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5" />
-                Peringatan Stok
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {lowStockItems.map((item, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{item.name}</span>
-                    <Badge variant={item.status === 'critical' ? 'destructive' : 'default'}>
-                      {item.status === 'critical' ? 'Kritis' : 'Peringatan'}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>Sisa: {item.current} {item.unit}</span>
-                    <span>Min: {item.minimum} {item.unit}</span>
-                  </div>
-                  <Progress 
-                    value={(item.current / item.minimum) * 100} 
-                    className="h-2"
-                  />
+          {isLoading(LOADING_KEYS.STOCK_ALERTS) ? (
+            <StockAlertSkeleton />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5" />
+                  Peringatan Stok
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+                  <p>Monitoring stok aktif</p>
+                  <p className="text-sm">Peringatan akan muncul jika ada stok menipis</p>
                 </div>
-              ))}
-              <Button variant="outline" className="w-full">
-                <Package className="h-4 w-4 mr-2" />
-                Kelola Inventory
-              </Button>
-            </CardContent>
-          </Card>
+                <Button variant="outline" className="w-full">
+                  <Package className="h-4 w-4 mr-2" />
+                  Kelola Inventory
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Quick Actions */}

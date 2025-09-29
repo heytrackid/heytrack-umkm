@@ -44,6 +44,7 @@ import {
   RefreshCw,
   Archive
 } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface Order {
   id: string
@@ -82,6 +83,7 @@ const OrdersTable = ({
   onUpdateStatus,
   onBulkAction
 }: OrdersTableProps) => {
+  const { formatCurrency } = useCurrency()
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
@@ -185,9 +187,7 @@ const OrdersTable = ({
     })
   }
 
-  const formatCurrency = (amount: number) => {
-    return `Rp ${amount.toLocaleString('id-ID')}`
-  }
+  // Using formatCurrency from useCurrency hook
 
   if (loading) {
     return (

@@ -137,7 +137,7 @@ export async function GET() {
       method: 'pricing_insights'
     },
     umkm_tips: [
-      '💡 Gunakan "moving_average" untuk HPP yang paling akurat',
+      '💡 Gunakan"moving_average" untuk HPP yang paling akurat',
       '📊 Review harga rata-rata setiap kali ada pembelian baru',
       '⚠️ Jika selisih harga >10%, pertimbangkan update price list',
       '🎯 Metode FIFO bagus untuk tracking stock rotation'

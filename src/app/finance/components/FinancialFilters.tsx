@@ -80,7 +80,7 @@ export function FinancialFilters({
                   onChange={setTypeFilter}
                   placeholder="Semua Tipe"
                   options={[
-                    { value: "Semua", label: "Semua Tipe" },
+                    { value:"Semua", label:"Semua Tipe" },
                     ...transactionTypes.map(type => ({
                       value: type.value,
                       label: type.label
@@ -92,7 +92,7 @@ export function FinancialFilters({
                   onChange={setCategoryFilter}
                   placeholder="Semua Kategori"
                   options={[
-                    { value: "Semua", label: "Semua Kategori" },
+                    { value:"Semua", label:"Semua Kategori" },
                     ...[...incomeCategories, ...expenseCategories].map(category => ({
                       value: category,
                       label: category

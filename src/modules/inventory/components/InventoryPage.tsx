@@ -36,7 +36,8 @@ import {
 import { MiniChartWithLoading } from '@/components/lazy/chart-features'
 
 // Utils and constants from inventory domain  
-import { formatCurrency, formatDate } from '@/shared/utils'
+import { formatDate } from '@/shared/utils'
+import { useCurrency } from '@/hooks/useCurrency'
 import { STOCK_TRANSACTION_TYPES } from '../constants'
 
 import { 
@@ -59,6 +60,7 @@ import {
 
 
 export default function InventoryPage() {
+  const { formatCurrency } = useCurrency()
   const { isMobile, isTablet } = useResponsive()
   
   // Use inventory domain hooks

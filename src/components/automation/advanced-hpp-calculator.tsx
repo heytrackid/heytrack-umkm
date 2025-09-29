@@ -21,6 +21,7 @@ import {
   Info
 } from 'lucide-react'
 import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface HPPResult {
   hpp_breakdown: {
@@ -67,6 +68,7 @@ function AdvancedHPPCalculator({
   recipeName, 
   onPriceUpdate 
 }: AdvancedHPPCalculatorProps) {
+  const { formatCurrency } = useCurrency()
   const [hppResult, setHppResult] = useState<HPPResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -238,28 +240,28 @@ function AdvancedHPPCalculator({
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Ingredient Cost:</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.ingredient_cost.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.hpp_breakdown.ingredient_cost)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Overhead (15%):</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.overhead_cost.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.hpp_breakdown.overhead_cost)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Labor Cost (20%):</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.labor_cost.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.hpp_breakdown.labor_cost)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Packaging (5%):</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.packaging_cost.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.hpp_breakdown.packaging_cost)}</span>
                   </div>
                   <hr />
                   <div className="flex justify-between font-medium">
                     <span>Total Cost:</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.total_cost.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.hpp_breakdown.total_cost)}</span>
                   </div>
                   <div className="flex justify-between font-medium text-gray-600 dark:text-gray-400">
                     <span>Cost per Serving:</span>
-                    <span className="font-mono">Rp {hppResult.hpp_breakdown.cost_per_serving.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.hpp_breakdown.cost_per_serving)}</span>
                   </div>
                 </div>
               </Card>
@@ -273,7 +275,7 @@ function AdvancedHPPCalculator({
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Current Price:</span>
-                    <span className="font-mono">Rp {hppResult.pricing_analysis.current_price.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.pricing_analysis.current_price)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Current Margin:</span>
@@ -283,13 +285,13 @@ function AdvancedHPPCalculator({
                   </div>
                   <div className="flex justify-between">
                     <span>Break-even Price:</span>
-                    <span className="font-mono">Rp {hppResult.pricing_analysis.break_even_price.toLocaleString()}</span>
+                    <span className="font-mono">{formatCurrency(hppResult.pricing_analysis.break_even_price)}</span>
                   </div>
                   <hr />
                   <div className="text-xs text-muted-foreground">
                     <div className="flex justify-between">
                       <span>Competitor Range:</span>
-                      <span>Rp {hppResult.pricing_analysis.competitor_price_range.min.toLocaleString()} - {hppResult.pricing_analysis.competitor_price_range.max.toLocaleString()}</span>
+                      <span>{formatCurrency(hppResult.pricing_analysis.competitor_price_range.min)} - {formatCurrency(hppResult.pricing_analysis.competitor_price_range.max)}</span>
                     </div>
                   </div>
                 </div>
@@ -335,7 +337,7 @@ function AdvancedHPPCalculator({
                         </Badge>
                       </div>
                       <div className="text-2xl font-bold mb-2">
-                        Rp {suggestion.price.toLocaleString()}
+                        {formatCurrency(suggestion.price)}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {suggestion.rationale}
@@ -539,8 +541,8 @@ function AdvancedHPPCalculator({
                           ></div>
                         </div>
                         <div className="flex justify-between text-xs mt-1">
-                          <span>Rp {hppResult.pricing_analysis.competitor_price_range.min.toLocaleString()}</span>
-                          <span>Rp {hppResult.pricing_analysis.competitor_price_range.max.toLocaleString()}</span>
+                          <span>{formatCurrency(hppResult.pricing_analysis.competitor_price_range.min)}</span>
+                          <span>{formatCurrency(hppResult.pricing_analysis.competitor_price_range.max)}</span>
                         </div>
                       </div>
                     </div>
@@ -555,13 +557,13 @@ function AdvancedHPPCalculator({
                   {!hppResult.margin_analysis.is_profitable && (
                     <li className="flex items-center gap-2">
                       <span className="h-1 w-1 bg-foreground rounded-full"></span>
-                      Increase selling price to at least Rp {hppResult.pricing_analysis.break_even_price.toLocaleString()}
+                      Increase selling price to at least {formatCurrency(hppResult.pricing_analysis.break_even_price)}
                     </li>
                   )}
                   {hppResult.margin_analysis.current_margin < hppResult.margin_analysis.recommended_margin && (
                     <li className="flex items-center gap-2">
                       <span className="h-1 w-1 bg-foreground rounded-full"></span>
-                      Consider pricing at Rp {hppResult.pricing_suggestions.standard.price.toLocaleString()} for optimal margin
+                      Consider pricing at {formatCurrency(hppResult.pricing_suggestions.standard.price)} for optimal margin
                     </li>
                   )}
                   {!hppResult.availability.can_produce && (

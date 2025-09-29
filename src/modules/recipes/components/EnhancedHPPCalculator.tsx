@@ -19,22 +19,15 @@ import { RecommendationsCard } from './RecommendationsCard'
 import { EducationalFooter } from './EducationalFooter'
 
 import { Lightbulb } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 export default function EnhancedHPPCalculator() {
+  const { formatCurrency } = useCurrency()
   const [selectedPricingMethod, setSelectedPricingMethod] = useState<PricingMethod>('moving')
   const [profitMarginPercent, setProfitMarginPercent] = useState(30)
   const [includeOperationalCosts, setIncludeOperationalCosts] = useState(true)
   const [calculationResult, setCalculationResult] = useState<HPPCalculationResult | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
 
   // Calculate HPP
   const calculateHPP = async () => {

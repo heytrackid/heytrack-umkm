@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useCurrency } from '@/hooks/useCurrency'
 import { 
   CheckCircle2, 
   AlertTriangle, 
@@ -70,6 +71,7 @@ interface AutoSyncData {
 }
 
 export default function AutoSyncFinancialDashboard() {
+  const { formatCurrency } = useCurrency()
   const [data, setData] = useState<AutoSyncData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -98,14 +100,6 @@ export default function AutoSyncFinancialDashboard() {
   useEffect(() => {
     fetchAutoSyncData()
   }, [])
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {

@@ -1,50 +1,50 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from"recharts"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from"@/components/ui/chart"
 
 const financialData = [
   {
-    month: "Jan",
+    month:"Jan",
     revenue: 12000,
     expenses: 8000,
     profit: 4000,
     hpp: 6000,
   },
   {
-    month: "Feb", 
+    month:"Feb", 
     revenue: 15000,
     expenses: 9500,
     profit: 5500,
     hpp: 7500,
   },
   {
-    month: "Mar",
+    month:"Mar",
     revenue: 18000,
     expenses: 11000,
     profit: 7000,
     hpp: 8800,
   },
   {
-    month: "Apr",
+    month:"Apr",
     revenue: 16500,
     expenses: 10200,
     profit: 6300,
     hpp: 8100,
   },
   {
-    month: "May",
+    month:"May",
     revenue: 20000,
     expenses: 12000,
     profit: 8000,
     hpp: 9600,
   },
   {
-    month: "Jun",
+    month:"Jun",
     revenue: 22000,
     expenses: 13000,
     profit: 9000,
@@ -54,20 +54,20 @@ const financialData = [
 
 const chartConfig = {
   revenue: {
-    label: "Pendapatan",
-    color: "#22c55e",
+    label:"Pendapatan",
+    color:"#22c55e",
   },
   expenses: {
-    label: "Pengeluaran", 
-    color: "#ef4444",
+    label:"Pengeluaran", 
+    color:"#ef4444",
   },
   profit: {
-    label: "Keuntungan",
-    color: "#3b82f6",
+    label:"Keuntungan",
+    color:"#3b82f6",
   },
   hpp: {
-    label: "HPP",
-    color: "#f59e0b",
+    label:"HPP",
+    color:"#f59e0b",
   },
 }
 
@@ -108,13 +108,13 @@ export function FinancialTrendsChart() {
           stroke="#22c55e"
           strokeWidth={3}
           dot={{
-            fill: "#22c55e",
+            fill:"#22c55e",
             strokeWidth: 2,
             r: 4,
           }}
           activeDot={{
             r: 6,
-            stroke: "#22c55e",
+            stroke:"#22c55e",
             strokeWidth: 2,
           }}
         />
@@ -124,13 +124,13 @@ export function FinancialTrendsChart() {
           stroke="#ef4444"
           strokeWidth={3}
           dot={{
-            fill: "#ef4444",
+            fill:"#ef4444",
             strokeWidth: 2,
             r: 4,
           }}
           activeDot={{
             r: 6,
-            stroke: "#ef4444",
+            stroke:"#ef4444",
             strokeWidth: 2,
           }}
         />
@@ -140,13 +140,13 @@ export function FinancialTrendsChart() {
           stroke="#3b82f6"
           strokeWidth={3}
           dot={{
-            fill: "#3b82f6",
+            fill:"#3b82f6",
             strokeWidth: 2,
             r: 4,
           }}
           activeDot={{
             r: 6,
-            stroke: "#3b82f6",
+            stroke:"#3b82f6",
             strokeWidth: 2,
           }}
         />

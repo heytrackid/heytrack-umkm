@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { WeightedAverageCostService, PricingInsights } from '../services/WeightedAverageCostService'
 import { Ingredient, StockTransaction } from '../types'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface WeightedAverageCostAnalysisProps {
   ingredient: Ingredient
@@ -30,6 +31,7 @@ export function WeightedAverageCostAnalysis({
   transactions, 
   onUpdatePrice 
 }: WeightedAverageCostAnalysisProps) {
+  const { formatCurrency } = useCurrency()
   const [selectedMethod, setSelectedMethod] = useState<'weighted' | 'fifo' | 'moving' | 'latest'>('moving')
   
   // Calculate pricing insights
@@ -44,15 +46,6 @@ export function WeightedAverageCostAnalysis({
     weighted: ((pricingInsights.weightedAveragePrice - currentPrice) / currentPrice) * 100,
     fifo: ((pricingInsights.fifoAveragePrice - currentPrice) / currentPrice) * 100,
     moving: ((pricingInsights.movingAveragePrice - currentPrice) / currentPrice) * 100
-  }
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
   }
 
   // Format percentage
@@ -109,7 +102,7 @@ export function WeightedAverageCostAnalysis({
                 {(pricingInsights.priceVolatility.coefficient * 100).toFixed(1)}%
               </p>
               <Badge 
-                variant={pricingInsights.priceVolatility.coefficient > 0.15 ? "destructive" : "secondary"}
+                variant={pricingInsights.priceVolatility.coefficient > 0.15 ?"destructive" :"secondary"}
                 className="text-xs mt-1"
               >
                 {pricingInsights.priceVolatility.coefficient > 0.15 ? 'Tinggi' : 'Stabil'}

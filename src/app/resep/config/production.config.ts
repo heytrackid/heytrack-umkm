@@ -8,7 +8,7 @@ export interface ProductionModuleConfig {
     min_batch_size: number
     max_batch_size: number
     auto_sizing: boolean // Auto calculate optimal batch size
-    batch_number_format: string // e.g., "BATCH-{YYYY}{MM}{DD}-{###}"
+    batch_number_format: string // e.g.,"BATCH-{YYYY}{MM}{DD}-{###}"
     allow_partial_batches: boolean
     quality_check_required: boolean
   }
@@ -19,8 +19,8 @@ export interface ProductionModuleConfig {
     buffer_time_hours: number // Safety buffer for delays
     max_concurrent_batches: number
     working_hours: {
-      start: string // "06:00"
-      end: string // "18:00"
+      start: string //"06:00"
+      end: string //"18:00"
       break_duration_minutes: number
       working_days: number[] // [1,2,3,4,5,6] = Mon-Sat
     }

@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import { useResponsive } from '@/hooks/use-mobile'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface TransactionDetailViewProps {
   transaction: any
@@ -13,6 +14,7 @@ interface TransactionDetailViewProps {
  */
 export function TransactionDetailView({ transaction }: TransactionDetailViewProps) {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
 
   const transactionTypes = [
     { value: 'INCOME', label: 'Pemasukan', color: 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' },
@@ -94,7 +96,7 @@ export function TransactionDetailView({ transaction }: TransactionDetailViewProp
               } ${
                 isMobile ? 'text-lg' : 'text-xl'
               }`}>
-                {transaction.type === 'INCOME' ? '+' : '-'}Rp {transaction.amount.toLocaleString()}
+                {transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}
               </span>
             </div>
             <div className="flex justify-between">

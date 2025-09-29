@@ -60,22 +60,22 @@ export class AIService {
 
     Berikan analisis dalam format JSON:
     {
-      "recommendedPrice": {
-        "min": number,
-        "optimal": number, 
-        "max": number
+     "recommendedPrice": {
+       "min": number,
+       "optimal": number, 
+       "max": number
       },
-      "marginAnalysis": {
-        "currentMargin": number,
-        "optimalMargin": number,
-        "industryAverage": number
+     "marginAnalysis": {
+       "currentMargin": number,
+       "optimalMargin": number,
+       "industryAverage": number
       },
-      "marketPositioning": "premium|mid-market|budget",
-      "competitiveAdvantage": "string",
-      "risks": ["string"],
-      "opportunities": ["string"],
-      "seasonalFactors": ["string"],
-      "actionItems": ["string"]
+     "marketPositioning":"premium|mid-market|budget",
+     "competitiveAdvantage":"string",
+     "risks": ["string"],
+     "opportunities": ["string"],
+     "seasonalFactors": ["string"],
+     "actionItems": ["string"]
     }
 
     Fokus pada konteks bisnis Indonesia, daya beli masyarakat, dan tren pasar F&B lokal.
@@ -123,39 +123,39 @@ export class AIService {
 
     Berikan rekomendasi dalam format JSON:
     {
-      "criticalItems": [
+     "criticalItems": [
         {
-          "ingredient": "string",
-          "urgencyLevel": "critical|high|medium",
-          "recommendedOrder": number,
-          "estimatedCost": number,
-          "reason": "string"
+         "ingredient":"string",
+         "urgencyLevel":"critical|high|medium",
+         "recommendedOrder": number,
+         "estimatedCost": number,
+         "reason":"string"
         }
       ],
-      "optimizations": [
+     "optimizations": [
         {
-          "ingredient": "string", 
-          "currentEOQ": number,
-          "optimizedEOQ": number,
-          "savings": number,
-          "rationale": "string"
+         "ingredient":"string", 
+         "currentEOQ": number,
+         "optimizedEOQ": number,
+         "savings": number,
+         "rationale":"string"
         }
       ],
-      "demandForecast": {
-        "nextWeek": number,
-        "nextMonth": number,
-        "confidence": number
+     "demandForecast": {
+       "nextWeek": number,
+       "nextMonth": number,
+       "confidence": number
       },
-      "riskAssessment": {
-        "stockoutRisk": ["string"],
-        "overstockRisk": ["string"],
-        "supplierRisks": ["string"]
+     "riskAssessment": {
+       "stockoutRisk": ["string"],
+       "overstockRisk": ["string"],
+       "supplierRisks": ["string"]
       },
-      "actionPlan": ["string"],
-      "costImpact": {
-        "currentValue": number,
-        "optimizedValue": number,
-        "savings": number
+     "actionPlan": ["string"],
+     "costImpact": {
+       "currentValue": number,
+       "optimizedValue": number,
+       "savings": number
       }
     }
 
@@ -210,46 +210,46 @@ export class AIService {
 
     Berikan optimasi dalam format JSON:
     {
-      "productionSchedule": [
+     "productionSchedule": [
         {
-          "date": "YYYY-MM-DD",
-          "batches": [
+         "date":"YYYY-MM-DD",
+         "batches": [
             {
-              "product": "string",
-              "batchSize": number,
-              "startTime": "HH:MM",
-              "endTime": "HH:MM", 
-              "assignedStaff": ["string"],
-              "equipment": ["string"]
+             "product":"string",
+             "batchSize": number,
+             "startTime":"HH:MM",
+             "endTime":"HH:MM", 
+             "assignedStaff": ["string"],
+             "equipment": ["string"]
             }
           ]
         }
       ],
-      "efficiencyMetrics": {
-        "capacityUtilization": number,
-        "onTimeDeliveryRate": number,
-        "resourceOptimization": number
+     "efficiencyMetrics": {
+       "capacityUtilization": number,
+       "onTimeDeliveryRate": number,
+       "resourceOptimization": number
       },
-      "bottlenecks": [
+     "bottlenecks": [
         {
-          "type": "equipment|staff|time",
-          "description": "string",
-          "impact": "high|medium|low",
-          "solution": "string"
+         "type":"equipment|staff|time",
+         "description":"string",
+         "impact":"high|medium|low",
+         "solution":"string"
         }
       ],
-      "recommendations": [
+     "recommendations": [
         {
-          "category": "scheduling|capacity|workflow",
-          "priority": "high|medium|low",
-          "description": "string",
-          "expectedBenefit": "string"
+         "category":"scheduling|capacity|workflow",
+         "priority":"high|medium|low",
+         "description":"string",
+         "expectedBenefit":"string"
         }
       ],
-      "riskAnalysis": {
-        "delayRisk": ["string"],
-        "qualityRisk": ["string"],
-        "costRisk": ["string"]
+     "riskAnalysis": {
+       "delayRisk": ["string"],
+       "qualityRisk": ["string"],
+       "costRisk": ["string"]
       }
     }
 
@@ -307,47 +307,47 @@ export class AIService {
 
     Berikan insights dalam format JSON:
     {
-      "customerSegmentation": [
+     "customerSegmentation": [
         {
-          "segment": "string",
-          "count": number,
-          "characteristics": ["string"],
-          "averageValue": number,
-          "retentionRate": number
+         "segment":"string",
+         "count": number,
+         "characteristics": ["string"],
+         "averageValue": number,
+         "retentionRate": number
         }
       ],
-      "behaviorPatterns": {
-        "peakOrderTimes": ["string"],
-        "seasonalTrends": ["string"],
-        "productPreferences": ["string"],
-        "pricesensitivity": "high|medium|low"
+     "behaviorPatterns": {
+       "peakOrderTimes": ["string"],
+       "seasonalTrends": ["string"],
+       "productPreferences": ["string"],
+       "pricesensitivity":"high|medium|low"
       },
-      "churnRisk": [
+     "churnRisk": [
         {
-          "customerId": "string",
-          "riskLevel": "high|medium|low",
-          "lastInteraction": "string",
-          "retentionStrategy": "string"
+         "customerId":"string",
+         "riskLevel":"high|medium|low",
+         "lastInteraction":"string",
+         "retentionStrategy":"string"
         }
       ],
-      "growthOpportunities": [
+     "growthOpportunities": [
         {
-          "opportunity": "string",
-          "targetSegment": "string",
-          "estimatedRevenue": number,
-          "implementation": "string"
+         "opportunity":"string",
+         "targetSegment":"string",
+         "estimatedRevenue": number,
+         "implementation":"string"
         }
       ],
-      "recommendations": {
-        "retention": ["string"],
-        "acquisition": ["string"],
-        "upselling": ["string"],
-        "crossSelling": ["string"]
+     "recommendations": {
+       "retention": ["string"],
+       "acquisition": ["string"],
+       "upselling": ["string"],
+       "crossSelling": ["string"]
       },
-      "marketingInsights": {
-        "bestChannels": ["string"],
-        "optimalTiming": ["string"],
-        "messageRecommendations": ["string"]
+     "marketingInsights": {
+       "bestChannels": ["string"],
+       "optimalTiming": ["string"],
+       "messageRecommendations": ["string"]
       }
     }
 
@@ -398,56 +398,56 @@ export class AIService {
 
     Berikan analisis dalam format JSON:
     {
-      "healthScore": {
-        "overall": number,
-        "profitability": number,
-        "liquidity": number,
-        "efficiency": number,
-        "growth": number
+     "healthScore": {
+       "overall": number,
+       "profitability": number,
+       "liquidity": number,
+       "efficiency": number,
+       "growth": number
       },
-      "keyInsights": [
+     "keyInsights": [
         {
-          "category": "strength|concern|opportunity",
-          "metric": "string",
-          "description": "string",
-          "impact": "high|medium|low"
+         "category":"strength|concern|opportunity",
+         "metric":"string",
+         "description":"string",
+         "impact":"high|medium|low"
         }
       ],
-      "cashFlowForecast": {
-        "next30Days": number,
-        "next90Days": number,
-        "confidence": number,
-        "assumptions": ["string"]
+     "cashFlowForecast": {
+       "next30Days": number,
+       "next90Days": number,
+       "confidence": number,
+       "assumptions": ["string"]
       },
-      "riskFactors": [
+     "riskFactors": [
         {
-          "risk": "string",
-          "probability": "high|medium|low",
-          "impact": "high|medium|low",
-          "mitigation": "string"
+         "risk":"string",
+         "probability":"high|medium|low",
+         "impact":"high|medium|low",
+         "mitigation":"string"
         }
       ],
-      "optimizationOpportunities": [
+     "optimizationOpportunities": [
         {
-          "area": "string",
-          "currentValue": number,
-          "potentialValue": number,
-          "effort": "low|medium|high",
-          "timeframe": "string"
+         "area":"string",
+         "currentValue": number,
+         "potentialValue": number,
+         "effort":"low|medium|high",
+         "timeframe":"string"
         }
       ],
-      "actionPlan": {
-        "immediate": ["string"],
-        "shortTerm": ["string"],
-        "longTerm": ["string"]
+     "actionPlan": {
+       "immediate": ["string"],
+       "shortTerm": ["string"],
+       "longTerm": ["string"]
       },
-      "benchmarks": {
-        "industryAverage": {
-          "grossMargin": number,
-          "netMargin": number,
-          "inventoryTurnover": number
+     "benchmarks": {
+       "industryAverage": {
+         "grossMargin": number,
+         "netMargin": number,
+         "inventoryTurnover": number
         },
-        "performanceGap": "string"
+       "performanceGap":"string"
       }
     }
 
@@ -481,55 +481,55 @@ export class AIService {
 
     Berikan forecast dalam format JSON:
     {
-      "salesForecast": {
-        "next30Days": {
-          "revenue": number,
-          "orderCount": number,
-          "confidence": number
+     "salesForecast": {
+       "next30Days": {
+         "revenue": number,
+         "orderCount": number,
+         "confidence": number
         },
-        "next90Days": {
-          "revenue": number,
-          "orderCount": number,
-          "confidence": number
+       "next90Days": {
+         "revenue": number,
+         "orderCount": number,
+         "confidence": number
         },
-        "yearEnd": {
-          "revenue": number,
-          "growth": number,
-          "confidence": number
+       "yearEnd": {
+         "revenue": number,
+         "growth": number,
+         "confidence": number
         }
       },
-      "trendAnalysis": {
-        "growthRate": number,
-        "seasonalityImpact": number,
-        "marketSentiment": "positive|neutral|negative",
-        "keyDrivers": ["string"]
+     "trendAnalysis": {
+       "growthRate": number,
+       "seasonalityImpact": number,
+       "marketSentiment":"positive|neutral|negative",
+       "keyDrivers": ["string"]
       },
-      "opportunityWindows": [
+     "opportunityWindows": [
         {
-          "period": "string",
-          "opportunity": "string",
-          "estimatedUplift": number,
-          "requirements": ["string"]
+         "period":"string",
+         "opportunity":"string",
+         "estimatedUplift": number,
+         "requirements": ["string"]
         }
       ],
-      "riskPeriods": [
+     "riskPeriods": [
         {
-          "period": "string",
-          "risk": "string",
-          "estimatedImpact": number,
-          "mitigation": "string"
+         "period":"string",
+         "risk":"string",
+         "estimatedImpact": number,
+         "mitigation":"string"
         }
       ],
-      "strategicRecommendations": {
-        "inventory": ["string"],
-        "marketing": ["string"],
-        "operations": ["string"],
-        "pricing": ["string"]
+     "strategicRecommendations": {
+       "inventory": ["string"],
+       "marketing": ["string"],
+       "operations": ["string"],
+       "pricing": ["string"]
       },
-      "scenarioAnalysis": {
-        "optimistic": { "revenue": number, "probability": number },
-        "realistic": { "revenue": number, "probability": number },
-        "pessimistic": { "revenue": number, "probability": number }
+     "scenarioAnalysis": {
+       "optimistic": {"revenue": number,"probability": number },
+       "realistic": {"revenue": number,"probability": number },
+       "pessimistic": {"revenue": number,"probability": number }
       }
     }
 
@@ -579,41 +579,41 @@ export class AIService {
     
     Berikan analisis dalam format JSON:
     {
-      "insights": [
+     "insights": [
         {
-          "category": "profitability|cashflow|expenses|revenue",
-          "title": "string",
-          "description": "string",
-          "severity": "critical|high|medium|low",
-          "actionRequired": boolean
+         "category":"profitability|cashflow|expenses|revenue",
+         "title":"string",
+         "description":"string",
+         "severity":"critical|high|medium|low",
+         "actionRequired": boolean
         }
       ],
-      "summary": "string",
-      "healthScore": number,
-      "trends": {
-        "revenue": "increasing|stable|decreasing",
-        "expenses": "increasing|stable|decreasing",
-        "profitability": "improving|stable|declining"
+     "summary":"string",
+     "healthScore": number,
+     "trends": {
+       "revenue":"increasing|stable|decreasing",
+       "expenses":"increasing|stable|decreasing",
+       "profitability":"improving|stable|declining"
       },
-      "recommendations": [
+     "recommendations": [
         {
-          "priority": "high|medium|low",
-          "category": "cost-reduction|revenue-growth|cashflow|efficiency",
-          "action": "string",
-          "expectedImpact": "string",
-          "timeframe": "immediate|1-month|3-months|6-months"
+         "priority":"high|medium|low",
+         "category":"cost-reduction|revenue-growth|cashflow|efficiency",
+         "action":"string",
+         "expectedImpact":"string",
+         "timeframe":"immediate|1-month|3-months|6-months"
         }
       ],
-      "forecasting": {
-        "nextMonthRevenue": number,
-        "nextMonthExpenses": number,
-        "confidence": number
+     "forecasting": {
+       "nextMonthRevenue": number,
+       "nextMonthExpenses": number,
+       "confidence": number
       },
-      "alerts": [
+     "alerts": [
         {
-          "type": "cashflow|expense-spike|revenue-drop|margin-decline",
-          "message": "string",
-          "urgency": "high|medium|low"
+         "type":"cashflow|expense-spike|revenue-drop|margin-decline",
+         "message":"string",
+         "urgency":"high|medium|low"
         }
       ]
     }
@@ -677,45 +677,45 @@ export class AIService {
     
     Berikan analisis dalam format JSON:
     {
-      "insights": [
+     "insights": [
         {
-          "category": "retention|acquisition|value|behavior",
-          "title": "string",
-          "description": "string",
-          "impact": "high|medium|low"
+         "category":"retention|acquisition|value|behavior",
+         "title":"string",
+         "description":"string",
+         "impact":"high|medium|low"
         }
       ],
-      "summary": "string",
-      "customerSegments": [
+     "summary":"string",
+     "customerSegments": [
         {
-          "name": "string",
-          "description": "string",
-          "percentage": number,
-          "avgValue": number,
-          "characteristics": ["string"]
+         "name":"string",
+         "description":"string",
+         "percentage": number,
+         "avgValue": number,
+         "characteristics": ["string"]
         }
       ],
-      "loyaltyAnalysis": {
-        "repeatCustomers": number,
-        "churnRisk": number,
-        "loyaltyScore": number,
-        "retentionRate": number
+     "loyaltyAnalysis": {
+       "repeatCustomers": number,
+       "churnRisk": number,
+       "loyaltyScore": number,
+       "retentionRate": number
       },
-      "recommendations": [
+     "recommendations": [
         {
-          "type": "retention|acquisition|upselling|engagement",
-          "priority": "high|medium|low",
-          "strategy": "string",
-          "expectedResult": "string",
-          "implementation": "string"
+         "type":"retention|acquisition|upselling|engagement",
+         "priority":"high|medium|low",
+         "strategy":"string",
+         "expectedResult":"string",
+         "implementation":"string"
         }
       ],
-      "opportunities": [
+     "opportunities": [
         {
-          "segment": "string",
-          "potential": "string",
-          "action": "string",
-          "estimatedRevenue": number
+         "segment":"string",
+         "potential":"string",
+         "action":"string",
+         "estimatedRevenue": number
         }
       ]
     }
@@ -794,7 +794,7 @@ export class AIService {
     
     try {
       const response = await this.callAI(
-        'Respond with JSON: {"status": "healthy", "message": "AI service is working"}',
+        'Respond with JSON: {"status":"healthy","message":"AI service is working"}',
         'health-check'
       )
       return response?.status === 'healthy'

@@ -173,10 +173,10 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
 
   const getNotificationColor = (type: string) => {
     switch (type) {
-      case 'critical': return 'border-red-200 bg-gray-100 dark:bg-gray-800'
-      case 'warning': return 'border-orange-200 bg-orange-50'
-      case 'success': return 'border-green-200 bg-gray-100 dark:bg-gray-800'
-      default: return 'border-blue-200 bg-gray-100 dark:bg-gray-800'
+      case 'critical': return 'border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800'
+      case 'warning': return 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'
+      case 'success': return 'border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800'
+      default: return 'border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800'
     }
   }
 
@@ -202,13 +202,13 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
           </Badge>
         )}
         {highPriorityCount > 0 && (
-          <div className="absolute -top-1 -right-1 h-3 w-3 bg-gray-100 dark:bg-gray-8000 rounded-full animate-pulse" />
+          <div className="absolute -top-1 -right-1 h-3 w-3 bg-gray-100 dark:bg-gray-800 rounded-full animate-pulse" />
         )}
       </Button>
 
       {/* Smart Notifications Panel - Mobile-First Responsive */}
       {isOpen && (
-        <div className="absolute right-0 top-12 w-[95vw] sm:w-96 max-h-[85vh] sm:max-h-96 overflow-hidden bg-background border border-border rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 top-12 w-[95vw] sm:w-96 max-h-[85vh] sm:max-h-96 overflow-hidden bg-background border border-border rounded-lg  z-50">
           <div className="p-3 sm:p-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -217,7 +217,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
               </div>
               <div className="flex items-center gap-2">
                 {loading && (
-                  <div className="h-4 w-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                  <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 dark:border-t-gray-400 rounded-full animate-spin" />
                 )}
                 <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
                   <X className="h-4 w-4" />

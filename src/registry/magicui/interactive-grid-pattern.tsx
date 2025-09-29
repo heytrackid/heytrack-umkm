@@ -1,7 +1,7 @@
 "use client"
 
-import { cn } from "@/lib/utils"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { cn } from"@/lib/utils"
+import { useCallback, useEffect, useRef, useState } from"react"
 
 interface InteractiveGridPatternProps {
   className?: string
@@ -63,7 +63,7 @@ export function InteractiveGridPattern({
       width="100%"
       height="100%"
       className={cn(
-        "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
+       "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
         className
       )}
       {...props}
@@ -95,7 +95,7 @@ export function InteractiveGridPattern({
               duration,
               repeat: 1,
               delay: index * 0.1,
-              repeatType: "reverse",
+              repeatType:"reverse",
             }}
             onAnimationComplete={() => updateSquarePosition(id)}
             key={`${pos[0]}-${pos[1]}`}

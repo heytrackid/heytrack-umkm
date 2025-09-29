@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useFinancialAnalytics } from '@/hooks/useDatabase'
+import { useCurrency } from '@/hooks/useCurrency'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -22,6 +23,7 @@ import {
 
 export default function FinancialReportsPage() {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   
@@ -127,7 +129,7 @@ export default function FinancialReportsPage() {
             </CardHeader>
             <CardContent>
               <div className={`font-bold text-green-600 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                Rp {stats.totalIncome.toLocaleString()}
+                {formatCurrency(stats.totalIncome)}
               </div>
               <p className="text-xs text-muted-foreground">bulan ini</p>
             </CardContent>
@@ -142,7 +144,7 @@ export default function FinancialReportsPage() {
             </CardHeader>
             <CardContent>
               <div className={`font-bold text-red-600 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                Rp {stats.totalExpense.toLocaleString()}
+                {formatCurrency(stats.totalExpense)}
               </div>
               <p className="text-xs text-muted-foreground">bulan ini</p>
             </CardContent>
@@ -157,7 +159,7 @@ export default function FinancialReportsPage() {
             </CardHeader>
             <CardContent>
               <div className={`font-bold text-primary ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                Rp {stats.netProfit.toLocaleString()}
+                {formatCurrency(stats.netProfit)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Margin: {stats.profitMargin.toFixed(1)}%
@@ -194,19 +196,19 @@ export default function FinancialReportsPage() {
                   <div className="flex justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded">
                     <span>Total Pemasukan</span>
                     <span className="font-medium text-green-600">
-                      Rp {stats.totalIncome.toLocaleString()}
+                      {formatCurrency(stats.totalIncome)}
                     </span>
                   </div>
                   <div className="flex justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded">
                     <span>Total Pengeluaran</span>
                     <span className="font-medium text-red-600">
-                      Rp {stats.totalExpense.toLocaleString()}
+                      {formatCurrency(stats.totalExpense)}
                     </span>
                   </div>
                   <div className="flex justify-between p-3 bg-primary/10 rounded">
                     <span>Keuntungan Bersih</span>
                     <span className="font-bold text-primary">
-                      Rp {stats.netProfit.toLocaleString()}
+                      {formatCurrency(stats.netProfit)}
                     </span>
                   </div>
                 </div>
@@ -226,7 +228,7 @@ export default function FinancialReportsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Rata-rata per Transaksi</span>
-                    <span>Rp {(stats.totalIncome / stats.totalTransactions).toLocaleString()}</span>
+                    <span>{formatCurrency(stats.totalIncome / stats.totalTransactions)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Status Bisnis</span>
@@ -278,7 +280,7 @@ export default function FinancialReportsPage() {
                             <div className={`flex justify-between ${isMobile ? 'text-sm' : 'text-sm'}`}>
                               <span>{category}</span>
                               <div className="text-right">
-                                <div className="font-medium">Rp {incomeAmount.toLocaleString()}</div>
+                                <div className="font-medium">{formatCurrency(incomeAmount)}</div>
                                 <div className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</div>
                               </div>
                             </div>
@@ -319,7 +321,7 @@ export default function FinancialReportsPage() {
                             <div className={`flex justify-between ${isMobile ? 'text-sm' : 'text-sm'}`}>
                               <span>{category}</span>
                               <div className="text-right">
-                                <div className="font-medium">Rp {expenseAmount.toLocaleString()}</div>
+                                <div className="font-medium">{formatCurrency(expenseAmount)}</div>
                                 <div className="text-xs text-muted-foreground">{percentage.toFixed(1)}%</div>
                               </div>
                             </div>
@@ -356,7 +358,7 @@ export default function FinancialReportsPage() {
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li>• Margin keuntungan {stats.profitMargin.toFixed(1)}% {stats.profitMargin > 20 ? 'sangat baik' : 'perlu ditingkatkan'}</li>
                   <li>• Total transaksi {stats.totalTransactions} menunjukkan aktivitas yang {stats.totalTransactions > 3 ? 'aktif' : 'perlu ditingkatkan'}</li>
-                  <li>• Keuntungan bersih positif Rp {stats.netProfit.toLocaleString()}</li>
+                  <li>• Keuntungan bersih positif {formatCurrency(stats.netProfit)}</li>
                 </ul>
               </div>
               <div className="space-y-3">

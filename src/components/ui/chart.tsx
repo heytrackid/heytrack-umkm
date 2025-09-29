@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
-import * as RechartsPrimitive from "recharts"
+import * as React from"react"
+import * as RechartsPrimitive from"recharts"
 
-import { cn } from "@/lib/utils"
+import { cn } from"@/lib/utils"
 
 // Chart container component
 const ChartContainer = React.forwardRef<
@@ -23,7 +23,7 @@ const ChartContainer = React.forwardRef<
     </div>
   )
 })
-ChartContainer.displayName = "Chart"
+ChartContainer.displayName ="Chart"
 
 // Chart tooltip
 const ChartTooltip = RechartsPrimitive.Tooltip
@@ -34,14 +34,14 @@ const ChartTooltipContent = React.forwardRef<
     React.HTMLAttributes<HTMLDivElement> & {
       hideLabel?: boolean
       hideIndicator?: boolean
-      indicator?: "line" | "dot" | "dashed"
+      indicator?:"line" |"dot" |"dashed"
     }
 >(
   ({ 
     className, 
     hideLabel = false, 
     hideIndicator = false, 
-    indicator = "dot",
+    indicator ="dot",
     // Filter out recharts-specific props that shouldn't be passed to DOM
     active,
     payload,
@@ -66,7 +66,7 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+         "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs",
           className
         )}
         {...validDOMProps}
@@ -74,7 +74,7 @@ const ChartTooltipContent = React.forwardRef<
     )
   }
 )
-ChartTooltipContent.displayName = "ChartTooltipContent"
+ChartTooltipContent.displayName ="ChartTooltipContent"
 
 // Chart legend
 const ChartLegend = RechartsPrimitive.Legend
@@ -109,7 +109,7 @@ const ChartLegendContent = React.forwardRef<
     </div>
   )
 })
-ChartLegendContent.displayName = "ChartLegendContent"
+ChartLegendContent.displayName ="ChartLegendContent"
 
 // Main Chart component (alias for ChartContainer)
 const Chart = ChartContainer

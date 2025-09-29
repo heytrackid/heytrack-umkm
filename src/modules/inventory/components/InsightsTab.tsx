@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart3 } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface InsightsTabProps {
   stats: {
@@ -16,6 +17,7 @@ interface InsightsTabProps {
  * Insights tab component showing smart insights and trends
  */
 export function InsightsTab({ stats, analysis, usageData, ingredients }: InsightsTabProps) {
+  const { formatCurrency } = useCurrency()
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
@@ -34,14 +36,14 @@ export function InsightsTab({ stats, analysis, usageData, ingredients }: Insight
             <div className="font-medium text-green-700 mb-1">Optimization Potential</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {analysis.filter(a => a.status === 'overstocked').length} item overstocked,
-              bisa hemat Rp {(analysis.filter(a => a.status === 'overstocked').reduce((sum, a) => sum + ((a.ingredient.current_stock - a.ingredient.min_stock * 2) * a.ingredient.price_per_unit), 0)).toLocaleString()}
+              bisa hemat {formatCurrency(analysis.filter(a => a.status === 'overstocked').reduce((sum, a) => sum + ((a.ingredient.current_stock - a.ingredient.min_stock * 2) * a.ingredient.price_per_unit), 0))}
             </div>
           </div>
 
           <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
             <div className="font-medium text-yellow-700 mb-1">Cash Flow Impact</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Inventory mengikat Rp {(stats.totalValue / 1000000).toFixed(1)}M modal kerja
+              Inventory mengikat {formatCurrency(stats.totalValue)} modal kerja
             </div>
           </div>
         </CardContent>

@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
 import { Ingredient } from '@/types/database'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface FinancialData {
   sales: Array<{ amount: number; cost: number; date: string; product?: string }>
@@ -48,6 +49,7 @@ export function SmartFinancialDashboard({
   targetMargin = 60, // Default 60% gross margin
   onFinancialAction 
 }: SmartFinancialDashboardProps) {
+  const { formatCurrency: formatCurrencyDynamic } = useCurrency()
   const [analysis, setAnalysis] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d')
@@ -75,11 +77,7 @@ export function SmartFinancialDashboard({
   }
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
+    return formatCurrencyDynamic(amount)
   }
 
   const formatPercentage = (value: number, decimals = 1) => {

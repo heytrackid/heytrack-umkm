@@ -25,8 +25,8 @@ export function MobileForm({ children, className, onSubmit }: MobileFormProps) {
     <form 
       onSubmit={onSubmit}
       className={cn(
-        "space-y-6",
-        isMobile && "space-y-5",
+       "space-y-6",
+        isMobile &&"space-y-5",
         className
       )}
     >
@@ -93,9 +93,9 @@ export function MobileInput({
       {label && (
         <Label 
           className={cn(
-            "text-sm font-medium",
-            isMobile && "text-base",
-            error && "text-destructive"
+           "text-sm font-medium",
+            isMobile &&"text-base",
+            error &&"text-destructive"
           )}
         >
           {label}
@@ -119,10 +119,10 @@ export function MobileInput({
             required={required}
             rows={rows}
             className={cn(
-              "transition-all duration-200 resize-none",
-              isMobile && "text-base",
-              error && "border-destructive focus-visible:ring-destructive",
-              isFocused && "ring-2 ring-ring ring-offset-2"
+             "transition-all duration-200 resize-none",
+              isMobile &&"text-base",
+              error &&"border-destructive focus-visible:ring-destructive",
+              isFocused &&"ring-2 ring-ring ring-offset-2"
             )}
           />
         ) : (
@@ -141,10 +141,10 @@ export function MobileInput({
             required={required}
             inputMode={getInputMode()}
             className={cn(
-              "transition-all duration-200",
-              isMobile && "h-12 text-base", // Larger touch targets on mobile
-              error && "border-destructive focus-visible:ring-destructive",
-              isFocused && "ring-2 ring-ring ring-offset-2"
+             "transition-all duration-200",
+              isMobile &&"h-12 text-base", // Larger touch targets on mobile
+              error &&"border-destructive focus-visible:ring-destructive",
+              isFocused &&"ring-2 ring-ring ring-offset-2"
             )}
           />
         )}
@@ -181,8 +181,8 @@ export function MobileInput({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-          "text-sm",
-          error ? "text-destructive" : "text-muted-foreground"
+         "text-sm",
+          error ?"text-destructive" :"text-muted-foreground"
         )}>
           {error || hint}
         </p>
@@ -232,9 +232,9 @@ export function MobileTextarea({
       {label && (
         <Label 
           className={cn(
-            "text-sm font-medium",
-            isMobile && "text-base",
-            error && "text-destructive"
+           "text-sm font-medium",
+            isMobile &&"text-base",
+            error &&"text-destructive"
           )}
         >
           {label}
@@ -258,10 +258,10 @@ export function MobileTextarea({
           rows={isMobile ? Math.max(rows, 3) : rows}
           maxLength={maxLength}
           className={cn(
-            "transition-all duration-200 resize-none",
-            isMobile && "text-base", // Better readability on mobile
-            error && "border-destructive focus-visible:ring-destructive",
-            isFocused && "ring-2 ring-ring ring-offset-2"
+           "transition-all duration-200 resize-none",
+            isMobile &&"text-base", // Better readability on mobile
+            error &&"border-destructive focus-visible:ring-destructive",
+            isFocused &&"ring-2 ring-ring ring-offset-2"
           )}
         />
       </div>
@@ -269,16 +269,16 @@ export function MobileTextarea({
       {/* Character count and hint/error */}
       <div className="flex justify-between items-start">
         <p className={cn(
-          "text-sm",
-          error ? "text-destructive" : "text-muted-foreground"
+         "text-sm",
+          error ?"text-destructive" :"text-muted-foreground"
         )}>
           {error || hint}
         </p>
         
         {maxLength && (
           <span className={cn(
-            "text-xs",
-            currentLength > maxLength * 0.9 ? "text-destructive" : "text-muted-foreground"
+           "text-xs",
+            currentLength > maxLength * 0.9 ?"text-destructive" :"text-muted-foreground"
           )}>
             {currentLength}/{maxLength}
           </span>
@@ -368,9 +368,9 @@ export function MobileNumberInput({
       {label && (
         <Label 
           className={cn(
-            "text-sm font-medium",
-            isMobile && "text-base",
-            error && "text-destructive"
+           "text-sm font-medium",
+            isMobile &&"text-base",
+            error &&"text-destructive"
           )}
         >
           {label}
@@ -387,8 +387,8 @@ export function MobileNumberInput({
           disabled={disabled || (min !== undefined && currentValue <= min)}
           onClick={handleDecrement}
           className={cn(
-            "h-10 w-10 rounded-r-none border-r-0 p-0 shrink-0",
-            isMobile && "h-12 w-12"
+           "h-10 w-10 rounded-r-none border-r-0 p-0 shrink-0",
+            isMobile &&"h-12 w-12"
           )}
         >
           <Minus className="h-4 w-4" />
@@ -412,10 +412,10 @@ export function MobileNumberInput({
           step={step}
           inputMode="decimal"
           className={cn(
-            "flex-1 rounded-none text-center transition-all duration-200",
-            isMobile && "h-12 text-base",
-            error && "border-destructive focus-visible:ring-destructive",
-            isFocused && "ring-2 ring-ring ring-offset-2"
+           "flex-1 rounded-none text-center transition-all duration-200",
+            isMobile &&"h-12 text-base",
+            error &&"border-destructive focus-visible:ring-destructive",
+            isFocused &&"ring-2 ring-ring ring-offset-2"
           )}
         />
 
@@ -427,8 +427,8 @@ export function MobileNumberInput({
           disabled={disabled || (max !== undefined && currentValue >= max)}
           onClick={handleIncrement}
           className={cn(
-            "h-10 w-10 rounded-l-none border-l-0 p-0 shrink-0",
-            isMobile && "h-12 w-12"
+           "h-10 w-10 rounded-l-none border-l-0 p-0 shrink-0",
+            isMobile &&"h-12 w-12"
           )}
         >
           <Plus className="h-4 w-4" />
@@ -445,8 +445,8 @@ export function MobileNumberInput({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-          "text-sm",
-          error ? "text-destructive" : "text-muted-foreground"
+         "text-sm",
+          error ?"text-destructive" :"text-muted-foreground"
         )}>
           {error || hint}
         </p>
@@ -490,9 +490,9 @@ export function MobileSelect({
       {label && (
         <Label 
           className={cn(
-            "text-sm font-medium",
-            isMobile && "text-base",
-            error && "text-destructive"
+           "text-sm font-medium",
+            isMobile &&"text-base",
+            error &&"text-destructive"
           )}
         >
           {label}
@@ -509,9 +509,9 @@ export function MobileSelect({
       >
         <SelectTrigger 
           className={cn(
-            "transition-all duration-200",
-            isMobile && "h-12 text-base",
-            error && "border-destructive focus:ring-destructive"
+           "transition-all duration-200",
+            isMobile &&"h-12 text-base",
+            error &&"border-destructive focus:ring-destructive"
           )}
         >
           <SelectValue placeholder={placeholder} />
@@ -521,7 +521,7 @@ export function MobileSelect({
             <SelectItem 
               key={option.value} 
               value={option.value}
-              className={cn(isMobile && "text-base py-3")}
+              className={cn(isMobile &&"text-base py-3")}
             >
               {option.label}
             </SelectItem>
@@ -532,8 +532,8 @@ export function MobileSelect({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-          "text-sm",
-          error ? "text-destructive" : "text-muted-foreground"
+         "text-sm",
+          error ?"text-destructive" :"text-muted-foreground"
         )}>
           {error || hint}
         </p>
@@ -578,18 +578,18 @@ export function MobileCheckbox({
           disabled={disabled}
           required={required}
           className={cn(
-            "transition-all duration-200",
-            isMobile && "h-5 w-5", // Larger touch target on mobile
-            error && "border-destructive data-[state=checked]:bg-destructive"
+           "transition-all duration-200",
+            isMobile &&"h-5 w-5", // Larger touch target on mobile
+            error &&"border-destructive data-[state=checked]:bg-destructive"
           )}
         />
         {label && (
           <Label 
             className={cn(
-              "text-sm font-medium cursor-pointer",
-              isMobile && "text-base",
-              error && "text-destructive",
-              disabled && "opacity-50 cursor-not-allowed"
+             "text-sm font-medium cursor-pointer",
+              isMobile &&"text-base",
+              error &&"text-destructive",
+              disabled &&"opacity-50 cursor-not-allowed"
             )}
           >
             {label}
@@ -601,8 +601,8 @@ export function MobileCheckbox({
       {/* Hint or Error message */}
       {(hint || error) && (
         <p className={cn(
-          "text-sm ml-8", // Align with checkbox label
-          error ? "text-destructive" : "text-muted-foreground"
+         "text-sm ml-8", // Align with checkbox label
+          error ?"text-destructive" :"text-muted-foreground"
         )}>
           {error || hint}
         </p>

@@ -243,7 +243,7 @@ export function SmartInventoryAutomation({
       {/* Smart Inventory Items */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {items.filter(item => item.actions.length > 0 || item.volatility === 'high' || item.statusStok !== 'aman').map((item) => (
-          <Card key={item.id} className="hover:shadow-md transition-shadow">
+          <Card key={item.id} className="hover: transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

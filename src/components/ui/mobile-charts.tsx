@@ -66,8 +66,8 @@ function MobileTooltip({
   if (active && payload && payload.length) {
     return (
       <div className={cn(
-        "bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-3",
-        isMobile ? "min-w-[200px] text-sm" : "min-w-[160px] text-xs"
+       "bg-background/95 backdrop-blur-sm border rounded-lg  p-3",
+        isMobile ?"min-w-[200px] text-sm" :"min-w-[160px] text-xs"
       )}>
         {label && (
           <div className="font-medium text-foreground mb-2 border-b pb-2">
@@ -172,19 +172,19 @@ function BaseMobileChart({
 
   return (
     <Card className={cn(
-      "transition-all duration-200",
-      isFullscreen && "fixed inset-4 z-50 overflow-auto",
+     "transition-all duration-200",
+      isFullscreen &&"fixed inset-4 z-50 overflow-auto",
       className
     )}>
       <CardHeader className={cn(
-        "flex flex-row items-start justify-between space-y-0 pb-2",
-        isMobile ? "p-4" : "p-6"
+       "flex flex-row items-start justify-between space-y-0 pb-2",
+        isMobile ?"p-4" :"p-6"
       )}>
         <div className="space-y-1 flex-1">
           {title && (
             <CardTitle className={cn(
-              "flex items-center gap-2",
-              isMobile ? "text-base" : "text-lg"
+             "flex items-center gap-2",
+              isMobile ?"text-base" :"text-lg"
             )}>
               {title}
               {trend && (
@@ -201,7 +201,7 @@ function BaseMobileChart({
           )}
           {description && (
             <CardDescription className={cn(
-              isMobile ? "text-sm" : "text-sm"
+              isMobile ?"text-sm" :"text-sm"
             )}>
               {description}
             </CardDescription>
@@ -253,7 +253,7 @@ function BaseMobileChart({
       </CardHeader>
       
       <CardContent className={cn(
-        isMobile ? "p-4 pt-0" : "p-6 pt-0"
+        isMobile ?"p-4 pt-0" :"p-6 pt-0"
       )}>
         <div style={{ height: chartHeight }}>
           {children}
@@ -329,7 +329,7 @@ export function MobileLineChart({
           {lines.map((line, index) => (
             <Line
               key={line.key}
-              type={curved ? "monotone" : "linear"}
+              type={curved ?"monotone" :"linear"}
               dataKey={line.key}
               stroke={line.color || CHART_COLORS.primary[index % CHART_COLORS.primary.length]}
               strokeWidth={line.strokeWidth || (isMobile ? 2 : 3)}
@@ -423,7 +423,7 @@ export function MobileAreaChart({
               key={area.key}
               type="monotone"
               dataKey={area.key}
-              stackId={stacked ? "1" : undefined}
+              stackId={stacked ?"1" : undefined}
               stroke={area.color || CHART_COLORS.primary[index]}
               fill={`url(#gradient-${area.key})`}
               strokeWidth={isMobile ? 2 : 3}
@@ -463,7 +463,7 @@ export function MobileBarChart({
       <ResponsiveContainer width="100%" height="100%">
         <BarChart 
           data={data}
-          layout={horizontal ? "horizontal" : "vertical"}
+          layout={horizontal ?"horizontal" :"vertical"}
           margin={{ 
             top: 5, 
             right: isMobile ? 10 : 30, 
@@ -476,14 +476,14 @@ export function MobileBarChart({
           )}
           <XAxis 
             dataKey={horizontal ? undefined : xKey}
-            type={horizontal ? "number" : "category"}
+            type={horizontal ?"number" :"category"}
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: isMobile ? 10 : 12 }}
           />
           <YAxis 
             dataKey={horizontal ? xKey : undefined}
-            type={horizontal ? "category" : "number"}
+            type={horizontal ?"category" :"number"}
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: isMobile ? 10 : 12 }}

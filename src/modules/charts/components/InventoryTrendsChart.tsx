@@ -1,50 +1,50 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from"recharts"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from"@/components/ui/chart"
 
 const inventoryData = [
   {
-    month: "Jan",
+    month:"Jan",
     stock: 850,
     purchases: 1200,
     usage: 1100,
     waste: 50,
   },
   {
-    month: "Feb", 
+    month:"Feb", 
     stock: 950,
     purchases: 1500,
     usage: 1300,
     waste: 80,
   },
   {
-    month: "Mar",
+    month:"Mar",
     stock: 1150,
     purchases: 1800,
     usage: 1600,
     waste: 70,
   },
   {
-    month: "Apr",
+    month:"Apr",
     stock: 1350,
     purchases: 1600,
     usage: 1400,
     waste: 60,
   },
   {
-    month: "May",
+    month:"May",
     stock: 1550,
     purchases: 2000,
     usage: 1800,
     waste: 90,
   },
   {
-    month: "Jun",
+    month:"Jun",
     stock: 1660,
     purchases: 1900,
     usage: 1700,
@@ -54,20 +54,20 @@ const inventoryData = [
 
 const chartConfig = {
   stock: {
-    label: "Stok Tersedia",
-    color: "#22c55e",
+    label:"Stok Tersedia",
+    color:"#22c55e",
   },
   purchases: {
-    label: "Pembelian", 
-    color: "#3b82f6",
+    label:"Pembelian", 
+    color:"#3b82f6",
   },
   usage: {
-    label: "Pemakaian",
-    color: "#f59e0b",
+    label:"Pemakaian",
+    color:"#f59e0b",
   },
   waste: {
-    label: "Waste",
-    color: "#ef4444",
+    label:"Waste",
+    color:"#ef4444",
   },
 }
 
@@ -109,13 +109,13 @@ export default function InventoryTrendsChart() {
             stroke="#22c55e"
             strokeWidth={3}
             dot={{
-              fill: "#22c55e",
+              fill:"#22c55e",
               strokeWidth: 2,
               r: 4,
             }}
             activeDot={{
               r: 6,
-              stroke: "#22c55e",
+              stroke:"#22c55e",
               strokeWidth: 2,
             }}
           />
@@ -141,7 +141,7 @@ export default function InventoryTrendsChart() {
             stroke="#ef4444"
             strokeWidth={2}
             dot={{
-              fill: "#ef4444",
+              fill:"#ef4444",
               strokeWidth: 2,
               r: 3,
             }}

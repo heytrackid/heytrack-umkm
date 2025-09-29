@@ -259,7 +259,7 @@ export default function ProductionBatchExecution({
       qualityChecks: updatedChecks,
       notes: [
         ...state.notes, 
-        `Quality check "${checkId}": ${passed ? 'PASSED' : 'FAILED'}${notes ? ` - ${notes}` : ''}`
+        `Quality check"${checkId}": ${passed ? 'PASSED' : 'FAILED'}${notes ? ` - ${notes}` : ''}`
       ]
     }
 
@@ -504,7 +504,7 @@ export default function ProductionBatchExecution({
                               <span className="text-sm">{check.name}</span>
                               <div className="flex gap-1">
                                 {check.completed ? (
-                                  <Badge variant={check.passed ? "default" : "destructive"} className="text-xs">
+                                  <Badge variant={check.passed ?"default" :"destructive"} className="text-xs">
                                     {check.passed ? 'PASSED' : 'FAILED'}
                                   </Badge>
                                 ) : (

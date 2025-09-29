@@ -41,7 +41,7 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
           <Button
             onClick={toggleChatbot}
             size="lg"
-            className="h-14 w-14 rounded-full shadow-2xl bg-gray-700 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 border-2 border-white dark:border-gray-300 relative overflow-hidden group"
+            className="h-14 w-14 rounded-full  bg-gray-700 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 border-2 border-white dark:border-gray-300 relative overflow-hidden group"
           >
             
             {/* Icon */}
@@ -92,7 +92,7 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
             onClick={toggleChatbot}
             variant="outline"
             size="sm"
-            className="fixed top-4 right-4 z-[60] md:hidden bg-white shadow-lg"
+            className="fixed top-4 right-4 z-[60] md:hidden bg-white"
           >
             <X className="h-4 w-4" />
           </Button>

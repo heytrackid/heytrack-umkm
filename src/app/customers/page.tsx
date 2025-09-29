@@ -1,9 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
+import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { 
+  StatsCardSkeleton,
+  DashboardHeaderSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
+import { 
+  CustomersTableSkeleton,
+  SearchFormSkeleton
+} from '@/components/ui/skeletons/table-skeletons'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -37,10 +46,22 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 export default function CustomersPage() {
   const { isMobile } = useResponsive()
-  const { formatCurrency, t } = useSettings()
+  const { formatCurrency, t, settings } = useSettings()
   const [searchTerm, setSearchTerm] = useState('')
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const { loading, setLoading, isLoading } = useLoading({
+    [LOADING_KEYS.FETCH_CUSTOMERS]: true
+  })
+
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
+    }, 1800)
+    
+    return () => clearTimeout(timer)
+  }, [])
 
   // Mock customer data - replace with actual data fetching
   const [customers] = useState([
@@ -139,14 +160,14 @@ export default function CustomersPage() {
     if (confirmed) {
       // TODO: Implement actual API call to delete customer
       console.log('Deleting customer:', customer.id)
-      alert(`✅ Pelanggan "${customer.name}" berhasil dihapus dari sistem.`)
+      alert(`✅ Pelanggan"${customer.name}" berhasil dihapus dari sistem.`)
     }
   }
 
   const handleViewCustomer = (customer: any) => {
     console.log('View customer details:', customer)
     // TODO: Open customer detail modal or navigate to customer detail page
-    alert(`👤 Detail pelanggan "${customer.name}" akan segera tersedia!`)
+    alert(`👤 Detail pelanggan"${customer.name}" akan segera tersedia!`)
   }
 
   // Breadcrumb component
@@ -211,7 +232,14 @@ export default function CustomersPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
+        {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
           <Card>
             <CardContent className="p-4 text-center">
               <Users className="h-8 w-8 text-primary mx-auto mb-2" />
@@ -232,7 +260,7 @@ export default function CustomersPage() {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">Rp</div>
+              <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">{settings.currency.symbol}</div>
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length)}
               </div>
@@ -248,10 +276,14 @@ export default function CustomersPage() {
               <p className="text-sm text-muted-foreground">Rata-rata Order</p>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
 
         {/* Search and Filters */}
-        <div className="space-y-4">
+        {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
+          <SearchFormSkeleton />
+        ) : (
+          <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -305,10 +337,14 @@ export default function CustomersPage() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        )}
 
         {/* Customers Table */}
-        <Card>
+        {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
+          <CustomersTableSkeleton rows={5} />
+        ) : (
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -439,7 +475,8 @@ export default function CustomersPage() {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        )}
 
         {/* Info Card */}
         <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">

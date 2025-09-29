@@ -59,11 +59,11 @@ const DEFAULT_CONSTRAINTS: ProductionConstraints = {
   packaging_capacity: 50,
   bakers_available: 2,
   decorators_available: 1,
-  shift_start: "06:00",
-  shift_end: "18:00",
+  shift_start:"06:00",
+  shift_end:"18:00",
   break_times: [
-    { start: "10:00", end: "10:15" },
-    { start: "14:00", end: "14:30" }
+    { start:"10:00", end:"10:15" },
+    { start:"14:00", end:"14:30" }
   ],
   setup_time_minutes: 15,
   cleanup_time_minutes: 10

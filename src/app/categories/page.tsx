@@ -150,7 +150,7 @@ export default function CategoriesPage() {
   // Individual action handlers
   const handleViewCategory = (category: Category) => {
     console.log('View category details:', category)
-    alert(`👁️ Detail kategori "${category.name}" akan segera tersedia!`)
+    alert(`👁️ Detail kategori"${category.name}" akan segera tersedia!`)
   }
 
   const handleAddIngredient = () => {
@@ -279,7 +279,7 @@ export default function CategoriesPage() {
               
               {newCategory.commonIngredients.length === 0 && (
                 <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded">
-                  Belum ada bahan baku. Klik "Tambah Bahan" untuk menambahkan.
+                  Belum ada bahan baku. Klik"Tambah Bahan" untuk menambahkan.
                 </p>
               )}
             </div>
@@ -458,7 +458,7 @@ export default function CategoriesPage() {
                           ))}
                           {category.commonIngredients.length > 3 && (
                             <Badge variant="outline" className="text-xs">
-                              +{category.commonIngredients.length - 3}
+                             {category.commonIngredients.length - 3}
                             </Badge>
                           )}
                         </div>

@@ -23,14 +23,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from"@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from"@/components/ui/select"
 
 interface SimpleColumn<T> {
   key: keyof T | string
@@ -64,13 +64,13 @@ export function SimpleDataTable<T extends Record<string, any>>({
   description,
   data,
   columns,
-  searchPlaceholder = "Cari data...",
+  searchPlaceholder ="Cari data...",
   onAdd,
   onView,
   onEdit,
   onDelete,
-  addButtonText = "Tambah",
-  emptyMessage = "Tidak ada data tersedia",
+  addButtonText ="Tambah",
+  emptyMessage ="Tidak ada data tersedia",
   exportData = false,
   loading = false
 }: SimpleDataTableProps<T>) {
@@ -185,13 +185,13 @@ export function SimpleDataTable<T extends Record<string, any>>({
             </div>
             <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
               {exportData && (
-                <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
+                <Button variant="outline" size={isMobile ?"sm" :"sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
                   {isMobile ? 'Export' : 'Export'}
                 </Button>
               )}
               {onAdd && (
-                <Button onClick={onAdd} size={isMobile ? "sm" : "default"} className={isMobile ? 'flex-1' : ''}>
+                <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
                   {isMobile ? 'Tambah' : addButtonText}
                 </Button>

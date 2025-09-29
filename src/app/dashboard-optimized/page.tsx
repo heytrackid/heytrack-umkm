@@ -11,6 +11,7 @@ import { ChartSkeleton, CardSkeleton } from '@/components/lazy/LazyWrapper'
 import { OptimizedTable } from '@/components/optimized/OptimizedTable'
 import { useOptimizedDashboard } from '@/hooks/useOptimizedDatabase'
 import { optimizedAPI } from '@/lib/optimized-api'
+import { useCurrency } from '@/hooks/useCurrency'
 
 // Icons
 import { 
@@ -69,13 +70,15 @@ StatsCard.displayName = 'StatsCard'
 
 // Optimized recent orders table
 const RecentOrdersTable = memo(({ orders }: { orders: any[] }) => {
+  const { formatCurrency } = useCurrency()
+  
   const columns = useMemo(() => [
     { key: 'order_no', label: 'Order No' },
     { key: 'customer_name', label: 'Customer' },
     { 
       key: 'total_amount', 
       label: 'Amount',
-      render: (value: number) => `Rp ${value?.toLocaleString('id-ID') || 0}`
+      render: (value: number) => formatCurrency(value || 0)
     },
     {
       key: 'status',
@@ -90,10 +93,10 @@ const RecentOrdersTable = memo(({ orders }: { orders: any[] }) => {
 
   const formatValue = useMemo(() => (key: string, value: any) => {
     if (key === 'total_amount') {
-      return `Rp ${value?.toLocaleString('id-ID') || 0}`
+      return formatCurrency(value || 0)
     }
     return value || '-'
-  }, [])
+  }, [formatCurrency])
 
   const handleView = useMemo(() => (order: any) => {
     console.log('View order:', order)
@@ -127,6 +130,7 @@ const RecentOrdersTable = memo(({ orders }: { orders: any[] }) => {
 RecentOrdersTable.displayName = 'RecentOrdersTable'
 
 export default function OptimizedDashboardPage() {
+  const { formatCurrency } = useCurrency()
   const { data, loading, error, refetch } = useOptimizedDashboard()
 
   // Memoized stats to prevent recalculation
@@ -157,13 +161,13 @@ export default function OptimizedDashboardPage() {
       },
       {
         title: 'Revenue',
-        value: `Rp ${data.sales.totalRevenue.toLocaleString('id-ID')}`,
+        value: formatCurrency(data.sales.totalRevenue),
         change: 'This month',
         icon: DollarSign,
         color: 'text-green-500'
       }
     ]
-  }, [data])
+  }, [data, formatCurrency])
 
   if (loading) {
     return (

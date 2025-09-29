@@ -30,7 +30,7 @@ export interface ProductionOrdersIntegrationConfig {
   auto_schedule_enabled: boolean
   schedule_buffer_hours: number
   max_batches_per_day: number
-  preferred_start_time: string // "04:00"
+  preferred_start_time: string //"04:00"
   
   // Order-to-batch mapping
   batch_size_strategy: 'fixed' | 'optimal' | 'order_based'

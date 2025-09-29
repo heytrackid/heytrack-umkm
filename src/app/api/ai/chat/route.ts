@@ -16,11 +16,11 @@ export async function POST(request: NextRequest) {
 
     // Simple fallback responses for now
     const responses = [
-      "Halo! Saya adalah asisten AI untuk bisnis bakery Anda. Bagaimana saya bisa membantu hari ini?",
-      "Terima kasih atas pertanyaannya! Saat ini saya sedang dalam mode pembelajaran untuk memahami bisnis Anda lebih baik.",
-      "Saya siap membantu dengan analisis bisnis, cek stok, laporan keuangan, dan saran strategis untuk UMKM Anda.",
-      "Berdasarkan data yang tersedia, saya bisa memberikan insights tentang performa produk dan rekomendasi bisnis.",
-      "Mari kita tingkatkan bisnis bakery Anda! Saya bisa membantu dengan optimasi HPP, manajemen inventori, dan analisis pelanggan."
+     "Halo! Saya adalah asisten AI untuk bisnis bakery Anda. Bagaimana saya bisa membantu hari ini?",
+     "Terima kasih atas pertanyaannya! Saat ini saya sedang dalam mode pembelajaran untuk memahami bisnis Anda lebih baik.",
+     "Saya siap membantu dengan analisis bisnis, cek stok, laporan keuangan, dan saran strategis untuk UMKM Anda.",
+     "Berdasarkan data yang tersedia, saya bisa memberikan insights tentang performa produk dan rekomendasi bisnis.",
+     "Mari kita tingkatkan bisnis bakery Anda! Saya bisa membantu dengan optimasi HPP, manajemen inventori, dan analisis pelanggan."
     ];
 
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];

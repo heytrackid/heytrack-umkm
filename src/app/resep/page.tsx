@@ -4,6 +4,16 @@ import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
+import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
+import { 
+  StatsCardSkeleton,
+  HPPResultsSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
+import { 
+  RecipesTableSkeleton,
+  SearchFormSkeleton
+} from '@/components/ui/skeletons/table-skeletons'
+import { RecipeFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -50,6 +60,21 @@ export default function ProductionPage() {
   const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  
+  // Skeleton loading management
+  const { loading: skeletonLoading, setLoading: setSkeletonLoading, isLoading: isSkeletonLoading } = useLoading({
+    [LOADING_KEYS.FETCH_RECIPES]: true,
+    [LOADING_KEYS.CALCULATE_HPP]: false
+  })
+  
+  // Simulate skeleton loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSkeletonLoading(LOADING_KEYS.FETCH_RECIPES, false)
+    }, 1600)
+    
+    return () => clearTimeout(timer)
+  }, [])
   
   // Form states
   const [newRecipe, setNewRecipe] = useState({
@@ -224,7 +249,7 @@ export default function ProductionPage() {
   // Individual action handlers
   const handleViewRecipe = (recipe: any) => {
     console.log('View recipe details:', recipe)
-    alert(`👁️ Detail resep "${recipe.name}" akan segera tersedia!`)
+    alert(`👁️ Detail resep"${recipe.name}" akan segera tersedia!`)
   }
 
   const handleDeleteRecipe = (recipe: any) => {
@@ -235,12 +260,13 @@ export default function ProductionPage() {
     if (confirmed) {
       // TODO: Implement actual API call to delete recipe
       console.log('Deleting recipe:', recipe.id)
-      alert(`✅ Resep "${recipe.name}" berhasil dihapus dari sistem.`)
+      alert(`✅ Resep"${recipe.name}" berhasil dihapus dari sistem.`)
       refetch()
     }
   }
 
-  if (loading) {
+  // Show skeleton while loading instead of old loading state
+  if (loading && !isSkeletonLoading(LOADING_KEYS.FETCH_RECIPES)) {
     return (
       <AppLayout>
         <div className="space-y-6">
@@ -368,7 +394,7 @@ export default function ProductionPage() {
                       💡 Fitur Auto-Populate Aktif!
                     </h4>
                     <p className="text-sm text-green-800 dark:text-green-200 mb-2">
-                      Bahan akan otomatis ditambahkan saat memilih kategori, atau klik "Auto Tambah" untuk menambah lebih banyak bahan untuk <strong>{newRecipe.category}</strong>
+                      Bahan akan otomatis ditambahkan saat memilih kategori, atau klik"Auto Tambah" untuk menambah lebih banyak bahan untuk <strong>{newRecipe.category}</strong>
                     </p>
                     <div className="text-xs text-green-700 dark:text-green-300">
                       Bahan yang akan ditambah: {getCommonIngredientsByCategory(newRecipe.category).slice(0, 4).join(', ')}
@@ -490,7 +516,7 @@ export default function ProductionPage() {
                   💡 Tips: Cara Mudah Buat Resep
                 </h3>
                 <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex items-center gap-4'}`}>
-                  <span>• Input nama produk (contoh: "Roti Tawar")</span>
+                  <span>• Input nama produk (contoh:"Roti Tawar")</span>
                   <span>• Pilih bahan dari daftar</span>
                   <span>• Masukkan takaran (gram/ml/pcs)</span>
                   <span>• HPP akan dihitung otomatis!</span>
@@ -501,7 +527,14 @@ export default function ProductionPage() {
         </Card>
 
         {/* Quick Info */}
-        <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-3'}`}>
+        {isSkeletonLoading(LOADING_KEYS.FETCH_RECIPES) ? (
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-3'}`}>
+            {Array.from({ length: 3 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-3'}`}>
           <Card>
             <CardContent className="p-4 text-center">
               <BookOpen className="h-8 w-8 text-primary mx-auto mb-2" />
@@ -529,10 +562,14 @@ export default function ProductionPage() {
               <p className="text-sm text-muted-foreground">Siap Hitung HPP</p>
             </CardContent>
           </Card>
-        </div>
+          </div>
+        )}
 
         {/* Search and Filters */}
-        <div className="space-y-4">
+        {isSkeletonLoading(LOADING_KEYS.FETCH_RECIPES) ? (
+          <SearchFormSkeleton />
+        ) : (
+          <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -587,6 +624,7 @@ export default function ProductionPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Recipe List */}
         {!ingredients || ingredients.length === 0 ? (
@@ -617,7 +655,9 @@ export default function ProductionPage() {
               </p>
             </CardHeader>
             <CardContent>
-              {filteredRecipes.length > 0 ? (
+              {isLoading ? (
+                <RecipeTableSkeleton />
+              ) : filteredRecipes.length > 0 ? (
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>

@@ -9,10 +9,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { AlertTriangle, Trash2, CheckCircle, XCircle } from "lucide-react"
-import { ReactNode } from "react"
+} from"@/components/ui/alert-dialog"
+import { Button } from"@/components/ui/button"
+import { AlertTriangle, Trash2, CheckCircle, XCircle } from"lucide-react"
+import { ReactNode } from"react"
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -30,23 +30,23 @@ interface ConfirmationDialogProps {
 const variantConfig = {
   default: {
     icon: CheckCircle,
-    confirmButtonClass: "bg-primary hover:bg-primary/90",
-    iconColor: "text-blue-500"
+    confirmButtonClass:"bg-primary hover:bg-primary/90",
+    iconColor:"text-blue-500"
   },
   destructive: {
     icon: Trash2,
-    confirmButtonClass: "bg-red-500 hover:bg-red-600 text-white",
-    iconColor: "text-red-500"
+    confirmButtonClass:"bg-red-500 hover:bg-red-600 text-white",
+    iconColor:"text-red-500"
   },
   success: {
     icon: CheckCircle,
-    confirmButtonClass: "bg-green-500 hover:bg-green-600 text-white",
-    iconColor: "text-green-500"
+    confirmButtonClass:"bg-green-500 hover:bg-green-600 text-white",
+    iconColor:"text-green-500"
   },
   warning: {
     icon: AlertTriangle,
-    confirmButtonClass: "bg-orange-500 hover:bg-orange-600 text-white",
-    iconColor: "text-orange-500"
+    confirmButtonClass:"bg-orange-500 hover:bg-orange-600 text-white",
+    iconColor:"text-orange-500"
   }
 }
 
@@ -55,9 +55,9 @@ export function ConfirmationDialog({
   onOpenChange,
   title,
   description,
-  confirmText = "Konfirmasi",
-  cancelText = "Batal", 
-  variant = "default",
+  confirmText ="Konfirmasi",
+  cancelText ="Batal", 
+  variant ="default",
   onConfirm,
   loading = false,
   icon

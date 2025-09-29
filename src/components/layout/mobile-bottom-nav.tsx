@@ -70,11 +70,11 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
 
   return (
     <nav className={cn(
-      "fixed bottom-0 left-0 right-0 z-50",
-      "bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800",
-      "shadow-lg",
-      "md:hidden", // Only show on mobile
-      "safe-area-pb", // Respect safe area on devices with notch/home indicator
+     "fixed bottom-0 left-0 right-0 z-50",
+     "bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800",
+     "",
+     "md:hidden", // Only show on mobile
+     "safe-area-pb", // Respect safe area on devices with notch/home indicator
       className
     )}>
       <div className="flex items-center justify-around px-2 py-2">
@@ -83,34 +83,34 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
             key={item.href}
             href={item.href}
             className={cn(
-              "relative flex flex-col items-center justify-center",
-              "min-w-0 flex-1 py-2 px-1",
-              "text-xs font-medium",
-              "transition-colors duration-200",
-              "rounded-lg",
+             "relative flex flex-col items-center justify-center",
+             "min-w-0 flex-1 py-2 px-1",
+             "text-xs font-medium",
+             "transition-colors duration-200",
+             "rounded-lg",
               isActive(item.href)
-                ? "text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
+                ?"text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800"
+                :"text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-900"
             )}
           >
             <div className="relative">
               <item.icon 
                 className={cn(
-                  "h-5 w-5 mb-1 transition-colors duration-200",
+                 "h-5 w-5 mb-1 transition-colors duration-200",
                   isActive(item.href)
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-500 dark:text-gray-400"
+                    ?"text-gray-900 dark:text-white"
+                    :"text-gray-500 dark:text-gray-400"
                 )}
               />
               {item.badge && item.badge > 0 && (
                 <Badge 
                   variant="destructive"
                   className={cn(
-                    "absolute -top-1 -right-1",
-                    "h-4 w-4 p-0",
-                    "flex items-center justify-center",
-                    "text-xs font-bold",
-                    "min-w-4"
+                   "absolute -top-1 -right-1",
+                   "h-4 w-4 p-0",
+                   "flex items-center justify-center",
+                   "text-xs font-bold",
+                   "min-w-4"
                   )}
                 >
                   {item.badge > 99 ? '99+' : item.badge}
@@ -118,10 +118,10 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
               )}
             </div>
             <span className={cn(
-              "truncate",
+             "truncate",
               isActive(item.href) 
-                ? "font-semibold text-gray-900 dark:text-white" 
-                : "font-normal text-gray-500 dark:text-gray-400"
+                ?"font-semibold text-gray-900 dark:text-white" 
+                :"font-normal text-gray-500 dark:text-gray-400"
             )}>
               {item.name}
             </span>
@@ -134,14 +134,14 @@ function MobileBottomNav({ className }: MobileBottomNavProps) {
         <Link
           href="/orders"
           className={cn(
-            "flex items-center justify-center",
-            "w-14 h-14 rounded-full",
-            "bg-gray-900 dark:bg-white",
-            "text-white dark:text-gray-900",
-            "shadow-lg hover:shadow-xl",
-            "transition-all duration-200",
-            "active:scale-95",
-            "border-4 border-white dark:border-black"
+           "flex items-center justify-center",
+           "w-14 h-14 rounded-full",
+           "bg-gray-900 dark:bg-white",
+           "text-white dark:text-gray-900",
+           " hover:",
+           "transition-all duration-200",
+           "active:scale-95",
+           "border-4 border-white dark:border-black"
           )}
         >
           <Plus className="h-6 w-6" />

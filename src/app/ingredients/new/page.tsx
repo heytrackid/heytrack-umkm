@@ -124,7 +124,7 @@ export default function NewIngredientPage() {
       // Show success message
       alert(`✅ BERHASIL!
 
-Bahan baku "${formData.name}" berhasil ditambahkan!
+Bahan baku"${formData.name}" berhasil ditambahkan!
 
 📝 Detail:
 • Nama: ${formData.name}
@@ -199,7 +199,7 @@ Anda akan kembali ke halaman inventory.`)
           <Info className="h-4 w-4 text-gray-600" />
           <AlertDescription className="text-gray-700">
             💡 <strong>Tips:</strong> Ini untuk menambah jenis bahan baku baru (misal: Tepung Terigu Premium). 
-            Untuk transaksi stok (beli/pakai), gunakan menu "Transaksi Inventory".
+            Untuk transaksi stok (beli/pakai), gunakan menu"Transaksi Inventory".
           </AlertDescription>
         </Alert>
 
@@ -335,7 +335,7 @@ Anda akan kembali ke halaman inventory.`)
                   <p className="text-sm text-red-600">{errors.current_stock}</p>
                 )}
                 <p className="text-xs text-gray-500">
-                  Biarkan 0 jika belum ada stock. Nanti bisa tambah via "Transaksi Inventory"
+                  Biarkan 0 jika belum ada stock. Nanti bisa tambah via"Transaksi Inventory"
                 </p>
               </div>
 

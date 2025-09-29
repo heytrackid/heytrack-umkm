@@ -98,10 +98,10 @@ export function PullToRefresh({
       {isMobile && (pullDistance > 0 || isRefreshing) && (
         <div
           className={cn(
-            "fixed top-0 left-0 right-0 z-50",
-            "flex items-center justify-center",
-            "bg-background/90 backdrop-blur-sm border-b",
-            "transition-all duration-200"
+           "fixed top-0 left-0 right-0 z-50",
+           "flex items-center justify-center",
+           "bg-background/90 backdrop-blur-sm border-b",
+           "transition-all duration-200"
           )}
           style={{
             height: isRefreshing ? '60px' : Math.min(pullDistance + 10, 60),
@@ -120,18 +120,18 @@ export function PullToRefresh({
               <>
                 <RefreshCw 
                   className={cn(
-                    "h-5 w-5 transition-transform",
-                    canRefresh ? "text-primary" : "text-muted-foreground"
+                   "h-5 w-5 transition-transform",
+                    canRefresh ?"text-primary" :"text-muted-foreground"
                   )}
                   style={{
                     transform: `rotate(${indicatorRotation}deg)`
                   }}
                 />
                 <span className={cn(
-                  "text-sm font-medium transition-colors",
-                  canRefresh ? "text-primary" : "text-muted-foreground"
+                 "text-sm font-medium transition-colors",
+                  canRefresh ?"text-primary" :"text-muted-foreground"
                 )}>
-                  {canRefresh ? "Lepas untuk memperbarui" : "Tarik untuk memperbarui"}
+                  {canRefresh ?"Lepas untuk memperbarui" :"Tarik untuk memperbarui"}
                 </span>
               </>
             )}
@@ -405,9 +405,9 @@ export function SwipeActions({
               key={action.id}
               onClick={() => handleActionClick(action)}
               className={cn(
-                "w-20 h-full flex flex-col items-center justify-center",
-                "transition-colors duration-200",
-                "text-xs font-medium",
+               "w-20 h-full flex flex-col items-center justify-center",
+               "transition-colors duration-200",
+               "text-xs font-medium",
                 getActionColor(action.color)
               )}
               style={{

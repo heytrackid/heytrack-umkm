@@ -94,8 +94,8 @@
   --accent: oklch(0.15 0 0);
   --accent-foreground: oklch(0.9 0 0);
   --destructive: oklch(0.6 0 0);
-  --border: oklch(0.15 0 0);
-  --input: oklch(0.15 0 0);
+  --border: oklch(0.25 0 0);
+  --input: oklch(0.25 0 0);
   --ring: oklch(0.5 0 0);
   --chart-1: oklch(0.4 0 0);
   --chart-2: oklch(0.5 0 0);
@@ -108,7 +108,7 @@
   --sidebar-primary-foreground: oklch(0.95 0 0);
   --sidebar-accent: oklch(0.15 0 0);
   --sidebar-accent-foreground: oklch(0.9 0 0);
-  --sidebar-border: oklch(0.15 0 0);
+  --sidebar-border: oklch(0.25 0 0);
   --sidebar-ring: oklch(0.5 0 0);
 }
 
@@ -196,6 +196,33 @@
   /* Ensure toast appears above mobile nav and chatbot */
   [data-radix-toast-viewport] [data-radix-toast] {
     z-index: 9999 !important;
+  }
+  
+  /* Enhanced border visibility for dark mode */
+  .border-subtle {
+    border-color: oklch(0.3 0 0);
+  }
+  
+  .dark .border-subtle {
+    border-color: oklch(0.3 0 0);
+  }
+  
+  /* Slightly more visible border for dark mode cards and components */
+  .border-enhanced {
+    border-color: oklch(0.922 0 0);
+  }
+  
+  .dark .border-enhanced {
+    border-color: oklch(0.35 0 0);
+  }
+  
+  /* For elements that need even more visibility in dark mode */
+  .border-prominent {
+    border-color: oklch(0.8 0 0);
+  }
+  
+  .dark .border-prominent {
+    border-color: oklch(0.4 0 0);
   }
 
 }

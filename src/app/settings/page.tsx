@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useSettings, currencies, languages } from '@/contexts/settings-context'
+import { useLoading } from '@/hooks/useLoading'
+import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
 // Breadcrumb components
 import {
@@ -24,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Icons
 import { Settings, RotateCcw, Save } from 'lucide-react'
+import ExcelExportButton from '@/components/export/ExcelExportButton'
 
 // Extracted components
 import { SettingsQuickLinks } from './components/SettingsQuickLinks'
@@ -46,13 +50,18 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 )
 
+const LOADING_KEYS = {
+  LOAD_SETTINGS: 'loadSettings',
+  SAVE_SETTINGS: 'saveSettings'
+} as const
+
 export default function SettingsPage() {
   const { settings: globalSettings, updateCurrency, updateLanguage, formatCurrency, t } = useSettings()
+  const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
   const [isUnsavedChanges, setIsUnsavedChanges] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
 
   // Settings state
   const [settings, setSettings] = useState({
@@ -116,7 +125,10 @@ export default function SettingsPage() {
 
   const loadSettings = async () => {
     try {
-      setIsLoading(true)
+      startLoading(LOADING_KEYS.LOAD_SETTINGS)
+      
+      // Simulate loading delay for demo
+      await new Promise(resolve => setTimeout(resolve, 1500))
       
       const { data, error } = await supabase
         .from('app_settings')
@@ -139,7 +151,7 @@ export default function SettingsPage() {
       console.error('Error loading settings:', error)
       toast.error('Gagal memuat pengaturan')
     } finally {
-      setIsLoading(false)
+      stopLoading(LOADING_KEYS.LOAD_SETTINGS)
     }
   }
 
@@ -194,29 +206,6 @@ export default function SettingsPage() {
     // Show reset confirmation
   }
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <AppLayout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Pengaturan</h1>
-              <p className="text-muted-foreground">Memuat pengaturan...</p>
-            </div>
-          </div>
-          
-          {/* Loading skeleton */}
-          <div className="space-y-4">
-            <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="h-96 bg-gray-200 rounded-lg animate-pulse"></div>
-            <div className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
-          </div>
-        </div>
-      </AppLayout>
-    )
-  }
 
   return (
     <AppLayout>
@@ -241,6 +230,7 @@ export default function SettingsPage() {
             <p className="text-muted-foreground">Kelola preferensi aplikasi dan pengaturan bisnis</p>
           </div>
           <div className="flex gap-2">
+            <ExcelExportButton variant="outline" className="mr-2" />
             {isUnsavedChanges && (
               <Badge variant="outline" className="text-orange-600 border-orange-600">
                 Belum Tersimpan
@@ -257,49 +247,83 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <SettingsQuickLinks />
+        {isSkeletonLoading(LOADING_KEYS.LOAD_SETTINGS) ? (
+          <div className="space-y-4">
+            {/* Quick Links Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <StatsCardSkeleton key={i} />
+              ))}
+            </div>
 
-        {/* Settings Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="general">Umum</TabsTrigger>
-            <TabsTrigger value="profile">Profil</TabsTrigger>
-            <TabsTrigger value="notifications">Notifikasi</TabsTrigger>
-            <TabsTrigger value="system">Sistem</TabsTrigger>
-            <TabsTrigger value="ui">Tampilan</TabsTrigger>
-          </TabsList>
+            {/* Tabs Skeleton */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="space-y-6">
+                  {/* Tab headers skeleton */}
+                  <div className="flex space-x-2">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <div key={i} className="h-9 w-20 bg-gray-200 rounded-md animate-pulse"></div>
+                    ))}
+                  </div>
+                  
+                  {/* Form fields skeleton */}
+                  <div className="space-y-6">
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <FormFieldSkeleton key={i} />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <>
+            <SettingsQuickLinks />
 
-          {/* General Settings */}
-          <TabsContent value="general" className="space-y-6">
-            <BusinessInfoSettings settings={settings} onSettingChange={handleSettingChange} />
-            <RegionalSettings settings={settings} onSettingChange={handleSettingChange} />
-          </TabsContent>
+            {/* Settings Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+              <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="general">Umum</TabsTrigger>
+                <TabsTrigger value="profile">Profil</TabsTrigger>
+                <TabsTrigger value="notifications">Notifikasi</TabsTrigger>
+                <TabsTrigger value="system">Sistem</TabsTrigger>
+                <TabsTrigger value="ui">Tampilan</TabsTrigger>
+              </TabsList>
 
-          {/* Profile Settings */}
-          <TabsContent value="profile" className="space-y-6">
-            <ProfileSettings settings={settings} onSettingChange={handleSettingChange} />
-            <SecuritySettings />
-          </TabsContent>
+              {/* General Settings */}
+              <TabsContent value="general" className="space-y-6">
+                <BusinessInfoSettings settings={settings} onSettingChange={handleSettingChange} />
+                <RegionalSettings settings={settings} onSettingChange={handleSettingChange} />
+              </TabsContent>
 
-          {/* Notifications Settings */}
-          <TabsContent value="notifications" className="space-y-6">
-            <NotificationSettings settings={settings} onSettingChange={handleSettingChange} />
-          </TabsContent>
+              {/* Profile Settings */}
+              <TabsContent value="profile" className="space-y-6">
+                <ProfileSettings settings={settings} onSettingChange={handleSettingChange} />
+                <SecuritySettings />
+              </TabsContent>
 
-          {/* System Settings */}
-          <TabsContent value="system" className="space-y-6">
-            <BackupSettings settings={settings} onSettingChange={handleSettingChange} />
-            <BusinessSettings settings={settings} onSettingChange={handleSettingChange} />
-            <DangerZone />
-          </TabsContent>
+              {/* Notifications Settings */}
+              <TabsContent value="notifications" className="space-y-6">
+                <NotificationSettings settings={settings} onSettingChange={handleSettingChange} />
+              </TabsContent>
 
-          {/* UI Settings */}
-          <TabsContent value="ui" className="space-y-6">
-            <UIThemeSettings settings={settings} onSettingChange={handleSettingChange} />
-            <DateTimeSettings settings={settings} onSettingChange={handleSettingChange} />
-            <NumberCurrencySettings settings={settings} onSettingChange={handleSettingChange} />
-          </TabsContent>
-        </Tabs>
+              {/* System Settings */}
+              <TabsContent value="system" className="space-y-6">
+                <BackupSettings settings={settings} onSettingChange={handleSettingChange} />
+                <BusinessSettings settings={settings} onSettingChange={handleSettingChange} />
+                <DangerZone />
+              </TabsContent>
+
+              {/* UI Settings */}
+              <TabsContent value="ui" className="space-y-6">
+                <UIThemeSettings settings={settings} onSettingChange={handleSettingChange} />
+                <DateTimeSettings settings={settings} onSettingChange={handleSettingChange} />
+                <NumberCurrencySettings settings={settings} onSettingChange={handleSettingChange} />
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
 
         <UnsavedChangesPrompt
           isUnsavedChanges={isUnsavedChanges}

@@ -19,7 +19,7 @@ export const ProgressiveLoader = ({
   fallback,
   timeout = 3000,
   showRetry = true,
-  loadingMessage = "Loading content..."
+  loadingMessage ="Loading content..."
 }: ProgressiveLoaderProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -263,7 +263,7 @@ const SimpleTableView = ({ data, columns }: any) => (
 export const ProgressiveImage = ({ 
   src, 
   alt, 
-  className = "",
+  className ="",
   fallback
 }: {
   src: string

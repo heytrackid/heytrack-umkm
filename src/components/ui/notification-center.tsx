@@ -213,7 +213,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
                   className={`p-3 rounded-lg border transition-colors ${
                     notification.is_read 
                       ? 'bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700' 
-                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 shadow-sm'
+                      : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 '
                   }`}
                 >
                   <div className="flex items-start gap-3">

@@ -27,7 +27,7 @@ export function SecuritySettings() {
           <div className="relative">
             <Input
               id="currentPassword"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ?"text" :"password"}
               placeholder="Masukkan password saat ini"
             />
             <Button

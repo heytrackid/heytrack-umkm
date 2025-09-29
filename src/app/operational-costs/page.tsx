@@ -4,6 +4,10 @@ import React, { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
+import { useLoading } from '@/hooks/useLoading'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -46,6 +50,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface OperationalCost {
   id: string
@@ -76,12 +81,55 @@ const frequencies = [
   { value: 'yearly', label: 'Tahunan' }
 ]
 
+const LOADING_KEYS = {
+  LOAD_COSTS: 'loadCosts',
+  SAVE_COST: 'saveCost'
+} as const
+
 export default function OperationalCostsPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
+  const { t } = useI18n()
+  const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
   const [costs, setCosts] = useState<OperationalCost[]>([])
   
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
+  
+  // Quick Setup: template biaya operasional umum
+  const getQuickSetupTemplate = (): OperationalCost[] => {
+    const now = Date.now()
+    const tmpl: Array<Pick<OperationalCost, 'name' | 'category' | 'amount' | 'frequency' | 'description' | 'isFixed'>> = [
+      { name: 'Listrik', category: 'utilities', amount: 500000, frequency: 'monthly', description: 'Biaya listrik bulanan', isFixed: false },
+      { name: 'Air & Gas', category: 'utilities', amount: 200000, frequency: 'monthly', description: 'Air PDAM & gas', isFixed: false },
+      { name: 'Sewa Toko', category: 'rent', amount: 1500000, frequency: 'monthly', description: 'Sewa tempat usaha', isFixed: true },
+      { name: 'Gaji Karyawan', category: 'staff', amount: 3000000, frequency: 'monthly', description: 'Total gaji per bulan', isFixed: true },
+      { name: 'Internet & Telepon', category: 'communication', amount: 250000, frequency: 'monthly', description: 'Paket data & telepon', isFixed: true },
+      { name: 'Transportasi', category: 'transport', amount: 300000, frequency: 'monthly', description: 'BBM/ongkir', isFixed: false },
+      { name: 'Keamanan/Asuransi', category: 'insurance', amount: 100000, frequency: 'monthly', description: 'Satpam/asuransi', isFixed: true },
+      { name: 'Perawatan Peralatan', category: 'maintenance', amount: 150000, frequency: 'monthly', description: 'Service & perawatan', isFixed: false },
+    ]
+
+    return tmpl.map((item, idx) => {
+      const categoryData = costCategories.find(c => c.id === item.category)
+      return {
+        id: (now + idx).toString(),
+        icon: categoryData?.icon || '📦',
+        ...item,
+      } as OperationalCost
+    })
+  }
+
+  const handleQuickSetup = () => {
+    const existingNames = new Set(costs.map(c => c.name.toLowerCase()))
+    const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
+    if (template.length === 0) {
+      alert('Semua item template sudah ada. Anda bisa menambah/ubah secara manual.')
+      return
+    }
+    const confirmed = window.confirm('Tambah template biaya operasional standar? Anda bisa mengubah nilainya setelah ditambahkan.')
+    if (!confirmed) return
+    setCosts(prev => [...prev, ...template])
+  }
   const [editingCost, setEditingCost] = useState<OperationalCost | null>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -95,6 +143,16 @@ export default function OperationalCostsPage() {
     isFixed: false,
     icon: '⚡'
   })
+
+  // Simulate loading on component mount
+  useEffect(() => {
+    startLoading(LOADING_KEYS.LOAD_COSTS)
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      stopLoading(LOADING_KEYS.LOAD_COSTS)
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
   const resetForm = () => {
     setNewCost({
@@ -211,7 +269,7 @@ export default function OperationalCostsPage() {
   // Individual action handlers
   const handleViewCost = (cost: OperationalCost) => {
     console.log('View cost details:', cost)
-    alert(`👁️ Detail biaya "${cost.name}" akan segera tersedia!`)
+    alert(`👁️ Detail biaya"${cost.name}" akan segera tersedia!`)
   }
 
   const getCategoryInfo = (categoryId: string) => {
@@ -235,9 +293,44 @@ export default function OperationalCostsPage() {
   }
 
   // Form Component
-  const CostForm = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+  const CostForm = () => {
+    if (isSkeletonLoading(LOADING_KEYS.LOAD_COSTS)) {
+      return (
+        <div className="space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="space-y-2">
+              <div className="h-6 w-48 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-4 w-64 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Form Skeleton */}
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <FormFieldSkeleton key={i} />
+                ))}
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-32 bg-gray-200 rounded-md animate-pulse"></div>
+                <div className="h-20 w-full bg-gray-200 rounded-md animate-pulse"></div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <div className="h-10 flex-1 bg-gray-200 rounded-md animate-pulse"></div>
+                <div className="h-10 w-20 bg-gray-200 rounded-md animate-pulse"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="sm"
@@ -360,25 +453,77 @@ export default function OperationalCostsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+    )
+  }
 
   // List Component
-  const CostList = () => (
-    <div className="space-y-6">
-      {/* Header */}
+  const CostList = () => {
+    if (isSkeletonLoading(LOADING_KEYS.LOAD_COSTS)) {
+      return (
+        <div className="space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <div className="h-8 w-48 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-4 w-96 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-10 w-32 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Summary Cards Skeleton */}
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
+            {Array.from({ length: 3 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+
+          {/* Info Card Skeleton */}
+          <div className="h-24 bg-gray-200 rounded-lg animate-pulse"></div>
+
+          {/* Search Form Skeleton */}
+          <SearchFormSkeleton />
+
+          {/* Table Skeleton */}
+          <div className="bg-white border rounded-lg">
+            <div className="p-6">
+              <div className="h-6 w-48 bg-gray-200 rounded-md animate-pulse mb-4"></div>
+              <DataGridSkeleton rows={6} />
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Header */}
       <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
         <div className={isMobile ? 'text-center' : ''}>
           <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-            Biaya Operasional
+            {t('operationalCosts.title')}
           </h1>
           <p className="text-muted-foreground">
             Kelola biaya operasional bisnis untuk perhitungan HPP yang akurat
           </p>
         </div>
-        <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
-          <Plus className="h-4 w-4 mr-2" />
-          Tambah Biaya
-        </Button>
+        <div className={`flex ${isMobile ? 'w-full flex-col gap-2' : 'items-center gap-2'}`}>
+          <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('operationalCosts.addCost')}
+          </Button>
+          <Button 
+            variant="outline" 
+            className={isMobile ? 'w-full' : ''}
+            onClick={handleQuickSetup}
+            title="Tambahkan biaya operasional standar secara otomatis"
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            {t('operationalCosts.quickSetup')}
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -603,7 +748,7 @@ export default function OperationalCostsPage() {
             <div className="py-12 text-center">
               <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada biaya operasional'}
+                {searchTerm ? 'Tidak ada hasil pencarian' : t('operationalCosts.title')}
               </h3>
               <p className="text-muted-foreground mb-4">
                 {searchTerm 
@@ -614,15 +759,16 @@ export default function OperationalCostsPage() {
               {!searchTerm && (
                 <Button onClick={() => setCurrentView('add')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Tambah Biaya Pertama
+                  {t('operationalCosts.addCost')}
                 </Button>
               )}
             </div>
           )}
         </CardContent>
       </Card>
-    </div>
-  )
+      </div>
+    )
+  }
 
   return (
     <AppLayout>

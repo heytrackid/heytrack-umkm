@@ -11,6 +11,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
 import { Order, OrderFormData, Priority } from './types'
 import { generateOrderNumber, calculateOrderTotal, validateOrderData } from './utils'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface OrderFormProps {
   order?: Order // For editing existing order
@@ -32,6 +33,7 @@ export default function OrderForm({
   loading = false 
 }: OrderFormProps) {
   const { isMobile } = useResponsive()
+  const { formatCurrency } = useCurrency()
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
     customer_phone: '',
@@ -302,7 +304,7 @@ export default function OrderForm({
           {formData.order_items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>Belum ada item pesanan</p>
-              <p className="text-sm">Klik "Tambah Item" untuk menambahkan produk</p>
+              <p className="text-sm">Klik"Tambah Item" untuk menambahkan produk</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -377,7 +379,7 @@ export default function OrderForm({
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total Pesanan:</span>
-                  <span>Rp {totalAmount.toLocaleString()}</span>
+                  <span>{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
             </div>
