@@ -259,22 +259,27 @@ export default function EnhancedInventoryPage() {
 
   // Individual action handlers
   const handleEditIngredient = (ingredient: any) => {
+    console.log('🔧 Edit button clicked for ingredient:', ingredient)
+    
     // TODO: Navigate to edit page or open edit modal
-    console.log('Editing ingredient:', ingredient)
-    alert(`📝 Edit bahan baku "${ingredient.name}" - fitur akan segera tersedia!`)
+    alert(`📝 Edit bahan baku "${ingredient.name}"\n\n🔜 Fitur edit akan segera tersedia!\n\nUntuk sementara, Anda bisa:\n• Hapus dan buat ulang\n• Atau tunggu update selanjutnya`)
   }
 
   const handleDeleteIngredient = (ingredient: any) => {
+    console.log('🗑️ Delete button clicked for ingredient:', ingredient)
+    
     const confirmed = window.confirm(
-      `⚠️ Yakin ingin menghapus bahan baku "${ingredient.name}"?\n\n❗ Tindakan ini tidak bisa dibatalkan!`
+      `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus bahan baku:\n"${ingredient.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!\n\n✅ Klik OK untuk lanjut\n❌ Klik Cancel untuk batalkan`
     )
     
     if (confirmed) {
       // TODO: Implement actual API call to delete ingredient
-      console.log('Deleting ingredient:', ingredient.id)
+      console.log('✅ User confirmed deletion for ingredient:', ingredient.id)
       
       // Simulate deletion (in real app, this would be API call)
-      alert(`✅ Bahan baku "${ingredient.name}" berhasil dihapus!`)
+      alert(`✅ BERHASIL!\n\nBahan baku "${ingredient.name}" berhasil dihapus dari sistem.\n\n📌 Catatan: Ini masih simulasi. Di aplikasi nyata, data akan dihapus dari database.`)
+    } else {
+      console.log('❌ User cancelled deletion for ingredient:', ingredient.name)
     }
   }
 
