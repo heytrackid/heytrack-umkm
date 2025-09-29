@@ -598,5 +598,101 @@
     "totalCOGS": "Total HPP",
     "suggestedPrice": "Harga Saran",
     "profitMargin": "Margin Keuntungan"
+  },
+  "ingredients": {
+    "title": "Bahan Baku",
+    "subtitle": "Kelola data bahan baku",
+    "addIngredient": "Tambah Bahan",
+    "addNewIngredient": "Tambah Bahan Baku Baru",
+    "editIngredient": "Edit Bahan Baku",
+    "deleteIngredient": "Hapus Bahan Baku",
+    "searchIngredients": "Cari bahan baku...",
+    "noIngredientsFound": "Tidak ada bahan baku ditemukan. Tambah bahan baku pertama untuk memulai.",
+    "createIngredient": "Buat Bahan Baku",
+    "updateIngredient": "Update Bahan Baku",
+    "errorLoading": "Error memuat bahan baku: {{error}}",
+    "form": {
+      "basicInfo": "Informasi Dasar",
+      "basicInfoDesc": "Masukkan detail dasar untuk bahan baku",
+      "stockPricing": "Stok & Harga",
+      "stockPricingDesc": "Atur level stok dan informasi biaya",
+      "additionalInfo": "Informasi Tambahan",
+      "updateBasicInfo": "Update detail dasar untuk bahan baku",
+      "updateStockPricing": "Update level stok dan informasi biaya",
+      "name": {
+        "label": "Nama",
+        "placeholder": "contoh: Tepung, Gula, Mentega",
+        "hint": "Masukkan nama bahan baku"
+      },
+      "unit": {
+        "label": "Satuan",
+        "hint": "Pilih satuan pengukuran"
+      },
+      "pricePerUnit": {
+        "label": "Harga per Satuan (Rp)",
+        "hint": "Masukkan harga dalam Rupiah"
+      },
+      "currentStock": {
+        "label": "Stok Saat Ini",
+        "hint": "Kuantitas yang tersedia"
+      },
+      "minimumStock": {
+        "label": "Stok Minimum",
+        "hint": "Batas reorder"
+      },
+      "description": {
+        "label": "Deskripsi",
+        "placeholder": "Deskripsi atau catatan opsional tentang bahan baku",
+        "placeholderEdit": "Deskripsi atau catatan opsional",
+        "hint": "Tambahkan catatan atau spesifikasi tambahan"
+      }
+    },
+    "confirmDelete": "Yakin ingin menghapus \"{{name}}\"? Tindakan ini tidak dapat dibatalkan."
+  },
+  "suppliers": {
+    "title": "Suppliers",
+    "addSupplier": "Tambah Supplier",
+    "addNewSupplier": "Tambah Supplier Baru",
+    "editSupplier": "Edit Supplier",
+    "deleteSupplier": "Hapus Supplier",
+    "noSuppliersFound": "Tidak ada supplier ditemukan. Tambah supplier pertama untuk memulai.",
+    "createSupplier": "Buat Supplier",
+    "updateSupplier": "Update Supplier",
+    "errorLoading": "Error memuat suppliers: {{error}}",
+    "form": {
+      "name": {
+        "label": "Nama",
+        "placeholder": "contoh: CV. Bahan Berkah"
+      },
+      "contactPerson": {
+        "label": "Contact Person",
+        "placeholder": "contoh: John Doe"
+      },
+      "phone": {
+        "label": "Telepon",
+        "placeholder": "+62 812-3456-7890"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "contact@supplier.com"
+      },
+      "address": {
+        "label": "Alamat",
+        "placeholder": "Alamat lengkap supplier"
+      },
+      "notes": {
+        "label": "Catatan",
+        "placeholder": "Catatan tambahan atau komentar"
+      }
+    },
+    "confirmDelete": "Yakin ingin menghapus \"{{name}}\"? Tindakan ini tidak dapat dibatalkan."
+  },
+  "units": {
+    "kg": "Kilogram (kg)",
+    "g": "Gram (g)",
+    "l": "Liter (l)",
+    "ml": "Milliliter (ml)",
+    "pcs": "Pieces (pcs)",
+    "dozen": "Dozen"
   }
 }

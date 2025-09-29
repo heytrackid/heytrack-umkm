@@ -6,6 +6,7 @@ import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
+import { useI18n } from '@/providers/I18nProvider';
 import { Database } from '@/types/database';
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row'];
@@ -34,17 +35,21 @@ const validationRules = {
   category: () => null,
 };
 
-const unitOptions = [
-  { value: 'kg', label: 'Kilogram (kg)' },
-  { value: 'g', label: 'Gram (g)' },
-  { value: 'l', label: 'Liter (l)' },
-  { value: 'ml', label: 'Milliliter (ml)' },
-  { value: 'pcs', label: 'Pieces (pcs)' },
-  { value: 'dozen', label: 'Dozen' },
-];
+// Unit options will be defined inside component to use t() function
 
 export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: any[] }) {
+  const { t } = useI18n();
   const { data: ingredients, loading, error, create, update, remove } = useIngredients({ initial: initialIngredients, refetchOnMount: false });
+  
+  // Unit options using i18n
+  const unitOptions = [
+    { value: 'kg', label: t('units.kg') },
+    { value: 'g', label: t('units.g') },
+    { value: 'l', label: t('units.l') },
+    { value: 'ml', label: t('units.ml') },
+    { value: 'pcs', label: t('units.pcs') },
+    { value: 'dozen', label: t('units.dozen') },
+  ];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -171,7 +176,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   if (error) {
     return (
       <div className="bg-gray-100 dark:bg-gray-800 border border-red-200 rounded-md p-4">
-        <p className="text-gray-600 dark:text-gray-400">Error loading ingredients: {error}</p>
+        <p className="text-gray-600 dark:text-gray-400">{t('ingredients.errorLoading', { error })}</p>
       </div>
     );
   }
@@ -181,12 +186,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <SimpleDataTable
         data={ingredients || []}
         columns={columns}
-        searchPlaceholder="Search ingredients..."
+        searchPlaceholder={t('ingredients.searchIngredients')}
         onAdd={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        addButtonText="Add Ingredient"
-        emptyMessage="No ingredients found. Add your first ingredient to get started."
+        addButtonText={t('ingredients.addIngredient')}
+        emptyMessage={t('ingredients.noIngredientsFound')}
         exportData={true}
       />
 
