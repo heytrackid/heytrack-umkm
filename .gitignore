@@ -40,5 +40,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Sensitive configuration files
+.cursor/
+.mcp.json
+supabase/.temp/
+*.log
+*.temp
+
+# Database and API configs
+**/pooler-url
+**/database-url
+
 /src/generated/prisma
 .env*.local

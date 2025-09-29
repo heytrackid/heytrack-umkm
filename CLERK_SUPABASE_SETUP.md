@@ -32,7 +32,7 @@ Or manually configure:
 2. Navigate to Authentication → Third-party Auth
 3. Add a new Clerk integration:
    - **Provider**: Clerk
-   - **Issuer URL**: `https://cute-robin-67.clerk.accounts.dev`
+   - **Issuer URL**: `https://your-clerk-domain.clerk.accounts.dev`
    - **JWKS URL**: Auto-detected from issuer
 
 ### 3. Environment Variables
@@ -41,8 +41,8 @@ The following environment variables are already configured in `.env.local`:
 
 ```bash
 # Clerk Configuration
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Y3V0ZS1yb2Jpbi02Ny5jbGVyay5hY2NvdW50cy5kZXYk
-CLERK_SECRET_KEY=sk_test_VPYdJ0EQllGvsgOpeBmKtwNUvlPWBw7yjarigoL2DE
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
 
 # Clerk Routes
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -52,7 +52,7 @@ NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
 
 # Clerk-Supabase Integration
 SUPABASE_THIRD_PARTY_AUTH_ENABLED=true
-CLERK_ISSUER_URL=https://cute-robin-67.clerk.accounts.dev
+CLERK_ISSUER_URL=https://your-clerk-domain.clerk.accounts.dev
 ```
 
 ### 4. Local Development (Optional)
@@ -62,7 +62,7 @@ For local development with Supabase CLI, add to `supabase/config.toml`:
 ```toml
 [auth.third_party.clerk]
 enabled = true
-domain = "cute-robin-67.clerk.accounts.dev"
+domain = "your-clerk-domain.clerk.accounts.dev"
 ```
 
 ## 🛠️ Implementation Details

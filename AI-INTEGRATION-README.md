@@ -66,13 +66,13 @@ src/
 
 ```bash
 # OpenRouter AI
-OPENROUTER_API_KEY="sk-or-v1-your-key-here"
+OPENROUTER_API_KEY="your_openrouter_api_key_here"
 AI_MODEL="x-ai/grok-4-fast:free"
 
 # Supabase Database
 NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your_supabase_anon_key_here"
+SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key_here"
 ```
 
 ### Model Configuration
