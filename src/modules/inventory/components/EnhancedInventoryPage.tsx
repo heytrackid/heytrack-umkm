@@ -352,8 +352,16 @@ export default function EnhancedInventoryPage() {
           </AlertDescription>
         </Alert>
 
-        {/* Search, Filter, and Bulk Actions */}
-        <div className="space-y-4">
+        {/* Tabs for Bahan Baku and Kategori */}
+        <Tabs defaultValue="ingredients" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="ingredients">Bahan Baku</TabsTrigger>
+            <TabsTrigger value="categories">Kategori</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="ingredients" className="space-y-4">
+            {/* Search, Filter, and Bulk Actions */}
+            <div className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -553,8 +561,8 @@ export default function EnhancedInventoryPage() {
           </CardContent>
         </Card>
 
-        {/* Educational Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Educational Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="border-gray-200 bg-gray-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-gray-800">
@@ -584,7 +592,105 @@ export default function EnhancedInventoryPage() {
               <p>📊 <strong>Sebelum bikin HPP:</strong> Gunakan harga rata-rata terbaru</p>
             </CardContent>
           </Card>
-        </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="categories" className="space-y-4">
+            {/* Categories Management */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Kategori Bahan Baku
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Kelola kategori untuk mengelompokkan bahan baku
+                    </p>
+                  </div>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Kategori
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Sample Categories */}
+                  {[
+                    { id: 'cat-1', name: 'Tepung & Biji-bijian', count: 5, color: 'bg-blue-100 text-blue-800' },
+                    { id: 'cat-2', name: 'Gula & Pemanis', count: 3, color: 'bg-green-100 text-green-800' },
+                    { id: 'cat-3', name: 'Dairy & Lemak', count: 4, color: 'bg-yellow-100 text-yellow-800' },
+                    { id: 'cat-4', name: 'Bumbu & Rempah', count: 8, color: 'bg-orange-100 text-orange-800' },
+                    { id: 'cat-5', name: 'Pewarna & Essens', count: 2, color: 'bg-purple-100 text-purple-800' },
+                    { id: 'cat-6', name: 'Pengembang & Pengawet', count: 3, color: 'bg-pink-100 text-pink-800' }
+                  ].map((category) => (
+                    <Card key={category.id} className="border-2 border-gray-100 hover:border-gray-200 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
+                            <Badge className={category.color}>
+                              {category.count} bahan
+                            </Badge>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuItem>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Kategori
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Eye className="h-4 w-4 mr-2" />
+                                Lihat Bahan
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Hapus Kategori
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>Total nilai:</span>
+                            <span className="font-medium">Rp {(Math.random() * 5000000 + 1000000).toLocaleString('id-ID')}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Add New Category Card */}
+                <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mt-4">
+                  <CardContent className="p-8 text-center">
+                    <Plus className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <h3 className="font-medium text-gray-900 mb-1">Tambah Kategori Baru</h3>
+                    <p className="text-sm text-gray-500 mb-4">Buat kategori untuk mengelompokkan bahan baku serupa</p>
+                    <Button variant="outline" size="sm">
+                      Buat Kategori
+                    </Button>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+
+            {/* Category Tips */}
+            <Alert className="border-gray-200 bg-gray-50">
+              <Lightbulb className="h-4 w-4 text-gray-600" />
+              <AlertDescription className="text-gray-700">
+                💡 <strong>Tips Kategori:</strong> Kelompokkan bahan dengan sifat serupa. Misalnya: semua tepung dalam "Tepung & Biji-bijian", semua dairy dalam "Dairy & Lemak". Ini memudahkan pencarian dan analisis cost per kategori!
+              </AlertDescription>
+            </Alert>
+          </TabsContent>
+        </Tabs>
 
         {/* Weighted Average Cost Analysis Modal */}
         <Dialog open={showPricingAnalysis} onOpenChange={setShowPricingAnalysis}>

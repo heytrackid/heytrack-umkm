@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
+import { toast } from 'react-hot-toast'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings, currencies, languages } from '@/contexts/settings-context'
@@ -51,11 +53,19 @@ import {
   Unlock
 } from 'lucide-react'
 
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+)
+
 export default function SettingsPage() {
   const { settings: globalSettings, updateCurrency, updateLanguage, formatCurrency, t } = useSettings()
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
   const [isUnsavedChanges, setIsUnsavedChanges] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Settings state
   const [settings, setSettings] = useState({
@@ -112,6 +122,40 @@ export default function SettingsPage() {
     }
   })
 
+  // Load settings from database on component mount
+  useEffect(() => {
+    loadSettings()
+  }, [])
+
+  const loadSettings = async () => {
+    try {
+      setIsLoading(true)
+      
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('settings_data')
+        .eq('user_id', 'default')
+        .single()
+      
+      if (error) {
+        console.error('Error loading settings:', error)
+        toast.error('Gagal memuat pengaturan')
+        return
+      }
+      
+      if (data?.settings_data) {
+        setSettings(data.settings_data)
+        console.log('✅ Settings loaded successfully:', data.settings_data)
+      }
+      
+    } catch (error) {
+      console.error('Error loading settings:', error)
+      toast.error('Gagal memuat pengaturan')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleSettingChange = (category: string, key: string, value: any) => {
     setSettings(prev => ({
       ...prev,
@@ -123,17 +167,68 @@ export default function SettingsPage() {
     setIsUnsavedChanges(true)
   }
 
-  const handleSave = () => {
-    // Here you would normally save to your backend
-    console.log('Saving settings:', settings)
-    setIsUnsavedChanges(false)
-    // Show success message
+  const handleSave = async () => {
+    setIsSaving(true)
+    
+    try {
+      // Create or update settings in Supabase
+      const settingsData = {
+        user_id: 'default', // In real app, get from auth context
+        settings_data: settings,
+        updated_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await supabase
+        .from('app_settings')
+        .upsert(settingsData, {
+          onConflict: 'user_id'
+        })
+        .select()
+      
+      if (error) {
+        throw error
+      }
+      
+      console.log('✅ Settings saved successfully:', data)
+      setIsUnsavedChanges(false)
+      toast.success('Pengaturan berhasil disimpan!')
+      
+    } catch (error) {
+      console.error('❌ Error saving settings:', error)
+      toast.error('Gagal menyimpan pengaturan. Silakan coba lagi.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleReset = () => {
     // Reset to default values
     setIsUnsavedChanges(false)
     // Show reset confirmation
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Pengaturan</h1>
+              <p className="text-muted-foreground">Memuat pengaturan...</p>
+            </div>
+          </div>
+          
+          {/* Loading skeleton */}
+          <div className="space-y-4">
+            <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+            <div className="h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+            <div className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+      </AppLayout>
+    )
   }
 
   return (
@@ -168,9 +263,9 @@ export default function SettingsPage() {
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} disabled={isSaving}>
               <Save className="h-4 w-4 mr-2" />
-              Simpan
+              {isSaving ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>
         </div>
@@ -782,8 +877,8 @@ export default function SettingsPage() {
                   <Button variant="outline" onClick={handleReset}>
                     Batal
                   </Button>
-                  <Button onClick={handleSave}>
-                    Simpan Sekarang
+                  <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? 'Menyimpan...' : 'Simpan Sekarang'}
                   </Button>
                 </div>
               </div>

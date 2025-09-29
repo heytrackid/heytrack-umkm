@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
 import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
+import { Toaster as HotToaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import "./globals.css";
@@ -51,6 +52,29 @@ export default function RootLayout({
                 {children}
               </ErrorBoundary>
               <Toaster />
+              <HotToaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: 'hsl(var(--background))',
+                    color: 'hsl(var(--foreground))',
+                    border: '1px solid hsl(var(--border))',
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: 'hsl(var(--primary))',
+                      secondary: 'hsl(var(--primary-foreground))',
+                    },
+                  },
+                  error: {
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#ffffff',
+                    },
+                  },
+                }}
+              />
             </SettingsProvider>
           </QueryProvider>
         </ThemeProvider>

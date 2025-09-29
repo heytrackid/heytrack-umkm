@@ -435,10 +435,10 @@ export default function OrdersPage({
       {/* Navigation Tabs */}
       <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">📊 Dashboard</TabsTrigger>
-          <TabsTrigger value="list">📋 Daftar Pesanan</TabsTrigger>
-          <TabsTrigger value="calendar">📅 Kalender</TabsTrigger>
-          <TabsTrigger value="analytics">📈 Analytics</TabsTrigger>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="list">Daftar Pesanan</TabsTrigger>
+          <TabsTrigger value="calendar">Kalender</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="mt-6">
