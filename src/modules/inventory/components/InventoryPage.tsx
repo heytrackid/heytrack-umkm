@@ -57,24 +57,6 @@ import {
   Factory
 } from 'lucide-react'
 
-// Sample transactions (will be replaced with real data from service)
-const sampleTransactions = [
-  {
-    id: '1',
-    ingredientId: 'ING-001',
-    ingredientName: 'Tepung Terigu Premium',
-    type: 'PURCHASE',
-    quantity: 50,
-    unit: 'kg',
-    unitPrice: 12000,
-    totalValue: 600000,
-    date: '2024-01-25',
-    reference: 'PO-2024-001',
-    supplier: 'CV. Bahan Berkah',
-    notes: 'Pembelian rutin mingguan'
-  },
-  // ... other sample data
-]
 
 export default function InventoryPage() {
   const { isMobile, isTablet } = useResponsive()
@@ -83,7 +65,7 @@ export default function InventoryPage() {
   const { ingredients, loading: ingredientsLoading, error: ingredientsError, refresh } = useInventoryData()
   const { alerts } = useInventoryAlerts()
   
-  const [transactions, setTransactions] = useState(sampleTransactions)
+  const [transactions, setTransactions] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
   const [dateFilter, setDateFilter] = useState('')

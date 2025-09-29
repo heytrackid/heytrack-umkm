@@ -15,21 +15,23 @@ type IngredientUpdate = Database['public']['Tables']['ingredients']['Update'];
 interface IngredientFormData {
   name: string;
   unit: string;
-  cost_per_unit: number;
-  supplier_id?: string;
+  price_per_unit: number;  // Database field is price_per_unit, not cost_per_unit
+  supplier?: string;       // Database field is supplier, not supplier_id
   minimum_stock: number;
   current_stock: number;
   description?: string;
+  category?: string;       // Add category field from database
 }
 
 const validationRules = {
   name: (value: string) => !value ? 'Name is required' : null,
   unit: (value: string) => !value ? 'Unit is required' : null,
-  cost_per_unit: (value: number) => value <= 0 ? 'Cost per unit must be greater than 0' : null,
+  price_per_unit: (value: number) => value <= 0 ? 'Price per unit must be greater than 0' : null,
   minimum_stock: (value: number) => value < 0 ? 'Minimum stock cannot be negative' : null,
   current_stock: (value: number) => value < 0 ? 'Current stock cannot be negative' : null,
-  supplier_id: () => null,
+  supplier: () => null,
   description: () => null,
+  category: () => null,
 };
 
 const unitOptions = [
@@ -51,11 +53,12 @@ export function IngredientsCRUD() {
   const initialFormData: IngredientFormData = {
     name: '',
     unit: '',
-    cost_per_unit: 0,
-    supplier_id: '',
+    price_per_unit: 0,
+    supplier: '',
     minimum_stock: 0,
     current_stock: 0,
     description: '',
+    category: '',
   };
 
   const {
@@ -80,8 +83,8 @@ export function IngredientsCRUD() {
       priority: 'high' as const,
     },
     {
-      key: 'cost_per_unit',
-      header: 'Cost per Unit',
+      key: 'price_per_unit',
+      header: 'Price per Unit',
       render: (value: number) => `Rp ${value.toLocaleString()}`,
       hideOnMobile: true,
     },
@@ -234,17 +237,17 @@ export function IngredientsCRUD() {
             description="Set stock levels and cost information"
           >
             <FormField
-              label="Cost per Unit (Rp)"
-              name="cost_per_unit"
+              label="Price per Unit (Rp)"
+              name="price_per_unit"
               type="number"
-              value={formData.cost_per_unit}
+              value={formData.price_per_unit}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.cost_per_unit ? errors.cost_per_unit : undefined}
+              error={touched.price_per_unit ? errors.price_per_unit : undefined}
               required
               min={0}
               step={0.01}
-              hint="Enter cost in Rupiah"
+              hint="Enter price in Rupiah"
             />
 
             <FormGrid cols={2}>
@@ -347,13 +350,13 @@ export function IngredientsCRUD() {
             description="Update stock levels and cost information"
           >
             <FormField
-              label="Cost per Unit (Rp)"
-              name="cost_per_unit"
+              label="Price per Unit (Rp)"
+              name="price_per_unit"
               type="number"
-              value={formData.cost_per_unit}
+              value={formData.price_per_unit}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.cost_per_unit ? errors.cost_per_unit : undefined}
+              error={touched.price_per_unit ? errors.price_per_unit : undefined}
               required
               min={0}
               step={0.01}

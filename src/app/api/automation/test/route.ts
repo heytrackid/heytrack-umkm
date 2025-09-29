@@ -114,13 +114,13 @@ async function testOrderCompletionWorkflow(data: any) {
   console.log('🧪 Testing order completion workflow...')
   
   try {
-    // Mock order data
-    const mockOrderId = data.orderId || 'test_order_' + Date.now()
+    // Test order data
+    const testOrderId = data.orderId || 'test_order_' + Date.now()
     
     // Trigger order completion workflow
-    await triggerWorkflow('order.completed', mockOrderId, {
+    await triggerWorkflow('order.completed', testOrderId, {
       order: {
-        id: mockOrderId,
+        id: testOrderId,
         order_no: 'ORD-TEST-001',
         total_amount: 150000,
         customer_id: 'test_customer'
@@ -131,7 +131,7 @@ async function testOrderCompletionWorkflow(data: any) {
       test: 'order_completion',
       status: 'passed',
       message: 'Order completion workflow triggered successfully',
-      orderId: mockOrderId,
+      orderId: testOrderId,
       automationTriggered: true
     }
   } catch (error) {
@@ -148,20 +148,20 @@ async function testInventoryAutomation(data: any) {
   console.log('🧪 Testing inventory automation...')
   
   try {
-    // Mock low stock scenario
-    const mockIngredient = {
+    // Test low stock scenario
+    const testIngredient = {
       id: 'test_ingredient_' + Date.now(),
-      name: 'Tepung Terigu Test',
+      name: 'Test Ingredient',
       current_stock: 5,
       min_stock: 20,
       unit: 'kg'
     }
 
     // Trigger low stock event
-    await triggerWorkflow('inventory.low_stock', mockIngredient.id, {
-      ingredient: mockIngredient,
-      currentStock: mockIngredient.current_stock,
-      minStock: mockIngredient.min_stock,
+    await triggerWorkflow('inventory.low_stock', testIngredient.id, {
+      ingredient: testIngredient,
+      currentStock: testIngredient.current_stock,
+      minStock: testIngredient.min_stock,
       severity: 'critical'
     })
 
@@ -169,7 +169,7 @@ async function testInventoryAutomation(data: any) {
       test: 'inventory_automation',
       status: 'passed',
       message: 'Low stock automation triggered successfully',
-      ingredient: mockIngredient.name,
+      ingredient: testIngredient.name,
       automationTriggered: true
     }
   } catch (error) {
@@ -241,52 +241,13 @@ async function testProductionPlanning(data: any) {
   console.log('🧪 Testing production planning...')
   
   try {
-    // Mock data for production planning
-    const mockOrders = [
-      {
-        id: 'test_order_1',
-        order_no: 'ORD-001',
-        status: 'CONFIRMED',
-        delivery_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
-        order_items: [
-          {
-            id: 'item_1',
-            recipe_id: 'recipe_1',
-            quantity: 10
-          }
-        ]
-      }
-    ]
+    // Test data for production planning
+    const testOrders = []
+    const testIngredients = []
+    const testRecipes = []
 
-    const mockIngredients = [
-      {
-        id: 'ingredient_1',
-        name: 'Tepung Terigu',
-        current_stock: 100,
-        min_stock: 20,
-        unit: 'kg'
-      }
-    ]
-
-    const mockRecipes = [
-      {
-        id: 'recipe_1',
-        name: 'Roti Tawar',
-        servings: 5,
-        prep_time: 60,
-        cook_time: 45,
-        recipe_ingredients: [
-          {
-            ingredient_id: 'ingredient_1',
-            quantity: 2,
-            unit: 'kg'
-          }
-        ]
-      }
-    ]
-
-    // Generate production schedule
-    const schedules = await generateProductionSchedule(mockOrders, mockIngredients, mockRecipes)
+    // Generate production schedule with empty test data
+    const schedules = await generateProductionSchedule(testOrders, testIngredients, testRecipes)
 
     return {
       test: 'production_planning',

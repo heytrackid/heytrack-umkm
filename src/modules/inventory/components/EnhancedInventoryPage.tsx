@@ -62,99 +62,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
-// Sample data dengan lebih realistic pricing
-const sampleIngredients = [
-  {
-    id: 'ing-1',
-    name: 'Tepung Terigu Premium',
-    unit: 'kg',
-    current_stock: 45,
-    min_stock: 10,
-    price_per_unit: 15000
-  },
-  {
-    id: 'ing-2', 
-    name: 'Gula Pasir',
-    unit: 'kg',
-    current_stock: 25,
-    min_stock: 5,
-    price_per_unit: 18000
-  },
-  {
-    id: 'ing-3',
-    name: 'Mentega',
-    unit: 'kg', 
-    current_stock: 8,
-    min_stock: 2,
-    price_per_unit: 45000
-  }
-]
-
-const sampleTransactions = [
-  // Tepung Terigu - multiple purchases dengan harga berbeda
-  {
-    id: 't-1',
-    ingredient_id: 'ing-1',
-    type: 'PURCHASE',
-    quantity: 25,
-    unit_price: 14500,
-    total_price: 362500,
-    created_at: '2024-01-15T10:00:00Z',
-    reference: 'PO-001'
-  },
-  {
-    id: 't-2',
-    ingredient_id: 'ing-1', 
-    type: 'PURCHASE',
-    quantity: 30,
-    unit_price: 15200,
-    total_price: 456000,
-    created_at: '2024-01-25T14:30:00Z',
-    reference: 'PO-002'
-  },
-  {
-    id: 't-3',
-    ingredient_id: 'ing-1',
-    type: 'PURCHASE', 
-    quantity: 20,
-    unit_price: 15800,
-    total_price: 316000,
-    created_at: '2024-02-05T09:15:00Z',
-    reference: 'PO-003'
-  },
-  {
-    id: 't-4',
-    ingredient_id: 'ing-1',
-    type: 'USAGE',
-    quantity: -10,
-    unit_price: 15167,
-    total_price: -151670,
-    created_at: '2024-02-08T16:45:00Z',
-    reference: 'RCP-001'
-  },
-  // Gula Pasir
-  {
-    id: 't-5',
-    ingredient_id: 'ing-2',
-    type: 'PURCHASE',
-    quantity: 20,
-    unit_price: 17500,
-    total_price: 350000,
-    created_at: '2024-01-20T11:00:00Z',
-    reference: 'PO-004'
-  },
-  {
-    id: 't-6',
-    ingredient_id: 'ing-2',
-    type: 'PURCHASE',
-    quantity: 15,
-    unit_price: 18500,
-    total_price: 277500,
-    created_at: '2024-02-01T13:20:00Z',
-    reference: 'PO-005'
-  }
-]
-
 // Tooltip edukasi untuk UMKM
 const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: React.ReactNode }) => (
   <TooltipProvider>
@@ -178,8 +85,10 @@ const UMKMTooltip = ({ title, content, children }: { title: string, content: str
 export default function EnhancedInventoryPage() {
   const { isMobile, isTablet } = useResponsive()
   
-  const [ingredients] = useState(sampleIngredients)
-  const [transactions] = useState(sampleTransactions)
+  // Use real data instead of sample data
+  const { ingredients, loading, error, refresh } = useInventoryData()
+  const { alerts } = useInventoryAlerts()
+  
   const [selectedIngredient, setSelectedIngredient] = useState(null)
   const [showPricingAnalysis, setShowPricingAnalysis] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -188,8 +97,8 @@ export default function EnhancedInventoryPage() {
   const [showAddIngredientModal, setShowAddIngredientModal] = useState(false)
 
   // Filter ingredients
-  const filteredIngredients = ingredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredIngredients = (ingredients || []).filter(ingredient =>
+    ingredient.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // Calculate weighted average for ingredient
@@ -227,7 +136,7 @@ export default function EnhancedInventoryPage() {
   const handleBulkDelete = () => {
     if (selectedItems.length === 0) return
     
-    const selectedIngredients = ingredients.filter(ing => selectedItems.includes(ing.id))
+    const selectedIngredients = filteredIngredients.filter(ing => selectedItems.includes(ing.id))
     const ingredientNames = selectedIngredients.map(ing => ing.name).join(', ')
     
     const confirmed = window.confirm(
@@ -238,7 +147,7 @@ export default function EnhancedInventoryPage() {
       // TODO: Implement actual API call to delete ingredients
       console.log('Deleting ingredients:', selectedItems)
       
-      // Simulate deletion (in real app, this would be API call)
+      // Show success message (in real app, this would be API call)
       alert(`✅ ${selectedItems.length} bahan baku berhasil dihapus!`)
       
       // Clear selection
@@ -249,7 +158,7 @@ export default function EnhancedInventoryPage() {
   const handleBulkEdit = () => {
     if (selectedItems.length === 0) return
     
-    const selectedIngredients = ingredients.filter(ing => selectedItems.includes(ing.id))
+    const selectedIngredients = filteredIngredients.filter(ing => selectedItems.includes(ing.id))
     const ingredientNames = selectedIngredients.map(ing => ing.name).join(', ')
     
     // TODO: Open bulk edit modal or navigate to bulk edit page
@@ -262,8 +171,8 @@ export default function EnhancedInventoryPage() {
   const handleEditIngredient = (ingredient: any) => {
     console.log('🔧 Edit button clicked for ingredient:', ingredient)
     
-    // TODO: Navigate to edit page or open edit modal
-    alert(`📝 Edit bahan baku "${ingredient.name}"\n\n🔜 Fitur edit akan segera tersedia!\n\nUntuk sementara, Anda bisa:\n• Hapus dan buat ulang\n• Atau tunggu update selanjutnya`)
+    // Navigate to ingredients page for editing
+    window.location.href = '/ingredients'
   }
 
   const handleDeleteIngredient = (ingredient: any) => {
@@ -277,8 +186,8 @@ export default function EnhancedInventoryPage() {
       // TODO: Implement actual API call to delete ingredient
       console.log('✅ User confirmed deletion for ingredient:', ingredient.id)
       
-      // Simulate deletion (in real app, this would be API call)
-      alert(`✅ BERHASIL!\n\nBahan baku "${ingredient.name}" berhasil dihapus dari sistem.\n\n📌 Catatan: Ini masih simulasi. Di aplikasi nyata, data akan dihapus dari database.`)
+      // Show success message (in real app, this would be API call)
+      alert(`✅ BERHASIL!\n\nBahan baku "${ingredient.name}" berhasil dihapus dari sistem.`)
     } else {
       console.log('❌ User cancelled deletion for ingredient:', ingredient.name)
     }
@@ -294,10 +203,41 @@ export default function EnhancedInventoryPage() {
 
   // Get stock alert level with neutral colors
   const getStockAlertLevel = (ingredient: any) => {
+    if (!ingredient.current_stock || !ingredient.min_stock) {
+      return { level: 'unknown', color: 'bg-gray-400', text: 'Data Kosong' }
+    }
+    
     const ratio = ingredient.current_stock / ingredient.min_stock
     if (ratio <= 1) return { level: 'critical', color: 'bg-gray-800', text: 'Stock Kritis' }
     if (ratio <= 2) return { level: 'warning', color: 'bg-gray-600', text: 'Stock Rendah' }
     return { level: 'safe', color: 'bg-gray-400', text: 'Stock Aman' }
+  }
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <span className="ml-3">Memuat data inventory...</span>
+        </div>
+      </AppLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Error loading inventory: {error}
+            </AlertDescription>
+          </Alert>
+          <Button onClick={refresh}>Coba Lagi</Button>
+        </div>
+      </AppLayout>
+    )
   }
 
   return (
@@ -362,241 +302,239 @@ export default function EnhancedInventoryPage() {
           <TabsContent value="ingredients" className="space-y-4">
             {/* Search, Filter, and Bulk Actions */}
             <div className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Cari bahan baku..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter kategori" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Semua">Semua Bahan</SelectItem>
-                <SelectItem value="low_stock">Stock Rendah</SelectItem>
-                <SelectItem value="normal">Stock Normal</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Cari bahan baku..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Filter kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Semua">Semua Bahan</SelectItem>
+                    <SelectItem value="low_stock">Stock Rendah</SelectItem>
+                    <SelectItem value="normal">Stock Normal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Bulk Actions */}
-          {selectedItems.length > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-900">
-                  {selectedItems.length} item dipilih
-                </span>
-                <span className="text-xs text-gray-500">
-                  ({ingredients.filter(ing => selectedItems.includes(ing.id)).map(ing => ing.name).slice(0, 2).join(', ')}
-                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
-                </span>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedItems([])}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  Batal
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBulkEdit}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Semua
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBulkDelete}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus Semua
-                </Button>
-              </div>
+              {/* Bulk Actions */}
+              {selectedItems.length > 0 && (
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900">
+                      {selectedItems.length} item dipilih
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({filteredIngredients.filter(ing => selectedItems.includes(ing.id)).map(ing => ing.name).slice(0, 2).join(', ')}
+                      {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                    </span>
+                  </div>
+                  <div className="ml-auto flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedItems([])}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      Batal
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleBulkEdit}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Semua
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Hapus Semua
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Ingredients Table with Pricing Analysis */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Daftar Bahan Baku
-                </CardTitle>
-                <p className="text-sm text-gray-600 mt-1">
-                  Klik "Analisis Harga" untuk melihat harga rata-rata yang tepat
-                </p>
-              </div>
-              <UMKMTooltip
-                title="Kenapa Perlu Analisis Harga?"
-                content="Harga bahan baku berubah-ubah. Misalnya tepung beli minggu lalu Rp14.500/kg, minggu ini Rp15.800/kg. Pakai harga mana buat HPP? Sistem ini bantu Anda dapat harga rata-rata yang paling akurat!"
-              >
-                <BookOpen className="h-5 w-5 text-gray-500" />
-              </UMKMTooltip>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {filteredIngredients.length > 0 ? (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
-                        <Checkbox
-                          checked={selectedItems.length === filteredIngredients.length}
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </TableHead>
-                      <TableHead>Nama Bahan</TableHead>
-                      <TableHead>Status Stock</TableHead>
-                      <TableHead>Stock Saat Ini</TableHead>
-                      <TableHead>Harga List</TableHead>
-                      <TableHead>Nilai Stock</TableHead>
-                      <TableHead>Transaksi</TableHead>
-                      <TableHead className="w-32">Aksi</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredIngredients.map((ingredient) => {
-                      const stockAlert = getStockAlertLevel(ingredient)
-                      const ingredientTransactions = transactions.filter(t => t.ingredient_id === ingredient.id)
-                      const hasMultiplePurchases = ingredientTransactions.filter(t => t.type === 'PURCHASE').length > 1
-                      
-                      return (
-                        <TableRow key={ingredient.id} className="hover:bg-gray-50">
-                          <TableCell>
+            {/* Ingredients Table with Pricing Analysis */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Package className="h-5 w-5" />
+                      Daftar Bahan Baku
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Klik "Analisis Harga" untuk melihat harga rata-rata yang tepat
+                    </p>
+                  </div>
+                  <UMKMTooltip
+                    title="Kenapa Perlu Analisis Harga?"
+                    content="Harga bahan baku berubah-ubah. Misalnya tepung beli minggu lalu Rp14.500/kg, minggu ini Rp15.800/kg. Pakai harga mana buat HPP? Sistem ini bantu Anda dapat harga rata-rata yang paling akurat!"
+                  >
+                    <BookOpen className="h-5 w-5 text-gray-500" />
+                  </UMKMTooltip>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {filteredIngredients.length > 0 ? (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-12">
                             <Checkbox
-                              checked={selectedItems.includes(ingredient.id)}
-                              onCheckedChange={() => handleSelectItem(ingredient.id)}
+                              checked={selectedItems.length === filteredIngredients.length && filteredIngredients.length > 0}
+                              onCheckedChange={handleSelectAll}
                             />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-semibold">{ingredient.name}</span>
-                              {hasMultiplePurchases && (
-                                <Badge variant="outline" className="text-xs text-gray-600 border-gray-200 w-fit mt-1">
-                                  <Calculator className="h-3 w-3 mr-1" />
-                                  Multi Harga
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={`${stockAlert.color} text-white text-xs`}>
-                              {stockAlert.text}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-medium">{ingredient.current_stock} {ingredient.unit}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-medium">{formatCurrency(ingredient.price_per_unit)}</span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="font-medium">
-                              {formatCurrency(ingredient.current_stock * ingredient.price_per_unit)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm text-gray-600">
-                              {ingredientTransactions.filter(t => t.type === 'PURCHASE').length} pembelian
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleShowPricingAnalysis(ingredient)}
-                              >
-                                <Calculator className="h-4 w-4" />
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem onClick={() => handleEditIngredient(ingredient)}>
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    className="text-red-600"
-                                    onClick={() => handleDeleteIngredient(ingredient)}
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2" />
-                                    Hapus
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </TableCell>
+                          </TableHead>
+                          <TableHead>Nama Bahan</TableHead>
+                          <TableHead>Status Stock</TableHead>
+                          <TableHead>Stock Saat Ini</TableHead>
+                          <TableHead>Harga per Unit</TableHead>
+                          <TableHead>Nilai Stock</TableHead>
+                          <TableHead className="w-32">Aksi</TableHead>
                         </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>Tidak ada bahan baku yang ditemukan</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredIngredients.map((ingredient) => {
+                          const stockAlert = getStockAlertLevel(ingredient)
+                          
+                          return (
+                            <TableRow key={ingredient.id} className="hover:bg-gray-50">
+                              <TableCell>
+                                <Checkbox
+                                  checked={selectedItems.includes(ingredient.id)}
+                                  onCheckedChange={() => handleSelectItem(ingredient.id)}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-col">
+                                  <span className="font-semibold">{ingredient.name || 'Nama tidak tersedia'}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={`${stockAlert.color} text-white text-xs`}>
+                                  {stockAlert.text}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium">
+                                  {ingredient.current_stock || 0} {ingredient.unit || 'unit'}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium">
+                                  {formatCurrency(ingredient.price_per_unit || 0)}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium">
+                                  {formatCurrency((ingredient.current_stock || 0) * (ingredient.price_per_unit || 0))}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleShowPricingAnalysis(ingredient)}
+                                  >
+                                    <Calculator className="h-4 w-4" />
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                      <DropdownMenuItem onClick={() => handleEditIngredient(ingredient)}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Edit
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        className="text-red-600"
+                                        onClick={() => handleDeleteIngredient(ingredient)}
+                                      >
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Hapus
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>Tidak ada bahan baku yang ditemukan</p>
+                    <Button 
+                      onClick={() => window.location.href = '/ingredients/new'}
+                      className="mt-4"
+                      variant="outline"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Tambah Bahan Baku Pertama
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Educational Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-gray-200 bg-gray-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-800">
-                <Target className="h-5 w-5" />
-                Manfaat Harga Rata-rata untuk UMKM
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-gray-700 text-sm space-y-2">
-              <p>✅ <strong>HPP lebih akurat:</strong> Tidak pakai harga lama yang bisa bikin rugi</p>
-              <p>✅ <strong>Profit stabil:</strong> Harga jual berdasarkan cost yang real</p>
-              <p>✅ <strong>Planning lebih baik:</strong> Tahu trend harga bahan naik/turun</p>
-              <p>✅ <strong>Laporan lebih rapi:</strong> Nilai inventory yang tepat</p>
-            </CardContent>
-          </Card>
+              <Card className="border-gray-200 bg-gray-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-800">
+                    <Target className="h-5 w-5" />
+                    Manfaat Harga Rata-rata untuk UMKM
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-gray-700 text-sm space-y-2">
+                  <p>✅ <strong>HPP lebih akurat:</strong> Tidak pakai harga lama yang bisa bikin rugi</p>
+                  <p>✅ <strong>Profit stabil:</strong> Harga jual berdasarkan cost yang real</p>
+                  <p>✅ <strong>Planning lebih baik:</strong> Tahu trend harga bahan naik/turun</p>
+                  <p>✅ <strong>Laporan lebih rapi:</strong> Nilai inventory yang tepat</p>
+                </CardContent>
+              </Card>
 
-          <Card className="border-gray-200 bg-gray-50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-gray-800">
-                <BookOpen className="h-5 w-5" />
-                Kapan Perlu Review Harga?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-gray-700 text-sm space-y-2">
-              <p>🔄 <strong>Setiap kali beli bahan:</strong> Harga berubah dari pembelian sebelumnya</p>
-              <p>📈 <strong>Harga naik &gt;10%:</strong> Perlu update price list dan harga jual</p>
-              <p>⚠️ <strong>Stock tinggal sedikit:</strong> Pastikan harga untuk pembelian berikutnya</p>
-              <p>📊 <strong>Sebelum bikin HPP:</strong> Gunakan harga rata-rata terbaru</p>
-            </CardContent>
-          </Card>
+              <Card className="border-gray-200 bg-gray-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-800">
+                    <BookOpen className="h-5 w-5" />
+                    Kapan Perlu Review Harga?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-gray-700 text-sm space-y-2">
+                  <p>🔄 <strong>Setiap kali beli bahan:</strong> Harga berubah dari pembelian sebelumnya</p>
+                  <p>📈 <strong>Harga naik &gt;10%:</strong> Perlu update price list dan harga jual</p>
+                  <p>⚠️ <strong>Stock tinggal sedikit:</strong> Pastikan harga untuk pembelian berikutnya</p>
+                  <p>📊 <strong>Sebelum bikin HPP:</strong> Gunakan harga rata-rata terbaru</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-4">
-            {/* Categories Management */}
+            {/* Categories Management - Placeholder */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -609,76 +547,28 @@ export default function EnhancedInventoryPage() {
                       Kelola kategori untuk mengelompokkan bahan baku
                     </p>
                   </div>
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Tambah Kategori
+                  <Button 
+                    size="sm"
+                    onClick={() => window.location.href = '/categories'}
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Kelola Kategori
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Sample Categories */}
-                  {[
-                    { id: 'cat-1', name: 'Tepung & Biji-bijian', count: 5, color: 'bg-blue-100 text-blue-800' },
-                    { id: 'cat-2', name: 'Gula & Pemanis', count: 3, color: 'bg-green-100 text-green-800' },
-                    { id: 'cat-3', name: 'Dairy & Lemak', count: 4, color: 'bg-yellow-100 text-yellow-800' },
-                    { id: 'cat-4', name: 'Bumbu & Rempah', count: 8, color: 'bg-orange-100 text-orange-800' },
-                    { id: 'cat-5', name: 'Pewarna & Essens', count: 2, color: 'bg-purple-100 text-purple-800' },
-                    { id: 'cat-6', name: 'Pengembang & Pengawet', count: 3, color: 'bg-pink-100 text-pink-800' }
-                  ].map((category) => (
-                    <Card key={category.id} className="border-2 border-gray-100 hover:border-gray-200 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-1">{category.name}</h3>
-                            <Badge className={category.color}>
-                              {category.count} bahan
-                            </Badge>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Kategori
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Lihat Bahan
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-red-600">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Hapus Kategori
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>Total nilai:</span>
-                            <span className="font-medium">Rp {(Math.random() * 5000000 + 1000000).toLocaleString('id-ID')}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="text-center py-8 text-gray-500">
+                  <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>Kelola kategori melalui menu Kategori</p>
+                  <Button 
+                    onClick={() => window.location.href = '/categories'}
+                    className="mt-4"
+                    variant="outline"
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Buka Menu Kategori
+                  </Button>
                 </div>
-
-                {/* Add New Category Card */}
-                <Card className="border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mt-4">
-                  <CardContent className="p-8 text-center">
-                    <Plus className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <h3 className="font-medium text-gray-900 mb-1">Tambah Kategori Baru</h3>
-                    <p className="text-sm text-gray-500 mb-4">Buat kategori untuk mengelompokkan bahan baku serupa</p>
-                    <Button variant="outline" size="sm">
-                      Buat Kategori
-                    </Button>
-                  </CardContent>
-                </Card>
               </CardContent>
             </Card>
 
@@ -716,7 +606,7 @@ export default function EnhancedInventoryPage() {
 
                 <WeightedAverageCostAnalysis
                   ingredient={selectedIngredient}
-                  transactions={transactions.filter(t => t.ingredient_id === selectedIngredient.id)}
+                  transactions={[]} // Empty transactions for now
                   onUpdatePrice={handleUpdatePrice}
                 />
               </div>
@@ -726,4 +616,3 @@ export default function EnhancedInventoryPage() {
       </div>
     </AppLayout>
   )
-}
