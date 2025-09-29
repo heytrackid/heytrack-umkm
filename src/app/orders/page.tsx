@@ -1,8 +1,16 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import AppLayout from '@/components/layout/app-layout'
 import { OrdersPage as ModularOrdersPage } from '@/modules/orders'
+import OrdersTable from '@/components/orders/orders-table'
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbPage
+} from '@/components/ui/breadcrumb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -50,7 +58,9 @@ import {
   TrendingUp,
   Users,
   ShoppingCart,
-  CheckCircle
+  CheckCircle,
+  MessageCircle,
+  Settings
 } from 'lucide-react'
 
 // Order Status Configurations
@@ -87,10 +97,224 @@ function getPriorityInfo(priority: string) {
 
 // Use modular OrdersPage component
 export default function OrdersPageWrapper() {
+  const [useTableView, setUseTableView] = useState(false)
+  
   return (
     <AppLayout>
-      <ModularOrdersPage userRole="manager" enableAdvancedFeatures={true} />
+      <div className="space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Pesanan</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        {/* Header with New Order Button */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <ShoppingCart className="h-8 w-8" />
+              Daftar Pesanan
+            </h1>
+            <p className="text-muted-foreground">
+              Kelola semua pesanan dan penjualan
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = '/settings/whatsapp-templates'}
+              className="hidden sm:flex"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Templates WA
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setUseTableView(!useTableView)}
+            >
+              {useTableView ? 'Card View' : 'Table View'}
+            </Button>
+            <Button asChild>
+              <Link href="/orders/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Pesanan Baru
+              </Link>
+            </Button>
+          </div>
+        </div>
+        
+        {useTableView ? (
+          <OrdersTableView />
+        ) : (
+          <ModularOrdersPage userRole="manager" enableAdvancedFeatures={true} />
+        )}
+      </div>
     </AppLayout>
+  )
+}
+
+// Orders Table View Component
+function OrdersTableView() {
+  const [orders, setOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [showOrderDetail, setShowOrderDetail] = useState(false)
+  const [editingOrder, setEditingOrder] = useState<any>(null)
+  const [showOrderForm, setShowOrderForm] = useState(false)
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/orders')
+      if (response.ok) {
+        const data = await response.json()
+        setOrders(data)
+      }
+    } catch (err) {
+      console.error('Error fetching orders:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleViewOrder = (order: any) => {
+    setSelectedOrder(order)
+    setShowOrderDetail(true)
+  }
+
+  const handleEditOrder = (order: any) => {
+    setEditingOrder(order)
+    setShowOrderForm(true)
+  }
+
+  const handleDeleteOrder = async (order: any) => {
+    try {
+      const response = await fetch(`/api/orders/${order.id}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        setOrders(prev => prev.filter(o => o.id !== order.id))
+      }
+    } catch (err) {
+      console.error('Error deleting order:', err)
+    }
+  }
+
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+      
+      if (response.ok) {
+        setOrders(prev => prev.map(order => 
+          order.id === orderId ? { ...order, status: newStatus } : order
+        ))
+      }
+    } catch (err) {
+      console.error('Error updating status:', err)
+    }
+  }
+
+  const handleBulkAction = async (action: string, orderIds: string[]) => {
+    console.log('Bulk action:', action, 'for orders:', orderIds)
+    
+    switch (action) {
+      case 'confirm':
+        // Bulk confirm orders
+        for (const orderId of orderIds) {
+          await handleUpdateStatus(orderId, 'CONFIRMED')
+        }
+        break
+      case 'export':
+        // Export selected orders
+        console.log('Exporting orders:', orderIds)
+        break
+      case 'print':
+        // Print selected orders
+        console.log('Printing orders:', orderIds)
+        break
+      case 'archive':
+        // Archive selected orders
+        console.log('Archiving orders:', orderIds)
+        break
+      case 'cancel':
+        // Cancel selected orders
+        for (const orderId of orderIds) {
+          await handleUpdateStatus(orderId, 'CANCELLED')
+        }
+        break
+      case 'delete':
+        // Delete selected orders
+        for (const orderId of orderIds) {
+          const order = orders.find(o => o.id === orderId)
+          if (order) {
+            await handleDeleteOrder(order)
+          }
+        }
+        break
+      default:
+        console.log('Unknown bulk action:', action)
+    }
+  }
+
+  return (
+    <>
+      <OrdersTable
+        orders={orders}
+        loading={loading}
+        onViewOrder={handleViewOrder}
+        onEditOrder={handleEditOrder}
+        onDeleteOrder={handleDeleteOrder}
+        onUpdateStatus={handleUpdateStatus}
+        onBulkAction={handleBulkAction}
+      />
+
+      {/* Order Detail Dialog */}
+      <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no}</DialogTitle>
+          </DialogHeader>
+          {selectedOrder && <OrderDetailView order={selectedOrder} />}
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Form Dialog */}
+      <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">
+              {editingOrder ? `Edit Pesanan ${editingOrder.order_no}` : 'Buat Pesanan Baru'}
+            </DialogTitle>
+          </DialogHeader>
+          <OrderForm 
+            onClose={() => {
+              setShowOrderForm(false)
+              setEditingOrder(null)
+            }} 
+            onSuccess={() => {
+              fetchOrders()
+              setShowOrderForm(false)
+              setEditingOrder(null)
+            }}
+            editData={editingOrder}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
@@ -1397,6 +1621,14 @@ function OrderForm({ onClose, onSuccess, editData }: {
 function OrderDetailView({ order }: { order: any }) {
   const statusInfo = getStatusInfo(order.status)
   const priorityInfo = getPriorityInfo(order.priority)
+  
+  // Import WhatsApp Follow-up component dynamically to avoid layout shifts
+  const WhatsAppFollowUp = React.lazy(() => import('@/components/ui/whatsapp-followup'))
+  
+  // Track when WhatsApp message is sent
+  const handleMessageSent = (method: 'whatsapp' | 'business', message: string, phone: string) => {
+    console.log(`Message sent via ${method}`, { phone, messageLength: message.length })
+  }
 
   return (
     <Tabs defaultValue="overview" className="w-full">
@@ -1508,6 +1740,31 @@ function OrderDetailView({ order }: { order: any }) {
           <div className="flex justify-between items-center font-medium">
             <span>Total Item: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}</span>
             <span>Subtotal: Rp {((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0)).toLocaleString()}</span>
+          </div>
+          
+          {/* WhatsApp Follow-Up Button */}
+          <div className="mt-4 pt-4 border-t flex justify-end">
+            <React.Suspense fallback={<Button variant="outline" disabled>Loading...</Button>}>
+              <WhatsAppFollowUp 
+                order={{
+                  id: order.id,
+                  order_number: order.order_no,
+                  customer_name: order.customer_name,
+                  customer_phone: order.customer_phone,
+                  status: order.status,
+                  order_date: order.order_date,
+                  due_date: order.delivery_date,
+                  total_amount: order.total_amount || 0,
+                  items: order.order_items?.map((item: any) => ({
+                    product_name: item.product_name,
+                    quantity: item.quantity
+                  })) || [],
+                  payment_status: order.payment_status,
+                  remaining_amount: order.total_amount - (order.paid_amount || 0)
+                }}
+                onSent={handleMessageSent}
+              />
+            </React.Suspense>
           </div>
         </div>
       </TabsContent>

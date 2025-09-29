@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,7 +25,8 @@ import {
   XCircle,
   AlertCircle,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  MessageCircle
 } from 'lucide-react'
 
 // Types and constants
@@ -45,7 +46,7 @@ import {
   ORDER_CONFIG 
 } from '../constants'
 
-// Lazy loading akan diimplementasikan setelah komponen ini
+
 interface OrdersPageProps {
   userRole?: 'admin' | 'manager' | 'staff'
   enableAdvancedFeatures?: boolean
@@ -397,6 +398,32 @@ export default function OrdersPage({
         </Card>
       </div>
 
+      {/* Quick Actions */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = '/settings/whatsapp-templates'}
+              className="flex items-center gap-2"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Kelola Template WhatsApp
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => console.log('Export orders')}
+              className="flex items-center gap-2"
+            >
+              <Package className="h-4 w-4" />
+              Export Data
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Status Summary */}
       <Card>
         <CardHeader>
@@ -593,7 +620,7 @@ export default function OrdersPage({
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button variant="outline" size="sm" onClick={() => handleViewOrder(order)}>
                       <Eye className="h-3 w-3 mr-1" />
                       Detail
