@@ -185,6 +185,7 @@ export default function EnhancedInventoryPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [showAddIngredientModal, setShowAddIngredientModal] = useState(false)
 
   // Filter ingredients
   const filteredIngredients = ingredients.filter(ingredient =>
@@ -283,6 +284,21 @@ export default function EnhancedInventoryPage() {
     }
   }
 
+  // Handle add new ingredient
+  const handleAddNewIngredient = () => {
+    console.log('🆕 Tambah Bahan Baku button clicked')
+    
+    // For now, show a simple modal or navigate to existing page
+    const choice = window.confirm(
+      `🆕 TAMBAH BAHAN BAKU BARU\n\nPilih cara menambah bahan baku:\n\n✅ OK - Buka form tambah bahan baku\n❌ Cancel - Batalkan`
+    )
+    
+    if (choice) {
+      // Navigate to the working inventory/new page for now
+      window.location.href = '/inventory/new'
+    }
+  }
+
   // Get stock alert level with neutral colors
   const getStockAlertLevel = (ingredient: any) => {
     const ratio = ingredient.current_stock / ingredient.min_stock
@@ -329,12 +345,10 @@ export default function EnhancedInventoryPage() {
               Kelola stok dan hitung harga yang tepat untuk HPP
             </p>
           </div>
-          <Link href="/inventory/ingredients/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Bahan Baku
-            </Button>
-          </Link>
+          <Button onClick={handleAddNewIngredient}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tambah Bahan Baku
+          </Button>
         </div>
 
         {/* Educational Banner */}
