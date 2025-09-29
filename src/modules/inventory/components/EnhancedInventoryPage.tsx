@@ -53,8 +53,14 @@ import {
   Eye,
   History,
   ShoppingCart,
-  Factory
+  Factory,
+  Edit,
+  Trash2,
+  MoreHorizontal
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 // Sample data dengan lebih realistic pricing
 const sampleIngredients = [
@@ -178,6 +184,7 @@ export default function EnhancedInventoryPage() {
   const [showPricingAnalysis, setShowPricingAnalysis] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('Semua')
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
 
   // Filter ingredients
   const filteredIngredients = ingredients.filter(ingredient =>
@@ -199,12 +206,41 @@ export default function EnhancedInventoryPage() {
     alert(`✅ Harga ${selectedIngredient?.name} berhasil diupdate ke Rp ${newPrice.toLocaleString('id-ID')} menggunakan metode ${method}`)
   }, [selectedIngredient])
 
-  // Get stock alert level
+  // Bulk action handlers
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredIngredients.length) {
+      setSelectedItems([])
+    } else {
+      setSelectedItems(filteredIngredients.map(ingredient => ingredient.id))
+    }
+  }
+
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId) 
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    )
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedItems.length > 0) {
+      alert(`Delete ${selectedItems.length} items?`)
+    }
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedItems.length > 0) {
+      alert(`Edit ${selectedItems.length} items?`)
+    }
+  }
+
+  // Get stock alert level with neutral colors
   const getStockAlertLevel = (ingredient: any) => {
     const ratio = ingredient.current_stock / ingredient.min_stock
-    if (ratio <= 1) return { level: 'critical', color: 'bg-red-500', text: 'Stock Kritis' }
-    if (ratio <= 2) return { level: 'warning', color: 'bg-yellow-500', text: 'Stock Rendah' }
-    return { level: 'safe', color: 'bg-green-500', text: 'Stock Aman' }
+    if (ratio <= 1) return { level: 'critical', color: 'bg-gray-800', text: 'Stock Kritis' }
+    if (ratio <= 2) return { level: 'warning', color: 'bg-gray-600', text: 'Stock Rendah' }
+    return { level: 'safe', color: 'bg-gray-400', text: 'Stock Aman' }
   }
 
   return (
@@ -245,41 +281,72 @@ export default function EnhancedInventoryPage() {
               Kelola stok dan hitung harga yang tepat untuk HPP
             </p>
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Transaksi Baru
-          </Button>
+          <Link href="/inventory/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Bahan Baku
+            </Button>
+          </Link>
         </div>
 
         {/* Educational Banner */}
-        <Alert className="border-blue-200 bg-blue-50">
-          <Lightbulb className="h-4 w-4 text-blue-600" />
-          <AlertDescription className="text-blue-800">
+        <Alert className="border-gray-200 bg-gray-50">
+          <Lightbulb className="h-4 w-4 text-gray-600" />
+          <AlertDescription className="text-gray-700">
             💡 <strong>Tips UMKM:</strong> Harga bahan baku bisa naik-turun. Dengan sistem harga rata-rata, HPP Anda lebih akurat dan profit lebih stabil!
           </AlertDescription>
         </Alert>
 
-        {/* Search and Filter */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Cari bahan baku..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        {/* Search, Filter, and Bulk Actions */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Cari bahan baku..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Filter kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Semua">Semua Bahan</SelectItem>
+                <SelectItem value="low_stock">Stock Rendah</SelectItem>
+                <SelectItem value="normal">Stock Normal</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full md:w-48">
-              <SelectValue placeholder="Filter kategori" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Semua">Semua Bahan</SelectItem>
-              <SelectItem value="low_stock">Stock Rendah</SelectItem>
-              <SelectItem value="normal">Stock Normal</SelectItem>
-            </SelectContent>
-          </Select>
+
+          {/* Bulk Actions */}
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+              <span className="text-sm text-gray-600">
+                {selectedItems.length} item dipilih
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkEdit}
+                className="ml-auto"
+              >
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkDelete}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Hapus
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Ingredients Table with Pricing Analysis */}
@@ -299,162 +366,130 @@ export default function EnhancedInventoryPage() {
                 title="Kenapa Perlu Analisis Harga?"
                 content="Harga bahan baku berubah-ubah. Misalnya tepung beli minggu lalu Rp14.500/kg, minggu ini Rp15.800/kg. Pakai harga mana buat HPP? Sistem ini bantu Anda dapat harga rata-rata yang paling akurat!"
               >
-                <BookOpen className="h-5 w-5 text-blue-500" />
+                <BookOpen className="h-5 w-5 text-gray-500" />
               </UMKMTooltip>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {filteredIngredients.map((ingredient, index) => {
-                const stockAlert = getStockAlertLevel(ingredient)
-                const ingredientTransactions = transactions.filter(t => t.ingredient_id === ingredient.id)
-                const hasMultiplePurchases = ingredientTransactions.filter(t => t.type === 'PURCHASE').length > 1
-                
-                return (
-                  <div key={ingredient.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      {/* Ingredient Info */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-semibold text-lg">{ingredient.name}</h3>
-                          <Badge className={`${stockAlert.color} text-white text-xs`}>
-                            {stockAlert.text}
-                          </Badge>
-                          {hasMultiplePurchases && (
-                            <UMKMTooltip
-                              title="Ada Beberapa Harga Pembelian"
-                              content="Bahan ini dibeli beberapa kali dengan harga berbeda. Klik 'Analisis Harga' untuk lihat harga rata-rata yang tepat untuk HPP!"
-                            >
-                              <Badge variant="outline" className="text-blue-600 border-blue-200">
-                                <Calculator className="h-3 w-3 mr-1" />
-                                Multi Harga
-                              </Badge>
-                            </UMKMTooltip>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-                          <div>
-                            <UMKMTooltip
-                              title="Stock Saat Ini"
-                              content="Jumlah bahan yang masih ada di gudang/tempat penyimpanan"
-                            >
-                              <p className="text-sm text-gray-600">Stock Saat Ini</p>
-                            </UMKMTooltip>
-                            <p className="font-semibold">{ingredient.current_stock} {ingredient.unit}</p>
-                          </div>
-                          <div>
-                            <UMKMTooltip
-                              title="Harga List Saat Ini"
-                              content="Harga yang tercatat di sistem. Mungkin perlu diupdate jika sudah beli dengan harga berbeda."
-                            >
-                              <p className="text-sm text-gray-600">Harga List</p>
-                            </UMKMTooltip>
-                            <p className="font-semibold">{formatCurrency(ingredient.price_per_unit)}</p>
-                          </div>
-                          <div>
-                            <UMKMTooltip
-                              title="Nilai Stock"
-                              content="Total nilai uang dari stock yang ada. Dihitung: Stock × Harga per unit"
-                            >
-                              <p className="text-sm text-gray-600">Nilai Stock</p>
-                            </UMKMTooltip>
-                            <p className="font-semibold">
-                              {formatCurrency(ingredient.current_stock * ingredient.price_per_unit)}
-                            </p>
-                          </div>
-                          <div>
-                            <UMKMTooltip
-                              title="Pembelian"
-                              content="Berapa kali bahan ini sudah dibeli. Semakin banyak pembelian dengan harga berbeda, semakin perlu analisis harga rata-rata."
-                            >
-                              <p className="text-sm text-gray-600">Transaksi</p>
-                            </UMKMTooltip>
-                            <p className="font-semibold">
-                              {ingredientTransactions.filter(t => t.type === 'PURCHASE').length} pembelian
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex flex-col gap-2 ml-4">
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleShowPricingAnalysis(ingredient)}
-                          className="whitespace-nowrap"
-                        >
-                          <Calculator className="h-4 w-4 mr-2" />
-                          Analisis Harga
-                        </Button>
-                        {hasMultiplePurchases && (
-                          <Badge variant="secondary" className="text-center text-xs">
-                            Butuh Review
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Quick Preview for ingredients with multiple purchases */}
-                    {hasMultiplePurchases && (
-                      <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Info className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-blue-800">Preview Harga Rata-rata</span>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                          <div className="text-center">
-                            <p className="text-gray-600">Harga Terendah</p>
-                            <p className="font-semibold text-green-600">
-                              {formatCurrency(Math.min(...ingredientTransactions
-                                .filter(t => t.type === 'PURCHASE')
-                                .map(t => t.unit_price)))}
-                            </p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-600">Harga Tertinggi</p>
-                            <p className="font-semibold text-red-600">
-                              {formatCurrency(Math.max(...ingredientTransactions
-                                .filter(t => t.type === 'PURCHASE') 
-                                .map(t => t.unit_price)))}
-                            </p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-gray-600">Selisih Harga</p>
-                            <p className="font-semibold text-orange-600">
-                              {formatCurrency(
-                                Math.max(...ingredientTransactions.filter(t => t.type === 'PURCHASE').map(t => t.unit_price)) -
-                                Math.min(...ingredientTransactions.filter(t => t.type === 'PURCHASE').map(t => t.unit_price))
+            {filteredIngredients.length > 0 ? (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedItems.length === filteredIngredients.length}
+                          onCheckedChange={handleSelectAll}
+                        />
+                      </TableHead>
+                      <TableHead>Nama Bahan</TableHead>
+                      <TableHead>Status Stock</TableHead>
+                      <TableHead>Stock Saat Ini</TableHead>
+                      <TableHead>Harga List</TableHead>
+                      <TableHead>Nilai Stock</TableHead>
+                      <TableHead>Transaksi</TableHead>
+                      <TableHead className="w-32">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredIngredients.map((ingredient) => {
+                      const stockAlert = getStockAlertLevel(ingredient)
+                      const ingredientTransactions = transactions.filter(t => t.ingredient_id === ingredient.id)
+                      const hasMultiplePurchases = ingredientTransactions.filter(t => t.type === 'PURCHASE').length > 1
+                      
+                      return (
+                        <TableRow key={ingredient.id} className="hover:bg-gray-50">
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedItems.includes(ingredient.id)}
+                              onCheckedChange={() => handleSelectItem(ingredient.id)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-semibold">{ingredient.name}</span>
+                              {hasMultiplePurchases && (
+                                <Badge variant="outline" className="text-xs text-gray-600 border-gray-200 w-fit mt-1">
+                                  <Calculator className="h-3 w-3 mr-1" />
+                                  Multi Harga
+                                </Badge>
                               )}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-
-              {filteredIngredients.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Tidak ada bahan baku yang ditemukan</p>
-                </div>
-              )}
-            </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${stockAlert.color} text-white text-xs`}>
+                              {stockAlert.text}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-medium">{ingredient.current_stock} {ingredient.unit}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-medium">{formatCurrency(ingredient.price_per_unit)}</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-medium">
+                              {formatCurrency(ingredient.current_stock * ingredient.price_per_unit)}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-gray-600">
+                              {ingredientTransactions.filter(t => t.type === 'PURCHASE').length} pembelian
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleShowPricingAnalysis(ingredient)}
+                              >
+                                <Calculator className="h-4 w-4" />
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  <DropdownMenuItem>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="text-red-600">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Hapus
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <p>Tidak ada bahan baku yang ditemukan</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Educational Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-green-200 bg-green-50">
+          <Card className="border-gray-200 bg-gray-50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-800">
+              <CardTitle className="flex items-center gap-2 text-gray-800">
                 <Target className="h-5 w-5" />
                 Manfaat Harga Rata-rata untuk UMKM
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-green-700 text-sm space-y-2">
+            <CardContent className="text-gray-700 text-sm space-y-2">
               <p>✅ <strong>HPP lebih akurat:</strong> Tidak pakai harga lama yang bisa bikin rugi</p>
               <p>✅ <strong>Profit stabil:</strong> Harga jual berdasarkan cost yang real</p>
               <p>✅ <strong>Planning lebih baik:</strong> Tahu trend harga bahan naik/turun</p>
@@ -462,14 +497,14 @@ export default function EnhancedInventoryPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-blue-200 bg-blue-50">
+          <Card className="border-gray-200 bg-gray-50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
+              <CardTitle className="flex items-center gap-2 text-gray-800">
                 <BookOpen className="h-5 w-5" />
                 Kapan Perlu Review Harga?
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-blue-700 text-sm space-y-2">
+            <CardContent className="text-gray-700 text-sm space-y-2">
               <p>🔄 <strong>Setiap kali beli bahan:</strong> Harga berubah dari pembelian sebelumnya</p>
               <p>📈 <strong>Harga naik &gt;10%:</strong> Perlu update price list dan harga jual</p>
               <p>⚠️ <strong>Stock tinggal sedikit:</strong> Pastikan harga untuk pembelian berikutnya</p>
@@ -491,11 +526,11 @@ export default function EnhancedInventoryPage() {
             {selectedIngredient && (
               <div className="mt-4">
                 {/* Quick education banner */}
-                <Alert className="mb-6 border-yellow-200 bg-yellow-50">
-                  <Lightbulb className="h-4 w-4 text-yellow-600" />
-                  <AlertDescription className="text-yellow-800">
+                <Alert className="mb-6 border-gray-200 bg-gray-50">
+                  <Lightbulb className="h-4 w-4 text-gray-600" />
+                  <AlertDescription className="text-gray-700">
                     <strong>Cara Baca:</strong> Bandingkan semua metode di bawah. 
-                    Untuk HPP yang akurat, pakai <strong>Moving Average</strong> (hijau). 
+                    Untuk HPP yang akurat, pakai <strong>Moving Average</strong> (rekomendasi). 
                     Jika ada selisih &gt;5% dari harga list, pertimbangkan update harga jual.
                   </AlertDescription>
                 </Alert>
