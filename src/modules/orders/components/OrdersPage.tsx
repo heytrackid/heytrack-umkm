@@ -103,127 +103,30 @@ export default function OrdersPage({
       setLoading(true)
       setError(null)
       
-      // Mock data for demonstration - in real app would fetch from API
-      const mockOrders: Order[] = [
-        {
-          id: '1',
-          order_number: 'ORD00001234',
-          customer_name: 'Ibu Sari',
-          customer_phone: '08123456789',
-          customer_email: 'sari@email.com',
-          status: 'confirmed',
-          priority: 'normal',
-          order_date: new Date().toISOString(),
-          due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          items: [
-            {
-              id: '1',
-              order_id: '1',
-              recipe_id: '1',
-              recipe: {
-                id: '1',
-                name: 'Roti Tawar Premium',
-                price: 25000,
-                category: 'Roti',
-                servings: 12
-              },
-              quantity: 2,
-              unit_price: 25000,
-              total_price: 50000,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          ],
-          subtotal: 50000,
-          tax_amount: 5500,
-          tax_rate: 0.11,
-          discount_amount: 0,
-          discount_percentage: 0,
-          total_amount: 55500,
-          payments: [],
-          payment_status: 'unpaid',
-          paid_amount: 0,
-          remaining_amount: 55500,
-          delivery_method: 'pickup',
-          delivery_fee: 0,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          order_number: 'ORD00001235',
-          customer_name: 'Pak Budi',
-          customer_phone: '08129876543',
-          status: 'in_production',
-          priority: 'high',
-          order_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          due_date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-          items: [
-            {
-              id: '2',
-              order_id: '2',
-              recipe_id: '2',
-              recipe: {
-                id: '2',
-                name: 'Kue Ulang Tahun',
-                price: 150000,
-                category: 'Cake',
-                servings: 8
-              },
-              quantity: 1,
-              unit_price: 150000,
-              total_price: 150000,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          ],
-          subtotal: 150000,
-          tax_amount: 16500,
-          tax_rate: 0.11,
-          discount_amount: 0,
-          discount_percentage: 0,
-          total_amount: 166500,
-          payments: [
-            {
-              id: '1',
-              order_id: '2',
-              amount: 83250,
-              method: 'transfer',
-              status: 'paid',
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }
-          ],
-          payment_status: 'partial',
-          paid_amount: 83250,
-          remaining_amount: 83250,
-          delivery_method: 'delivery',
-          delivery_address: 'Jl. Sudirman No. 123, Jakarta',
-          delivery_fee: 15000,
-          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]
+      // Fetch orders from API
+      const response = await fetch('/api/orders')
+      if (!response.ok) throw new Error('Failed to fetch orders')
+      const fetchedOrders: Order[] = await response.json()
       
-      setOrders(mockOrders)
+      setOrders(fetchedOrders)
       
       // Calculate stats
       const newStats: OrderStats = {
-        total_orders: mockOrders.length,
-        pending_orders: mockOrders.filter(o => o.status === 'pending').length,
-        confirmed_orders: mockOrders.filter(o => o.status === 'confirmed').length,
-        in_production_orders: mockOrders.filter(o => o.status === 'in_production').length,
-        completed_orders: mockOrders.filter(o => o.status === 'completed').length,
-        cancelled_orders: mockOrders.filter(o => o.status === 'cancelled').length,
-        total_revenue: mockOrders.reduce((sum, o) => sum + o.total_amount, 0),
-        pending_revenue: mockOrders.filter(o => o.payment_status === 'unpaid').reduce((sum, o) => sum + o.total_amount, 0),
-        paid_revenue: mockOrders.reduce((sum, o) => sum + o.paid_amount, 0),
-        average_order_value: mockOrders.length > 0 ? mockOrders.reduce((sum, o) => sum + o.total_amount, 0) / mockOrders.length : 0,
-        total_customers: new Set(mockOrders.map(o => o.customer_name)).size,
+        total_orders: fetchedOrders.length,
+        pending_orders: fetchedOrders.filter(o => o.status === 'pending').length,
+        confirmed_orders: fetchedOrders.filter(o => o.status === 'confirmed').length,
+        in_production_orders: fetchedOrders.filter(o => o.status === 'in_production').length,
+        completed_orders: fetchedOrders.filter(o => o.status === 'completed').length,
+        cancelled_orders: fetchedOrders.filter(o => o.status === 'cancelled').length,
+        total_revenue: fetchedOrders.reduce((sum, o) => sum + o.total_amount, 0),
+        pending_revenue: fetchedOrders.filter(o => o.payment_status === 'unpaid').reduce((sum, o) => sum + o.total_amount, 0),
+        paid_revenue: fetchedOrders.reduce((sum, o) => sum + o.paid_amount, 0),
+        average_order_value: fetchedOrders.length > 0 ? fetchedOrders.reduce((sum, o) => sum + o.total_amount, 0) / fetchedOrders.length : 0,
+        total_customers: new Set(fetchedOrders.map(o => o.customer_name)).size,
         repeat_customers: 0,
-        period_growth: 15.5,
-        revenue_growth: 23.2,
-        order_growth: 18.7
+        period_growth: 0,
+        revenue_growth: 0,
+        order_growth: 0
       }
       
       setStats(newStats)

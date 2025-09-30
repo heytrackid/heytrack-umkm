@@ -69,51 +69,13 @@ export default function RecipesPage({
   const fetchRecipes = async () => {
     try {
       setLoading(true)
-      // Mock data for now - in real app, this would fetch from Supabase
-      const mockRecipes: Recipe[] = [
-        {
-          id: '1',
-          name: 'Roti Tawar Premium',
-          description: 'Roti tawar lembut dengan bahan premium',
-          servings: 12,
-          prep_time: 30,
-          cook_time: 45,
-          difficulty: 'medium',
-          category: 'bread',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          name: 'Croissant Butter',
-          description: 'Croissant berlapis dengan butter asli',
-          servings: 8,
-          prep_time: 120,
-          cook_time: 25,
-          difficulty: 'hard',
-          category: 'pastry',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: '3',
-          name: 'Kue Coklat Fudge',
-          description: 'Kue coklat lembut dengan topping fudge',
-          servings: 16,
-          prep_time: 45,
-          cook_time: 35,
-          difficulty: 'medium',
-          category: 'cake',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-      ]
-      setRecipes(mockRecipes)
-      if (mockRecipes.length > 0) {
-        setSelectedRecipe(mockRecipes[0])
+      // Fetch recipes from API
+      const response = await fetch('/api/recipes')
+      if (!response.ok) throw new Error('Failed to fetch recipes')
+      const fetchedRecipes: Recipe[] = await response.json()
+      setRecipes(fetchedRecipes)
+      if (fetchedRecipes.length > 0) {
+        setSelectedRecipe(fetchedRecipes[0])
       }
     } catch (error) {
       console.error('Error fetching recipes:', error)

@@ -317,11 +317,15 @@ export class HPPAutomationSystem {
   }
 
   private async findRecipesUsingIngredient(ingredientId: string) {
-    // Mock implementation - in real app would query database
-    return [
-      { id: 'recipe_1', name: 'Roti Tawar' },
-      { id: 'recipe_2', name: 'Croissant' }
-    ]
+    try {
+      const response = await fetch(`/api/ingredients/${ingredientId}`)
+      if (!response.ok) return []
+      const data = await response.json()
+      return data.recipes || []
+    } catch (error) {
+      console.error('Error fetching recipes for ingredient:', error)
+      return []
+    }
   }
 
   private async getRecipeData(recipeId: string) {
@@ -486,8 +490,15 @@ export class HPPAutomationSystem {
   }
 
   private async getAllRecipeIds(): Promise<string[]> {
-    // Mock - in real app would fetch from database
-    return ['recipe_1', 'recipe_2', 'recipe_3']
+    try {
+      const response = await fetch('/api/recipes')
+      if (!response.ok) return []
+      const recipes = await response.json()
+      return recipes.map((r: any) => r.id)
+    } catch (error) {
+      console.error('Error fetching recipe IDs:', error)
+      return []
+    }
   }
 
   private getImpactLevel(change: number): 'low' | 'medium' | 'high' {
@@ -506,7 +517,7 @@ export class HPPAutomationSystem {
   }
 
   private async checkIngredientPriceChanges() {
-    // Mock implementation - in real app would check database for price updates
+    // TODO: Check database for price updates
     console.log('🔍 Checking for ingredient price changes...')
   }
 

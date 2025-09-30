@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, lazy, Suspense } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useSettings } from '@/contexts/settings-context'
 import {
@@ -34,64 +34,74 @@ export default function CashFlowPage() {
     date: new Date().toISOString().split('T')[0]
   })
 
-  // Mock cash flow data
   const [cashFlowData, setCashFlowData] = useState({
-    totalIncome: 15750000,
-    totalExpenses: 8950000,
-    netFlow: 6800000,
-    incomeTransactions: [
-      {
-        id: 1,
-        date: '2024-01-28',
-        description: 'Penjualan Roti Tawar Premium',
-        category: 'Penjualan Produk',
-        amount: 450000,
-        type: 'income'
-      },
-      {
-        id: 2,
-        date: '2024-01-28',
-        description: 'Penjualan Kue Ulang Tahun',
-        category: 'Penjualan Produk',
-        amount: 750000,
-        type: 'income'
-      },
-      {
-        id: 3,
-        date: '2024-01-27',
-        description: 'Penjualan Cookies & Pastry',
-        category: 'Penjualan Produk',
-        amount: 325000,
-        type: 'income'
-      },
-    ],
-    expenseTransactions: [
-      {
-        id: 4,
-        date: '2024-01-28',
-        description: 'Pembelian Tepung & Gula',
-        category: 'Bahan Baku',
-        amount: -235000,
-        type: 'expense'
-      },
-      {
-        id: 5,
-        date: '2024-01-27',
-        description: 'Tagihan Listrik',
-        category: 'Operasional',
-        amount: -150000,
-        type: 'expense'
-      },
-      {
-        id: 6,
-        date: '2024-01-26',
-        description: 'Gaji Karyawan',
-        category: 'SDM',
-        amount: -800000,
-        type: 'expense'
-      },
-    ],
+    totalIncome: 0,
+    totalExpenses: 0,
+    netFlow: 0,
+    incomeTransactions: [],
+    expenseTransactions: [],
   })
+
+  // Fetch cash flow data from API
+  useEffect(() => {
+    fetchCashFlowData()
+  }, [selectedPeriod])
+
+  const fetchCashFlowData = async () => {
+    try {
+      // Calculate date range based on period
+      const today = new Date()
+      let startDate = ''
+      
+      if (selectedPeriod === 'week') {
+        startDate = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0]
+      } else if (selectedPeriod === 'month') {
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
+      } else if (selectedPeriod === 'year') {
+        startDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
+      }
+
+      // Fetch income from orders (paid orders)
+      const ordersResponse = await fetch(`/api/orders?payment_status=paid&start_date=${startDate}`)
+      const ordersData = await ordersResponse.json()
+      
+      // Fetch expenses
+      const expensesResponse = await fetch(`/api/expenses?start_date=${startDate}`)
+      const expensesData = await expensesResponse.json()
+
+      // Transform data
+      const incomeTransactions = ordersData.map((order: any) => ({
+        id: order.id,
+        date: order.order_date,
+        description: `Order ${order.order_number} - ${order.customer_name}`,
+        category: 'Penjualan Produk',
+        amount: order.paid_amount || order.total_amount,
+        type: 'income'
+      }))
+
+      const expenseTransactions = expensesData.data?.map((expense: any) => ({
+        id: expense.id,
+        date: expense.expense_date,
+        description: expense.description,
+        category: expense.category,
+        amount: -Math.abs(expense.amount),
+        type: 'expense'
+      })) || []
+
+      const totalIncome = incomeTransactions.reduce((sum: number, t: any) => sum + t.amount, 0)
+      const totalExpenses = Math.abs(expenseTransactions.reduce((sum: number, t: any) => sum + t.amount, 0))
+
+      setCashFlowData({
+        totalIncome,
+        totalExpenses,
+        netFlow: totalIncome - totalExpenses,
+        incomeTransactions,
+        expenseTransactions,
+      })
+    } catch (error) {
+      console.error('Error fetching cash flow data:', error)
+    }
+  }
 
   // Categories
   const incomeCategories = [

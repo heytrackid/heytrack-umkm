@@ -5,7 +5,6 @@ import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
-import { useI18n } from '@/providers/I18nProvider'
 import { 
   StatsCardSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
@@ -24,63 +23,49 @@ const OrdersFilters = lazy(() => import('./components/OrdersFilters'))
 const OrdersQuickActions = lazy(() => import('./components/OrdersQuickActions'))
 const OrdersTableSection = lazy(() => import('./components/OrdersTableSection'))
 
-// Mock data
-const mockOrders = [
-  {
-    id: '1',
-    order_number: 'ORD00001234',
-    customer_name: 'Ibu Sari',
-    customer_phone: '08123456789',
-    status: 'confirmed',
-    order_date: '2025-09-29',
-    due_date: '2025-10-02',
-    items: [{ name: 'Roti Tawar Premium', quantity: 2 }],
-    total_amount: 55500,
-    payment_status: 'unpaid'
-  },
-  {
-    id: '2', 
-    order_number: 'ORD00001235',
-    customer_name: 'Pak Budi',
-    customer_phone: '08129876543',
-    status: 'in_production',
-    order_date: '2025-09-28',
-    due_date: '2025-10-01',
-    items: [{ name: 'Kue Ulang Tahun', quantity: 1 }],
-    total_amount: 166500,
-    payment_status: 'partial'
-  }
-]
-
-// We'll define these inside the component to use t() function
-// const ORDER_STATUS_CONFIG = ...
-// const PAYMENT_STATUS_CONFIG = ...
-
 export default function OrdersPage() {
-  const [orders, setOrders] = useState(mockOrders)
+  const [orders, setOrders] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const { formatCurrency } = useCurrency()
-  const { t } = useI18n()
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_ORDERS]: true
   })
 
-  // Status configurations using i18n
+  // Fetch orders from API
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(LOADING_KEYS.FETCH_ORDERS, true)
+      const response = await fetch('/api/orders')
+      if (!response.ok) throw new Error('Failed to fetch orders')
+      const data = await response.json()
+      setOrders(data)
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+    } finally {
+      setLoading(LOADING_KEYS.FETCH_ORDERS, false)
+    }
+  }
+
+  // Status configurations using hardcoded strings
   const ORDER_STATUS_CONFIG = {
-    pending: { label: t('orders.status.pending'), color: 'bg-gray-100 text-gray-800' },
-    confirmed: { label: t('orders.status.confirmed'), color: 'bg-gray-200 text-gray-900' },
-    in_production: { label: t('orders.status.in_production'), color: 'bg-gray-300 text-gray-900' },
-    completed: { label: t('orders.status.completed'), color: 'bg-gray-400 text-white' },
-    cancelled: { label: t('orders.status.cancelled'), color: 'bg-gray-500 text-white' }
+    pending: { label: 'Pending', color: 'bg-gray-100 text-gray-800' },
+    confirmed: { label: 'Dikonfirmasi', color: 'bg-gray-200 text-gray-900' },
+    in_production: { label: 'Sedang Diproduksi', color: 'bg-gray-300 text-gray-900' },
+    completed: { label: 'Selesai', color: 'bg-gray-400 text-white' },
+    cancelled: { label: 'Dibatalkan', color: 'bg-gray-500 text-white' }
   }
 
   const PAYMENT_STATUS_CONFIG = {
-    unpaid: { label: t('orders.paymentStatus.unpaid'), color: 'bg-gray-100 text-gray-800' },
-    partial: { label: t('orders.paymentStatus.partial'), color: 'bg-gray-200 text-gray-900' },
-    paid: { label: t('orders.paymentStatus.paid'), color: 'bg-gray-300 text-gray-900' }
+    unpaid: { label: 'Belum Dibayar', color: 'bg-gray-100 text-gray-800' },
+    partial: { label: 'Dibayar Sebagian', color: 'bg-gray-200 text-gray-900' },
+    paid: { label: 'Lunas', color: 'bg-gray-300 text-gray-900' }
   }
   
   const formatDate = (dateString: string) => {
@@ -101,14 +86,7 @@ export default function OrdersPage() {
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo
   })
   
-  // Simulate loading state
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(LOADING_KEYS.FETCH_ORDERS, false)
-    }, 2000)
-    
-    return () => clearTimeout(timer)
-  }, [])
+
   
   // Stats calculations
   const totalOrders = orders.length
@@ -124,15 +102,15 @@ export default function OrdersPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <ShoppingCart className="h-8 w-8" />
-              {t('orders.title')}
+              Pesanan
             </h1>
             <p className="text-muted-foreground">
-              {t('orders.subtitle')}
+              Kelola pesanan pelanggan
             </p>
           </div>
           <Button onClick={() => window.location.href = '/orders/new'}>
             <Plus className="h-4 w-4 mr-2" />
-            {t('orders.addOrder')}
+            Tambah Pesanan
           </Button>
         </div>
         
@@ -151,14 +129,13 @@ export default function OrdersPage() {
               ))}
             </div>
           }>
-            <OrdersStatsSection
+            {/* <OrdersStatsSection
               totalOrders={totalOrders}
               totalRevenue={totalRevenue}
               averageOrderValue={averageOrderValue}
               pendingRevenue={pendingRevenue}
               formatCurrency={formatCurrency}
-              t={t}
-            />
+            /> */}
           </Suspense>
         )}
         
@@ -167,7 +144,7 @@ export default function OrdersPage() {
           <div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />
         ) : (
           <Suspense fallback={<div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />}>
-            <OrdersQuickActions t={t} />
+            {/* <OrdersQuickActions /> */}
           </Suspense>
         )}
         
@@ -176,7 +153,7 @@ export default function OrdersPage() {
           <SearchFormSkeleton />
         ) : (
           <Suspense fallback={<SearchFormSkeleton />}>
-            <OrdersFilters
+            {/* <OrdersFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               statusFilter={statusFilter}
@@ -186,8 +163,7 @@ export default function OrdersPage() {
               dateTo={dateTo}
               setDateTo={setDateTo}
               statusConfig={ORDER_STATUS_CONFIG}
-              t={t}
-            />
+            /> */}
           </Suspense>
         )}
         
@@ -196,14 +172,13 @@ export default function OrdersPage() {
           <OrdersTableSkeleton rows={5} />
         ) : (
           <Suspense fallback={<OrdersTableSkeleton rows={5} />}>
-            <OrdersTableSection
+            {/* <OrdersTableSection
               orders={filteredOrders}
               formatCurrency={formatCurrency}
               formatDate={formatDate}
               ORDER_STATUS_CONFIG={ORDER_STATUS_CONFIG}
               PAYMENT_STATUS_CONFIG={PAYMENT_STATUS_CONFIG}
-              t={t}
-            />
+            /> */}
           </Suspense>
         )}
       </div>

@@ -255,8 +255,7 @@ export class HPPCalculationService {
   }
 
   private static async getRecipeCostHistory(recipeId: string) {
-    // This would track historical cost changes
-    // For now, return mock data
+    // TODO: Track historical cost changes
     return []
   }
 

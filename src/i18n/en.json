@@ -838,13 +838,5 @@
     "totalCOGS": "Total COGS",
     "suggestedPrice": "Suggested Price",
     "profitMargin": "Profit Margin"
-  },
-  "units": {
-    "g": "gram",
-    "kg": "kilogram",
-    "ml": "milliliter",
-    "l": "liter",
-    "pcs": "pieces",
-    "dozen": "dozen"
   }
 }

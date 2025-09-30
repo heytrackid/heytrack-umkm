@@ -849,7 +849,7 @@
   },
   "errors": {
     "componentNotAvailable": "{{component}} tidak tersedia",
-    "componentNotFound": "Komponen tidak ditemukan"
+    "componentNotFound": "Komponen tidak ditemukan",
     "confirmation": {
       "deleteItem": "Apakah Anda yakin ingin menghapus item ini?",
       "deleteItems": "Apakah Anda yakin ingin menghapus {{count}} item?",
@@ -966,22 +966,7 @@
     },
     "alerts": {
       "allHandled": "Semua alert sudah ditangani! 🎉"
-    },
-    "transactionTypes": {
-      "income": "Pemasukan",
-      "expense": "Pengeluaran"
-    },
-    "categories": {
-      "income": ["Penjualan", "Investasi", "Lain-lain"],
-      "expense": ["Bahan Baku", "Gaji", "Operasional", "Equipment", "Marketing", "Transport"]
-    },
-    "paymentMethods": {
-      "cash": "Tunai",
-      "bankTransfer": "Transfer Bank",
-      "creditCard": "Kartu Kredit",
-      "digitalWallet": "E-Wallet"
-    },
-    "all": "Semua"
+    }
   },
   "hpp": {
     "title": "Perhitungan HPP",
@@ -1090,13 +1075,5 @@
       }
     },
     "confirmDelete": "Yakin ingin menghapus \"{{name}}\"? Tindakan ini tidak dapat dibatalkan."
-  },
-  "units": {
-    "kg": "Kilogram (kg)",
-    "g": "Gram (g)",
-    "l": "Liter (l)",
-    "ml": "Milliliter (ml)",
-    "pcs": "Pieces (pcs)",
-    "dozen": "Dozen"
   }
 }

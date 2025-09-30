@@ -32,9 +32,9 @@ import {
   Search,
   Edit2,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  UserPlus
 } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 // Dynamically import the heavy table component
 const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
@@ -44,7 +44,6 @@ const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
 export default function CustomersPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency, settings } = useSettings()
-  const { t } = useI18n()
   const [searchTerm, setSearchTerm] = useState('')
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedItems, setSelectedItems] = useState<string[]>([])
@@ -52,42 +51,29 @@ export default function CustomersPage() {
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  // Simulate loading state
+
+
+  const [customers, setCustomers] = useState([])
+
+  // Fetch customer data from API
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
-    }, 1800)
-    
-    return () => clearTimeout(timer)
+    fetchCustomers()
   }, [])
 
-  // Mock customer data - replace with actual data fetching
-  const [customers] = useState([
-    {
-      id: 1,
-      name: 'Sarah Jessica',
-      email: 'sarah@email.com',
-      phone: '081234567890',
-      address: 'Jl. Merdeka No. 123, Jakarta',
-      totalOrders: 15,
-      totalSpent: 2450000,
-      status: 'active',
-      lastOrderDate: '2024-01-15'
-    },
-    {
-      id: 2,
-      name: 'Ahmad Rahman', 
-      email: 'ahmad@email.com',
-      phone: '081987654321',
-      address: 'Jl. Sudirman No. 45, Bandung',
-      totalOrders: 8,
-      totalSpent: 1200000,
-      status: 'active',
-      lastOrderDate: '2024-01-12'
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch('/api/customers')
+      if (!response.ok) throw new Error('Failed to fetch customers')
+      const data = await response.json()
+      setCustomers(data)
+    } catch (error) {
+      console.error('Error fetching customers:', error)
+    } finally {
+      setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
     }
-  ])
+  }
 
-  const filteredCustomers = customers.filter(customer =>
+  const filteredCustomers = customers.filter((customer: any) =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone.includes(searchTerm)
@@ -117,7 +103,7 @@ export default function CustomersPage() {
     const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
     
     const confirmed = window.confirm(
-      t('messages.confirmation.bulkDelete', { count: selectedItems.length, type: 'pelanggan', names: customerNames })
+      `⚠️ Yakin ingin menghapus ${selectedItems.length} pelanggan berikut?\n\n${customerNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
     )
     
     if (confirmed) {
@@ -125,7 +111,7 @@ export default function CustomersPage() {
       console.log('Deleting customers:', selectedItems)
       
       // Show success message (in real app, this would be API call)
-      alert(t('messages.success.bulkDeleted', { count: selectedItems.length, type: 'pelanggan' }))
+      alert(`✅ ${selectedItems.length} pelanggan berhasil dihapus dari sistem.`)
       
       // Clear selection
       setSelectedItems([])
@@ -141,7 +127,7 @@ export default function CustomersPage() {
     // TODO: Open bulk edit modal
     console.log('Bulk editing customers:', selectedItems)
     
-    alert(t('messages.info.bulkEditFeature', { count: selectedItems.length, type: 'pelanggan', names: customerNames }))
+    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} pelanggan akan segera tersedia!\n\nPelanggan yang dipilih:\n${customerNames}`)
   }
 
   // Individual action handlers
@@ -152,32 +138,33 @@ export default function CustomersPage() {
 
   const handleDeleteCustomer = (customer: any) => {
     const confirmed = window.confirm(
-      t('messages.confirmation.singleDelete', { type: 'pelanggan', name: customer.name })
+      `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus pelanggan:\n"${customer.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
     )
     
     if (confirmed) {
       // TODO: Implement actual API call to delete customer
       console.log('Deleting customer:', customer.id)
-      alert(t('messages.success.singleDeleted', { type: 'Pelanggan', name: customer.name }))
+      alert(`✅ Pelanggan "${customer.name}" berhasil dihapus dari sistem.`)
     }
   }
 
   const handleViewCustomer = (customer: any) => {
     console.log('View customer details:', customer)
     // TODO: Open customer detail modal or navigate to customer detail page
-    alert(t('messages.info.customerDetailFeature', { type: 'pelanggan', name: customer.name }))
+    alert(`👤 Detail pelanggan "${customer.name}" akan segera tersedia!`)
   }
 
   // Breadcrumb component
   const getBreadcrumbItems = () => {
     const items = [
-      { label: t('navigation.dashboard.title'), href: '/' },
-      { label: t('customers.customerData'), href: currentView === 'list' ? undefined : '/customers' }
+      { label: 'Dashboard', href: '/' },
+      { label: 'Data Pelanggan', href: currentView === 'list' ? undefined : '/customers' }
     ]
     
     if (currentView !== 'list') {
       items.push({ 
-        label: currentView === 'add' ? t('customers.addCustomer') : t('customers.editCustomer')
+        label: currentView === 'add' ? 'Tambah Pelanggan' : 'Edit Pelanggan',
+        href: undefined
       })
     }
     
@@ -211,20 +198,20 @@ export default function CustomersPage() {
         <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
           <div className={isMobile ? 'text-center' : ''}>
             <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              {t('customers.customerData')}
+              Data Pelanggan
             </h1>
             <p className="text-muted-foreground">
-              {t('customers.customerDatabaseDesc')}
+              Kelola database pelanggan dan riwayat pembelian
             </p>
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
             <Button variant="outline" className={isMobile ? 'w-full' : ''}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              {t('common.actions.refresh')}
+              Refresh
             </Button>
             <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
               <Plus className="h-4 w-4 mr-2" />
-              {t('customers.addCustomer')}
+              Tambah Pelanggan
             </Button>
           </div>
         </div>
@@ -244,7 +231,7 @@ export default function CustomersPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {customers.length}
               </div>
-              <p className="text-sm text-muted-foreground">{t('customers.totalCustomers')}</p>
+              <p className="text-sm text-muted-foreground">Total Pelanggan</p>
             </CardContent>
           </Card>
           <Card>
@@ -253,7 +240,7 @@ export default function CustomersPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {customers.filter(c => c.status === 'active').length}
               </div>
-              <p className="text-sm text-muted-foreground">{t('customers.activeCustomers')}</p>
+              <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
             </CardContent>
           </Card>
           <Card>
@@ -262,7 +249,7 @@ export default function CustomersPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length)}
               </div>
-              <p className="text-sm text-muted-foreground">{t('customers.averageSpending')}</p>
+              <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
             </CardContent>
           </Card>
           <Card>
@@ -271,7 +258,7 @@ export default function CustomersPage() {
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {Math.round(customers.reduce((sum, c) => sum + c.totalOrders, 0) / customers.length)}
               </div>
-              <p className="text-sm text-muted-foreground">{t('customers.averageOrders')}</p>
+              <p className="text-sm text-muted-foreground">Rata-rata Order</p>
             </CardContent>
           </Card>
           </div>
@@ -286,7 +273,7 @@ export default function CustomersPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder={t('customers.searchCustomersPlaceholder')}
+                placeholder="Cari pelanggan berdasarkan nama, email, atau nomor telepon..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -299,11 +286,11 @@ export default function CustomersPage() {
             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">
-                  {t('customers.selectedCustomers', { count: selectedItems.length })}
+                  {selectedItems.length} pelanggan dipilih
                 </span>
                 <span className="text-xs text-gray-500">
                   ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
-                  {selectedItems.length > 2 ? ` ${t('customers.otherCustomers', { count: selectedItems.length - 2 })}` : ''})
+                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
                 </span>
               </div>
               <div className="ml-auto flex items-center gap-2">
@@ -313,7 +300,7 @@ export default function CustomersPage() {
                   onClick={() => setSelectedItems([])}
                   className="text-gray-500 hover:text-gray-700"
                 >
-                  {t('common.actions.cancel')}
+                  Batal
                 </Button>
                 <Button
                   variant="outline"
@@ -321,7 +308,7 @@ export default function CustomersPage() {
                   onClick={handleBulkEdit}
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
-                  {t('customers.bulkActions.editAll')}
+                  Edit Semua
                 </Button>
                 <Button
                   variant="outline"
@@ -330,7 +317,7 @@ export default function CustomersPage() {
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {t('customers.bulkActions.deleteAll')}
+                  Hapus Semua
                 </Button>
               </div>
             </div>
@@ -365,13 +352,13 @@ export default function CustomersPage() {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  {t('customers.tips.title')}
+                  💡 Tips: Manfaatkan Data Pelanggan
                 </h3>
                 <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex items-center gap-4'}`}>
-                  <span>{t('customers.tips.trackPurchaseHistory')}</span>
-                  <span>{t('customers.tips.analyzeBestCustomers')}</span>
-                  <span>{t('customers.tips.personalizeOffers')}</span>
-                  <span>{t('customers.tips.followUpOrders')}</span>
+                  <span>• Lacak riwayat pembelian</span>
+                  <span>• Analisa pelanggan terbaik</span>
+                  <span>• Personalisasi penawaran</span>
+                  <span>• Follow up order berkala</span>
                 </div>
               </div>
             </div>

@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { whatsappService, WhatsAppTemplate, OrderData } from '@/lib/whatsapp-service';
+import { WhatsAppService, WhatsAppTemplate, OrderData, whatsappService } from '@/lib/whatsapp-service';
 import { toast } from 'react-hot-toast';
 import { useSettings } from '@/contexts/settings-context';
 

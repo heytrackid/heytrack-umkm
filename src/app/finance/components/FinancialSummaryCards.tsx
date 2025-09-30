@@ -99,9 +99,9 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
             Margin: {stats.profitMargin.toFixed(1)}%
           </p>
           <MiniChart
-            data={transactions.slice(-7).map((_, index) => ({
+            data={transactions.slice(-7).map((transaction, index) => ({
               day: index + 1,
-              profit: Math.random() * 1000000 + 500000 // Mock profit trend
+              profit: transaction.type === 'income' ? transaction.amount : -Math.abs(transaction.amount)
             }))}
             type="line"
             dataKey="profit"

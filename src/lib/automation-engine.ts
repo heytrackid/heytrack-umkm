@@ -528,16 +528,11 @@ export class WorkflowAutomation {
   private generateHPPBusinessInsights(affectedRecipes: any[]) {
     // Import smart notification system
     import('./smart-notifications').then(({ smartNotificationSystem }) => {
-      // Mock insights - in real app would analyze actual HPP data
+      // TODO: Analyze actual HPP data
       const insights = [
         {
-          type: 'optimization',
-          message: 'Identifikasi 3 resep dengan margin terendah yang perlu review pricing',
-          action: 'Review resep dengan profitabilitas rendah'
-        },
-        {
-          type: 'cost_efficiency', 
-          message: 'Ditemukan peluang penghematan 5% dengan substitusi bahan alternatif',
+          type: 'ingredient_alternatives',
+          message: 'HPP meningkat 15% bulan ini. Pertimbangkan alternatif bahan.',
           action: 'Analisis ingredient alternatives'
         },
         {

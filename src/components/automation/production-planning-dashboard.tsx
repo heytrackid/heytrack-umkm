@@ -82,10 +82,19 @@ function ProductionPlanningDashboard() {
     limit: 20
   })
 
-  // const { insertData: createProduction } = useSupabaseCRUD('productions')
-  // Temporarily create a mock function
   const createProduction = async (data: any) => {
-    console.log('Would create production:', data)
+    try {
+      const response = await fetch('/api/production-batches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      if (!response.ok) throw new Error('Failed to create production')
+      return await response.json()
+    } catch (error) {
+      console.error('Error creating production:', error)
+      throw error
+    }
   }
 
   useEffect(() => {
@@ -171,16 +180,26 @@ function ProductionPlanningDashboard() {
   }
 
   const getRecipeIngredientRequirements = async (recipeId: string) => {
-    // This would typically fetch from recipe_ingredients table
-    // For now, return sample data
-    return ingredients?.slice(0, 3).map(ingredient => ({
-      ingredient_id: ingredient.id,
-      ingredient_name: ingredient.name,
-      required_quantity: Math.random() * 500 + 100,
-      available_quantity: ingredient.current_stock,
-      unit: ingredient.unit,
-      shortage: ingredient.current_stock < 200 ? 200 - ingredient.current_stock : 0
-    })) || []
+    try {
+      const response = await fetch(`/api/recipes/${recipeId}`)
+      if (!response.ok) throw new Error('Failed to fetch recipe details')
+      const recipeData = await response.json()
+      
+      // Get ingredient details and calculate requirements
+      const requirements = recipeData.recipe_ingredients?.map((ri: any) => ({
+        ingredient_id: ri.ingredient_id,
+        ingredient_name: ri.ingredient?.name || 'Unknown',
+        required_quantity: ri.quantity,
+        available_quantity: ri.ingredient?.current_stock || 0,
+        unit: ri.ingredient?.unit || '',
+        shortage: Math.max(0, ri.quantity - (ri.ingredient?.current_stock || 0))
+      })) || []
+      
+      return requirements
+    } catch (error) {
+      console.error('Error fetching recipe requirements:', error)
+      return []
+    }
   }
 
   const calculatePriorityScore = (recipe: any, demandForecast: number): number => {

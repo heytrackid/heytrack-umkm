@@ -149,14 +149,14 @@ export function enhanceIngredientWithIntelligence(
   
   // Calculate smart metrics
   const averageUsage = merged.averageUsage || estimateUsageFromStock(basicIngredient)
-  const usageHistory = merged.usageHistory || generateMockUsageHistory(averageUsage)
+  const usageHistory = merged.usageHistory || []
   const demandForecast = calculateDemandForecast(usageHistory)
   const leadTime = merged.leadTime || 5 // Default 5 days
   const volatility = merged.volatility || determineVolatility(basicIngredient.nama)
   const alternatives = merged.alternatives || []
   const seasonality = merged.seasonality || false
   const supplierReliability = merged.supplierReliability || 80
-  const priceHistory = merged.priceHistory || generateMockPriceHistory(basicIngredient.harga)
+  const priceHistory = merged.priceHistory || []
   
   // Calculate reorder metrics
   const safetyStock = averageUsage * 0.5 // 50% safety buffer
@@ -203,16 +203,7 @@ function estimateUsageFromStock(ingredient: BasicIngredient): number {
   return ingredient.stok * 0.3 // Conservative estimate for healthy stock
 }
 
-/**
- * Generate mock usage history for forecasting
- */
-function generateMockUsageHistory(averageUsage: number): number[] {
-  const variance = averageUsage * 0.3 // 30% variance
-  return Array.from({ length: 4 }, () => {
-    const random = (Math.random() - 0.5) * 2 * variance
-    return Math.max(0, averageUsage + random)
-  })
-}
+
 
 /**
  * Calculate demand forecast using simple moving average with trend
@@ -247,18 +238,7 @@ function determineVolatility(ingredientName: string): 'low' | 'medium' | 'high' 
   return 'medium'
 }
 
-/**
- * Generate mock price history
- */
-function generateMockPriceHistory(currentPrice: number): number[] {
-  const variance = currentPrice * 0.1 // 10% price variance
-  return Array.from({ length: 4 }, (_, index) => {
-    const random = (Math.random() - 0.5) * 2 * variance
-    // Trend slightly toward current price
-    const trendFactor = (index - 1.5) * 0.02 * currentPrice
-    return Math.max(0, currentPrice + random + trendFactor)
-  })
-}
+
 
 /**
  * Generate smart actions based on ingredient analysis

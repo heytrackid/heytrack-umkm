@@ -1,9 +1,3 @@
-/**
- * WhatsApp Integration Service
- * Handles order follow-up via WhatsApp and WhatsApp Business
- * Supports customizable templates and URL generation
- */
-
 import { formatCurrency } from '@/shared/utils/currency'
 
 export interface WhatsAppTemplate {
@@ -61,7 +55,7 @@ Order ID: {order_id}
 💰 Total: *{total_amount}*
 📅 Pengiriman: {delivery_date}
 
-Pesanan sedang diproses dan akan siap sesuai jadwal. 
+Pesanan sedang diproses dan akan siap sesuai jadwal.
 
 Ada pertanyaan? Langsung chat aja ya! 🙏
 
@@ -135,7 +129,7 @@ Track pesanan atau hubungi kami jika ada pertanyaan ya! 😊
         category: 'follow_up',
         template: `Halo {customer_name}! 😊
 
-Bagaimana dengan pesanan {order_id} kemarin? Semoga suka ya dengan {product_name}! 
+Bagaimana dengan pesanan {order_id} kemarin? Semoga suka ya dengan {product_name}!
 
 ⭐ Boleh minta review honest-nya dong:
 - Rasa gimana?
