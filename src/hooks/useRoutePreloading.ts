@@ -287,8 +287,8 @@ export const useIdleTimePreloading = () => {
           preloadChartBundle().catch(() => {}),
           preloadTableBundle().catch(() => {}),
           // Preload common modals
-          preloadModalComponen"Placeholder".catch(() => {}),
-          preloadModalComponen"Placeholder".catch(() => {}),
+          preloadModalComponent(modalType).catch(() => {}),
+          preloadModalComponent(modalType).catch(() => {}),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
         })

@@ -183,7 +183,7 @@ export class EnhancedAutomationEngine {
       // Get current recipe price
       const { data: recipe } = await this.supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .eq('id', recipeId)
         .single()
 
@@ -417,7 +417,7 @@ export class EnhancedAutomationEngine {
       // Get active alerts from database
       const { data: alerts } = await this.supabase
         .from('inventory_alerts')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
 
       // Generate contextual priority alerts
@@ -530,7 +530,7 @@ export class EnhancedAutomationEngine {
     // Get recipe ingredients and check stock status
     const { data: recipeIngredients } = await this.supabase
       .from('recipe_ingredients')
-      .selec"Placeholder"
+      .select('*')
       .eq('recipe_id', recipeId)
 
     const limitingIngredients: string[] = []

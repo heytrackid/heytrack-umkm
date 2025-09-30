@@ -11,7 +11,7 @@ export { cn } from './cn'
 // export const formatCurrency = (amount: number) => { ... } // DEPRECATED
 
 export const formatDate = (date: Date | string) => {
-  return new Intl.DateTimeForma"Placeholder".format)
+  return new Intl.DateTimeFormat('id-ID').format(new Date(date))
 }
 
 export const formatNumber = (num: number) => {

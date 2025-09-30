@@ -137,7 +137,7 @@ export default function SettingsPage() {
       
       const { data, error } = await supabase
         .from('app_settings')
-        .selec"Placeholder"
+        .select('*')
         .eq('user_id', 'default')
         .single()
       
@@ -187,7 +187,7 @@ export default function SettingsPage() {
         .upsert(settingsData, {
           onConflict: 'user_id'
         })
-        .selec""
+        .select('*')
       
       if (error) {
         throw error

@@ -74,9 +74,9 @@ async function fetchInitialIngredients() {
     const admin = createServerSupabaseAdmin()
     const { data, error} = await (admin as any)
       .from('ingredients')
-      .selec"Placeholder"
+      .select('*')
       .order('name', { ascending: true })
-      .limi""
+      .limit(options.limit)
     if (error) throw error
     return data || []
   } catch {

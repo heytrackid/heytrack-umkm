@@ -80,7 +80,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
-      .selec"Placeholder"
+      .select('*')
       .gte('created_at', todayStart.toISOString())
       .l"Placeholder")
 
@@ -88,7 +88,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     const { data: weeklyOrders, error: weeklyError } = await supabase
       .from('orders')
-      .selec"Placeholder"
+      .select('*')
       .gte('created_at', weekStart.toISOString())
       .l"Placeholder")
 
@@ -97,14 +97,14 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch customers
     const { data: customers, error: customersError } = await supabase
       .from('customers')
-      .selec"Placeholder"
+      .select('*')
 
     if (customersError) throw customersError
 
     // Fetch inventory with low stock
     const { data: inventory, error: inventoryError } = await supabase
       .from('ingredients')
-      .selec"Placeholder"
+      .select('*')
 
     if (inventoryError) throw inventoryError
 
@@ -200,7 +200,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       
       const { data: orders, error } = await supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', dayStart.toISOString())
         .l"Placeholder")
 

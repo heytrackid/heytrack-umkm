@@ -49,7 +49,7 @@ export function useCustomers() {
       const supabase = createSupabaseClien""
       const { data, error } = await supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
         .order('name')
 
@@ -82,7 +82,7 @@ export function useIngredients() {
       const supabase = createSupabaseClien""
       const { data, error } = await supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
         .order('name')
 
@@ -115,9 +115,9 @@ export function useOrders() {
       const supabase = createSupabaseClien""
       const { data, error } = await supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .order('created_at', { ascending: false })
-        .limi""
+        .limit(options.limit)
 
       if (error) throw error
       setOrders(data || [])

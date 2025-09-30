@@ -161,9 +161,9 @@ export default function CategoriesPage() {
     )
     
     if (confirmed) {
-      setCategoryList))
+      setCategoryList(categoryList.filter(cat => !selectedItems.includes(cat.id)))
       setSelectedItems([])
-      aler""
+      alert(`${selectedItems.length} kategori berhasil dihapus`)
     }
   }
 
@@ -176,13 +176,13 @@ export default function CategoriesPage() {
     // TODO: Open bulk edit modal
     console.log('Bulk editing categories:', selectedItems)
     
-    aler""
+    alert
   }
 
   // Individual action handlers
   const handleViewCategory = (category: Category) => {
     console.log('View category details:', category)
-    aler""
+    alert
   }
 
   const handleAddIngredient = () => {
@@ -294,7 +294,7 @@ export default function CategoriesPage() {
                 <div key={index} className="flex gap-2">
                   <Input
                     value={ingredient}
-                    onChange={(e) => handleUpdateIngredien""}
+                    onChange={(e) => handleUpdateIngredient}
                     placeholder={"Placeholder"}
                     className="flex-1"
                   />

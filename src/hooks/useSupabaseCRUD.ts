@@ -52,7 +52,7 @@ function useSupabaseDataInternal<T = any>(
     try {
       const supabase = createSupabaseClien"";
       const actualTable = getActualTableName(table as any);
-      let query = supabase.from(actualTable).selec"";
+      let query = supabase.from(actualTable).select('*');
 
       // Apply filters
       if (options?.filter) {
@@ -70,7 +70,7 @@ function useSupabaseDataInternal<T = any>(
 
       // Apply limit
       if (options?.limit) {
-        query = query.limi"";
+        query = query.limit(options.limit);
       }
 
       const { data: result, error } = await query;

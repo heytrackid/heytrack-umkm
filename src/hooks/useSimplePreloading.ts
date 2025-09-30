@@ -18,7 +18,7 @@ const ROUTE_PRELOADING_PATTERNS = {
 // Simple preloading functions
 export const preloadChartBundle = async () => {
   try {
-    await import('@/components')
+    await import('recharts')
     console.log('✅ Chart bundle preloaded')
   } catch (error) {
     console.warn('❌ Failed to preload chart bundle:', error)
@@ -28,9 +28,9 @@ export const preloadChartBundle = async () => {
 export const preloadTableBundle = async () => {
   try {
     await Promise.all([
-      import('@/components'),
-      import('@/components'),
-      import('@/components'),
+      import('@/components/optimized/OptimizedTable'),
+      import('@/components/ui/table'),
+      import('@/components/ui/data-table'),
     ])
     console.log('✅ Table bundle preloaded')
   } catch (error) {
@@ -42,10 +42,10 @@ export const preloadModalComponent = async (modalType: string) => {
   try {
     // Simple modal preloading based on type
     if (modalType.includes('form')) {
-      await import('@/components')
+      await import('@/components/forms')
     }
     if (modalType.includes('dialog')) {
-      await import('@/components')
+      await import('@/components/ui/dialog')
     }
     console.log(`✅ Modal ${modalType} preloaded`)
   } catch (error) {
@@ -179,8 +179,8 @@ export const useIdleTimePreloading = () => {
         Promise.all([
           preloadChartBundle(),
           preloadTableBundle(),
-          preloadModalComponen"Placeholder",
-          preloadModalComponen"Placeholder",
+          preloadModalComponent(modalType),
+          preloadModalComponent(modalType),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
         }).catch(() => {})
@@ -239,7 +239,7 @@ export const LazyLoadingMetrics = {
     const loadTime = endTime - startTime
     
     LazyLoadingMetrics.loadedComponents.add(componentName)
-    LazyLoadingMetrics.loadingTimes.set(key: string, data: any, ttl: number = 300000): void {
+    LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
     
     if (loadTime > 1000) {
       console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)

@@ -24,7 +24,7 @@ export class InventoryService {
     return await inventoryCache.cachedFetch(
       'ingredients',
       async () => {
-        let query = supabase.from('ingredients').selec"Placeholder"
+        let query = supabase.from('ingredients').select('*')
     
     // Apply filters
     if (params?.filters.category) {
@@ -90,7 +90,7 @@ export class InventoryService {
       async () => {
         const { data, error } = await supabase
           .from('ingredients')
-          .selec"Placeholder"
+          .select('*')
           .eq('id', id)
           .single()
         
@@ -108,8 +108,8 @@ export class InventoryService {
   static async createIngredien"": Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
-      ..insert(data)
-      .selec""
+      .insert(data)
+      .select('*')
       .single()
     
     if (error) throw error
@@ -128,7 +128,7 @@ export class InventoryService {
       .from('ingredients')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .selec""
+      .select('*')
       .single()
     
     if (error) throw error
@@ -173,7 +173,7 @@ export class InventoryService {
     }
     
     if (limit) {
-      query = query.limi""
+      query = query.limit(options.limit)
     }
     
     const { data, error } = await query
@@ -188,8 +188,8 @@ export class InventoryService {
   static async createStockTransaction(transaction: Omit<StockTransaction, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('stock_transactions')
-      ..insert(data)
-      .selec""
+      .insert(data)
+      .select('*')
       .single()
     
     if (error) throw error

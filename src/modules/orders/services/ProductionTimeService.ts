@@ -22,7 +22,7 @@ export class ProductionTimeService {
       const recipeIds = items.map(item => item.recipe_id)
       const { data: recipes, error } = await supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .in('id', recipeIds)
 
       if (error) throw error

@@ -44,7 +44,7 @@ export class QueryCache {
     }
 
     try {
-      const query = supabase.from(table).selec"Placeholder"
+      const query = supabase.from(table).select('*')
       const result = await queryBuilder(query)
       
       this.cache.set(key, {
@@ -113,7 +113,7 @@ export const optimizedQueries = {
 
         // Pagination
         if (filters.limit) {
-          query = query.limi""
+          query = query.limit(options.limit)
         }
         if (filters.offset) {
           query = query.range(filters.offset, (filters.offset + (filters.limit || 50)) - 1)
@@ -143,14 +143,14 @@ export const optimizedQueries = {
           outOfStockCount,
           recentTransactions
         ] = await Promise.all([
-          supabase.from('ingredients').selec"Placeholder",
+          supabase.from('ingredients').select('*'),
           supabase
             .from('ingredients')
-            .selec"Placeholder"
+            .select('*')
             .filter('current_stock', 'lte', 'min_stock'),
           supabase
             .from('ingredients')
-            .selec"Placeholder"
+            .select('*')
             .eq('current_stock', 0),
           supabase
             .from('stock_transactions')
@@ -159,7 +159,7 @@ export const optimizedQueries = {
               ingredients:ingredient_id(name, unit)
             `)
             .order('created_at', { ascending: false })
-            .limi""
+            .limit(options.limit)
         ])
 
         return {

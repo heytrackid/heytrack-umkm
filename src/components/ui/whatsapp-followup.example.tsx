@@ -40,7 +40,7 @@ export default function WhatsAppFollowUpExample() {
     // 2. Update order status if needed
     // 3. Send analytics events
     // 4. Show success notification to user
-    aler""
+    alert
   }
 
   return (

@@ -14,9 +14,9 @@ export const syncEventApi = {
   async getRecentEvents(limit = 20) {
     const { data, error } = await supabase
       .from('sync_events')
-      .selec"Placeholder"
+      .select('*')
       .order('created_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
     
     if (error) throw error
     return data as SyncEvent[]
@@ -26,10 +26,10 @@ export const syncEventApi = {
   async getEventsByType(eventType: string, limit = 10) {
     const { data, error } = await supabase
       .from('sync_events')
-      .selec"Placeholder"
+      .select('*')
       .eq('event_type', eventType)
       .order('created_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
     
     if (error) throw error
     return data as SyncEvent[]
@@ -39,11 +39,11 @@ export const syncEventApi = {
   async getEventsByEntity(entityType: string, entityId: string, limit = 10) {
     const { data, error } = await supabase
       .from('sync_events')
-      .selec"Placeholder"
+      .select('*')
       .eq('entity_type', entityType)
       .eq('entity_id', entityId)
       .order('created_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
     
     if (error) throw error
     return data as SyncEvent[]
@@ -53,8 +53,8 @@ export const syncEventApi = {
   async createEven"" {
     const { data, error } = await supabase
       .from('sync_events')
-      ..insert(data)
-      .selec""
+      .insert(data)
+      .select('*')
       .single()
     
     if (error) throw error
@@ -70,7 +70,7 @@ export const syncEventApi = {
         processed_at: new Date().toISOString()
       })
       .eq('id', id)
-      .selec""
+      .select('*')
       .single()
     
     if (error) throw error
@@ -81,7 +81,7 @@ export const syncEventApi = {
   async getPendingCoun"" {
     const { count, error } = await supabase
       .from('sync_events')
-      .selec"Placeholder"
+      .select('*')
       .eq('sync_status', 'pending')
     
     if (error) throw error
@@ -95,14 +95,14 @@ export const systemMetricsApi = {
   async getLatestMetrics(metricType?: string) {
     let query = supabase
       .from('system_metrics')
-      .selec"Placeholder"
+      .select('*')
       .order('recorded_at', { ascending: false })
 
     if (metricType) {
       query = query.eq('metric_type', metricType)
     }
 
-    const { data, error } = await query.limi""
+    const { data, error } = await query.limit(options.limit)
     
     if (error) throw error
     return data as SystemMetric[]
@@ -112,8 +112,8 @@ export const systemMetricsApi = {
   async recordMetric(metric: SystemMetricInsert) {
     const { data, error } = await supabase
       .from('system_metrics')
-      ..insert(data)
-      .selec""
+      .insert(data)
+      .select('*')
       .single()
     
     if (error) throw error
@@ -124,10 +124,10 @@ export const systemMetricsApi = {
   async getSyncHealth() {
     const { data, error } = await supabase
       .from('system_metrics')
-      .selec"Placeholder"
+      .select('*')
       .eq('metric_type', 'sync_health')
       .order('recorded_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
       .single()
     
     if (error && error.code !== 'PGRST116') throw error
@@ -147,7 +147,7 @@ export const inventoryStockLogsApi = {
       `)
       .eq('ingredient_id', ingredientId)
       .order('created_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
     
     if (error) throw error
     return data
@@ -162,7 +162,7 @@ export const inventoryStockLogsApi = {
         ingredient:ingredients(name)
       `)
       .order('created_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
     
     if (error) throw error
     return data
@@ -172,8 +172,8 @@ export const inventoryStockLogsApi = {
   async logStockChange(log: InventoryStockLogInsert) {
     const { data, error } = await supabase
       .from('inventory_stock_logs')
-      ..insert(data)
-      .selec""
+      .insert(data)
+      .select('*')
       .single()
     
     if (error) throw error
@@ -200,7 +200,7 @@ export const syncDashboardApi = {
             )
           `)
           .order('created_at', { ascending: false })
-          .limi""
+          .limit(options.limit)
       ])
 
       return {
@@ -221,14 +221,14 @@ export const syncDashboardApi = {
     const [totalEvents, pendingEvents, failedEvents] = await Promise.all([
       supabase
         .from('sync_events')
-        .selec"Placeholder",
+        .select('*'),
       supabase
         .from('sync_events')
-        .selec"Placeholder"
+        .select('*')
         .eq('sync_status', 'pending'),
       supabase
         .from('sync_events')
-        .selec"Placeholder"
+        .select('*')
         .eq('sync_status', 'failed')
     ])
 

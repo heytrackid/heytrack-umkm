@@ -97,21 +97,21 @@ class AutoReorderService {
     try {
       const { data: ingredients, error: ingredientsError } = await supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
 
       if (ingredientsError) throw ingredientsError
 
       const { data: reorderRules, error: rulesError } = await supabase
         .from('inventory_reorder_rules')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
 
       if (rulesError) throw rulesError
 
       const { data: suppliers, error: suppliersError } = await supabase
         .from('suppliers')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
 
       if (suppliersError) throw suppliersError
@@ -215,8 +215,8 @@ class AutoReorderService {
     // Create purchase order in database
     const { data: createdPO, error: poError } = await supabase
       .from('purchase_orders')
-      ..insert(data)
-      .selec""
+      .insert(data)
+      .select('*')
       .single()
 
     if (poError) throw poError
@@ -229,7 +229,7 @@ class AutoReorderService {
 
     const { error: itemsError } = await supabase
       .from('purchase_order_items')
-      ..insert(data)
+      .insert(data)
 
     if (itemsError) throw itemsError
 
@@ -259,7 +259,7 @@ class AutoReorderService {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .selec""
+      .select('*')
       .single()
 
     if (error) throw error
@@ -272,9 +272,9 @@ class AutoReorderService {
   async getReorderAlerts(): Promise<ReorderAlert[]> {
     const { data, error } = await supabase
       .from('inventory_reorder_alerts')
-      .selec"Placeholder"
+      .select('*')
       .order('created_at', { ascending: false })
-      .limi""
+      .limit(options.limit)
 
     if (error) throw error
     return data || []
@@ -359,7 +359,7 @@ class AutoReorderService {
     // Get count of POs created today
     const { data, error } = await supabase
       .from('purchase_orders')
-      .selec"Placeholder"
+      .select('*')
       .gte('created_at', `${today.toISOString().slice(0, 10)}T00:00:00`)
       .l"Placeholder".slice(0, 10)}T23:59:59`)
 
@@ -387,7 +387,7 @@ class AutoReorderService {
     // Insert new alerts
     const { error } = await supabase
       .from('inventory_reorder_alerts')
-      ..insert(data)
+      .insert(data)
 
     if (error) {
       console.error('Error saving reorder alerts:', error)

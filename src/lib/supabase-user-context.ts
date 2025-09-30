@@ -130,14 +130,14 @@ export class SupabaseUserContext {
       const [ordersResult, expensesResult] = await Promise.all([
         supabaseServer
           .from('orders')
-          .selec"Placeholder"
+          .select('*')
           .gte('created_at', thirtyDaysAgo.toISOString())
           .eq('status', 'COMPLETED')
           .order('created_at', { ascending: false }),
         
         supabaseServer
           .from('financial_records')
-          .selec"Placeholder"
+          .select('*')
           .eq('type', 'EXPENSE')
           .gte('created_at', thirtyDaysAgo.toISOString())
           .order('created_at', { ascending: false })
@@ -180,12 +180,12 @@ export class SupabaseUserContext {
       const [ingredientsResult, lowStockResult] = await Promise.all([
       supabaseServer
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .order('current_stock', { ascending: true }),
       
       supabaseServer
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .filter('current_stock', 'lte', 'min_stock')
         .order('current_stock', { ascending: true })
     ]);
@@ -233,15 +233,15 @@ export class SupabaseUserContext {
     const [customersResult, recentOrdersResult] = await Promise.all([
       supabaseServer
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .order('total_spent', { ascending: false }),
       
       supabaseServer
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limi""
+        .limit(options.limit)
     ]);
 
     const customers = customersResult.data || [];
@@ -287,14 +287,14 @@ export class SupabaseUserContext {
       const [recipesResult, productionResult] = await Promise.all([
       supabaseServer
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .order('times_made', { ascending: false }),
       
       supabaseServer
         .from('productions')
-        .selec"Placeholder"
+        .select('*')
         .order('created_at', { ascending: false })
-        .limi""
+        .limit(options.limit)
     ]);
 
     const recipes = recipesResult.data || [];
@@ -346,24 +346,24 @@ export class SupabaseUserContext {
     const [orders, productions, transactions] = await Promise.all([
       supabaseServer
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', oneDayAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limi"",
+        .limit(options.limit),
       
       supabaseServer
         .from('productions')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', oneDayAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limi"",
+        .limit(options.limit),
       
       supabaseServer
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', oneDayAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limi""
+        .limit(options.limit)
     ]);
 
     const activities = [

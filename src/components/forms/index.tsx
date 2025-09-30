@@ -65,22 +65,22 @@ export const LazyFinancialRecordForm = dynamic(
 // Preloading functions for better UX
 export const preloadIngredientForm = () => {
   const componentImport = () => import('@/components')
-  componentImpor""
+  componentImport()
 }
 
 export const preloadRecipeForm = () => {
   const componentImport = () => import('@/components')
-  componentImpor""
+  componentImport()
 }
 
 export const preloadCustomerForm = () => {
   const componentImport = () => import('@/components')
-  componentImpor""
+  componentImport()
 }
 
 export const preloadFinancialRecordForm = () => {
   const componentImport = () => import('@/components')
-  componentImpor""
+  componentImport()
 }
 
 // Enhanced Forms bundle for lazy loading (backward compatibility)

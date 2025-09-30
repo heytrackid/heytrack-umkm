@@ -53,7 +53,7 @@ export default function CostForm({
 
   const handleSubmit = () => {
     if (!formData.category || !formData.amount) {
-      aler""
+      alert
       return
     }
     onSave(formData)

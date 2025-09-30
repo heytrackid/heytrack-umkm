@@ -82,7 +82,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     console.log(`Update ${selectedIngredient?.name} price to ${newPrice} using ${method} method`)
 
     // Show success message
-    aler""} using ${method} method`)
+    alert} using ${method} method`)
   }, [selectedIngredient])
 
   // Bulk action handlers
@@ -116,7 +116,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
       try {
         const deletePromises = selectedItems.map(id => fetch(`/api/ingredients/${id}`, { method: 'DELETE' }))
         await Promise.all(deletePromises)
-        aler""
+        alert
         setSelectedItems([])
         refetch()
       } catch (error) {
@@ -134,7 +134,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     // TODO: Open bulk edit modal or navigate to bulk edit page
     console.log('Bulk editing ingredients:', selectedItems)
 
-    aler""
+    alert
   }
 
   // Individual action handlers
@@ -156,7 +156,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
       try {
         const response = await fetch(`/api/ingredients/${ingredient.id}`, { method: 'DELETE' })
         if (!response.ok) throw new Error('Failed')
-        aler""
+        alert
         refetch()
       } catch (error) {
         alert

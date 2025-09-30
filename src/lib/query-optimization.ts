@@ -22,18 +22,18 @@ export class QueryOptimizer {
     searchByName: (searchTerm: string, limit: number = 50) => {
       return supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .textSearch('name', searchTerm)
         .eq('is_active', true)
         .order('name')
-        .limi"";
+        .limit(options.limit);
     },
 
     // Uses idx_ingredients_category for fast category filtering
     getByCategory: (category: string) => {
       return supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('category', category)
         .eq('is_active', true)
         .order('current_stock', { ascending: false });
@@ -43,7 +43,7 @@ export class QueryOptimizer {
     getLowStockIngredients: () => {
       return supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .filter('current_stock', 'lte', 'min_stock')
         .eq('is_active', true)
         .order('current_stock', { ascending: true });
@@ -53,7 +53,7 @@ export class QueryOptimizer {
     getStockStatus: () => {
       return supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
         .order('current_stock', { ascending: true });
     },
@@ -62,7 +62,7 @@ export class QueryOptimizer {
     getBySupplier: (supplier: string) => {
       return supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('supplier', supplier)
         .eq('is_active', true)
         .order('name');
@@ -72,9 +72,9 @@ export class QueryOptimizer {
     getCostAnalysis: () => {
       return supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
-        .g"Placeholder"
+        .gte(0)
         .order('total_value', { ascending: false });
     }
   };
@@ -87,17 +87,17 @@ export class QueryOptimizer {
     getByStatus: (status: string, limit: number = 100) => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .eq('status', status)
         .order('created_at', { ascending: false })
-        .limi"";
+        .limit(options.limit);
     },
 
     // Uses idx_orders_customer_id for customer order lookup
     getByCustomer: (customerId: string) => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .eq('customer_id', customerId)
         .order('created_at', { ascending: false });
     },
@@ -106,7 +106,7 @@ export class QueryOptimizer {
     getByDateRange: (startDate: string, endDate: string) => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', startDate)
         .lte('created_at', endDate)
         .order('created_at', { ascending: false });
@@ -116,7 +116,7 @@ export class QueryOptimizer {
     getDeliverySchedule: (date: string) => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .eq('delivery_date', date)
         .in('status', ['CONFIRMED', 'IN_PROGRESS'])
         .order('delivery_time', { ascending: true });
@@ -126,7 +126,7 @@ export class QueryOptimizer {
     getUrgentOrders: () => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .in('priority', ['high', 'urgent'])
         .neq('status', 'DELIVERED')
         .order('delivery_date', { ascending: true });
@@ -136,19 +136,19 @@ export class QueryOptimizer {
     fullTextSearch: (searchTerm: string) => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .textSearch('customer_name,notes,order_no', searchTerm)
         .order('created_at', { ascending: false })
-        .limi"";
+        .limit(options.limit);
     },
 
     // Uses idx_orders_analytics for dashboard analytics
     getAnalytics: (startDate: string, endDate: string) => {
       return supabase
         .from('orders')
-        .selec"Placeholder"
+        .select('*')
         .eq('status', 'DELIVERED')
-        .g"Placeholder"
+        .gte(0)
         .gte('created_at', startDate)
         .lte('created_at', endDate)
         .order('created_at', { ascending: false });
@@ -163,7 +163,7 @@ export class QueryOptimizer {
     searchByName: (searchTerm: string) => {
       return supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .textSearch('name', searchTerm)
         .eq('is_active', true)
         .order('times_made', { ascending: false });
@@ -173,7 +173,7 @@ export class QueryOptimizer {
     getByCategory: (category: string) => {
       return supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .eq('category', category)
         .eq('is_active', true)
         .order('name');
@@ -183,7 +183,7 @@ export class QueryOptimizer {
     getActiveRecipes: () => {
       return supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
         .order('name');
     },
@@ -192,21 +192,21 @@ export class QueryOptimizer {
     getPopularRecipes: (limit: number = 10) => {
       return supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
-        .g"Placeholder"
+        .gte(0)
         .order('times_made', { ascending: false })
         .order('total_revenue', { ascending: false })
-        .limi"";
+        .limit(options.limit);
     },
 
     // Uses idx_recipes_profitability for profitability analysis
     getProfitabilityAnalysis: () => {
       return supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
-        .g"Placeholder"
+        .gte(0)
         .order('total_revenue', { ascending: false });
     },
 
@@ -214,10 +214,10 @@ export class QueryOptimizer {
     fullTextSearch: (searchTerm: string) => {
       return supabase
         .from('recipes')
-        .selec"Placeholder"
+        .select('*')
         .textSearch('name,description,category', searchTerm)
         .eq('is_active', true)
-        .limi"";
+        .limit(options.limit);
     }
   };
 
@@ -229,7 +229,7 @@ export class QueryOptimizer {
     searchByName: (searchTerm: string) => {
       return supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .textSearch('name', searchTerm)
         .eq('is_active', true)
         .order('total_spent', { ascending: false });
@@ -239,7 +239,7 @@ export class QueryOptimizer {
     getByPhone: (phone: string) => {
       return supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .eq('phone', phone)
         .single();
     },
@@ -248,7 +248,7 @@ export class QueryOptimizer {
     getByEmail: (email: string) => {
       return supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .eq('email', email)
         .single();
     },
@@ -257,7 +257,7 @@ export class QueryOptimizer {
     getByType: (customerType: string) => {
       return supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .eq('customer_type', customerType)
         .eq('is_active', true)
         .order('total_spent', { ascending: false });
@@ -267,9 +267,9 @@ export class QueryOptimizer {
     getValueAnalysis: () => {
       return supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
-        .g"Placeholder"
+        .gte(0)
         .order('total_spent', { ascending: false });
     },
 
@@ -277,11 +277,11 @@ export class QueryOptimizer {
     getTopCustomers: (limit: number = 20) => {
       return supabase
         .from('customers')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_active', true)
         .order('total_spent', { ascending: false })
         .order('total_orders', { ascending: false })
-        .limi"";
+        .limit(options.limit);
     }
   };
 
@@ -293,7 +293,7 @@ export class QueryOptimizer {
     getByType: (type: 'INCOME' | 'EXPENSE', startDate?: string, endDate?: string) => {
       let query = supabase
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .eq('type', type)
         .order('date', { ascending: false });
 
@@ -307,7 +307,7 @@ export class QueryOptimizer {
     getCategoryBreakdown: (startDate: string, endDate: string) => {
       return supabase
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .gte('date', startDate)
         .lte('date', endDate)
         .order('category')
@@ -318,10 +318,10 @@ export class QueryOptimizer {
     getLargeTransactions: (minAmount: number = 1000000) => {
       return supabase
         .from('financial_records')
-        .selec"Placeholder"
-        .g"Placeholder"
+        .select('*')
+        .gte(0)
         .order('amount', { ascending: false })
-        .limi"";
+        .limit(options.limit);
     }
   };
 
@@ -344,7 +344,7 @@ export class QueryOptimizer {
           )
         `)
         .order('created_at', { ascending: false })
-        .limi"";
+        .limit(options.limit);
     },
 
     // Optimized recipe with ingredients query
@@ -387,29 +387,29 @@ export class QueryOptimizer {
         // Uses idx_orders_created_at
         supabase
           .from('orders')
-          .selec"Placeholder"
+          .select('*')
           .gte('created_at', startDate)
           .lte('created_at', endDate),
         
         // Uses idx_ingredients_low_stock  
         supabase
           .from('ingredients')
-          .selec"Placeholder"
+          .select('*')
           .filter('current_stock', 'lte', 'min_stock')
           .eq('is_active', true),
           
         // Uses idx_customers_active
         supabase
           .from('customers')
-          .selec"Placeholder"
+          .select('*')
           .eq('is_active', true),
           
         // Uses idx_orders_analytics
         supabase
           .from('orders')
-          .selec"Placeholder"
+          .select('*')
           .eq('status', 'DELIVERED')
-          .g"Placeholder"
+          .gte(0)
           .gte('created_at', startDate)
           .lte('created_at', endDate)
       ]);
@@ -443,7 +443,7 @@ export class QueryPerformanceMonitor {
       // Store query time for analysis
       const times = this.queryTimes.get(key) || [];
       times.push(duration);
-      this.queryTimes.set(key: string, data: any, ttl: number = 300000): void {); // Keep last 100 measurements
+      this.queryTimes.set(key, times.slice(-100)); // Keep last 100 measurements
       
       console.log(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
       
@@ -504,7 +504,7 @@ export const OptimizedQueries = {
       QueryOptimizer.ingredients.getLowStockIngredients(),
       supabase
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .filter('current_stock', 'lte', 'reorder_point')
         .eq('is_active', true)
     ]);

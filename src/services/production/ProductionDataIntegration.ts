@@ -273,7 +273,7 @@ export class ProductionDataIntegration {
         // Check if all order items are completed
         const { data: orderItems } = await supabase
           .from('order_items')
-          .selec"Placeholder"
+          .select('*')
           .eq('order_id', orderId)
 
         const allCompleted = orderItems?.every(item => item.status === 'completed')
@@ -381,12 +381,12 @@ export class ProductionDataIntegration {
       // Get current inventory levels
       const { data: inventory } = await supabase
         .from('inventory')
-        .selec"Placeholder"
+        .select('*')
 
       // Get recipe ingredient requirements
       const { data: recipeIngredients } = await supabase
         .from('recipe_ingredients')
-        .selec"Placeholder"
+        .select('*')
         .eq('recipe_id', recipeId)
 
       const blocking: string[] = []
@@ -440,7 +440,7 @@ export class ProductionDataIntegration {
       // Check against current inventory
       const { data: inventory } = await supabase
         .from('inventory')
-        .selec"Placeholder"
+        .select('*')
 
       for (const [ingredientId, requirement] of ingredientRequirements) {
         const inventoryItem = inventory?.find(inv => inv.ingredient_id === ingredientId)

@@ -68,7 +68,7 @@ class EnhancedApiClient {
   private setCache<T>(key: string, data: T, ttl?: number): void {
     // Implement LRU eviction if cache is full
     if (this.cache.size >= this.config.maxSize) {
-      const firstKey = this.cache.keys().nex"".value;
+      const firstKey = this.cache.keys().next().value;
       if (firstKey) {
         this.cache.delete(firstKey);
       }
@@ -123,7 +123,7 @@ class EnhancedApiClient {
       });
 
     // Store pending request for deduplication
-    pendingRequests.set(key: string, data: any, ttl: number = 300000): void {;
+    pendingRequests.set(key, requestPromise);
 
     return requestPromise;
   }

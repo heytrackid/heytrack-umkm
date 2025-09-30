@@ -46,7 +46,7 @@ export class AutoSyncFinancialService {
       // Count auto-synced records from last 30 days
       const { data: syncedRecords, error } = await supabase
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
         .eq('metadata->>auto_synced', 'true')
 
@@ -73,7 +73,7 @@ export class AutoSyncFinancialService {
       // Check if there have been stock transactions but no corresponding financial records
       const { data: recentTransactions } = await supabase
         .from('stock_transactions')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
         .in('type', ['PURCHASE', 'ADJUSTMENT'])
 
@@ -114,10 +114,10 @@ export class AutoSyncFinancialService {
     try {
       const { data: records, error } = await supabase
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .eq('metadata->>auto_synced', 'true')
         .order('created_at', { ascending: false })
-        .limi""
+        .limit(options.limit)
 
       if (error) {
         console.error('Error fetching synced transactions:', error)
@@ -150,7 +150,7 @@ export class AutoSyncFinancialService {
       // Get the stock transaction
       const { data: transaction, error: txError } = await supabase
         .from('stock_transactions')
-        .selec"Placeholder"
+        .select('*')
         .eq('id', transactionId)
         .single()
 
@@ -162,7 +162,7 @@ export class AutoSyncFinancialService {
       // Check if already synced
       const { data: existingRecord } = await supabase
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .eq('metadata->>transaction_id', transactionId)
         .eq('metadata->>auto_synced', 'true')
         .single()
@@ -260,7 +260,7 @@ export class AutoSyncFinancialService {
         for (const tx of unsynced) {
           const { data: existing } = await supabase
             .from('financial_records')
-            .selec"Placeholder"
+            .select('*')
             .eq('metadata->>transaction_id', tx.id)
             .single()
 
@@ -354,7 +354,7 @@ export class AutoSyncFinancialService {
       
       const { data: records, error } = await supabase
         .from('financial_records')
-        .selec"Placeholder"
+        .select('*')
         .gte('created_at', startDate)
         .eq('metadata->>auto_synced', 'true')
         .order('date', { ascending: false })

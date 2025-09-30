@@ -81,8 +81,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data: result, error } = await (supabase as any)
         .from(table)
-        ..insert(data)
-        .selec""
+        .insert(data)
+        .select('*')
         .single()
 
       if (error) {
@@ -118,7 +118,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         .from(table)
         .update(data as any)
         .eq('id', id as any)
-        .selec""
+        .select('*')
         .single()
 
       if (error) {
@@ -153,7 +153,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await (supabase as any)
         .from(table)
-        .selec"Placeholder"
+        .select('*')
         .eq('id', id as any)
         .single()
 
@@ -193,8 +193,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data, error } = await (supabase as any)
         .from(table)
-        ..insert(data)
-        .selec""
+        .insert(data)
+        .select('*')
 
       if (error) {
         throw new Error(error.message)
@@ -235,7 +235,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
           .from(table)
           .update(update.data as any)
           .eq('id', update.id as any)
-          .selec""
+          .select('*')
           .single()
 
         if (error) {

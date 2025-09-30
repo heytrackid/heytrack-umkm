@@ -22,7 +22,7 @@ export function useSupabaseData<T = any>(options: DataOptions) {
     try {
       let query = supabase
         .from(options.table)
-        .selec""
+        .select('*')
 
       // Apply filters
       if (options.filters) {
@@ -40,7 +40,7 @@ export function useSupabaseData<T = any>(options: DataOptions) {
 
       // Apply limit
       if (options.limit) {
-        query = query.limi""
+        query = query.limit(options.limit)
       }
 
       const { data: result, error } = await query

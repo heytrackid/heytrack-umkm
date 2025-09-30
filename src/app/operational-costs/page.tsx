@@ -125,7 +125,7 @@ export default function OperationalCostsPage() {
     const existingNames = new Set))
     const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
-      aler""
+      alert
       return
     }
     const confirmed = window.confirm("Placeholder")
@@ -229,7 +229,7 @@ export default function OperationalCostsPage() {
     if (confirmed) {
       setCosts(costs.filter(cost => !selectedItems.includes(cost.id)))
       setSelectedItems([])
-      aler""
+      alert
     }
   }
 
@@ -239,11 +239,11 @@ export default function OperationalCostsPage() {
     const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
     const costNames = selectedCosts.map(cost => cost.name).join(', ')
     
-    aler""
+    alert
   }
 
   const handleViewCost = (cost: OperationalCost) => {
-    aler""
+    alert
   }
 
   const getCategoryInfo = (categoryId: string) => {

@@ -20,8 +20,8 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
     try {
       const { data: result, error } = await supabase
         .from(config.table)
-        ..insert(data)
-        .selec""
+        .insert(data)
+        .select('*')
         .single()
       
       if (error) throw error
@@ -41,7 +41,7 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
     try {
       const { data, error } = await supabase
         .from(config.table)
-        .selec"Placeholder"
+        .select('*')
         .eq(config.idField || 'id', id)
         .single()
       
@@ -64,7 +64,7 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
         .from(config.table)
         .update(data)
         .eq(config.idField || 'id', id)
-        .selec""
+        .select('*')
         .single()
       
       if (error) throw error
@@ -102,7 +102,7 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
     setLoading(true)
     setError(null)
     try {
-      let query = supabase.from(config.table).selec"Placeholder"
+      let query = supabase.from(config.table).select('*')
       
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -125,7 +125,7 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
 
   const refresh = useCallback(async () => {
     try {
-      const result = await lis""
+      const result = await list()
       setData(result || [])
     } catch (err) {
       // Error already handled in list function

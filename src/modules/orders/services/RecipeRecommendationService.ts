@@ -35,7 +35,7 @@ export class RecipeRecommendationService {
       query = query
         .eq('status', 'completed')
         .order('created_at', { ascending: false })
-        .limi"" // Get recent orders
+        .limit(options.limit) // Get recent orders
 
       const { data: orders, error } = await query
 

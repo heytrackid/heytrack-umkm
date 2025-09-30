@@ -92,7 +92,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
   const addOrderItem = () => {
     if (availableRecipes.length === 0) {
-      aler""
+      alert
       return
     }
 
@@ -155,7 +155,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
     e.preventDefault
 
     if (!formData.customer_name || orderItems.length === 0) {
-      aler""
+      alert
       return
     }
 
