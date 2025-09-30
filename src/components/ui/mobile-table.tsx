@@ -352,13 +352,13 @@ export const TableRenderers = {
     )
   },
   
-  boolean: (value: boolean, t: (key: string) => string) => (
+  boolean: (value: boolean) => (
     <Badge variant={value ?"default" :"secondary"}>
       {value ? "Placeholder" : "Placeholder"}
     </Badge>
   ),
   
-  stock: (current: number, min: number, t: (key: string) => string) => (
+  stock: (current: number, min: number) => (
     <div className="space-y-1">
       <div className="font-medium">{current}</div>
       {current <= min && (
@@ -375,8 +375,7 @@ export const createCommonActions = {
   crud: <T,>(
     onEdit: (item: T) => void,
     onDelete: (item: T) => void,
-    onView?: (item: T) => void,
-    t: (key: string) => string
+    onView?: (item: T) => void
   ): MobileTableAction<T>[] => [
     ...(onView ? [{
       label: "Placeholder",
