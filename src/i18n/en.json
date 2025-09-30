@@ -206,9 +206,63 @@
     "title": "Recipes",
     "subtitle": "Manage product recipes",
     "addRecipe": "Add Recipe",
+    "editRecipe": "Edit Recipe",
     "totalRecipes": "Total Recipes",
     "readyForCOGS": "Ready for COGS",
-    "needsIngredients": "Needs Ingredients"
+    "needsIngredients": "Needs Ingredients",
+    "pageTitle": "Product Recipes",
+    "pageDescription": "Create and manage recipes to calculate COGS",
+    "addNewRecipe": "Add New Recipe",
+    "createRecipeDesc": "Create product recipe for COGS calculation",
+    "productName": "Product Name",
+    "productNamePlaceholder": "Example: Premium White Bread",
+    "descriptionPlaceholder": "Short description about the product...",
+    "ingredientComposition": "Ingredient Composition",
+    "autoAdd": "Auto Add",
+    "manualAdd": "Add Manual",
+    "mainPageDescription": "Create and manage recipes to calculate COGS automatically",
+    "manageCategories": "Manage Categories",
+    "totalRecipesLabel": "Total Recipes",
+    "availableIngredients": "Available Ingredients",
+    "readyForHPP": "Ready for COGS",
+    "searchPlaceholder": "Search recipes by name, description, or category...",
+    "selectedRecipes": "{{count}} recipes selected",
+    "otherRecipes": "+{{count}} more",
+    "saveRecipe": "Save Recipe",
+    "noIngredientData": "No ingredient data yet",
+    "addIngredientsFirst": "Please add ingredients first",
+    "manageIngredients": "Manage Ingredients",
+    "ingredient": "Ingredient",
+    "selectIngredient": "Select ingredient",
+    "quantity": "Quantity",
+    "tips": {
+      "title": "💡 Tips: Easy Way to Create Recipes",
+      "step1": "• Input product name (example: \"White Bread\")",
+      "step2": "• Select ingredients from list",
+      "step3": "• Enter measurements (gram/ml/pcs)",
+      "step4": "• COGS will be calculated automatically!"
+    },
+    "table": {
+      "recipeList": "Recipe List",
+      "manageRecipesEasily": "Manage product recipes easily",
+      "nameCategory": "Name & Category",
+      "hppEstimate": "COGS Estimate",
+      "ingredientCount": "Ingredient Count",
+      "readyHPP": "READY COGS",
+      "needIngredients": "NEEDS INGREDIENTS",
+      "ingredients": "{{count}} ingredients",
+      "calculateHPP": "Calculate COGS"
+    },
+    "empty": {
+      "noIngredients": "No ingredient data yet",
+      "addIngredientsBeforeRecipes": "Before creating recipes, you need to add ingredients first",
+      "goToIngredients": "Go to Ingredients",
+      "noResults": "No search results",
+      "noRecipes": "No recipes yet",
+      "tryDifferentKeyword": "Try different keywords to find recipes",
+      "startAddingRecipes": "Start by adding your first product recipe",
+      "addFirstRecipe": "Add First Recipe"
+    }
   },
   "orders": {
     "title": "Orders",
@@ -311,6 +365,8 @@
       "saved": "Successfully saved!",
       "updated": "Successfully updated!",
       "deleted": "Successfully deleted!",
+      "bulkDeleted": "Successfully deleted {{count}} {{type}}!",
+      "singleDeleted": "{{type}} '{{name}}' successfully deleted!",
       "created": "Successfully created!",
       "exported": "Successfully exported!",
       "imported": "Successfully imported!"
@@ -326,15 +382,25 @@
     "confirmation": {
       "deleteItem": "Are you sure you want to delete this item?",
       "deleteItems": "Are you sure you want to delete {{count}} items?",
+      "bulkDelete": "Are you sure you want to delete {{count}} {{type}}? ({{names}})",
+      "singleDelete": "Are you sure you want to delete {{type}} '{{name}}'?",
       "unsavedChanges": "You have unsaved changes. Do you want to save them?",
       "confirmAction": "Are you sure you want to perform this action?"
     },
     "info": {
       "loading": "Loading data...",
+      "loadingSpecific": "Loading {{type}}...",
       "saving": "Saving...",
       "processing": "Processing...",
       "noChanges": "No changes detected",
-      "dataUpdated": "Data has been updated"
+      "dataUpdated": "Data has been updated",
+      "bulkEditFeature": "Bulk edit feature: Will edit {{count}} {{type}} ({{names}})",
+      "detailFeature": "Detail view feature: Viewing details of {{type}} '{{name}}'"
+    },
+    "features": {
+      "autoPopulateTitle": "💡 Smart Auto-Populate Feature",
+      "autoPopulateDesc": "System will automatically add common ingredients for {{category}}",
+      "ingredientsToAdd": "Ingredients: {{ingredients}}"
     }
   },
   "buttons": {
