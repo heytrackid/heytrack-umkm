@@ -11,9 +11,11 @@ import { OrderFormProps, Order, OrderItem } from '../types'
 import { ORDER_PRIORITIES, ORDER_CONFIG } from '../constants'
 import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useI18n } from '@/providers/I18nProvider'
 
 export function OrderForm({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) {
   const { formatCurrency } = useCurrency()
+  const { t } = useI18n()
   const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
   const [availableCustomers, setAvailableCustomers] = useState<any[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
@@ -92,7 +94,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
   const addOrderItem = () => {
     if (availableRecipes.length === 0) {
-      alert('Belum ada resep tersedia. Tambahkan resep terlebih dahulu.')
+      alert(t('orders.errors.noRecipesAvailable'))
       return
     }
 
@@ -155,7 +157,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
     e.preventDefault()
 
     if (!formData.customer_name || orderItems.length === 0) {
-      alert('Nama pelanggan dan minimal 1 item pesanan harus diisi')
+      alert(t('orders.errors.customerAndItemRequired'))
       return
     }
 

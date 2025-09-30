@@ -8,6 +8,7 @@
       "placeholder": "Cari resep, bahan, pesanan..."
     },
     "actions": {
+      "title": "Aksi",
       "add": "Tambah",
       "quickSetup": "Setup Cepat",
       "edit": "Edit",
@@ -21,11 +22,12 @@
       "refresh": "Refresh",
       "export": "Export",
       "import": "Import",
-      "print": "Print",
-      "download": "Download",
-      "upload": "Upload",
+      "print": "Cetak",
+      "download": "Unduh",
+      "upload": "Unggah",
       "view": "Lihat",
-      "close": "Tutup"
+      "close": "Tutup",
+      "update": "Update"
     },
     "status": {
       "active": "Aktif",
@@ -191,7 +193,10 @@
     },
     "messages": {
       "whyImportant": "💡 Mengapa Biaya Operasional Penting?",
-      "whyImportantDesc": "Biaya operasional digunakan untuk menghitung HPP yang akurat. Semakin lengkap data biaya, semakin tepat perhitungan harga jual produk Anda."
+      "whyImportantDesc": "Biaya operasional digunakan untuk menghitung HPP yang akurat. Semakin lengkap data biaya, semakin tepat perhitungan harga jual produk Anda.",
+      "allTemplatesExist": "Semua item template sudah ada. Anda bisa menambah/ubah secara manual.",
+      "addTemplateConfirm": "Tambah template biaya operasional standar? Anda bisa mengubah nilainya setelah ditambahkan.",
+      "deleteConfirm": "Apakah Anda yakin ingin menghapus biaya ini?"
     }
   },
   "inventory": {
@@ -320,7 +325,11 @@
       "actions": "Actions",
       "due": "Due"
     },
-    "exportData": "Export Data"
+    "exportData": "Export Data",
+    "errors": {
+      "noRecipesAvailable": "Belum ada resep tersedia. Tambahkan resep terlebih dahulu.",
+      "customerAndItemRequired": "Nama pelanggan dan minimal 1 item pesanan harus diisi"
+    }
   },
   "customers": {
     "title": "Pelanggan",

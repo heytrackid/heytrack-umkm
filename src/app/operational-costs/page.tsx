@@ -128,10 +128,10 @@ export default function OperationalCostsPage() {
     const existingNames = new Set(costs.map(c => c.name.toLowerCase()))
     const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
-      alert('Semua item template sudah ada. Anda bisa menambah/ubah secara manual.')
+      alert(t('operationalCosts.messages.allTemplatesExist'))
       return
     }
-    const confirmed = window.confirm('Tambah template biaya operasional standar? Anda bisa mengubah nilainya setelah ditambahkan.')
+    const confirmed = window.confirm(t('operationalCosts.messages.addTemplateConfirm'))
     if (!confirmed) return
     setCosts(prev => [...prev, ...template])
   }
@@ -199,7 +199,7 @@ export default function OperationalCostsPage() {
   }
 
   const handleDeleteCost = (costId: string) => {
-    if (confirm('Apakah Anda yakin ingin menghapus biaya ini?')) {
+    if (confirm(t('operationalCosts.messages.deleteConfirm'))) {
       setCosts(costs.filter(cost => cost.id !== costId))
     }
   }
