@@ -2,20 +2,20 @@
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent } from '@/components/ui/card'
-import { Calendar } from '@/components/ui/calendar'
+import { Textarea } from '@/components/ui/textarea'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { format } from 'date-fns'
+import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon, Save, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
 
 interface CostFormProps {
   cost?: any
-  onSave: (cost: any) => void
+  onSave: (data: any) => void
   onCancel: () => void
   isMobile?: boolean
 }
@@ -53,7 +53,7 @@ export default function CostForm({
 
   const handleSubmit = () => {
     if (!formData.category || !formData.amount) {
-      alert
+      alert('Harap isi kategori dan jumlah')
       return
     }
     onSave(formData)
@@ -64,13 +64,13 @@ export default function CostForm({
       <CardContent className="p-6 space-y-4">
         {/* Category */}
         <div className="space-y-2">
-          <Label>{"Placeholder"} *</Label>
+          <Label>Kategori *</Label>
           <Select 
             value={formData.category}
             onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
           >
             <SelectTrigger>
-              <SelectValue placeholder={"Placeholder"} />
+              <SelectValue placeholder="Pilih kategori" />
             </SelectTrigger>
             <SelectContent>
               {costCategories.map(cat => (
@@ -84,28 +84,28 @@ export default function CostForm({
 
         {/* Description */}
         <div className="space-y-2">
-          <Label>{"Placeholder"} *</Label>
+          <Label>Deskripsi *</Label>
           <Input
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder={"Placeholder"}
+            placeholder="Masukkan deskripsi biaya"
           />
         </div>
 
         {/* Amount */}
         <div className="space-y-2">
-          <Label>{"Placeholder"} *</Label>
+          <Label>Jumlah *</Label>
           <Input
             type="number"
             value={formData.amount}
-            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat || 0 }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
             placeholder="0"
           />
         </div>
 
         {/* Date */}
         <div className="space-y-2">
-          <Label>{"Placeholder"}</Label>
+          <Label>Tanggal</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -116,7 +116,7 @@ export default function CostForm({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {formData.date ? format, "PPP") : <span>{"Placeholder"}</span>}
+                {formData.date ? format(new Date(formData.date), "PPP") : <span>Pilih tanggal</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -132,7 +132,7 @@ export default function CostForm({
 
         {/* Payment Method */}
         <div className="space-y-2">
-          <Label>{"Placeholder"}</Label>
+          <Label>Metode Pembayaran</Label>
           <Select
             value={formData.payment_method}
             onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
@@ -141,21 +141,21 @@ export default function CostForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="cash">{"Placeholder"}</SelectItem>
-              <SelectItem value="transfer">{"Placeholder"}</SelectItem>
-              <SelectItem value="credit_card">{"Placeholder"}</SelectItem>
-              <SelectItem value="digital_wallet">{"Placeholder"}</SelectItem>
+              <SelectItem value="cash">Tunai</SelectItem>
+              <SelectItem value="transfer">Transfer Bank</SelectItem>
+              <SelectItem value="credit_card">Kartu Kredit</SelectItem>
+              <SelectItem value="digital_wallet">Dompet Digital</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Notes */}
         <div className="space-y-2">
-          <Label>{"Placeholder"}</Label>
+          <Label>Catatan</Label>
           <Textarea
             value={formData.notes}
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-            placeholder={"Placeholder"}
+            placeholder="Catatan tambahan (opsional)"
             rows={3}
           />
         </div>
@@ -164,11 +164,11 @@ export default function CostForm({
         <div className="flex gap-3 pt-4">
           <Button onClick={handleSubmit} className="flex-1">
             <Save className="h-4 w-4 mr-2" />
-            {cost ? "Placeholder" : "Placeholder"}
+            {cost ? "Update" : "Simpan"}
           </Button>
           <Button variant="outline" onClick={onCancel}>
             <X className="h-4 w-4 mr-2" />
-            {"Placeholder"}
+            Batal
           </Button>
         </div>
       </CardContent>

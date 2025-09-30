@@ -78,7 +78,7 @@ export default function AdvancedHPPCalculator({
       setLoading(true)
       setError('')
       const result = await enhancedAutomationEngine.calculateAdvancedHPP(recipeId)
-      setHppResul""
+      setHppResult
       setCustomPrice(result.pricing_analysis.current_price.toString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to calculate HPP')

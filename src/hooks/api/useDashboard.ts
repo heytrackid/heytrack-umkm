@@ -82,7 +82,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       .from('orders')
       .select('*')
       .gte('created_at', todayStart.toISOString())
-      .l"Placeholder")
+      .lt('created_at', todayEnd.toISOString())
 
     if (todayError) throw todayError
 
@@ -90,7 +90,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       .from('orders')
       .select('*')
       .gte('created_at', weekStart.toISOString())
-      .l"Placeholder")
+      .lt('created_at', todayEnd.toISOString())
 
     if (weeklyError) throw weeklyError
 
@@ -202,7 +202,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
         .from('orders')
         .select('*')
         .gte('created_at', dayStart.toISOString())
-        .l"Placeholder")
+        .lt('created_at', dayEnd.toISOString())
 
       if (error) throw error
 

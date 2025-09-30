@@ -90,7 +90,7 @@ const chartConfig = {
   },
 }
 
-export function InventoryTrendsChar"" {
+export function InventoryTrendsChart() {
   return (
     <ChartContainer config={chartConfig}>
       <LineChart

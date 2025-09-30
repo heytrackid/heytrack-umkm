@@ -199,7 +199,7 @@ export default function ProductionCapacityManager({
         ...prev,
         break_times: [...prev.break_times, { start: newBreakStart, end: newBreakEnd }]
       }))
-      setNewBreakStar"Placeholder"
+      setNewBreakStart('')
       setNewBreakEnd('')
     }
   }
@@ -295,7 +295,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.oven_capacity]}
-                        onValueChange={([value]) => updateConstrain"Placeholder"}
+                        onValueChange={([value]) => updateConstraint('oven_capacity', value)}
                         max={10}
                         min={1}
                         step={1}
@@ -312,7 +312,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.mixing_stations]}
-                        onValueChange={([value]) => updateConstrain"Placeholder"}
+                        onValueChange={([value]) => updateConstraint('mixing_stations', value)}
                         max={6}
                         min={1}
                         step={1}
@@ -331,7 +331,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.decorating_stations]}
-                        onValueChange={([value]) => updateConstrain"Placeholder"}
+                        onValueChange={([value]) => updateConstraint('decorating_stations', value)}
                         max={4}
                         min={1}
                         step={1}
@@ -348,7 +348,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.packaging_capacity]}
-                        onValueChange={([value]) => updateConstrain"Placeholder"}
+                        onValueChange={([value]) => updateConstraint('packaging_capacity', value)}
                         max={200}
                         min={10}
                         step={10}
@@ -370,7 +370,7 @@ export default function ProductionCapacityManager({
                       <Input
                         type="number"
                         value={constraints.setup_time_minutes}
-                        onChange={(e) => updateConstrain"Placeholder" || 0)}
+                        onChange={(e) => updateConstraint('setup_time_minutes', parseInt(e.target.value) || 0)}
                         min={0}
                         max={60}
                       />
@@ -380,7 +380,7 @@ export default function ProductionCapacityManager({
                       <Input
                         type="number"
                         value={constraints.cleanup_time_minutes}
-                        onChange={(e) => updateConstrain"Placeholder" || 0)}
+                        onChange={(e) => updateConstraint('cleanup_time_minutes', parseInt(e.target.value) || 0)}
                         min={0}
                         max={30}
                       />
@@ -407,7 +407,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.bakers_available]}
-                        onValueChange={([value]) => updateConstrain"Placeholder"}
+                        onValueChange={([value]) => updateConstraint('bakers_available', value)}
                         max={8}
                         min={1}
                         step={1}
@@ -424,7 +424,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.decorators_available]}
-                        onValueChange={([value]) => updateConstrain"Placeholder"}
+                        onValueChange={([value]) => updateConstraint('decorators_available', value)}
                         max={4}
                         min={0}
                         step={1}
@@ -465,7 +465,7 @@ export default function ProductionCapacityManager({
                     <Input
                       type="time"
                       value={constraints.shift_start}
-                      onChange={(e) => updateConstrain"Placeholder"}
+                      onChange={(e) => updateConstraint('shift_start', e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
@@ -473,7 +473,7 @@ export default function ProductionCapacityManager({
                     <Input
                       type="time"
                       value={constraints.shift_end}
-                      onChange={(e) => updateConstrain"Placeholder"}
+                      onChange={(e) => updateConstraint('shift_end', e.target.value)}
                     />
                   </div>
                 </div>
@@ -509,7 +509,7 @@ export default function ProductionCapacityManager({
                       type="time"
                       placeholder="Start"
                       value={newBreakStart}
-                      onChange={(e) => setNewBreakStar""}
+                      onChange={(e) => setNewBreakStart(e.target.value)}
                       className="flex-1"
                     />
                     <Input

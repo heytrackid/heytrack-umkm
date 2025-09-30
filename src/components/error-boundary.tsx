@@ -211,12 +211,12 @@ export class AsyncErrorBoundary extends Component<Props, State> {
     this.props.onError?.(error, errorInfo)
   }
   
-  componentDidMoun"" {
+  componentDidMount() {
     // Handle unhandled promise rejections
     window.addEventListener('unhandledrejection', this.handleUnhandledRejection)
   }
   
-  componentWillUnmoun"" {
+  componentWillUnmount() {
     window.removeEventListener('unhandledrejection', this.handleUnhandledRejection)
   }
   
@@ -231,7 +231,7 @@ export class AsyncErrorBoundary extends Component<Props, State> {
     })
     
     // Prevent default browser error handling
-    event.preventDefault
+    event.preventDefault()
   }
   
   render() {

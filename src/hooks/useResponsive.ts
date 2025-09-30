@@ -283,10 +283,10 @@ export function useSafeAreaInsets() {
       const style = getComputedStyle(document.documentElement);
       
       setInsets({
-        top: parseInt || '0', 10),
-        bottom: parseInt || '0', 10),
-        left: parseInt || '0', 10),
-        right: parseInt || '0', 10),
+        top: parseInt(style.getPropertyValue('--sat') || '0', 10),
+        bottom: parseInt(style.getPropertyValue('--sab') || '0', 10),
+        left: parseInt(style.getPropertyValue('--sal') || '0', 10),
+        right: parseInt(style.getPropertyValue('--sar') || '0', 10),
       });
     };
 
@@ -326,7 +326,7 @@ export function useContainerQueries(): boolean {
       return CSS.supports('container-type', 'inline-size');
     };
 
-    setSupported(checkSuppor"");
+    setSupported(checkSupport());
   }, []);
 
   return supported;

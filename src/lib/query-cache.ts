@@ -24,7 +24,7 @@ export class QueryCache {
 
   private generateKey(table: string, filters: Record<string, any> = {}): string {
     const filterString = Object.keys(filters)
-      .sort((a, b)
+      .sort((a, b) => a.localeCompare(b))
       .map(key => `${key}:${JSON.stringify(filters[key])}`)
       .join(',')
     return `${table}${filterString ? `_${filterString}` : ''}`
@@ -67,7 +67,7 @@ export class QueryCache {
   invalidate(pattern: string): void {
     const regex = new RegExp(pattern.replace(/\*/g, '.*'))
     for (const [key] of this.cache) {
-      if (regex.tes"") {
+      if (regex.test(key)) {
         this.cache.delete(key)
       }
     }
@@ -113,7 +113,7 @@ export const optimizedQueries = {
 
         // Pagination
         if (filters.limit) {
-          query = query.limit(options.limit)
+          query = query.limit(filters.limit)
         }
         if (filters.offset) {
           query = query.range(filters.offset, (filters.offset + (filters.limit || 50)) - 1)
@@ -159,7 +159,7 @@ export const optimizedQueries = {
               ingredients:ingredient_id(name, unit)
             `)
             .order('created_at', { ascending: false })
-            .limit(options.limit)
+            .limit(10)
         ])
 
         return {
@@ -202,9 +202,9 @@ export const optimizedQueries = {
         }
 
         // Group by category
-        data?.forEach(transaction => {
+        data?.forEach((transaction: any) => {
           if (transaction.ingredients?.category) {
-            const category = transaction.ingredients.category
+            const category = transaction.ingredients.category as string
             analytics.topCategories[category] = (analytics.topCategories[category] || 0) + 1
           }
         })

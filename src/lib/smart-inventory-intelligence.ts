@@ -150,7 +150,7 @@ export function enhanceIngredientWithIntelligence(
   // Calculate smart metrics
   const averageUsage = merged.averageUsage || estimateUsageFromStock(basicIngredient)
   const usageHistory = merged.usageHistory || []
-  const demandForecast = calculateDemandForecas""
+  const demandForecast = calculateDemandForecast(usageHistory)
   const leadTime = merged.leadTime || 5 // Default 5 days
   const volatility = merged.volatility || determineVolatility(basicIngredient.nama)
   const alternatives = merged.alternatives || []
@@ -208,7 +208,7 @@ function estimateUsageFromStock(ingredient: BasicIngredient): number {
 /**
  * Calculate demand forecast using simple moving average with trend
  */
-function calculateDemandForecas"": number {
+function calculateDemandForecast(usageHistory: number[]): number {
   if (usageHistory.length < 2) return usageHistory[0] || 0
   
   const recent = usageHistory.slice(-2)

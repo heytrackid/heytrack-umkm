@@ -17,8 +17,8 @@ export const MIN_LOADING_DURATION = {
 // Debounce utility untuk mencegah flickering
 export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
   return useCallback((callback: () => void) => {
-    const timeoutId = setTimeout
-    return () => clearTimeout
+    const timeoutId = setTimeout(callback, delay)
+    return () => clearTimeout(timeoutId)
   }, [delay])
 }
 
@@ -38,7 +38,7 @@ export class ProgressiveLoader {
     // Clear existing timer if any
     const existingTimer = this.timers.get(key)
     if (existingTimer) {
-      clearTimeout
+      clearTimeout(existingTimer)
     }
 
     // Schedule new timer
@@ -47,19 +47,19 @@ export class ProgressiveLoader {
       this.timers.delete(key)
     }, delay)
 
-    this.timers.set(key: string, data: any, ttl: number = 300000): void {
+    this.timers.set(key, timer)
   }
 
   cancelLoading(key: string) {
     const timer = this.timers.get(key)
     if (timer) {
-      clearTimeout
+      clearTimeout(timer)
       this.timers.delete(key)
     }
   }
 
   cancelAll() {
-    this.timers.forEach(timer => clearTimeout)
+    this.timers.forEach(timer => clearTimeout(timer))
     this.timers.clear()
   }
 }
@@ -72,7 +72,7 @@ export function getCachedSkeleton(
   factory: () => JSX.Element
 ): JSX.Element {
   if (!skeletonCache.has(key)) {
-    skeletonCache.set(key: string, data: any, ttl: number = 300000): void {)
+    skeletonCache.set(key, factory())
   }
   return skeletonCache.get(key)!
 }
@@ -128,7 +128,7 @@ export class SkeletonPerformanceMonitor {
   private metrics = new Map<string, SkeletonMetrics>()
 
   startSkeleton(key: string) {
-    this.startTimes.set(key: string, data: any, ttl: number = 300000): void {)
+    this.startTimes.set(key, performance.now())
   }
 
   endSkeleton(key: string) {

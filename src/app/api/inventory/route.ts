@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const { data: inventory, error } = await (supabase as any)
       .from('inventory')
-      .insert(data)
+      .insert([body])
       .select(`
         *,
         ingredient:ingredients(name, unit)

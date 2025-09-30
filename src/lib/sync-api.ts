@@ -50,7 +50,7 @@ export const syncEventApi = {
   },
 
   // Create sync event
-  async createEven"" {
+  async createEvent(eventData: any) {
     const { data, error } = await supabase
       .from('sync_events')
       .insert(data)
@@ -78,7 +78,7 @@ export const syncEventApi = {
   },
 
   // Get pending events count
-  async getPendingCoun"" {
+  async getPendingCount() {
     const { count, error } = await supabase
       .from('sync_events')
       .select('*')
@@ -138,7 +138,7 @@ export const systemMetricsApi = {
 // Inventory Stock Logs API
 export const inventoryStockLogsApi = {
   // Get stock logs for ingredient
-  async getLogsForIngredien"" {
+  async getLogsForIngredient(ingredientId: string) {
     const { data, error } = await supabase
       .from('inventory_stock_logs')
       .select(`

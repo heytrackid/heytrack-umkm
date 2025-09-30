@@ -6,7 +6,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from"@/components/ui/chart"
+} from "@/components/ui/chart"
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(() => import('@/components').then(mod => mod.LineChart), { 
@@ -83,7 +83,17 @@ const chartConfig = {
   },
 }
 
-export function FinancialTrendsChart {
+// Helper function for currency formatting
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value)
+}
+
+export function FinancialTrendsChart() {
   return (
     <ChartContainer config={chartConfig}>
       <LineChart

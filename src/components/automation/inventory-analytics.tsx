@@ -334,7 +334,7 @@ function InventoryAnalytics() {
     return analytics.filter(a => a.category === selectedCategory)
   }
 
-  const categories = [...new Set)]
+  const categories = [...new Set(analytics.map(a => a.category))]
 
   if (loading) {
     return (

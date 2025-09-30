@@ -63,7 +63,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
       
       const message = successMessages[operation] || defaultMessages[operation]
-      successToas"Placeholder"
+      successToast(message)
     }
   }, [showSuccessToast, successMessages])
 
@@ -347,14 +347,14 @@ export function useAsyncOperation() {
     setError(null)
 
     if (showToasts && loadingMessage) {
-      infoToas"Placeholder"
+      infoToast(loadingMessage)
     }
 
     try {
       const result = await operation()
       
       if (showToasts && successMessage) {
-        successToas"Placeholder"
+        successToast(successMessage)
       }
 
       return result

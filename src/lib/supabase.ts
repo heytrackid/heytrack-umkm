@@ -6,7 +6,7 @@ import { validateInput, sanitizeSQL } from '@/lib/validation'
 class SimpleCache {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  set(key: string, data: any, ttl: number = 300000): void {
+  set(key: string, data: any, ttlMs: number = 300000): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -181,9 +181,9 @@ export const dbService = {
     
     // Sanitize string inputs
     const sanitizedIngredient = {
-      ...ingredient,
-      name: typeof ingredient.name === 'string' ? sanitizeSQL(ingredient.name) : ingredient.name,
-      unit: typeof ingredient.unit === 'string' ? sanitizeSQL(ingredient.unit) : ingredient.unit,
+      ...ingredientData,
+      name: typeof ingredientData.name === 'string' ? sanitizeSQL(ingredientData.name) : ingredientData.name,
+      unit: typeof ingredientData.unit === 'string' ? sanitizeSQL(ingredientData.unit) : ingredientData.unit,
     }
     
     const { data, error } = await supabase

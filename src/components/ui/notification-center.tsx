@@ -72,7 +72,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
       
       if (response.ok) {
         setNotifications(data.data || [])
-        setUnreadCoun""
+        setUnreadCount(data.unread_count || 0)
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
@@ -97,7 +97,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
               : notif
           )
         )
-        setUnreadCoun"")
+        setUnreadCount(prev => prev - notificationIds.length)
       }
     } catch (error) {
       console.error('Error marking notifications as read:', error)
@@ -116,7 +116,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
         setNotifications(prev => prev.filter(notif => notif.id !== notificationId))
         const notification = notifications.find(n => n.id === notificationId)
         if (notification && !notification.is_read) {
-          setUnreadCoun"")
+          setUnreadCount(prev => prev - 1)
         }
       }
     } catch (error) {

@@ -11,8 +11,8 @@ export function createLazyComponent<T extends ComponentType<any>>(
   
   return memo((props: Parameters<T>[0]) => 
     React.createElement(Suspense, { 
-      fallback: fallback || React.createElemen"Placeholder" 
-    }, React.createElemen"")
+      fallback: fallback || React.createElement("link") 
+    }, React.createElement("div"))
   )
 }
 
@@ -42,7 +42,7 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.set(key: string, data: any, ttl: number = 300000): void {
+        this.metrics.set(key, data)
       }
       
       this.metrics.get(key)!.push(duration)
@@ -187,7 +187,7 @@ export class VirtualScroller {
     return { start: Math.max(0, start - 1), end } // -1 for buffer
   }
   
-  getTotalHeigh"": number {
+  getTotalHeight(): number {
     return this.items.length * this.itemHeight
   }
 }
@@ -275,7 +275,7 @@ export const registerServiceWorker = async (): Promise<void> => {
 export class CacheManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  set(key: string, data: any, ttl: number = 300000): void {: void {
+  set(key, data): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),

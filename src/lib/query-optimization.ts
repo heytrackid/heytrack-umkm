@@ -26,7 +26,7 @@ export class QueryOptimizer {
         .textSearch('name', searchTerm)
         .eq('is_active', true)
         .order('name')
-        .limit(options.limit);
+        .limit(limit);
     },
 
     // Uses idx_ingredients_category for fast category filtering
@@ -90,7 +90,7 @@ export class QueryOptimizer {
         .select('*')
         .eq('status', status)
         .order('created_at', { ascending: false })
-        .limit(options.limit);
+        .limit(limit);
     },
 
     // Uses idx_orders_customer_id for customer order lookup
@@ -139,7 +139,7 @@ export class QueryOptimizer {
         .select('*')
         .textSearch('customer_name,notes,order_no', searchTerm)
         .order('created_at', { ascending: false })
-        .limit(options.limit);
+        .limit(50);
     },
 
     // Uses idx_orders_analytics for dashboard analytics
@@ -197,7 +197,7 @@ export class QueryOptimizer {
         .gte(0)
         .order('times_made', { ascending: false })
         .order('total_revenue', { ascending: false })
-        .limit(options.limit);
+        .limit(limit);
     },
 
     // Uses idx_recipes_profitability for profitability analysis
@@ -217,7 +217,7 @@ export class QueryOptimizer {
         .select('*')
         .textSearch('name,description,category', searchTerm)
         .eq('is_active', true)
-        .limit(options.limit);
+        .limit(50);
     }
   };
 
@@ -281,7 +281,7 @@ export class QueryOptimizer {
         .eq('is_active', true)
         .order('total_spent', { ascending: false })
         .order('total_orders', { ascending: false })
-        .limit(options.limit);
+        .limit(limit);
     }
   };
 
@@ -321,7 +321,7 @@ export class QueryOptimizer {
         .select('*')
         .gte(0)
         .order('amount', { ascending: false })
-        .limit(options.limit);
+        .limit(50);
     }
   };
 
@@ -344,7 +344,7 @@ export class QueryOptimizer {
           )
         `)
         .order('created_at', { ascending: false })
-        .limit(options.limit);
+        .limit(limit);
     },
 
     // Optimized recipe with ingredients query

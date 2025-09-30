@@ -388,8 +388,8 @@ export default function ProductionTimeline({
                                     <div>Priority: {batch.priority}/10</div>
                                     <div>Duration: {batch.estimated_duration} min</div>
                                     <div>Status: <Badge variant="outline" className="text-xs">{batch.status}</Badge></div>
-                                    <div>Start: {format, 'HH:mm')}</div>
-                                    <div>End: {format, 'HH:mm')}</div>
+                                    <div>Start: {format(new Date(batch.scheduled_start!), 'HH:mm')}</div>
+                                    <div>End: {format(new Date(batch.scheduled_end!), 'HH:mm')}</div>
                                   </div>
                                   
                                   {/* Quick actions */}

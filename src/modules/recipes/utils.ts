@@ -252,7 +252,7 @@ export function getCategoryInfo(category: string) {
   }
 
   return categories[category] || {
-    label: category.charA"".toUpperCase() + category.slice(1),
+    label: category.charAt(0).toUpperCase() + category.slice(1),
     icon: '👩‍🍳',
     description: 'Kategori lainnya'
   }

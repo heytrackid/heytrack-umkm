@@ -14,7 +14,7 @@ class APICache {
   private cache = new Map<string, CacheEntry>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
 
-  set(key: string, data: any, ttl: number = 300000): void { {
+  set(key, data) {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -65,7 +65,7 @@ class RequestDeduplicator {
       this.pendingRequests.delete(key)
     })
 
-    this.pendingRequests.set(key: string, data: any, ttl: number = 300000): void {
+    this.pendingRequests.set(key, data)
     return promise
   }
 }
@@ -113,7 +113,7 @@ class OptimizedAPIClient {
 
       // Cache the result
       if (!cacheOptions?.skipCache && options.method !== 'POST' && options.method !== 'PUT' && options.method !== 'DELETE') {
-        this.cache.set(key: string, data: any, ttl: number = 300000): void {
+        this.cache.set(key, data)
       }
 
       // Invalidate related cache patterns on mutations
@@ -166,7 +166,7 @@ class OptimizedAPIClient {
     })
   }
 
-  async deleteIngredien"" {
+  async deleteIngredient(id: string) {
     return this.fetch(`/api/ingredients/${id}`, {
       method: 'DELETE'
     }, {
@@ -212,7 +212,7 @@ class OptimizedAPIClient {
 }
 
 // Singleton instance
-export const optimizedAPI = new OptimizedAPIClien""
+export const optimizedAPI = new OptimizedAPIClient()
 
 // React hook for using optimized API with loading states
 import { useState, useEffect, useCallback } from 'react'

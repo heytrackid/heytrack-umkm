@@ -34,13 +34,13 @@ const validationRules = {
   name: (value: string) => !value ? 'Name is required' : null,
   contact_person: () => null,
   phone: (value: string) => {
-    if (value && !/^[\d\s\-\+\(\)]+$/.tes"") {
+    if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
       return 'Invalid phone number format';
     }
     return null;
   },
   email: (value: string) => {
-    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.tes"") {
+    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return 'Invalid email format';
     }
     return null;

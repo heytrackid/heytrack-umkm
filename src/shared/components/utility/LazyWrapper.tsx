@@ -94,7 +94,7 @@ function DelayedWrapper({
   
   useEffect(() => {
     const timer = setTimeout(() => setIsReady(true), minDelay)
-    return () => clearTimeout
+    return () => clearTimeout(timer)
   }, [minDelay])
   
   return isReady ? children : null
@@ -124,7 +124,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
 /**
  * Preload a lazy component for better UX
  */
-export function preloadComponen"" => Promise<{ default: any }>) {
+export function preloadComponent(importFn: () => Promise<{ default: any }>) {
   // Start loading the component but don't wait for it
   importFn().catch(console.error)
 }
@@ -142,7 +142,7 @@ export function useProgressiveLoading(
     components.forEach((importFn, index) => {
       setTimeout(() => {
         importFn().then(() => {
-          setLoadedCoun""
+          setLoadedCount(prev => prev + 1)
         }).catch(console.error)
       }, delay * index)
     })

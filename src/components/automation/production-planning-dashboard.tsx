@@ -133,7 +133,7 @@ function ProductionPlanningDashboard() {
 
   const generateRecipeProductionPlan = async (recipe: any): Promise<ProductionPlan> => {
     // Calculate demand forecast based on recent orders
-    const demandForecast = calculateDemandForecas""
+    const demandForecast = calculateDemandForecast(recipe.id)
     
     // Get ingredient requirements
     const requiredIngredients = await getRecipeIngredientRequirements(recipe.id)
@@ -272,7 +272,7 @@ function ProductionPlanningDashboard() {
         ]
       },
       inventory_impact: {
-        ingredients_needed: generateIngredientsLis"",
+        ingredients_needed: generateIngredientsList(viablePlans),
         post_production_levels: generatePostProductionLevels(viablePlans)
       }
     }
@@ -286,7 +286,7 @@ function ProductionPlanningDashboard() {
         const key = ing.ingredient_name
         const existing = ingredientMap.get(key) || { name: ing.ingredient_name, quantity: 0, unit: ing.unit }
         existing.quantity += ing.required_quantity * plan.planned_quantity
-        ingredientMap.set(key: string, data: any, ttl: number = 300000): void {
+        ingredientMap.set(key, existing)
       })
     })
 

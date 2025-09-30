@@ -172,10 +172,10 @@ export class BatchSchedulingService {
     
     // Initialize resource timelines
     for (let i = 1; i <= this.constraints.oven_capacity; i++) {
-      resourceTimeline.set(key: string, data: any, ttl: number = 300000): void {
+      resourceTimeline.set(`oven_${i}`, [])
     }
     for (let i = 1; i <= this.constraints.mixing_stations; i++) {
-      resourceTimeline.set(key: string, data: any, ttl: number = 300000): void {
+      resourceTimeline.set(`mixing_${i}`, [])
     }
 
     // Sort batches by total score (descending)
@@ -184,7 +184,7 @@ export class BatchSchedulingService {
     for (const batch of sortedBatches) {
       try {
         // Find earliest available slot that satisfies constraints
-        const scheduledSlot = this.findOptimalTimeSlo""
+        const scheduledSlot = this.findOptimalTimeSlot(batch, resourceTimeline)
         
         if (scheduledSlot) {
           batch.scheduled_start = scheduledSlot.start
@@ -439,7 +439,7 @@ export class BatchSchedulingService {
   ): void {
     for (const resourceId of slot.resources) {
       if (!resourceTimeline.has(resourceId)) {
-        resourceTimeline.set(key: string, data: any, ttl: number = 300000): void {
+        resourceTimeline.set(key, value)
       }
       resourceTimeline.get(key)!.push({
         start: slot.start,

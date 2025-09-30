@@ -137,7 +137,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
   // Copy to clipboard
   const copyToClipboard = async (text: string, type: string) => {
     try {
-      await navigator.clipboard.writeTex"";
+      await navigator.clipboard.writeText(text);
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
@@ -156,7 +156,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     
     // Call callback if provided
     if (onSent) {
-      onSen"";
+      onSent();
     }
     
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);

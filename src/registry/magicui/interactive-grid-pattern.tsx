@@ -31,7 +31,7 @@ export function InteractiveGridPattern({
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClien""
+    setIsClient
   }, [])
 
   function generateSquares(count: number) {

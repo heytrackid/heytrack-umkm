@@ -365,7 +365,7 @@ export class EnhancedAutomationEngine {
       const bottleneckAnalysis = await this.analyzeProductionBottlenecks(optimization)
       
       // Profitability forecast
-      const profitabilityForecast = this.calculateProfitabilityForecas""
+      const profitabilityForecast = this.calculateProfitabilityForecast
 
       return {
         optimized_schedule: optimizedSchedule,
@@ -681,7 +681,7 @@ export class EnhancedAutomationEngine {
     }
   }
 
-  private calculateProfitabilityForecas"" {
+  private calculateProfitabilityForecast() {
     // Would calculate detailed profitability projections
     return {
       total_revenue: 0,

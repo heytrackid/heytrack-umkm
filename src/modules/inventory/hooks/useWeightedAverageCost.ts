@@ -17,7 +17,7 @@ interface WeightedAverageCostState {
  * Hook untuk menggunakan Weighted Average Cost functionality
  * dengan error handling dan loading states yang proper
  */
-export function useWeightedAverageCos"" {
+export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = {}) {
   const [state, setState] = useState<WeightedAverageCostState>({
     isCalculating: false,
     lastCalculation: null,

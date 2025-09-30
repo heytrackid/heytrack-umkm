@@ -56,7 +56,7 @@ export default function PerformanceProvider({
       ]
       
       criticalRoutes.forEach(route => {
-        const link = document.createElemen"Placeholder"
+        const link = document.createElement('link')
         link.rel = 'prefetch'
         link.href = route
         document.head.appendChild(link)
@@ -64,7 +64,7 @@ export default function PerformanceProvider({
     }
     
     // Prefetch after initial load
-    setTimeout
+    setTimeout(prefetchCriticalResources, 1000)
     
     // Log performance metrics every 30 seconds in development
     if (process.env.NODE_ENV === 'development') {

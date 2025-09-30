@@ -53,13 +53,13 @@ export async function GET() {
       customer.customer_type === 'vip').length || 0
     
     const lowStockItems = ingredients?.filter((ingredient: any) => 
-      parseFloat(order.total_amount) <= parseFloat(order.total_amount)).length || 0
+      parseFloat(ingredient.current_stock || 0) <= parseFloat(ingredient.min_stock || 0)).length || 0
     
     const totalIngredients = ingredients?.length || 0
     const totalRecipes = recipes?.length || 0
     
     const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: any) => 
-      sum + parseFloat(order.total_amount), 0) || 0
+      sum + parseFloat(expense.amount || 0), 0) || 0
     
     // Calculate yesterday for comparison
     const yesterday = new Date()
@@ -172,12 +172,12 @@ export async function POST() {
       sum + parseFloat(order.total_amount), 0) || 0
     
     const totalItemsSold = todayItems.reduce((sum: number, item: any) => 
-      sum + parseInt(value), 0) || 0
+      sum + parseInt(item.quantity || 0), 0) || 0
     
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
     
     const totalExpenses = todayExpenses?.reduce((sum: number, expense: any) => 
-      sum + parseFloat(order.total_amount), 0) || 0
+      sum + parseFloat(expense.amount || 0), 0) || 0
     
     const profitEstimate = totalRevenue - totalExpenses
     

@@ -76,11 +76,11 @@ const InventoryTableRow = memo(({
 
   // Memoized event handlers
   const handleSelect = useCallback(() => {
-    onSelec""
+    onSelect
   }, [ingredient.id, onSelect])
 
   const handleEdit = useCallback(() => {
-    onEdi""
+    onEdit
   }, [ingredient, onEdit])
 
   const handleDelete = useCallback(() => {

@@ -4,11 +4,11 @@ import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const limit = searchParams.get('param') || '50'
-  const offset = searchParams.get('param') || '0'
-  const category = searchParams.get('param')
-  const startDate = searchParams.get('param')
-  const endDate = searchParams.get('param')
+  const limit = searchParams.get('limit') || '50'
+  const offset = searchParams.get('offset') || '0'
+  const category = searchParams.get('category')
+  const startDate = searchParams.get('startDate')
+  const endDate = searchParams.get('endDate')
 
   try {
     const supabase = createSupabaseClient()
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       .from('expenses')
       .select('*')
       .order('expense_date', { ascending: false })
-      .range(parseInt(value), parseInt(value) + parseInt(value) - 1)
+      .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)
 
     if (category) {
       query = query.eq('category', category)
@@ -55,12 +55,12 @@ export async function GET(request: NextRequest) {
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
-    const todayTotal = todayExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(value), 0) || 0
-    const monthTotal = monthExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(value), 0) || 0
+    const todayTotal = todayExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || '0'), 0) || 0
+    const monthTotal = monthExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || '0'), 0) || 0
     
     // Category breakdown
     const categoryBreakdown = monthExpenses?.reduce((acc: any, exp: any) => {
-      acc[exp.category] = (acc[exp.category] || 0) + parseFloat(value)
+      acc[exp.category] = (acc[exp.category] || 0) + parseFloat(exp.amount || '0')
       return acc
     }, {}) || {}
 
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
       data: expenses, 
       count,
       pagination: {
-        limit: parseInt(value),
-        offset: parseInt(value),
+        limit: parseInt(limit),
+        offset: parseInt(offset),
         total: count
       },
       summary: {
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
-        message: `A large expense of ${formatCurrency(parseFloat(value))} has been recorded for ${body.category}`,
+        message: `A large expense of ${formatCurrency(parseFloat(body.amount))} has been recorded for ${body.category}`,
         entity_type: 'expense',
         entity_id: expense.id,
         priority: 'high'

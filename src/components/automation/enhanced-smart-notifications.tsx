@@ -300,7 +300,7 @@ export default function EnhancedSmartNotifications() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => acknowledgeAler""}
+                              onClick={() => acknowledgeAlert(alert.id)}
                               className="h-6 w-6 p-0"
                             >
                               <CheckCircle className="h-3 w-3" />
@@ -308,7 +308,7 @@ export default function EnhancedSmartNotifications() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => dismissAler""}
+                              onClick={() => dismissAlert(alert.id)}
                               className="h-6 w-6 p-0"
                             >
                               <X className="h-3 w-3" />

@@ -141,7 +141,7 @@ export class ProductionDataIntegration {
       const resourceConstraints = await this.checkResourceConstraints(processedOrders)
 
       // Calculate forecasted demand
-      const forecastedDemand = await this.calculateDemandForecas""
+      const forecastedDemand = await this.calculateDemandForecast
 
       return {
         orders: processedOrders,
@@ -174,7 +174,7 @@ export class ProductionDataIntegration {
         const deadline = new Date(deliveryDate.getTime() - productionBuffer)
         
         // Calculate earliest start (considering ingredients availability)
-        const earliestStart = await this.calculateEarliestStar""
+        const earliestStart = await this.calculateEarliestStart(recipeData, item.quantity)
 
         // Calculate priority score
         const urgencyScore = this.calculateUrgencyScore(order.delivery_date)
@@ -350,7 +350,7 @@ export class ProductionDataIntegration {
     }
   }
 
-  private async calculateEarliestStar"": Promise<Date> {
+  private async calculateEarliestStart(recipeData: RecipeRequirement, quantity: number): Promise<Date> {
     // Check ingredient availability and lead times
     const now = new Date()
     
@@ -432,7 +432,7 @@ export class ProductionDataIntegration {
             const key = ri.ingredient.id
             const existing = ingredientRequirements.get(key) || { name: ri.ingredient.name, required: 0 }
             existing.required += ri.quantity * item.quantity
-            ingredientRequirements.set(key: string, data: any, ttl: number = 300000): void {
+            ingredientRequirements.set(key, existing)
           }
         }
       }
@@ -475,7 +475,7 @@ export class ProductionDataIntegration {
     return { ingredient_shortfalls, capacity_warnings }
   }
 
-  private async calculateDemandForecas"" {
+  private async calculateDemandForecast(orders: OrderData[]) {
     const now = Date.now()
     const next24h = orders
       .filter(order => new Date(order.delivery_date).getTime() - now < 24 * 60 * 60 * 1000)

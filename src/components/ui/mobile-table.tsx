@@ -195,7 +195,7 @@ export function MobileTable<T extends Record<string, any>>({
                 style={{ width: column.width }}
                 onClick={() => {
                   if (column.sortable && sortable) {
-                    handleSor""
+                    handleSort(column.key)
                   }
                 }}
               >

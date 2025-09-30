@@ -187,7 +187,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
   const handleSendWhatsApp = (type: 'whatsapp' | 'business') => {
     const message = getCurrentMessage()
     const formattedPhone = formatPhoneNumber(phoneNumber)
-    const encodedMessage = encodeURIComponen""
+    const encodedMessage = encodeURIComponent(message);
     
     let url: string
     if (type === 'business') {
@@ -210,7 +210,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
   const handleCopyMessage = () => {
     const message = getCurrentMessage()
-    navigator.clipboard.writeTex""
+    navigator.clipboard.writeText(text)
   }
 
   const getStatusBadgeColor = (status: string) => {

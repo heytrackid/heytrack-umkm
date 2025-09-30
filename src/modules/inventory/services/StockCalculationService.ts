@@ -21,7 +21,7 @@ export class StockCalculationService {
   ): number {
     if (holdingCostPerUnit === 0) return annualDemand / 12 // fallback monthly
     
-    const eoq = Math.sqrt(variance) / holdingCostPerUnit)
+    const eoq = Math.sqrt(variance) / holdingCostPerUnit
     return Math.max(1, Math.ceil(eoq))
   }
 

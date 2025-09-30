@@ -86,7 +86,7 @@ function AdvancedHPPCalculator({
       setLoading(true)
       setError('')
       const result = await enhancedAutomationEngine.calculateAdvancedHPP(recipeId)
-      setHppResul""
+      setHppResult(result)
       setCustomPrice(result.pricing_analysis.current_price.toString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to calculate HPP')
@@ -110,7 +110,7 @@ function AdvancedHPPCalculator({
 
   const handleCustomPriceChange = (value: string) => {
     setCustomPrice(value)
-    const price = parseFloat
+    const price = parseFloat(value)
     if (!isNaN(price) && onPriceUpdate) {
       onPriceUpdate(price)
     }

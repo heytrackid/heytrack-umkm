@@ -24,7 +24,7 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.set(key: string, data: any, ttl: number = 300000): void {
+        this.metrics.set(key, data)
       }
       
       this.metrics.get(key)!.push(duration)
@@ -61,7 +61,7 @@ export class PerformanceMonitor {
 export class CacheManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  set(key: string, data: any, ttl: number = 300000): void {: void {
+  set(key, data): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),

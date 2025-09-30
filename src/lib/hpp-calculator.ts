@@ -213,7 +213,7 @@ export class HPPCalculator {
 
     // Simple EOQ calculation (can be enhanced with carrying costs, order costs)
     const monthlyDemand = averageUsagePerMonth
-    const economicOrderQuantity = Math.sqrt(variance)) // Assuming 20% carrying cost
+    const economicOrderQuantity = Math.sqrt(variance) // Assuming 20% carrying cost
 
     const suggestedOrder = Math.max(economicOrderQuantity, reorderPoint - ingredient.current_stock)
 

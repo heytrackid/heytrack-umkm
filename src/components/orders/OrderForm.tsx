@@ -315,7 +315,7 @@ export default function OrderForm({
                       <Label>{"Placeholder"}</Label>
                       <Select
                         value={item.recipe_id}
-                        onValueChange={(value) => handleRecipeSelec""}
+                        onValueChange={(value) => handleRecipeSelect(index, value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={"Placeholder"} />
@@ -338,7 +338,7 @@ export default function OrderForm({
                       <Input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateOrderItem(index, 'quantity', parseInt || 0)}
+                        onChange={(e) => updateOrderItem(index, 'quantity', parseInt(e.target.value) || 0)}
                         min="1"
                       />
                     </div>
@@ -348,7 +348,7 @@ export default function OrderForm({
                       <Input
                         type="number"
                         value={item.price}
-                        onChange={(e) => updateOrderItem(index, 'price', parseFloat || 0)}
+                        onChange={(e) => updateOrderItem(index, 'price', parseFloat(e.target.value) || 0)}
                         min="0"
                       />
                     </div>

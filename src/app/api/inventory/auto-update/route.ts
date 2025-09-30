@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
       if (stockTransactions.length > 0) {
         const { error: transactionError } = await (supabase as any)
           .from('stock_transactions')
-          .insert(data)
+          .insert(stockTransactions)
         
         if (transactionError) {
           console.error('Error creating stock transactions:', transactionError)
@@ -219,8 +219,8 @@ async function checkLowStockAlerts(supabase: any, results: any[]) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(value)
-    const offset = parseInt(value)
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
     
     const supabase = createServerSupabaseAdmin()
     

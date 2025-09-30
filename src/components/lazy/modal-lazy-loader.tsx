@@ -141,7 +141,7 @@ export const LazyModal = ({
     }
   }
 
-  const Component = getComponen""
+  const Component = getComponent()
   const isFormComponent = component.includes('form')
   
   if (mobile) {

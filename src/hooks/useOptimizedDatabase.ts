@@ -28,7 +28,7 @@ export function useOptimizedIngredients() {
       
       const result = await enhancedApiClient.getIngredients()
       setData(result)
-      hookCache.set(key, result)
+      hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch ingredients')
       setError(error)
@@ -43,7 +43,7 @@ export function useOptimizedIngredients() {
 
   // Check cache first
   useEffect(() => {
-    const cached = hookCache.get(key)
+    const cached = hookCache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < 60000) { // 1 minute cache
       setData(cached.data)
       setLoading(false)
@@ -100,7 +100,7 @@ export function useOptimizedRecipes() {
       
       const result = await enhancedApiClient.getRecipes()
       setData(result)
-      hookCache.set(key, result)
+      hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch recipes')
       setError(error)
@@ -114,7 +114,7 @@ export function useOptimizedRecipes() {
   }, [fetchRecipes])
 
   useEffect(() => {
-    const cached = hookCache.get(key)
+    const cached = hookCache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < 300000) { // 5 minute cache for recipes
       setData(cached.data)
       setLoading(false)
@@ -167,7 +167,7 @@ export function useOptimizedOrders(limit: number = 50) {
       
       const result = await enhancedApiClient.getOrders({ limit })
       setData(result)
-      hookCache.set(key, result)
+      hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch orders')
       setError(error)
@@ -181,7 +181,7 @@ export function useOptimizedOrders(limit: number = 50) {
   }, [fetchOrders])
 
   useEffect(() => {
-    const cached = hookCache.get(key)
+    const cached = hookCache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < 30000) { // 30 second cache for orders
       setData(cached.data)
       setLoading(false)
@@ -250,7 +250,7 @@ export function useOptimizedCustomers() {
       
       const result = await enhancedApiClient.getCustomers()
       setData(result)
-      hookCache.set(key, result)
+      hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch customers')
       setError(error)
@@ -264,7 +264,7 @@ export function useOptimizedCustomers() {
   }, [fetchCustomers])
 
   useEffect(() => {
-    const cached = hookCache.get(key)
+    const cached = hookCache.get(cacheKey)
     if (cached && Date.now() - cached.timestamp < 180000) { // 3 minute cache
       setData(cached.data)
       setLoading(false)

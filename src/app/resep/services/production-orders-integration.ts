@@ -581,7 +581,7 @@ export class ProductionOrdersIntegrationService {
 
     // Sort orders by priority and delivery date
     const sortedOrders = [...orders].sort((a, b) => {
-      const priorityWeight = this.getOrderPriorityWeigh"" - this.getOrderPriorityWeigh""
+      const priorityWeight = this.getOrderPriorityWeight(a.priority) - this.getOrderPriorityWeight(b.priority)
       if (priorityWeight !== 0) return priorityWeight
 
       // Then by delivery date (earlier first)
@@ -604,7 +604,7 @@ export class ProductionOrdersIntegrationService {
     return assignedOrders
   }
 
-  private getOrderPriorityWeigh"": number {
+  private getOrderPriorityWeight(priority: string): number {
     const weights: Record<string, number> = {
       'urgent': 2, 
       'high': 3,
@@ -626,7 +626,7 @@ export class ProductionOrdersIntegrationService {
     // Generate batch number
     const today = new Date()
     const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
-    const batchNumber = `BATCH-${dateStr}-${String(sequenceNumber + 1).padStar""}`
+    const batchNumber = `BATCH-${dateStr}-${String(sequenceNumber + 1).padStart(3, '0')}`
 
     // Determine batch priority based on orders
     const batchPriority = this.determineBatchPriority(orders)
@@ -643,8 +643,8 @@ export class ProductionOrdersIntegrationService {
     )
 
     // Calculate costs
-    const materialCost = this.calculateMaterialCos""
-    const laborCost = this.calculateLaborCos""
+    const materialCost = this.calculateMaterialCost(recipe, batchSize)
+    const laborCost = this.calculateLaborCost(timeline.total_time_minutes)
     const overheadCost = materialCost * 0.15 // 15% overhead
     const totalCost = materialCost + laborCost + overheadCost
 
@@ -699,7 +699,7 @@ export class ProductionOrdersIntegrationService {
     return 'low'
   }
 
-  private calculateMaterialCos"": number {
+  private calculateMaterialCost(recipe: any, batchSize: number): number {
     if (!recipe.recipe_ingredients) return 0
 
     return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
@@ -709,7 +709,7 @@ export class ProductionOrdersIntegrationService {
     }, 0)
   }
 
-  private calculateLaborCos"": number {
+  private calculateLaborCost(durationMinutes: number): number {
     const hourlyRate = 25000 // Rp 25,000/hour for Indonesian bakery
     const hours = durationMinutes / 60
     return hours * hourlyRate

@@ -86,9 +86,9 @@ export default function CostTable({
       <Card>
         <CardContent className="py-12 text-center">
           <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium mb-2">{"Placeholder"}</h3>
+          <h3 className="font-medium mb-2">Belum ada biaya operasional</h3>
           <p className="text-muted-foreground mb-4">
-            {"Placeholder"}
+            Mulai catat biaya operasional untuk melacak pengeluaran bisnis Anda
           </p>
         </CardContent>
       </Card>
@@ -98,26 +98,26 @@ export default function CostTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{"Placeholder"}</CardTitle>
+        <CardTitle>Daftar Biaya Operasional</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead className="text-right">{"Placeholder"}</TableHead>
+                <TableHead>Tanggal</TableHead>
+                <TableHead>Kategori</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead>Jumlah</TableHead>
+                <TableHead>Metode Pembayaran</TableHead>
+                <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedCosts.map((cost) => (
                 <TableRow key={cost.id}>
                   <TableCell>
-                    {format, 'MMM dd, yyyy')}
+                    {format(new Date(cost.date), 'MMM dd, yyyy')}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export default function CostTable({
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">
-                      {"" || cost.payment_method}
+                      {cost.payment_method}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -149,14 +149,14 @@ export default function CostTable({
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => onEdit(cost)}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
                             onClick={() => onDelete(cost)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Hapus
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -172,18 +172,14 @@ export default function CostTable({
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  {t('operationalCosts.pagination.showing', {
-                    from: ((currentPage - 1) * pageSize) + 1,
-                    to: Math.min(currentPage * pageSize, totalItems),
-                    total: totalItems
-                  })}
+                  Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} data
                 </span>
               </div>
               
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
+                  <span className="text-sm text-muted-foreground">Per halaman:</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
@@ -212,7 +208,7 @@ export default function CostTable({
                   </Button>
                   
                   <span className="text-sm font-medium">
-                    {"Placeholder"}
+                    {currentPage} / {totalPages}
                   </span>
                   
                   <Button

@@ -122,7 +122,7 @@ export default function OrdersPage({
         pending_revenue: fetchedOrders.filter(o => o.payment_status === 'unpaid').reduce((sum, o) => sum + o.total_amount, 0),
         paid_revenue: fetchedOrders.reduce((sum, o) => sum + o.paid_amount, 0),
         average_order_value: fetchedOrders.length > 0 ? fetchedOrders.reduce((sum, o) => sum + o.total_amount, 0) / fetchedOrders.length : 0,
-        total_customers: new Set).size,
+        total_customers: new Set(orders.map(o => o.customer_id)).size,
         repeat_customers: 0,
         period_growth: 0,
         revenue_growth: 0,

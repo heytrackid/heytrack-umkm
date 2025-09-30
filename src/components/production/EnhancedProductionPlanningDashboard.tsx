@@ -76,7 +76,7 @@ export default function EnhancedProductionPlanningDashboard({
 
       // Generate optimized schedule
       const schedule = await productionDataIntegration.generateProductionSchedule(3)
-      setSchedulingResul""
+      setSchedulingResult(schedule)
 
       toast.success('Production data loaded successfully')
     } catch (error) {
@@ -99,7 +99,7 @@ export default function EnhancedProductionPlanningDashboard({
       try {
         const batches = await productionDataIntegration.convertOrdersToBatches(productionDemand.orders)
         const newSchedule = await batchSchedulingService.scheduleProductionBatches(batches, newConstraints)
-        setSchedulingResul""
+        setSchedulingResult(newSchedule)
       } catch (error) {
         console.error('Error updating schedule:', error)
       }
@@ -117,7 +117,7 @@ export default function EnhancedProductionPlanningDashboard({
           batch.id === batchId ? { ...batch, status } : batch
         )
       }
-      setSchedulingResul""
+      setSchedulingResult(updatedSchedule)
 
       // Update in data integration service
       await productionDataIntegration.updateProductionProgress(batchId, status)

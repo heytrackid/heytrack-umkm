@@ -26,7 +26,7 @@ interface SmartPricingAssistantProps {
   onPriceUpdate: (price: number, margin: number) => void
 }
 
-export function SmartPricingAssistan"" {
+export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAssistantProps) {
   const [analysis, setAnalysis] = useState<any>(null)
   const [selectedTier, setSelectedTier] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)

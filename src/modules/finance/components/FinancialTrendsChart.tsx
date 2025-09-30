@@ -46,7 +46,7 @@ const placeholderData: FinancialDataPoint[] = [
   { month: 'Jun', revenue: 52000000, expenses: 36000000, profit: 16000000, margin: 30.8 }
 ]
 
-export default function FinancialTrendsChart {
+export default function FinancialTrendsChart() {
   const [selectedChart, setSelectedChart] = useState<'line' | 'bar' | 'area'>('line')
   const [timeRange, setTimeRange] = useState<'6m' | '1y' | '2y'>('6m')
 
@@ -146,21 +146,21 @@ export default function FinancialTrendsChart {
             <Button
               variant={selectedChart === 'line' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setSelectedChar"Placeholder"}
+              onClick={() => setSelectedChart(type)}
             >
               <LineChartIcon className="h-4 w-4" />
             </Button>
             <Button
               variant={selectedChart === 'bar' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setSelectedChar"Placeholder"}
+              onClick={() => setSelectedChart(type)}
             >
               <BarChart3 className="h-4 w-4" />
             </Button>
             <Button
               variant={selectedChart === 'area' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setSelectedChar"Placeholder"}
+              onClick={() => setSelectedChart(type)}
             >
               <PieChart className="h-4 w-4" />
             </Button>
@@ -198,7 +198,7 @@ export default function FinancialTrendsChart {
         {/* Chart */}
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            {renderChar""}
+            {renderChart}
           </ResponsiveContainer>
         </div>
 
