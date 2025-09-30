@@ -56,7 +56,7 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState([])
 
   // Fetch customer data from API
-  useEffec"" => {
+  useEffect(() => {
     fetchCustomers()
   }, [])
 
@@ -112,12 +112,12 @@ export default function CustomersPage() {
           fetch(`/api/customers/${id}`, { method: 'DELETE' })
         )
         await Promise.all(deletePromises)
-        aler""
+        alert(`Berhasil menghapus ${selectedItems.length} pelanggan`)
         setSelectedItems([])
         fetchCustomers()
       } catch (error) {
         console.error('Error:', error)
-        aler"Placeholder"
+        alert('Gagal menghapus pelanggan')
       }
     }
   }
@@ -131,7 +131,7 @@ export default function CustomersPage() {
     // TODO: Open bulk edit modal
     console.log('Bulk editing customers:', selectedItems)
     
-    aler""
+    alert("Pesan")
   }
 
   // Individual action handlers
@@ -149,11 +149,11 @@ export default function CustomersPage() {
       try {
         const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
         if (!response.ok) throw new Error('Failed')
-        aler""
+        alert("Pesan")
         fetchCustomers()
       } catch (error) {
         console.error('Error:', error)
-        aler"Placeholder"
+        alert("Pesan")
       }
     }
   }
@@ -161,7 +161,7 @@ export default function CustomersPage() {
   const handleViewCustomer = (customer: any) => {
     console.log('View customer details:', customer)
     // TODO: Open customer detail modal or navigate to customer detail page
-    aler""
+    alert("Pesan")
   }
 
   // Breadcrumb component

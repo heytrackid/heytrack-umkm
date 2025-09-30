@@ -11,7 +11,7 @@ interface NumberCurrencySettingsProps {
 }
 
 /**
- * Number and currency format settings component
+ * Pengaturan format angka dan mata uang
  */
 export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurrencySettingsProps) {
   const { settings: currentSettings, updateCurrency, formatCurrency } = useSettings()
@@ -21,12 +21,12 @@ export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
-          {"Placeholder"}
+          Format Angka & Mata Uang
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="numberFormat">{"Placeholder"}</Label>
+          <Label htmlFor="numberFormat">Format Angka</Label>
           <select
             id="numberFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
@@ -39,7 +39,7 @@ export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurr
           </select>
         </div>
         <div>
-          <Label htmlFor="uiCurrency">{"Placeholder"}</Label>
+          <Label htmlFor="uiCurrency">Mata Uang Utama</Label>
           <select
             id="uiCurrency"
             className="w-full p-2 border border-input rounded-md bg-background"

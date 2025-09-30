@@ -66,7 +66,7 @@ export const useOrderLogic = () => {
   const [customers, setCustomers] = useState<any[]>([])
 
   // Load initial data
-  useEffec"" => {
+  useEffect(() => {
     fetchRecipes()
     fetchCustomers()
   }, [])
