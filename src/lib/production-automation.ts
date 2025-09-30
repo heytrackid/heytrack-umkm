@@ -265,7 +265,7 @@ export class ProductionPlanningSystem {
     for (const task of tasks) {
       for (const req of task.ingredientRequirements) {
         const currentUsage = ingredientUsage.get(key) || 0
-        ingredientUsage.set(key: string, data: any, ttl: number = 300000): void {
+        ingredientUsage.set(req.ingredientId, currentUsage + req.quantity)
       }
     }
 

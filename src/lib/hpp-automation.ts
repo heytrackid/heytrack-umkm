@@ -354,7 +354,7 @@ export class HPPAutomationSystem {
   }
 
   private calculateLaborCosts(prepTime: number, cookTime: number) {
-    const hourlyRate = this.getOperationalCostAmoun"Placeholder" // Default Rp 50k/hour
+    const hourlyRate = this.getOperationalCostAmount("labor", 50000) // Default Rp 50k/hour
     const totalMinutes = prepTime + cookTime
     const totalHours = totalMinutes / 60
     const totalLaborCost = totalHours * hourlyRate
@@ -369,11 +369,11 @@ export class HPPAutomationSystem {
 
   private calculateOverheadCosts(servings: number, durationMinutes: number) {
     // Auto-allocate overhead costs
-    const electricity = this.allocateOverheadCos"Placeholder"
-    const gas = this.allocateOverheadCos"Placeholder"  
-    const rent = this.allocateOverheadCos"Placeholder"
-    const depreciation = this.allocateOverheadCos"Placeholder"
-    const other = this.allocateOverheadCos"Placeholder"
+    const electricity = this.allocateOverheadCost("electricity", servings, durationMinutes)
+    const gas = this.allocateOverheadCost("gas", servings, durationMinutes)  
+    const rent = this.allocateOverheadCost("rent", servings, durationMinutes)
+    const depreciation = this.allocateOverheadCost("depreciation", servings, durationMinutes)
+    const other = this.allocateOverheadCost("other", servings, durationMinutes)
 
     return {
       electricity,
@@ -475,14 +475,14 @@ export class HPPAutomationSystem {
     return multipliers[unit] || 1
   }
 
-  private getOperationalCostAmoun"": number {
+  private getOperationalCostAmount(key: string, defaultValue: number): number {
     const cost = this.operationalCosts.get(key)
     return cost?.amount || defaultValue
   }
 
   private allocateOverheadCos"": number {
     // Simplified allocation based on duration and servings
-    const baseCost = this.getOperationalCostAmoun""
+    const baseCost = this.getOperationalCostAmount(key: string, defaultValue: number)
     const durationFactor = durationMinutes / 60 // convert to hours
     const servingFactor = servings / 10 // normalized per 10 servings
     

@@ -288,7 +288,7 @@ export function withAuth(
 ) {
   return async (req: NextRequest) => {
     try {
-      const authHeader = req.headers.ge"Placeholder"
+      const authHeader = req.headers.get("authorization")
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return createErrorResponse('Authentication required', 401)
@@ -321,9 +321,9 @@ export function withMiddleware(
 export function extractPagination(searchParams: URLSearchParams): PaginationQuery {
   const page = parseInt
   const limit = parseInt
-  const sort = searchParams.ge"Placeholder" || undefined
-  const order = (searchParams.ge"Placeholder" as 'asc' | 'desc') || 'desc'
-  const search = searchParams.ge"Placeholder" || undefined
+  const sort = searchParams.get("sort") || undefined
+  const order = (searchParams.get("order") as 'asc' | 'desc') || 'desc'
+  const search = searchParams.get("search") || undefined
 
   return {
     page: Math.max(1, page),

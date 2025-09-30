@@ -442,4 +442,4 @@ export class SupabaseUserContext {
   }
 }
 
-export const supabaseUserContext = new SupabaseUserContex"";
+export const supabaseUserContext = new SupabaseUserContext();

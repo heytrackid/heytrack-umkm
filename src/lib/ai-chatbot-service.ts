@@ -433,7 +433,7 @@ class ActionExecutor {
 // Intent Recognition (Simplified NLP)
 class IntentRecognizer {
   
-  static recognizeIntent(query: string): {
+  static recognizeIntent(message): {
     intent: ChatIntent;
     confidence: number;
     entities: Record<string, any>;
@@ -579,7 +579,7 @@ export class AIChatbotService {
     context: ChatContext;
   }> {
     // Get or create context
-    const context = this.getOrCreateContex"";
+    const context = this.getOrCreateContext(userId);
     
     // Add user message to context
     const userMessage: ChatMessage = {
@@ -592,7 +592,7 @@ export class AIChatbotService {
     context.conversation.push(userMessage);
 
     // Recognize intent
-    const { intent, confidence, entities } = IntentRecognizer.recognizeIntent(query: string);
+    const { intent, confidence, entities } = IntentRecognizer.recognizeIntent(message);
     
     // Generate response based on intent
     const response = await this.generateResponse(intent, entities, context);
@@ -887,7 +887,7 @@ export class AIChatbotService {
   }
 
   // Get or create context
-  private getOrCreateContex"": ChatContext {
+  private getOrCreateContext(userId): ChatContext {
     const id = contextId || `ctx_${userId}_${Date.now()}`;
     
     if (contextId && this.contexts.has(contextId)) {
