@@ -102,7 +102,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     )
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return
 
     const selectedIngredients = filteredIngredients.filter(ing => selectedItems.includes(ing.id))
@@ -113,14 +113,15 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     )
 
     if (confirmed) {
-      // TODO: Implement actual API call to delete ingredients
-      console.log('Deleting ingredients:', selectedItems)
-
-      // Show success message (in real app, this would be API call)
-      alert(`✅ ${selectedItems.length} bahan baku berhasil dihapus!`)
-
-      // Clear selection
-      setSelectedItems([])
+      try {
+        const deletePromises = selectedItems.map(id => fetch(`/api/ingredients/${id}`, { method: 'DELETE' }))
+        await Promise.all(deletePromises)
+        alert(`✅ ${selectedItems.length} bahan baku berhasil dihapus!`)
+        setSelectedItems([])
+        refetch()
+      } catch (error) {
+        alert('❌ Gagal menghapus bahan baku')
+      }
     }
   }
 
@@ -144,7 +145,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     window.location.href = '/ingredients'
   }
 
-  const handleDeleteIngredient = (ingredient: any) => {
+  const handleDeleteIngredient = async (ingredient: any) => {
     console.log('🗑️ Delete button clicked for ingredient:', ingredient)
 
     const confirmed = window.confirm(
@@ -152,11 +153,14 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     )
 
     if (confirmed) {
-      // TODO: Implement actual API call to delete ingredient
-      console.log('✅ User confirmed deletion for ingredient:', ingredient.id)
-
-      // Show success message (in real app, this would be API call)
-      alert(`✅ BERHASIL!\n\nBahan baku"${ingredient.name}" berhasil dihapus dari sistem.`)
+      try {
+        const response = await fetch(`/api/ingredients/${ingredient.id}`, { method: 'DELETE' })
+        if (!response.ok) throw new Error('Failed')
+        alert(`✅ BERHASIL!\n\nBahan baku "${ingredient.name}" berhasil dihapus dari sistem.`)
+        refetch()
+      } catch (error) {
+        alert('❌ Gagal menghapus bahan baku')
+      }
     } else {
       console.log('❌ User cancelled deletion for ingredient:', ingredient.name)
     }

@@ -65,16 +65,16 @@ export default function NewInventoryTransactionPage() {
     setIsSubmitting(true)
     
     try {
-      // TODO: Implement actual API call to save transaction
-      console.log('Saving transaction:', formData)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Redirect back to inventory page
+      const response = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      if (!response.ok) throw new Error('Failed')
+      alert('\u2705 Transaksi berhasil disimpan!')
       router.push('/inventory')
     } catch (error) {
-      console.error('Error saving transaction:', error)
+      alert('\u274c Gagal menyimpan transaksi')
     } finally {
       setIsSubmitting(false)
     }

@@ -96,7 +96,7 @@ export default function CustomersPage() {
     )
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return
     
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
@@ -107,14 +107,18 @@ export default function CustomersPage() {
     )
     
     if (confirmed) {
-      // TODO: Implement actual API call to delete customers
-      console.log('Deleting customers:', selectedItems)
-      
-      // Show success message (in real app, this would be API call)
-      alert(`✅ ${selectedItems.length} pelanggan berhasil dihapus dari sistem.`)
-      
-      // Clear selection
-      setSelectedItems([])
+      try {
+        const deletePromises = selectedItems.map(id =>
+          fetch(`/api/customers/${id}`, { method: 'DELETE' })
+        )
+        await Promise.all(deletePromises)
+        alert(`✅ ${selectedItems.length} pelanggan berhasil dihapus dari sistem.`)
+        setSelectedItems([])
+        fetchCustomers()
+      } catch (error) {
+        console.error('Error:', error)
+        alert('❌ Gagal menghapus pelanggan')
+      }
     }
   }
 
@@ -136,15 +140,21 @@ export default function CustomersPage() {
     setCurrentView('edit')
   }
 
-  const handleDeleteCustomer = (customer: any) => {
+  const handleDeleteCustomer = async (customer: any) => {
     const confirmed = window.confirm(
       `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus pelanggan:\n"${customer.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
     )
     
     if (confirmed) {
-      // TODO: Implement actual API call to delete customer
-      console.log('Deleting customer:', customer.id)
-      alert(`✅ Pelanggan "${customer.name}" berhasil dihapus dari sistem.`)
+      try {
+        const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
+        if (!response.ok) throw new Error('Failed')
+        alert(`✅ Pelanggan "${customer.name}" berhasil dihapus dari sistem.`)
+        fetchCustomers()
+      } catch (error) {
+        console.error('Error:', error)
+        alert('❌ Gagal menghapus pelanggan')
+      }
     }
   }
 

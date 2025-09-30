@@ -218,7 +218,7 @@ export default function ProductionPage() {
     )
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return
     
     const selectedRecipes = filteredRecipes.filter(recipe => selectedItems.includes(recipe.id.toString()))
@@ -229,15 +229,15 @@ export default function ProductionPage() {
     )
     
     if (confirmed) {
-      // TODO: Implement actual API call to delete recipes
-      console.log('Deleting recipes:', selectedItems)
-      
-      // Show success message (in real app, this would be API call)
-      alert(t('messages.success.bulkDeleted', { count: selectedItems.length, type: 'resep' }))
-      
-      // Clear selection and refresh
-      setSelectedItems([])
-      refetch()
+      try {
+        const deletePromises = selectedItems.map(id => fetch(`/api/recipes/${id}`, { method: 'DELETE' }))
+        await Promise.all(deletePromises)
+        alert(t('messages.success.bulkDeleted', { count: selectedItems.length, type: 'resep' }))
+        setSelectedItems([])
+        refetch()
+      } catch (error) {
+        alert('❌ Gagal menghapus resep')
+      }
     }
   }
 
@@ -259,16 +259,20 @@ export default function ProductionPage() {
     alert(t('messages.info.detailFeature', { type: 'resep', name: recipe.name }))
   }
 
-  const handleDeleteRecipe = (recipe: any) => {
+  const handleDeleteRecipe = async (recipe: any) => {
     const confirmed = window.confirm(
       t('messages.confirmation.singleDelete', { type: 'resep', name: recipe.name })
     )
     
     if (confirmed) {
-      // TODO: Implement actual API call to delete recipe
-      console.log('Deleting recipe:', recipe.id)
-      alert(t('messages.success.singleDeleted', { type: 'Resep', name: recipe.name }))
-      refetch()
+      try {
+        const response = await fetch(`/api/recipes/${recipe.id}`, { method: 'DELETE' })
+        if (!response.ok) throw new Error('Failed')
+        alert(t('messages.success.singleDeleted', { type: 'Resep', name: recipe.name }))
+        refetch()
+      } catch (error) {
+        alert('❌ Gagal menghapus resep')
+      }
     }
   }
 
