@@ -214,7 +214,7 @@ export default function RecipeTable({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => onEdi""}>
+                              <DropdownMenuItem onClick={() => onEdit(cost)}>
                                 <Edit2 className="h-4 w-4 mr-2" />
                                 {"Placeholder"}
                               </DropdownMenuItem>

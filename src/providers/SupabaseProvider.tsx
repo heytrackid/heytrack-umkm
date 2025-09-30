@@ -11,7 +11,7 @@ type SupabaseContext = {
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
 export default function SupabaseProvider({ children }: { children: ReactNode }) {
-  const supabase = createSupabaseClien""
+  const supabase = createSupabaseClient()
 
   return (
     <Context.Provider value={{ supabase }}>

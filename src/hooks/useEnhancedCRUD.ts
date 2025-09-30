@@ -72,7 +72,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
       
       // Validate data if needed
       if (!data || typeof data !== 'object') {
@@ -104,7 +104,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
 
       // Validate inputs
       if (!id) {
@@ -144,7 +144,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
 
       if (!id) {
         throw new Error('ID tidak boleh kosong')
@@ -185,7 +185,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
 
       if (!Array.isArray(records) || records.length === 0) {
         throw new Error('Data tidak valid atau kosong')
@@ -223,7 +223,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
 
       if (!Array.isArray(updates) || updates.length === 0) {
         throw new Error('Data tidak valid atau kosong')
@@ -266,7 +266,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
 
       if (!Array.isArray(ids) || ids.length === 0) {
         throw new Error('ID tidak valid atau kosong')

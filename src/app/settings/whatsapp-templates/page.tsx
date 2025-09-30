@@ -385,7 +385,7 @@ export default function WhatsAppTemplatesPage() {
                               Preview
                             </DropdownMenuItem>
                             
-                            <DropdownMenuItem onClick={() => handleEdi""}>
+                            <DropdownMenuItem onClick={() => handleEdit(template)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>

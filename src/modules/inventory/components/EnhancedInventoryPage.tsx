@@ -72,7 +72,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
 
   // Calculate weighted average for ingredient
   const handleShowPricingAnalysis = (ingredient: any) => {
-    setSelectedIngredien""
+    setSelectedIngredient(ingredient)
     setShowPricingAnalysis(true)
   }
 

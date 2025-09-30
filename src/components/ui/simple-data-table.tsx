@@ -81,7 +81,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
   pageSizeOptions,
   initialPageSize
 }: SimpleDataTableProps<T>) {
-  const { isMobile, shouldUseCompactUI } = useMobileFirs""
+  const { isMobile, shouldUseCompactUI } = useMobileFirst()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [sortBy, setSortBy] = useState<string>('')
@@ -172,7 +172,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     }
   }, [rowsPerPage, sanitizedInitialPageSize, sanitizedPageSizeOptions, enablePagination])
 
-  function handleSor"" {
+  function handleSort(columnKey: string) {
     if (sortBy === columnKey) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
@@ -188,7 +188,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     }))
   }
 
-  function handleExpor"" {
+  function handleExport() {
     if (!exportData) return
     
     const csvContent = [
@@ -337,7 +337,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                             </Button>
                           )}
                           {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdi""} className="flex-1">
+                            <Button variant="outline" size="sm" onClick={() => onEdit(cost)} className="flex-1">
                               <Edit className="h-4 w-4 mr-2" />
                               {"Placeholder"}
                             </Button>
@@ -446,7 +446,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                                 </DropdownMenuItem>
                               )}
                               {onEdit && (
-                                <DropdownMenuItem onClick={() => onEdi""}>
+                                <DropdownMenuItem onClick={() => onEdit(cost)}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   {"Placeholder"}
                                 </DropdownMenuItem>

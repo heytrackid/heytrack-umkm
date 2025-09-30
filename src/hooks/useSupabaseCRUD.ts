@@ -50,7 +50,7 @@ function useSupabaseDataInternal<T = any>(
     setError(null);
     
     try {
-      const supabase = createSupabaseClien"";
+      const supabase = createSupabaseClient();
       const actualTable = getActualTableName(table as any);
       let query = supabase.from(actualTable).select('*');
 
@@ -84,7 +84,7 @@ function useSupabaseDataInternal<T = any>(
   }, [table, options]);
 
   useEffect(() => {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     const actualTable = getActualTableName(table as any);
     
     // Initial fetch – skip if we have initial and refetchOnMount === false

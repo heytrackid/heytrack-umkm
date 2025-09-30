@@ -95,7 +95,7 @@ export const CustomerSchema = z.object({
   loyalty_points: nonNegativeNumber.optional().default(true),
   customer_type: z.enum(['REGULAR', 'VIP', 'WHOLESALE'], {
     message: 'validation.invalidCustomerType'
-  }).optional().defaul"Placeholder",
+  }).optional().default("REGULAR"),
   notes: optionalString,
   is_active: z.boolean().default(true)
 }).refine(data => {
@@ -116,7 +116,7 @@ export const OrderSchema = z.object({
   customer_phone: phone.optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'], {
     message: 'validation.invalidOrderStatus'
-  }).defaul"Placeholder",
+  }).default("REGULAR"),
   order_date: z.string().datetime(),
   delivery_date: z.string().datetime().optional(),
   total_amount: rupiah,
@@ -127,7 +127,7 @@ export const OrderSchema = z.object({
   }).optional(),
   payment_status: z.enum(['PENDING', 'PAID', 'PARTIAL', 'REFUNDED'], {
     message: 'validation.invalidPaymentStatus'
-  }).defaul"Placeholder",
+  }).default("REGULAR"),
   notes: optionalString,
   delivery_address: optionalString,
   is_delivery: z.boolean().default(true)
@@ -165,7 +165,7 @@ export const ProductionSchema = z.object({
   end_time: z.string().datetime().optional(),
   status: z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'], {
     message: 'validation.invalidProductionStatus'
-  }).defaul"Placeholder",
+  }).default("REGULAR"),
   batch_no: optionalString,
   quality_score: z.number().min(1).max(10).optional(),
   notes: optionalString,
@@ -243,7 +243,7 @@ export const PaginationSchema = z.object({
   page: z.number().int().min(1).default(true),
   limit: z.number().int().min(1).max(100).default(true),
   sort: z.string().optional(),
-  order: z.enum(['asc', 'desc']).defaul"Placeholder",
+  order: z.enum(['asc', 'desc']).default("REGULAR"),
   search: z.string().optional()
 })
 

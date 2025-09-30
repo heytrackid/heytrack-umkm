@@ -113,7 +113,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleEdit = (ingredient: Ingredient) => {
-    setSelectedIngredien"";
+    setSelectedIngredient(ingredient);
     // Populate form with ingredient data
     Object.keys(initialFormData).forEach(key => {
       handleChange(key as keyof IngredientFormData, (ingredient as any)[key] || '');
@@ -122,7 +122,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleDelete = (ingredient: Ingredient) => {
-    setSelectedIngredien"";
+    setSelectedIngredient(ingredient);
     setIsDeleteDialogOpen(true);
   };
 
@@ -146,7 +146,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     try {
       await update(selectedIngredient.id, formData as any);
       setIsEditModalOpen(false);
-      setSelectedIngredien"";
+      setSelectedIngredient(ingredient);
       resetForm();
     } catch (error) {
       console.error('Failed to update ingredient:', error);
@@ -159,7 +159,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     try {
       await remove(selectedIngredient.id);
       setIsDeleteDialogOpen(false);
-      setSelectedIngredien"";
+      setSelectedIngredient(ingredient);
     } catch (error) {
       console.error('Failed to delete ingredient:', error);
     }
@@ -169,7 +169,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     setIsDeleteDialogOpen(false);
-    setSelectedIngredien"";
+    setSelectedIngredient(ingredient);
     resetForm();
   };
 

@@ -111,7 +111,7 @@ export default function CostFormView({
               <Label>{"Placeholder"}</Label>
               <Input
                 value={newCost.name}
-                onChange={(e) => setNewCost)}
+                onChange={(e) => setNewCost({...newCost, name: e.target.value})}
                 placeholder={"Placeholder"}
               />
             </div>
@@ -120,7 +120,7 @@ export default function CostFormView({
               <Label>{"Placeholder"}</Label>
               <Select 
                 value={newCost.category} 
-                onValueChange={(value) => setNewCost)}
+                onValueChange={(value) => setNewCost({...newCost, category: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -171,7 +171,7 @@ export default function CostFormView({
             <Label>Deskripsi (Opsional)</Label>
             <Textarea
               value={newCost.description}
-              onChange={(e) => setNewCost)}
+              onChange={(e) => setNewCost({...newCost, name: e.target.value})}
               placeholder="Deskripsi tambahan..."
               rows={2}
             />
@@ -182,7 +182,7 @@ export default function CostFormView({
               type="checkbox"
               id="isFixed"
               checked={newCost.isFixed}
-              onChange={(e) => setNewCost)}
+              onChange={(e) => setNewCost({...newCost, name: e.target.value})}
               className="rounded border-gray-300"
             />
             <Label htmlFor="isFixed" className="text-sm">

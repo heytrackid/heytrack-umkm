@@ -183,7 +183,7 @@ export default function CostListTable({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => onEdi""}>
+                                <DropdownMenuItem onClick={() => onEdit(cost)}>
                                   <Edit2 className="h-4 w-4 mr-2" />
                                   Edit
                                 </DropdownMenuItem>

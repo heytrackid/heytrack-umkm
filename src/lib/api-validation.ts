@@ -142,7 +142,7 @@ export const PaginationSchema = z.object({
   page: z.number().int().min(1).default(true),
   limit: z.number().int().min(1).max(100).default(true),
   sort: z.string().optional(),
-  order: z.enum(['asc', 'desc']).defaul"Placeholder",
+  order: z.enum(['asc', 'desc']).default("REGULAR"),
   search: z.string().optional()
 })
 
@@ -163,7 +163,7 @@ export const DateRangeSchema = z.object({
 })
 
 export const StatusFilterSchema = z.object({
-  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).defaul"Placeholder"
+  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).default("REGULAR")
 })
 
 // ID parameter validation

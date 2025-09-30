@@ -46,7 +46,7 @@ export function useCustomers() {
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -79,7 +79,7 @@ export function useIngredients() {
   const fetchIngredients = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
       const { data, error } = await supabase
         .from('ingredients')
         .select('*')
@@ -112,7 +112,7 @@ export function useOrders() {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
       const { data, error } = await supabase
         .from('orders')
         .select('*')

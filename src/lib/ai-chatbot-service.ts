@@ -277,7 +277,7 @@ class ActionExecutor {
           return await this.checkStock(action.data, context);
         
         case 'view_report':
-          return await this.generateRepor"";
+          return await this.generateReport(action.data, context);
         
         case 'analysis':
           return await this.performAnalysis(action.data, context);
@@ -331,7 +331,7 @@ class ActionExecutor {
     }
   }
 
-  private static async generateRepor"" {
+  private static async generateReport(action.data, context) {
     const { type, period } = data;
     const userId = context?.userId || 'default-user';
     
