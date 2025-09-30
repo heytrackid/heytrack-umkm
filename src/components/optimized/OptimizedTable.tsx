@@ -29,7 +29,7 @@ export const OptimizedTableRow = memo(({
   formatValue?: (key: string, value: any, item: any) => React.ReactNode
 }) => {
   const handleSelect = useCallback(() => {
-    onSelec"")
+    onSelect(item.id)
   }, [onSelect, item.id])
 
   const handleEdit = useCallback(() => {

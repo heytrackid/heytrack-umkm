@@ -152,12 +152,12 @@ export function SimpleDataTable<T extends Record<string, any>>({
     return item[key as keyof T]
   }
 
-  useEffec"" => {
+  useEffect(() => {
     if (!enablePagination) return
     setCurrentPage(1)
   }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
 
-  useEffec"" => {
+  useEffect(() => {
     if (!enablePagination) return
     const maxPage = Math.max(1, Math.ceil(totalItems / rowsPerPage))
     if (currentPage > maxPage) {
@@ -165,7 +165,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     }
   }, [currentPage, rowsPerPage, totalItems, enablePagination])
 
-  useEffec"" => {
+  useEffect(() => {
     if (!enablePagination) return
     if (!sanitizedPageSizeOptions.includes(rowsPerPage)) {
       setRowsPerPage(sanitizedInitialPageSize)

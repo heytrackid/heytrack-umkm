@@ -53,7 +53,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
         description: 'Data bahan berhasil disimpan'
       })
       if (!initialData) {
-        form.rese""
+        form.reset(key: string, data: any, ttl: number = 300000): void {
       }
     } catch (error) {
       toast({

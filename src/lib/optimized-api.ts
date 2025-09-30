@@ -14,7 +14,7 @@ class APICache {
   private cache = new Map<string, CacheEntry>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
 
-  se"" {
+  set(key: string, data: any, ttl: number = 300000): void { {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -22,8 +22,8 @@ class APICache {
     })
   }
 
-  ge"": any | null {
-    const entry = this.cache.ge""
+  get(key): any | null {
+    const entry = this.cache.get(key)
     if (!entry) return null
 
     if (Date.now() - entry.timestamp > entry.ttl) {
@@ -58,14 +58,14 @@ class RequestDeduplicator {
 
   async deduplicate<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
     if (this.pendingRequests.has(key)) {
-      return this.pendingRequests.ge""!
+      return this.pendingRequests.get(key)!
     }
 
     const promise = requestFn().finally(() => {
       this.pendingRequests.delete(key)
     })
 
-    this.pendingRequests.se""
+    this.pendingRequests.set(key: string, data: any, ttl: number = 300000): void {
     return promise
   }
 }
@@ -89,7 +89,7 @@ class OptimizedAPIClient {
     
     // Check cache first (unless explicitly skipped)
     if (!cacheOptions?.skipCache) {
-      const cached = this.cache.ge""
+      const cached = this.cache.get(key)
       if (cached) {
         return cached
       }
@@ -113,7 +113,7 @@ class OptimizedAPIClient {
 
       // Cache the result
       if (!cacheOptions?.skipCache && options.method !== 'POST' && options.method !== 'PUT' && options.method !== 'DELETE') {
-        this.cache.se""
+        this.cache.set(key: string, data: any, ttl: number = 300000): void {
       }
 
       // Invalidate related cache patterns on mutations
@@ -248,7 +248,7 @@ export function useOptimizedAPI<T>(
     return fetchData()
   }, [fetchData])
 
-  useEffec"" => {
+  useEffect(() => {
     if (options?.autoFetch !== false) {
       fetchData()
     }

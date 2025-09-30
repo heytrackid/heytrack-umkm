@@ -13,7 +13,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { RefreshCw, Calculator, Target } from 'lucide-react'
 
 // Dynamic imports for better performance
-const HPPSummaryStats = dynamic(() => impor"Placeholder", {
+const HPPSummaryStats = dynamic(() => import('./components/HPPSummaryStats'), {
   ssr: false,
   loading: () => (
     <div className="grid gap-4 md:grid-cols-4">
@@ -31,7 +31,7 @@ const HPPSummaryStats = dynamic(() => impor"Placeholder", {
   )
 })
 
-const HPPCalculatorTab = dynamic(() => impor"Placeholder", {
+const HPPCalculatorTab = dynamic(() => import('./components/HPPCalculatorTab'), {
   ssr: false,
   loading: () => (
     <div className="space-y-6">
@@ -81,7 +81,7 @@ const HPPCalculatorTab = dynamic(() => impor"Placeholder", {
   )
 })
 
-const PricingStrategyTab = dynamic(() => impor"Placeholder", {
+const PricingStrategyTab = dynamic(() => import('./components/PricingStrategyTab'), {
   ssr: false,
   loading: () => (
     <div className="space-y-6">

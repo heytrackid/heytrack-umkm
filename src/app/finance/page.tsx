@@ -18,7 +18,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { PullToRefresh } from '@/components/ui/mobile-gestures'
 
 // Dynamically load heavy sections with skeleton fallbacks
-const FinancialSummaryCards = dynamic(() => impor"Placeholder".then(m => m.FinancialSummaryCards), {
+const FinancialSummaryCards = dynamic(() => import('@/components').then(m => m.FinancialSummaryCards), {
   loading: () => (
     <div className="grid gap-4 md:grid-cols-4">
       {Array.from({ length: 4 }, (_, i) => (
@@ -28,7 +28,7 @@ const FinancialSummaryCards = dynamic(() => impor"Placeholder".then(m => m.Finan
   ),
 })
 
-const FinancialFilters = dynamic(() => impor"Placeholder".then(m => m.FinancialFilters), {
+const FinancialFilters = dynamic(() => import('@/components').then(m => m.FinancialFilters), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -39,7 +39,7 @@ const FinancialFilters = dynamic(() => impor"Placeholder".then(m => m.FinancialF
   ),
 })
 
-const QuickAnalytics = dynamic(() => impor"Placeholder".then(m => m.QuickAnalytics), {
+const QuickAnalytics = dynamic(() => import('@/components').then(m => m.QuickAnalytics), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -49,7 +49,7 @@ const QuickAnalytics = dynamic(() => impor"Placeholder".then(m => m.QuickAnalyti
   ),
 })
 
-const TransactionList = dynamic(() => impor"Placeholder".then(m => m.TransactionList), {
+const TransactionList = dynamic(() => import('@/components').then(m => m.TransactionList), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -59,11 +59,11 @@ const TransactionList = dynamic(() => impor"Placeholder".then(m => m.Transaction
   ),
 })
 
-const FinanceForm = dynamic(() => impor"Placeholder".then(m => m.FinanceForm), {
+const FinanceForm = dynamic(() => import('@/components').then(m => m.FinanceForm), {
   loading: () => <div className="h-64 rounded bg-muted animate-pulse" />,
 })
 
-const TransactionDetailView = dynamic(() => impor"Placeholder".then(m => m.TransactionDetailView), {
+const TransactionDetailView = dynamic(() => import('@/components').then(m => m.TransactionDetailView), {
   loading: () => <div className="h-32 rounded bg-muted animate-pulse" />,
 })
 

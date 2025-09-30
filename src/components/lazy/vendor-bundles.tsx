@@ -16,68 +16,68 @@ const VendorLoadingSkeleton = ({ name }: { name: string }) => (
 
 // Recharts Bundle (Heavy charting library)
 export const LazyRechartsBundle = {
-  LineChart: lazy(() => impor"Placeholder".then(m => ({ default: m.LineChart }))),
-  BarChart: lazy(() => impor"Placeholder".then(m => ({ default: m.BarChart }))),
-  AreaChart: lazy(() => impor"Placeholder".then(m => ({ default: m.AreaChart }))),
-  PieChart: lazy(() => impor"Placeholder".then(m => ({ default: m.PieChart }))),
-  RadarChart: lazy(() => impor"Placeholder".then(m => ({ default: m.RadarChart }))),
-  ComposedChart: lazy(() => impor"Placeholder".then(m => ({ default: m.ComposedChart }))),
+  LineChart: lazy(() => import('@/components').then(m => ({ default: m.LineChart }))),
+  BarChart: lazy(() => import('@/components').then(m => ({ default: m.BarChart }))),
+  AreaChart: lazy(() => import('@/components').then(m => ({ default: m.AreaChart }))),
+  PieChart: lazy(() => import('@/components').then(m => ({ default: m.PieChart }))),
+  RadarChart: lazy(() => import('@/components').then(m => ({ default: m.RadarChart }))),
+  ComposedChart: lazy(() => import('@/components').then(m => ({ default: m.ComposedChart }))),
   
   // Recharts components
-  XAxis: lazy(() => impor"Placeholder".then(m => ({ default: m.XAxis }))),
-  YAxis: lazy(() => impor"Placeholder".then(m => ({ default: m.YAxis }))),
-  CartesianGrid: lazy(() => impor"Placeholder".then(m => ({ default: m.CartesianGrid }))),
-  Tooltip: lazy(() => impor"Placeholder".then(m => ({ default: m.Tooltip }))),
-  Legend: lazy(() => impor"Placeholder".then(m => ({ default: m.Legend }))),
-  ResponsiveContainer: lazy(() => impor"Placeholder".then(m => ({ default: m.ResponsiveContainer }))),
+  XAxis: lazy(() => import('@/components').then(m => ({ default: m.XAxis }))),
+  YAxis: lazy(() => import('@/components').then(m => ({ default: m.YAxis }))),
+  CartesianGrid: lazy(() => import('@/components').then(m => ({ default: m.CartesianGrid }))),
+  Tooltip: lazy(() => import('@/components').then(m => ({ default: m.Tooltip }))),
+  Legend: lazy(() => import('@/components').then(m => ({ default: m.Legend }))),
+  ResponsiveContainer: lazy(() => import('@/components').then(m => ({ default: m.ResponsiveContainer }))),
   
   // Chart elements
-  Line: lazy(() => impor"Placeholder".then(m => ({ default: m.Line }))),
-  Bar: lazy(() => impor"Placeholder".then(m => ({ default: m.Bar }))),
-  Area: lazy(() => impor"Placeholder".then(m => ({ default: m.Area }))),
-  Cell: lazy(() => impor"Placeholder".then(m => ({ default: m.Cell }))),
+  Line: lazy(() => import('@/components').then(m => ({ default: m.Line }))),
+  Bar: lazy(() => import('@/components').then(m => ({ default: m.Bar }))),
+  Area: lazy(() => import('@/components').then(m => ({ default: m.Area }))),
+  Cell: lazy(() => import('@/components').then(m => ({ default: m.Cell }))),
 }
 
 // Radix UI Complex Components Bundle (yang tidak semua pages butuh)
 export const LazyRadixBundle = {
   // Navigation & Menu
-  NavigationMenu: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  Menubar: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  ContextMenu: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
+  NavigationMenu: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  Menubar: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  ContextMenu: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
   
   // Layout & Container
-  ScrollArea: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  Separator: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  AspectRatio: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
+  ScrollArea: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  Separator: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  AspectRatio: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
   
   // Advanced Inputs
-  Slider: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  RadioGroup: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  ToggleGroup: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
+  Slider: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  RadioGroup: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  ToggleGroup: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
   
   // Overlay & Modal
-  HoverCard: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  Popover: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
-  Toast: lazy(() => impor"Placeholder".then(m => ({ default: m.Root }))),
+  HoverCard: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  Popover: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
+  Toast: lazy(() => import('@/components').then(m => ({ default: m.Root }))),
 }
 
 // React Hook Form Bundle (Form libraries) - Commented out due to TypeScript issues
 // These libraries export utilities, not React components
 // export const LazyFormBundle = {
-//   ReactHookForm: lazy(() => impor"Placeholder"),
-//   ZodResolver: lazy(() => impor"Placeholder".then(m => ({ default: m.zodResolver }))),
-//   Zod: lazy(() => impor"Placeholder"),
+//   ReactHookForm: lazy(() => import('@/components')),
+//   ZodResolver: lazy(() => import('@/components').then(m => ({ default: m.zodResolver }))),
+//   Zod: lazy(() => import('@/components')),
 // }
 
 // Date & Time Libraries Bundle - Fixed to only include React components
 export const LazyDateBundle = {
-  // DateFns: lazy(() => impor"Placeholder"), // Utility library, not a component
-  ReactDayPicker: lazy(() => impor"Placeholder".then(m => ({ default: m.DayPicker }))),
+  // DateFns: lazy(() => import('@/components')), // Utility library, not a component
+  ReactDayPicker: lazy(() => import('@/components').then(m => ({ default: m.DayPicker }))),
 }
 
 // Table Libraries Bundle - Commented out as it exports utilities not components
 // export const LazyTableBundle = {
-//   ReactTable: lazy(() => impor"Placeholder"),
+//   ReactTable: lazy(() => import('@/components')),
 // }
 
 // Wrapper components untuk vendor libraries
@@ -117,19 +117,19 @@ export const HoverCardWithSuspense = RadixWithLoading(LazyRadixBundle.HoverCard,
 export const loadVendorWhenNeeded = async (vendorName: string, componentName?: string) => {
   switch (vendorName) {
     case 'recharts':
-      return impor"Placeholder"
+      return import('@/components')
     case 'radix-navigation':
-      return impor"Placeholder"
+      return import('@/components')
     case 'radix-scroll':
-      return impor"Placeholder"
+      return import('@/components')
     case 'react-hook-form':
-      return impor"Placeholder"
+      return import('@/components')
     case 'zod':
-      return impor"Placeholder"
+      return import('@/components')
     case 'date-fns':
-      return impor"Placeholder"
+      return import('@/components')
     case 'react-table':
-      return impor"Placeholder"
+      return import('@/components')
     default:
       throw new Error(`Unknown vendor: ${vendorName}`)
   }
@@ -141,7 +141,7 @@ export const useVendorLib = (vendorName: string) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  useEffec"" => {
+  useEffect(() => {
     loadVendorWhenNeeded(vendorName)
       .then(module => {
         setLib(module)

@@ -92,11 +92,11 @@ export async function GET(request: NextRequest) {
 
     // Add smart notifications unread count
     if (source === 'smart' || source === 'all') {
-      unreadCount += smartNotificationSystem.getUnreadCoun""
+      unreadCount += smartNotificationSystem.getUnreadCount()
     }
 
     // Sort all notifications by timestamp (newest first)
-    notifications.sort((a, b) => => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    notifications.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
     // Limit final results
     notifications = notifications.slice(0, limit)

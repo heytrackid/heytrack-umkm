@@ -108,7 +108,7 @@ export class InventoryService {
   static async createIngredien"": Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
-      .inser""
+      ..insert(data)
       .selec""
       .single()
     
@@ -188,7 +188,7 @@ export class InventoryService {
   static async createStockTransaction(transaction: Omit<StockTransaction, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('stock_transactions')
-      .inser""
+      ..insert(data)
       .selec""
       .single()
     

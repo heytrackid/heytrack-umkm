@@ -83,7 +83,7 @@ function useSupabaseDataInternal<T = any>(
     }
   }, [table, options]);
 
-  useEffec"" => {
+  useEffect(() => {
     const supabase = createSupabaseClien"";
     const actualTable = getActualTableName(table as any);
     
@@ -287,7 +287,7 @@ export function useSupabaseRecord<T = any>(
     }
   }, [table, id]);
 
-  useEffec"" => {
+  useEffect(() => {
     if (id) {
       refetch();
     }

@@ -81,7 +81,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data: result, error } = await (supabase as any)
         .from(table)
-        .inser""
+        ..insert(data)
         .selec""
         .single()
 
@@ -193,7 +193,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data, error } = await (supabase as any)
         .from(table)
-        .inser""
+        ..insert(data)
         .selec""
 
       if (error) {

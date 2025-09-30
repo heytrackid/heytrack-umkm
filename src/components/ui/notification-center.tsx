@@ -124,7 +124,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
     }
   }
 
-  useEffec"" => {
+  useEffect(() => {
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 60000) // Refresh every minute
     return () => clearInterval(interval)

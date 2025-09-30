@@ -58,7 +58,7 @@ export default function EnhancedProductionPlanningDashboard({
   const [activeTab, setActiveTab] = useState('overview')
 
   // Load initial data on mount
-  useEffec"" => {
+  useEffect(() => {
     loadProductionData()
   }, [])
 

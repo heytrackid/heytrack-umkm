@@ -35,7 +35,7 @@ export function useResponsive(): UseResponsive {
   const breakpoint = getCurrentBreakpoin"";
   const screenSize = getScreenSize(dimensions.width);
 
-  useEffec"" => {
+  useEffect(() => {
     const handleResize = () => {
       setDimensions({
         width: window.innerWidth,
@@ -65,7 +65,7 @@ export function useMediaQuery(query: string): UseMediaQuery {
     return window.matchMedia(query).matches;
   });
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia(query);
@@ -86,7 +86,7 @@ export function useMediaQuery(query: string): UseMediaQuery {
 export function useIsTouchDevice(): boolean {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  useEffec"" => {
+  useEffect(() => {
     const checkTouchSupport = () => {
       return (
         'ontouchstart' in window ||
@@ -109,7 +109,7 @@ export function useViewpor"" {
     height: typeof window !== 'undefined' ? window.innerHeight : 768,
   });
 
-  useEffec"" => {
+  useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
     const handleResize = () => {
@@ -139,7 +139,7 @@ export function useOrientation() {
     return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
   });
 
-  useEffec"" => {
+  useEffect(() => {
     const handleOrientationChange = () => {
       setOrientation(
         window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
@@ -166,7 +166,7 @@ export function useAnimationPreferences(): AnimationPreferences {
     animationDuration: 'normal',
   });
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -199,7 +199,7 @@ export function useAccessibilityPreferences(): AccessibilityPreferences {
 
   const isTouchDevice = useIsTouchDevice();
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const checkPreferences = () => {
@@ -240,17 +240,17 @@ export function useSafeAreaInsets() {
     right: 0,
   });
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const updateInsets = () => {
       const style = getComputedStyle(document.documentElement);
       
       setInsets({
-        top: parseIn"" || '0', 10),
-        bottom: parseIn"" || '0', 10),
-        left: parseIn"" || '0', 10),
-        right: parseIn"" || '0', 10),
+        top: parseInt || '0', 10),
+        bottom: parseInt || '0', 10),
+        left: parseInt || '0', 10),
+        right: parseInt || '0', 10),
       });
     };
 
@@ -282,7 +282,7 @@ export function useSafeAreaInsets() {
 export function useContainerQueries(): boolean {
   const [supported, setSupported] = useState(false);
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     // Check if CSS Container Queries are supported

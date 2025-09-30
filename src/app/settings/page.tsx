@@ -29,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // Icons
 import { Settings, RotateCcw, Save } from 'lucide-react'
 // Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => impor"Placeholder", {
+const ExcelExportButton = dynamic(() => import('@/components/ui/ExcelExportButton'), {
   ssr: false,
   loading: () => <div className="h-10 w-32 bg-gray-200 animate-pulse rounded" />
 })
@@ -124,7 +124,7 @@ export default function SettingsPage() {
   })
 
   // Load settings from database on component mount
-  useEffec"" => {
+  useEffect(() => {
     loadSettings()
   }, [])
 

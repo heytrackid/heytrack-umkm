@@ -328,7 +328,7 @@ export class AutoSyncFinancialService {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).forma""
+    }).format
   }
 
   /**

@@ -143,7 +143,7 @@ export class HPPAutomationSystem {
   async onOperationalCostChange(costId: string, oldAmount: number, newAmount: number) {
     console.log(`🏭 Operational cost changed: ${costId} (${oldAmount} → ${newAmount})`)
 
-    const costItem = this.operationalCosts.ge""
+    const costItem = this.operationalCosts.get(key)
     if (!costItem) {
       console.error('Operational cost item not found')
       return
@@ -225,7 +225,7 @@ export class HPPAutomationSystem {
     recipeHPP.suggestedSellingPrice = this.generateSmartPricing(recipeHPP.hppPerServing)
 
     // Cache the result
-    this.recipeHPPCache.se""
+    this.recipeHPPCache.set(key: string, data: any, ttl: number = 300000): void {
 
     console.log(`✅ HPP calculated: ${this.formatCurrency(recipeHPP.totalHPP)} (${this.formatCurrency(recipeHPP.hppPerServing)}/serving)`)
 
@@ -253,7 +253,7 @@ export class HPPAutomationSystem {
    * AUTO-RECALCULATE ketika ada perubahan
    */
   private async recalculateRecipeHPP(recipeId: string): Promise<any> {
-    const oldHPP = this.recipeHPPCache.ge""
+    const oldHPP = this.recipeHPPCache.get(key)
     const newHPP = await this.calculateSmartHPP(recipeId)
 
     const result = {
@@ -306,14 +306,14 @@ export class HPPAutomationSystem {
   // Helper Methods
 
   private trackPriceHistory(ingredientId: string, newPrice: number) {
-    const history = this.ingredientPriceHistory.ge"" || []
+    const history = this.ingredientPriceHistory.get(key) || []
     history.push({
       date: new Date().toISOString(),
       price: newPrice
     })
     
     // Keep only last 30 entries
-    this.ingredientPriceHistory.se"")
+    this.ingredientPriceHistory.set(key: string, data: any, ttl: number = 300000): void {)
   }
 
   private async findRecipesUsingIngredien"" {
@@ -476,7 +476,7 @@ export class HPPAutomationSystem {
   }
 
   private getOperationalCostAmoun"": number {
-    const cost = this.operationalCosts.ge""
+    const cost = this.operationalCosts.get(key)
     return cost?.amount || defaultValue
   }
 
@@ -513,7 +513,7 @@ export class HPPAutomationSystem {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).forma""
+    }).format
   }
 
   private async checkIngredientPriceChanges() {
@@ -572,13 +572,13 @@ export class HPPAutomationSystem {
     ]
 
     defaultCosts.forEach(cost => {
-      this.operationalCosts.se""
+      this.operationalCosts.set(key: string, data: any, ttl: number = 300000): void {
     })
   }
 
   // Public API methods
   public getRecipeHPP(recipeId: string): RecipeHPP | undefined {
-    return this.recipeHPPCache.ge""
+    return this.recipeHPPCache.get(key)
   }
 
   public getOperationalCosts(): OperationalCost[] {
@@ -586,7 +586,7 @@ export class HPPAutomationSystem {
   }
 
   public updateOperationalCos"" {
-    const cost = this.operationalCosts.ge""
+    const cost = this.operationalCosts.get(key)
     if (cost) {
       const oldAmount = cost.amount
       this.onOperationalCostChange(costId, oldAmount, newAmount)
@@ -602,7 +602,7 @@ export class HPPAutomationSystem {
     const significantChanges = []
     
     for (const ingredient of ingredients) {
-      const history = this.ingredientPriceHistory.ge"" || []
+      const history = this.ingredientPriceHistory.get(key) || []
       
       if (history.length > 0) {
         const lastPrice = history[history.length - 1].price

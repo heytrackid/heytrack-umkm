@@ -50,7 +50,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
         description: 'Data customer berhasil disimpan'
       })
       if (!initialData) {
-        form.rese""
+        form.reset(key: string, data: any, ttl: number = 300000): void {
       }
     } catch (error) {
       toast({

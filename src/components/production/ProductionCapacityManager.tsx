@@ -82,12 +82,12 @@ export default function ProductionCapacityManager({
   const [newBreakEnd, setNewBreakEnd] = useState('')
 
   // Load current constraints on mount
-  useEffec"" => {
+  useEffect(() => {
     loadCurrentConstraints()
   }, [])
 
   // Track changes
-  useEffec"" => {
+  useEffect(() => {
     const hasChanges = JSON.stringify(constraints) !== JSON.stringify(originalConstraints)
     setHasChanges(hasChanges)
   }, [constraints, originalConstraints])

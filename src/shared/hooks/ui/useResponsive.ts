@@ -17,7 +17,7 @@ export function useResponsive(): ResponsiveState {
     breakpoint: 'desktop'
   })
 
-  useEffec"" => {
+  useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth
       

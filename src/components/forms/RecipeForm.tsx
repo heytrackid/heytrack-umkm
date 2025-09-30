@@ -63,7 +63,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
         description: 'Resep berhasil disimpan'
       })
       if (!initialData) {
-        form.rese""
+        form.reset(key: string, data: any, ttl: number = 300000): void {
       }
     } catch (error) {
       toast({

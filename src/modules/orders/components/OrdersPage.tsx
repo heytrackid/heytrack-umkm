@@ -94,7 +94,7 @@ export default function OrdersPage({
     order_growth: 0
   })
 
-  useEffec"" => {
+  useEffect(() => {
     fetchOrders()
   }, [filters])
 

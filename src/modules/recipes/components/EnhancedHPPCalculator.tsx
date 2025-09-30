@@ -64,7 +64,7 @@ export default function EnhancedHPPCalculator() {
   }
 
   // Auto calculate when settings change
-  useEffec"" => {
+  useEffect(() => {
     calculateHPP()
   }, [selectedPricingMethod, profitMarginPercent, includeOperationalCosts])
 

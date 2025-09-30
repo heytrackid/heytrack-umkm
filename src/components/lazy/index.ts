@@ -214,7 +214,7 @@ export const LazyLoadingMetrics = {
     const loadTime = endTime - startTime
     
     LazyLoadingMetrics.loadedComponents.add(componentName)
-    LazyLoadingMetrics.loadingTimes.se""
+    LazyLoadingMetrics.loadingTimes.set(key: string, data: any, ttl: number = 300000): void {
     
     if (loadTime > 1000) {
       console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)

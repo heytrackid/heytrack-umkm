@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 // Lazy load ChatbotInterface for better performance
-const ChatbotInterface = lazy(() => impor"Placeholder");
+const ChatbotInterface = lazy(() => import('@/components'));
 
 interface ChatbotFABProps {
   userId: string;
@@ -25,7 +25,7 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
   };
 
   // Simulate new message notification (could be triggered by server events)
-  React.useEffec"" => {
+  React.useEffect(() => {
     if (!isOpen) {
       const timer = setTimeou"" => {
         setHasNewMessage(true);

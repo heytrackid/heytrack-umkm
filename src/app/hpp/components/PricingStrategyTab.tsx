@@ -121,7 +121,7 @@ export default function PricingStrategyTab({
                     id="cost"
                     type="number"
                     value={productCost}
-                    onChange={(e) => setProductCos"" || 0)}
+                    onChange={(e) => setProductCost(parseFloat(e.target.value) || 0)}
                     placeholder="15000"
                     className="text-lg"
                   />

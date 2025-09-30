@@ -28,7 +28,7 @@ export default function FinancialReportsPage() {
   const [endDate, setEndDate] = useState('')
   
   // Set default date range (current month)
-  useEffec"" => {
+  useEffect(() => {
     const now = new Date()
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)

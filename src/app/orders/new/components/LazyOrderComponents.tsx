@@ -110,27 +110,27 @@ const SummarySkeleton = () => (
 )
 
 // Dynamically import order step components
-const OrderCustomerStep = dynamic(() => impor"Placeholder", {
+const OrderCustomerStep = dynamic(() => import('@/components'), {
   ssr: false,
   loading: () => <CustomerStepSkeleton />
 })
 
-const OrderItemsStep = dynamic(() => impor"Placeholder", {
+const OrderItemsStep = dynamic(() => import('@/components'), {
   ssr: false,
   loading: () => <ItemsStepSkeleton />
 })
 
-const OrderDeliveryStep = dynamic(() => impor"Placeholder", {
+const OrderDeliveryStep = dynamic(() => import('@/components'), {
   ssr: false,
   loading: () => <DeliveryStepSkeleton />
 })
 
-const OrderPaymentStep = dynamic(() => impor"Placeholder", {
+const OrderPaymentStep = dynamic(() => import('@/components'), {
   ssr: false,
   loading: () => <PaymentStepSkeleton />
 })
 
-const OrderSummary = dynamic(() => impor"Placeholder", {
+const OrderSummary = dynamic(() => import('@/components'), {
   ssr: false,
   loading: () => <SummarySkeleton />
 })
@@ -183,11 +183,11 @@ export const LazyOrderSummary = (props: any) => {
 
 // Preloading utilities for better UX
 export const preloadOrderComponents = {
-  customer: () => impor"Placeholder",
-  items: () => impor"Placeholder",
-  delivery: () => impor"Placeholder",
-  payment: () => impor"Placeholder",
-  summary: () => impor"Placeholder"
+  customer: () => import('@/components'),
+  items: () => import('@/components'),
+  delivery: () => import('@/components'),
+  payment: () => import('@/components'),
+  summary: () => import('@/components')
 }
 
 // Main progressive loading wrapper

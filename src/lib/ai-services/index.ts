@@ -18,7 +18,7 @@ export class AIService {
    * 🧠 Smart Pricing Analysis - Lazy loaded
    */
   async analyzePricing(data: any) {
-    const { analyzePricing } = await impor"Placeholder"
+    const { analyzePricing } = await import('@/components')
     return analyzePricing(data, this.apiKey, this.baseUrl)
   }
 
@@ -26,7 +26,7 @@ export class AIService {
    * 📦 Smart Inventory Optimization - Lazy loaded
    */
   async optimizeInventory(data: any) {
-    const { optimizeInventory } = await impor"Placeholder"
+    const { optimizeInventory } = await import('@/components')
     return optimizeInventory(data, this.apiKey, this.baseUrl)
   }
 
@@ -34,7 +34,7 @@ export class AIService {
    * 🏭 Smart Production Planning - Lazy loaded
    */
   async optimizeProduction(data: any) {
-    const { optimizeProduction } = await impor"Placeholder"
+    const { optimizeProduction } = await import('@/components')
     return optimizeProduction(data, this.apiKey, this.baseUrl)
   }
 
@@ -42,7 +42,7 @@ export class AIService {
    * 👥 Customer Insights - Lazy loaded
    */
   async analyzeCustomers(data: any) {
-    const { analyzeCustomers } = await impor"Placeholder"
+    const { analyzeCustomers } = await import('@/components')
     return analyzeCustomers(data, this.apiKey, this.baseUrl)
   }
 
@@ -50,7 +50,7 @@ export class AIService {
    * 💰 Financial Analytics - Lazy loaded
    */
   async analyzeFinancial(data: any) {
-    const { analyzeFinancial } = await impor"Placeholder"
+    const { analyzeFinancial } = await import('@/components')
     return analyzeFinancial(data, this.apiKey, this.baseUrl)
   }
 
@@ -58,7 +58,7 @@ export class AIService {
    * 📈 Sales Forecast - Lazy loaded
    */
   async forecastSales(data: any) {
-    const { forecastSales } = await impor"Placeholder"
+    const { forecastSales } = await import('@/components')
     return forecastSales(data, this.apiKey, this.baseUrl)
   }
 
@@ -66,7 +66,7 @@ export class AIService {
    * 💡 Business Insights - Lazy loaded
    */
   async generateBusinessInsights(data: any) {
-    const { generateBusinessInsights } = await impor"Placeholder"
+    const { generateBusinessInsights } = await import('@/components')
     return generateBusinessInsights(data, this.apiKey, this.baseUrl)
   }
 
@@ -74,7 +74,7 @@ export class AIService {
    * 🎯 Marketing Recommendations - Lazy loaded
    */
   async analyzeMarketing(data: any) {
-    const { analyzeMarketing } = await impor"Placeholder"
+    const { analyzeMarketing } = await import('@/components')
     return analyzeMarketing(data, this.apiKey, this.baseUrl)
   }
 }

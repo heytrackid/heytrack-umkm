@@ -67,7 +67,7 @@ export default function AdvancedHPPCalculator({
   const [selectedPricing, setSelectedPricing] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState('')
 
-  useEffec"" => {
+  useEffect(() => {
     if (recipeId) {
       calculateAdvancedHPP()
     }

@@ -18,10 +18,10 @@ import {
 } from 'lucide-react'
 
 // Lazy load heavy components
-const OrdersStatsSection = lazy(() => impor"Placeholder")
-const OrdersFilters = lazy(() => impor"Placeholder")
-const OrdersQuickActions = lazy(() => impor"Placeholder")
-const OrdersTableSection = lazy(() => impor"Placeholder")
+const OrdersStatsSection = lazy(() => import('@/components'))
+const OrdersFilters = lazy(() => import('@/components'))
+const OrdersQuickActions = lazy(() => import('@/components'))
+const OrdersTableSection = lazy(() => import('@/components'))
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([])
@@ -35,7 +35,7 @@ export default function OrdersPage() {
   })
 
   // Fetch orders from API
-  useEffec"" => {
+  useEffect(() => {
     fetchOrders()
   }, [])
 

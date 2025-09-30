@@ -20,7 +20,7 @@ export function useSupabaseCRUD<T = any>(options: CRUDOptions | string) {
     try {
       const { data: result, error } = await supabase
         .from(config.table)
-        .inser""
+        ..insert(data)
         .selec""
         .single()
       

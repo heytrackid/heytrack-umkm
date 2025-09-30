@@ -39,35 +39,35 @@ const FormLoadingSkeleton = ({ fields = 4 }: { fields?: number }) => (
 
 // Lazy loaded form components
 export const LazyIngredientForm = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.IngredientForm }))
+  import('@/components').then(m => ({ default: m.IngredientForm }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
 )
 
 export const LazyOrderForm = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.OrderForm }))
+  import('@/components').then(m => ({ default: m.OrderForm }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
 )
 
 export const LazyCustomerForm = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.CustomerForm }))
+  import('@/components').then(m => ({ default: m.CustomerForm }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
 )
 
 export const LazyRecipeForm = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.RecipeForm }))
+  import('@/components').then(m => ({ default: m.RecipeForm }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
 )
 
 export const LazyFinanceForm = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.FinanceForm }))
+  import('@/components').then(m => ({ default: m.FinanceForm }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
@@ -75,21 +75,21 @@ export const LazyFinanceForm = lazy(() =>
 
 // Lazy loaded detail/view components
 export const LazyOrderDetail = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.OrderDetail }))
+  import('@/components').then(m => ({ default: m.OrderDetail }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
 )
 
 export const LazyCustomerDetail = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.CustomerDetail }))
+  import('@/components').then(m => ({ default: m.CustomerDetail }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
 )
 
 export const LazyInventoryDetail = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.InventoryDetail }))
+  import('@/components').then(m => ({ default: m.InventoryDetail }))
     .catch(() => ({ default: () => {
       return <div>{"Placeholder"}</div>;
     }}))
@@ -243,31 +243,31 @@ export const useLazyModal = () => {
 // Preloader for modal components
 export const preloadModalComponent = (component: LazyModalProps['component']) => {
   switch (component) {
-    case 'ingredient-form': return impor"Placeholder"
-    case 'order-form': return impor"Placeholder"
-    case 'customer-form': return impor"Placeholder"
-    case 'recipe-form': return impor"Placeholder"
-    case 'finance-form': return impor"Placeholder"
-    case 'order-detail': return impor"Placeholder"
-    case 'customer-detail': return impor"Placeholder"
-    case 'inventory-detail': return impor"Placeholder"
+    case 'ingredient-form': return import('@/components')
+    case 'order-form': return import('@/components')
+    case 'customer-form': return import('@/components')
+    case 'recipe-form': return import('@/components')
+    case 'finance-form': return import('@/components')
+    case 'order-detail': return import('@/components')
+    case 'customer-detail': return import('@/components')
+    case 'inventory-detail': return import('@/components')
     default: return Promise.resolve()
   }
 }
 
 // Bulk Modal Components (for multiple items)
 export const LazyBulkActionModal = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.BulkActionModal }))
+  import('@/components').then(m => ({ default: m.BulkActionModal }))
     .catch(() => ({ default: () => <div>Bulk action modal not available</div> }))
 )
 
 export const LazyConfirmationModal = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.ConfirmationModal }))
+  import('@/components').then(m => ({ default: m.ConfirmationModal }))
     .catch(() => ({ default: () => <div>Confirmation modal not available</div> }))
 )
 
 export const LazyExportModal = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.ExportModal }))
+  import('@/components').then(m => ({ default: m.ExportModal }))
     .catch(() => ({ default: () => <div>Export modal not available</div> }))
 )
 

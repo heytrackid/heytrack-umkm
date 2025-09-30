@@ -73,7 +73,7 @@ export function PullToRefresh({
     currentY.current = 0
   }
 
-  useEffec"" => {
+  useEffect(() => {
     if (!isMobile) return
 
     const element = document.body
@@ -191,7 +191,7 @@ export function InfiniteScroll({
     }
   }, [loading, hasMore, threshold, isNearBottom, onLoadMore])
 
-  useEffec"" => {
+  useEffect(() => {
     const handleThrottledScroll = throttle(handleScroll, 100)
     
     window.addEventListener('scroll', handleThrottledScroll, { passive: true })
@@ -199,7 +199,7 @@ export function InfiniteScroll({
   }, [handleScroll])
 
   // Check if we need to load more on mount (in case content is shorter than viewport)
-  useEffec"" => {
+  useEffect(() => {
     const checkInitialLoad = () => {
       if (document.documentElement.scrollHeight <= window.innerHeight && hasMore && !loading) {
         onLoadMore()

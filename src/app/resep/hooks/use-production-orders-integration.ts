@@ -115,7 +115,7 @@ export function useProductionOrdersIntegration(
   }, [batches])
 
   // Update state when data changes
-  useEffec"" => {
+  useEffect(() => {
     if (orders && ingredients) {
       const pendingOrders = filterPendingOrders(orders)
       const availableIngredients = transformIngredientsToAvailability(ingredients)
@@ -203,7 +203,7 @@ export function useProductionOrdersIntegration(
   }, [orders, batches, recipes, state.pendingOrders, state.availableIngredients, integrationService, batchCRUD])
 
   // Auto-schedule on data changes (if enabled)
-  useEffec"" => {
+  useEffect(() => {
     if (
       integrationConfig.auto_schedule_enabled &&
       state.pendingOrders.length > 0 &&

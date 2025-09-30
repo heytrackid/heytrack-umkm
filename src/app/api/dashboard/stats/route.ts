@@ -80,7 +80,7 @@ export async function GET() {
     
     // Recent orders for activity feed
     const recentOrders = orders
-      ?.sort((a, b) => => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      ?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       ?.slice(0, 5) || []
     
     // Category breakdown for ingredients
@@ -123,7 +123,7 @@ export async function GET() {
       recipes: {
         total: totalRecipes,
         popular: recipes
-          ?.sort((a, b) => => (b.times_made || 0) - (a.times_made || 0))
+          ?.sort((a, b) => (b.times_made || 0) - (a.times_made || 0))
           ?.slice(0, 3) || []
       },
       expenses: {

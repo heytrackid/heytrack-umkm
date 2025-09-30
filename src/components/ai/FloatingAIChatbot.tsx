@@ -43,7 +43,7 @@ export const FloatingAIChatbot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffec"" => {
+  useEffect(() => {
     scrollToBottom()
   }, [messages])
 

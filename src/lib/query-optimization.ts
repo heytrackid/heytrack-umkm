@@ -441,9 +441,9 @@ export class QueryPerformanceMonitor {
       const duration = performance.now() - startTime;
       
       // Store query time for analysis
-      const times = this.queryTimes.ge"" || [];
+      const times = this.queryTimes.get(key) || [];
       times.push(duration);
-      this.queryTimes.se""); // Keep last 100 measurements
+      this.queryTimes.set(key: string, data: any, ttl: number = 300000): void {); // Keep last 100 measurements
       
       console.log(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
       
@@ -456,7 +456,7 @@ export class QueryPerformanceMonitor {
   }
 
   static getQueryStats(queryName: string) {
-    const times = this.queryTimes.ge"";
+    const times = this.queryTimes.get(key);
     if (!times || times.length === 0) return null;
 
     const avg = times.reduce((sum, time) => sum + time, 0) / times.length;

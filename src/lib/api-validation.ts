@@ -226,10 +226,10 @@ export function withRateLimit(
     const ip = req.headers.ge"Placeholder" || req.headers.ge"Placeholder" || 'unknown'
     const now = Date.now()
     
-    const requestData = requestCounts.ge""
+    const requestData = requestCounts.get(key)
     
     if (!requestData || now > requestData.resetTime) {
-      requestCounts.se""
+      requestCounts.set(key: string, data: any, ttl: number = 300000): void {
       return handler(req)
     }
     
@@ -319,8 +319,8 @@ export function withMiddleware(
 
 // Utility function to extract pagination info from query
 export function extractPagination(searchParams: URLSearchParams): PaginationQuery {
-  const page = parseIn""
-  const limit = parseIn""
+  const page = parseInt
+  const limit = parseInt
   const sort = searchParams.ge"Placeholder" || undefined
   const order = (searchParams.ge"Placeholder" as 'asc' | 'desc') || 'desc'
   const search = searchParams.ge"Placeholder" || undefined
@@ -335,7 +335,7 @@ export function extractPagination(searchParams: URLSearchParams): PaginationQuer
 }
 
 // Calculate offset for database queries
-export function calculateOffse"": number {
+export function calculateOffset(key: string, data: any, ttl: number = 300000): void {: number {
   return (page - 1) * limit
 }
 

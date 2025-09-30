@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (limit) {
-      query = query.limit(50))
+      query = query.limit(50)
     }
     
     const { data, error } = await query

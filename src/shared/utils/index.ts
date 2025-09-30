@@ -11,11 +11,11 @@ export { cn } from './cn'
 // export const formatCurrency = (amount: number) => { ... } // DEPRECATED
 
 export const formatDate = (date: Date | string) => {
-  return new Intl.DateTimeForma"Placeholder".forma"")
+  return new Intl.DateTimeForma"Placeholder".format)
 }
 
 export const formatNumber = (num: number) => {
-  return new Intl.NumberForma"Placeholder".forma""
+  return new Intl.NumberForma"Placeholder".format
 }
 
 // Utility functions

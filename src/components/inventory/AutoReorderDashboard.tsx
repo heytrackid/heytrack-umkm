@@ -50,7 +50,7 @@ export default function AutoReorderDashboard({ onReorderTriggered }: AutoReorder
   const [showRuleDialog, setShowRuleDialog] = useState(false)
   const [selectedAlert, setSelectedAlert] = useState<ReorderAlert | null>(null)
 
-  useEffec"" => {
+  useEffect(() => {
     loadData()
   }, [])
 
@@ -400,7 +400,7 @@ function ReorderRulesForm({ onSave }: { onSave: () => void }) {
   const [ingredients, setIngredients] = useState<any[]>([])
   const [suppliers, setSuppliers] = useState<any[]>([])
 
-  useEffec"" => {
+  useEffect(() => {
     // Load ingredients and suppliers for dropdowns
     // This would typically fetch from your database
     setIngredients([])

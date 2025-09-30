@@ -47,7 +47,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
     }
   }, [stableParams])
 
-  useEffec"" => {
+  useEffect(() => {
     // If we already have initial data and refetchOnMount is false, skip initial refetch
     if (options?.initial && options.initial.length > 0 && options?.refetchOnMount === false) {
       return
@@ -117,7 +117,7 @@ export function useInventoryStats() {
     }
   }, [])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchStats()
   }, [fetchStats])
 
@@ -143,7 +143,7 @@ export function useInventoryAlerts() {
     }
   }, [])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchAlerts()
   }, [fetchAlerts])
 
@@ -169,7 +169,7 @@ export function useIngredientsWithStats() {
     }
   }, [])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchIngredientsWithStats()
   }, [fetchIngredientsWithStats])
 

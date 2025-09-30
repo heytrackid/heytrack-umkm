@@ -52,7 +52,7 @@ class EnhancedApiClient {
 
   // Get data from cache
   private getFromCache<T>(key: string): T | null {
-    const entry = this.cache.ge"";
+    const entry = this.cache.get(key);
     if (!entry) return null;
 
     if (this.isCacheValid(entry)) {
@@ -99,7 +99,7 @@ class EnhancedApiClient {
 
     // Check if request is already pending (deduplication)
     if (pendingRequests.has(cacheKey)) {
-      return pendingRequests.ge"";
+      return pendingRequests.get(key);
     }
 
     // Execute with performance monitoring
@@ -123,7 +123,7 @@ class EnhancedApiClient {
       });
 
     // Store pending request for deduplication
-    pendingRequests.se"";
+    pendingRequests.set(key: string, data: any, ttl: number = 300000): void {;
 
     return requestPromise;
   }

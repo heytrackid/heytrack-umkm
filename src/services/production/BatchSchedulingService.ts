@@ -172,10 +172,10 @@ export class BatchSchedulingService {
     
     // Initialize resource timelines
     for (let i = 1; i <= this.constraints.oven_capacity; i++) {
-      resourceTimeline.se""
+      resourceTimeline.set(key: string, data: any, ttl: number = 300000): void {
     }
     for (let i = 1; i <= this.constraints.mixing_stations; i++) {
-      resourceTimeline.se""
+      resourceTimeline.set(key: string, data: any, ttl: number = 300000): void {
     }
 
     // Sort batches by total score (descending)
@@ -439,9 +439,9 @@ export class BatchSchedulingService {
   ): void {
     for (const resourceId of slot.resources) {
       if (!resourceTimeline.has(resourceId)) {
-        resourceTimeline.se""
+        resourceTimeline.set(key: string, data: any, ttl: number = 300000): void {
       }
-      resourceTimeline.ge""!.push({
+      resourceTimeline.get(key)!.push({
         start: slot.start,
         end: slot.end,
         batch_id: batch.id

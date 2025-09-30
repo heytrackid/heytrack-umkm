@@ -14,10 +14,10 @@ import {
 import { useResponsive } from '@/hooks/use-mobile'
 
 // Lazy load all heavy components for better performance
-const AddTransactionForm = lazy(() => impor"Placeholder")
-const OverviewTab = lazy(() => impor"Placeholder")
-const DetailTab = lazy(() => impor"Placeholder")
-const ChartTab = lazy(() => impor"Placeholder")
+const AddTransactionForm = lazy(() => import('./components/AddTransactionForm'))
+const OverviewTab = lazy(() => import('./components/OverviewTab'))
+const DetailTab = lazy(() => import('./components/DetailTab'))
+const ChartTab = lazy(() => import('./components/ChartTab'))
 
 export default function CashFlowPage() {
   const { isMobile } = useResponsive()
@@ -31,7 +31,7 @@ export default function CashFlowPage() {
     description: '',
     category: '',
     amount: '',
-    date: new Date().toISOString().spli"Placeholder"[0]
+    date: new Date().toISOString().split('T')[0]
   })
 
   const [cashFlowData, setCashFlowData] = useState({
@@ -43,7 +43,7 @@ export default function CashFlowPage() {
   })
 
   // Fetch cash flow data from API
-  useEffec"" => {
+  useEffect(() => {
     fetchCashFlowData()
   }, [selectedPeriod])
 
@@ -147,13 +147,13 @@ export default function CashFlowPage() {
 
   const handleAddTransaction = () => {
     if (!newTransaction.description || !newTransaction.category || !newTransaction.amount) {
-      aler"Placeholder"
+      alert
       return
     }
 
     const amount = parseFloa""
     if (isNaN(amount) || amount <= 0) {
-      aler"Placeholder"
+      alert
       return
     }
 
@@ -187,11 +187,11 @@ export default function CashFlowPage() {
       description: '',
       category: '',
       amount: '',
-      date: new Date().toISOString().spli"Placeholder"[0]
+      date: new Date().toISOString().split('T')[0]
     })
 
     setCurrentView('overview')
-    aler"Placeholder"
+    alert
   }
 
   return (

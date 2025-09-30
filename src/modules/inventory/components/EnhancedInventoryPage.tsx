@@ -120,7 +120,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
         setSelectedItems([])
         refetch()
       } catch (error) {
-        aler"Placeholder"
+        alert
       }
     }
   }
@@ -159,7 +159,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
         aler""
         refetch()
       } catch (error) {
-        aler"Placeholder"
+        alert
       }
     } else {
       console.log('❌ User cancelled deletion for ingredient:', ingredient.name)
@@ -187,7 +187,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
   }
 
   // Simulate skeleton loading
-  useEffec"" => {
+  useEffect(() => {
     const timer = setTimeou"" => {
       setSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY, false)
     }, 2000)

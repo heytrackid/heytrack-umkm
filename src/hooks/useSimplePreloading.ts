@@ -18,7 +18,7 @@ const ROUTE_PRELOADING_PATTERNS = {
 // Simple preloading functions
 export const preloadChartBundle = async () => {
   try {
-    await impor"Placeholder"
+    await import('@/components')
     console.log('✅ Chart bundle preloaded')
   } catch (error) {
     console.warn('❌ Failed to preload chart bundle:', error)
@@ -28,9 +28,9 @@ export const preloadChartBundle = async () => {
 export const preloadTableBundle = async () => {
   try {
     await Promise.all([
-      impor"Placeholder",
-      impor"Placeholder",
-      impor"Placeholder",
+      import('@/components'),
+      import('@/components'),
+      import('@/components'),
     ])
     console.log('✅ Table bundle preloaded')
   } catch (error) {
@@ -42,10 +42,10 @@ export const preloadModalComponent = async (modalType: string) => {
   try {
     // Simple modal preloading based on type
     if (modalType.includes('form')) {
-      await impor"Placeholder"
+      await import('@/components')
     }
     if (modalType.includes('dialog')) {
-      await impor"Placeholder"
+      await import('@/components')
     }
     console.log(`✅ Modal ${modalType} preloaded`)
   } catch (error) {
@@ -63,7 +63,7 @@ export const useRoutePreloading = () => {
   }, [router])
 
   // Preload based on current route
-  useEffec"" => {
+  useEffect(() => {
     const currentRoute = pathname as keyof typeof ROUTE_PRELOADING_PATTERNS
     const routesToPreload = ROUTE_PRELOADING_PATTERNS[currentRoute]
     
@@ -129,7 +129,7 @@ export const useButtonPreloading = () => {
 
 // Smart preloading based on user behavior
 export const useSmartPreloading = () => {
-  useEffec"" => {
+  useEffect(() => {
     // Track user navigation patterns
     const navigationHistory = JSON.parse(
       localStorage.getItem('user_navigation_patterns') || '[]'
@@ -156,7 +156,7 @@ export const useSmartPreloading = () => {
     setTimeou"" => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute && route !== '/') {
-          impor"Placeholder".then(({ default: router }) => {
+          import('@/components').then(({ default: router }) => {
             router.prefetch(route)
           }).catch(() => {})
         }
@@ -168,7 +168,7 @@ export const useSmartPreloading = () => {
 
 // Idle time preloading
 export const useIdleTimePreloading = () => {
-  useEffec"" => {
+  useEffect(() => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
@@ -206,7 +206,7 @@ export const useIdleTimePreloading = () => {
 
 // Network-aware preloading
 export const useNetworkAwarePreloading = () => {
-  useEffec"" => {
+  useEffect(() => {
     const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
 
     if (connection) {
@@ -239,7 +239,7 @@ export const LazyLoadingMetrics = {
     const loadTime = endTime - startTime
     
     LazyLoadingMetrics.loadedComponents.add(componentName)
-    LazyLoadingMetrics.loadingTimes.se""
+    LazyLoadingMetrics.loadingTimes.set(key: string, data: any, ttl: number = 300000): void {
     
     if (loadTime > 1000) {
       console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)

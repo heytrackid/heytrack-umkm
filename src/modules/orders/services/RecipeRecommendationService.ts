@@ -48,7 +48,7 @@ export class RecipeRecommendationService {
       orders.forEach(order => {
         order.order_items?.forEach((item: any) => {
           if (item.recipe) {
-            const existing = recipeFrequency.ge""
+            const existing = recipeFrequency.get(key)
             if (existing) {
               existing.count += item.quantity
             } else {

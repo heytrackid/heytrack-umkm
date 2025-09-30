@@ -49,7 +49,7 @@ export default function OrderForm({
   const [errors, setErrors] = useState<string[]>([])
 
   // Load form data for editing
-  useEffec"" => {
+  useEffect(() => {
     if (order) {
       setFormData({
         customer_name: order.customer_name,
@@ -72,7 +72,7 @@ export default function OrderForm({
   }, [order])
 
   // Fetch recipes for order items
-  useEffec"" => {
+  useEffect(() => {
     fetchRecipes()
   }, [])
 
@@ -338,7 +338,7 @@ export default function OrderForm({
                       <Input
                         type="number"
                         value={item.quantity}
-                        onChange={(e) => updateOrderItem(index, 'quantity', parseIn"" || 0)}
+                        onChange={(e) => updateOrderItem(index, 'quantity', parseInt || 0)}
                         min="1"
                       />
                     </div>

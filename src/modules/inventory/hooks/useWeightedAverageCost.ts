@@ -309,7 +309,7 @@ export function useCurrencyFormatter() {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).forma""
+    }).format
   }, [])
 }
 

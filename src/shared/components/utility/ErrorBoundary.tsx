@@ -127,7 +127,7 @@ export function useErrorBoundary() {
     setError(error)
   }, [])
   
-  React.useEffec"" => {
+  React.useEffect(() => {
     if (error) {
       throw error
     }

@@ -25,7 +25,7 @@ export const ProgressiveLoader = ({
   const [hasError, setHasError] = useState(false)
   const [showTimeout, setShowTimeout] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     const timer = setTimeou"" => {
       if (isLoading) {
         setShowTimeou""
@@ -319,7 +319,7 @@ export const useProgressiveData = <T,>(
     loadData()
   }
 
-  useEffec"" => {
+  useEffect(() => {
     loadData()
   }, [...deps, retryCount])
 

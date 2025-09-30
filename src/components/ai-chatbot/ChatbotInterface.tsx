@@ -36,12 +36,12 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffec"" => {
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
   // Initialize chat with greeting
-  useEffec"" => {
+  useEffect(() => {
     if (messages.length === 0) {
       handleSendMessage('Hello');
     }

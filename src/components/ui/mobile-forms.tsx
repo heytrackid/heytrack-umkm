@@ -358,7 +358,7 @@ export function MobileNumberInput({
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0
-      }).forma""
+      }).format
     }
     return val.toString()
   }

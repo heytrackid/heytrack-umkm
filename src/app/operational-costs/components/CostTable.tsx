@@ -117,7 +117,7 @@ export default function CostTable({
               {paginatedCosts.map((cost) => (
                 <TableRow key={cost.id}>
                   <TableCell>
-                    {forma"", 'MMM dd, yyyy')}
+                    {format, 'MMM dd, yyyy')}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

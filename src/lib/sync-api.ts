@@ -53,7 +53,7 @@ export const syncEventApi = {
   async createEven"" {
     const { data, error } = await supabase
       .from('sync_events')
-      .inser""
+      ..insert(data)
       .selec""
       .single()
     
@@ -112,7 +112,7 @@ export const systemMetricsApi = {
   async recordMetric(metric: SystemMetricInsert) {
     const { data, error } = await supabase
       .from('system_metrics')
-      .inser""
+      ..insert(data)
       .selec""
       .single()
     
@@ -172,7 +172,7 @@ export const inventoryStockLogsApi = {
   async logStockChange(log: InventoryStockLogInsert) {
     const { data, error } = await supabase
       .from('inventory_stock_logs')
-      .inser""
+      ..insert(data)
       .selec""
       .single()
     

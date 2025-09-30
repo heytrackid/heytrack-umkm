@@ -37,7 +37,7 @@ export class QueryCache {
     ttl: number = this.DEFAULT_TTL
   ): Promise<T> {
     const key = this.generateKey(table, filters)
-    const cached = this.cache.ge""
+    const cached = this.cache.get(key)
 
     if (cached && this.isValid(cached)) {
       return cached.data

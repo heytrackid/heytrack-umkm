@@ -11,7 +11,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => impor"Placeholder", {
+const ExcelExportButton = dynamic(() => import('@/components/ui/ExcelExportButton'), {
   ssr: false,
   loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
 })
@@ -41,7 +41,7 @@ import {
   Zap
 } from 'lucide-react'
 
-const StatsCardsSection = dynamic(() => impor"Placeholder", {
+const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection'), {
   loading: () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: 4 }, (_, i) => (
@@ -50,8 +50,8 @@ const StatsCardsSection = dynamic(() => impor"Placeholder", {
     </div>
   ),
 })
-const RecentOrdersSection = dynamic(() => impor"Placeholder", { loading: () => <RecentOrdersSkeleton /> })
-const StockAlertsSection = dynamic(() => impor"Placeholder", { loading: () => <StockAlertSkeleton /> })
+const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
+const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
 
 // Sample data removed - now using real data from API
 // const sampleStats = {
@@ -94,13 +94,13 @@ export default function Dashboard() {
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
 
-  useEffec"" => {
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
   // Simulate loading states
-  useEffec"" => {
+  useEffect(() => {
     // Simulate dashboard stats loading
     const statsTimer = setTimeou"" => {
       setLoading(LOADING_KEYS.DASHBOARD_STATS, false)

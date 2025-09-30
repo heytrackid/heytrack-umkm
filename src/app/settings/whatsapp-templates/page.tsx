@@ -99,7 +99,7 @@ export default function WhatsAppTemplatesPage() {
     { value: 'general', label: 'Umum' }
   ]
 
-  useEffec"" => {
+  useEffect(() => {
     fetchTemplates()
   }, [])
 

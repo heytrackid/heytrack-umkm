@@ -60,7 +60,7 @@ const PerformanceMonitor = memo(() => {
   })
   const [isVisible, setIsVisible] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     // Web Vitals monitoring
     const observeWebVitals = () => {
       if ('web-vital' in window) {

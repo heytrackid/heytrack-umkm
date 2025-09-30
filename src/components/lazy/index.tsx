@@ -29,93 +29,93 @@ export const withLazyLoading = <T extends ComponentType<any>>(
 
 // Chart components (heavy due to Recharts)
 export const LazyFinancialTrendsChart = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.FinancialTrendsChart })),
+  () => import('@/components').then(m => ({ default: m.FinancialTrendsChart })),
  "h-64"
 )
 
 export const LazyInventoryTrendsChart = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.InventoryTrendsChart })),
+  () => import('@/components').then(m => ({ default: m.InventoryTrendsChart })),
  "h-64"
 )
 
 // Automation components (heavy business logic)
 export const LazySmartExpenseAutomation = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SmartExpenseAutomation })),
+  () => import('@/components').then(m => ({ default: m.SmartExpenseAutomation })),
  "h-96"
 )
 
 export const LazySmartFinancialDashboard = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SmartFinancialDashboard })),
+  () => import('@/components').then(m => ({ default: m.SmartFinancialDashboard })),
  "h-96"
 )
 
 export const LazySmartProductionPlanner = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SmartProductionPlanner })),
+  () => import('@/components').then(m => ({ default: m.SmartProductionPlanner })),
  "h-96"
 )
 
 export const LazySmartInventoryManager = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SmartInventoryManager })),
+  () => import('@/components').then(m => ({ default: m.SmartInventoryManager })),
  "h-96"
 )
 
 export const LazyAdvancedHPPCalculator = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.AdvancedHPPCalculator })),
+  () => import('@/components').then(m => ({ default: m.AdvancedHPPCalculator })),
  "h-96"
 )
 
 export const LazySmartNotificationCenter = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SmartNotificationCenter })),
+  () => import('@/components').then(m => ({ default: m.SmartNotificationCenter })),
  "h-48"
 )
 
 // Complex CRUD components
 export const LazyIngredientsCRUD = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.IngredientsCRUD })),
+  () => import('@/components').then(m => ({ default: m.IngredientsCRUD })),
  "h-96"
 )
 
 export const LazySuppliersCRUD = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SuppliersCRUD })),
+  () => import('@/components').then(m => ({ default: m.SuppliersCRUD })),
  "h-96"
 )
 
 // Enhanced forms - load individual forms instead of bundle
 export const LazyIngredientForm = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.IngredientForm })),
+  () => import('@/components').then(m => ({ default: m.IngredientForm })),
  "h-64"
 )
 
 export const LazyRecipeForm = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.RecipeForm })),
+  () => import('@/components').then(m => ({ default: m.RecipeForm })),
  "h-64"
 )
 
 export const LazyCustomerForm = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.CustomerForm })),
+  () => import('@/components').then(m => ({ default: m.CustomerForm })),
  "h-64"
 )
 
 export const LazyFinancialRecordForm = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.FinancialRecordForm })),
+  () => import('@/components').then(m => ({ default: m.FinancialRecordForm })),
  "h-64"
 )
 
 // Data table (heavy due to @tanstack/react-table)
 export const LazyDataTable = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.SimpleDataTable })),
+  () => import('@/components').then(m => ({ default: m.SimpleDataTable })),
  "h-64"
 )
 
 // Chart component (heavy due to Recharts)
 export const LazyChart = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.Chart })),
+  () => import('@/components').then(m => ({ default: m.Chart })),
  "h-48"
 )
 
 // Mobile components (optional on desktop)
 export const LazyMobileBottomNav = withLazyLoading(
-  () => impor"Placeholder".then(m => ({ default: m.MobileBottomNav })),
+  () => import('@/components').then(m => ({ default: m.MobileBottomNav })),
  "h-16"
 )
 

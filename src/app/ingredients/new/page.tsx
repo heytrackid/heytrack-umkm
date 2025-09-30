@@ -127,7 +127,7 @@ Anda akan kembali ke halaman inventory.`)
       router.push('/inventory')
     } catch (error) {
       console.error('Error saving ingredient:', error)
-      aler"Placeholder"
+      alert
     } finally {
       setIsSubmitting(false)
     }

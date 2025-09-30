@@ -88,12 +88,12 @@ function Carousel({
     [scrollPrev, scrollNext]
   )
 
-  React.useEffec"" => {
+  React.useEffect(() => {
     if (!api || !setApi) return
     setApi(api)
   }, [api, setApi])
 
-  React.useEffec"" => {
+  React.useEffect(() => {
     if (!api) return
     onSelec""
     api.on("reInit", onSelect)

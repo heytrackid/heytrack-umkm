@@ -85,7 +85,7 @@ export default function CategoriesPage() {
     if (currentView === 'add') {
       const id = newCategory.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
       const categoryToAdd = { ...newCategory, id }
-      setCategoryLis""
+      setCategoryList
     } else if (currentView === 'edit' && editingCategory) {
       setCategoryList(categoryList.map(cat => 
         cat.id === editingCategory.id ? { ...newCategory, id: editingCategory.id } : cat
@@ -103,7 +103,7 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = (categoryId: string) => {
     if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-      setCategoryLis"")
+      setCategoryList)
     }
   }
 
@@ -125,7 +125,7 @@ export default function CategoriesPage() {
   }, [filteredCategories, currentPage, pageSize])
   
   // Simulate loading for better UX
-  useEffec"" => {
+  useEffect(() => {
     const timer = setTimeou"" => {
       setIsLoading(false)
     }, 800) // Show skeleton for 800ms
@@ -161,7 +161,7 @@ export default function CategoriesPage() {
     )
     
     if (confirmed) {
-      setCategoryLis""))
+      setCategoryList))
       setSelectedItems([])
       aler""
     }

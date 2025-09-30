@@ -26,12 +26,12 @@ import {
 } from 'lucide-react'
 
 // Lazy load heavy components
-const LazyChart = lazy(() => impor"Placeholder".then(m => ({ 
+const LazyChart = lazy(() => import('@/modules/charts/components/MiniChart').then(m => ({ 
   default: m.MiniChartWithLoading 
 })))
 
-const LazyFinancialWidget = lazy(() => impor"Placeholder".then(m => ({ 
-  default: m.SmartFinancialDashboardWithLoading 
+const LazyFinancialWidget = lazy(() => import('@/components/dashboard/AutoSyncFinancialDashboard').then(m => ({ 
+  default: m.default 
 })))
 
 // Memoized components to prevent unnecessary re-renders

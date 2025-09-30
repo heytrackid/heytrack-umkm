@@ -4,18 +4,18 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => impor"Placeholder".then(mod => mod.LineChart), { 
+const LineChart = dynamic(() => import('@/components').then(mod => mod.LineChart), { 
   ssr: false,
   loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
 })
-const Line = dynamic(() => impor"Placeholder".then(mod => mod.Line), { ssr: false })
-const BarChart = dynamic(() => impor"Placeholder".then(mod => mod.BarChart), { 
+const Line = dynamic(() => import('@/components').then(mod => mod.Line), { ssr: false })
+const BarChart = dynamic(() => import('@/components').then(mod => mod.BarChart), { 
   ssr: false,
   loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
 })
-const Bar = dynamic(() => impor"Placeholder".then(mod => mod.Bar), { ssr: false })
+const Bar = dynamic(() => import('@/components').then(mod => mod.Bar), { ssr: false })
 const ResponsiveContainer = dynamic(
-  () => impor"Placeholder".then(mod => mod.ResponsiveContainer),
+  () => import('@/components').then(mod => mod.ResponsiveContainer),
   { 
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />

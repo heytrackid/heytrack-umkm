@@ -19,7 +19,7 @@ export default function PerformanceProvider({
   enableMemoryMonitoring = process.env.NODE_ENV === 'development',
 }: PerformanceProviderProps) {
   
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') return
 
     // Initialize performance monitoring

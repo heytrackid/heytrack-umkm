@@ -231,14 +231,14 @@ export const formatCurrency = (amount: number): string => {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
-  }).forma""
+  }).format
 }
 
 export const formatNumber = (number: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
-  }).forma""
+  }).format
 }
 
 export const formatPercentage = (percentage: number, decimals: number = 1): string => {

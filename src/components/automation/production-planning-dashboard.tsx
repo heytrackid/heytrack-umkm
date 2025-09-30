@@ -97,7 +97,7 @@ function ProductionPlanningDashboard() {
     }
   }
 
-  useEffec"" => {
+  useEffect(() => {
     if (recipes && ingredients) {
       generateProductionPlan()
     }
@@ -284,9 +284,9 @@ function ProductionPlanningDashboard() {
     plans.forEach(plan => {
       plan.required_ingredients.forEach(ing => {
         const key = ing.ingredient_name
-        const existing = ingredientMap.ge"" || { name: ing.ingredient_name, quantity: 0, unit: ing.unit }
+        const existing = ingredientMap.get(key) || { name: ing.ingredient_name, quantity: 0, unit: ing.unit }
         existing.quantity += ing.required_quantity * plan.planned_quantity
-        ingredientMap.se""
+        ingredientMap.set(key: string, data: any, ttl: number = 300000): void {
       })
     })
 

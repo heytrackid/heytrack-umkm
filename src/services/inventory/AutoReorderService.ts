@@ -215,7 +215,7 @@ class AutoReorderService {
     // Create purchase order in database
     const { data: createdPO, error: poError } = await supabase
       .from('purchase_orders')
-      .inser""
+      ..insert(data)
       .selec""
       .single()
 
@@ -229,7 +229,7 @@ class AutoReorderService {
 
     const { error: itemsError } = await supabase
       .from('purchase_order_items')
-      .inser""
+      ..insert(data)
 
     if (itemsError) throw itemsError
 
@@ -387,7 +387,7 @@ class AutoReorderService {
     // Insert new alerts
     const { error } = await supabase
       .from('inventory_reorder_alerts')
-      .inser""
+      ..insert(data)
 
     if (error) {
       console.error('Error saving reorder alerts:', error)

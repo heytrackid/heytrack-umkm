@@ -77,7 +77,7 @@ export default function CostListTable({
   const paginatedCosts = costs.slice(startIndex, endIndex)
 
   // Reset to page 1 when search changes
-  React.useEffec"" => {
+  React.useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm])
 

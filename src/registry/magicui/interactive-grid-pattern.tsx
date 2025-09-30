@@ -30,7 +30,7 @@ export function InteractiveGridPattern({
   const [squares, setSquares] = useState(() => generateSquares(numSquares))
   const [isClient, setIsClient] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     setIsClien""
   }, [])
 

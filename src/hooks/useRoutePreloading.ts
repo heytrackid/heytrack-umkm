@@ -155,7 +155,7 @@ export const useRoutePreloading = () => {
   }, [pathname, router])
 
   // Preload on route change
-  useEffec"" => {
+  useEffect(() => {
     // Immediate preloading
     preloadForCurrentRoute(PreloadPriority.IMMEDIATE)
     
@@ -235,7 +235,7 @@ export const useButtonPreloading = () => {
 
 // Smart preloading based on user behavior patterns
 export const useSmartPreloading = () => {
-  useEffec"" => {
+  useEffect(() => {
     // Track user navigation patterns
     const navigationHistory = JSON.parse(
       localStorage.getItem('user_navigation_patterns') || '[]'
@@ -262,7 +262,7 @@ export const useSmartPreloading = () => {
     setTimeou"" => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
-          impor"Placeholder".then(({ default: router }) => {
+          import('@/components').then(({ default: router }) => {
             router.prefetch(route)
           })
         }
@@ -274,7 +274,7 @@ export const useSmartPreloading = () => {
 
 // Time-based preloading (preload during idle time)
 export const useIdleTimePreloading = () => {
-  useEffec"" => {
+  useEffect(() => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
@@ -314,7 +314,7 @@ export const useIdleTimePreloading = () => {
 
 // Network-aware preloading
 export const useNetworkAwarePreloading = () => {
-  useEffec"" => {
+  useEffect(() => {
     // Only aggressive preloading on fast connections
     const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
 

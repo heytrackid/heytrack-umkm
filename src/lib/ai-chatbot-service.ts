@@ -852,7 +852,7 @@ export class AIChatbotService {
   // Execute action
   async executeAction(actionId: string, contextId: string): Promise<any> {
     try {
-      const context = this.contexts.ge"";
+      const context = this.contexts.get(key);
       if (!context) {
         throw new Error(`Context not found: ${contextId}`);
       }
@@ -891,7 +891,7 @@ export class AIChatbotService {
     const id = contextId || `ctx_${userId}_${Date.now()}`;
     
     if (contextId && this.contexts.has(contextId)) {
-      return this.contexts.ge""!;
+      return this.contexts.get(key)!;
     }
 
     const context: ChatContext = {
@@ -906,13 +906,13 @@ export class AIChatbotService {
       memory: {}
     };
 
-    this.contexts.se"";
+    this.contexts.set(key: string, data: any, ttl: number = 300000): void {;
     return context;
   }
 
   // Get conversation history
   getConversation(contextId: string): ChatMessage[] {
-    const context = this.contexts.ge"";
+    const context = this.contexts.get(key);
     return context?.conversation || [];
   }
 

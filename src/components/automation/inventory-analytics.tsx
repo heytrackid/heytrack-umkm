@@ -28,22 +28,22 @@ import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
 
 // Dynamically import Recharts to reduce initial bundle size
 const ResponsiveContainer = dynamic(
-  () => impor"Placeholder".then(mod => mod.ResponsiveContainer),
+  () => import('@/components').then(mod => mod.ResponsiveContainer),
   { ssr: false, loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" /> }
 )
-const LineChart = dynamic(() => impor"Placeholder".then(mod => mod.LineChart), { ssr: false })
-const Line = dynamic(() => impor"Placeholder".then(mod => mod.Line), { ssr: false })
-const XAxis = dynamic(() => impor"Placeholder".then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => impor"Placeholder".then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => impor"Placeholder".then(mod => mod.CartesianGrid), { ssr: false })
-const Tooltip = dynamic(() => impor"Placeholder".then(mod => mod.Tooltip), { ssr: false })
-const BarChart = dynamic(() => impor"Placeholder".then(mod => mod.BarChart), { ssr: false })
-const Bar = dynamic(() => impor"Placeholder".then(mod => mod.Bar), { ssr: false })
-const PieChart = dynamic(() => impor"Placeholder".then(mod => mod.PieChart), { ssr: false })
-const Pie = dynamic(() => impor"Placeholder".then(mod => mod.Pie), { ssr: false })
-const Cell = dynamic(() => impor"Placeholder".then(mod => mod.Cell), { ssr: false })
-const Area = dynamic(() => impor"Placeholder".then(mod => mod.Area), { ssr: false })
-const AreaChart = dynamic(() => impor"Placeholder".then(mod => mod.AreaChart), { ssr: false })
+const LineChart = dynamic(() => import('@/components').then(mod => mod.LineChart), { ssr: false })
+const Line = dynamic(() => import('@/components').then(mod => mod.Line), { ssr: false })
+const XAxis = dynamic(() => import('@/components').then(mod => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import('@/components').then(mod => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => import('@/components').then(mod => mod.CartesianGrid), { ssr: false })
+const Tooltip = dynamic(() => import('@/components').then(mod => mod.Tooltip), { ssr: false })
+const BarChart = dynamic(() => import('@/components').then(mod => mod.BarChart), { ssr: false })
+const Bar = dynamic(() => import('@/components').then(mod => mod.Bar), { ssr: false })
+const PieChart = dynamic(() => import('@/components').then(mod => mod.PieChart), { ssr: false })
+const Pie = dynamic(() => import('@/components').then(mod => mod.Pie), { ssr: false })
+const Cell = dynamic(() => import('@/components').then(mod => mod.Cell), { ssr: false })
+const Area = dynamic(() => import('@/components').then(mod => mod.Area), { ssr: false })
+const AreaChart = dynamic(() => import('@/components').then(mod => mod.AreaChart), { ssr: false })
 
 interface InventoryAnalytics {
   ingredient_id: string
@@ -116,7 +116,7 @@ function InventoryAnalytics() {
   // Temporarily disable usage analytics until table is properly set up
   const usageAnalytics: any[] = []
 
-  useEffec"" => {
+  useEffect(() => {
     if (ingredients) {
       generateInventoryAnalytics()
     }

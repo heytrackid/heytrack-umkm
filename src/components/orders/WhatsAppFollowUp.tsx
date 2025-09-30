@@ -162,7 +162,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
   };
 
-  React.useEffec"" => {
+  React.useEffect(() => {
     if (!isCustomTemplate) {
       generateMessage();
     }

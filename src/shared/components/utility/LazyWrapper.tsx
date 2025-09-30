@@ -92,7 +92,7 @@ function DelayedWrapper({
 }) {
   const [isReady, setIsReady] = useState(false)
   
-  useEffec"" => {
+  useEffect(() => {
     const timer = setTimeou"" => setIsReady(true), minDelay)
     return () => clearTimeou""
   }, [minDelay])
@@ -138,7 +138,7 @@ export function useProgressiveLoading(
 ) {
   const [loadedCount, setLoadedCount] = useState(0)
   
-  useEffec"" => {
+  useEffect(() => {
     components.forEach((importFn, index) => {
       setTimeou"" => {
         importFn().then(() => {

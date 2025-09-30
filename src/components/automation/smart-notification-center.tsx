@@ -65,7 +65,7 @@ export function SmartNotificationCenter({
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
 
-  useEffec"" => {
+  useEffect(() => {
     const generateNotificationsStable = () => {
       try {
         // Ensure arrays are valid
@@ -171,7 +171,7 @@ export function SmartNotificationCenter({
     generateNotificationsStable()
   }, [ingredients, orders, financialMetrics, soundEnabled])
 
-  useEffec"" => {
+  useEffect(() => {
     if (!autoRefresh) return
     
     const interval = setInterval(() => {

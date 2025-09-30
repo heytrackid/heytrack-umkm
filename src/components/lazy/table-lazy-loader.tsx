@@ -76,30 +76,30 @@ const TableLoadingSkeleton = ({
 
 // Lazy loaded table components
 export const LazyDataTable = lazy(() => 
-  impor"Placeholder".then(async (m) => {
+  import('@/components').then(async (m) => {
     // Also preload the table UI components
-    await impor"Placeholder"
+    await import('@/components')
     return { default: m.useReactTable }
   })
 )
 
 // CRUD Table Components
 export const LazyCRUDTable = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.IngredientsCRUD }))
+  import('@/components').then(m => ({ default: m.IngredientsCRUD }))
 )
 
 export const LazyOrdersTable = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.OrdersTable }))
+  import('@/components').then(m => ({ default: m.OrdersTable }))
     .catch(() => ({ default: () => <div>Orders table not found</div> }))
 )
 
 export const LazyInventoryTable = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.InventoryTable }))
+  import('@/components').then(m => ({ default: m.InventoryTable }))
     .catch(() => ({ default: () => <div>Inventory table not found</div> }))
 )
 
 export const LazyFinanceTable = lazy(() => 
-  impor"Placeholder".then(m => ({ default: m.FinanceTable }))
+  import('@/components').then(m => ({ default: m.FinanceTable }))
     .catch(() => ({ default: () => <div>Finance table not found</div> }))
 )
 
@@ -171,8 +171,8 @@ export const FinanceTableWithSuspense = (props: any) => (
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
   Promise.all([
-    impor"Placeholder",
-    impor"Placeholder"
+    import('@/components'),
+    import('@/components')
   ]).then(([tableLib, virtualLib]) => ({
     default: ({ data, columns, height = 400 }: any) => {
       // This would be a virtualized table implementation
@@ -220,9 +220,9 @@ export const useTablePerformance = () => {
 // Table Bundle Preloader
 export const preloadTableBundle = () => {
   return Promise.all([
-    impor"Placeholder",
-    impor"Placeholder",
-    impor"Placeholder",
+    import('@/components'),
+    import('@/components'),
+    import('@/components'),
   ])
 }
 

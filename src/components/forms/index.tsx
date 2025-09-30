@@ -31,7 +31,7 @@ const FormSkeleton = () => (
 
 // Lazy loaded form components
 export const LazyIngredientForm = dynamic(
-  () => impor"Placeholder".then(mod => ({ default: mod.IngredientForm })),
+  () => import('@/components').then(mod => ({ default: mod.IngredientForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -39,7 +39,7 @@ export const LazyIngredientForm = dynamic(
 )
 
 export const LazyRecipeForm = dynamic(
-  () => impor"Placeholder".then(mod => ({ default: mod.RecipeForm })),
+  () => import('@/components').then(mod => ({ default: mod.RecipeForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -47,7 +47,7 @@ export const LazyRecipeForm = dynamic(
 )
 
 export const LazyCustomerForm = dynamic(
-  () => impor"Placeholder".then(mod => ({ default: mod.CustomerForm })),
+  () => import('@/components').then(mod => ({ default: mod.CustomerForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -55,7 +55,7 @@ export const LazyCustomerForm = dynamic(
 )
 
 export const LazyFinancialRecordForm = dynamic(
-  () => impor"Placeholder".then(mod => ({ default: mod.FinancialRecordForm })),
+  () => import('@/components').then(mod => ({ default: mod.FinancialRecordForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -64,22 +64,22 @@ export const LazyFinancialRecordForm = dynamic(
 
 // Preloading functions for better UX
 export const preloadIngredientForm = () => {
-  const componentImport = () => impor"Placeholder"
+  const componentImport = () => import('@/components')
   componentImpor""
 }
 
 export const preloadRecipeForm = () => {
-  const componentImport = () => impor"Placeholder"
+  const componentImport = () => import('@/components')
   componentImpor""
 }
 
 export const preloadCustomerForm = () => {
-  const componentImport = () => impor"Placeholder"
+  const componentImport = () => import('@/components')
   componentImpor""
 }
 
 export const preloadFinancialRecordForm = () => {
-  const componentImport = () => impor"Placeholder"
+  const componentImport = () => import('@/components')
   componentImpor""
 }
 

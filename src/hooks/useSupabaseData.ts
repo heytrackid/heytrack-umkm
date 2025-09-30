@@ -30,7 +30,7 @@ export function useRealtimeData<T>(
     }
   }, [fetchFunction])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchData()
   }, [fetchData])
 
@@ -63,7 +63,7 @@ export function useCustomers() {
     }
   }, [])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchCustomers()
   }, [fetchCustomers])
 
@@ -96,7 +96,7 @@ export function useIngredients() {
     }
   }, [])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchIngredients()
   }, [fetchIngredients])
 
@@ -129,7 +129,7 @@ export function useOrders() {
     }
   }, [])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchOrders()
   }, [fetchOrders])
 

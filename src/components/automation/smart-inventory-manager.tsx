@@ -39,7 +39,7 @@ export function SmartInventoryManager({
   const [loading, setLoading] = useState(false)
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'critical' | 'low' | 'adequate' | 'overstocked'>('all')
 
-  useEffec"" => {
+  useEffect(() => {
     if (ingredients.length > 0) {
       analyzeInventory()
     }

@@ -108,7 +108,7 @@ export function useExpenses() {
     }
   }
 
-  useEffec"" => {
+  useEffect(() => {
     fetchExpenses()
   }, [])
 

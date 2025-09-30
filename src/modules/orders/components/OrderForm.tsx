@@ -47,7 +47,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
   )
 
   // Fetch data
-  useEffec"" => {
+  useEffect(() => {
     fetchRecipes()
     fetchCustomers()
   }, [])
@@ -127,7 +127,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseIn"" || 0
+        const qty = parseInt || 0
         updated[index] = {
           ...updated[index],
           quantity: qty,

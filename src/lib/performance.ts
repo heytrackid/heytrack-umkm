@@ -42,10 +42,10 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.se""
+        this.metrics.set(key: string, data: any, ttl: number = 300000): void {
       }
       
-      this.metrics.ge""!.push(duration)
+      this.metrics.get(key)!.push(duration)
       
       // Log slow operations (>100ms)
       if (duration > 100) {
@@ -55,7 +55,7 @@ export class PerformanceMonitor {
   }
   
   getMetrics(label: string): { avg: number; min: number; max: number; count: number } | null {
-    const measurements = this.metrics.ge""
+    const measurements = this.metrics.get(key)
     if (!measurements || measurements.length === 0) return null
     
     return {
@@ -219,7 +219,7 @@ export const analyzeBundleSize = (): void => {
     for (const script of scripts) {
       try {
         const response = await fetch((script as HTMLScriptElement).src)
-        const size = parseIn""
+        const size = parseInt
         totalSize += size
         console.log(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
       } catch (error) {
@@ -275,7 +275,7 @@ export const registerServiceWorker = async (): Promise<void> => {
 export class CacheManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  se"": void {
+  set(key: string, data: any, ttl: number = 300000): void {: void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -284,7 +284,7 @@ export class CacheManager {
   }
   
   get<T = any>(key: string): T | null {
-    const item = this.cache.ge""
+    const item = this.cache.get(key)
     
     if (!item) return null
     
@@ -329,7 +329,7 @@ export const measureWebVitals = (): void => {
   if (typeof window === 'undefined') return
   
   // Import web-vitals dynamically to avoid SSR issues
-  impor"Placeholder".then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+  import('@/components').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
     getCLS((metric) => console.log('📊 CLS:', metric))
     getFID((metric) => console.log('📊 FID:', metric))
     getFCP((metric) => console.log('📊 FCP:', metric))

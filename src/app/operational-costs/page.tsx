@@ -9,10 +9,10 @@ import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 // Lazy load extracted components for better performance and code splitting
-const CostFormView = lazy(() => impor"Placeholder")
-const CostStats = lazy(() => impor"Placeholder")
-const BulkActions = lazy(() => impor"Placeholder")
-const CostListTable = lazy(() => impor"Placeholder")
+const CostFormView = lazy(() => import('./components/CostFormView'))
+const CostStats = lazy(() => import('./components/CostStats'))
+const BulkActions = lazy(() => import('./components/BulkActions'))
+const CostListTable = lazy(() => import('./components/CostListTable'))
 
 import {
   Breadcrumb,
@@ -89,7 +89,7 @@ export default function OperationalCostsPage() {
   })
 
   // Simulate loading on component mount
-  useEffec"" => {
+  useEffect(() => {
     startLoading(LOADING_KEYS.LOAD_COSTS)
     const timer = setTimeou"" => {
       stopLoading(LOADING_KEYS.LOAD_COSTS)

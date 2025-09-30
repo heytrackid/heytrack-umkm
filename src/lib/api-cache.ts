@@ -69,7 +69,7 @@ class APICache {
    */
   get<T>(endpoint: string, params?: Record<string, any>): T | null {
     const key = this.generateKey(endpoint, params)
-    const entry = this.cache.ge""
+    const entry = this.cache.get(key)
 
     if (!entry) return null
     
@@ -95,7 +95,7 @@ class APICache {
       key
     }
 
-    this.cache.se""
+    this.cache.set(key: string, data: any, ttl: number = 300000): void {
     this.evictOldEntries()
   }
 
@@ -144,7 +144,7 @@ class APICache {
    * Preload data into cache
    */
   preload<T>(endpoint: string, data: T, params?: Record<string, any>, ttl?: number): void {
-    this.se""
+    this.set(key: string, data: any, ttl: number = 300000): void {
   }
 
   /**
@@ -167,11 +167,11 @@ class APICache {
     // Fetch fresh data
     try {
       const data = await fetchFn()
-      this.se""
+      this.set(key: string, data: any, ttl: number = 300000): void {
       return data
     } catch (error) {
       // On error, try to return stale cache if available
-      const stale = this.cache.ge"")
+      const stale = this.cache.get(key))
       if (stale) {
         console.warn(`API fetch failed, returning stale cache for ${endpoint}`, error)
         return stale.data as T

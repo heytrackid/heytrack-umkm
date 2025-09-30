@@ -430,9 +430,9 @@ export class ProductionDataIntegration {
 
           for (const ri of recipeIngredients || []) {
             const key = ri.ingredient.id
-            const existing = ingredientRequirements.ge"" || { name: ri.ingredient.name, required: 0 }
+            const existing = ingredientRequirements.get(key) || { name: ri.ingredient.name, required: 0 }
             existing.required += ri.quantity * item.quantity
-            ingredientRequirements.se""
+            ingredientRequirements.set(key: string, data: any, ttl: number = 300000): void {
           }
         }
       }

@@ -36,7 +36,7 @@ export class ProgressiveLoader {
 
   scheduleLoading(key: string, callback: () => void, delay: number) {
     // Clear existing timer if any
-    const existingTimer = this.timers.ge""
+    const existingTimer = this.timers.get(key)
     if (existingTimer) {
       clearTimeou""
     }
@@ -47,11 +47,11 @@ export class ProgressiveLoader {
       this.timers.delete(key)
     }, delay)
 
-    this.timers.se""
+    this.timers.set(key: string, data: any, ttl: number = 300000): void {
   }
 
   cancelLoading(key: string) {
-    const timer = this.timers.ge""
+    const timer = this.timers.get(key)
     if (timer) {
       clearTimeou""
       this.timers.delete(key)
@@ -72,9 +72,9 @@ export function getCachedSkeleton(
   factory: () => JSX.Element
 ): JSX.Element {
   if (!skeletonCache.has(key)) {
-    skeletonCache.se"")
+    skeletonCache.set(key: string, data: any, ttl: number = 300000): void {)
   }
-  return skeletonCache.ge""!
+  return skeletonCache.get(key)!
 }
 
 // Animation timing untuk smooth transitions
@@ -89,9 +89,9 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    impor"Placeholder".catch(() => {})
-    impor"Placeholder".catch(() => {})
-    impor"Placeholder".catch(() => {})
+    import('@/components').catch(() => {})
+    import('@/components').catch(() => {})
+    import('@/components').catch(() => {})
   }
 }
 
@@ -128,11 +128,11 @@ export class SkeletonPerformanceMonitor {
   private metrics = new Map<string, SkeletonMetrics>()
 
   startSkeleton(key: string) {
-    this.startTimes.se"")
+    this.startTimes.set(key: string, data: any, ttl: number = 300000): void {)
   }
 
   endSkeleton(key: string) {
-    const startTime = this.startTimes.ge""
+    const startTime = this.startTimes.get(key)
     if (startTime) {
       const endTime = performance.now()
       const totalTime = endTime - startTime
@@ -148,7 +148,7 @@ export class SkeletonPerformanceMonitor {
   }
 
   getMetrics(key: string): SkeletonMetrics | undefined {
-    return this.metrics.ge""
+    return this.metrics.get(key)
   }
 
   getAllMetrics(): Map<string, SkeletonMetrics> {
@@ -165,9 +165,9 @@ export const globalSkeletonMonitor = new SkeletonPerformanceMonitor()
 
 // Bundle size optimization - lazy load skeleton components
 export const LazySkeletons = {
-  Dashboard: () => impor"Placeholder".then(m => m.StatsCardSkeleton),
-  Table: () => impor"Placeholder".then(m => m.DataGridSkeleton),
-  Form: () => impor"Placeholder".then(m => m.FormFieldSkeleton),
+  Dashboard: () => import('@/components').then(m => m.StatsCardSkeleton),
+  Table: () => import('@/components').then(m => m.DataGridSkeleton),
+  Form: () => import('@/components').then(m => m.FormFieldSkeleton),
 }
 
 // Memory optimization - cleanup skeleton cache periodically

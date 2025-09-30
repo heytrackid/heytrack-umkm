@@ -59,12 +59,12 @@ export function useSupabaseData<T = any>(options: DataOptions) {
     fetchData()
   }, [fetchData])
 
-  useEffec"" => {
+  useEffect(() => {
     fetchData()
   }, [fetchData])
 
   // Setup realtime subscription if enabled
-  useEffec"" => {
+  useEffect(() => {
     if (!options.realtime) return
 
     const channel = supabase

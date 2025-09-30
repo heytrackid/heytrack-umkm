@@ -26,7 +26,7 @@ export const Modal: React.FC<ModalProps> = ({
   const previousFocus = useRef<HTMLElement | null>(null);
 
   // Handle escape key
-  useEffec"" => {
+  useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -156,7 +156,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
 }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  useEffec"" => {
+  useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();

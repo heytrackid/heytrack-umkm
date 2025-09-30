@@ -64,7 +64,7 @@ export default function EnhancedSmartNotifications() {
   const [activeTab, setActiveTab] = useState('priority')
   const [showSettings, setShowSettings] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     loadEnhancedNotifications()
     // Set up real-time updates every 5 minutes
     const interval = setInterval(loadEnhancedNotifications, 5 * 60 * 1000)

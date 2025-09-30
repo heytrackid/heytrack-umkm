@@ -71,10 +71,10 @@ export default function NewInventoryTransactionPage() {
         body: JSON.stringify(formData)
       })
       if (!response.ok) throw new Error('Failed')
-      aler"Placeholder"
+      alert
       router.push('/inventory')
     } catch (error) {
-      aler"Placeholder"
+      alert
     } finally {
       setIsSubmitting(false)
     }

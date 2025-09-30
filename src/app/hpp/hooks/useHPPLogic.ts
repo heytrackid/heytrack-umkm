@@ -19,15 +19,15 @@ export const useHPPLogic = () => {
   const selectedRecipe = recipes.find(r => r.id === selectedRecipeId && selectedRecipeId !== 'placeholder')
 
   // Update product cost when recipe changes
-  useEffec"" => {
+  useEffect(() => {
     if (selectedRecipe) {
-      setProductCos"")
+      setProductCost(selectedRecipe.production_cost || 0)
       setTargetMargin(selectedRecipe.margin || 40)
     }
   }, [selectedRecipe])
 
   // Calculate recommended price
-  useEffec"" => {
+  useEffect(() => {
     if (productCost > 0) {
       const price = productCost / (1 - targetMargin / 100)
       setRecommendedPrice(Math.round(price))
@@ -46,10 +46,10 @@ export const useHPPLogic = () => {
       })
       
       // Show success (you can add toast notification here)
-      aler"Placeholder"
+      alert('Recipe updated successfully!')
     } catch (error) {
       console.error('Error updating recipe:', error)
-      aler"Placeholder"
+      alert('Failed to update recipe')
     } finally {
       setIsUpdating(false)
     }

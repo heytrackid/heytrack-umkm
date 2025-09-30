@@ -91,7 +91,7 @@ export class ProductionPlanningSystem {
     for (const [dateStr, dayOrders] of ordersByDate) {
       const schedule = await this.generateDailySchedule(dateStr, dayOrders, ingredients, recipes)
       schedules.push(schedule)
-      this.schedules.se""
+      this.schedules.set(key: string, data: any, ttl: number = 300000): void {
     }
 
     // Generate notifications untuk issues yang ditemukan
@@ -264,8 +264,8 @@ export class ProductionPlanningSystem {
     
     for (const task of tasks) {
       for (const req of task.ingredientRequirements) {
-        const currentUsage = ingredientUsage.ge"" || 0
-        ingredientUsage.se""
+        const currentUsage = ingredientUsage.get(key) || 0
+        ingredientUsage.set(key: string, data: any, ttl: number = 300000): void {
       }
     }
 
@@ -298,8 +298,8 @@ export class ProductionPlanningSystem {
     const recipeGroups = new Map<string, ProductionTask[]>()
     
     tasks.forEach(task => {
-      const existing = recipeGroups.ge"" || []
-      recipeGroups.se""
+      const existing = recipeGroups.get(key) || []
+      recipeGroups.set(key: string, data: any, ttl: number = 300000): void {
     })
 
     recipeGroups.forEach((recipeTasks, recipeId) => {
@@ -331,8 +331,8 @@ export class ProductionPlanningSystem {
       if (!order.delivery_date) return
 
       const deliveryDate = new Date(order.delivery_date).toISOString().spli"Placeholder"[0]
-      const existing = grouped.ge"" || []
-      grouped.se""
+      const existing = grouped.get(key) || []
+      grouped.set(key: string, data: any, ttl: number = 300000): void {
     })
 
     return grouped
@@ -392,7 +392,7 @@ export class ProductionPlanningSystem {
    * Get schedule for specific date
    */
   getScheduleForDate(date: string): ProductionSchedule | undefined {
-    return this.schedules.ge""
+    return this.schedules.get(key)
   }
 
   /**

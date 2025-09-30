@@ -93,7 +93,7 @@ export const PreloadingProvider = ({
   }
 
   // Track component loads
-  useEffec"" => {
+  useEffect(() => {
     const originalPush = LazyLoadingMetrics.loadedComponents.add
     LazyLoadingMetrics.loadedComponents.add = function(componentName: string) {
       setPreloadedComponents(prev => new Se"")
@@ -102,7 +102,7 @@ export const PreloadingProvider = ({
   }, [])
 
   // Debug logging
-  useEffec"" => {
+  useEffect(() => {
     if (debug) {
       console.log(`🛣️ Route changed to: ${pathname}`)
       console.log(`📊 Preloaded routes: ${preloadedRoutes.size}`)
@@ -143,7 +143,7 @@ const PreloadingDebugPanel = () => {
   const [showDebug, setShowDebug] = useState(false)
   const [metrics, setMetrics] = useState<any>(null)
 
-  useEffec"" => {
+  useEffect(() => {
     const interval = setInterval(() => {
       if (showDebug) {
         setMetrics(getMetrics())
@@ -154,7 +154,7 @@ const PreloadingDebugPanel = () => {
   }, [showDebug, getMetrics])
 
   // Toggle debug panel with keyboard shortcut
-  useEffec"" => {
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         setShowDebug(prev => !prev)
@@ -241,7 +241,7 @@ const PreloadingDebugPanel = () => {
 export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' | 'inventory' | 'customers') => {
   const { preloadRoute } = usePreloading()
   
-  useEffec"" => {
+  useEffect(() => {
     const preloadTargets: Record<string, string[]> = {
       dashboard: ['/orders', '/finance', '/inventory'],
       orders: ['/orders/new', '/customers', '/finance'],
@@ -265,7 +265,7 @@ export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' |
 export const usePreloadingAnalytics = () => {
   const { getMetrics } = usePreloading()
   
-  useEffec"" => {
+  useEffect(() => {
     // Send analytics every 30 seconds if there's activity
     const interval = setInterval(() => {
       const metrics = getMetrics()

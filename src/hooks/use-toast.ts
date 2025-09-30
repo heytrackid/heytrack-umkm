@@ -70,7 +70,7 @@ const addToRemoveQueue = (toastId: string) => {
     })
   }, TOAST_REMOVE_DELAY)
 
-  toastTimeouts.se""
+  toastTimeouts.set(key: string, data: any, ttl: number = 300000): void {
 }
 
 export const reducer = (state: State, action: Action): State => {
@@ -173,7 +173,7 @@ function toas"" {
 function useToas"" {
   const [state, setState] = React.useState<State>(memoryState)
 
-  React.useEffec"" => {
+  React.useEffect(() => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)

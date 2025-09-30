@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 // Lazy load inventory components with optimized loading
 export const LazySmartInventoryManager = createLazyComponent(
-  () => impor"Placeholder",
+  () => import('@/components'),
   {
     name: 'Smart Inventory Manager',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -14,7 +14,7 @@ export const LazySmartInventoryManager = createLazyComponent(
 )
 
 export const LazyInventoryTrendsChart = createLazyComponent(
-  () => impor"Placeholder",
+  () => import('@/components'),
   {
     name: 'Inventory Trends Chart',
     fallback: <ComponentSkeletons.Chart height={400} />,
@@ -23,7 +23,7 @@ export const LazyInventoryTrendsChart = createLazyComponent(
 )
 
 export const LazyInventoryPage = createLazyComponent(
-  () => impor"Placeholder",
+  () => import('@/components'),
   {
     name: 'Inventory Page',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -34,8 +34,8 @@ export const LazyInventoryPage = createLazyComponent(
 // Preload critical components for better UX
 export const preloadInventoryComponents = () => {
   // Preload most commonly used components
-  impor"Placeholder"
-  impor"Placeholder"
+  import('@/components')
+  import('@/components')
 }
 
 // Progressive loading for inventory dashboard
@@ -71,8 +71,8 @@ export function InventoryPageWithProgressiveLoading() {
 // Hook for progressive component loading with metrics
 export function useInventoryProgressiveLoading() {
   const components = [
-    () => impor"Placeholder",
-    () => impor"Placeholder",
+    () => import('@/components'),
+    () => import('@/components'),
   ]
   
   return useProgressiveLoading(components, 200)

@@ -34,7 +34,7 @@ export default function SmartPricingAssistan"" {
   const [customPrice, setCustomPrice] = useState<number>(0)
   const [loading, setLoading] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     if (recipe && recipe.recipe_ingredients) {
       analyzePricing()
     }

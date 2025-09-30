@@ -50,7 +50,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
         description: 'Catatan keuangan berhasil disimpan'
       })
       if (!initialData) {
-        form.rese""
+        form.reset(key: string, data: any, ttl: number = 300000): void {
       }
     } catch (error) {
       toast({

@@ -9,15 +9,15 @@ import {
 } from"@/components/ui/chart"
 
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => impor"Placeholder".then(mod => mod.LineChart), { 
+const LineChart = dynamic(() => import('@/components').then(mod => mod.LineChart), { 
   ssr: false,
   loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
 })
-const Line = dynamic(() => impor"Placeholder".then(mod => mod.Line), { ssr: false })
-const XAxis = dynamic(() => impor"Placeholder".then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => impor"Placeholder".then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => impor"Placeholder".then(mod => mod.CartesianGrid), { ssr: false })
-const Legend = dynamic(() => impor"Placeholder".then(mod => mod.Legend), { ssr: false })
+const Line = dynamic(() => import('@/components').then(mod => mod.Line), { ssr: false })
+const XAxis = dynamic(() => import('@/components').then(mod => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import('@/components').then(mod => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => import('@/components').then(mod => mod.CartesianGrid), { ssr: false })
+const Legend = dynamic(() => import('@/components').then(mod => mod.Legend), { ssr: false })
 
 const financialData = [
   {

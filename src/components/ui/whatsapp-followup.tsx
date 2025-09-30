@@ -81,7 +81,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
   const [loading, setLoading] = useState(true)
 
   // Fetch templates on component mount
-  useEffec"" => {
+  useEffect(() => {
     fetchTemplates()
   }, [])
 

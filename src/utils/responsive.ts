@@ -180,10 +180,10 @@ export function getSafeAreaInsets(): {
   const style = getComputedStyle(document.documentElement);
   
   return {
-    top: parseIn"" || '0', 10),
-    bottom: parseIn"" || '0', 10),
-    left: parseIn"" || '0', 10),
-    right: parseIn"" || '0', 10),
+    top: parseInt || '0', 10),
+    bottom: parseInt || '0', 10),
+    left: parseInt || '0', 10),
+    right: parseInt || '0', 10),
   };
 }
 

@@ -140,7 +140,7 @@ export const useOrderLogic = () => {
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseIn"" || 0
+        const qty = parseInt || 0
         updated[index] = {
           ...updated[index],
           quantity: qty,
