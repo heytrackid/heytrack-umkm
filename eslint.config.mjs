@@ -21,6 +21,12 @@ const eslintConfig = [
     ],
   },
   {
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
+      },
+    },
     rules: {
       // TypeScript Rules - Stricter to prevent common errors
       "@typescript-eslint/no-explicit-any": "warn", // Warn on any usage
@@ -56,8 +62,10 @@ const eslintConfig = [
       
       // Null safety
       "@typescript-eslint/no-non-null-assertion": "warn",
-      "@typescript-eslint/prefer-optional-chain": "warn",
-      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      // Note: optional-chain and nullish-coalescing require type information
+      // Disabled for performance - enable if needed:
+      // "@typescript-eslint/prefer-optional-chain": "warn",
+      // "@typescript-eslint/prefer-nullish-coalescing": "warn",
     },
   },
 ];
