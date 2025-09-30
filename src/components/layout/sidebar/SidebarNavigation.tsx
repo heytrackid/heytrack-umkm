@@ -8,13 +8,17 @@ interface SidebarNavigationProps {
   isItemActive: (item: any) => boolean
   onItemMouseEnter?: (href: string) => void
   variant?: 'default' | 'mobile'
+  isSectionCollapsed: (sectionTitle: string) => boolean
+  onToggleSection: (sectionTitle: string) => void
 }
 
 export default function SidebarNavigation({ 
   sections, 
   isItemActive, 
   onItemMouseEnter,
-  variant = 'default' 
+  variant = 'default',
+  isSectionCollapsed,
+  onToggleSection
 }: SidebarNavigationProps) {
   const spacingClass = variant === 'mobile' ? 'space-y-4' : 'space-y-4 lg:space-y-6'
   const paddingClass = variant === 'mobile' ? 'px-4 py-4' : 'px-3 lg:px-4 py-4'
@@ -28,6 +32,8 @@ export default function SidebarNavigation({
           isItemActive={isItemActive}
           onItemMouseEnter={onItemMouseEnter}
           variant={variant}
+          isCollapsed={section.isCollapsible ? isSectionCollapsed(section.title) : false}
+          onToggle={() => onToggleSection(section.title)}
         />
       ))}
     </nav>

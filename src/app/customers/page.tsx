@@ -37,7 +37,7 @@ import {
 } from 'lucide-react'
 
 // Dynamically import the heavy table component
-const CustomersTable = dynamic(() => impor"Placeholder", {
+const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
   loading: () => <CustomersTableSkeleton rows={10} />,
   ssr: false
 })
@@ -53,7 +53,7 @@ export default function CustomersPage() {
 
 
 
-  const [customers, setCustomers] = useState([])
+  const [customers, setCustomers] = useState<any[]>([])
 
   // Fetch customer data from API
   useEffect(() => {
@@ -215,7 +215,7 @@ export default function CustomersPage() {
             </p>
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
-            <Button variant="outline" className={isMobile ? 'w-full' : ''}>
+            <Button  className={isMobile ? 'w-full' : ''}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -305,7 +305,7 @@ export default function CustomersPage() {
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Button
-                  variant="ghost"
+                  
                   size="sm"
                   onClick={() => setSelectedItems([])}
                   className="text-gray-500 hover:text-gray-700"
@@ -313,7 +313,7 @@ export default function CustomersPage() {
                   Batal
                 </Button>
                 <Button
-                  variant="outline"
+                  
                   size="sm"
                   onClick={handleBulkEdit}
                 >
@@ -321,7 +321,7 @@ export default function CustomersPage() {
                   Edit Semua
                 </Button>
                 <Button
-                  variant="outline"
+                  
                   size="sm"
                   onClick={handleBulkDelete}
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"

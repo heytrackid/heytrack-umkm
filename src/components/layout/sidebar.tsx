@@ -53,7 +53,7 @@ const SidebarSkeleton = () => (
 )
 
 // Dynamically import the main sidebar component
-const LazySidebar = dynamic(() => impor"Placeholder", {
+const LazySidebar = dynamic(() => import('./sidebar/LazySidebar'), {
   ssr: false,
   loading: () => <SidebarSkeleton />
 })

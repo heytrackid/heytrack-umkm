@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -19,7 +19,6 @@ import {
   Banknote,
   Brain,
   MessageSquare,
-  TrendingDown,
   Lightbulb
 } from 'lucide-react'
 
@@ -38,14 +37,25 @@ export interface NavigationSection {
   items: NavigationItem[]
   description?: string
   isWorkflow?: boolean
+  isCollapsible?: boolean
+  defaultCollapsed?: boolean
 }
 
 export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
+  
+  // Collapsible sections state
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
+    'Data Manager': false,
+    'Calculation': false,
+    'Operations': false,
+    'Monitoring': true, // Default collapsed to save space
+    'AI Assistant': false,
+  })
 
   // Prefetch next likely routes to reduce navigation latency
-  useEffec"" => {
+  useEffect(() => {
     const routesToPrefetch = ['/', '/orders', '/inventory', '/hpp', '/finance', '/resep', '/customers']
     routesToPrefetch.forEach((r) => {
       try { router.prefetch(r) } catch {}
@@ -54,136 +64,142 @@ export const useSidebarLogic = () => {
 
   const navigationSections: NavigationSection[] = [
     {
-      title: "Placeholder",
+      title: "Dashboard",
       items: [
         {
-          name: "Placeholder",
+          name: "Dashboard",
           href: '/',
           icon: LayoutDashboard,
-          description: "Placeholder"
+          description: "Overview bisnis dan metrics utama"
         }
       ]
     },
     {
-      title: "Placeholder",
+      title: "Data Manager",
+      description: "Kelola data dasar bisnis",
       isWorkflow: true,
+      isCollapsible: true,
       items: [
         {
-          name: "Placeholder",
+          name: "Raw Materials",
           href: '/inventory',
           icon: Package,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "DATA",
+          description: "Kelola bahan baku dan stok"
         },
         {
-          name: "Placeholder",
+          name: "Categories",
           href: '/categories',
           icon: Layers,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "ORGANIZE",
+          description: "Kategori produk dan bahan"
         },
         {
-          name: "Placeholder",
+          name: "Operational Costs",
           href: '/operational-costs',
           icon: Receipt,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "COSTS",
+          description: "Biaya operasional harian"
         },
         {
-          name: "Placeholder",
+          name: "Recipes",
           href: '/resep',
           icon: ChefHat,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "RECIPE",
+          description: "Formula resep dan ingredients"
         },
       ]
     },
     {
-      title: "Placeholder",
-      description: "Placeholder",
+      title: "Calculation",
+      description: "Hitung HPP dan pricing strategy",
       isWorkflow: true,
+      isCollapsible: true,
       items: [
         {
-          name: "Placeholder",
+          name: "HPP Pricing",
           href: '/hpp',
           icon: Calculator,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "CALC",
+          description: "Perhitungan Harga Pokok Produksi"
         },
         {
-          name: "Placeholder",
+          name: "HPP Enhanced",
           href: '/hpp-enhanced',
           icon: Target,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "ENHANCED",
+          description: "HPP dengan analisa mendalam"
         },
       ]
     },
     {
-      title: "Placeholder",
-      description: "Placeholder",
+      title: "Operations",
+      description: "Kelola pesanan dan customer",
       isWorkflow: true,
+      isCollapsible: true,
       items: [
         {
-          name: "Placeholder",
+          name: "Orders",
           href: '/orders',
           icon: ShoppingCart,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "ORDER",
+          description: "Kelola pesanan dan delivery"
         },
         {
-          name: "Placeholder",
+          name: "Customers",
           href: '/customers',
           icon: Users,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "CRM",
+          description: "Database customer dan history"
         },
       ]
     },
     {
-      title: "Placeholder",
-      description: "Placeholder",
+      title: "Monitoring",
+      description: "Laporan dan analisis bisnis",
       isWorkflow: true,
+      isCollapsible: true,
+      defaultCollapsed: true,
       items: [
         {
-          name: "Placeholder",
+          name: "Cash Flow",
           href: '/cash-flow',
           icon: DollarSign,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "MONEY",
+          description: "Arus kas masuk dan keluar"
         },
         {
-          name: "Placeholder",
+          name: "Finance",
           href: '/finance',
           icon: Banknote,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "FINANCE",
+          description: "Laporan keuangan detail"
         },
         {
-          name: "Placeholder",
+          name: "Reports",
           href: '/reports',
           icon: BarChart3,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "REPORT",
+          description: "Laporan bisnis comprehensive"
         },
         {
-          name: "Placeholder",
+          name: "Review",
           href: '/review',
           icon: TrendingUp,
           isSimple: true,
-          badge: "Placeholder",
-          description: "Placeholder"
+          badge: "REVIEW",
+          description: "Review performa dan growth"
         },
       ]
     },
@@ -191,6 +207,7 @@ export const useSidebarLogic = () => {
       title: 'AI Assistant',
       description: 'Asisten cerdas untuk optimasi bisnis',
       isWorkflow: true,
+      isCollapsible: true,
       items: [
         {
           name: 'AI Insights',
@@ -207,14 +224,6 @@ export const useSidebarLogic = () => {
           isSimple: true,
           badge: 'AI',
           description: 'Analisis harga optimal berbasis AI'
-        },
-        {
-          name: 'Inventory AI',
-          href: '/ai/inventory',
-          icon: TrendingDown,
-          isSimple: true,
-          badge: 'AUTO',
-          description: 'Prediksi stok dan auto-reorder'
         },
         {
           name: 'Chat Assistant',
@@ -235,21 +244,32 @@ export const useSidebarLogic = () => {
       ]
     },
     {
-      title: "Placeholder",
+      title: "Others",
       items: [
         {
-          name: "Placeholder",
+          name: "Settings",
           href: '/settings',
           icon: Settings,
-          description: "Placeholder"
+          description: "Pengaturan aplikasi dan preferences"
         },
       ]
     }
   ]
 
+  // Initialize collapsed sections based on defaultCollapsed
+  useEffect(() => {
+    const initialCollapsedState: Record<string, boolean> = {}
+    navigationSections.forEach(section => {
+      if (section.isCollapsible) {
+        initialCollapsedState[section.title] = section.defaultCollapsed || false
+      }
+    })
+    setCollapsedSections(prev => ({ ...prev, ...initialCollapsedState }))
+  }, [])
+
   const isItemActive = (item: NavigationItem): boolean => {
     return pathname === item.href || 
-      (item.href.includes('#') && pathname === item.href.spli"Placeholder"[0])
+      (item.href.includes('#') && pathname === item.href.split('#')[0])
   }
 
   const prefetchRoute = (href: string) => {
@@ -258,11 +278,25 @@ export const useSidebarLogic = () => {
     } catch {}
   }
 
+  const toggleSection = (sectionTitle: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionTitle]: !prev[sectionTitle]
+    }))
+  }
+
+  const isSectionCollapsed = (sectionTitle: string): boolean => {
+    return collapsedSections[sectionTitle] || false
+  }
+
   return {
     navigationSections,
     pathname,
     router,
     isItemActive,
-    prefetchRoute
+    prefetchRoute,
+    toggleSection,
+    isSectionCollapsed,
+    collapsedSections
   }
 }

@@ -130,7 +130,6 @@ export default function NewOrderPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button 
-              variant="outline" 
               size="sm"
               onClick={() => router.back()}
             >
