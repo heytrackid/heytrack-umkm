@@ -142,7 +142,7 @@ export class ProductionAutomation {
       
       const criticalShortages = availability.requirements
         .filter(req => !req.sufficient)
-        .sor"" => b.shortage - a.shortage)
+        .sort((a, b) => b.shortage - a.shortage)
         .slice(0, 3)
       
       criticalShortages.forEach(shortage => {
@@ -295,7 +295,7 @@ export class ProductionAutomation {
     
     return Object.values(ingredientUsage)
       .filter(ingredient => ingredient.recipeCount > 1)
-      .sor"" => b.recipeCount - a.recipeCount)
+      .sort((a, b) => b.recipeCount - a.recipeCount)
   }
 
   /**
@@ -361,7 +361,7 @@ export class ProductionAutomation {
    */
   scheduleOptimalProduction(plan: ProductionPlanItem[], workingHours: { start: number; end: number }) {
     // Sort by delivery date priority
-    const sortedPlan = [...plan].sor"" => a.deliveryDate.getTime() - b.deliveryDate.getTime())
+    const sortedPlan = [...plan].sort((a, b) => a.deliveryDate.getTime() - b.deliveryDate.getTime())
     
     let currentTime = new Date()
     currentTime.setHours(workingHours.start, 0, 0, 0)

@@ -7,7 +7,7 @@ import { Menu, X } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Lazy imports for sidebar components
-const SidebarHeader = dynamic(() => impor"Placeholder", {
+const SidebarHeader = dynamic(() => import('./SidebarHeader'), {
   ssr: false,
   loading: () => (
     <div className="h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -22,7 +22,7 @@ const SidebarHeader = dynamic(() => impor"Placeholder", {
   )
 })
 
-const SidebarNavigation = dynamic(() => impor"Placeholder", {
+const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
   ssr: false,
   loading: () => (
     <div className="flex-1 px-3 lg:px-4 py-4 space-y-6 overflow-y-auto">
@@ -47,7 +47,7 @@ const SidebarNavigation = dynamic(() => impor"Placeholder", {
   )
 })
 
-const SidebarFooter = dynamic(() => impor"Placeholder", {
+const SidebarFooter = dynamic(() => import('./SidebarFooter'), {
   ssr: false,
   loading: () => (
     <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
@@ -59,7 +59,7 @@ const SidebarFooter = dynamic(() => impor"Placeholder", {
   )
 })
 
-const MobileSidebar = dynamic(() => impor"Placeholder", {
+const MobileSidebar = dynamic(() => import('./MobileSidebar'), {
   ssr: false,
   loading: () => (
     <div className="h-full flex flex-col bg-background">
@@ -98,7 +98,13 @@ interface LazySidebarProps {
 }
 
 export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarProps) {
-  const { navigationSections, isItemActive, prefetchRoute } = useSidebarLogic()
+  const { 
+    navigationSections, 
+    isItemActive, 
+    prefetchRoute, 
+    isSectionCollapsed, 
+    toggleSection 
+  } = useSidebarLogic()
 
   // If it's mobile mode (used within Sheet), render simplified version
   if (isMobile) {
@@ -146,6 +152,8 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
             sections={navigationSections}
             isItemActive={isItemActive}
             onItemMouseEnter={prefetchRoute}
+            isSectionCollapsed={isSectionCollapsed}
+            onToggleSection={toggleSection}
           />
         </Suspense>
         

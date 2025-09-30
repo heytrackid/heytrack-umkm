@@ -64,12 +64,12 @@ export function RecipeForm({
       .filter(Boolean)
       
     // Avoid duplicate ingredients
-    const existingIngredientIds = new Se"" => ing.ingredient_id))
+    const existingIngredientIds = new Set(recipe.ingredients.map(ing => ing.ingredient_id))
     const newIngredients = availableIngredients
       .filter(ing => !existingIngredientIds.has(ing!.id))
       .map(ing => ({
         ingredient_id: ing!.id,
-        quantity: getDefaultQuantityByIngredien"",
+        quantity: 1,
         unit: ing!.unit
       }))
     
@@ -80,7 +80,7 @@ export function RecipeForm({
   }
 
   // Auto-populate ingredients when category changes
-  useEffec"" => {
+  useEffect(() => {
     if (recipe.category && recipe.category !== '' && ingredients && recipe.ingredients.length === 0) {
       handleQuickAddIngredients()
     }
@@ -201,14 +201,14 @@ export function RecipeForm({
               <div key={index} className="flex gap-2 items-end">
                 <div className="flex-1">
                   <Label className="text-xs text-gray-600">
-                    {"Placeholder"}
+                    Bahan Baku
                   </Label>
                   <Select
                     value={ingredient.ingredient_id}
-                    onValueChange={(value) => handleUpdateIngredien""}
+                    onValueChange={(value) => handleUpdateIngredient(index, 'ingredient_id', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={"Placeholder"} />
+                      <SelectValue placeholder="Pilih bahan baku" />
                     </SelectTrigger>
                     <SelectContent>
                       {ingredients?.map((ing) => (
@@ -227,7 +227,7 @@ export function RecipeForm({
                   <Input
                     type="number"
                     value={ingredient.quantity}
-                    onChange={(e) => handleUpdateIngredien"" || 0)}
+                    onChange={(e) => handleUpdateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
                     placeholder="0"
                     min="0"
                     step="0.1"
@@ -240,7 +240,7 @@ export function RecipeForm({
                   </Label>
                   <Select
                     value={ingredient.unit}
-                    onValueChange={(value) => handleUpdateIngredien""}
+                    onValueChange={(value) => handleUpdateIngredient(index, 'unit', value)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -260,7 +260,7 @@ export function RecipeForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => handleRemoveIngredien""}
+                  onClick={() => handleRemoveIngredient(index)}
                   disabled={recipe.ingredients.length <= 1}
                 >
                   <Trash2 className="h-4 w-4" />

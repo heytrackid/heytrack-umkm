@@ -94,7 +94,7 @@ const RecipeFormSkeleton = () => (
 
 // Lazy loaded components
 export const LazyRecipeList = dynamic(
-  () => impor"Placeholder".then(mod => ({ default: mod.RecipeList })),
+  () => import('./RecipeList').then(mod => ({ default: mod.RecipeList })),
   { 
     ssr: false,
     loading: () => <RecipeListSkeleton />
@@ -102,7 +102,7 @@ export const LazyRecipeList = dynamic(
 )
 
 export const LazyRecipeForm = dynamic(
-  () => impor"Placeholder".then(mod => ({ default: mod.RecipeForm })),
+  () => import('./RecipeForm').then(mod => ({ default: mod.RecipeForm })),
   { 
     ssr: false,
     loading: () => <RecipeFormSkeleton />
@@ -111,13 +111,13 @@ export const LazyRecipeForm = dynamic(
 
 // Preloading functions
 export const preloadRecipeList = () => {
-  const componentImport = () => impor"Placeholder"
-  componentImpor""
+  const componentImport = () => import('./RecipeList')
+  componentImport()
 }
 
 export const preloadRecipeForm = () => {
-  const componentImport = () => impor"Placeholder"
-  componentImpor""
+  const componentImport = () => import('./RecipeForm')
+  componentImport()
 }
 
 // Component wrappers with preloading
@@ -159,7 +159,7 @@ export function RecipePageWithProgressiveLoading({
 
   const handlePreloadList = () => {
     if (currentView !== 'list') {
-      preloadRecipeLis""
+      preloadRecipeList()
     }
   }
 

@@ -23,7 +23,7 @@ export default function AppLayout({
   pageTitle,
   showMobileHeader = true
 }: AppLayoutProps) {
-  const { isMobile } = useMobileFirs""
+  const { isMobile } = useMobileFirst()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   

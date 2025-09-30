@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { PricingAIService } from '@/lib/ai/services/PricingAIService'
-import { InventoryAIService } from '@/lib/ai/services/InventoryAIService'
 
 export const useAILogic = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -11,18 +10,17 @@ export const useAILogic = () => {
   
   // AI service instances
   const [pricingService] = useState(() => new PricingAIService())
-  const [inventoryService] = useState(() => new InventoryAIService())
 
   // Dashboard stats
   const [aiStats, setAiStats] = useState({
     totalAnalyses: 0,
     activePricingInsights: 0,
-    inventoryOptimizations: 0,
+    chatInteractions: 0,
     costSavings: 0
   })
 
   // Load initial AI insights
-  useEffec"" => {
+  useEffect(() => {
     loadAIInsights()
   }, [])
 
@@ -47,12 +45,12 @@ export const useAILogic = () => {
         },
         {
           id: 2,
-          type: 'inventory',
-          title: 'Stock Alert: Tepung Terigu',
-          message: 'Prediksi habis dalam 3 hari, segera reorder 50kg',
-          impact: 'urgent',
+          type: 'chat',
+          title: 'Chat Insights Available',
+          message: 'AI telah menganalisis 15 chat interaction minggu ini',
+          impact: 'medium',
           savings: 0,
-          action: 'reorder-stock',
+          action: 'view-chat-insights',
           timestamp: new Date()
         },
         {
@@ -71,7 +69,7 @@ export const useAILogic = () => {
       setAiStats({
         totalAnalyses: 24,
         activePricingInsights: 5,
-        inventoryOptimizations: 8,
+        chatInteractions: 18,
         costSavings: 850000
       })
     } catch (err) {
@@ -96,15 +94,16 @@ export const useAILogic = () => {
     }
   }
 
-  const optimizeInventory = async (inventoryData: any) => {
+  const startChatSession = async () => {
     setIsLoading(true)
     setError(null)
 
     try {
-      const optimization = await inventoryService.optimizeInventory(inventoryData)
-      return optimization
+      // Initialize chat session or perform setup
+      await new Promise(resolve => setTimeout(resolve, 500))
+      return { success: true, sessionId: Date.now().toString() }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Inventory optimization failed')
+      setError(err instanceof Error ? err.message : 'Failed to start chat session')
       return null
     } finally {
       setIsLoading(false)
@@ -123,8 +122,8 @@ export const useAILogic = () => {
         case 'review-pricing':
           // Navigate to pricing page or show pricing modal
           break
-        case 'reorder-stock':
-          // Navigate to inventory page or create order
+        case 'view-chat-insights':
+          // Navigate to chat insights or show chat analytics
           break
         case 'bulk-order':
           // Show bulk order recommendations
@@ -162,13 +161,12 @@ export const useAILogic = () => {
     
     // Actions
     analyzePricing,
-    optimizeInventory,
+    startChatSession,
     executeAIAction,
     dismissInsight,
     refreshInsights,
     
     // Services
-    pricingService,
-    inventoryService
+    pricingService
   }
 }

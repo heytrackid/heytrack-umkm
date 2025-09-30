@@ -11,8 +11,8 @@ export class LazyExcelExportService {
   private static async loadDependencies() {
     // Dynamically import heavy dependencies only when needed
     const [{ default: XLSX }, { saveAs }] = await Promise.all([
-      impor"Placeholder",
-      impor"Placeholder"
+      import('xlsx'),
+      import('file-saver')
     ])
     return { XLSX, saveAs }
   }
@@ -48,7 +48,7 @@ export class LazyExcelExportService {
           })
           
           // Add headers as first row
-          processedData.unshif""
+          processedData.unshift(headers)
         }
         
         const worksheet = XLSX.utils.json_to_sheet(processedData, {
@@ -63,7 +63,7 @@ export class LazyExcelExportService {
           worksheet['!cols'] = colWidths
         }
         
-        XLSX.utils.book_append_shee""
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
       })
       
       // Generate Excel file
@@ -77,7 +77,7 @@ export class LazyExcelExportService {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
       })
       
-      const defaultFileName = `HeyTrack-Export-${new Date().toISOString().spli"Placeholder"[0]}.xlsx`
+      const defaultFileName = `HeyTrack-Export-${new Date().toISOString().split('T')[0]}.xlsx`
       saveAs(blob, fileName || defaultFileName)
     } catch (error) {
       console.error('Excel export failed:', error)

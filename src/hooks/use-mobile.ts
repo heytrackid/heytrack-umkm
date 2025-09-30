@@ -16,7 +16,7 @@ const MOBILE_BREAKPOINT = 768
 export function useIsMobile() {
   const [isMobile, setIsMobile] = useState<boolean | undefined>(undefined)
 
-  useEffec"" => {
+  useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
     const onChange = () => {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
@@ -32,7 +32,7 @@ export function useIsMobile() {
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -57,7 +57,7 @@ export function useScreenSize() {
     height: 0
   })
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -99,7 +99,7 @@ export function useMobile() {
 export function useOrientation() {
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait')
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -120,7 +120,7 @@ export function useOrientation() {
 export function useTouchDevice() {
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -141,10 +141,10 @@ export function useTouchDevice() {
 }
 
 // Hook untuk deteksi viewport height (berguna untuk mobile dengan dynamic viewport)
-export function useViewportHeigh"" {
+export function useViewportHeight() {
   const [viewportHeight, setViewportHeight] = useState(0)
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -152,13 +152,13 @@ export function useViewportHeigh"" {
     const updateHeight = () => {
       // Gunakan visualViewport jika tersedia (lebih akurat di mobile)
       const height = (window as any).visualViewport?.height ?? window.innerHeight
-      setViewportHeigh""
+      setViewportHeight(height)
       
       // Set CSS custom property untuk digunakan di CSS
       document.documentElement.style.setProperty('--viewport-height', `${height}px`)
     }
 
-    updateHeigh""
+    updateHeight()
 
     if ((window as any).visualViewport) {
       (window as any).visualViewport.addEventListener('resize', updateHeight)
@@ -177,7 +177,7 @@ export function useScrollDirection() {
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(null)
   const [isScrolling, setIsScrolling] = useState(false)
 
-  useEffec"" => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -190,8 +190,8 @@ export function useScrollDirection() {
       const scrollY = window.scrollY
       
       setIsScrolling(true)
-      clearTimeou""
-      scrollTimeout = setTimeou"" => setIsScrolling(false), 150)
+      clearTimeout(scrollTimeout)
+      scrollTimeout = setTimeout(() => setIsScrolling(false), 150)
 
       if (Math.abs(scrollY - lastScrollY) < 3) {
         // Jika scroll terlalu kecil, abaikan
@@ -214,7 +214,7 @@ export function useScrollDirection() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', onScroll)
-      clearTimeou""
+      clearTimeout(scrollTimeout)
     }
   }, [])
 
@@ -226,7 +226,7 @@ export function useResponsive() {
   const mobile = useMobile()
   const orientation = useOrientation()
   const isTouchDevice = useTouchDevice()
-  const viewportHeight = useViewportHeigh""
+  const viewportHeight = useViewportHeight()
   const { scrollDirection, isScrolling } = useScrollDirection()
   const screenSize = useScreenSize()
 

@@ -41,7 +41,7 @@ export default function AIInsightsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [insights, setInsights] = useState<BusinessInsight[]>([])
 
-  useEffec"" => {
+  useEffect(() => {
     loadInsights()
   }, [])
 
@@ -49,7 +49,7 @@ export default function AIInsightsPage() {
     setIsLoading(true)
     
     // Simulate AI analysis
-    setTimeou"" => {
+    setTimeout(() => {
       const mockInsights: BusinessInsight[] = [
         {
           id: '1',

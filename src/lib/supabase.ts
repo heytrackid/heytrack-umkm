@@ -6,7 +6,7 @@ import { validateInput, sanitizeSQL } from '@/lib/validation'
 class SimpleCache {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  se"": void {
+  set(key: string, data: any, ttl: number = 300000): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -15,7 +15,7 @@ class SimpleCache {
   }
   
   get<T = any>(key: string): T | null {
-    const item = this.cache.ge""
+    const item = this.cache.get(key)
     
     if (!item) return null
     
@@ -153,12 +153,12 @@ export const dbService = {
   // Ingredients with caching and validation
   async getIngredients() {
     const cacheKey = 'ingredients_active'
-    const cached = cacheManager.ge""
+    const cached = cacheManager.get(cacheKey)
     if (cached) return cached
     
     const { data, error } = await supabase
       .from('ingredients')
-      .selec"Placeholder"
+      .select('*')
       .eq('is_active', true)
       .order('name')
     
@@ -168,13 +168,13 @@ export const dbService = {
     }
     
     // Cache for 5 minutes
-    cacheManager.se""
+    cacheManager.set(cacheKey, data, 300000)
     return data
   },
 
-  async addIngredien"" {
+  async addIngredient(ingredientData: any) {
     // Validate input
-    const validation = validateInpu""
+    const validation = validateInput(ingredientData)
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`)
     }
@@ -188,8 +188,8 @@ export const dbService = {
     
     const { data, error } = await supabase
       .from('ingredients')
-      .inser""
-      .selec""
+      .insert(ingredientData)
+      .select('*')
       .single()
     
     if (error) {
@@ -202,14 +202,14 @@ export const dbService = {
     return data
   },
 
-  async updateIngredien"" {
+  async updateIngredient(id: string, updates: any) {
     // Validate UUID
-    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.tes"") {
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
       throw new Error('Invalid ingredient ID format')
     }
     
     // Validate updates
-    const validation = validateInpu""
+    const validation = validateInput(updates)
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`)
     }
@@ -227,7 +227,7 @@ export const dbService = {
       .from('ingredients')
       .update(sanitizedUpdates)
       .eq('id', id)
-      .selec"Placeholder"
+      .select('*')
       .single()
     
     if (error) {
@@ -295,7 +295,7 @@ export const dbService = {
   async getFinancialRecords(startDate?: string, endDate?: string) {
     let query = supabase
       .from('financial_records')
-      .selec"Placeholder"
+      .select('*')
       .order('date', { ascending: false })
     
     if (startDate) {

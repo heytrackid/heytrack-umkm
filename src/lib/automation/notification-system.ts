@@ -36,7 +36,7 @@ export class NotificationSystem {
 
     // Sort by priority and timestamp
     return notifications
-      .sor"" => {
+      .sort((a, b) => {
         const priorityOrder = { high: 3, medium: 2, low: 1 }
         const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority]
         

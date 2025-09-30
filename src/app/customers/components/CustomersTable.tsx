@@ -193,16 +193,16 @@ export default function CustomersTable({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => onEdi""}>
+                          <DropdownMenuItem onClick={() => onEdit(customer)}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
                             onClick={() => onDelete(customer)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

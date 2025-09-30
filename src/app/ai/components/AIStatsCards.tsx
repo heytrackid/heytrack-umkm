@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { 
   Brain, 
   TrendingUp, 
-  Package, 
+  MessageSquare, 
   DollarSign,
   Activity,
   Zap
@@ -15,7 +15,7 @@ import { formatCurrency } from '@/shared/utils/currency'
 interface AIStats {
   totalAnalyses: number
   activePricingInsights: number
-  inventoryOptimizations: number
+  chatInteractions: number
   costSavings: number
 }
 
@@ -67,21 +67,21 @@ export default function AIStatsCards({ stats, loading = false }: AIStatsCardsPro
       badge: 'SMART'
     },
     {
-      title: 'Optimasi Inventory',
-      value: stats.inventoryOptimizations.toString(),
-      description: 'Prediksi stok',
-      icon: Package,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      badge: 'AUTO'
+      title: 'Chat Interactions',
+      value: stats.chatInteractions.toString(),
+      description: 'Interaksi AI',
+      icon: MessageSquare,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+      badge: 'BETA'
     },
     {
       title: 'Penghematan AI',
       value: formatCurrency(stats.costSavings),
       description: 'Total hemat bulan ini',
       icon: DollarSign,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
       badge: 'HEMAT'
     }
   ]

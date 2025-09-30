@@ -12,7 +12,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { Brain, RefreshCw, Sparkles } from 'lucide-react'
 
 // Dynamic imports with skeletons
-const AIStatsCards = dynamic(() => impor"Placeholder", {
+const AIStatsCards = dynamic(() => import('./components/AIStatsCards'), {
   ssr: false,
   loading: () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -34,7 +34,7 @@ const AIStatsCards = dynamic(() => impor"Placeholder", {
   )
 })
 
-const AIInsightsCard = dynamic(() => impor"Placeholder", {
+const AIInsightsCard = dynamic(() => import('./components/AIInsightsCard'), {
   ssr: false,
   loading: () => (
     <Card>
@@ -72,7 +72,7 @@ const AIInsightsCard = dynamic(() => impor"Placeholder", {
   )
 })
 
-const AIQuickActions = dynamic(() => impor"Placeholder", {
+const AIQuickActions = dynamic(() => import('./components/AIQuickActions'), {
   ssr: false,
   loading: () => (
     <Card>

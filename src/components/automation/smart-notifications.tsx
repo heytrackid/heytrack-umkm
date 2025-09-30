@@ -30,7 +30,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
   const [loading, setLoading] = useState(false)
 
   // Fetch smart notifications
-  useEffec"" => {
+  useEffect(() => {
     fetchSmartNotifications()
     // Set up periodic refresh every 30 seconds
     const interval = setInterval(fetchSmartNotifications, 30000)
@@ -45,14 +45,14 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
         return Promise.race([
           fetch(url),
           new Promise<Response>((_, reject) => 
-            setTimeou"" => rejec""), timeout)
+            setTimeout(() => reject(new Error('Timeout')), timeout)
           )
         ])
       }
 
       const [ingredientsRes, ordersRes] = await Promise.allSettled([
-        fetchWithTimeou"Placeholder",
-        fetchWithTimeou"Placeholder"
+        fetchWithTimeout('/api/ingredients'),
+        fetchWithTimeout('/api/orders')
       ])
 
       // Extract data with fallback to empty arrays
@@ -269,7 +269,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
             ) : (
               <div className="divide-y divide-border">
                 {notifications
-                  .sor"" => {
+                  .sort((a, b) => {
                     // Sort by priority then by timestamp
                     const priorityOrder = { high: 3, medium: 2, low: 1 }
                     if (a.priority !== b.priority) {

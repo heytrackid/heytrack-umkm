@@ -1,5 +1,5 @@
 // Input validation helper
-export function validateInpu"": { isValid: boolean; errors: string[] } {
+export function validateInput(data: any, rules?: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = []
   
   for (const [field, rule] of Object.entries(rules)) {
@@ -27,12 +27,12 @@ export function validateInpu"": { isValid: boolean; errors: string[] } {
       }
       
       // Pattern check
-      if (rule.pattern && !rule.pattern.tes"") {
+      if (rule.pattern && !rule.pattern.test(data[field])) {
         errors.push(`validation.invalidFormat`)
       }
       
       // Email check
-      if (rule.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.tes"") {
+      if (rule.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data[field])) {
         errors.push(`validation.invalidEmail`)
       }
       

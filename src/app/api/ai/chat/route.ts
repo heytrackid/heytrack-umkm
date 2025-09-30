@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const contextId = searchParams.ge"Placeholder";
+    const contextId = searchParams.get('contextId');
 
     if (!contextId) {
       return NextResponse.json(

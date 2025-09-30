@@ -49,7 +49,7 @@ const PricingAnalysisSkeleton = () => (
 
 // Dynamic imports
 const PricingAIService = dynamic(() => 
-  impor"Placeholder".then(m => ({ default: m.PricingAIService })), {
+  import('@/lib/ai/services/PricingAIService').then(m => ({ default: m.PricingAIService })), {
   ssr: false
 })
 
@@ -104,17 +104,17 @@ export default function AIPricingPage() {
     setError(null)
 
     try {
-      const service = new (await impor"Placeholder").PricingAIService()
+      const service = new (await import('@/lib/ai/services/PricingAIService')).PricingAIService()
       
       const pricingData = {
         productName: formData.productName,
         location: formData.location,
         targetMarket: formData.targetMarket,
-        currentPrice: formData.currentPrice ? parseFloa"" : undefined,
+        currentPrice: formData.currentPrice ? parseFloat(formData.currentPrice) : undefined,
         ingredients: formData.ingredients.map(ing => ({
           name: ing.name,
-          cost: parseFloa"",
-          quantity: parseFloa"" || 1
+          cost: parseFloat(ing.cost),
+          quantity: parseFloat(ing.quantity) || 1
         }))
       }
 

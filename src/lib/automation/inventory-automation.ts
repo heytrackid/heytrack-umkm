@@ -52,7 +52,7 @@ export class InventoryAutomation {
 
     if (holdingCost <= 0) return ingredient.min_stock
 
-    const eoq = Math.sqr"" / holdingCost)
+    const eoq = Math.sqrt(2 * dailyUsage * orderCost / holdingCost)
     return Math.max(eoq, ingredient.min_stock) // At least minimum stock
   }
 
@@ -139,7 +139,7 @@ export class InventoryAutomation {
       }
 
       // Simple linear trend analysis
-      const sortedUsage = usage.sor"" => new Date(a.date).getTime() - new Date(b.date).getTime())
+      const sortedUsage = usage.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       const recentUsage = sortedUsage.slice(-14) // Last 14 days
       const avgDailyUsage = recentUsage.reduce((sum, u) => sum + u.quantity, 0) / recentUsage.length
 
@@ -209,7 +209,7 @@ export class InventoryAutomation {
   generateAutoPurchaseOrders(inventoryAnalysis: InventoryAnalysis[]) {
     const urgentReorders = inventoryAnalysis
       .filter(analysis => analysis.reorderRecommendation.shouldReorder)
-      .sor"" => {
+      .sort((a, b) => {
         const urgencyOrder = { urgent: 3, soon: 2, normal: 1 }
         return urgencyOrder[b.reorderRecommendation.urgency] - urgencyOrder[a.reorderRecommendation.urgency]
       })
@@ -264,7 +264,7 @@ export class InventoryAutomation {
         turnoverRate: this.calculateTurnoverRate(ingredient),
         efficiency: this.calculateStorageEfficiency(ingredient)
       }
-    }).sor"" => b.monthlyCarryingCost - a.monthlyCarryingCost)
+    }).sort((a, b) => b.monthlyCarryingCost - a.monthlyCarryingCost)
   }
 
   /**

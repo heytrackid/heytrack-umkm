@@ -33,16 +33,6 @@ export default function AIQuickActions({ onAnalyzeClick, loading = false }: AIQu
       action: 'pricing'
     },
     {
-      title: 'Inventory Prediction',
-      description: 'Prediksi stok dan auto-reorder',
-      icon: Package,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      badge: 'AUTO',
-      href: '/ai/inventory',
-      action: 'inventory'
-    },
-    {
       title: 'Chat Assistant',
       description: 'Tanya AI tentang bisnis Anda',
       icon: MessageSquare,
@@ -74,8 +64,8 @@ export default function AIQuickActions({ onAnalyzeClick, loading = false }: AIQu
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array(4).fill(0).map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array(3).fill(0).map((_, i) => (
               <div key={i} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
@@ -105,7 +95,7 @@ export default function AIQuickActions({ onAnalyzeClick, loading = false }: AIQu
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {quickActions.map((action, index) => (
             <div key={index} className="border rounded-lg p-4 hover:shadow-sm transition-all">
               <div className="flex items-center justify-between mb-3">
