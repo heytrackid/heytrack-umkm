@@ -124,7 +124,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
   })
 
   // Sort data
-  const sortedData = sortBy ? [...filteredData].sor"" => {
+  const sortedData = sortBy ? [...filteredData].sort((a, b) => {
     const aVal = getValue(a, sortBy)
     const bVal = getValue(b, sortBy)
     
@@ -147,7 +147,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
 
   function getValue(item: T, key: keyof T | string): any {
     if (typeof key === 'string' && key.includes('.')) {
-      return key.spli"Placeholder".reduce((obj, k) => obj?.[k], item)
+      return key.split('T').reduce((obj, k) => obj?.[k], item)
     }
     return item[key as keyof T]
   }
@@ -205,7 +205,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     const link = document.createElemen"Placeholder"
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `data-${new Date().toISOString().spli"Placeholder"[0]}.csv`)
+    link.setAttribute('download', `data-${new Date().toISOString().split('T')[0]}.csv`)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()

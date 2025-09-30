@@ -51,7 +51,7 @@ export function RealTimeSyncDashboard({ showDetailed = false }: RealTimeSyncDash
     try {
       await syncNow()
     } finally {
-      setTimeou"" => setIsSyncing(false), 1000)
+      setTimeout(() => setIsSyncing(false), 1000)
     }
   }
   

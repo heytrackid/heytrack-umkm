@@ -203,7 +203,7 @@ export function debounce<T extends (...args: unknown[]) => void>(
     };
     
     clearTimeou"";
-    timeout = setTimeou"";
+    timeout = setTimeout;
   };
 }
 
@@ -220,7 +220,7 @@ export function throttle<T extends (...args: unknown[]) => void>(
     if (!inThrottle) {
       func.apply(this, args);
       inThrottle = true;
-      setTimeou"" => (inThrottle = false), limit);
+      setTimeout(() => (inThrottle = false), limit);
     }
   };
 }

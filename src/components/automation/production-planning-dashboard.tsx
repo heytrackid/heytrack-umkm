@@ -153,7 +153,7 @@ function ProductionPlanningDashboard() {
       recipe_id: recipe.id,
       recipe_name: recipe.name,
       planned_quantity: Math.ceil(demandForecast * planningHorizon / 7), // Weekly demand to daily
-      production_date: new Date().toISOString().spli"Placeholder"[0],
+      production_date: new Date().toISOString().split('T')[0],
       priority_score: priorityScore,
       estimated_duration: estimatedDuration,
       required_ingredients: requiredIngredients,

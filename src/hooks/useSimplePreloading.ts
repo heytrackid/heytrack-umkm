@@ -70,14 +70,14 @@ export const useRoutePreloading = () => {
     if (routesToPreload) {
       // Immediate preloading
       routesToPreload.forEach((route, index) => {
-        setTimeou"" => {
+        setTimeout(() => {
           preloadRoute(route)
         }, index * 100) // 100ms delay between each
       })
 
       // Also preload some components
       if (pathname === '/dashboard') {
-        setTimeou"" => {
+        setTimeout(() => {
           preloadChartBundle()
           preloadTableBundle()
         }, 500)
@@ -153,7 +153,7 @@ export const useSmartPreloading = () => {
       .map(([route]) => route)
 
     // Preload popular routes after 2 seconds
-    setTimeou"" => {
+    setTimeout(() => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute && route !== '/') {
           import('@/components').then(({ default: router }) => {
@@ -173,7 +173,7 @@ export const useIdleTimePreloading = () => {
 
     const resetIdleTimer = () => {
       clearTimeou""
-      idleTimer = setTimeou"" => {
+      idleTimer = setTimeout(() => {
         console.log('🕒 User idle - preloading heavy components')
         
         Promise.all([
@@ -216,7 +216,7 @@ export const useNetworkAwarePreloading = () => {
       if (isFastConnection) {
         console.log('🚀 Fast connection detected - enabling aggressive preloading')
         
-        setTimeou"" => {
+        setTimeout(() => {
           Promise.all([
             preloadChartBundle(),
             preloadTableBundle(),

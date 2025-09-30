@@ -199,7 +199,7 @@ function InventoryAnalytics() {
       optimal_reorder_point: optimalReorderPoint,
       optimal_reorder_quantity: optimalQuantity,
       reorder_cost_optimization: optimalQuantity * (ingredient.cost_per_unit || 1000),
-      next_reorder_date: nextReorderDate.toISOString().spli"Placeholder"[0]
+      next_reorder_date: nextReorderDate.toISOString().split('T')[0]
     }
   }
 
@@ -334,7 +334,7 @@ function InventoryAnalytics() {
     return analytics.filter(a => a.category === selectedCategory)
   }
 
-  const categories = [...new Se"")]
+  const categories = [...new Set)]
 
   if (loading) {
     return (

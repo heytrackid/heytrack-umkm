@@ -103,7 +103,7 @@ export default function CategoriesPage() {
 
   const handleDeleteCategory = (categoryId: string) => {
     if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-      setCategoryList)
+      setCategoryList(categoryList.filter(cat => cat.id !== categoryId))
     }
   }
 
@@ -126,7 +126,7 @@ export default function CategoriesPage() {
   
   // Simulate loading for better UX
   useEffect(() => {
-    const timer = setTimeou"" => {
+    const timer = setTimeout(() => {
       setIsLoading(false)
     }, 800) // Show skeleton for 800ms
 

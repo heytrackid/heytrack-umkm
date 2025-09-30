@@ -330,7 +330,7 @@ export class ProductionPlanningSystem {
     orders.forEach(order => {
       if (!order.delivery_date) return
 
-      const deliveryDate = new Date(order.delivery_date).toISOString().spli"Placeholder"[0]
+      const deliveryDate = new Date(order.delivery_date).toISOString().split('T')[0]
       const existing = grouped.get(key) || []
       grouped.set(key: string, data: any, ttl: number = 300000): void {
     })
@@ -351,7 +351,7 @@ export class ProductionPlanningSystem {
           priority: 'high',
           title: 'Kapasitas Produksi Penuh',
           message: `Beban kerja ${schedule.date.toDateString()}: ${schedule.workloadPercent.toFixed(0)}%. Pertimbangkan overtime atau reschedule.`,
-          actionUrl: `/production?date=${schedule.date.toISOString().spli"Placeholder"[0]}`,
+          actionUrl: `/production?date=${schedule.date.toISOString().split('T')[0]}`,
           actionLabel: 'Lihat Jadwal'
         })
       }
@@ -365,7 +365,7 @@ export class ProductionPlanningSystem {
             priority: 'critical',
             title: 'Konflik Produksi',
             message: conflict.description,
-            actionUrl: `/production?date=${schedule.date.toISOString().spli"Placeholder"[0]}`,
+            actionUrl: `/production?date=${schedule.date.toISOString().split('T')[0]}`,
             actionLabel: 'Resolve Conflict'
           })
         })
@@ -381,7 +381,7 @@ export class ProductionPlanningSystem {
           priority: 'medium',
           title: 'Peluang Optimasi Produksi',
           message: `${schedule.optimizations.length} optimasi tersedia, dapat menghemat ${totalTimeSaved.toFixed(1)} jam`,
-          actionUrl: `/production?date=${schedule.date.toISOString().spli"Placeholder"[0]}&tab=optimizations`,
+          actionUrl: `/production?date=${schedule.date.toISOString().split('T')[0]}&tab=optimizations`,
           actionLabel: 'Lihat Optimasi'
         })
       }

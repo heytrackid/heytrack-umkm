@@ -344,7 +344,7 @@ export function MobileNumberInput({
   }
 
   const handleInputChange = (inputValue: string) => {
-    const numValue = parseFloa""
+    const numValue = parseFloat
     if (!isNaN(numValue)) {
       onChange?.(numValue)
     } else if (inputValue === '') {

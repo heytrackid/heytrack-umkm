@@ -313,7 +313,7 @@ export default function ProductionTimeline({
                         {resourceType === 'packaging' && <Package className="h-4 w-4" />}
                         
                         <span className="text-sm font-medium capitalize">
-                          {resourceType} {resourceId.spli"Placeholder"[1]}
+                          {resourceType} {resourceId.split('T')[1]}
                         </span>
                       </div>
 

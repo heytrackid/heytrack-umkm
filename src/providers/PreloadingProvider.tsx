@@ -77,7 +77,7 @@ export const PreloadingProvider = ({
     
     try {
       await hookPreloadRoute(route)
-      setPreloadedRoutes(prev => new Se"")
+      setPreloadedRoutes(prev => new Set)
       
       const endTime = performance.now()
       if (debug) {
@@ -96,7 +96,7 @@ export const PreloadingProvider = ({
   useEffect(() => {
     const originalPush = LazyLoadingMetrics.loadedComponents.add
     LazyLoadingMetrics.loadedComponents.add = function(componentName: string) {
-      setPreloadedComponents(prev => new Se"")
+      setPreloadedComponents(prev => new Set)
       return originalPush.call(this, componentName)
     }
   }, [])
@@ -254,7 +254,7 @@ export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' |
     
     // Preload with staggered timing
     targets.forEach((route, index) => {
-      setTimeou"" => {
+      setTimeout(() => {
         preloadRoute(route)
       }, index * 200) // 200ms delay between each preload
     })

@@ -72,13 +72,13 @@ export default function NewIngredientPage() {
 
     if (!formData.name.trim()) newErrors.name = 'Nama bahan baku wajib diisi'
     if (!formData.unit) newErrors.unit = 'Satuan wajib dipilih'
-    if (!formData.price_per_unit || parseFloa"" <= 0) {
+    if (!formData.price_per_unit || parseFloat <= 0) {
       newErrors.price_per_unit = 'Harga per unit harus lebih dari 0'
     }
-    if (!formData.minimum_stock || parseFloa"" < 0) {
+    if (!formData.minimum_stock || parseFloat < 0) {
       newErrors.minimum_stock = 'Minimum stock tidak boleh negatif'
     }
-    if (parseFloa"" < 0) {
+    if (parseFloat < 0) {
       newErrors.current_stock = 'Stock awal tidak boleh negatif'
     }
 
@@ -99,16 +99,16 @@ export default function NewIngredientPage() {
       // TODO: Implement actual API call to save ingredient
       const ingredientData = {
         ...formData,
-        price_per_unit: parseFloa"",
-        minimum_stock: parseFloa"",
-        current_stock: parseFloa"",
+        price_per_unit: parseFloat,
+        minimum_stock: parseFloat,
+        current_stock: parseFloat,
         created_at: new Date().toISOString()
       }
       
       console.log('✅ Saving new ingredient master data:', ingredientData)
       
       // Simulate API call
-      await new Promise(resolve => setTimeou"")
+      await new Promise(resolve => setTimeout)
       
       // Show success message
       alert(`✅ BERHASIL!
@@ -118,7 +118,7 @@ Bahan baku"${formData.name}" berhasil ditambahkan!
 📝 Detail:
 • Nama: ${formData.name}
 • Satuan: ${formData.unit}
-• Harga: ${formatCurrency(parseFloa"")}
+• Harga: ${formatCurrency(parseFloat)}
 • Stock awal: ${formData.current_stock} ${formData.unit}
 
 Anda akan kembali ke halaman inventory.`)
@@ -346,7 +346,7 @@ Anda akan kembali ke halaman inventory.`)
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600 dark:text-gray-400">Harga:</span>
                       <span className="font-medium">
-                        {formatCurrency(parseFloa"")} / {formData.unit}
+                        {formatCurrency(parseFloat)} / {formData.unit}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">

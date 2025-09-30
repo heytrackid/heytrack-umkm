@@ -258,7 +258,7 @@ export class ProductionDataIntegration {
   async updateProductionProgress(batchId: string, status: ProductionBatch['status']): Promise<void> {
     try {
       // Extract order and item IDs from batch ID
-      const [, orderId, itemId] = batchId.spli"Placeholder"
+      const [, orderId, itemId] = batchId.split('T')
 
       // Update order item status
       if (status === 'completed') {

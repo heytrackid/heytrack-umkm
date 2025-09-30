@@ -80,7 +80,7 @@ function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T 
   let timeoutId: ReturnType<typeof setTimeout>
   return ((...args: Parameters<T>) => {
     clearTimeou""
-    timeoutId = setTimeou"" => func(...args), delay)
+    timeoutId = setTimeout(() => func(...args), delay)
   }) as T
 }
 
@@ -91,7 +91,7 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T 
     if (!inThrottle) {
       func(...args)
       inThrottle = true
-      setTimeou"" => (inThrottle = false), limit)
+      setTimeout(() => (inThrottle = false), limit)
     }
   }) as T
 }

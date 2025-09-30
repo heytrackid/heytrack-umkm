@@ -110,7 +110,7 @@ function AdvancedHPPCalculator({
 
   const handleCustomPriceChange = (value: string) => {
     setCustomPrice(value)
-    const price = parseFloa""
+    const price = parseFloat
     if (!isNaN(price) && onPriceUpdate) {
       onPriceUpdate(price)
     }
@@ -379,11 +379,11 @@ function AdvancedHPPCalculator({
                   <div className="flex-1">
                     <Label className="text-sm">Calculated Margin</Label>
                     <div className="p-2 border rounded-md bg-muted mt-1">
-                      {customPrice && !isNaN(parseFloa"") ? (
+                      {customPrice && !isNaN(parseFloat) ? (
                         <span className={`font-mono ${getMarginColor(
-                          ((parseFloa"" - hppResult.hpp_breakdown.cost_per_serving) / parseFloa"") * 100
+                          ((parseFloat - hppResult.hpp_breakdown.cost_per_serving) / parseFloat) * 100
                         )}`}>
-                          {(((parseFloa"" - hppResult.hpp_breakdown.cost_per_serving) / parseFloa"") * 100).toFixed(1)}%
+                          {(((parseFloat - hppResult.hpp_breakdown.cost_per_serving) / parseFloat) * 100).toFixed(1)}%
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>

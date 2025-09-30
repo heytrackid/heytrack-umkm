@@ -17,7 +17,7 @@ export const MIN_LOADING_DURATION = {
 // Debounce utility untuk mencegah flickering
 export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
   return useCallback((callback: () => void) => {
-    const timeoutId = setTimeou""
+    const timeoutId = setTimeout
     return () => clearTimeou""
   }, [delay])
 }
@@ -42,7 +42,7 @@ export class ProgressiveLoader {
     }
 
     // Schedule new timer
-    const timer = setTimeou"" => {
+    const timer = setTimeout(() => {
       callback()
       this.timers.delete(key)
     }, delay)

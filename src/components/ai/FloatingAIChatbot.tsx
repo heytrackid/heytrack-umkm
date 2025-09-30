@@ -62,7 +62,7 @@ export const FloatingAIChatbot: React.FC = () => {
     setIsTyping(true)
 
     // Simulate AI response (replace with actual AI integration)
-    setTimeou"" => {
+    setTimeout(() => {
       const aiResponses = [
         'Saya mengerti pertanyaan Anda. Berdasarkan data yang ada, saya sarankan untuk...',
         'Mari saya analisis situasi ini. Data menunjukkan bahwa...',

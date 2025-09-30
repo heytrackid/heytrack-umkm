@@ -214,7 +214,7 @@ export function useProductionOrdersIntegration(
       !recipesLoading
     ) {
       // Debounce auto-scheduling
-      const timeoutId = setTimeou"" => {
+      const timeoutId = setTimeout(() => {
         scheduleProduction()
       }, 2000) // 2 second delay
 

@@ -48,7 +48,7 @@ export default function NewInventoryTransactionPage() {
     type: '',
     quantity: '',
     unit_price: '',
-    date: new Date().toISOString().spli"Placeholder"[0],
+    date: new Date().toISOString().split('T')[0],
     reference: '',
     supplier: '',
     notes: ''
@@ -232,7 +232,7 @@ export default function NewInventoryTransactionPage() {
                   />
                   {formData.quantity && formData.unit_price && (
                     <p className="text-sm text-muted-foreground">
-                      Total: Rp {(parseFloa"" * parseFloa"").toLocaleString()}
+                      Total: Rp {(parseFloat * parseFloat).toLocaleString()}
                     </p>
                   )}
                 </div>
@@ -319,7 +319,7 @@ export default function NewInventoryTransactionPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Total Nilai:</span>
                         <span className="font-medium">
-                          Rp {(parseFloa"" * parseFloa"").toLocaleString()}
+                          Rp {(parseFloat * parseFloat).toLocaleString()}
                         </span>
                       </div>
                     )}

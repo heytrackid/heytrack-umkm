@@ -54,11 +54,11 @@ export default function CashFlowPage() {
       let startDate = ''
       
       if (selectedPeriod === 'week') {
-        startDate = new Date(today.setDate(today.getDate() - 7)).toISOString().spli"Placeholder"[0]
+        startDate = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0]
       } else if (selectedPeriod === 'month') {
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().spli"Placeholder"[0]
+        startDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
       } else if (selectedPeriod === 'year') {
-        startDate = new Date(today.getFullYear(), 0, 1).toISOString().spli"Placeholder"[0]
+        startDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
       }
 
       // Fetch income from orders (paid orders)
@@ -127,7 +127,7 @@ export default function CashFlowPage() {
   const allTransactions = [
     ...cashFlowData.incomeTransactions,
     ...cashFlowData.expenseTransactions
-  ].sor"" => new Date(b.date).getTime() - new Date(a.date).getTime())
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   const getBreadcrumbItems = () => {
     const items = [
@@ -151,7 +151,7 @@ export default function CashFlowPage() {
       return
     }
 
-    const amount = parseFloa""
+    const amount = parseFloat
     if (isNaN(amount) || amount <= 0) {
       alert
       return

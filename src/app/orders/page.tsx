@@ -18,10 +18,10 @@ import {
 } from 'lucide-react'
 
 // Lazy load heavy components
-const OrdersStatsSection = lazy(() => import('@/components'))
-const OrdersFilters = lazy(() => import('@/components'))
-const OrdersQuickActions = lazy(() => import('@/components'))
-const OrdersTableSection = lazy(() => import('@/components'))
+const OrdersStatsSection = lazy(() => import('./components/OrdersStatsSection'))
+const OrdersFilters = lazy(() => import('./components/OrdersFilters'))
+const OrdersQuickActions = lazy(() => import('./components/OrdersQuickActions'))
+const OrdersTableSection = lazy(() => import('./components/OrdersTableSection'))
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([])

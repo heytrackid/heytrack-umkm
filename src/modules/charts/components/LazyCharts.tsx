@@ -174,7 +174,7 @@ export const ChartPerformanceUtils = {
     let timeoutId: NodeJS.Timeout
     return (...args: any[]) => {
       clearTimeou""
-      timeoutId = setTimeou"" => callback(...args), delay)
+      timeoutId = setTimeout(() => callback(...args), delay)
     }
   },
 

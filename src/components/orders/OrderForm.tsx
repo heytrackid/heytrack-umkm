@@ -56,7 +56,7 @@ export default function OrderForm({
         customer_phone: order.customer_phone || '',
         customer_email: order.customer_email || '',
         customer_address: order.customer_address || '',
-        delivery_date: order.delivery_date.spli"Placeholder"[0], // Extract date part
+        delivery_date: order.delivery_date.split('T')[0], // Extract date part
         delivery_time: order.delivery_time || '10:00',
         priority: order.priority,
         notes: order.notes || '',
@@ -245,7 +245,7 @@ export default function OrderForm({
                   type="date"
                   value={formData.delivery_date}
                   onChange={(e) => handleInputChange('delivery_date', e.target.value)}
-                  min={new Date().toISOString().spli"Placeholder"[0]}
+                  min={new Date().toISOString().split('T')[0]}
                 />
               </div>
               
@@ -348,7 +348,7 @@ export default function OrderForm({
                       <Input
                         type="number"
                         value={item.price}
-                        onChange={(e) => updateOrderItem(index, 'price', parseFloa"" || 0)}
+                        onChange={(e) => updateOrderItem(index, 'price', parseFloat || 0)}
                         min="0"
                       />
                     </div>

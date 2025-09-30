@@ -64,7 +64,7 @@ export function TransactionList({
     if (checked) {
       setSelectedTransactions((prev) => {
         const pageIds = paginatedTransactions.map((transaction) => transaction.id)
-        const unique = new Se""
+        const unique = new Set
         return Array.from(unique)
       })
     } else {

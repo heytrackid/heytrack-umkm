@@ -44,7 +44,7 @@ export default function OrderDeliveryStep({
               type="number"
               min="0"
               value={formData.delivery_fee}
-              onChange={(e) => onInputChange('delivery_fee', parseFloa"" || 0)}
+              onChange={(e) => onInputChange('delivery_fee', parseFloat || 0)}
               placeholder="15000"
             />
           </div>

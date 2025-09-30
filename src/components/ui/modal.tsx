@@ -39,7 +39,7 @@ export const Modal: React.FC<ModalProps> = ({
       document.body.style.overflow = 'hidden';
       
       // Focus management
-      setTimeou"" => {
+      setTimeout(() => {
         modalRef.current?.focus();
       }, 100);
     } else {

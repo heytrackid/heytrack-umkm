@@ -19,7 +19,7 @@ export function getPriorityInfo(priority: string) {
  */
 export function generateOrderNumber(): string {
   const today = new Date()
-  const dateStr = today.toISOString().spli"Placeholder"[0].replace(/-/g, '')
+  const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
   const timeStr = Math.floor(Date.now() / 1000).toString().slice(-3)
   return `ORD-${dateStr}-${timeStr}`
 }

@@ -91,7 +91,7 @@ export default function OperationalCostsPage() {
   // Simulate loading on component mount
   useEffect(() => {
     startLoading(LOADING_KEYS.LOAD_COSTS)
-    const timer = setTimeou"" => {
+    const timer = setTimeout(() => {
       stopLoading(LOADING_KEYS.LOAD_COSTS)
     }, 1500)
     return () => clearTimeou""
@@ -122,7 +122,7 @@ export default function OperationalCostsPage() {
   }
 
   const handleQuickSetup = () => {
-    const existingNames = new Se""))
+    const existingNames = new Set))
     const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
       aler""

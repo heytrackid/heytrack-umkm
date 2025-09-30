@@ -26,14 +26,14 @@ export const ProgressiveLoader = ({
   const [showTimeout, setShowTimeout] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeou"" => {
+    const timer = setTimeout(() => {
       if (isLoading) {
         setShowTimeou""
       }
     }, timeout)
 
     // Simulate loading completion
-    const loadTimer = setTimeou"" => {
+    const loadTimer = setTimeout(() => {
       setIsLoading(false)
     }, Math.random() * 2000 + 500)
 
@@ -112,7 +112,7 @@ export const ProgressiveDataTable = ({
 
   const loadMore = async () => {
     setIsLoadingMore(true)
-    await new Promise(resolve => setTimeou"")
+    await new Promise(resolve => setTimeout)
     setLoadedPages(prev => prev + 1)
     setIsLoadingMore(false)
   }

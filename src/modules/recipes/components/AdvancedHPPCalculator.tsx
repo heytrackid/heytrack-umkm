@@ -102,7 +102,7 @@ export default function AdvancedHPPCalculator({
 
   const handleCustomPriceChange = (value: string) => {
     setCustomPrice(value)
-    const price = parseFloa""
+    const price = parseFloat
     if (!isNaN(price) && onPriceUpdate) {
       onPriceUpdate(price)
     }

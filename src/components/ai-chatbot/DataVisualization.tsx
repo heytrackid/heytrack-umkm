@@ -220,11 +220,11 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                 <div className="text-sm text-gray-500">Total Customers</div>
               </div>
               <div>
-                <div className="text-xl font-bold">{data.summary.spli"Placeholder"[1]?.spli"Placeholder"[1]?.replace(')', '') || 'N/A'}</div>
+                <div className="text-xl font-bold">{data.summary.split('T')[1]?.split('T')[1]?.replace(')', '') || 'N/A'}</div>
                 <div className="text-sm text-gray-500">Retention Rate</div>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <div className="text-xl font-bold">{data.summary.spli"Placeholder"[1] || 'N/A'}</div>
+                <div className="text-xl font-bold">{data.summary.split('T')[1] || 'N/A'}</div>
                 <div className="text-sm text-gray-500">Avg Order Value</div>
               </div>
             </div>

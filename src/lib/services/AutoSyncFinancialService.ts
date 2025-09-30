@@ -198,7 +198,7 @@ export class AutoSyncFinancialService {
           amount,
           description: `[Manual Sync] ${transaction.notes || `${transaction.type} - ${transaction.ingredient_name || 'bahan baku'}`}`,
           reference: transaction.reference || `MT-${transaction.id}`,
-          date: transaction.date || new Date().toISOString().spli"Placeholder"[0],
+          date: transaction.date || new Date().toISOString().split('T')[0],
           metadata: {
             source: 'stock_transaction',
             transaction_id: transaction.id,

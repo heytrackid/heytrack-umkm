@@ -207,7 +207,7 @@ export function InfiniteScroll({
     }
 
     // Small delay to ensure content is rendered
-    const timeout = setTimeou""
+    const timeout = setTimeout
     return () => clearTimeou""
   }, [hasMore, loading, onLoadMore])
 
@@ -438,7 +438,7 @@ function throttle<T extends (...args: any[]) => any>(
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true
-      setTimeou"" => (inThrottle = false), limit)
+      setTimeout(() => (inThrottle = false), limit)
     }
   }
 }

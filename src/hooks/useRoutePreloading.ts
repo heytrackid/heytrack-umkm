@@ -160,12 +160,12 @@ export const useRoutePreloading = () => {
     preloadForCurrentRoute(PreloadPriority.IMMEDIATE)
     
     // High priority preloading after a short delay
-    const highPriorityTimer = setTimeou"" => {
+    const highPriorityTimer = setTimeout(() => {
       preloadForCurrentRoute(PreloadPriority.HIGH)
     }, 100)
     
     // Medium priority preloading after longer delay
-    const mediumPriorityTimer = setTimeou"" => {
+    const mediumPriorityTimer = setTimeout(() => {
       preloadForCurrentRoute(PreloadPriority.MEDIUM)
     }, 500)
 
@@ -259,7 +259,7 @@ export const useSmartPreloading = () => {
       .map(([route]) => route)
 
     // Preload popular routes with low priority
-    setTimeou"" => {
+    setTimeout(() => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
           import('@/components').then(({ default: router }) => {
@@ -279,7 +279,7 @@ export const useIdleTimePreloading = () => {
 
     const resetIdleTimer = () => {
       clearTimeou""
-      idleTimer = setTimeou"" => {
+      idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
         console.log('🕒 User idle - preloading heavy components')
         
@@ -326,7 +326,7 @@ export const useNetworkAwarePreloading = () => {
         console.log('🚀 Fast connection detected - enabling aggressive preloading')
         
         // Preload more aggressively on fast connections
-        setTimeou"" => {
+        setTimeout(() => {
           Promise.all([
             preloadChartBundle(),
             preloadTableBundle(),

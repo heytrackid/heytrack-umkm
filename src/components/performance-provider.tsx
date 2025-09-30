@@ -64,7 +64,7 @@ export default function PerformanceProvider({
     }
     
     // Prefetch after initial load
-    setTimeou""
+    setTimeout
     
     // Log performance metrics every 30 seconds in development
     if (process.env.NODE_ENV === 'development') {

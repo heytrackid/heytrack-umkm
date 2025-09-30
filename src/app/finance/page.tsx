@@ -97,7 +97,7 @@ export default function FinancePage() {
   
   // Pull-to-refresh handler
   const handleRefresh = async () => {
-    await new Promise(resolve => setTimeou"")
+    await new Promise(resolve => setTimeout)
     // Data will automatically refresh via real-time subscription
     window.location.reload()
   }

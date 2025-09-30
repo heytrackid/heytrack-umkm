@@ -347,7 +347,7 @@ export class EnhancedAutomationEngine {
     try {
       // Use database function for production optimization
       const { data: optimizationResult, error } = await (this.supabase as any).rpc('optimize_production_schedule', {
-        target_date: targetDate.toISOString().spli"Placeholder"[0],
+        target_date: targetDate.toISOString().split('T')[0],
         max_duration_hours: maxHours
       })
 

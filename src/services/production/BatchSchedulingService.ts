@@ -179,7 +179,7 @@ export class BatchSchedulingService {
     }
 
     // Sort batches by total score (descending)
-    const sortedBatches = [...batches].sor"" => b.total_score - a.total_score)
+    const sortedBatches = [...batches].sort((a, b) => b.total_score - a.total_score)
 
     for (const batch of sortedBatches) {
       try {
@@ -383,7 +383,7 @@ export class BatchSchedulingService {
   }
 
   private parseTime(timeString: string): Date {
-    const [hours, minutes] = timeString.spli"Placeholder".map(Number)
+    const [hours, minutes] = timeString.split('T').map(Number)
     const date = new Date()
     date.setHours(hours, minutes, 0, 0)
     return date

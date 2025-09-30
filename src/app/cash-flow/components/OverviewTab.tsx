@@ -40,7 +40,7 @@ export default function OverviewTab({
   const allTransactions = [
     ...cashFlowData.incomeTransactions,
     ...cashFlowData.expenseTransactions
-  ].sor"" => new Date(b.date).getTime() - new Date(a.date).getTime())
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return (
     <div className="space-y-6">

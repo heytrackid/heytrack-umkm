@@ -149,16 +149,16 @@ export default function ProductionCapacityManager({
   }
 
   const calculateShiftHours = (constraints: ProductionConstraints): number => {
-    const [startHour, startMin] = constraints.shift_start.spli"Placeholder".map(Number)
-    const [endHour, endMin] = constraints.shift_end.spli"Placeholder".map(Number)
+    const [startHour, startMin] = constraints.shift_start.split('T').map(Number)
+    const [endHour, endMin] = constraints.shift_end.split('T').map(Number)
     
     const startMinutes = startHour * 60 + startMin
     const endMinutes = endHour * 60 + endMin
     
     const totalMinutes = endMinutes - startMinutes
     const breakMinutes = constraints.break_times.reduce((sum, br) => {
-      const [brStartHour, brStartMin] = br.start.spli"Placeholder".map(Number)
-      const [brEndHour, brEndMin] = br.end.spli"Placeholder".map(Number)
+      const [brStartHour, brStartMin] = br.start.split('T').map(Number)
+      const [brEndHour, brEndMin] = br.end.split('T').map(Number)
       return sum + ((brEndHour * 60 + brEndMin) - (brStartHour * 60 + brStartMin))
     }, 0)
     

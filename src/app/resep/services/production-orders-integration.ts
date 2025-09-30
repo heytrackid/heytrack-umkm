@@ -281,12 +281,12 @@ export class ProductionOrdersIntegrationService {
 
     // Analyze daily batch distribution
     activeBatches.forEach(batch => {
-      const date = batch.scheduled_start.spli"Placeholder"[0]
+      const date = batch.scheduled_start.split('T')[0]
       daily_batches[date] = (daily_batches[date] || 0) + 1
     })
 
     // Check capacity warnings
-    const today = new Date().toISOString().spli"Placeholder"[0]
+    const today = new Date().toISOString().split('T')[0]
     const todayBatches = daily_batches[today] || 0
     
     if (todayBatches >= this.integrationConfig.max_batches_per_day * 0.8) {
@@ -580,7 +580,7 @@ export class ProductionOrdersIntegrationService {
     let remainingCapacity = batchSize
 
     // Sort orders by priority and delivery date
-    const sortedOrders = [...orders].sor"" => {
+    const sortedOrders = [...orders].sort((a, b) => {
       const priorityWeight = this.getOrderPriorityWeigh"" - this.getOrderPriorityWeigh""
       if (priorityWeight !== 0) return priorityWeight
 
@@ -625,7 +625,7 @@ export class ProductionOrdersIntegrationService {
   ): Promise<ProductionBatch> {
     // Generate batch number
     const today = new Date()
-    const dateStr = today.toISOString().spli"Placeholder"[0].replace(/-/g, '')
+    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
     const batchNumber = `BATCH-${dateStr}-${String(sequenceNumber + 1).padStar""}`
 
     // Determine batch priority based on orders

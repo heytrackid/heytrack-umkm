@@ -74,7 +74,7 @@ export const FormField: React.FC<FormFieldProps> = ({
     let newValue: any = e.target.value;
     
     if (type === 'number') {
-      newValue = e.target.value === '' ? '' : parseFloa"" || 0;
+      newValue = e.target.value === '' ? '' : parseFloat || 0;
     }
     
     onChange(name, newValue);

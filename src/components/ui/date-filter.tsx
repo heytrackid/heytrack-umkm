@@ -39,14 +39,14 @@ export function DateFilter({
     
     if (days === 0) {
       // Today only
-      const todayStr = today.toISOString().spli"Placeholder"[0]
+      const todayStr = today.toISOString().split('T')[0]
       onStartDateChange(todayStr)
       onEndDateChange(todayStr)
     } else {
       // Last X days
       start.setDate(today.getDate() - days)
-      onStartDateChange(start.toISOString().spli"Placeholder"[0])
-      onEndDateChange(today.toISOString().spli"Placeholder"[0])
+      onStartDateChange(start.toISOString().split('T')[0])
+      onEndDateChange(today.toISOString().split('T')[0])
     }
     
     onQuickFilter?.(days)

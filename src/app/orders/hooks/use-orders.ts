@@ -386,7 +386,7 @@ export function useInvoiceGeneration() {
       company_info: companyInfo,
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
-      due_date: dueDate.toISOString().spli"Placeholder"[0],
+      due_date: dueDate.toISOString().split('T')[0],
       invoice_number: order.order_number,
       notes: order.notes
     }

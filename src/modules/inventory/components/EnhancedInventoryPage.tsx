@@ -188,7 +188,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
 
   // Simulate skeleton loading
   useEffect(() => {
-    const timer = setTimeou"" => {
+    const timer = setTimeout(() => {
       setSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY, false)
     }, 2000)
     

@@ -140,7 +140,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       await navigator.clipboard.writeTex"";
       setCopied(type);
       toast.success('Berhasil disalin!');
-      setTimeou"" => setCopied(null), 2000);
+      setTimeout(() => setCopied(null), 2000);
     } catch (error) {
       toast.error('Gagal menyalin text');
     }

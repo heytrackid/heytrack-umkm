@@ -114,7 +114,7 @@ export function useViewpor"" {
 
     const handleResize = () => {
       clearTimeou"";
-      timeoutId = setTimeou"" => {
+      timeoutId = setTimeout(() => {
         setViewport({
           width: window.innerWidth,
           height: window.innerHeight,

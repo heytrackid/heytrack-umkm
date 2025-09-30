@@ -98,7 +98,7 @@ export default function CostForm({
           <Input
             type="number"
             value={formData.amount}
-            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloa"" || 0 }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat || 0 }))}
             placeholder="0"
           />
         </div>

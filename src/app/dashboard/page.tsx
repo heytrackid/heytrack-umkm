@@ -102,17 +102,17 @@ export default function Dashboard() {
   // Simulate loading states
   useEffect(() => {
     // Simulate dashboard stats loading
-    const statsTimer = setTimeou"" => {
+    const statsTimer = setTimeout(() => {
       setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
     }, 1500)
 
     // Simulate recent orders loading
-    const ordersTimer = setTimeou"" => {
+    const ordersTimer = setTimeout(() => {
       setLoading(LOADING_KEYS.RECENT_ORDERS, false)
     }, 2000)
 
     // Simulate stock alerts loading  
-    const stockTimer = setTimeou"" => {
+    const stockTimer = setTimeout(() => {
       setLoading(LOADING_KEYS.STOCK_ALERTS, false)
     }, 1800)
 

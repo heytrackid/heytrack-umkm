@@ -65,7 +65,7 @@ export function useOptimizedIngredients() {
       sum + ((item.current_stock || 0) * (item.price_per_unit || 0)), 0
     )
 
-    const categories = [...new Se"".filter(Boolean))]
+    const categories = [...new Set(data.map((item: any) => item.category).filter(Boolean))]
 
     return { lowStockCount, totalValue, categories }
   }, [data])
@@ -131,7 +131,7 @@ export function useOptimizedRecipes() {
       recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0
     ).length
 
-    const categories = [...new Se"".filter(Boolean))]
+    const categories = [...new Set(data.map((item: any) => item.category).filter(Boolean))]
     const totalRecipes = data.length
 
     return { recipesWithIngredients, categories, totalRecipes }

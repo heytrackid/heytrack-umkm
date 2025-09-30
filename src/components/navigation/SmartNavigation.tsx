@@ -46,7 +46,7 @@ export const SmartLink = ({
   const handleMouseEnter = () => {
     setIsHovered(true)
     if (preloadOnHover) {
-      setTimeou"" => {
+      setTimeout(() => {
         linkPreloading.onMouseEnter(href)
       }, preloadDelay)
     }

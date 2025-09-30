@@ -27,7 +27,7 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
   // Simulate new message notification (could be triggered by server events)
   React.useEffect(() => {
     if (!isOpen) {
-      const timer = setTimeou"" => {
+      const timer = setTimeout(() => {
         setHasNewMessage(true);
       }, 10000); // Show notification after 10 seconds if chatbot is closed
 

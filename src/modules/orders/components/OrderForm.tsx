@@ -24,7 +24,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
     customer_name: order?.customer_name || '',
     customer_phone: order?.customer_phone || '',
     customer_address: order?.customer_address || '',
-    order_date: order?.order_date || new Date().toISOString().spli"Placeholder"[0],
+    order_date: order?.order_date || new Date().toISOString().split('T')[0],
     delivery_date: order?.delivery_date || '',
     delivery_time: order?.delivery_date || '',
     delivery_fee: order?.delivery_fee || ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
@@ -134,7 +134,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
           total_price: updated[index].unit_price * qty
         }
       } else if (field === 'unit_price') {
-        const price = parseFloa"" || 0
+        const price = parseFloat || 0
         updated[index] = {
           ...updated[index],
           unit_price: price,
@@ -495,7 +495,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                 type="number"
                 placeholder="15000"
                 value={formData.delivery_fee}
-                onChange={(e) => handleInputChange('delivery_fee', parseFloa"" || 0)}
+                onChange={(e) => handleInputChange('delivery_fee', parseFloat || 0)}
                 min="0"
                 step="1000"
                 className="mt-1"
@@ -546,7 +546,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                 type="number"
                 placeholder="10000"
                 value={formData.discount}
-                onChange={(e) => handleInputChange('discount', parseFloa"" || 0)}
+                onChange={(e) => handleInputChange('discount', parseFloat || 0)}
                 min="0"
                 className="mt-1"
               />
@@ -558,7 +558,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                 type="number"
                 placeholder="11"
                 value={formData.tax_amount}
-                onChange={(e) => handleInputChange('tax_amount', parseFloa"" || 0)}
+                onChange={(e) => handleInputChange('tax_amount', parseFloat || 0)}
                 min="0"
                 max="100"
                 className="mt-1"
@@ -571,7 +571,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                 type="number"
                 placeholder="0"
                 value={formData.paid_amount}
-                onChange={(e) => handleInputChange('paid_amount', parseFloa"" || 0)}
+                onChange={(e) => handleInputChange('paid_amount', parseFloat || 0)}
                 min="0"
                 step="1000"
                 className="mt-1"

@@ -5,7 +5,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   useEffect(() => {
     // Update debounced value after delay
-    const handler = setTimeou"" => {
+    const handler = setTimeout(() => {
       setDebouncedValue(value)
     }, delay)
 
@@ -26,7 +26,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
   const [debouncedCallback, setDebouncedCallback] = useState<T>(callback)
 
   useEffect(() => {
-    const handler = setTimeou"" => {
+    const handler = setTimeout(() => {
       setDebouncedCallback(callback)
     }, delay)
 
