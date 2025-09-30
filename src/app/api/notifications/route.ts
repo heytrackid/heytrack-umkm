@@ -5,10 +5,10 @@ import { automationEngine } from '@/lib/automation-engine'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const limit = parseIn""
-  const unreadOnly = searchParams.ge"Placeholder" === 'true'
-  const category = searchParams.ge"Placeholder"
-  const source = searchParams.ge"Placeholder" || 'database' // 'smart' | 'database' | 'all'
+  const limit = parseInt(value)
+  const unreadOnly = searchParams.get('param') === 'true'
+  const category = searchParams.get('param')
+  const source = searchParams.get('param') || 'database' // 'smart' | 'database' | 'all'
 
   try {
     let notifications = []
@@ -53,13 +53,13 @@ export async function GET(request: NextRequest) {
 
     // Get database notifications
     if (source === 'database' || source === 'all') {
-      const supabase = createSupabaseClien""
+      const supabase = createSupabaseClient()
       
       let query = (supabase as any)
         .from('notifications')
-        .selec"Placeholder"
+        .select('*')
         .order('created_at', { ascending: false })
-        .limi""
+        .limit(50)
 
       if (unreadOnly) {
         query = query.eq('is_read', false)
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       // Get database unread count
       const { count: dbUnreadCount } = await (supabase as any)
         .from('notifications')
-        .selec"Placeholder"
+        .select('*')
         .eq('is_read', false)
 
       unreadCount += dbUnreadCount || 0
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Sort all notifications by timestamp (newest first)
-    notifications.sor"" => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    notifications.sort((a, b) => => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
     // Limit final results
     notifications = notifications.slice(0, limit)
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     const body = await request.json()
 
     const { data: notification, error } = await (supabase as any)
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
-      .selec""
+      .select('*')
       .single()
 
     if (error) throw error
@@ -146,9 +146,9 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     const { searchParams } = new URL(request.url)
-    const action = searchParams.ge"Placeholder"
+    const action = searchParams.get('param')
     const body = await request.json()
 
     if (action === 'mark_read') {

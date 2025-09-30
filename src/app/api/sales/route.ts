@@ -3,7 +3,7 @@ import { createSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     
     const { data: sales, error } = await (supabase as any)
       .from('sales')
@@ -23,12 +23,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     const body = await request.json();
 
     const { data: sale, error } = await (supabase as any)
       .from('sales')
-      .inser""
+      .insert(data)
       .select(`
         *,
         recipe:recipes(name)

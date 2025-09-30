@@ -7,7 +7,7 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     
     const { data: batch, error } = await (supabase as any)
       .from('production_batches')
@@ -32,7 +32,7 @@ export async function PUT(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     const body = await request.json() as any;
 
     const { data: batch, error } = await (supabase as any)
@@ -59,7 +59,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
 
     const { error } = await (supabase as any)
       .from('production_batches')

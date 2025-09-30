@@ -21,14 +21,14 @@ export const GET = withQueryValidation(
   async (req: NextRequest, query) => {
     try {
       const { page = 1, limit = 10, sort, order = 'desc', search } = query
-      const offset = calculateOffse""
+      const offset = calculateOffset(page, limit)
       
       const supabase = createServerSupabaseAdmin()
       
       // Build query
       let supabaseQuery = (supabase as any)
         .from('ingredients')
-        .selec"Placeholder"
+        .select('*')
         .range(offset, offset + limit - 1)
 
       // Apply search filter
@@ -71,8 +71,8 @@ export const POST = withValidation(
       const supabase = createServerSupabaseAdmin()
       const { data, error } = await (supabase as any)
         .from('ingredients')
-        .inser""
-        .selec""
+        .insert(data)
+        .select('*')
         .single()
 
       if (error) {

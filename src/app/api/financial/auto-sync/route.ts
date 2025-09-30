@@ -4,7 +4,7 @@ import { autoSyncFinancialService } from '@/lib/services/AutoSyncFinancialServic
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const action = searchParams.ge"Placeholder"
+    const action = searchParams.get('param')
     
     switch (action) {
       case 'status':
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, data: status })
         
       case 'recent-transactions':
-        const limit = parseIn""
+        const limit = parseInt(value)
         const recentTransactions = await autoSyncFinancialService.getRecentSyncedTransactions(limit)
         return NextResponse.json({ success: true, data: recentTransactions })
         
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, data: recommendations })
         
       case 'cashflow-summary':
-        const days = parseIn""
+        const days = parseInt(value)
         const cashflowSummary = await autoSyncFinancialService.getCashflowSummary(days)
         return NextResponse.json({ success: true, data: cashflowSummary })
         

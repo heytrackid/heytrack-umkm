@@ -256,7 +256,7 @@ export default function AIPricingPage() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => removeIngredien""}
+                          onClick={() => removeIngredient(index)}
                           disabled={formData.ingredients.length === 1}
                           className="text-red-600"
                         >

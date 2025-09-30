@@ -30,7 +30,7 @@ export const useAILogic = () => {
 
     try {
       // Simulate loading AI insights from various sources
-      await new Promise(resolve => setTimeou"")
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
       const mockInsights = [
         {
@@ -116,7 +116,7 @@ export const useAILogic = () => {
 
     try {
       // Simulate action execution
-      await new Promise(resolve => setTimeou"")
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
       switch (action) {
         case 'review-pricing':

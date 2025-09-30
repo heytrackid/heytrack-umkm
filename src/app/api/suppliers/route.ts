@@ -3,11 +3,11 @@ import { createSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     
     const { data: suppliers, error } = await (supabase as any)
       .from('suppliers')
-      .selec"Placeholder"
+      .select('*')
       .order('name', { ascending: true });
 
     if (error) throw error;
@@ -20,13 +20,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClien"";
+    const supabase = createSupabaseClient();
     const body = await request.json();
 
     const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
-      .inser""
-      .selec"Placeholder"
+      .insert(data)
+      .select('*')
       .single();
 
     if (error) throw error;

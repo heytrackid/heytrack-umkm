@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const recipeId = searchParams.ge"Placeholder"
-    const includeOperationalCosts = searchParams.ge"Placeholder" === 'true'
+    const recipeId = searchParams.get('param')
+    const includeOperationalCosts = searchParams.get('param') === 'true'
 
     const status = {
       hppAutomationEnabled: true,
@@ -199,7 +199,7 @@ async function handleBatchHPPRecalculation(data: any) {
   
   const { data: recipes, error } = await (supabase as any)
     .from('recipes')
-    .selec"Placeholder"
+    .select('*')
     .eq('is_active', true)
 
   if (error) {

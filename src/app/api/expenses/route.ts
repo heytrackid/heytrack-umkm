@@ -4,20 +4,20 @@ import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const limit = searchParams.ge"Placeholder" || '50'
-  const offset = searchParams.ge"Placeholder" || '0'
-  const category = searchParams.ge"Placeholder"
-  const startDate = searchParams.ge"Placeholder"
-  const endDate = searchParams.ge"Placeholder"
+  const limit = searchParams.get('param') || '50'
+  const offset = searchParams.get('param') || '0'
+  const category = searchParams.get('param')
+  const startDate = searchParams.get('param')
+  const endDate = searchParams.get('param')
 
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     
     let query = (supabase as any)
       .from('expenses')
-      .selec"Placeholder"
+      .select('*')
       .order('expense_date', { ascending: false })
-      .range(parseIn"", parseIn"" + parseIn"" - 1)
+      .range(parseInt(value), parseInt(value) + parseInt(value) - 1)
 
     if (category) {
       query = query.eq('category', category)
@@ -38,29 +38,29 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     const { count } = await (supabase as any)
       .from('expenses')
-      .selec"Placeholder"
+      .select('*')
 
     // Get summary stats for dashboard
-    const today = new Date().toISOString().spli"Placeholder"[0]
+    const today = new Date().toISOString().split('T')[0]
     const thisMonth = new Date().toISOString().slice(0, 7)
     
     const { data: todayExpenses } = await (supabase as any)
       .from('expenses')
-      .selec"Placeholder"
+      .select('*')
       .eq('expense_date', today)
     
     const { data: monthExpenses } = await (supabase as any)
       .from('expenses')
-      .selec"Placeholder"
+      .select('*')
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
-    const todayTotal = todayExpenses?.reduce((sum: number, exp: any) => sum + parseFloa"", 0) || 0
-    const monthTotal = monthExpenses?.reduce((sum: number, exp: any) => sum + parseFloa"", 0) || 0
+    const todayTotal = todayExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(value), 0) || 0
+    const monthTotal = monthExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(value), 0) || 0
     
     // Category breakdown
     const categoryBreakdown = monthExpenses?.reduce((acc: any, exp: any) => {
-      acc[exp.category] = (acc[exp.category] || 0) + parseFloa""
+      acc[exp.category] = (acc[exp.category] || 0) + parseFloat(value)
       return acc
     }, {}) || {}
 
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
       data: expenses, 
       count,
       pagination: {
-        limit: parseIn"",
-        offset: parseIn"",
+        limit: parseInt(value),
+        offset: parseInt(value),
         total: count
       },
       summary: {
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     const body = await request.json()
 
     const { data: expense, error } = await (supabase as any)
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
-      .selec""
+      .select('*')
       .single()
 
     if (error) throw error
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
-        message: `A large expense of ${formatCurrency(parseFloa"")} has been recorded for ${body.category}`,
+        message: `A large expense of ${formatCurrency(parseFloat(value))} has been recorded for ${body.category}`,
         entity_type: 'expense',
         entity_id: expense.id,
         priority: 'high'

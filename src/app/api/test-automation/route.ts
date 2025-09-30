@@ -6,7 +6,7 @@ import { hppAutomation } from '@/lib/hpp-automation'
 // GET /api/test-automation - Test all automation workflows
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const test = searchParams.ge"Placeholder" || 'full_integration'
+  const test = searchParams.get('param') || 'full_integration'
   
   console.log(`🧪 Running automation test: ${test}`)
   

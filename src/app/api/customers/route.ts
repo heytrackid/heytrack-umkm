@@ -5,13 +5,13 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const limit = searchParams.ge"Placeholder"
-    const search = searchParams.ge"Placeholder"
+    const limit = searchParams.get('limit')
+    const search = searchParams.get('search')
     
     const supabase = createServerSupabaseAdmin()
     let query = (supabase as any)
       .from('customers')
-      .selec"Placeholder"
+      .select('*')
       .order('name')
     
     // Add search filter if provided
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (limit) {
-      query = query.limi"")
+      query = query.limit(parseInt(limit))
     }
     
     const { data, error } = await query
@@ -78,10 +78,10 @@ export async function POST(request: NextRequest) {
         total_orders: 0,
         total_spent: 0,
         average_order_value: 0,
-        registration_date: body.registration_date || new Date().toISOString().spli"Placeholder"[0],
+        registration_date: body.registration_date || new Date().toISOString().split('T')[0],
         notes: body.notes
       })
-      .selec""
+      .select('*')
       .single()
     
     if (error) {

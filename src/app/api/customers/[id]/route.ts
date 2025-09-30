@@ -11,7 +11,7 @@ export async function GET(
     const supabase = createServerSupabaseAdmin()
     const { data, error } = await (supabase as any)
       .from('customers')
-      .selec"Placeholder"
+      .select('*')
       .eq('id', id)
       .single()
     
@@ -64,7 +64,7 @@ export async function PUT(
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .selec""
+      .select('*')
       .single()
     
     if (error) {
@@ -109,9 +109,9 @@ export async function DELETE(
     // Check if customer has orders
     const { data: orders } = await (supabase as any)
       .from('orders')
-      .selec"Placeholder"
+      .select('*')
       .eq('customer_id', id)
-      .limi""
+      .limit(1)
     
     if (orders && orders.length > 0) {
       return NextResponse.json(

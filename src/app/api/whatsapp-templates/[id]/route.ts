@@ -6,11 +6,11 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     
     const { data, error } = await supabase
       .from('whatsapp_templates')
-      .selec"Placeholder"
+      .select('*')
       .eq('id', params.id)
       .single()
     
@@ -36,7 +36,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     const body = await request.json()
     
     const { name, description, category, template_content, variables, is_active, is_default } = body
@@ -63,7 +63,7 @@ export async function PUT(
         is_default
       })
       .eq('id', params.id)
-      .selec""
+      .select('*')
     
     if (error) {
       console.error('Error updating WhatsApp template:', error)
@@ -88,13 +88,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createSupabaseClien""
+    const supabase = createSupabaseClient()
     
     const { data, error } = await supabase
       .from('whatsapp_templates')
       .delete()
       .eq('id', params.id)
-      .selec""
+      .select('*')
     
     if (error) {
       console.error('Error deleting WhatsApp template:', error)

@@ -37,7 +37,7 @@ export function validateInput(data: any, rules?: any): { isValid: boolean; error
       }
       
       // Sanitization check for XSS
-      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.tes"") {
+      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
         errors.push(`validation.dangerousContent`)
       }
     }

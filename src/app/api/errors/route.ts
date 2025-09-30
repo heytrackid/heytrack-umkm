@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
   }
   
   const url = new URL(request.url)
-  const limit = Math.min(parseIn"", 100)
+  const limit = Math.min(parseInt(value), 100)
   
   const recentErrors = errorStore
     .slice(-limit)
