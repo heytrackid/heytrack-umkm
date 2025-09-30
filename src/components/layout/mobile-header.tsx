@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import LanguageToggle from '@/components/ui/language-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { 
   Search, 
@@ -209,7 +208,6 @@ export default function MobileHeader({
         {/* Right Section - Actions */}
         <div className="flex items-center space-x-1">
           {/* Dark/Light Mode Toggle */}
-          <LanguageToggle />
           <ThemeToggle />
           
           {/* Smart Notification - Shared component with desktop */}

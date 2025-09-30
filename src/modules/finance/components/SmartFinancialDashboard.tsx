@@ -16,10 +16,8 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { formatCurrency } from '@/shared/utils/currency'
-import { useTranslation } from '@/contexts/TranslationContext'
 
 export default function SmartFinancialDashboard() {
-  const { t } = useTranslation()
   
   const [financialData, setFinancialData] = useState({
     revenue: 45000000,

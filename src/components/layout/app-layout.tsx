@@ -7,7 +7,6 @@ import { Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import LanguageToggle from '@/components/ui/language-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
@@ -72,7 +71,6 @@ export default function AppLayout({
             </div>
             <div className="flex items-center space-x-4">
               <SmartNotifications />
-              <LanguageToggle />
               <ThemeToggle />
               {/* User menu */}
               <Button variant="ghost" size="sm">

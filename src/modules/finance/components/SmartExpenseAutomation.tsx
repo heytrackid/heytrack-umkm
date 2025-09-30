@@ -27,7 +27,6 @@ import {
   Plus
 } from 'lucide-react'
 import { formatCurrency } from '@/shared/utils/currency'
-import { useTranslation } from '@/contexts/TranslationContext'
 
 interface AutomationRule {
   id: string
