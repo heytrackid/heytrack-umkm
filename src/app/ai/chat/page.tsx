@@ -1,14 +1,22 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+
+// Lazy load heavy chat components
+const ScrollArea = dynamic(() => import('@/components/ui/scroll-area').then(m => ({ default: m.ScrollArea })))
+const Breadcrumb = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.Breadcrumb })))
+const BreadcrumbList = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbList })))
+const BreadcrumbItem = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbItem })))
+const BreadcrumbLink = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbLink })))
+const BreadcrumbPage = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbPage })))
+const BreadcrumbSeparator = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbSeparator })))
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   MessageSquare, 

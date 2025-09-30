@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -35,10 +36,17 @@ import {
 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useSettings } from '@/contexts/settings-context'
 import categoriesData from '@/data/categories.json'
 import { CategoriesTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
+
+// Lazy load heavy components
+const Table = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.Table })))
+const TableBody = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableBody })))
+const TableCell = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableCell })))
+const TableHead = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableHead })))
+const TableHeader = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableHeader })))
+const TableRow = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableRow })))
 
 interface Category {
   id: string

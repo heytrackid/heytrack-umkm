@@ -8,10 +8,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+
+// Lazy load heavy form components
+const Select = dynamic(() => import('@/components/ui/select').then(m => ({ default: m.Select })))
+const SelectContent = dynamic(() => import('@/components/ui/select').then(m => ({ default: m.SelectContent })))
+const SelectItem = dynamic(() => import('@/components/ui/select').then(m => ({ default: m.SelectItem })))
+const SelectTrigger = dynamic(() => import('@/components/ui/select').then(m => ({ default: m.SelectTrigger })))
+const SelectValue = dynamic(() => import('@/components/ui/select').then(m => ({ default: m.SelectValue })))
+const Breadcrumb = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.Breadcrumb })))
+const BreadcrumbList = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbList })))
+const BreadcrumbItem = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbItem })))
+const BreadcrumbLink = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbLink })))
+const BreadcrumbPage = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbPage })))
+const BreadcrumbSeparator = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbSeparator })))
 import { useResponsive } from '@/hooks/use-mobile'
 import { TrendingUp, Brain, Calculator, Target, Lightbulb, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '@/shared/utils/currency'
