@@ -32,7 +32,7 @@ export function UMKMTooltip({ title, content, children }: UMKMTooltipProps) {
         <TooltipContent className="max-w-80 p-4">
           <div className="space-y-2">
             <h4 className="font-semibold text-sm">{title}</h4>
-            <p className="text-xs text-gray-600">{content}</p>
+            <p className="text-xs opacity-90">{content}</p>
           </div>
         </TooltipContent>
       </Tooltip>

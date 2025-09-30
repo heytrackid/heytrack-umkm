@@ -40,20 +40,45 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
   const fetchSmartNotifications = async () => {
     setLoading(true)
     try {
-      // Fetch data needed for automation engine analysis
-      const [ingredientsRes, ordersRes] = await Promise.all([
-        fetch('/api/ingredients'),
-        fetch('/api/orders?limit=50')
+      // Fetch data needed for automation engine analysis with timeout
+      const fetchWithTimeout = (url: string, timeout = 5000) => {
+        return Promise.race([
+          fetch(url),
+          new Promise<Response>((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeout)
+          )
+        ])
+      }
+
+      const [ingredientsRes, ordersRes] = await Promise.allSettled([
+        fetchWithTimeout('/api/ingredients'),
+        fetchWithTimeout('/api/orders?limit=50')
       ])
 
-      if (ingredientsRes.ok && ordersRes.ok) {
-        const ingredientsData = await ingredientsRes.json()
-        const ordersData = await ordersRes.json()
-        
-        // Ensure data is in array format
-        const ingredients = Array.isArray(ingredientsData) ? ingredientsData : []
-        const orders = Array.isArray(ordersData) ? ordersData : []
-        
+      // Extract data with fallback to empty arrays
+      let ingredients: any[] = []
+      let orders: any[] = []
+
+      if (ingredientsRes.status === 'fulfilled' && ingredientsRes.value.ok) {
+        try {
+          const data = await ingredientsRes.value.json()
+          ingredients = Array.isArray(data) ? data : []
+        } catch (e) {
+          console.warn('Failed to parse ingredients data:', e)
+        }
+      }
+
+      if (ordersRes.status === 'fulfilled' && ordersRes.value.ok) {
+        try {
+          const data = await ordersRes.value.json()
+          orders = Array.isArray(data) ? data : []
+        } catch (e) {
+          console.warn('Failed to parse orders data:', e)
+        }
+      }
+
+      // Only proceed if we have some data
+      if (ingredients.length > 0 || orders.length > 0) {
         // Generate smart notifications using automation engine
         const smartNotifications = automationEngine.notifications.generateSmartNotifications(
           ingredients,
@@ -81,7 +106,8 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
         setNotifications([...formattedNotifications, ...additionalNotifications])
       }
     } catch (error) {
-      console.error('Error fetching smart notifications:', error)
+      console.warn('Error fetching smart notifications (non-critical):', error)
+      // Silently fail - notifications are not critical
     } finally {
       setLoading(false)
     }
