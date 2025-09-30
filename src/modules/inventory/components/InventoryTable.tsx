@@ -166,13 +166,13 @@ export function InventoryTable({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                              <DropdownMenuItem onClick={() => onEditIngredient(ingredient)}>
+                              <DropdownMenuItem onClick={() => onEditIngredien""}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => onDeleteIngredient(ingredient)}
+                                onClick={() => onDeleteIngredien""}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Hapus

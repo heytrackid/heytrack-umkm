@@ -76,30 +76,30 @@ const TableLoadingSkeleton = ({
 
 // Lazy loaded table components
 export const LazyDataTable = lazy(() => 
-  import('@tanstack/react-table').then(async (m) => {
+  impor"Placeholder".then(async (m) => {
     // Also preload the table UI components
-    await import('@/components/ui/table')
+    await impor"Placeholder"
     return { default: m.useReactTable }
   })
 )
 
 // CRUD Table Components
 export const LazyCRUDTable = lazy(() => 
-  import('@/components/crud/ingredients-crud').then(m => ({ default: m.IngredientsCRUD }))
+  impor"Placeholder".then(m => ({ default: m.IngredientsCRUD }))
 )
 
 export const LazyOrdersTable = lazy(() => 
-  import('@/components/tables/orders-table').then(m => ({ default: m.OrdersTable }))
+  impor"Placeholder".then(m => ({ default: m.OrdersTable }))
     .catch(() => ({ default: () => <div>Orders table not found</div> }))
 )
 
 export const LazyInventoryTable = lazy(() => 
-  import('@/modules/inventory/components/InventoryTable').then(m => ({ default: m.InventoryTable }))
+  impor"Placeholder".then(m => ({ default: m.InventoryTable }))
     .catch(() => ({ default: () => <div>Inventory table not found</div> }))
 )
 
 export const LazyFinanceTable = lazy(() => 
-  import('@/components/tables/finance-table').then(m => ({ default: m.FinanceTable }))
+  impor"Placeholder".then(m => ({ default: m.FinanceTable }))
     .catch(() => ({ default: () => <div>Finance table not found</div> }))
 )
 
@@ -171,8 +171,8 @@ export const FinanceTableWithSuspense = (props: any) => (
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
   Promise.all([
-    import('@tanstack/react-table'),
-    import('@tanstack/react-virtual')
+    impor"Placeholder",
+    impor"Placeholder"
   ]).then(([tableLib, virtualLib]) => ({
     default: ({ data, columns, height = 400 }: any) => {
       // This would be a virtualized table implementation
@@ -220,9 +220,9 @@ export const useTablePerformance = () => {
 // Table Bundle Preloader
 export const preloadTableBundle = () => {
   return Promise.all([
-    import('@tanstack/react-table'),
-    import('@/components/ui/table'),
-    import('@/components/ui/simple-data-table'),
+    impor"Placeholder",
+    impor"Placeholder",
+    impor"Placeholder",
   ])
 }
 

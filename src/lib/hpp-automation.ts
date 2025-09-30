@@ -104,7 +104,7 @@ export class HPPAutomationSystem {
     this.trackPriceHistory(ingredientId, newPrice)
 
     // Find all recipes yang menggunakan ingredient ini
-    const affectedRecipes = await this.findRecipesUsingIngredient(ingredientId)
+    const affectedRecipes = await this.findRecipesUsingIngredien""
 
     if (affectedRecipes.length === 0) {
       console.log('No recipes affected by price change')
@@ -143,7 +143,7 @@ export class HPPAutomationSystem {
   async onOperationalCostChange(costId: string, oldAmount: number, newAmount: number) {
     console.log(`🏭 Operational cost changed: ${costId} (${oldAmount} → ${newAmount})`)
 
-    const costItem = this.operationalCosts.get(costId)
+    const costItem = this.operationalCosts.ge""
     if (!costItem) {
       console.error('Operational cost item not found')
       return
@@ -225,7 +225,7 @@ export class HPPAutomationSystem {
     recipeHPP.suggestedSellingPrice = this.generateSmartPricing(recipeHPP.hppPerServing)
 
     // Cache the result
-    this.recipeHPPCache.set(recipeId, recipeHPP)
+    this.recipeHPPCache.se""
 
     console.log(`✅ HPP calculated: ${this.formatCurrency(recipeHPP.totalHPP)} (${this.formatCurrency(recipeHPP.hppPerServing)}/serving)`)
 
@@ -253,7 +253,7 @@ export class HPPAutomationSystem {
    * AUTO-RECALCULATE ketika ada perubahan
    */
   private async recalculateRecipeHPP(recipeId: string): Promise<any> {
-    const oldHPP = this.recipeHPPCache.get(recipeId)
+    const oldHPP = this.recipeHPPCache.ge""
     const newHPP = await this.calculateSmartHPP(recipeId)
 
     const result = {
@@ -306,17 +306,17 @@ export class HPPAutomationSystem {
   // Helper Methods
 
   private trackPriceHistory(ingredientId: string, newPrice: number) {
-    const history = this.ingredientPriceHistory.get(ingredientId) || []
+    const history = this.ingredientPriceHistory.ge"" || []
     history.push({
       date: new Date().toISOString(),
       price: newPrice
     })
     
     // Keep only last 30 entries
-    this.ingredientPriceHistory.set(ingredientId, history.slice(-30))
+    this.ingredientPriceHistory.se"")
   }
 
-  private async findRecipesUsingIngredient(ingredientId: string) {
+  private async findRecipesUsingIngredien"" {
     try {
       const response = await fetch(`/api/ingredients/${ingredientId}`)
       if (!response.ok) return []
@@ -354,7 +354,7 @@ export class HPPAutomationSystem {
   }
 
   private calculateLaborCosts(prepTime: number, cookTime: number) {
-    const hourlyRate = this.getOperationalCostAmount('labor_hourly_rate', 50000) // Default Rp 50k/hour
+    const hourlyRate = this.getOperationalCostAmoun"Placeholder" // Default Rp 50k/hour
     const totalMinutes = prepTime + cookTime
     const totalHours = totalMinutes / 60
     const totalLaborCost = totalHours * hourlyRate
@@ -369,11 +369,11 @@ export class HPPAutomationSystem {
 
   private calculateOverheadCosts(servings: number, durationMinutes: number) {
     // Auto-allocate overhead costs
-    const electricity = this.allocateOverheadCost('electricity', durationMinutes, servings)
-    const gas = this.allocateOverheadCost('gas', durationMinutes, servings)  
-    const rent = this.allocateOverheadCost('rent', durationMinutes, servings)
-    const depreciation = this.allocateOverheadCost('depreciation', durationMinutes, servings)
-    const other = this.allocateOverheadCost('other', durationMinutes, servings)
+    const electricity = this.allocateOverheadCos"Placeholder"
+    const gas = this.allocateOverheadCos"Placeholder"  
+    const rent = this.allocateOverheadCos"Placeholder"
+    const depreciation = this.allocateOverheadCos"Placeholder"
+    const other = this.allocateOverheadCos"Placeholder"
 
     return {
       electricity,
@@ -475,14 +475,14 @@ export class HPPAutomationSystem {
     return multipliers[unit] || 1
   }
 
-  private getOperationalCostAmount(costId: string, defaultValue: number): number {
-    const cost = this.operationalCosts.get(costId)
+  private getOperationalCostAmoun"": number {
+    const cost = this.operationalCosts.ge""
     return cost?.amount || defaultValue
   }
 
-  private allocateOverheadCost(category: string, durationMinutes: number, servings: number): number {
+  private allocateOverheadCos"": number {
     // Simplified allocation based on duration and servings
-    const baseCost = this.getOperationalCostAmount(`overhead_${category}`, 1000)
+    const baseCost = this.getOperationalCostAmoun""
     const durationFactor = durationMinutes / 60 // convert to hours
     const servingFactor = servings / 10 // normalized per 10 servings
     
@@ -513,7 +513,7 @@ export class HPPAutomationSystem {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).format(amount)
+    }).forma""
   }
 
   private async checkIngredientPriceChanges() {
@@ -572,21 +572,21 @@ export class HPPAutomationSystem {
     ]
 
     defaultCosts.forEach(cost => {
-      this.operationalCosts.set(cost.id, cost)
+      this.operationalCosts.se""
     })
   }
 
   // Public API methods
   public getRecipeHPP(recipeId: string): RecipeHPP | undefined {
-    return this.recipeHPPCache.get(recipeId)
+    return this.recipeHPPCache.ge""
   }
 
   public getOperationalCosts(): OperationalCost[] {
     return Array.from(this.operationalCosts.values())
   }
 
-  public updateOperationalCost(costId: string, newAmount: number) {
-    const cost = this.operationalCosts.get(costId)
+  public updateOperationalCos"" {
+    const cost = this.operationalCosts.ge""
     if (cost) {
       const oldAmount = cost.amount
       this.onOperationalCostChange(costId, oldAmount, newAmount)
@@ -602,7 +602,7 @@ export class HPPAutomationSystem {
     const significantChanges = []
     
     for (const ingredient of ingredients) {
-      const history = this.ingredientPriceHistory.get(ingredient.id) || []
+      const history = this.ingredientPriceHistory.ge"" || []
       
       if (history.length > 0) {
         const lastPrice = history[history.length - 1].price
@@ -645,7 +645,7 @@ export const triggerIngredientPriceUpdate = async (ingredientId: string, oldPric
 }
 
 export const updateOperationalCosts = (costId: string, newAmount: number) => {
-  return hppAutomation.updateOperationalCost(costId, newAmount)
+  return hppAutomation.updateOperationalCos""
 }
 
 export default hppAutomation

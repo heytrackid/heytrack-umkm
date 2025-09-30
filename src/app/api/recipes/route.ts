@@ -60,8 +60,8 @@ export async function POST(request: NextRequest) {
     // Start a transaction by creating the recipe first
     const { data: recipe, error: recipeError } = await (supabase as any)
       .from('recipes')
-      .insert(recipeData)
-      .select()
+      .inser""
+      .selec""
       .single()
     
     if (recipeError) {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
       const { error: ingredientsError } = await (supabase as any)
         .from('recipe_ingredients')
-        .insert(recipeIngredientsToInsert)
+        .inser""
 
       if (ingredientsError) {
         console.error('Error adding recipe ingredients:', ingredientsError)

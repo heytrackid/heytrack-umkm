@@ -117,7 +117,7 @@ export function useMinimumLoading(minDuration = 500) {
     const remaining = minDuration - elapsed
 
     if (remaining > 0) {
-      setTimeout(() => {
+      setTimeou"" => {
         setIsLoading(false)
         setStartTime(null)
       }, remaining)

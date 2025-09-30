@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useResponsive } from '@/hooks/use-mobile'
 import { Search, Filter, X, Calendar } from 'lucide-react'
 import { OrderFilters as OrderFiltersType } from './types'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface OrderFiltersProps {
   filters: OrderFiltersType
@@ -21,7 +20,6 @@ export default function OrderFilters({
   onFiltersChange, 
   onReset 
 }: OrderFiltersProps) {
-  const { t } = useI18n()
   const { isMobile } = useResponsive()
 
   const handleFilterChange = (key: keyof OrderFiltersType, value: string) => {
@@ -44,7 +42,7 @@ export default function OrderFilters({
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t('orders.searchPlaceholder')}
+              placeholder={"Placeholder"}
               value={filters.searchTerm}
               onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
               className="pl-10"
@@ -57,16 +55,16 @@ export default function OrderFilters({
             <div>
               <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('orders.table.status')} />
+                  <SelectValue placeholder={"Placeholder"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('orders.allStatus')}</SelectItem>
-                  <SelectItem value="PENDING">{t('orders.status.pending')}</SelectItem>
-                  <SelectItem value="CONFIRMED">{t('orders.status.confirmed')}</SelectItem>
-                  <SelectItem value="IN_PROGRESS">{t('orders.status.in_production')}</SelectItem>
-                  <SelectItem value="READY">{t('orders.status.completed')}</SelectItem>
-                  <SelectItem value="DELIVERED">{t('orders.status.completed')}</SelectItem>
-                  <SelectItem value="CANCELLED">{t('orders.status.cancelled')}</SelectItem>
+                  <SelectItem value="all">{"Placeholder"}</SelectItem>
+                  <SelectItem value="PENDING">{"Placeholder"}</SelectItem>
+                  <SelectItem value="CONFIRMED">{"Placeholder"}</SelectItem>
+                  <SelectItem value="IN_PROGRESS">{"Placeholder"}</SelectItem>
+                  <SelectItem value="READY">{"Placeholder"}</SelectItem>
+                  <SelectItem value="DELIVERED">{"Placeholder"}</SelectItem>
+                  <SelectItem value="CANCELLED">{"Placeholder"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -75,13 +73,13 @@ export default function OrderFilters({
             <div>
               <Select value={filters.paymentStatus} onValueChange={(value) => handleFilterChange('paymentStatus', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('orders.table.payment')} />
+                  <SelectValue placeholder={"Placeholder"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('orders.allPaymentStatus')}</SelectItem>
-                  <SelectItem value="UNPAID">{t('orders.paymentStatus.unpaid')}</SelectItem>
-                  <SelectItem value="PARTIAL">{t('orders.paymentStatus.partial')}</SelectItem>
-                  <SelectItem value="PAID">{t('orders.paymentStatus.paid')}</SelectItem>
+                  <SelectItem value="all">{"Placeholder"}</SelectItem>
+                  <SelectItem value="UNPAID">{"Placeholder"}</SelectItem>
+                  <SelectItem value="PARTIAL">{"Placeholder"}</SelectItem>
+                  <SelectItem value="PAID">{"Placeholder"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -90,13 +88,13 @@ export default function OrderFilters({
             <div>
               <Select value={filters.priority} onValueChange={(value) => handleFilterChange('priority', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('orders.priority')} />
+                  <SelectValue placeholder={"Placeholder"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('orders.allPriority')}</SelectItem>
-                  <SelectItem value="high">{t('orders.priority.high')}</SelectItem>
-                  <SelectItem value="normal">{t('orders.priority.normal')}</SelectItem>
-                  <SelectItem value="low">{t('orders.priority.low')}</SelectItem>
+                  <SelectItem value="all">{"Placeholder"}</SelectItem>
+                  <SelectItem value="high">{"Placeholder"}</SelectItem>
+                  <SelectItem value="normal">{"Placeholder"}</SelectItem>
+                  <SelectItem value="low">{"Placeholder"}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -107,7 +105,7 @@ export default function OrderFilters({
                 type="date"
                 value={filters.dateFrom || ''}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                placeholder={t('orders.fromDate')}
+                placeholder={"Placeholder"}
               />
             </div>
 
@@ -117,7 +115,7 @@ export default function OrderFilters({
                 type="date"
                 value={filters.dateTo || ''}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                placeholder={t('orders.toDate')}
+                placeholder={"Placeholder"}
               />
             </div>
           </div>
@@ -129,35 +127,35 @@ export default function OrderFilters({
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'PENDING' ? 'all' : 'PENDING')}
             >
-              {t('orders.status.pending')}
+              {"Placeholder"}
             </Button>
             <Button
               variant={filters.status === 'IN_PROGRESS' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
             >
-              {t('orders.status.in_production')}
+              {"Placeholder"}
             </Button>
             <Button
               variant={filters.status === 'READY' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'READY' ? 'all' : 'READY')}
             >
-              {t('orders.status.completed')}
+              {"Placeholder"}
             </Button>
             <Button
               variant={filters.paymentStatus === 'UNPAID' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('paymentStatus', filters.paymentStatus === 'UNPAID' ? 'all' : 'UNPAID')}
             >
-              {t('orders.paymentStatus.unpaid')}
+              {"Placeholder"}
             </Button>
             <Button
               variant={filters.priority === 'high' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('priority', filters.priority === 'high' ? 'all' : 'high')}
             >
-              {t('orders.priority.high')}
+              {"Placeholder"}
             </Button>
           </div>
 
@@ -165,7 +163,7 @@ export default function OrderFilters({
           {hasActiveFilters && (
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-sm text-muted-foreground">
-                {t('orders.filtersActive')}
+                {"Placeholder"}
               </span>
               <Button
                 variant="ghost"
@@ -174,7 +172,7 @@ export default function OrderFilters({
                 className="text-red-600 hover:text-red-700"
               >
                 <X className="h-4 w-4 mr-2" />
-                {t('orders.resetFilters')}
+                {"Placeholder"}
               </Button>
             </div>
           )}

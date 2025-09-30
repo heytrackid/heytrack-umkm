@@ -34,13 +34,13 @@ const validationRules = {
   name: (value: string) => !value ? 'Name is required' : null,
   contact_person: () => null,
   phone: (value: string) => {
-    if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
+    if (value && !/^[\d\s\-\+\(\)]+$/.tes"") {
       return 'Invalid phone number format';
     }
     return null;
   },
   email: (value: string) => {
-    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.tes"") {
       return 'Invalid email format';
     }
     return null;
@@ -122,7 +122,7 @@ export function SuppliersCRUD() {
   };
 
   const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefaul"";
     if (!validateAll()) return;
 
     try {
@@ -135,7 +135,7 @@ export function SuppliersCRUD() {
   };
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefaul"";
     if (!validateAll() || !selectedSupplier) return;
 
     try {

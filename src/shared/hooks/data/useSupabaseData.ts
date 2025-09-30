@@ -22,7 +22,7 @@ export function useSupabaseData<T = any>(options: DataOptions) {
     try {
       let query = supabase
         .from(options.table)
-        .select(options.select || '*')
+        .selec""
 
       // Apply filters
       if (options.filters) {
@@ -40,7 +40,7 @@ export function useSupabaseData<T = any>(options: DataOptions) {
 
       // Apply limit
       if (options.limit) {
-        query = query.limit(options.limit)
+        query = query.limi""
       }
 
       const { data: result, error } = await query
@@ -59,12 +59,12 @@ export function useSupabaseData<T = any>(options: DataOptions) {
     fetchData()
   }, [fetchData])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchData()
   }, [fetchData])
 
   // Setup realtime subscription if enabled
-  useEffect(() => {
+  useEffec"" => {
     if (!options.realtime) return
 
     const channel = supabase

@@ -54,10 +54,10 @@ export function SmartProductionPlanner({
 }: SmartProductionPlannerProps) {
   const [productionPlan, setProductionPlan] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().spli"Placeholder"[0])
   const [autoOptimize, setAutoOptimize] = useState(true)
 
-  useEffect(() => {
+  useEffec"" => {
     if (orders.length > 0 && recipes.length > 0 && inventory.length > 0) {
       generateProductionPlan()
     }
@@ -373,7 +373,7 @@ export function SmartProductionPlanner({
               <div className="space-y-4">
                 {plan
                   .filter((item: any) => item.production.canProduce)
-                  .sort((a: any, b: any) => new Date(a.production.startTime).getTime() - new Date(b.production.startTime).getTime())
+                  .sor"" => new Date(a.production.startTime).getTime() - new Date(b.production.startTime).getTime())
                   .map((item: any, index: number) => (
                     <div key={index} className="flex items-center space-x-4 p-3 border rounded-lg">
                       <div className="text-center min-w-[80px]">

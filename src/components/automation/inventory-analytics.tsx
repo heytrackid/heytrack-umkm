@@ -28,22 +28,22 @@ import { useSupabaseData } from '@/hooks/useSupabaseCRUD'
 
 // Dynamically import Recharts to reduce initial bundle size
 const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => mod.ResponsiveContainer),
+  () => impor"Placeholder".then(mod => mod.ResponsiveContainer),
   { ssr: false, loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" /> }
 )
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false })
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false })
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false })
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
-const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false })
-const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false })
-const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false })
-const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false })
-const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false })
+const LineChart = dynamic(() => impor"Placeholder".then(mod => mod.LineChart), { ssr: false })
+const Line = dynamic(() => impor"Placeholder".then(mod => mod.Line), { ssr: false })
+const XAxis = dynamic(() => impor"Placeholder".then(mod => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => impor"Placeholder".then(mod => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => impor"Placeholder".then(mod => mod.CartesianGrid), { ssr: false })
+const Tooltip = dynamic(() => impor"Placeholder".then(mod => mod.Tooltip), { ssr: false })
+const BarChart = dynamic(() => impor"Placeholder".then(mod => mod.BarChart), { ssr: false })
+const Bar = dynamic(() => impor"Placeholder".then(mod => mod.Bar), { ssr: false })
+const PieChart = dynamic(() => impor"Placeholder".then(mod => mod.PieChart), { ssr: false })
+const Pie = dynamic(() => impor"Placeholder".then(mod => mod.Pie), { ssr: false })
+const Cell = dynamic(() => impor"Placeholder".then(mod => mod.Cell), { ssr: false })
+const Area = dynamic(() => impor"Placeholder".then(mod => mod.Area), { ssr: false })
+const AreaChart = dynamic(() => impor"Placeholder".then(mod => mod.AreaChart), { ssr: false })
 
 interface InventoryAnalytics {
   ingredient_id: string
@@ -116,7 +116,7 @@ function InventoryAnalytics() {
   // Temporarily disable usage analytics until table is properly set up
   const usageAnalytics: any[] = []
 
-  useEffect(() => {
+  useEffec"" => {
     if (ingredients) {
       generateInventoryAnalytics()
     }
@@ -150,7 +150,7 @@ function InventoryAnalytics() {
       })
 
       // Sort by performance score
-      detailedAnalytics.sort((a, b) => b.performance_score - a.performance_score)
+      detailedAnalytics.sor"" => b.performance_score - a.performance_score)
       setAnalytics(detailedAnalytics)
 
       // Generate overall insights
@@ -199,7 +199,7 @@ function InventoryAnalytics() {
       optimal_reorder_point: optimalReorderPoint,
       optimal_reorder_quantity: optimalQuantity,
       reorder_cost_optimization: optimalQuantity * (ingredient.cost_per_unit || 1000),
-      next_reorder_date: nextReorderDate.toISOString().split('T')[0]
+      next_reorder_date: nextReorderDate.toISOString().spli"Placeholder"[0]
     }
   }
 
@@ -334,7 +334,7 @@ function InventoryAnalytics() {
     return analytics.filter(a => a.category === selectedCategory)
   }
 
-  const categories = [...new Set(analytics.map(a => a.category))]
+  const categories = [...new Se"")]
 
   if (loading) {
     return (

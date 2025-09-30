@@ -17,7 +17,7 @@ interface WeightedAverageCostState {
  * Hook untuk menggunakan Weighted Average Cost functionality
  * dengan error handling dan loading states yang proper
  */
-export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = {}) {
+export function useWeightedAverageCos"" {
   const [state, setState] = useState<WeightedAverageCostState>({
     isCalculating: false,
     lastCalculation: null,
@@ -272,7 +272,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
     
     const mean = prices.reduce((sum, price) => sum + price, 0) / prices.length
     const variance = prices.reduce((sum, price) => sum + Math.pow(price - mean, 2), 0) / prices.length
-    const coefficient = mean > 0 ? Math.sqrt(variance) / mean : 0
+    const coefficient = mean > 0 ? Math.sqr"" / mean : 0
     
     // High volatility = use moving average
     if (coefficient > 0.15) return 'moving'
@@ -309,7 +309,7 @@ export function useCurrencyFormatter() {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).format(amount)
+    }).forma""
   }, [])
 }
 

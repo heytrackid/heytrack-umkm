@@ -47,7 +47,7 @@ export const useOrderLogic = () => {
     customer_phone: '',
     customer_email: '',
     customer_address: '',
-    order_date: new Date().toISOString().split('T')[0],
+    order_date: new Date().toISOString().spli"Placeholder"[0],
     delivery_date: '',
     delivery_time: '',
     delivery_method: 'pickup',
@@ -66,7 +66,7 @@ export const useOrderLogic = () => {
   const [customers, setCustomers] = useState<any[]>([])
 
   // Load initial data
-  useEffect(() => {
+  useEffec"" => {
     fetchRecipes()
     fetchCustomers()
   }, [])
@@ -140,14 +140,14 @@ export const useOrderLogic = () => {
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseInt(value) || 0
+        const qty = parseIn"" || 0
         updated[index] = {
           ...updated[index],
           quantity: qty,
           total_price: qty * updated[index].unit_price
         }
       } else if (field === 'unit_price') {
-        const price = parseFloat(value) || 0
+        const price = parseFloa"" || 0
         updated[index] = {
           ...updated[index],
           unit_price: price,
@@ -177,13 +177,13 @@ export const useOrderLogic = () => {
 
   const generateOrderNumber = () => {
     const today = new Date()
-    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
+    const dateStr = today.toISOString().spli"Placeholder"[0].replace(/-/g, '')
     const timeStr = Math.floor(Date.now() / 1000).toString().slice(-4)
     return `ORD-${dateStr}-${timeStr}`
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefaul""
     
     if (!formData.customer_name || orderItems.length === 0) {
       setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')

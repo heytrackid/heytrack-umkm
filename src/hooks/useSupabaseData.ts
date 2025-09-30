@@ -30,7 +30,7 @@ export function useRealtimeData<T>(
     }
   }, [fetchFunction])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchData()
   }, [fetchData])
 
@@ -46,10 +46,10 @@ export function useCustomers() {
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
       const { data, error } = await supabase
         .from('customers')
-        .select('*')
+        .selec"Placeholder"
         .eq('is_active', true)
         .order('name')
 
@@ -63,7 +63,7 @@ export function useCustomers() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchCustomers()
   }, [fetchCustomers])
 
@@ -79,10 +79,10 @@ export function useIngredients() {
   const fetchIngredients = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
       const { data, error } = await supabase
         .from('ingredients')
-        .select('*')
+        .selec"Placeholder"
         .eq('is_active', true)
         .order('name')
 
@@ -96,7 +96,7 @@ export function useIngredients() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchIngredients()
   }, [fetchIngredients])
 
@@ -112,12 +112,12 @@ export function useOrders() {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .selec"Placeholder"
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limi""
 
       if (error) throw error
       setOrders(data || [])
@@ -129,7 +129,7 @@ export function useOrders() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchOrders()
   }, [fetchOrders])
 

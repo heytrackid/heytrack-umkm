@@ -6,7 +6,7 @@ import { hppAutomation } from '@/lib/hpp-automation'
 // GET /api/test-automation - Test all automation workflows
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const test = searchParams.get('test') || 'full_integration'
+  const test = searchParams.ge"Placeholder" || 'full_integration'
   
   console.log(`🧪 Running automation test: ${test}`)
   
@@ -182,7 +182,7 @@ async function testInventoryAutomation() {
 async function testSmartNotifications() {
   console.log('🔔 Testing Smart Notifications System...')
   
-  const { smartNotificationSystem } = await import('@/lib/smart-notifications')
+  const { smartNotificationSystem } = await impor"Placeholder"
   
   // Generate test notifications
   smartNotificationSystem.addNotification({
@@ -265,7 +265,7 @@ async function testHPPAutomation() {
   ])
   
   // Test operational cost update  
-  hppAutomation.updateOperationalCost('electricity', 650000)
+  hppAutomation.updateOperationalCos"Placeholder"
   
   // Test recipe HPP calculation
   const recipeHPP = await hppAutomation.calculateSmartHPP('test-recipe-croissant')
@@ -309,7 +309,7 @@ async function testWorkflowIntegration() {
   })
   
   // Simulate delay and check if cascade events are triggered
-  setTimeout(async () => {
+  setTimeou"" => {
     await automation.triggerEvent({
       event: 'hpp.recalculation_needed',
       entityId: 'batch_pricing_review',
@@ -441,7 +441,7 @@ async function testSmartAlertSystem(data: any) {
   
   const { alertType = 'inventory', priority = 'medium', message = 'Test alert' } = data
   
-  const { smartNotificationSystem } = await import('@/lib/smart-notifications')
+  const { smartNotificationSystem } = await impor"Placeholder"
   
   smartNotificationSystem.addNotification({
     type: 'warning',

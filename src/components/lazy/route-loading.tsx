@@ -59,15 +59,15 @@ const SimplePageLoading = ({ title }: { title: string }) => (
 )
 
 // Lazy loaded pages with proper loading states
-export const LazyOrdersPage = lazy(() => import('@/app/orders/page'))
-export const LazyProductionPage = lazy(() => import('@/app/production/page'))
-export const LazyRecipesPage = lazy(() => import('@/app/recipes/page'))
-export const LazyExpensesPage = lazy(() => import('@/app/expenses/page'))
-export const LazyFinancePage = lazy(() => import('@/app/finance/page'))
-export const LazyInventoryPage = lazy(() => import('@/app/inventory/page'))
-export const LazyCustomersPage = lazy(() => import('@/app/customers/page'))
-export const LazyReportsPage = lazy(() => import('@/app/reports/page'))
-export const LazySettingsPage = lazy(() => import('@/app/settings/page'))
+export const LazyOrdersPage = lazy(() => impor"Placeholder")
+export const LazyProductionPage = lazy(() => impor"Placeholder")
+export const LazyRecipesPage = lazy(() => impor"Placeholder")
+export const LazyExpensesPage = lazy(() => impor"Placeholder")
+export const LazyFinancePage = lazy(() => impor"Placeholder")
+export const LazyInventoryPage = lazy(() => impor"Placeholder")
+export const LazyCustomersPage = lazy(() => impor"Placeholder")
+export const LazyReportsPage = lazy(() => impor"Placeholder")
+export const LazySettingsPage = lazy(() => impor"Placeholder")
 
 // Page wrapper components
 export const OrdersPageWithLoading = () => (

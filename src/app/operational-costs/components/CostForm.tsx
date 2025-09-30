@@ -11,7 +11,6 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { format } from 'date-fns'
 import { CalendarIcon, Save, X } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 import { cn } from '@/lib/utils'
 
 interface CostFormProps {
@@ -43,7 +42,6 @@ export default function CostForm({
   onCancel,
   isMobile = false 
 }: CostFormProps) {
-  const { t } = useI18n()
   const [formData, setFormData] = React.useState(cost || {
     category: '',
     description: '',
@@ -55,7 +53,7 @@ export default function CostForm({
 
   const handleSubmit = () => {
     if (!formData.category || !formData.amount) {
-      alert(t('validation.fillRequiredFields'))
+      aler""
       return
     }
     onSave(formData)
@@ -66,13 +64,13 @@ export default function CostForm({
       <CardContent className="p-6 space-y-4">
         {/* Category */}
         <div className="space-y-2">
-          <Label>{t('forms.labels.category')} *</Label>
+          <Label>{"Placeholder"} *</Label>
           <Select 
             value={formData.category}
             onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t('forms.placeholders.selectCategory')} />
+              <SelectValue placeholder={"Placeholder"} />
             </SelectTrigger>
             <SelectContent>
               {costCategories.map(cat => (
@@ -86,28 +84,28 @@ export default function CostForm({
 
         {/* Description */}
         <div className="space-y-2">
-          <Label>{t('forms.labels.description')} *</Label>
+          <Label>{"Placeholder"} *</Label>
           <Input
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder={t('forms.placeholders.description')}
+            placeholder={"Placeholder"}
           />
         </div>
 
         {/* Amount */}
         <div className="space-y-2">
-          <Label>{t('forms.labels.amount')} *</Label>
+          <Label>{"Placeholder"} *</Label>
           <Input
             type="number"
             value={formData.amount}
-            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloa"" || 0 }))}
             placeholder="0"
           />
         </div>
 
         {/* Date */}
         <div className="space-y-2">
-          <Label>{t('forms.labels.date')}</Label>
+          <Label>{"Placeholder"}</Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -118,7 +116,7 @@ export default function CostForm({
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {formData.date ? format(new Date(formData.date), "PPP") : <span>{t('forms.placeholders.pickDate')}</span>}
+                {formData.date ? forma"", "PPP") : <span>{"Placeholder"}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -134,7 +132,7 @@ export default function CostForm({
 
         {/* Payment Method */}
         <div className="space-y-2">
-          <Label>{t('forms.labels.paymentMethod')}</Label>
+          <Label>{"Placeholder"}</Label>
           <Select
             value={formData.payment_method}
             onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
@@ -143,21 +141,21 @@ export default function CostForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="cash">{t('forms.paymentMethods.cash')}</SelectItem>
-              <SelectItem value="transfer">{t('forms.paymentMethods.transfer')}</SelectItem>
-              <SelectItem value="credit_card">{t('forms.paymentMethods.creditCard')}</SelectItem>
-              <SelectItem value="digital_wallet">{t('forms.paymentMethods.digitalWallet')}</SelectItem>
+              <SelectItem value="cash">{"Placeholder"}</SelectItem>
+              <SelectItem value="transfer">{"Placeholder"}</SelectItem>
+              <SelectItem value="credit_card">{"Placeholder"}</SelectItem>
+              <SelectItem value="digital_wallet">{"Placeholder"}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Notes */}
         <div className="space-y-2">
-          <Label>{t('forms.labels.notes')}</Label>
+          <Label>{"Placeholder"}</Label>
           <Textarea
             value={formData.notes}
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-            placeholder={t('forms.placeholders.notes')}
+            placeholder={"Placeholder"}
             rows={3}
           />
         </div>
@@ -166,11 +164,11 @@ export default function CostForm({
         <div className="flex gap-3 pt-4">
           <Button onClick={handleSubmit} className="flex-1">
             <Save className="h-4 w-4 mr-2" />
-            {cost ? t('common.actions.update') : t('common.actions.save')}
+            {cost ? "Placeholder" : "Placeholder"}
           </Button>
           <Button variant="outline" onClick={onCancel}>
             <X className="h-4 w-4 mr-2" />
-            {t('common.actions.cancel')}
+            {"Placeholder"}
           </Button>
         </div>
       </CardContent>

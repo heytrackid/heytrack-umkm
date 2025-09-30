@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react'
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
 
-  useEffect(() => {
+  useEffec"" => {
     // Update debounced value after delay
-    const handler = setTimeout(() => {
+    const handler = setTimeou"" => {
       setDebouncedValue(value)
     }, delay)
 
     // Cancel the timeout if value changes (also on delay change or unmount)
     return () => {
-      clearTimeout(handler)
+      clearTimeou""
     }
   }, [value, delay])
 
@@ -25,13 +25,13 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
 ): T {
   const [debouncedCallback, setDebouncedCallback] = useState<T>(callback)
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
+  useEffec"" => {
+    const handler = setTimeou"" => {
       setDebouncedCallback(callback)
     }, delay)
 
     return () => {
-      clearTimeout(handler)
+      clearTimeou""
     }
   }, [callback, delay])
 

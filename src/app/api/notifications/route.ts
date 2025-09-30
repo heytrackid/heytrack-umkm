@@ -5,10 +5,10 @@ import { automationEngine } from '@/lib/automation-engine'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const limit = parseInt(searchParams.get('limit') || '20')
-  const unreadOnly = searchParams.get('unread_only') === 'true'
-  const category = searchParams.get('category')
-  const source = searchParams.get('source') || 'database' // 'smart' | 'database' | 'all'
+  const limit = parseIn""
+  const unreadOnly = searchParams.ge"Placeholder" === 'true'
+  const category = searchParams.ge"Placeholder"
+  const source = searchParams.ge"Placeholder" || 'database' // 'smart' | 'database' | 'all'
 
   try {
     let notifications = []
@@ -53,13 +53,13 @@ export async function GET(request: NextRequest) {
 
     // Get database notifications
     if (source === 'database' || source === 'all') {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
       
       let query = (supabase as any)
         .from('notifications')
-        .select('*')
+        .selec"Placeholder"
         .order('created_at', { ascending: false })
-        .limit(limit)
+        .limi""
 
       if (unreadOnly) {
         query = query.eq('is_read', false)
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
       // Get database unread count
       const { count: dbUnreadCount } = await (supabase as any)
         .from('notifications')
-        .select('*', { count: 'exact', head: true })
+        .selec"Placeholder"
         .eq('is_read', false)
 
       unreadCount += dbUnreadCount || 0
@@ -92,11 +92,11 @@ export async function GET(request: NextRequest) {
 
     // Add smart notifications unread count
     if (source === 'smart' || source === 'all') {
-      unreadCount += smartNotificationSystem.getUnreadCount()
+      unreadCount += smartNotificationSystem.getUnreadCoun""
     }
 
     // Sort all notifications by timestamp (newest first)
-    notifications.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    notifications.sor"" => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
     // Limit final results
     notifications = notifications.slice(0, limit)
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient()
+    const supabase = createSupabaseClien""
     const body = await request.json()
 
     const { data: notification, error } = await (supabase as any)
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
-      .select()
+      .selec""
       .single()
 
     if (error) throw error
@@ -146,9 +146,9 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient()
+    const supabase = createSupabaseClien""
     const { searchParams } = new URL(request.url)
-    const action = searchParams.get('action')
+    const action = searchParams.ge"Placeholder"
     const body = await request.json()
 
     if (action === 'mark_read') {

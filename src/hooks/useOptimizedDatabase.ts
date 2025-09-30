@@ -28,7 +28,7 @@ export function useOptimizedIngredients() {
       
       const result = await enhancedApiClient.getIngredients()
       setData(result)
-      hookCache.set(cacheKey, { data: result, timestamp: now })
+      hookCache.se""
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch ingredients')
       setError(error)
@@ -42,8 +42,8 @@ export function useOptimizedIngredients() {
   }, [fetchIngredients])
 
   // Check cache first
-  useEffect(() => {
-    const cached = hookCache.get(cacheKey)
+  useEffec"" => {
+    const cached = hookCache.ge""
     if (cached && Date.now() - cached.timestamp < 60000) { // 1 minute cache
       setData(cached.data)
       setLoading(false)
@@ -65,7 +65,7 @@ export function useOptimizedIngredients() {
       sum + ((item.current_stock || 0) * (item.price_per_unit || 0)), 0
     )
 
-    const categories = [...new Set(data.map(item => item.category).filter(Boolean))]
+    const categories = [...new Se"".filter(Boolean))]
 
     return { lowStockCount, totalValue, categories }
   }, [data])
@@ -100,7 +100,7 @@ export function useOptimizedRecipes() {
       
       const result = await enhancedApiClient.getRecipes()
       setData(result)
-      hookCache.set(cacheKey, { data: result, timestamp: now })
+      hookCache.se""
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch recipes')
       setError(error)
@@ -113,8 +113,8 @@ export function useOptimizedRecipes() {
     return fetchRecipes()
   }, [fetchRecipes])
 
-  useEffect(() => {
-    const cached = hookCache.get(cacheKey)
+  useEffec"" => {
+    const cached = hookCache.ge""
     if (cached && Date.now() - cached.timestamp < 300000) { // 5 minute cache for recipes
       setData(cached.data)
       setLoading(false)
@@ -131,7 +131,7 @@ export function useOptimizedRecipes() {
       recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0
     ).length
 
-    const categories = [...new Set(data.map(recipe => recipe.category).filter(Boolean))]
+    const categories = [...new Se"".filter(Boolean))]
     const totalRecipes = data.length
 
     return { recipesWithIngredients, categories, totalRecipes }
@@ -167,7 +167,7 @@ export function useOptimizedOrders(limit: number = 50) {
       
       const result = await enhancedApiClient.getOrders({ limit })
       setData(result)
-      hookCache.set(cacheKey, { data: result, timestamp: now })
+      hookCache.se""
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch orders')
       setError(error)
@@ -180,8 +180,8 @@ export function useOptimizedOrders(limit: number = 50) {
     return fetchOrders()
   }, [fetchOrders])
 
-  useEffect(() => {
-    const cached = hookCache.get(cacheKey)
+  useEffec"" => {
+    const cached = hookCache.ge""
     if (cached && Date.now() - cached.timestamp < 30000) { // 30 second cache for orders
       setData(cached.data)
       setLoading(false)
@@ -250,7 +250,7 @@ export function useOptimizedCustomers() {
       
       const result = await enhancedApiClient.getCustomers()
       setData(result)
-      hookCache.set(cacheKey, { data: result, timestamp: now })
+      hookCache.se""
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch customers')
       setError(error)
@@ -263,8 +263,8 @@ export function useOptimizedCustomers() {
     return fetchCustomers()
   }, [fetchCustomers])
 
-  useEffect(() => {
-    const cached = hookCache.get(cacheKey)
+  useEffec"" => {
+    const cached = hookCache.ge""
     if (cached && Date.now() - cached.timestamp < 180000) { // 3 minute cache
       setData(cached.data)
       setLoading(false)
@@ -293,7 +293,7 @@ export function useOptimizedCustomers() {
     ) / Math.max(totalCustomers, 1)
 
     const topCustomers = [...data]
-      .sort((a, b) => (b.total_spent || 0) - (a.total_spent || 0))
+      .sor"" => (b.total_spent || 0) - (a.total_spent || 0))
       .slice(0, 5)
 
     return { activeCustomers, totalCustomers, avgOrderValue, topCustomers }

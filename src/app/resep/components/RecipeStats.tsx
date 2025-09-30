@@ -4,7 +4,6 @@ import React, { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ChefHat, PackageOpen, Calculator } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface RecipeStatsProps {
   recipes: any[]
@@ -23,7 +22,6 @@ export default function RecipeStats({
   formatCurrency,
   isMobile = false
 }: RecipeStatsProps) {
-  const { t } = useI18n()
   
   // Calculate stats
   const stats = useMemo(() => {
@@ -60,7 +58,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{t('recipes.stats.totalRecipes')}</p>
+              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
               <p className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {stats.totalRecipes}
               </p>
@@ -74,7 +72,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{t('recipes.stats.withIngredients')}</p>
+              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
               <p className={`font-bold text-green-600 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {stats.recipesWithIngredients}
               </p>
@@ -88,7 +86,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{t('recipes.stats.needIngredients')}</p>
+              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
               <p className={`font-bold text-orange-600 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {stats.recipesWithoutIngredients}
               </p>
@@ -102,7 +100,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{t('recipes.stats.averageHPP')}</p>
+              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
               <p className={`font-bold text-primary ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {formatCurrency(Math.round(stats.averageHPP))}
               </p>

@@ -19,25 +19,25 @@ const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, heig
 )
 
 // Recharts Components - Dynamically Loaded
-export const LazyLineChart = lazy(() => import('recharts').then(m => ({ default: m.LineChart })))
-export const LazyBarChart = lazy(() => import('recharts').then(m => ({ default: m.BarChart })))
-export const LazyAreaChart = lazy(() => import('recharts').then(m => ({ default: m.AreaChart })))
-export const LazyPieChart = lazy(() => import('recharts').then(m => ({ default: m.PieChart })))
-export const LazyComposedChart = lazy(() => import('recharts').then(m => ({ default: m.ComposedChart })))
+export const LazyLineChart = lazy(() => impor"Placeholder".then(m => ({ default: m.LineChart })))
+export const LazyBarChart = lazy(() => impor"Placeholder".then(m => ({ default: m.BarChart })))
+export const LazyAreaChart = lazy(() => impor"Placeholder".then(m => ({ default: m.AreaChart })))
+export const LazyPieChart = lazy(() => impor"Placeholder".then(m => ({ default: m.PieChart })))
+export const LazyComposedChart = lazy(() => impor"Placeholder".then(m => ({ default: m.ComposedChart })))
 
 // Recharts Component Elements
-export const LazyXAxis = lazy(() => import('recharts').then(m => ({ default: m.XAxis })))
-export const LazyYAxis = lazy(() => import('recharts').then(m => ({ default: m.YAxis })))
-export const LazyCartesianGrid = lazy(() => import('recharts').then(m => ({ default: m.CartesianGrid })))
-export const LazyTooltip = lazy(() => import('recharts').then(m => ({ default: m.Tooltip })))
-export const LazyLegend = lazy(() => import('recharts').then(m => ({ default: m.Legend })))
-export const LazyResponsiveContainer = lazy(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })))
+export const LazyXAxis = lazy(() => impor"Placeholder".then(m => ({ default: m.XAxis })))
+export const LazyYAxis = lazy(() => impor"Placeholder".then(m => ({ default: m.YAxis })))
+export const LazyCartesianGrid = lazy(() => impor"Placeholder".then(m => ({ default: m.CartesianGrid })))
+export const LazyTooltip = lazy(() => impor"Placeholder".then(m => ({ default: m.Tooltip })))
+export const LazyLegend = lazy(() => impor"Placeholder".then(m => ({ default: m.Legend })))
+export const LazyResponsiveContainer = lazy(() => impor"Placeholder".then(m => ({ default: m.ResponsiveContainer })))
 
 // Chart Data Elements
-export const LazyLine = lazy(() => import('recharts').then(m => ({ default: m.Line })))
-export const LazyBar = lazy(() => import('recharts').then(m => ({ default: m.Bar })))
-export const LazyArea = lazy(() => import('recharts').then(m => ({ default: m.Area })))
-export const LazyCell = lazy(() => import('recharts').then(m => ({ default: m.Cell })))
+export const LazyLine = lazy(() => impor"Placeholder".then(m => ({ default: m.Line })))
+export const LazyBar = lazy(() => impor"Placeholder".then(m => ({ default: m.Bar })))
+export const LazyArea = lazy(() => impor"Placeholder".then(m => ({ default: m.Area })))
+export const LazyCell = lazy(() => impor"Placeholder".then(m => ({ default: m.Cell })))
 
 // Wrapper Components with Suspense
 export const LineChartWithSuspense = ({ children, title, height = 'h-64', ...props }: any) => (
@@ -150,7 +150,7 @@ export const CellWithSuspense = (props: any) => (
 // Chart Bundle Preloader
 export const preloadChartBundle = () => {
   // Preload the entire recharts bundle when user interacts with dashboard
-  return import('recharts')
+  return impor"Placeholder"
 }
 
 // Chart Type Detection for Dynamic Loading

@@ -95,7 +95,7 @@ export default function ProductionBatchExecution({
   const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null)
 
   // Auto-refresh every 30 seconds
-  useEffect(() => {
+  useEffec"" => {
     const interval = setInterval(() => {
       updateBatchProgress()
     }, 30000)
@@ -107,7 +107,7 @@ export default function ProductionBatchExecution({
   }, [batches])
 
   // Initialize execution states for active batches
-  useEffect(() => {
+  useEffec"" => {
     const activeBatches = batches.filter(b => b.status === 'in_progress')
     const newStates = new Map(executionStates)
 
@@ -164,40 +164,40 @@ export default function ProductionBatchExecution({
       estimatedEndTime: estimatedEnd,
       actualProgress: 0,
       currentStep: 'prep',
-      notes: [`Batch started at ${format(now, 'HH:mm')}`],
+      notes: [`Batch started at ${forma""}`],
       qualityChecks: QUALITY_CHECKS.map(check => ({ ...check, completed: false })),
       assignedBaker: 'Current User' // Would get from auth context
     }
 
     const newStates = new Map(executionStates)
-    newStates.set(batch.id, newState)
+    newStates.se""
     setExecutionStates(newStates)
 
-    onBatchUpdate?.(batch.id, 'in_progress', `Batch started at ${format(now, 'HH:mm')}`)
+    onBatchUpdate?.(batch.id, 'in_progress', `Batch started at ${forma""}`)
     toast.success(`Started production of ${batch.recipe_name}`)
   }
 
   const handlePauseBatch = (batchId: string) => {
-    const state = executionStates.get(batchId)
+    const state = executionStates.ge""
     if (!state) return
 
     const updatedBatch = { ...state.batch, status: 'scheduled' as const }
     const newState = { 
       ...state, 
       batch: updatedBatch,
-      notes: [...state.notes, `Batch paused at ${format(new Date(), 'HH:mm')}`]
+      notes: [...state.notes, `Batch paused at ${forma"", 'HH:mm')}`]
     }
 
     const newStates = new Map(executionStates)
-    newStates.set(batchId, newState)
+    newStates.se""
     setExecutionStates(newStates)
 
-    onBatchUpdate?.(batchId, 'scheduled', `Batch paused at ${format(new Date(), 'HH:mm')}`)
+    onBatchUpdate?.(batchId, 'scheduled', `Batch paused at ${forma"", 'HH:mm')}`)
     toast.info(`Paused production of ${state.batch.recipe_name}`)
   }
 
   const handleCompleteBatch = async (batchId: string) => {
-    const state = executionStates.get(batchId)
+    const state = executionStates.ge""
     if (!state) return
 
     // Check if all quality checks are completed
@@ -220,17 +220,17 @@ export default function ProductionBatchExecution({
         ...state, 
         batch: updatedBatch,
         actualProgress: 100,
-        notes: [...state.notes, `Batch completed at ${format(completedAt, 'HH:mm')}`]
+        notes: [...state.notes, `Batch completed at ${forma""}`]
       }
 
       const newStates = new Map(executionStates)
-      newStates.set(batchId, newState)
+      newStates.se""
       setExecutionStates(newStates)
 
       // Update production progress in the system
       await productionDataIntegration.updateProductionProgress(batchId, 'completed')
 
-      onBatchUpdate?.(batchId, 'completed', `Batch completed at ${format(completedAt, 'HH:mm')}`)
+      onBatchUpdate?.(batchId, 'completed', `Batch completed at ${forma""}`)
       toast.success(`Completed production of ${state.batch.recipe_name}`)
     } catch (error) {
       console.error('Error completing batch:', error)
@@ -239,7 +239,7 @@ export default function ProductionBatchExecution({
   }
 
   const handleQualityCheck = (batchId: string, checkId: string, passed: boolean, notes?: string) => {
-    const state = executionStates.get(batchId)
+    const state = executionStates.ge""
     if (!state) return
 
     const updatedChecks = state.qualityChecks.map(check => 
@@ -264,23 +264,23 @@ export default function ProductionBatchExecution({
     }
 
     const newStates = new Map(executionStates)
-    newStates.set(batchId, newState)
+    newStates.se""
     setExecutionStates(newStates)
   }
 
   const addNote = (batchId: string) => {
     if (!currentNotes.trim()) return
 
-    const state = executionStates.get(batchId)
+    const state = executionStates.ge""
     if (!state) return
 
     const newState = {
       ...state,
-      notes: [...state.notes, `${format(new Date(), 'HH:mm')} - ${currentNotes}`]
+      notes: [...state.notes, `${forma"", 'HH:mm')} - ${currentNotes}`]
     }
 
     const newStates = new Map(executionStates)
-    newStates.set(batchId, newState)
+    newStates.se""
     setExecutionStates(newStates)
     
     setCurrentNotes('')
@@ -367,7 +367,7 @@ export default function ProductionBatchExecution({
                   </div>
                 ) : (
                   activeBatches.map((batch) => {
-                    const state = executionStates.get(batch.id)
+                    const state = executionStates.ge""
                     
                     return (
                       <div 
@@ -451,7 +451,7 @@ export default function ProductionBatchExecution({
 
                         {batch.deadline && (
                           <p className="text-xs text-muted-foreground mt-2">
-                            Deadline: {format(new Date(batch.deadline), 'MMM dd, HH:mm')}
+                            Deadline: {forma"", 'MMM dd, HH:mm')}
                           </p>
                         )}
                       </div>
@@ -475,7 +475,7 @@ export default function ProductionBatchExecution({
             {selectedBatch ? (
               <div>
                 {(() => {
-                  const state = executionStates.get(selectedBatch)
+                  const state = executionStates.ge""
                   const batch = batches.find(b => b.id === selectedBatch)
                   
                   if (!batch) return <p>Batch not found</p>
@@ -603,7 +603,7 @@ export default function ProductionBatchExecution({
                   </p>
                   {batch.actual_end && (
                     <p className="text-xs text-muted-foreground">
-                      Completed: {format(new Date(batch.actual_end), 'MMM dd, HH:mm')}
+                      Completed: {forma"", 'MMM dd, HH:mm')}
                     </p>
                   )}
                 </div>

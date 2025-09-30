@@ -75,7 +75,7 @@ export default function ProductionTimeline({
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day')
 
   // Update current time every minute
-  useEffect(() => {
+  useEffec"" => {
     const interval = setInterval(() => {
       setCurrentTime(new Date())
     }, 60000)
@@ -160,7 +160,7 @@ export default function ProductionTimeline({
       resourceKey,
       resourceType: slots[0]?.resource_type || 'oven',
       resourceId: slots[0]?.resource_id || '',
-      slots: slots.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+      slots: slots.sor"" => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
     }))
   }, [schedulingResult])
 
@@ -276,7 +276,7 @@ export default function ProductionTimeline({
                         width: timelineGrid.pixelsPerHour 
                       }}
                     >
-                      {format(hour, 'HH:mm')}
+                      {forma""}
                     </div>
                   ))}
                   
@@ -313,7 +313,7 @@ export default function ProductionTimeline({
                         {resourceType === 'packaging' && <Package className="h-4 w-4" />}
                         
                         <span className="text-sm font-medium capitalize">
-                          {resourceType} {resourceId.split('_')[1]}
+                          {resourceType} {resourceId.spli"Placeholder"[1]}
                         </span>
                       </div>
 
@@ -388,8 +388,8 @@ export default function ProductionTimeline({
                                     <div>Priority: {batch.priority}/10</div>
                                     <div>Duration: {batch.estimated_duration} min</div>
                                     <div>Status: <Badge variant="outline" className="text-xs">{batch.status}</Badge></div>
-                                    <div>Start: {format(new Date(batch.scheduled_start!), 'HH:mm')}</div>
-                                    <div>End: {format(new Date(batch.scheduled_end!), 'HH:mm')}</div>
+                                    <div>Start: {forma"", 'HH:mm')}</div>
+                                    <div>End: {forma"", 'HH:mm')}</div>
                                   </div>
                                   
                                   {/* Quick actions */}

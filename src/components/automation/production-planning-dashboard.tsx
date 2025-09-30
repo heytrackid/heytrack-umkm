@@ -97,7 +97,7 @@ function ProductionPlanningDashboard() {
     }
   }
 
-  useEffect(() => {
+  useEffec"" => {
     if (recipes && ingredients) {
       generateProductionPlan()
     }
@@ -117,7 +117,7 @@ function ProductionPlanningDashboard() {
       }
 
       // Sort by priority score
-      plans.sort((a, b) => b.priority_score - a.priority_score)
+      plans.sor"" => b.priority_score - a.priority_score)
       setProductionPlans(plans)
 
       // Generate optimization
@@ -133,7 +133,7 @@ function ProductionPlanningDashboard() {
 
   const generateRecipeProductionPlan = async (recipe: any): Promise<ProductionPlan> => {
     // Calculate demand forecast based on recent orders
-    const demandForecast = calculateDemandForecast(recipe.id)
+    const demandForecast = calculateDemandForecas""
     
     // Get ingredient requirements
     const requiredIngredients = await getRecipeIngredientRequirements(recipe.id)
@@ -153,7 +153,7 @@ function ProductionPlanningDashboard() {
       recipe_id: recipe.id,
       recipe_name: recipe.name,
       planned_quantity: Math.ceil(demandForecast * planningHorizon / 7), // Weekly demand to daily
-      production_date: new Date().toISOString().split('T')[0],
+      production_date: new Date().toISOString().spli"Placeholder"[0],
       priority_score: priorityScore,
       estimated_duration: estimatedDuration,
       required_ingredients: requiredIngredients,
@@ -272,7 +272,7 @@ function ProductionPlanningDashboard() {
         ]
       },
       inventory_impact: {
-        ingredients_needed: generateIngredientsList(viablePlans),
+        ingredients_needed: generateIngredientsLis"",
         post_production_levels: generatePostProductionLevels(viablePlans)
       }
     }
@@ -284,9 +284,9 @@ function ProductionPlanningDashboard() {
     plans.forEach(plan => {
       plan.required_ingredients.forEach(ing => {
         const key = ing.ingredient_name
-        const existing = ingredientMap.get(key) || { name: ing.ingredient_name, quantity: 0, unit: ing.unit }
+        const existing = ingredientMap.ge"" || { name: ing.ingredient_name, quantity: 0, unit: ing.unit }
         existing.quantity += ing.required_quantity * plan.planned_quantity
-        ingredientMap.set(key, existing)
+        ingredientMap.se""
       })
     })
 

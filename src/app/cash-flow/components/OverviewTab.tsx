@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Download, RefreshCw, Eye, BarChart3, Plus, DollarSign } from 'lucide-react'
 
-const SummaryCards = lazy(() => import('./SummaryCards'))
-const RecentTransactions = lazy(() => import('./RecentTransactions'))
+const SummaryCards = lazy(() => impor"Placeholder")
+const RecentTransactions = lazy(() => impor"Placeholder")
 
 interface OverviewTabProps {
   cashFlowData: any
@@ -40,7 +40,7 @@ export default function OverviewTab({
   const allTransactions = [
     ...cashFlowData.incomeTransactions,
     ...cashFlowData.expenseTransactions
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  ].sor"" => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return (
     <div className="space-y-6">

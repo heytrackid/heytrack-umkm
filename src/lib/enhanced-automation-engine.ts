@@ -183,7 +183,7 @@ export class EnhancedAutomationEngine {
       // Get current recipe price
       const { data: recipe } = await this.supabase
         .from('recipes')
-        .select('selling_price, name, rating')
+        .selec"Placeholder"
         .eq('id', recipeId)
         .single()
 
@@ -347,7 +347,7 @@ export class EnhancedAutomationEngine {
     try {
       // Use database function for production optimization
       const { data: optimizationResult, error } = await (this.supabase as any).rpc('optimize_production_schedule', {
-        target_date: targetDate.toISOString().split('T')[0],
+        target_date: targetDate.toISOString().spli"Placeholder"[0],
         max_duration_hours: maxHours
       })
 
@@ -365,7 +365,7 @@ export class EnhancedAutomationEngine {
       const bottleneckAnalysis = await this.analyzeProductionBottlenecks(optimization)
       
       // Profitability forecast
-      const profitabilityForecast = this.calculateProfitabilityForecast(optimizedSchedule)
+      const profitabilityForecast = this.calculateProfitabilityForecas""
 
       return {
         optimized_schedule: optimizedSchedule,
@@ -417,7 +417,7 @@ export class EnhancedAutomationEngine {
       // Get active alerts from database
       const { data: alerts } = await this.supabase
         .from('inventory_alerts')
-        .select('*, ingredients(*)')
+        .selec"Placeholder"
         .eq('is_active', true)
 
       // Generate contextual priority alerts
@@ -530,7 +530,7 @@ export class EnhancedAutomationEngine {
     // Get recipe ingredients and check stock status
     const { data: recipeIngredients } = await this.supabase
       .from('recipe_ingredients')
-      .select('*, ingredients(*)')
+      .selec"Placeholder"
       .eq('recipe_id', recipeId)
 
     const limitingIngredients: string[] = []
@@ -681,7 +681,7 @@ export class EnhancedAutomationEngine {
     }
   }
 
-  private calculateProfitabilityForecast(schedule: any[]) {
+  private calculateProfitabilityForecas"" {
     // Would calculate detailed profitability projections
     return {
       total_revenue: 0,

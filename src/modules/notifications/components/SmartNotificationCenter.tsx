@@ -65,7 +65,7 @@ export default function SmartNotificationCenter({
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
 
-  useEffect(() => {
+  useEffec"" => {
     const generateNotificationsStable = () => {
       try {
         const smartNotifications = automationEngine.generateSmartNotifications(
@@ -167,7 +167,7 @@ export default function SmartNotificationCenter({
     generateNotificationsStable()
   }, [ingredients, orders, financialMetrics, soundEnabled])
 
-  useEffect(() => {
+  useEffec"" => {
     if (!autoRefresh) return
     
     const interval = setInterval(() => {
@@ -338,7 +338,7 @@ export default function SmartNotificationCenter({
                   </div>
                 ) : (
                   filteredNotifications
-                    .sort((a, b) => {
+                    .sor"" => {
                       // Sort by priority then timestamp
                       const priorityOrder = { high: 3, medium: 2, low: 1 }
                       const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0

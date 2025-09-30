@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 // Lazy load finance components with optimized loading
 export const LazySmartExpenseAutomation = createLazyComponent(
-  () => import('./SmartExpenseAutomation'),
+  () => impor"Placeholder",
   {
     name: 'Smart Expense Automation',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -14,7 +14,7 @@ export const LazySmartExpenseAutomation = createLazyComponent(
 )
 
 export const LazySmartFinancialDashboard = createLazyComponent(
-  () => import('./SmartFinancialDashboard'),
+  () => impor"Placeholder",
   {
     name: 'Smart Financial Dashboard',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -23,7 +23,7 @@ export const LazySmartFinancialDashboard = createLazyComponent(
 )
 
 export const LazyFinancialTrendsChart = createLazyComponent(
-  () => import('./FinancialTrendsChart'),
+  () => impor"Placeholder",
   {
     name: 'Financial Trends Chart',
     fallback: <ComponentSkeletons.Chart height={400} />,
@@ -34,9 +34,9 @@ export const LazyFinancialTrendsChart = createLazyComponent(
 // Preload critical finance components for better UX
 export const preloadFinanceComponents = () => {
   // Preload most commonly used components
-  import('./SmartExpenseAutomation')
-  import('./SmartFinancialDashboard')
-  import('./FinancialTrendsChart')
+  impor"Placeholder"
+  impor"Placeholder"
+  impor"Placeholder"
 }
 
 // Progressive loading for finance dashboard
@@ -76,9 +76,9 @@ export function FinanceDashboardWithProgressiveLoading() {
 // Hook for progressive finance component loading with metrics
 export function useFinanceProgressiveLoading() {
   const components = [
-    () => import('./FinancialTrendsChart'),
-    () => import('./SmartExpenseAutomation'),
-    () => import('./SmartFinancialDashboard'),
+    () => impor"Placeholder",
+    () => impor"Placeholder",
+    () => impor"Placeholder",
   ]
   
   return useProgressiveLoading(components, 200)

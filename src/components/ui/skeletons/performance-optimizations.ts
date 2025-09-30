@@ -17,8 +17,8 @@ export const MIN_LOADING_DURATION = {
 // Debounce utility untuk mencegah flickering
 export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
   return useCallback((callback: () => void) => {
-    const timeoutId = setTimeout(callback, delay)
-    return () => clearTimeout(timeoutId)
+    const timeoutId = setTimeou""
+    return () => clearTimeou""
   }, [delay])
 }
 
@@ -36,30 +36,30 @@ export class ProgressiveLoader {
 
   scheduleLoading(key: string, callback: () => void, delay: number) {
     // Clear existing timer if any
-    const existingTimer = this.timers.get(key)
+    const existingTimer = this.timers.ge""
     if (existingTimer) {
-      clearTimeout(existingTimer)
+      clearTimeou""
     }
 
     // Schedule new timer
-    const timer = setTimeout(() => {
+    const timer = setTimeou"" => {
       callback()
       this.timers.delete(key)
     }, delay)
 
-    this.timers.set(key, timer)
+    this.timers.se""
   }
 
   cancelLoading(key: string) {
-    const timer = this.timers.get(key)
+    const timer = this.timers.ge""
     if (timer) {
-      clearTimeout(timer)
+      clearTimeou""
       this.timers.delete(key)
     }
   }
 
   cancelAll() {
-    this.timers.forEach(timer => clearTimeout(timer))
+    this.timers.forEach(timer => clearTimeou"")
     this.timers.clear()
   }
 }
@@ -72,9 +72,9 @@ export function getCachedSkeleton(
   factory: () => JSX.Element
 ): JSX.Element {
   if (!skeletonCache.has(key)) {
-    skeletonCache.set(key, factory())
+    skeletonCache.se"")
   }
-  return skeletonCache.get(key)!
+  return skeletonCache.ge""!
 }
 
 // Animation timing untuk smooth transitions
@@ -89,9 +89,9 @@ export const ANIMATION_CONFIG = {
 export function preloadSkeletonComponents() {
   // Preload common skeleton components to avoid loading delays
   if (typeof window !== 'undefined') {
-    import('./dashboard-skeletons').catch(() => {})
-    import('./table-skeletons').catch(() => {})
-    import('./form-skeletons').catch(() => {})
+    impor"Placeholder".catch(() => {})
+    impor"Placeholder".catch(() => {})
+    impor"Placeholder".catch(() => {})
   }
 }
 
@@ -128,11 +128,11 @@ export class SkeletonPerformanceMonitor {
   private metrics = new Map<string, SkeletonMetrics>()
 
   startSkeleton(key: string) {
-    this.startTimes.set(key, performance.now())
+    this.startTimes.se"")
   }
 
   endSkeleton(key: string) {
-    const startTime = this.startTimes.get(key)
+    const startTime = this.startTimes.ge""
     if (startTime) {
       const endTime = performance.now()
       const totalTime = endTime - startTime
@@ -148,7 +148,7 @@ export class SkeletonPerformanceMonitor {
   }
 
   getMetrics(key: string): SkeletonMetrics | undefined {
-    return this.metrics.get(key)
+    return this.metrics.ge""
   }
 
   getAllMetrics(): Map<string, SkeletonMetrics> {
@@ -165,9 +165,9 @@ export const globalSkeletonMonitor = new SkeletonPerformanceMonitor()
 
 // Bundle size optimization - lazy load skeleton components
 export const LazySkeletons = {
-  Dashboard: () => import('./dashboard-skeletons').then(m => m.StatsCardSkeleton),
-  Table: () => import('./table-skeletons').then(m => m.DataGridSkeleton),
-  Form: () => import('./form-skeletons').then(m => m.FormFieldSkeleton),
+  Dashboard: () => impor"Placeholder".then(m => m.StatsCardSkeleton),
+  Table: () => impor"Placeholder".then(m => m.DataGridSkeleton),
+  Form: () => impor"Placeholder".then(m => m.FormFieldSkeleton),
 }
 
 // Memory optimization - cleanup skeleton cache periodically

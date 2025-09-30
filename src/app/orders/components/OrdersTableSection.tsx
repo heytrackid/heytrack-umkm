@@ -5,7 +5,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 function OrdersTableSection({
   orders,
@@ -16,24 +15,23 @@ function OrdersTableSection({
   formatCurrency: (n: number) => string
   formatDate: (d: string) => string
 }) {
-  const { t } = useI18n()
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   
   const ORDER_STATUS_CONFIG = useMemo(() => ({
-    pending: { label: t('orders.status.pending'), color: 'bg-gray-100 text-gray-800' },
-    confirmed: { label: t('orders.status.confirmed'), color: 'bg-gray-200 text-gray-900' },
-    in_production: { label: t('orders.status.in_production'), color: 'bg-gray-300 text-gray-900' },
-    completed: { label: t('orders.status.completed'), color: 'bg-gray-400 text-white' },
-    cancelled: { label: t('orders.status.cancelled'), color: 'bg-gray-500 text-white' }
+    pending: { label: "Placeholder", color: 'bg-gray-100 text-gray-800' },
+    confirmed: { label: "Placeholder", color: 'bg-gray-200 text-gray-900' },
+    in_production: { label: "Placeholder", color: 'bg-gray-300 text-gray-900' },
+    completed: { label: "Placeholder", color: 'bg-gray-400 text-white' },
+    cancelled: { label: "Placeholder", color: 'bg-gray-500 text-white' }
   }), [t])
 
   const PAYMENT_STATUS_CONFIG = useMemo(() => ({
-    unpaid: { label: t('orders.paymentStatus.unpaid'), color: 'bg-gray-100 text-gray-800' },
-    partial: { label: t('orders.paymentStatus.partial'), color: 'bg-gray-200 text-gray-900' },
-    paid: { label: t('orders.paymentStatus.paid'), color: 'bg-gray-300 text-gray-900' }
+    unpaid: { label: "Placeholder", color: 'bg-gray-100 text-gray-800' },
+    partial: { label: "Placeholder", color: 'bg-gray-200 text-gray-900' },
+    paid: { label: "Placeholder", color: 'bg-gray-300 text-gray-900' }
   }), [t])
   
   // Calculate pagination
@@ -71,13 +69,13 @@ function OrdersTableSection({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t('orders.table.orderCode')}</TableHead>
-            <TableHead>{t('orders.table.customerName')}</TableHead>
-            <TableHead>{t('orders.table.date')}</TableHead>
-            <TableHead>{t('orders.table.dueDate')}</TableHead>
-            <TableHead>{t('orders.table.status')}</TableHead>
-            <TableHead>{t('orders.table.payment')}</TableHead>
-            <TableHead className="text-right">{t('orders.table.total')}</TableHead>
+            <TableHead>{"Placeholder"}</TableHead>
+            <TableHead>{"Placeholder"}</TableHead>
+            <TableHead>{"Placeholder"}</TableHead>
+            <TableHead>{"Placeholder"}</TableHead>
+            <TableHead>{"Placeholder"}</TableHead>
+            <TableHead>{"Placeholder"}</TableHead>
+            <TableHead className="text-right">{"Placeholder"}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -126,7 +124,7 @@ function OrdersTableSection({
           <div className="flex items-center gap-6">
             {/* Page Size Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{t('orders.pagination.showLabel')}</span>
+              <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
               <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
                 <SelectTrigger className="w-20 h-8">
                   <SelectValue />
@@ -152,7 +150,7 @@ function OrdersTableSection({
               </Button>
               
               <span className="text-sm font-medium">
-                {t('orders.pagination.pageLabel', { current: currentPage, total: totalPages })}
+                {"Placeholder"}
               </span>
               
               <Button

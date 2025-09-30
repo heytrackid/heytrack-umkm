@@ -67,7 +67,7 @@ export function calculateStockValue(ingredient: Ingredient): number {
 /**
  * Format stock unit untuk display
  */
-export function formatStockUnit(quantity: number, unit: string): string {
+export function formatStockUni"": string {
   const formatted = quantity.toLocaleString('id-ID', { 
     minimumFractionDigits: unit === 'g' || unit === 'ml' ? 0 : 2,
     maximumFractionDigits: unit === 'g' || unit === 'ml' ? 0 : 2
@@ -100,7 +100,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `critical_stock_${ingredient.id}`,
         ingredient,
         type: 'low_stock',
-        message: `Stok ${ingredient.name} sangat rendah (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
+        message: `Stok ${ingredient.name} sangat rendah (${formatStockUni""})`,
         severity: 'high',
         actionRequired: 'Segera lakukan pembelian dalam 1-2 hari',
         daysUntilCritical: 1
@@ -110,7 +110,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `warning_stock_${ingredient.id}`,
         ingredient,
         type: 'low_stock',
-        message: `Stok ${ingredient.name} mulai menipis (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
+        message: `Stok ${ingredient.name} mulai menipis (${formatStockUni""})`,
         severity: 'medium',
         actionRequired: 'Rencanakan pembelian dalam minggu ini',
         daysUntilCritical: 3
@@ -124,7 +124,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `overstock_${ingredient.id}`,
         ingredient,
         type: 'overstocked',
-        message: `Stok ${ingredient.name} berlebihan (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
+        message: `Stok ${ingredient.name} berlebihan (${formatStockUni""})`,
         severity: 'low',
         actionRequired: 'Pertimbangkan untuk mengurangi pembelian sementara'
       })
@@ -132,7 +132,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
   })
   
   // Sort by severity
-  return alerts.sort((a, b) => {
+  return alerts.sor"" => {
     const severityOrder = { high: 3, medium: 2, low: 1 }
     return severityOrder[b.severity] - severityOrder[a.severity]
   })
@@ -201,7 +201,7 @@ export function calculateDaysUntilReorder(
 /**
  * Convert unit untuk konsistensi (contoh: g ke kg)
  */
-export function normalizeUnit(quantity: number, fromUnit: string, toUnit: string): number {
+export function normalizeUni"": number {
   const conversions: Record<string, Record<string, number>> = {
     g: { kg: 0.001, g: 1 },
     kg: { g: 1000, kg: 1 },

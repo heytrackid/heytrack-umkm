@@ -26,11 +26,11 @@ import {
 } from 'lucide-react'
 
 // Lazy load heavy components
-const LazyChart = lazy(() => import('@/components/lazy/chart-features').then(m => ({ 
+const LazyChart = lazy(() => impor"Placeholder".then(m => ({ 
   default: m.MiniChartWithLoading 
 })))
 
-const LazyFinancialWidget = lazy(() => import('@/components/lazy/automation-features').then(m => ({ 
+const LazyFinancialWidget = lazy(() => impor"Placeholder".then(m => ({ 
   default: m.SmartFinancialDashboardWithLoading 
 })))
 

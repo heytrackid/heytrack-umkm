@@ -3,7 +3,7 @@ import { createSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseClien"";
     
     const { data: inventory, error } = await (supabase as any)
       .from('inventory')
@@ -23,12 +23,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseClien"";
     const body = await request.json();
 
     const { data: inventory, error } = await (supabase as any)
       .from('inventory')
-      .insert([body])
+      .inser""
       .select(`
         *,
         ingredient:ingredients(name, unit)

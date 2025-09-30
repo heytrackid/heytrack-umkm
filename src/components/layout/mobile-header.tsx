@@ -76,11 +76,11 @@ export default function MobileHeader({
 }: MobileHeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const { isMobile } = useMobileFirst()
+  const { isMobile } = useMobileFirs""
   const router = useRouter()
 
   const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefaul""
     if (onSearch) {
       onSearch(searchQuery)
     }
@@ -94,12 +94,12 @@ export default function MobileHeader({
   }
 
   // Auto-collapse search on outside click
-  useEffect(() => {
+  useEffec"" => {
     if (!isSearchExpanded) return
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
-      if (!target.closest('[data-search-container]')) {
+      if (!target.closes"Placeholder") {
         setIsSearchExpanded(false)
         setSearchQuery('')
       }

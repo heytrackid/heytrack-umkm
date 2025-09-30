@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useSettings, currencies, languages } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/useLoading'
-import { useI18n } from '@/providers/I18nProvider'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
@@ -30,7 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // Icons
 import { Settings, RotateCcw, Save } from 'lucide-react'
 // Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+const ExcelExportButton = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => <div className="h-10 w-32 bg-gray-200 animate-pulse rounded" />
 })
@@ -63,7 +62,6 @@ const LOADING_KEYS = {
 
 export default function SettingsPage() {
   const { settings: globalSettings, updateCurrency, updateLanguage, formatCurrency } = useSettings()
-  const { t } = useI18n()
   const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
   const [activeTab, setActiveTab] = useState('general')
   const [showPassword, setShowPassword] = useState(false)
@@ -126,7 +124,7 @@ export default function SettingsPage() {
   })
 
   // Load settings from database on component mount
-  useEffect(() => {
+  useEffec"" => {
     loadSettings()
   }, [])
 
@@ -135,17 +133,17 @@ export default function SettingsPage() {
       startLoading(LOADING_KEYS.LOAD_SETTINGS)
       
       // Simulate loading delay for demo
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => setTimeou"")
       
       const { data, error } = await supabase
         .from('app_settings')
-        .select('settings_data')
+        .selec"Placeholder"
         .eq('user_id', 'default')
         .single()
       
       if (error) {
         console.error('Error loading settings:', error)
-        toast.error(t('settings.messages.loadError'))
+        toast.error("Placeholder")
         return
       }
       
@@ -156,7 +154,7 @@ export default function SettingsPage() {
       
     } catch (error) {
       console.error('Error loading settings:', error)
-      toast.error(t('settings.messages.loadError'))
+      toast.error("Placeholder")
     } finally {
       stopLoading(LOADING_KEYS.LOAD_SETTINGS)
     }
@@ -189,7 +187,7 @@ export default function SettingsPage() {
         .upsert(settingsData, {
           onConflict: 'user_id'
         })
-        .select()
+        .selec""
       
       if (error) {
         throw error
@@ -197,11 +195,11 @@ export default function SettingsPage() {
       
       console.log('✅ Settings saved successfully:', data)
       setIsUnsavedChanges(false)
-      toast.success(t('settings.messages.saveSuccess'))
+      toast.success("Placeholder")
       
     } catch (error) {
       console.error('❌ Error saving settings:', error)
-      toast.error(t('settings.messages.saveError'))
+      toast.error("Placeholder")
     } finally {
       setIsSaving(false)
     }
@@ -221,11 +219,11 @@ export default function SettingsPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">{t('navigation.dashboard.title')}</BreadcrumbLink>
+              <BreadcrumbLink href="/">{"Placeholder"}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{t('settings.title')}</BreadcrumbPage>
+              <BreadcrumbPage>{"Placeholder"}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -233,23 +231,23 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('settings.title')}</h1>
-            <p className="text-sm md:text-base text-muted-foreground">{t('settings.subtitle')}</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{"Placeholder"}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{"Placeholder"}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <ExcelExportButton variant="outline" className="hidden sm:inline-flex" />
             {isUnsavedChanges && (
               <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs md:text-sm">
-                {t('settings.actions.unsaved')}
+                {"Placeholder"}
               </Badge>
             )}
             <Button variant="outline" onClick={handleReset} size="sm" className="flex-1 sm:flex-none">
               <RotateCcw className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{t('settings.actions.reset')}</span>
+              <span className="hidden sm:inline">{"Placeholder"}</span>
             </Button>
             <Button onClick={handleSave} disabled={isSaving} size="sm" className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isSaving ? t('settings.actions.saving') : t('common.actions.save')}</span>
+              <span className="hidden sm:inline">{isSaving ? "Placeholder" : "Placeholder"}</span>
               <span className="sm:hidden">{isSaving ? 'Saving...' : 'Save'}</span>
             </Button>
           </div>
@@ -292,11 +290,11 @@ export default function SettingsPage() {
             {/* Settings Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
-                <TabsTrigger value="general" className="text-xs sm:text-sm">{t('settings.tabs.general')}</TabsTrigger>
-                <TabsTrigger value="profile" className="text-xs sm:text-sm">{t('settings.tabs.profile')}</TabsTrigger>
-                <TabsTrigger value="notifications" className="text-xs sm:text-sm">{t('settings.tabs.notifications')}</TabsTrigger>
-                <TabsTrigger value="system" className="text-xs sm:text-sm">{t('settings.tabs.system')}</TabsTrigger>
-                <TabsTrigger value="ui" className="text-xs sm:text-sm">{t('settings.tabs.ui')}</TabsTrigger>
+                <TabsTrigger value="general" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
+                <TabsTrigger value="profile" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
+                <TabsTrigger value="notifications" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
+                <TabsTrigger value="system" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
+                <TabsTrigger value="ui" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
               </TabsList>
 
               {/* General Settings */}

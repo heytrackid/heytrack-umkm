@@ -39,7 +39,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
       
       const result = await InventoryService.getIngredients(stableParams)
       setIngredients(result.data)
-      setTotalCount(result.count)
+      setTotalCoun""
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch ingredients')
     } finally {
@@ -47,7 +47,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
     }
   }, [stableParams])
 
-  useEffect(() => {
+  useEffec"" => {
     // If we already have initial data and refetchOnMount is false, skip initial refetch
     if (options?.initial && options.initial.length > 0 && options?.refetchOnMount === false) {
       return
@@ -61,7 +61,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
 
   const createIngredient = useCallback(async (ingredient: any) => {
     try {
-      await InventoryService.createIngredient(ingredient)
+      await InventoryService.createIngredien""
       refresh()
     } catch (err) {
       throw err
@@ -70,7 +70,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
 
   const updateIngredient = useCallback(async (id: string, updates: any) => {
     try {
-      await InventoryService.updateIngredient(id, updates)
+      await InventoryService.updateIngredien""
       refresh()
     } catch (err) {
       throw err
@@ -79,7 +79,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
 
   const deleteIngredient = useCallback(async (id: string) => {
     try {
-      await InventoryService.deleteIngredient(id)
+      await InventoryService.deleteIngredien""
       refresh()
     } catch (err) {
       throw err
@@ -117,7 +117,7 @@ export function useInventoryStats() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchStats()
   }, [fetchStats])
 
@@ -143,7 +143,7 @@ export function useInventoryAlerts() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchAlerts()
   }, [fetchAlerts])
 
@@ -169,7 +169,7 @@ export function useIngredientsWithStats() {
     }
   }, [])
 
-  useEffect(() => {
+  useEffec"" => {
     fetchIngredientsWithStats()
   }, [fetchIngredientsWithStats])
 

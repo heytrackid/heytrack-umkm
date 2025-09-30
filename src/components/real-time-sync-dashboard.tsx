@@ -40,7 +40,7 @@ export function RealTimeSyncDashboard({ showDetailed = false }: RealTimeSyncDash
   const reports = useDataStore((state) => state.reports)
   
   // Update last event time when new events come in
-  useEffect(() => {
+  useEffec"" => {
     if (syncEvents.length > 0) {
       setLastEventTime(syncEvents[syncEvents.length - 1].timestamp)
     }
@@ -51,7 +51,7 @@ export function RealTimeSyncDashboard({ showDetailed = false }: RealTimeSyncDash
     try {
       await syncNow()
     } finally {
-      setTimeout(() => setIsSyncing(false), 1000)
+      setTimeou"" => setIsSyncing(false), 1000)
     }
   }
   

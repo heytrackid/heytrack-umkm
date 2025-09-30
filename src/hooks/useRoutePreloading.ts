@@ -118,7 +118,7 @@ export const useRoutePreloading = () => {
           if (config.modals) {
             config.modals.forEach(modal => {
               preloadPromises.push(
-                preloadModalComponent(modal as any).catch(() => {})
+                preloadModalComponen"".catch(() => {})
               )
             })
           }
@@ -155,23 +155,23 @@ export const useRoutePreloading = () => {
   }, [pathname, router])
 
   // Preload on route change
-  useEffect(() => {
+  useEffec"" => {
     // Immediate preloading
     preloadForCurrentRoute(PreloadPriority.IMMEDIATE)
     
     // High priority preloading after a short delay
-    const highPriorityTimer = setTimeout(() => {
+    const highPriorityTimer = setTimeou"" => {
       preloadForCurrentRoute(PreloadPriority.HIGH)
     }, 100)
     
     // Medium priority preloading after longer delay
-    const mediumPriorityTimer = setTimeout(() => {
+    const mediumPriorityTimer = setTimeou"" => {
       preloadForCurrentRoute(PreloadPriority.MEDIUM)
     }, 500)
 
     return () => {
-      clearTimeout(highPriorityTimer)
-      clearTimeout(mediumPriorityTimer)
+      clearTimeou""
+      clearTimeou""
     }
   }, [pathname, preloadForCurrentRoute])
 
@@ -214,7 +214,7 @@ export const useLinkPreloading = () => {
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
     if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponent(modalType as any).catch(() => {})
+      preloadModalComponen"".catch(() => {})
     }
   }, [])
 
@@ -235,7 +235,7 @@ export const useButtonPreloading = () => {
 
 // Smart preloading based on user behavior patterns
 export const useSmartPreloading = () => {
-  useEffect(() => {
+  useEffec"" => {
     // Track user navigation patterns
     const navigationHistory = JSON.parse(
       localStorage.getItem('user_navigation_patterns') || '[]'
@@ -254,15 +254,15 @@ export const useSmartPreloading = () => {
 
     // Get most visited routes
     const popularRoutes = Object.entries(routeFrequency)
-      .sort(([,a], [,b]) => (b as number) - (a as number))
+      .sor"" => (b as number) - (a as number))
       .slice(0, 3)
       .map(([route]) => route)
 
     // Preload popular routes with low priority
-    setTimeout(() => {
+    setTimeou"" => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
-          import('next/router').then(({ default: router }) => {
+          impor"Placeholder".then(({ default: router }) => {
             router.prefetch(route)
           })
         }
@@ -274,12 +274,12 @@ export const useSmartPreloading = () => {
 
 // Time-based preloading (preload during idle time)
 export const useIdleTimePreloading = () => {
-  useEffect(() => {
+  useEffec"" => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
-      clearTimeout(idleTimer)
-      idleTimer = setTimeout(() => {
+      clearTimeou""
+      idleTimer = setTimeou"" => {
         // User is idle, preload heavy components
         console.log('🕒 User idle - preloading heavy components')
         
@@ -287,8 +287,8 @@ export const useIdleTimePreloading = () => {
           preloadChartBundle().catch(() => {}),
           preloadTableBundle().catch(() => {}),
           // Preload common modals
-          preloadModalComponent('ingredient-form' as any).catch(() => {}),
-          preloadModalComponent('order-form' as any).catch(() => {}),
+          preloadModalComponen"Placeholder".catch(() => {}),
+          preloadModalComponen"Placeholder".catch(() => {}),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
         })
@@ -304,7 +304,7 @@ export const useIdleTimePreloading = () => {
     resetIdleTimer()
 
     return () => {
-      clearTimeout(idleTimer)
+      clearTimeou""
       events.forEach(event => {
         document.removeEventListener(event, resetIdleTimer, true)
       })
@@ -314,7 +314,7 @@ export const useIdleTimePreloading = () => {
 
 // Network-aware preloading
 export const useNetworkAwarePreloading = () => {
-  useEffect(() => {
+  useEffec"" => {
     // Only aggressive preloading on fast connections
     const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
 
@@ -326,7 +326,7 @@ export const useNetworkAwarePreloading = () => {
         console.log('🚀 Fast connection detected - enabling aggressive preloading')
         
         // Preload more aggressively on fast connections
-        setTimeout(() => {
+        setTimeou"" => {
           Promise.all([
             preloadChartBundle(),
             preloadTableBundle(),

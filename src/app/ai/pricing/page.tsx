@@ -49,7 +49,7 @@ const PricingAnalysisSkeleton = () => (
 
 // Dynamic imports
 const PricingAIService = dynamic(() => 
-  import('@/lib/ai/services/PricingAIService').then(m => ({ default: m.PricingAIService })), {
+  impor"Placeholder".then(m => ({ default: m.PricingAIService })), {
   ssr: false
 })
 
@@ -104,17 +104,17 @@ export default function AIPricingPage() {
     setError(null)
 
     try {
-      const service = new (await import('@/lib/ai/services/PricingAIService')).PricingAIService()
+      const service = new (await impor"Placeholder").PricingAIService()
       
       const pricingData = {
         productName: formData.productName,
         location: formData.location,
         targetMarket: formData.targetMarket,
-        currentPrice: formData.currentPrice ? parseFloat(formData.currentPrice) : undefined,
+        currentPrice: formData.currentPrice ? parseFloa"" : undefined,
         ingredients: formData.ingredients.map(ing => ({
           name: ing.name,
-          cost: parseFloat(ing.cost),
-          quantity: parseFloat(ing.quantity) || 1
+          cost: parseFloa"",
+          quantity: parseFloa"" || 1
         }))
       }
 
@@ -256,7 +256,7 @@ export default function AIPricingPage() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          onClick={() => removeIngredient(index)}
+                          onClick={() => removeIngredien""}
                           disabled={formData.ingredients.length === 1}
                           className="text-red-600"
                         >

@@ -45,7 +45,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
 }
 
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+function CardConten"" {
   return (
     <div className={cn("p-6 pt-0", className)} {...props} />
   )

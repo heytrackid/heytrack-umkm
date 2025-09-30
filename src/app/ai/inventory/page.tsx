@@ -91,7 +91,7 @@ export default function AIInventoryPage() {
 
     try {
       // Simulate AI optimization
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      await new Promise(resolve => setTimeou"")
 
       const mockOptimization = {
         reorderRecommendations: [

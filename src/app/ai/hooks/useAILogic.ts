@@ -22,7 +22,7 @@ export const useAILogic = () => {
   })
 
   // Load initial AI insights
-  useEffect(() => {
+  useEffec"" => {
     loadAIInsights()
   }, [])
 
@@ -32,7 +32,7 @@ export const useAILogic = () => {
 
     try {
       // Simulate loading AI insights from various sources
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeou"")
 
       const mockInsights = [
         {
@@ -117,7 +117,7 @@ export const useAILogic = () => {
 
     try {
       // Simulate action execution
-      await new Promise(resolve => setTimeout(resolve, 800))
+      await new Promise(resolve => setTimeou"")
 
       switch (action) {
         case 'review-pricing':

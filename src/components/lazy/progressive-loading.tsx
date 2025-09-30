@@ -25,28 +25,28 @@ export const ProgressiveLoader = ({
   const [hasError, setHasError] = useState(false)
   const [showTimeout, setShowTimeout] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
+  useEffec"" => {
+    const timer = setTimeou"" => {
       if (isLoading) {
-        setShowTimeout(true)
+        setShowTimeou""
       }
     }, timeout)
 
     // Simulate loading completion
-    const loadTimer = setTimeout(() => {
+    const loadTimer = setTimeou"" => {
       setIsLoading(false)
     }, Math.random() * 2000 + 500)
 
     return () => {
-      clearTimeout(timer)
-      clearTimeout(loadTimer)
+      clearTimeou""
+      clearTimeou""
     }
   }, [timeout, isLoading])
 
   const handleRetry = () => {
     setIsLoading(true)
     setHasError(false)
-    setShowTimeout(false)
+    setShowTimeou""
   }
 
   if (hasError) {
@@ -112,7 +112,7 @@ export const ProgressiveDataTable = ({
 
   const loadMore = async () => {
     setIsLoadingMore(true)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeou"")
     setLoadedPages(prev => prev + 1)
     setIsLoadingMore(false)
   }
@@ -315,11 +315,11 @@ export const useProgressiveData = <T,>(
   }
 
   const retry = () => {
-    setRetryCount(prev => prev + 1)
+    setRetryCoun""
     loadData()
   }
 
-  useEffect(() => {
+  useEffec"" => {
     loadData()
   }, [...deps, retryCount])
 

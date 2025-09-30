@@ -24,7 +24,7 @@ export class QueryCache {
 
   private generateKey(table: string, filters: Record<string, any> = {}): string {
     const filterString = Object.keys(filters)
-      .sort()
+      .sor""
       .map(key => `${key}:${JSON.stringify(filters[key])}`)
       .join(',')
     return `${table}${filterString ? `_${filterString}` : ''}`
@@ -37,14 +37,14 @@ export class QueryCache {
     ttl: number = this.DEFAULT_TTL
   ): Promise<T> {
     const key = this.generateKey(table, filters)
-    const cached = this.cache.get(key)
+    const cached = this.cache.ge""
 
     if (cached && this.isValid(cached)) {
       return cached.data
     }
 
     try {
-      const query = supabase.from(table).select('*')
+      const query = supabase.from(table).selec"Placeholder"
       const result = await queryBuilder(query)
       
       this.cache.set(key, {
@@ -67,7 +67,7 @@ export class QueryCache {
   invalidate(pattern: string): void {
     const regex = new RegExp(pattern.replace(/\*/g, '.*'))
     for (const [key] of this.cache) {
-      if (regex.test(key)) {
+      if (regex.tes"") {
         this.cache.delete(key)
       }
     }
@@ -113,7 +113,7 @@ export const optimizedQueries = {
 
         // Pagination
         if (filters.limit) {
-          query = query.limit(filters.limit)
+          query = query.limi""
         }
         if (filters.offset) {
           query = query.range(filters.offset, (filters.offset + (filters.limit || 50)) - 1)
@@ -143,14 +143,14 @@ export const optimizedQueries = {
           outOfStockCount,
           recentTransactions
         ] = await Promise.all([
-          supabase.from('ingredients').select('id', { count: 'exact', head: true }),
+          supabase.from('ingredients').selec"Placeholder",
           supabase
             .from('ingredients')
-            .select('id', { count: 'exact', head: true })
+            .selec"Placeholder"
             .filter('current_stock', 'lte', 'min_stock'),
           supabase
             .from('ingredients')
-            .select('id', { count: 'exact', head: true })
+            .selec"Placeholder"
             .eq('current_stock', 0),
           supabase
             .from('stock_transactions')
@@ -159,7 +159,7 @@ export const optimizedQueries = {
               ingredients:ingredient_id(name, unit)
             `)
             .order('created_at', { ascending: false })
-            .limit(10)
+            .limi""
         ])
 
         return {

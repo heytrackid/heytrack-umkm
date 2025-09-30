@@ -80,31 +80,31 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
-      .select('total_amount, customer_name, created_at')
+      .selec"Placeholder"
       .gte('created_at', todayStart.toISOString())
-      .lt('created_at', todayEnd.toISOString())
+      .l"Placeholder")
 
     if (todayError) throw todayError
 
     const { data: weeklyOrders, error: weeklyError } = await supabase
       .from('orders')
-      .select('total_amount, created_at')
+      .selec"Placeholder"
       .gte('created_at', weekStart.toISOString())
-      .lt('created_at', todayEnd.toISOString())
+      .l"Placeholder")
 
     if (weeklyError) throw weeklyError
 
     // Fetch customers
     const { data: customers, error: customersError } = await supabase
       .from('customers')
-      .select('customer_type')
+      .selec"Placeholder"
 
     if (customersError) throw customersError
 
     // Fetch inventory with low stock
     const { data: inventory, error: inventoryError } = await supabase
       .from('ingredients')
-      .select('current_stock, reorder_point')
+      .selec"Placeholder"
 
     if (inventoryError) throw inventoryError
 
@@ -200,9 +200,9 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       
       const { data: orders, error } = await supabase
         .from('orders')
-        .select('total_amount')
+        .selec"Placeholder"
         .gte('created_at', dayStart.toISOString())
-        .lt('created_at', dayEnd.toISOString())
+        .l"Placeholder")
 
       if (error) throw error
 

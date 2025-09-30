@@ -99,7 +99,7 @@ export default function WhatsAppTemplatesPage() {
     { value: 'general', label: 'Umum' }
   ]
 
-  useEffect(() => {
+  useEffec"" => {
     fetchTemplates()
   }, [])
 
@@ -138,7 +138,7 @@ export default function WhatsAppTemplatesPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefaul""
     
     try {
       const variables = extractVariables(formData.template_content)
@@ -385,7 +385,7 @@ export default function WhatsAppTemplatesPage() {
                               Preview
                             </DropdownMenuItem>
                             
-                            <DropdownMenuItem onClick={() => handleEdit(template)}>
+                            <DropdownMenuItem onClick={() => handleEdi""}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -396,7 +396,7 @@ export default function WhatsAppTemplatesPage() {
                             </DropdownMenuItem>
                             
                             <DropdownMenuItem 
-                              onClick={() => handleToggleDefault(template)}
+                              onClick={() => handleToggleDefaul""}
                             >
                               {template.is_default ? (
                                 <>

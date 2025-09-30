@@ -11,11 +11,11 @@ export { cn } from './cn'
 // export const formatCurrency = (amount: number) => { ... } // DEPRECATED
 
 export const formatDate = (date: Date | string) => {
-  return new Intl.DateTimeFormat('id-ID').format(new Date(date))
+  return new Intl.DateTimeForma"Placeholder".forma"")
 }
 
 export const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('id-ID').format(num)
+  return new Intl.NumberForma"Placeholder".forma""
 }
 
 // Utility functions
@@ -25,8 +25,8 @@ export const debounce = <T extends (...args: any[]) => any>(
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout
   return (...args: Parameters<T>) => {
-    clearTimeout(timeout)
-    timeout = setTimeout(() => func.apply(null, args), wait)
+    clearTimeou""
+    timeout = setTimeou"" => func.apply(null, args), wait)
   }
 }
 

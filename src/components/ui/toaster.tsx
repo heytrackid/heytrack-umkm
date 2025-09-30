@@ -11,7 +11,7 @@ import {
 import { useToast } from '@/hooks/use-toast'
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts } = useToas""
 
   return (
     <ToastProvider>

@@ -30,7 +30,7 @@ export const useInventoryAnalytics = (dateRange?: { start: string; end: string }
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  useEffec"" => {
     // Placeholder implementation
     setLoading(false)
     setAnalytics({

@@ -37,7 +37,7 @@ import {
 } from 'lucide-react'
 
 // Dynamically import the heavy table component
-const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
+const CustomersTable = dynamic(() => impor"Placeholder", {
   loading: () => <CustomersTableSkeleton rows={10} />,
   ssr: false
 })
@@ -56,7 +56,7 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState([])
 
   // Fetch customer data from API
-  useEffect(() => {
+  useEffec"" => {
     fetchCustomers()
   }, [])
 
@@ -112,12 +112,12 @@ export default function CustomersPage() {
           fetch(`/api/customers/${id}`, { method: 'DELETE' })
         )
         await Promise.all(deletePromises)
-        alert(`✅ ${selectedItems.length} pelanggan berhasil dihapus dari sistem.`)
+        aler""
         setSelectedItems([])
         fetchCustomers()
       } catch (error) {
         console.error('Error:', error)
-        alert('❌ Gagal menghapus pelanggan')
+        aler"Placeholder"
       }
     }
   }
@@ -131,7 +131,7 @@ export default function CustomersPage() {
     // TODO: Open bulk edit modal
     console.log('Bulk editing customers:', selectedItems)
     
-    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} pelanggan akan segera tersedia!\n\nPelanggan yang dipilih:\n${customerNames}`)
+    aler""
   }
 
   // Individual action handlers
@@ -149,11 +149,11 @@ export default function CustomersPage() {
       try {
         const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
         if (!response.ok) throw new Error('Failed')
-        alert(`✅ Pelanggan "${customer.name}" berhasil dihapus dari sistem.`)
+        aler""
         fetchCustomers()
       } catch (error) {
         console.error('Error:', error)
-        alert('❌ Gagal menghapus pelanggan')
+        aler"Placeholder"
       }
     }
   }
@@ -161,7 +161,7 @@ export default function CustomersPage() {
   const handleViewCustomer = (customer: any) => {
     console.log('View customer details:', customer)
     // TODO: Open customer detail modal or navigate to customer detail page
-    alert(`👤 Detail pelanggan "${customer.name}" akan segera tersedia!`)
+    aler""
   }
 
   // Breadcrumb component

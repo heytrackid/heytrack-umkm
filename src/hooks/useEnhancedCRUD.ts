@@ -63,7 +63,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
       
       const message = successMessages[operation] || defaultMessages[operation]
-      successToast('Berhasil!', message)
+      successToas"Placeholder"
     }
   }, [showSuccessToast, successMessages])
 
@@ -72,7 +72,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
       
       // Validate data if needed
       if (!data || typeof data !== 'object') {
@@ -81,8 +81,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data: result, error } = await (supabase as any)
         .from(table)
-        .insert(data as any)
-        .select()
+        .inser""
+        .selec""
         .single()
 
       if (error) {
@@ -104,7 +104,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
 
       // Validate inputs
       if (!id) {
@@ -118,7 +118,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         .from(table)
         .update(data as any)
         .eq('id', id as any)
-        .select()
+        .selec""
         .single()
 
       if (error) {
@@ -144,7 +144,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
 
       if (!id) {
         throw new Error('ID tidak boleh kosong')
@@ -153,7 +153,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await (supabase as any)
         .from(table)
-        .select('id')
+        .selec"Placeholder"
         .eq('id', id as any)
         .single()
 
@@ -185,7 +185,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
 
       if (!Array.isArray(records) || records.length === 0) {
         throw new Error('Data tidak valid atau kosong')
@@ -193,8 +193,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data, error } = await (supabase as any)
         .from(table)
-        .insert(records as any)
-        .select()
+        .inser""
+        .selec""
 
       if (error) {
         throw new Error(error.message)
@@ -223,7 +223,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
 
       if (!Array.isArray(updates) || updates.length === 0) {
         throw new Error('Data tidak valid atau kosong')
@@ -235,7 +235,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
           .from(table)
           .update(update.data as any)
           .eq('id', update.id as any)
-          .select()
+          .selec""
           .single()
 
         if (error) {
@@ -266,7 +266,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     setError(null)
 
     try {
-      const supabase = createSupabaseClient()
+      const supabase = createSupabaseClien""
 
       if (!Array.isArray(ids) || ids.length === 0) {
         throw new Error('ID tidak valid atau kosong')
@@ -347,14 +347,14 @@ export function useAsyncOperation() {
     setError(null)
 
     if (showToasts && loadingMessage) {
-      infoToast('Memproses...', loadingMessage)
+      infoToas"Placeholder"
     }
 
     try {
       const result = await operation()
       
       if (showToasts && successMessage) {
-        successToast('Berhasil!', successMessage)
+        successToas"Placeholder"
       }
 
       return result

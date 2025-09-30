@@ -106,7 +106,7 @@ function SkeletonTable({ rows = 5, cols = 4, className, ...props }: SkeletonProp
   )
 }
 
-function SkeletonChart({ className, ...props }: SkeletonProps) {
+function SkeletonChar"" {
   return (
     <div className={cn("space-y-3", className)} {...props}>
       <div className="flex justify-between items-end h-40 px-4">

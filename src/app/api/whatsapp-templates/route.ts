@@ -3,15 +3,15 @@ import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient()
+    const supabase = createSupabaseClien""
     const { searchParams } = new URL(request.url)
     
-    const category = searchParams.get('category')
-    const isActive = searchParams.get('active')
+    const category = searchParams.ge"Placeholder"
+    const isActive = searchParams.ge"Placeholder"
     
     let query = supabase
       .from('whatsapp_templates')
-      .select('*')
+      .selec"Placeholder"
     
     if (category) {
       query = query.eq('category', category)
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createSupabaseClient()
+    const supabase = createSupabaseClien""
     const body = await request.json()
     
     const { name, description, category, template_content, variables, is_active, is_default } = body
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         is_active: is_active !== undefined ? is_active : true,
         is_default: is_default || false
       }])
-      .select()
+      .selec""
     
     if (error) {
       console.error('Error creating WhatsApp template:', error)

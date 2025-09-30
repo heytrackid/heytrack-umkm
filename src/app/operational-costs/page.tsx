@@ -7,13 +7,12 @@ import { useSettings } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/useLoading'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
-import { useI18n } from '@/providers/I18nProvider'
 
 // Lazy load extracted components for better performance and code splitting
-const CostFormView = lazy(() => import('./components/CostFormView'))
-const CostStats = lazy(() => import('./components/CostStats'))
-const BulkActions = lazy(() => import('./components/BulkActions'))
-const CostListTable = lazy(() => import('./components/CostListTable'))
+const CostFormView = lazy(() => impor"Placeholder")
+const CostStats = lazy(() => impor"Placeholder")
+const BulkActions = lazy(() => impor"Placeholder")
+const CostListTable = lazy(() => impor"Placeholder")
 
 import {
   Breadcrumb,
@@ -71,7 +70,6 @@ export default function OperationalCostsPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
   const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
-  const { t } = useI18n()
   
   // State management
   const [costs, setCosts] = useState<OperationalCost[]>([])
@@ -91,12 +89,12 @@ export default function OperationalCostsPage() {
   })
 
   // Simulate loading on component mount
-  useEffect(() => {
+  useEffec"" => {
     startLoading(LOADING_KEYS.LOAD_COSTS)
-    const timer = setTimeout(() => {
+    const timer = setTimeou"" => {
       stopLoading(LOADING_KEYS.LOAD_COSTS)
     }, 1500)
-    return () => clearTimeout(timer)
+    return () => clearTimeou""
   }, [])
 
   // Quick Setup: template biaya operasional umum
@@ -124,13 +122,13 @@ export default function OperationalCostsPage() {
   }
 
   const handleQuickSetup = () => {
-    const existingNames = new Set(costs.map(c => c.name.toLowerCase()))
+    const existingNames = new Se""))
     const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
-      alert(t('operationalCosts.messages.allTemplatesExist'))
+      aler""
       return
     }
-    const confirmed = window.confirm(t('operationalCosts.messages.addTemplateConfirm'))
+    const confirmed = window.confirm("Placeholder")
     if (!confirmed) return
     setCosts(prev => [...prev, ...template])
   }
@@ -146,7 +144,7 @@ export default function OperationalCostsPage() {
       isFixed: false,
       icon: '⚡'
     })
-    setEditingCost(null)
+    setEditingCos""
   }
 
   const handleSaveCost = () => {
@@ -169,13 +167,13 @@ export default function OperationalCostsPage() {
   }
 
   const handleEditCost = (cost: OperationalCost) => {
-    setEditingCost(cost)
-    setNewCost({ ...cost })
+    setEditingCos""
+    setNewCos""
     setCurrentView('edit')
   }
 
   const handleDeleteCost = (costId: string) => {
-    if (confirm(t('operationalCosts.messages.deleteConfirm'))) {
+    if (confirm("Placeholder")) {
       setCosts(costs.filter(cost => cost.id !== costId))
     }
   }
@@ -191,7 +189,7 @@ export default function OperationalCostsPage() {
   }
 
   const getTotalMonthlyCosts = (): number => {
-    return costs.reduce((total, cost) => total + calculateMonthlyCost(cost), 0)
+    return costs.reduce((total, cost) => total + calculateMonthlyCos"", 0)
   }
 
   // Filter costs based on search term
@@ -231,7 +229,7 @@ export default function OperationalCostsPage() {
     if (confirmed) {
       setCosts(costs.filter(cost => !selectedItems.includes(cost.id)))
       setSelectedItems([])
-      alert(`✅ ${selectedItems.length} biaya operasional berhasil dihapus!`)
+      aler""
     }
   }
 
@@ -241,11 +239,11 @@ export default function OperationalCostsPage() {
     const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
     const costNames = selectedCosts.map(cost => cost.name).join(', ')
     
-    alert(`📝 Fitur bulk edit untuk ${selectedItems.length} biaya operasional akan segera tersedia!\n\nBiaya yang dipilih:\n${costNames}`)
+    aler""
   }
 
   const handleViewCost = (cost: OperationalCost) => {
-    alert(`👁️ Detail biaya "${cost.name}" akan segera tersedia!`)
+    aler""
   }
 
   const getCategoryInfo = (categoryId: string) => {
@@ -378,25 +376,25 @@ export default function OperationalCostsPage() {
             <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
               <div className={isMobile ? 'text-center' : ''}>
                 <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-                  {t('operationalCosts.title')}
+                  {"Placeholder"}
                 </h1>
                 <p className="text-muted-foreground">
-                  {t('operationalCosts.subtitle')}
+                  {"Placeholder"}
                 </p>
               </div>
               <div className={`flex ${isMobile ? 'w-full flex-col gap-2' : 'items-center gap-2'}`}>
                 <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {t('operationalCosts.addCost')}
+                  {"Placeholder"}
                 </Button>
                 <Button 
                   variant="outline" 
                   className={isMobile ? 'w-full' : ''}
                   onClick={handleQuickSetup}
-                  title={t('operationalCosts.quickSetup')}
+                  title={"Placeholder"}
                 >
                   <Zap className="h-4 w-4 mr-2" />
-                  {t('operationalCosts.quickSetup')}
+                  {"Placeholder"}
                 </Button>
               </div>
             </div>

@@ -19,7 +19,7 @@ export function useResponsive(): ResponsiveState {
     height: 768
   })
 
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return
     
     const updateState = () => {
@@ -49,7 +49,7 @@ export function useResponsive(): ResponsiveState {
 }
 
 // Hook untuk breakpoint checks
-export function useBreakpoint() {
+export function useBreakpoin"" {
   const responsive = useResponsive()
   
   return {
@@ -63,7 +63,7 @@ export function useBreakpoint() {
 }
 
 // Hook untuk mobile-first development
-export function useMobileFirst() {
+export function useMobileFirs"" {
   const { isMobile, isTablet, width } = useResponsive()
   
   const isTouch = typeof window !== 'undefined' && 

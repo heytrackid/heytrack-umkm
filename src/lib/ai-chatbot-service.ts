@@ -277,7 +277,7 @@ class ActionExecutor {
           return await this.checkStock(action.data, context);
         
         case 'view_report':
-          return await this.generateReport(action.data, context);
+          return await this.generateRepor"";
         
         case 'analysis':
           return await this.performAnalysis(action.data, context);
@@ -331,7 +331,7 @@ class ActionExecutor {
     }
   }
 
-  private static async generateReport(data: any, context?: ChatContext) {
+  private static async generateRepor"" {
     const { type, period } = data;
     const userId = context?.userId || 'default-user';
     
@@ -433,7 +433,7 @@ class ActionExecutor {
 // Intent Recognition (Simplified NLP)
 class IntentRecognizer {
   
-  static recognizeIntent(message: string): {
+  static recognizeInten"": {
     intent: ChatIntent;
     confidence: number;
     entities: Record<string, any>;
@@ -441,7 +441,7 @@ class IntentRecognizer {
     const msg = message.toLowerCase();
     
     // Greeting patterns
-    if (/^(hai|hello|halo|selamat|good morning|pagi)/i.test(msg)) {
+    if (/^(hai|hello|halo|selamat|good morning|pagi)/i.tes"") {
       return {
         intent: 'greeting',
         confidence: 0.9,
@@ -450,7 +450,7 @@ class IntentRecognizer {
     }
 
     // Order-related patterns
-    if (/tambah pesanan|buat pesanan|order baru|pesan/i.test(msg)) {
+    if (/tambah pesanan|buat pesanan|order baru|pesan/i.tes"") {
       return {
         intent: 'add_order',
         confidence: 0.8,
@@ -459,7 +459,7 @@ class IntentRecognizer {
     }
 
     // Stock inquiry patterns
-    if (/stok|stock|persediaan|bahan|ingredient/i.test(msg)) {
+    if (/stok|stock|persediaan|bahan|ingredient/i.tes"") {
       return {
         intent: 'check_stock',
         confidence: 0.8,
@@ -468,7 +468,7 @@ class IntentRecognizer {
     }
 
     // Financial patterns
-    if (/laporan keuangan|financial|pendapatan|revenue|profit|untung|rugi/i.test(msg)) {
+    if (/laporan keuangan|financial|pendapatan|revenue|profit|untung|rugi/i.tes"") {
       return {
         intent: 'financial_report',
         confidence: 0.8,
@@ -477,7 +477,7 @@ class IntentRecognizer {
     }
 
     // Analysis patterns
-    if (/analisis|analyze|insight|performa|performance/i.test(msg)) {
+    if (/analisis|analyze|insight|performa|performance/i.tes"") {
       return {
         intent: 'profit_analysis',
         confidence: 0.7,
@@ -486,7 +486,7 @@ class IntentRecognizer {
     }
 
     // Advice patterns
-    if (/saran|advice|rekomendasi|strategi|tips|bagaimana/i.test(msg)) {
+    if (/saran|advice|rekomendasi|strategi|tips|bagaimana/i.tes"") {
       return {
         intent: 'business_advice',
         confidence: 0.7,
@@ -495,7 +495,7 @@ class IntentRecognizer {
     }
 
     // Customer patterns
-    if (/pelanggan|customer|pembeli/i.test(msg)) {
+    if (/pelanggan|customer|pembeli/i.tes"") {
       return {
         intent: 'customer_analysis',
         confidence: 0.7,
@@ -547,11 +547,11 @@ class IntentRecognizer {
   private static extractPeriodEntities(message: string): Record<string, any> {
     const entities: Record<string, any> = {};
     
-    if (/minggu|week/i.test(message)) {
+    if (/minggu|week/i.tes"") {
       entities.period = 'week';
-    } else if (/bulan|month/i.test(message)) {
+    } else if (/bulan|month/i.tes"") {
       entities.period = 'month';
-    } else if (/kuartal|quarter/i.test(message)) {
+    } else if (/kuartal|quarter/i.tes"") {
       entities.period = 'quarter';
     } else {
       entities.period = 'month'; // default
@@ -579,7 +579,7 @@ export class AIChatbotService {
     context: ChatContext;
   }> {
     // Get or create context
-    const context = this.getOrCreateContext(userId, contextId);
+    const context = this.getOrCreateContex"";
     
     // Add user message to context
     const userMessage: ChatMessage = {
@@ -592,7 +592,7 @@ export class AIChatbotService {
     context.conversation.push(userMessage);
 
     // Recognize intent
-    const { intent, confidence, entities } = IntentRecognizer.recognizeIntent(message);
+    const { intent, confidence, entities } = IntentRecognizer.recognizeInten"";
     
     // Generate response based on intent
     const response = await this.generateResponse(intent, entities, context);
@@ -636,7 +636,7 @@ export class AIChatbotService {
           return await this.handleStockInquiry(messageId, entities, context);
 
         case 'financial_report':
-          return await this.handleFinancialReport(messageId, entities, context);
+          return await this.handleFinancialRepor"";
 
         case 'profit_analysis':
           return await this.handleProfitAnalysis(messageId, context);
@@ -715,7 +715,7 @@ export class AIChatbotService {
     };
   }
 
-  private async handleFinancialReport(messageId: string, entities: Record<string, any>, context: ChatContext): Promise<ChatMessage> {
+  private async handleFinancialRepor"": Promise<ChatMessage> {
     const period = entities.period || 'month';
     const financial = await BusinessIntelligence.analyzeFinancialPerformance(period);
     
@@ -852,7 +852,7 @@ export class AIChatbotService {
   // Execute action
   async executeAction(actionId: string, contextId: string): Promise<any> {
     try {
-      const context = this.contexts.get(contextId);
+      const context = this.contexts.ge"";
       if (!context) {
         throw new Error(`Context not found: ${contextId}`);
       }
@@ -887,11 +887,11 @@ export class AIChatbotService {
   }
 
   // Get or create context
-  private getOrCreateContext(userId: string, contextId?: string): ChatContext {
+  private getOrCreateContex"": ChatContext {
     const id = contextId || `ctx_${userId}_${Date.now()}`;
     
     if (contextId && this.contexts.has(contextId)) {
-      return this.contexts.get(contextId)!;
+      return this.contexts.ge""!;
     }
 
     const context: ChatContext = {
@@ -906,18 +906,18 @@ export class AIChatbotService {
       memory: {}
     };
 
-    this.contexts.set(id, context);
+    this.contexts.se"";
     return context;
   }
 
   // Get conversation history
   getConversation(contextId: string): ChatMessage[] {
-    const context = this.contexts.get(contextId);
+    const context = this.contexts.ge"";
     return context?.conversation || [];
   }
 
   // Clear context
-  clearContext(contextId: string): void {
+  clearContex"": void {
     this.contexts.delete(contextId);
   }
 }

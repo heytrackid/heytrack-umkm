@@ -43,7 +43,7 @@ export const FloatingAIChatbot: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffect(() => {
+  useEffec"" => {
     scrollToBottom()
   }, [messages])
 
@@ -62,7 +62,7 @@ export const FloatingAIChatbot: React.FC = () => {
     setIsTyping(true)
 
     // Simulate AI response (replace with actual AI integration)
-    setTimeout(() => {
+    setTimeou"" => {
       const aiResponses = [
         'Saya mengerti pertanyaan Anda. Berdasarkan data yang ada, saya sarankan untuk...',
         'Mari saya analisis situasi ini. Data menunjukkan bahwa...',
@@ -84,7 +84,7 @@ export const FloatingAIChatbot: React.FC = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
+      e.preventDefaul""
       handleSendMessage()
     }
   }

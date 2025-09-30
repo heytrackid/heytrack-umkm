@@ -1,5 +1,5 @@
 // Input validation helper
-export function validateInput(data: any, rules: Record<string, any>): { isValid: boolean; errors: string[] } {
+export function validateInpu"": { isValid: boolean; errors: string[] } {
   const errors: string[] = []
   
   for (const [field, rule] of Object.entries(rules)) {
@@ -27,17 +27,17 @@ export function validateInput(data: any, rules: Record<string, any>): { isValid:
       }
       
       // Pattern check
-      if (rule.pattern && !rule.pattern.test(value)) {
+      if (rule.pattern && !rule.pattern.tes"") {
         errors.push(`validation.invalidFormat`)
       }
       
       // Email check
-      if (rule.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      if (rule.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.tes"") {
         errors.push(`validation.invalidEmail`)
       }
       
       // Sanitization check for XSS
-      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
+      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.tes"") {
         errors.push(`validation.dangerousContent`)
       }
     }

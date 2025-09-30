@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 import { useResponsive } from '@/hooks/use-mobile'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
@@ -48,7 +47,6 @@ export default function CostFormView({
   costCategories,
   frequencies
 }: CostFormViewProps) {
-  const { t } = useI18n()
   const { isMobile } = useResponsive()
 
   if (isLoading) {
@@ -110,19 +108,19 @@ export default function CostFormView({
         <CardContent className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t('operationalCosts.form.name')}</Label>
+              <Label>{"Placeholder"}</Label>
               <Input
                 value={newCost.name}
-                onChange={(e) => setNewCost(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={t('forms.placeholders.enterName')}
+                onChange={(e) => setNewCos"")}
+                placeholder={"Placeholder"}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>{t('operationalCosts.form.category')}</Label>
+              <Label>{"Placeholder"}</Label>
               <Select 
                 value={newCost.category} 
-                onValueChange={(value) => setNewCost(prev => ({ ...prev, category: value }))}
+                onValueChange={(value) => setNewCos"")}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -140,20 +138,20 @@ export default function CostFormView({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{t('operationalCosts.form.amount')}</Label>
+              <Label>{"Placeholder"}</Label>
               <Input
                 type="number"
                 value={newCost.amount}
-                onChange={(e) => setNewCost(prev => ({ ...prev, amount: Number(e.target.value) }))}
-                placeholder={t('forms.placeholders.enterAmount')}
+                onChange={(e) => setNewCos"" }))}
+                placeholder={"Placeholder"}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>{t('operationalCosts.form.frequency')}</Label>
+              <Label>{"Placeholder"}</Label>
               <Select 
                 value={newCost.frequency} 
-                onValueChange={(value: any) => setNewCost(prev => ({ ...prev, frequency: value }))}
+                onValueChange={(value: any) => setNewCos"")}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -173,7 +171,7 @@ export default function CostFormView({
             <Label>Deskripsi (Opsional)</Label>
             <Textarea
               value={newCost.description}
-              onChange={(e) => setNewCost(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setNewCos"")}
               placeholder="Deskripsi tambahan..."
               rows={2}
             />
@@ -184,7 +182,7 @@ export default function CostFormView({
               type="checkbox"
               id="isFixed"
               checked={newCost.isFixed}
-              onChange={(e) => setNewCost(prev => ({ ...prev, isFixed: e.target.checked }))}
+              onChange={(e) => setNewCos"")}
               className="rounded border-gray-300"
             />
             <Label htmlFor="isFixed" className="text-sm">
@@ -195,10 +193,10 @@ export default function CostFormView({
           <div className="flex gap-3 pt-4">
             <Button onClick={onSave} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
-              {t('buttons.primary.saveChanges')}
+              {"Placeholder"}
             </Button>
             <Button variant="outline" onClick={onCancel}>
-              {t('common.actions.cancel')}
+              {"Placeholder"}
             </Button>
           </div>
         </CardContent>

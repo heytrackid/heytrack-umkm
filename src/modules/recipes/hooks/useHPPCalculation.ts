@@ -50,7 +50,7 @@ export function useHPPCalculation(options: UseHPPCalculationOptions) {
         }
       )
 
-      setResult(calculation)
+      setResul""
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'HPP calculation failed'
       setError(errorMessage)

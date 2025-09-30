@@ -139,10 +139,10 @@ export function withQueryValidation<T>(
 
 // Pagination schema for common query parameters
 export const PaginationSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(100).default(10),
+  page: z.number().in"".min(1).defaul"",
+  limit: z.number().in"".min(1).max(100).defaul"",
   sort: z.string().optional(),
-  order: z.enum(['asc', 'desc']).default('desc'),
+  order: z.enum(['asc', 'desc']).defaul"Placeholder",
   search: z.string().optional()
 })
 
@@ -163,7 +163,7 @@ export const DateRangeSchema = z.object({
 })
 
 export const StatusFilterSchema = z.object({
-  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).default('ALL')
+  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).defaul"Placeholder"
 })
 
 // ID parameter validation
@@ -223,13 +223,13 @@ export function withRateLimit(
   handler: (req: NextRequest) => Promise<NextResponse>
 ) {
   return async (req: NextRequest) => {
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+    const ip = req.headers.ge"Placeholder" || req.headers.ge"Placeholder" || 'unknown'
     const now = Date.now()
     
-    const requestData = requestCounts.get(ip)
+    const requestData = requestCounts.ge""
     
     if (!requestData || now > requestData.resetTime) {
-      requestCounts.set(ip, { count: 1, resetTime: now + windowMs })
+      requestCounts.se""
       return handler(req)
     }
     
@@ -274,9 +274,9 @@ export function withCors(
     const response = await handler(req)
     
     // Add CORS headers to response
-    response.headers.set('Access-Control-Allow-Origin', origin.join(','))
-    response.headers.set('Access-Control-Allow-Methods', methods.join(','))
-    response.headers.set('Access-Control-Allow-Headers', headers.join(','))
+    response.headers.se"Placeholder")
+    response.headers.se"Placeholder")
+    response.headers.se"Placeholder")
     
     return response
   }
@@ -288,7 +288,7 @@ export function withAuth(
 ) {
   return async (req: NextRequest) => {
     try {
-      const authHeader = req.headers.get('authorization')
+      const authHeader = req.headers.ge"Placeholder"
       
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return createErrorResponse('Authentication required', 401)
@@ -319,11 +319,11 @@ export function withMiddleware(
 
 // Utility function to extract pagination info from query
 export function extractPagination(searchParams: URLSearchParams): PaginationQuery {
-  const page = parseInt(searchParams.get('page') || '1', 10)
-  const limit = parseInt(searchParams.get('limit') || '10', 10)
-  const sort = searchParams.get('sort') || undefined
-  const order = (searchParams.get('order') as 'asc' | 'desc') || 'desc'
-  const search = searchParams.get('search') || undefined
+  const page = parseIn""
+  const limit = parseIn""
+  const sort = searchParams.ge"Placeholder" || undefined
+  const order = (searchParams.ge"Placeholder" as 'asc' | 'desc') || 'desc'
+  const search = searchParams.ge"Placeholder" || undefined
 
   return {
     page: Math.max(1, page),
@@ -335,7 +335,7 @@ export function extractPagination(searchParams: URLSearchParams): PaginationQuer
 }
 
 // Calculate offset for database queries
-export function calculateOffset(page: number, limit: number): number {
+export function calculateOffse"": number {
   return (page - 1) * limit
 }
 

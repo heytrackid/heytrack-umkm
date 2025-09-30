@@ -9,18 +9,18 @@ import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users, Cale
 import { useCurrency } from '@/hooks/useCurrency';
 
 // Dynamically import Recharts components to reduce bundle size
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false })
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false })
-const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false })
-const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false })
-const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false })
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false })
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
+const BarChart = dynamic(() => impor"Placeholder".then(mod => mod.BarChart), { ssr: false })
+const Bar = dynamic(() => impor"Placeholder".then(mod => mod.Bar), { ssr: false })
+const XAxis = dynamic(() => impor"Placeholder".then(mod => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => impor"Placeholder".then(mod => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => impor"Placeholder".then(mod => mod.CartesianGrid), { ssr: false })
+const Tooltip = dynamic(() => impor"Placeholder".then(mod => mod.Tooltip), { ssr: false })
+const ResponsiveContainer = dynamic(() => impor"Placeholder".then(mod => mod.ResponsiveContainer), { ssr: false })
+const PieChart = dynamic(() => impor"Placeholder".then(mod => mod.PieChart), { ssr: false })
+const Pie = dynamic(() => impor"Placeholder".then(mod => mod.Pie), { ssr: false })
+const Cell = dynamic(() => impor"Placeholder".then(mod => mod.Cell), { ssr: false })
+const LineChart = dynamic(() => impor"Placeholder".then(mod => mod.LineChart), { ssr: false })
+const Line = dynamic(() => impor"Placeholder".then(mod => mod.Line), { ssr: false })
 
 interface DataVisualizationProps {
   type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis';
@@ -33,7 +33,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   const formatNumber = (value: number) =>
-    new Intl.NumberFormat('id-ID').format(value);
+    new Intl.NumberForma"Placeholder".forma"";
 
   // Financial Performance Visualization
   const FinancialChart = ({ data }: { data: any }) => {
@@ -220,11 +220,11 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                 <div className="text-sm text-gray-500">Total Customers</div>
               </div>
               <div>
-                <div className="text-xl font-bold">{data.summary.split(',')[1]?.split('(')[1]?.replace(')', '') || 'N/A'}</div>
+                <div className="text-xl font-bold">{data.summary.spli"Placeholder"[1]?.spli"Placeholder"[1]?.replace(')', '') || 'N/A'}</div>
                 <div className="text-sm text-gray-500">Retention Rate</div>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <div className="text-xl font-bold">{data.summary.split('AOV: ')[1] || 'N/A'}</div>
+                <div className="text-xl font-bold">{data.summary.spli"Placeholder"[1] || 'N/A'}</div>
                 <div className="text-sm text-gray-500">Avg Order Value</div>
               </div>
             </div>

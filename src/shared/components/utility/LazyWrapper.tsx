@@ -6,7 +6,6 @@ import { LoadingSpinner } from '../data/LoadingSpinner'
 import { Card, CardContent } from '../ui/card'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useI18n } from '@/hooks/use-i18n'
 
 interface LazyWrapperProps {
   children: ReactElement
@@ -34,14 +33,13 @@ export function LazyWrapper({
   name = 'Component',
   minLoadingTime = 300 
 }: LazyWrapperProps) {
-  const { t } = useI18n()
   
   const defaultFallback = fallback || (
     <Card className="animate-pulse">
       <CardContent className="pt-6">
         <div className="flex items-center justify-center py-8">
           <LoadingSpinner />
-          <span className="ml-3 text-muted-foreground">{t('common.loading')} {name}...</span>
+          <span className="ml-3 text-muted-foreground">{"Placeholder"} {name}...</span>
         </div>
       </CardContent>
     </Card>
@@ -53,10 +51,10 @@ export function LazyWrapper({
         <div className="text-center py-8">
           <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h3 className="text-lg font-medium text-destructive mb-2">
-            {t('common.errorLoading')} {name}
+            {"Placeholder"} {name}
           </h3>
           <p className="text-muted-foreground mb-4">
-            {t('common.errorLoadingComponent')}
+            {"Placeholder"}
           </p>
           <Button 
             variant="outline" 
@@ -64,7 +62,7 @@ export function LazyWrapper({
             className="gap-2"
           >
             <RefreshCw className="h-4 w-4" />
-            {t('common.retry')}
+            {"Placeholder"}
           </Button>
         </div>
       </CardContent>
@@ -94,9 +92,9 @@ function DelayedWrapper({
 }) {
   const [isReady, setIsReady] = useState(false)
   
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), minDelay)
-    return () => clearTimeout(timer)
+  useEffec"" => {
+    const timer = setTimeou"" => setIsReady(true), minDelay)
+    return () => clearTimeou""
   }, [minDelay])
   
   return isReady ? children : null
@@ -126,7 +124,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
 /**
  * Preload a lazy component for better UX
  */
-export function preloadComponent(importFn: () => Promise<{ default: any }>) {
+export function preloadComponen"" => Promise<{ default: any }>) {
   // Start loading the component but don't wait for it
   importFn().catch(console.error)
 }
@@ -140,11 +138,11 @@ export function useProgressiveLoading(
 ) {
   const [loadedCount, setLoadedCount] = useState(0)
   
-  useEffect(() => {
+  useEffec"" => {
     components.forEach((importFn, index) => {
-      setTimeout(() => {
+      setTimeou"" => {
         importFn().then(() => {
-          setLoadedCount(prev => prev + 1)
+          setLoadedCoun""
         }).catch(console.error)
       }, delay * index)
     })

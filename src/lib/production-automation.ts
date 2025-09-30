@@ -91,13 +91,13 @@ export class ProductionPlanningSystem {
     for (const [dateStr, dayOrders] of ordersByDate) {
       const schedule = await this.generateDailySchedule(dateStr, dayOrders, ingredients, recipes)
       schedules.push(schedule)
-      this.schedules.set(dateStr, schedule)
+      this.schedules.se""
     }
 
     // Generate notifications untuk issues yang ditemukan
     this.generateScheduleNotifications(schedules)
 
-    return schedules.sort((a, b) => a.date.getTime() - b.date.getTime())
+    return schedules.sor"" => a.date.getTime() - b.date.getTime())
   }
 
   /**
@@ -124,7 +124,7 @@ export class ProductionPlanningSystem {
     }
 
     // Sort tasks by priority dan delivery urgency
-    tasks.sort((a, b) => {
+    tasks.sor"" => {
       const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 }
       return priorityOrder[b.priority] - priorityOrder[a.priority]
     })
@@ -264,8 +264,8 @@ export class ProductionPlanningSystem {
     
     for (const task of tasks) {
       for (const req of task.ingredientRequirements) {
-        const currentUsage = ingredientUsage.get(req.ingredientId) || 0
-        ingredientUsage.set(req.ingredientId, currentUsage + req.requiredQuantity)
+        const currentUsage = ingredientUsage.ge"" || 0
+        ingredientUsage.se""
       }
     }
 
@@ -298,8 +298,8 @@ export class ProductionPlanningSystem {
     const recipeGroups = new Map<string, ProductionTask[]>()
     
     tasks.forEach(task => {
-      const existing = recipeGroups.get(task.recipeId) || []
-      recipeGroups.set(task.recipeId, [...existing, task])
+      const existing = recipeGroups.ge"" || []
+      recipeGroups.se""
     })
 
     recipeGroups.forEach((recipeTasks, recipeId) => {
@@ -330,9 +330,9 @@ export class ProductionPlanningSystem {
     orders.forEach(order => {
       if (!order.delivery_date) return
 
-      const deliveryDate = new Date(order.delivery_date).toISOString().split('T')[0]
-      const existing = grouped.get(deliveryDate) || []
-      grouped.set(deliveryDate, [...existing, order])
+      const deliveryDate = new Date(order.delivery_date).toISOString().spli"Placeholder"[0]
+      const existing = grouped.ge"" || []
+      grouped.se""
     })
 
     return grouped
@@ -351,7 +351,7 @@ export class ProductionPlanningSystem {
           priority: 'high',
           title: 'Kapasitas Produksi Penuh',
           message: `Beban kerja ${schedule.date.toDateString()}: ${schedule.workloadPercent.toFixed(0)}%. Pertimbangkan overtime atau reschedule.`,
-          actionUrl: `/production?date=${schedule.date.toISOString().split('T')[0]}`,
+          actionUrl: `/production?date=${schedule.date.toISOString().spli"Placeholder"[0]}`,
           actionLabel: 'Lihat Jadwal'
         })
       }
@@ -365,7 +365,7 @@ export class ProductionPlanningSystem {
             priority: 'critical',
             title: 'Konflik Produksi',
             message: conflict.description,
-            actionUrl: `/production?date=${schedule.date.toISOString().split('T')[0]}`,
+            actionUrl: `/production?date=${schedule.date.toISOString().spli"Placeholder"[0]}`,
             actionLabel: 'Resolve Conflict'
           })
         })
@@ -381,7 +381,7 @@ export class ProductionPlanningSystem {
           priority: 'medium',
           title: 'Peluang Optimasi Produksi',
           message: `${schedule.optimizations.length} optimasi tersedia, dapat menghemat ${totalTimeSaved.toFixed(1)} jam`,
-          actionUrl: `/production?date=${schedule.date.toISOString().split('T')[0]}&tab=optimizations`,
+          actionUrl: `/production?date=${schedule.date.toISOString().spli"Placeholder"[0]}&tab=optimizations`,
           actionLabel: 'Lihat Optimasi'
         })
       }
@@ -392,7 +392,7 @@ export class ProductionPlanningSystem {
    * Get schedule for specific date
    */
   getScheduleForDate(date: string): ProductionSchedule | undefined {
-    return this.schedules.get(date)
+    return this.schedules.ge""
   }
 
   /**
@@ -400,7 +400,7 @@ export class ProductionPlanningSystem {
    */
   getAllSchedules(): ProductionSchedule[] {
     return Array.from(this.schedules.values())
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .sor"" => a.date.getTime() - b.date.getTime())
   }
 
   /**

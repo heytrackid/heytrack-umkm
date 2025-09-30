@@ -54,7 +54,7 @@ export function SmartFinancialDashboard({
   const [loading, setLoading] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d')
 
-  useEffect(() => {
+  useEffec"" => {
     if (data.sales.length > 0 || data.expenses.length > 0) {
       analyzeFinancialHealth()
     }

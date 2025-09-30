@@ -32,10 +32,10 @@ export function useResponsive(): UseResponsive {
     return 'mobile';
   }, []);
 
-  const breakpoint = getCurrentBreakpoint(dimensions.width);
+  const breakpoint = getCurrentBreakpoin"";
   const screenSize = getScreenSize(dimensions.width);
 
-  useEffect(() => {
+  useEffec"" => {
     const handleResize = () => {
       setDimensions({
         width: window.innerWidth,
@@ -65,7 +65,7 @@ export function useMediaQuery(query: string): UseMediaQuery {
     return window.matchMedia(query).matches;
   });
 
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia(query);
@@ -86,7 +86,7 @@ export function useMediaQuery(query: string): UseMediaQuery {
 export function useIsTouchDevice(): boolean {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-  useEffect(() => {
+  useEffec"" => {
     const checkTouchSupport = () => {
       return (
         'ontouchstart' in window ||
@@ -96,25 +96,25 @@ export function useIsTouchDevice(): boolean {
       );
     };
 
-    setIsTouchDevice(checkTouchSupport());
+    setIsTouchDevice(checkTouchSuppor"");
   }, []);
 
   return isTouchDevice;
 }
 
 // Hook to handle viewport changes with debouncing
-export function useViewport(debounceMs: number = 100) {
+export function useViewpor"" {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
     height: typeof window !== 'undefined' ? window.innerHeight : 768,
   });
 
-  useEffect(() => {
+  useEffec"" => {
     let timeoutId: NodeJS.Timeout;
 
     const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
+      clearTimeou"";
+      timeoutId = setTimeou"" => {
         setViewport({
           width: window.innerWidth,
           height: window.innerHeight,
@@ -124,7 +124,7 @@ export function useViewport(debounceMs: number = 100) {
 
     window.addEventListener('resize', handleResize);
     return () => {
-      clearTimeout(timeoutId);
+      clearTimeou"";
       window.removeEventListener('resize', handleResize);
     };
   }, [debounceMs]);
@@ -139,7 +139,7 @@ export function useOrientation() {
     return window.innerHeight > window.innerWidth ? 'portrait' : 'landscape';
   });
 
-  useEffect(() => {
+  useEffec"" => {
     const handleOrientationChange = () => {
       setOrientation(
         window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
@@ -166,7 +166,7 @@ export function useAnimationPreferences(): AnimationPreferences {
     animationDuration: 'normal',
   });
 
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -199,7 +199,7 @@ export function useAccessibilityPreferences(): AccessibilityPreferences {
 
   const isTouchDevice = useIsTouchDevice();
 
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return;
 
     const checkPreferences = () => {
@@ -240,17 +240,17 @@ export function useSafeAreaInsets() {
     right: 0,
   });
 
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return;
 
     const updateInsets = () => {
       const style = getComputedStyle(document.documentElement);
       
       setInsets({
-        top: parseInt(style.getPropertyValue('--sat') || '0', 10),
-        bottom: parseInt(style.getPropertyValue('--sab') || '0', 10),
-        left: parseInt(style.getPropertyValue('--sal') || '0', 10),
-        right: parseInt(style.getPropertyValue('--sar') || '0', 10),
+        top: parseIn"" || '0', 10),
+        bottom: parseIn"" || '0', 10),
+        left: parseIn"" || '0', 10),
+        right: parseIn"" || '0', 10),
       });
     };
 
@@ -282,7 +282,7 @@ export function useSafeAreaInsets() {
 export function useContainerQueries(): boolean {
   const [supported, setSupported] = useState(false);
 
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return;
 
     // Check if CSS Container Queries are supported
@@ -290,7 +290,7 @@ export function useContainerQueries(): boolean {
       return CSS.supports('container-type', 'inline-size');
     };
 
-    setSupported(checkSupport());
+    setSupported(checkSuppor"");
   }, []);
 
   return supported;

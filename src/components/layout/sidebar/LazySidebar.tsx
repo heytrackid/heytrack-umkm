@@ -7,7 +7,7 @@ import { Menu, X } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Lazy imports for sidebar components
-const SidebarHeader = dynamic(() => import('./SidebarHeader'), {
+const SidebarHeader = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => (
     <div className="h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -22,7 +22,7 @@ const SidebarHeader = dynamic(() => import('./SidebarHeader'), {
   )
 })
 
-const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
+const SidebarNavigation = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => (
     <div className="flex-1 px-3 lg:px-4 py-4 space-y-6 overflow-y-auto">
@@ -47,7 +47,7 @@ const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
   )
 })
 
-const SidebarFooter = dynamic(() => import('./SidebarFooter'), {
+const SidebarFooter = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => (
     <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
@@ -59,7 +59,7 @@ const SidebarFooter = dynamic(() => import('./SidebarFooter'), {
   )
 })
 
-const MobileSidebar = dynamic(() => import('./MobileSidebar'), {
+const MobileSidebar = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => (
     <div className="h-full flex flex-col bg-background">

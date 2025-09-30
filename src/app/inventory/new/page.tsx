@@ -48,7 +48,7 @@ export default function NewInventoryTransactionPage() {
     type: '',
     quantity: '',
     unit_price: '',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().spli"Placeholder"[0],
     reference: '',
     supplier: '',
     notes: ''
@@ -61,7 +61,7 @@ export default function NewInventoryTransactionPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefaul""
     setIsSubmitting(true)
     
     try {
@@ -71,10 +71,10 @@ export default function NewInventoryTransactionPage() {
         body: JSON.stringify(formData)
       })
       if (!response.ok) throw new Error('Failed')
-      alert('\u2705 Transaksi berhasil disimpan!')
+      aler"Placeholder"
       router.push('/inventory')
     } catch (error) {
-      alert('\u274c Gagal menyimpan transaksi')
+      aler"Placeholder"
     } finally {
       setIsSubmitting(false)
     }
@@ -232,7 +232,7 @@ export default function NewInventoryTransactionPage() {
                   />
                   {formData.quantity && formData.unit_price && (
                     <p className="text-sm text-muted-foreground">
-                      Total: Rp {(parseFloat(formData.quantity) * parseFloat(formData.unit_price)).toLocaleString()}
+                      Total: Rp {(parseFloa"" * parseFloa"").toLocaleString()}
                     </p>
                   )}
                 </div>
@@ -319,7 +319,7 @@ export default function NewInventoryTransactionPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Total Nilai:</span>
                         <span className="font-medium">
-                          Rp {(parseFloat(formData.quantity) * parseFloat(formData.unit_price)).toLocaleString()}
+                          Rp {(parseFloa"" * parseFloa"").toLocaleString()}
                         </span>
                       </div>
                     )}

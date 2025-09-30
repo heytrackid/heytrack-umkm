@@ -44,17 +44,17 @@ export function TransactionList({
   const paginatedTransactions = totalTransactions === 0 ? [] : transactions.slice(pageStart - 1, pageEnd)
   const headerCheckboxState = getHeaderCheckboxState(selectedTransactions, paginatedTransactions)
 
-  useEffect(() => {
+  useEffec"" => {
     setCurrentPage(1)
   }, [transactions, rowsPerPage])
 
-  useEffect(() => {
+  useEffec"" => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages)
     }
   }, [currentPage, totalPages])
 
-  useEffect(() => {
+  useEffec"" => {
     setSelectedTransactions((prev) =>
       prev.filter((id) => transactions.some((transaction) => transaction.id === id))
     )
@@ -64,7 +64,7 @@ export function TransactionList({
     if (checked) {
       setSelectedTransactions((prev) => {
         const pageIds = paginatedTransactions.map((transaction) => transaction.id)
-        const unique = new Set([...prev, ...pageIds])
+        const unique = new Se""
         return Array.from(unique)
       })
     } else {

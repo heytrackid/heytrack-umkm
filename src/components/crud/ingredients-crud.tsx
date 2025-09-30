@@ -6,7 +6,6 @@ import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
-import { useI18n } from '@/providers/I18nProvider';
 import { useSettings } from '@/contexts/settings-context';
 import { Database } from '@/types';
 
@@ -36,21 +35,20 @@ const validationRules = {
   category: () => null,
 };
 
-// Unit options will be defined inside component to use t() function
+// Unit options will be defined inside component to use "" function
 
 export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: any[] }) {
-  const { t } = useI18n();
   const { formatCurrency, settings } = useSettings();
   const { data: ingredients, loading, error, create, update, remove } = useIngredients({ initial: initialIngredients, refetchOnMount: false });
   
   // Unit options using i18n
   const unitOptions = [
-    { value: 'kg', label: t('units.kg') },
-    { value: 'g', label: t('units.g') },
-    { value: 'l', label: t('units.l') },
-    { value: 'ml', label: t('units.ml') },
-    { value: 'pcs', label: t('units.pcs') },
-    { value: 'dozen', label: t('units.dozen') },
+    { value: 'kg', label: "Placeholder" },
+    { value: 'g', label: "Placeholder" },
+    { value: 'l', label: "Placeholder" },
+    { value: 'ml', label: "Placeholder" },
+    { value: 'pcs', label: "Placeholder" },
+    { value: 'dozen', label: "Placeholder" },
   ];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -81,29 +79,29 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   const columns = [
     {
       key: 'name',
-      header: t('forms.labels.name'),
+      header: "Placeholder",
       priority: 'high' as const,
     },
     {
       key: 'unit',
-      header: t('forms.labels.unit'),
+      header: "Placeholder",
       priority: 'high' as const,
     },
     {
       key: 'price_per_unit',
-      header: t('forms.labels.pricePerUnit'),
+      header: "Placeholder",
       render: (value: number) => formatCurrency(value),
       hideOnMobile: true,
     },
     {
       key: 'current_stock',
-      header: t('forms.labels.currentStock'),
+      header: "Placeholder",
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
       priority: 'medium' as const,
     },
     {
       key: 'minimum_stock',
-      header: t('forms.labels.minStock'),
+      header: "Placeholder",
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
       hideOnMobile: true,
     },
@@ -115,7 +113,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleEdit = (ingredient: Ingredient) => {
-    setSelectedIngredient(ingredient);
+    setSelectedIngredien"";
     // Populate form with ingredient data
     Object.keys(initialFormData).forEach(key => {
       handleChange(key as keyof IngredientFormData, (ingredient as any)[key] || '');
@@ -124,12 +122,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleDelete = (ingredient: Ingredient) => {
-    setSelectedIngredient(ingredient);
+    setSelectedIngredien"";
     setIsDeleteDialogOpen(true);
   };
 
   const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefaul"";
     if (!validateAll()) return;
 
     try {
@@ -142,13 +140,13 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefaul"";
     if (!validateAll() || !selectedIngredient) return;
 
     try {
       await update(selectedIngredient.id, formData as any);
       setIsEditModalOpen(false);
-      setSelectedIngredient(null);
+      setSelectedIngredien"";
       resetForm();
     } catch (error) {
       console.error('Failed to update ingredient:', error);
@@ -161,7 +159,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     try {
       await remove(selectedIngredient.id);
       setIsDeleteDialogOpen(false);
-      setSelectedIngredient(null);
+      setSelectedIngredien"";
     } catch (error) {
       console.error('Failed to delete ingredient:', error);
     }
@@ -171,14 +169,14 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     setIsDeleteDialogOpen(false);
-    setSelectedIngredient(null);
+    setSelectedIngredien"";
     resetForm();
   };
 
   if (error) {
     return (
       <div className="bg-gray-100 dark:bg-gray-800 border border-red-200 rounded-md p-4">
-        <p className="text-gray-600 dark:text-gray-400">{t('ingredients.errorLoading', { error })}</p>
+        <p className="text-gray-600 dark:text-gray-400">{"Placeholder"}</p>
       </div>
     );
   }
@@ -188,12 +186,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <SimpleDataTable
         data={ingredients || []}
         columns={columns}
-        searchPlaceholder={t('ingredients.searchIngredients')}
+        searchPlaceholder={"Placeholder"}
         onAdd={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        addButtonText={t('ingredients.addIngredient')}
-        emptyMessage={t('ingredients.noIngredientsFound')}
+        addButtonText={"Placeholder"}
+        emptyMessage={"Placeholder"}
         exportData={true}
       />
 
@@ -201,18 +199,18 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <Modal
         isOpen={isCreateModalOpen}
         onClose={closeModals}
-        title={t('ingredients.addNewIngredient')}
+        title={"Placeholder"}
         size="lg"
         fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitCreate}>
           <FormSection
-            title={t('forms.sections.basicInformation')}
-            description={t('forms.descriptions.enterBasicDetails')}
+            title={"Placeholder"}
+            description={"Placeholder"}
           >
             <FormGrid cols={2}>
               <FormField
-                label={t('forms.labels.name')}
+                label={"Placeholder"}
                 name="name"
                 type="text"
                 value={formData.name}
@@ -220,12 +218,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder={t('forms.placeholders.ingredientName')}
-                hint={t('forms.hints.enterIngredientName')}
+                placeholder={"Placeholder"}
+                hint={"Placeholder"}
               />
 
               <FormField
-                label={t('forms.labels.unit')}
+                label={"Placeholder"}
                 name="unit"
                 type="select"
                 value={formData.unit}
@@ -234,17 +232,17 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 error={touched.unit ? errors.unit : undefined}
                 required
                 options={unitOptions}
-                hint={t('forms.hints.selectMeasurementUnit')}
+                hint={"Placeholder"}
               />
             </FormGrid>
           </FormSection>
 
           <FormSection
-            title={t('forms.sections.stockPricing')}
-            description={t('forms.descriptions.setStockLevels')}
+            title={"Placeholder"}
+            description={"Placeholder"}
           >
             <FormField
-label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
+label={"Placeholder"}
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -254,12 +252,12 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
               required
               min={0}
               step={0.01}
-              hint={t('forms.hints.enterPrice', { currency: settings.currency.name })}
+              hint={"Placeholder"}
             />
 
             <FormGrid cols={2}>
               <FormField
-                label={t('forms.labels.currentStock')}
+                label={"Placeholder"}
                 name="current_stock"
                 type="number"
                 value={formData.current_stock}
@@ -269,11 +267,11 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
                 required
                 min={0}
                 step={0.01}
-                hint={t('forms.hints.availableQuantity')}
+                hint={"Placeholder"}
               />
 
               <FormField
-                label={t('forms.labels.minStock')}
+                label={"Placeholder"}
                 name="minimum_stock"
                 type="number"
                 value={formData.minimum_stock}
@@ -283,29 +281,29 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
                 required
                 min={0}
                 step={0.01}
-                hint={t('forms.hints.reorderThreshold')}
+                hint={"Placeholder"}
               />
             </FormGrid>
           </FormSection>
 
-          <FormSection title={t('forms.sections.additionalInformation')}>
+          <FormSection title={"Placeholder"}>
             <FormField
-              label={t('forms.labels.description')}
+              label={"Placeholder"}
               name="description"
               type="textarea"
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.description ? errors.description : undefined}
-              placeholder={t('forms.placeholders.optionalDescription')}
+              placeholder={"Placeholder"}
               rows={3}
-              hint={t('forms.hints.addNotes')}
+              hint={"Placeholder"}
             />
           </FormSection>
 
           <FormActions
             onCancel={closeModals}
-            submitText={t('ingredients.createIngredient')}
+            submitText={"Placeholder"}
             loading={loading}
             sticky={true}
           />
@@ -316,18 +314,18 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
       <Modal
         isOpen={isEditModalOpen}
         onClose={closeModals}
-        title={t('ingredients.editIngredient')}
+        title={"Placeholder"}
         size="lg"
         fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitEdit}>
           <FormSection
-            title={t('forms.sections.basicInformation')}
-            description={t('forms.descriptions.updateBasicDetails')}
+            title={"Placeholder"}
+            description={"Placeholder"}
           >
             <FormGrid cols={2}>
               <FormField
-                label={t('forms.labels.name')}
+                label={"Placeholder"}
                 name="name"
                 type="text"
                 value={formData.name}
@@ -335,11 +333,11 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder={t('forms.placeholders.ingredientName')}
+                placeholder={"Placeholder"}
               />
 
               <FormField
-                label={t('forms.labels.unit')}
+                label={"Placeholder"}
                 name="unit"
                 type="select"
                 value={formData.unit}
@@ -353,11 +351,11 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
           </FormSection>
 
           <FormSection
-            title={t('forms.sections.stockPricing')}
-            description={t('forms.descriptions.updateStockLevels')}
+            title={"Placeholder"}
+            description={"Placeholder"}
           >
             <FormField
-              label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
+              label={"Placeholder"}
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -371,7 +369,7 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
 
             <FormGrid cols={2}>
               <FormField
-                label={t('forms.labels.currentStock')}
+                label={"Placeholder"}
                 name="current_stock"
                 type="number"
                 value={formData.current_stock}
@@ -384,7 +382,7 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
               />
 
               <FormField
-                label={t('forms.labels.minStock')}
+                label={"Placeholder"}
                 name="minimum_stock"
                 type="number"
                 value={formData.minimum_stock}
@@ -398,23 +396,23 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
             </FormGrid>
           </FormSection>
 
-          <FormSection title={t('forms.sections.additionalInformation')}>
+          <FormSection title={"Placeholder"}>
             <FormField
-              label={t('forms.labels.description')}
+              label={"Placeholder"}
               name="description"
               type="textarea"
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.description ? errors.description : undefined}
-              placeholder={t('forms.placeholders.optionalDescription')}
+              placeholder={"Placeholder"}
               rows={3}
             />
           </FormSection>
 
           <FormActions
             onCancel={closeModals}
-            submitText={t('ingredients.updateIngredient')}
+            submitText={"Placeholder"}
             loading={loading}
             sticky={true}
           />
@@ -426,9 +424,9 @@ label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
         isOpen={isDeleteDialogOpen}
         onClose={closeModals}
         onConfirm={handleConfirmDelete}
-        title={t('ingredients.deleteIngredient')}
-        message={t('dialogs.deleteConfirmation', { name: selectedIngredient?.name })}
-        confirmText={t('common.actions.delete')}
+        title={"Placeholder"}
+        message={"Placeholder"}
+        confirmText={"Placeholder"}
         type="danger"
       />
     </div>

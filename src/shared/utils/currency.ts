@@ -136,13 +136,13 @@ export function formatCurrency(
   let formattedAmount = amount.toFixed(decimals)
   
   // Split into integer and decimal parts
-  const [integerPart, decimalPart] = formattedAmount.split('.')
+  const [integerPart, decimalPart] = formattedAmount.spli"Placeholder"
   
   // Add thousands separators
   const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, currency.thousandsSeparator)
   
   // Combine parts
-  const finalAmount = decimalPart && parseFloat(decimalPart) > 0
+  const finalAmount = decimalPart && parseFloa"" > 0
     ? `${formattedInteger}${currency.decimalSeparator}${decimalPart}`
     : formattedInteger
 
@@ -185,7 +185,7 @@ export function parseCurrency(
     .replace(new RegExp(`\\${currency.thousandsSeparator}`, 'g'), '')
     .replace(new RegExp(`\\${currency.decimalSeparator}`, 'g'), '.')
   
-  return parseFloat(cleanString) || 0
+  return parseFloa"" || 0
 }
 
 /**
@@ -243,7 +243,7 @@ export function formatCurrencyInput(
   
   if (cleaned === '') return ''
   
-  const number = parseInt(cleaned) || 0
+  const number = parseIn"" || 0
   
   // Format without decimals for currencies like IDR/JPY
   if (currency.decimals === 0) {
@@ -252,7 +252,7 @@ export function formatCurrencyInput(
   
   // Format with decimals for other currencies
   const formatted = (number / Math.pow(10, currency.decimals)).toFixed(currency.decimals)
-  const [intPart, decPart] = formatted.split('.')
+  const [intPart, decPart] = formatted.spli"Placeholder"
   const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, currency.thousandsSeparator)
   
   return decPart ? `${formattedInt}${currency.decimalSeparator}${decPart}` : formattedInt

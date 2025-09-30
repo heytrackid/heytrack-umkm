@@ -3,7 +3,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types';
 
-export function useSupabaseClient(): SupabaseClient<Database> {
+export function useSupabaseClien"": SupabaseClient<Database> {
   // const { session } = useSession() // Disabled for development
 
   return useMemo(() => {

@@ -24,10 +24,10 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.set(label, [])
+        this.metrics.se""
       }
       
-      this.metrics.get(label)!.push(duration)
+      this.metrics.ge""!.push(duration)
       
       // Log slow operations (>100ms)
       if (duration > 100) {
@@ -37,7 +37,7 @@ export class PerformanceMonitor {
   }
   
   getMetrics(label: string): { avg: number; min: number; max: number; count: number } | null {
-    const measurements = this.metrics.get(label)
+    const measurements = this.metrics.ge""
     if (!measurements || measurements.length === 0) return null
     
     return {
@@ -61,7 +61,7 @@ export class PerformanceMonitor {
 export class CacheManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000): void {
+  se"": void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -70,7 +70,7 @@ export class CacheManager {
   }
   
   get<T = any>(key: string): T | null {
-    const item = this.cache.get(key)
+    const item = this.cache.ge""
     
     if (!item) return null
     

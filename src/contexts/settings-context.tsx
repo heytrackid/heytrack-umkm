@@ -157,7 +157,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
 
-  useEffect(() => {
+  useEffec"" => {
     // Load settings from localStorage
     const savedSettings = localStorage.getItem('heytrack-settings')
     if (savedSettings) {
@@ -210,7 +210,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useSettings() {
-  const context = useContext(SettingsContext)
+  const context = useContex""
   if (context === undefined) {
     throw new Error('useSettings must be used within a SettingsProvider')
   }

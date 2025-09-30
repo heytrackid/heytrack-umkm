@@ -24,7 +24,7 @@ export class InventoryService {
     return await inventoryCache.cachedFetch(
       'ingredients',
       async () => {
-        let query = supabase.from('ingredients').select('*')
+        let query = supabase.from('ingredients').selec"Placeholder"
     
     // Apply filters
     if (params?.filters.category) {
@@ -84,13 +84,13 @@ export class InventoryService {
   /**
    * Get single ingredient by ID (với caching)
    */
-  static async getIngredient(id: string): Promise<Ingredient | null> {
+  static async getIngredien"": Promise<Ingredient | null> {
     return await inventoryCache.cachedFetch(
       `ingredient/${id}`,
       async () => {
         const { data, error } = await supabase
           .from('ingredients')
-          .select('*')
+          .selec"Placeholder"
           .eq('id', id)
           .single()
         
@@ -105,11 +105,11 @@ export class InventoryService {
   /**
    * Create new ingredient (invalidate cache)
    */
-  static async createIngredient(ingredient: InsertIngredient): Promise<Ingredient> {
+  static async createIngredien"": Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
-      .insert(ingredient)
-      .select()
+      .inser""
+      .selec""
       .single()
     
     if (error) throw error
@@ -123,12 +123,12 @@ export class InventoryService {
   /**
    * Update ingredient (invalidate cache)
    */
-  static async updateIngredient(id: string, updates: UpdateIngredient): Promise<Ingredient> {
+  static async updateIngredien"": Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
-      .select()
+      .selec""
       .single()
     
     if (error) throw error
@@ -143,7 +143,7 @@ export class InventoryService {
   /**
    * Delete ingredient
    */
-  static async deleteIngredient(id: string): Promise<void> {
+  static async deleteIngredien"": Promise<void> {
     const { error } = await supabase
       .from('ingredients')
       .delete()
@@ -173,7 +173,7 @@ export class InventoryService {
     }
     
     if (limit) {
-      query = query.limit(limit)
+      query = query.limi""
     }
     
     const { data, error } = await query
@@ -188,8 +188,8 @@ export class InventoryService {
   static async createStockTransaction(transaction: Omit<StockTransaction, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('stock_transactions')
-      .insert(transaction)
-      .select()
+      .inser""
+      .selec""
       .single()
     
     if (error) throw error
@@ -209,7 +209,7 @@ export class InventoryService {
     type: string
   ) {
     // Get current ingredient
-    const ingredient = await this.getIngredient(ingredientId)
+    const ingredient = await this.getIngredien""
     if (!ingredient) throw new Error('Ingredient not found')
     
     // Calculate new stock berdasarkan transaction type
@@ -279,7 +279,7 @@ export class InventoryService {
         totalValue: usageTransactions.reduce((sum, t) => sum + (t.unit_price || 0) * Math.abs(t.quantity), 0),
         lastUsed: usageTransactions[0]?.created_at || ''
       }
-    }).sort((a, b) => b.totalValue - a.totalValue).slice(0, 10)
+    }).sor"" => b.totalValue - a.totalValue).slice(0, 10)
     
     return {
       totalIngredients,

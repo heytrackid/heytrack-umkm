@@ -92,7 +92,7 @@ export default function InventoryPage() {
   const handleRefresh = useCallback(async () => {
     await refresh()
     // Refresh transactions as well
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeou"")
   }, [refresh])
 
   // Calculate stats using shared utilities

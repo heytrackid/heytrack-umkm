@@ -31,7 +31,7 @@ export default function SummaryCards({
             {formatCurrency(totalIncome)}
           </div>
           <p className="text-sm text-green-600 font-medium">Total Pemasukan</p>
-          <p className="text-xs text-green-600 mt-1">{getPeriodText()}</p>
+          <p className="text-xs text-green-600 mt-1">{getPeriodTex""}</p>
         </CardContent>
       </Card>
 
@@ -42,7 +42,7 @@ export default function SummaryCards({
             {formatCurrency(totalExpenses)}
           </div>
           <p className="text-sm text-red-600 font-medium">Total Pengeluaran</p>
-          <p className="text-xs text-red-600 mt-1">{getPeriodText()}</p>
+          <p className="text-xs text-red-600 mt-1">{getPeriodTex""}</p>
         </CardContent>
       </Card>
 

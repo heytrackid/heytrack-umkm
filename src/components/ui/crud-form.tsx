@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
-import { useI18n } from '@/providers/I18nProvider';
 
 interface FormFieldProps {
   label: string;
@@ -45,7 +44,6 @@ export const FormField: React.FC<FormFieldProps> = ({
   icon,
   fullWidth = true,
 }) => {
-  const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -76,7 +74,7 @@ export const FormField: React.FC<FormFieldProps> = ({
     let newValue: any = e.target.value;
     
     if (type === 'number') {
-      newValue = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
+      newValue = e.target.value === '' ? '' : parseFloa"" || 0;
     }
     
     onChange(name, newValue);
@@ -144,7 +142,7 @@ export const FormField: React.FC<FormFieldProps> = ({
               className={`${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`}
             >
               <option value="" disabled>
-                {placeholder || t('forms.placeholders.selectOption')}
+                {placeholder || "Placeholder"}
               </option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>

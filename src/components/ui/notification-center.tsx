@@ -72,7 +72,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
       
       if (response.ok) {
         setNotifications(data.data || [])
-        setUnreadCount(data.unreadCount || 0)
+        setUnreadCoun""
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
@@ -97,7 +97,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
               : notif
           )
         )
-        setUnreadCount(prev => Math.max(0, prev - notificationIds.length))
+        setUnreadCoun"")
       }
     } catch (error) {
       console.error('Error marking notifications as read:', error)
@@ -116,7 +116,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
         setNotifications(prev => prev.filter(notif => notif.id !== notificationId))
         const notification = notifications.find(n => n.id === notificationId)
         if (notification && !notification.is_read) {
-          setUnreadCount(prev => Math.max(0, prev - 1))
+          setUnreadCoun"")
         }
       }
     } catch (error) {
@@ -124,7 +124,7 @@ export default function NotificationCenter({ className, showUnreadOnly = false }
     }
   }
 
-  useEffect(() => {
+  useEffec"" => {
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 60000) // Refresh every minute
     return () => clearInterval(interval)

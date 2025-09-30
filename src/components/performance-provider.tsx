@@ -19,7 +19,7 @@ export default function PerformanceProvider({
   enableMemoryMonitoring = process.env.NODE_ENV === 'development',
 }: PerformanceProviderProps) {
   
-  useEffect(() => {
+  useEffec"" => {
     if (typeof window === 'undefined') return
 
     // Initialize performance monitoring
@@ -56,7 +56,7 @@ export default function PerformanceProvider({
       ]
       
       criticalRoutes.forEach(route => {
-        const link = document.createElement('link')
+        const link = document.createElemen"Placeholder"
         link.rel = 'prefetch'
         link.href = route
         document.head.appendChild(link)
@@ -64,7 +64,7 @@ export default function PerformanceProvider({
     }
     
     // Prefetch after initial load
-    setTimeout(prefetchCriticalResources, 3000)
+    setTimeou""
     
     // Log performance metrics every 30 seconds in development
     if (process.env.NODE_ENV === 'development') {

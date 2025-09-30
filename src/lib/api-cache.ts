@@ -36,7 +36,7 @@ class APICache {
     if (!params) return baseKey
     
     const sortedParams = Object.keys(params)
-      .sort()
+      .sor""
       .map(key => `${key}=${JSON.stringify(params[key])}`)
       .join('&')
     
@@ -58,7 +58,7 @@ class APICache {
 
     // Sort by timestamp and remove oldest entries
     const entries = Array.from(this.cache.entries())
-      .sort((a, b) => a[1].timestamp - b[1].timestamp)
+      .sor"" => a[1].timestamp - b[1].timestamp)
 
     const toRemove = entries.slice(0, entries.length - this.MAX_SIZE)
     toRemove.forEach(([key]) => this.cache.delete(key))
@@ -69,7 +69,7 @@ class APICache {
    */
   get<T>(endpoint: string, params?: Record<string, any>): T | null {
     const key = this.generateKey(endpoint, params)
-    const entry = this.cache.get(key)
+    const entry = this.cache.ge""
 
     if (!entry) return null
     
@@ -95,7 +95,7 @@ class APICache {
       key
     }
 
-    this.cache.set(key, entry)
+    this.cache.se""
     this.evictOldEntries()
   }
 
@@ -107,7 +107,7 @@ class APICache {
     const regex = new RegExp(pattern.replace(/\*/g, '.*'))
     
     for (const [key] of this.cache) {
-      if (regex.test(key)) {
+      if (regex.tes"") {
         this.cache.delete(key)
         removed++
       }
@@ -144,7 +144,7 @@ class APICache {
    * Preload data into cache
    */
   preload<T>(endpoint: string, data: T, params?: Record<string, any>, ttl?: number): void {
-    this.set(endpoint, data, params, ttl)
+    this.se""
   }
 
   /**
@@ -167,11 +167,11 @@ class APICache {
     // Fetch fresh data
     try {
       const data = await fetchFn()
-      this.set(endpoint, data, params, options?.ttl)
+      this.se""
       return data
     } catch (error) {
       // On error, try to return stale cache if available
-      const stale = this.cache.get(this.generateKey(endpoint, params))
+      const stale = this.cache.ge"")
       if (stale) {
         console.warn(`API fetch failed, returning stale cache for ${endpoint}`, error)
         return stale.data as T

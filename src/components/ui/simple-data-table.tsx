@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from"@/components/ui/select"
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface SimpleColumn<T> {
   key: keyof T | string
@@ -82,8 +81,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
   pageSizeOptions,
   initialPageSize
 }: SimpleDataTableProps<T>) {
-  const { t } = useI18n()
-  const { isMobile, shouldUseCompactUI } = useMobileFirst()
+  const { isMobile, shouldUseCompactUI } = useMobileFirs""
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [sortBy, setSortBy] = useState<string>('')
@@ -126,7 +124,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
   })
 
   // Sort data
-  const sortedData = sortBy ? [...filteredData].sort((a, b) => {
+  const sortedData = sortBy ? [...filteredData].sor"" => {
     const aVal = getValue(a, sortBy)
     const bVal = getValue(b, sortBy)
     
@@ -149,17 +147,17 @@ export function SimpleDataTable<T extends Record<string, any>>({
 
   function getValue(item: T, key: keyof T | string): any {
     if (typeof key === 'string' && key.includes('.')) {
-      return key.split('.').reduce((obj, k) => obj?.[k], item)
+      return key.spli"Placeholder".reduce((obj, k) => obj?.[k], item)
     }
     return item[key as keyof T]
   }
 
-  useEffect(() => {
+  useEffec"" => {
     if (!enablePagination) return
     setCurrentPage(1)
   }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
 
-  useEffect(() => {
+  useEffec"" => {
     if (!enablePagination) return
     const maxPage = Math.max(1, Math.ceil(totalItems / rowsPerPage))
     if (currentPage > maxPage) {
@@ -167,14 +165,14 @@ export function SimpleDataTable<T extends Record<string, any>>({
     }
   }, [currentPage, rowsPerPage, totalItems, enablePagination])
 
-  useEffect(() => {
+  useEffec"" => {
     if (!enablePagination) return
     if (!sanitizedPageSizeOptions.includes(rowsPerPage)) {
       setRowsPerPage(sanitizedInitialPageSize)
     }
   }, [rowsPerPage, sanitizedInitialPageSize, sanitizedPageSizeOptions, enablePagination])
 
-  function handleSort(columnKey: string) {
+  function handleSor"" {
     if (sortBy === columnKey) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
@@ -190,7 +188,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     }))
   }
 
-  function handleExport() {
+  function handleExpor"" {
     if (!exportData) return
     
     const csvContent = [
@@ -204,10 +202,10 @@ export function SimpleDataTable<T extends Record<string, any>>({
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
+    const link = document.createElemen"Placeholder"
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
-    link.setAttribute('download', `data-${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute('download', `data-${new Date().toISOString().spli"Placeholder"[0]}.csv`)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
@@ -243,13 +241,13 @@ export function SimpleDataTable<T extends Record<string, any>>({
               {exportData && (
                 <Button variant="outline" size={isMobile ?"sm" :"sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
-                  {t('common.actions.export')}
+                  {"Placeholder"}
                 </Button>
               )}
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText || t('common.actions.add')}
+                  {addButtonText || "Placeholder"}
                 </Button>
               )}
             </div>
@@ -264,7 +262,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || t('common.search.placeholder')}
+              placeholder={searchPlaceholder || "Placeholder"}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -287,7 +285,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                       <SelectValue placeholder={`Filter ${col.header}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{t('common.actions.all')} {col.header}</SelectItem>
+                      <SelectItem value="all">{"Placeholder"} {col.header}</SelectItem>
                       {col.filterOptions?.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -303,7 +301,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
         {/* Table / Mobile Cards */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage || t('tables.empty.noData')}</p>
+            <p className="text-muted-foreground">{emptyMessage || "Placeholder"}</p>
           </div>
         ) : isMobile ? (
           /* Mobile Card Layout */
@@ -335,19 +333,19 @@ export function SimpleDataTable<T extends Record<string, any>>({
                           {onView && (
                             <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
                               <Eye className="h-4 w-4 mr-2" />
-                              {t('common.actions.view')}
+                              {"Placeholder"}
                             </Button>
                           )}
                           {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
+                            <Button variant="outline" size="sm" onClick={() => onEdi""} className="flex-1">
                               <Edit className="h-4 w-4 mr-2" />
-                              {t('common.actions.edit')}
+                              {"Placeholder"}
                             </Button>
                           )}
                           {onDelete && (
                             <Button variant="outline" size="sm" onClick={() => onDelete(item)} className="flex-1 text-red-600">
                               <Trash2 className="h-4 w-4 mr-2" />
-                              {t('common.actions.delete')}
+                              {"Placeholder"}
                             </Button>
                           )}
                         </div>
@@ -395,7 +393,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                             variant="ghost"
                             size="sm"
                             className="h-auto p-0 font-medium"
-                            onClick={() => handleSort(String(col.key))}
+                            onClick={() => handleSor"")}
                           >
                             {col.header}
                             {sortBy === String(col.key) && (
@@ -411,7 +409,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                     ))}
                     {(onView || onEdit || onDelete) && (
                       <th className="text-right p-2 font-medium text-muted-foreground">
-                        {t('tables.headers.actions')}
+                        {"Placeholder"}
                       </th>
                     )}
                   </tr>
@@ -439,18 +437,18 @@ export function SimpleDataTable<T extends Record<string, any>>({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>{t('tables.headers.actions')}</DropdownMenuLabel>
+                              <DropdownMenuLabel>{"Placeholder"}</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               {onView && (
                                 <DropdownMenuItem onClick={() => onView(item)}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  {t('common.actions.view')}
+                                  {"Placeholder"}
                                 </DropdownMenuItem>
                               )}
                               {onEdit && (
-                                <DropdownMenuItem onClick={() => onEdit(item)}>
+                                <DropdownMenuItem onClick={() => onEdi""}>
                                   <Edit className="h-4 w-4 mr-2" />
-                                  {t('common.actions.edit')}
+                                  {"Placeholder"}
                                 </DropdownMenuItem>
                               )}
                               {onDelete && (
@@ -459,7 +457,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                                   className="text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
-                                  {t('common.actions.delete')}
+                                  {"Placeholder"}
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>

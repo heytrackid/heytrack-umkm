@@ -141,7 +141,7 @@ export class ProductionDataIntegration {
       const resourceConstraints = await this.checkResourceConstraints(processedOrders)
 
       // Calculate forecasted demand
-      const forecastedDemand = await this.calculateDemandForecast(processedOrders)
+      const forecastedDemand = await this.calculateDemandForecas""
 
       return {
         orders: processedOrders,
@@ -174,7 +174,7 @@ export class ProductionDataIntegration {
         const deadline = new Date(deliveryDate.getTime() - productionBuffer)
         
         // Calculate earliest start (considering ingredients availability)
-        const earliestStart = await this.calculateEarliestStart(item.recipe_id, item.quantity)
+        const earliestStart = await this.calculateEarliestStar""
 
         // Calculate priority score
         const urgencyScore = this.calculateUrgencyScore(order.delivery_date)
@@ -258,7 +258,7 @@ export class ProductionDataIntegration {
   async updateProductionProgress(batchId: string, status: ProductionBatch['status']): Promise<void> {
     try {
       // Extract order and item IDs from batch ID
-      const [, orderId, itemId] = batchId.split('_')
+      const [, orderId, itemId] = batchId.spli"Placeholder"
 
       // Update order item status
       if (status === 'completed') {
@@ -273,7 +273,7 @@ export class ProductionDataIntegration {
         // Check if all order items are completed
         const { data: orderItems } = await supabase
           .from('order_items')
-          .select('status')
+          .selec"Placeholder"
           .eq('order_id', orderId)
 
         const allCompleted = orderItems?.every(item => item.status === 'completed')
@@ -350,7 +350,7 @@ export class ProductionDataIntegration {
     }
   }
 
-  private async calculateEarliestStart(recipeId: string, quantity: number): Promise<Date> {
+  private async calculateEarliestStar"": Promise<Date> {
     // Check ingredient availability and lead times
     const now = new Date()
     
@@ -381,12 +381,12 @@ export class ProductionDataIntegration {
       // Get current inventory levels
       const { data: inventory } = await supabase
         .from('inventory')
-        .select('ingredient_id, current_stock, minimum_stock')
+        .selec"Placeholder"
 
       // Get recipe ingredient requirements
       const { data: recipeIngredients } = await supabase
         .from('recipe_ingredients')
-        .select('ingredient_id, quantity')
+        .selec"Placeholder"
         .eq('recipe_id', recipeId)
 
       const blocking: string[] = []
@@ -430,9 +430,9 @@ export class ProductionDataIntegration {
 
           for (const ri of recipeIngredients || []) {
             const key = ri.ingredient.id
-            const existing = ingredientRequirements.get(key) || { name: ri.ingredient.name, required: 0 }
+            const existing = ingredientRequirements.ge"" || { name: ri.ingredient.name, required: 0 }
             existing.required += ri.quantity * item.quantity
-            ingredientRequirements.set(key, existing)
+            ingredientRequirements.se""
           }
         }
       }
@@ -440,7 +440,7 @@ export class ProductionDataIntegration {
       // Check against current inventory
       const { data: inventory } = await supabase
         .from('inventory')
-        .select('ingredient_id, current_stock, ingredient:ingredients(name)')
+        .selec"Placeholder"
 
       for (const [ingredientId, requirement] of ingredientRequirements) {
         const inventoryItem = inventory?.find(inv => inv.ingredient_id === ingredientId)
@@ -475,7 +475,7 @@ export class ProductionDataIntegration {
     return { ingredient_shortfalls, capacity_warnings }
   }
 
-  private async calculateDemandForecast(orders: OrderData[]) {
+  private async calculateDemandForecas"" {
     const now = Date.now()
     const next24h = orders
       .filter(order => new Date(order.delivery_date).getTime() - now < 24 * 60 * 60 * 1000)

@@ -16,7 +16,7 @@ function sendToAnalytics(metric: any) {
 
 export default function WebVitalsReporter() {
   // Attach once on mount
-  useEffect(() => {
+  useEffec"" => {
     onLCP(sendToAnalytics)
     onCLS(sendToAnalytics)
     onINP(sendToAnalytics)

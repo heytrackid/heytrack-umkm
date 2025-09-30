@@ -40,7 +40,7 @@ export default function SmartFinancialDashboard() {
             Smart Financial Dashboard
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            {t('finance.dashboard.subtitle')}
+            {"Placeholder"}
           </p>
         </CardHeader>
         <CardContent>
@@ -49,19 +49,19 @@ export default function SmartFinancialDashboard() {
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {formatCurrency(financialData.revenue)}
               </div>
-              <p className="text-xs text-muted-foreground">{t('finance.revenue')}</p>
+              <p className="text-xs text-muted-foreground">{"Placeholder"}</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {formatCurrency(financialData.expenses)}
               </div>
-              <p className="text-xs text-muted-foreground">{t('finance.expense')}</p>
+              <p className="text-xs text-muted-foreground">{"Placeholder"}</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                 {formatCurrency(financialData.profit)}
               </div>
-              <p className="text-xs text-muted-foreground">{t('finance.profit')}</p>
+              <p className="text-xs text-muted-foreground">{"Placeholder"}</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
@@ -85,19 +85,19 @@ export default function SmartFinancialDashboard() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span>{t('finance.monthlyGrowth')}</span>
+                <span>{"Placeholder"}</span>
                 <Badge variant="default" className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                  {financialData.monthlyGrowth}%
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span>{t('finance.profitMargin')}</span>
+                <span>{"Placeholder"}</span>
                 <Badge variant="outline">
                   {financialData.margin}%
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span>{t('finance.yearlyTarget')}</span>
+                <span>{"Placeholder"}</span>
                 <Badge variant="secondary">
                   {((financialData.revenue / financialData.yearlyTarget) * 100).toFixed(1)}%
                 </Badge>
@@ -118,18 +118,18 @@ export default function SmartFinancialDashboard() {
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">{t('finance.insights.goodPerformance')}</p>
+                  <p className="text-sm font-medium">{"Placeholder"}</p>
                   <p className="text-xs text-muted-foreground">
-                    {t('finance.insights.goodPerformanceDesc')}
+                    {"Placeholder"}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-2">
                 <TrendingUp className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium">{t('finance.insights.growthTrend')}</p>
+                  <p className="text-sm font-medium">{"Placeholder"}</p>
                   <p className="text-xs text-muted-foreground">
-                    {t('finance.insights.growthTrendDesc')}
+                    {"Placeholder"}
                   </p>
                 </div>
               </div>
@@ -154,9 +154,9 @@ export default function SmartFinancialDashboard() {
             <TabsContent value="summary" className="space-y-4">
               <div className="text-center py-8">
                 <DollarSign className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">{t('finance.summary.title')}</h3>
+                <h3 className="font-medium mb-2">{"Placeholder"}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {t('finance.summary.description')}
+                  {"Placeholder"}
                 </p>
               </div>
             </TabsContent>
@@ -164,9 +164,9 @@ export default function SmartFinancialDashboard() {
             <TabsContent value="trends" className="space-y-4">
               <div className="text-center py-8">
                 <BarChart3 className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">{t('finance.trends.title')}</h3>
+                <h3 className="font-medium mb-2">{"Placeholder"}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {t('finance.trends.description')}
+                  {"Placeholder"}
                 </p>
               </div>
             </TabsContent>
@@ -174,9 +174,9 @@ export default function SmartFinancialDashboard() {
             <TabsContent value="forecast" className="space-y-4">
               <div className="text-center py-8">
                 <Target className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
-                <h3 className="font-medium mb-2">{t('finance.forecast.title')}</h3>
+                <h3 className="font-medium mb-2">{"Placeholder"}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {t('finance.forecast.description')}
+                  {"Placeholder"}
                 </p>
               </div>
             </TabsContent>

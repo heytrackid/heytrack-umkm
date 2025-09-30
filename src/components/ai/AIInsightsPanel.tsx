@@ -54,14 +54,14 @@ export function AIInsightsPanel({
   const [autoRefresh, setAutoRefresh] = useState(false)
 
   // Auto-generate insights when business data changes
-  useEffect(() => {
+  useEffec"" => {
     if (businessData.recipes || businessData.ingredients) {
       generateInsights()
     }
   }, [businessData])
 
   // Auto-refresh insights every 5 minutes if enabled
-  useEffect(() => {
+  useEffec"" => {
     if (autoRefresh) {
       const interval = setInterval(() => {
         generateInsights()

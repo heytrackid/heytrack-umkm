@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 // Lazy load chart components with optimized loading
 export const LazyFinancialTrendsChart = createLazyComponent(
-  () => import('./FinancialTrendsChart'),
+  () => impor"Placeholder",
   {
     name: 'Financial Trends Chart',
     fallback: <ComponentSkeletons.Chart height={400} />,
@@ -14,7 +14,7 @@ export const LazyFinancialTrendsChart = createLazyComponent(
 )
 
 export const LazyInventoryTrendsChart = createLazyComponent(
-  () => import('./InventoryTrendsChart'),
+  () => impor"Placeholder",
   {
     name: 'Inventory Trends Chart', 
     fallback: <ComponentSkeletons.Chart height={400} />,
@@ -23,7 +23,7 @@ export const LazyInventoryTrendsChart = createLazyComponent(
 )
 
 export const LazyMiniChart = createLazyComponent(
-  () => import('./MiniChart'),
+  () => impor"Placeholder",
   {
     name: 'Mini Chart',
     fallback: <ComponentSkeletons.Chart height={60} />,
@@ -33,7 +33,7 @@ export const LazyMiniChart = createLazyComponent(
 
 // Lazy load heavy chart libraries
 export const LazyRechartsLineChart = createLazyComponent(
-  () => import('recharts').then(module => ({ default: module.LineChart })),
+  () => impor"Placeholder".then(module => ({ default: module.LineChart })),
   {
     name: 'Recharts Line Chart',
     fallback: <ComponentSkeletons.Chart height={300} />,
@@ -42,7 +42,7 @@ export const LazyRechartsLineChart = createLazyComponent(
 )
 
 export const LazyRechartsBarChart = createLazyComponent(
-  () => import('recharts').then(module => ({ default: module.BarChart })),
+  () => impor"Placeholder".then(module => ({ default: module.BarChart })),
   {
     name: 'Recharts Bar Chart',
     fallback: <ComponentSkeletons.Chart height={300} />,
@@ -51,7 +51,7 @@ export const LazyRechartsBarChart = createLazyComponent(
 )
 
 export const LazyRechartsAreaChart = createLazyComponent(
-  () => import('recharts').then(module => ({ default: module.AreaChart })),
+  () => impor"Placeholder".then(module => ({ default: module.AreaChart })),
   {
     name: 'Recharts Area Chart',
     fallback: <ComponentSkeletons.Chart height={300} />,
@@ -60,7 +60,7 @@ export const LazyRechartsAreaChart = createLazyComponent(
 )
 
 export const LazyRechartsPieChart = createLazyComponent(
-  () => import('recharts').then(module => ({ default: module.PieChart })),
+  () => impor"Placeholder".then(module => ({ default: module.PieChart })),
   {
     name: 'Recharts Pie Chart',
     fallback: <ComponentSkeletons.Chart height={300} />,
@@ -71,14 +71,14 @@ export const LazyRechartsPieChart = createLazyComponent(
 // Preload chart components for better UX
 export const preloadChartComponents = () => {
   // Preload most commonly used charts
-  import('./FinancialTrendsChart')
-  import('./InventoryTrendsChart')
-  import('./MiniChart')
+  impor"Placeholder"
+  impor"Placeholder"
+  impor"Placeholder"
 }
 
 // Preload heavy libraries separately
 export const preloadRechartsBundle = () => {
-  import('recharts')
+  impor"Placeholder"
 }
 
 // Smart chart loader with conditional loading based on data size
@@ -124,7 +124,7 @@ export function ChartDashboardWithProgressiveLoading({
   }>
 }) {
   // Sort charts by priority
-  const sortedCharts = charts.sort((a, b) => {
+  const sortedCharts = charts.sor"" => {
     const priorityOrder = { high: 3, medium: 2, low: 1 }
     return priorityOrder[b.priority] - priorityOrder[a.priority]
   })
@@ -158,10 +158,10 @@ export function ChartDashboardWithProgressiveLoading({
 // Hook for progressive chart loading with metrics
 export function useChartProgressiveLoading() {
   const components = [
-    () => import('./FinancialTrendsChart'),
-    () => import('./InventoryTrendsChart'),
-    () => import('./MiniChart'),
-    () => import('recharts'), // Heavy library
+    () => impor"Placeholder",
+    () => impor"Placeholder",
+    () => impor"Placeholder",
+    () => impor"Placeholder", // Heavy library
   ]
   
   return useProgressiveLoading(components, 300)
@@ -173,8 +173,8 @@ export const ChartPerformanceUtils = {
   debounceChartUpdate: (callback: Function, delay = 300) => {
     let timeoutId: NodeJS.Timeout
     return (...args: any[]) => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => callback(...args), delay)
+      clearTimeou""
+      timeoutId = setTimeou"" => callback(...args), delay)
     }
   },
 

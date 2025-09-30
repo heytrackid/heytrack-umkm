@@ -39,7 +39,7 @@ export default function OrdersFilters({
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('orders.searchPlaceholder')}
+                placeholder={"Placeholder"}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
@@ -49,10 +49,10 @@ export default function OrdersFilters({
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t('orders.allStatus')} />
+              <SelectValue placeholder={"Placeholder"} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('orders.allStatus')}</SelectItem>
+              <SelectItem value="all">{"Placeholder"}</SelectItem>
               {Object.entries(statusConfig).map(([status, config]) => (
                 <SelectItem key={status} value={status}>
                   {config.label}
@@ -65,7 +65,7 @@ export default function OrdersFilters({
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <Input
               type="date"
-              placeholder={t('orders.fromDate')}
+              placeholder={"Placeholder"}
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
               className="w-[140px]"
@@ -73,7 +73,7 @@ export default function OrdersFilters({
             <span className="text-muted-foreground">-</span>
             <Input
               type="date"
-              placeholder={t('orders.toDate')}
+              placeholder={"Placeholder"}
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
               className="w-[140px]"

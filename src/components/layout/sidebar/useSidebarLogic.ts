@@ -22,7 +22,6 @@ import {
   TrendingDown,
   Lightbulb
 } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 export interface NavigationItem {
   name: string
@@ -44,10 +43,9 @@ export interface NavigationSection {
 export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
-  const { t } = useI18n()
 
   // Prefetch next likely routes to reduce navigation latency
-  useEffect(() => {
+  useEffec"" => {
     const routesToPrefetch = ['/', '/orders', '/inventory', '/hpp', '/finance', '/resep', '/customers']
     routesToPrefetch.forEach((r) => {
       try { router.prefetch(r) } catch {}
@@ -56,136 +54,136 @@ export const useSidebarLogic = () => {
 
   const navigationSections: NavigationSection[] = [
     {
-      title: t('navigation.dashboard.title'),
+      title: "Placeholder",
       items: [
         {
-          name: t('navigation.dashboard.title'),
+          name: "Placeholder",
           href: '/',
           icon: LayoutDashboard,
-          description: t('navigation.dashboard.description')
+          description: "Placeholder"
         }
       ]
     },
     {
-      title: t('navigation.dataManager.title'),
+      title: "Placeholder",
       isWorkflow: true,
       items: [
         {
-          name: t('navigation.dataManager.rawMaterials.title'),
+          name: "Placeholder",
           href: '/inventory',
           icon: Package,
           isSimple: true,
-          badge: t('navigation.dataManager.rawMaterials.badge'),
-          description: t('navigation.dataManager.rawMaterials.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.dataManager.categories.title'),
+          name: "Placeholder",
           href: '/categories',
           icon: Layers,
           isSimple: true,
-          badge: t('navigation.dataManager.categories.badge'),
-          description: t('navigation.dataManager.categories.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.dataManager.operationalCosts.title'),
+          name: "Placeholder",
           href: '/operational-costs',
           icon: Receipt,
           isSimple: true,
-          badge: t('navigation.dataManager.operationalCosts.badge'),
-          description: t('navigation.dataManager.operationalCosts.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.dataManager.recipes.title'),
+          name: "Placeholder",
           href: '/resep',
           icon: ChefHat,
           isSimple: true,
-          badge: t('navigation.dataManager.recipes.badge'),
-          description: t('navigation.dataManager.recipes.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
       ]
     },
     {
-      title: t('navigation.calculation.title'),
-      description: t('navigation.calculation.description'),
+      title: "Placeholder",
+      description: "Placeholder",
       isWorkflow: true,
       items: [
         {
-          name: t('navigation.calculation.hppPricing.title'),
+          name: "Placeholder",
           href: '/hpp',
           icon: Calculator,
           isSimple: true,
-          badge: t('navigation.calculation.hppPricing.badge'),
-          description: t('navigation.calculation.hppPricing.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.calculation.hppEnhanced.title'),
+          name: "Placeholder",
           href: '/hpp-enhanced',
           icon: Target,
           isSimple: true,
-          badge: t('navigation.calculation.hppEnhanced.badge'),
-          description: t('navigation.calculation.hppEnhanced.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
       ]
     },
     {
-      title: t('navigation.operations.title'),
-      description: t('navigation.operations.description'),
+      title: "Placeholder",
+      description: "Placeholder",
       isWorkflow: true,
       items: [
         {
-          name: t('navigation.operations.orders.title'),
+          name: "Placeholder",
           href: '/orders',
           icon: ShoppingCart,
           isSimple: true,
-          badge: t('navigation.operations.orders.badge'),
-          description: t('navigation.operations.orders.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.operations.customers.title'),
+          name: "Placeholder",
           href: '/customers',
           icon: Users,
           isSimple: true,
-          badge: t('navigation.operations.customers.badge'),
-          description: t('navigation.operations.customers.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
       ]
     },
     {
-      title: t('navigation.monitoring.title'),
-      description: t('navigation.monitoring.description'),
+      title: "Placeholder",
+      description: "Placeholder",
       isWorkflow: true,
       items: [
         {
-          name: t('navigation.monitoring.cashFlow.title'),
+          name: "Placeholder",
           href: '/cash-flow',
           icon: DollarSign,
           isSimple: true,
-          badge: t('navigation.monitoring.cashFlow.badge'),
-          description: t('navigation.monitoring.cashFlow.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.monitoring.finance.title'),
+          name: "Placeholder",
           href: '/finance',
           icon: Banknote,
           isSimple: true,
-          badge: t('navigation.monitoring.finance.badge'),
-          description: t('navigation.monitoring.finance.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.monitoring.reports.title'),
+          name: "Placeholder",
           href: '/reports',
           icon: BarChart3,
           isSimple: true,
-          badge: t('navigation.monitoring.reports.badge'),
-          description: t('navigation.monitoring.reports.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
         {
-          name: t('navigation.monitoring.review.title'),
+          name: "Placeholder",
           href: '/review',
           icon: TrendingUp,
           isSimple: true,
-          badge: t('navigation.monitoring.review.badge'),
-          description: t('navigation.monitoring.review.description')
+          badge: "Placeholder",
+          description: "Placeholder"
         },
       ]
     },
@@ -237,13 +235,13 @@ export const useSidebarLogic = () => {
       ]
     },
     {
-      title: t('navigation.others.title'),
+      title: "Placeholder",
       items: [
         {
-          name: t('navigation.others.settings.title'),
+          name: "Placeholder",
           href: '/settings',
           icon: Settings,
-          description: t('navigation.others.settings.description')
+          description: "Placeholder"
         },
       ]
     }
@@ -251,7 +249,7 @@ export const useSidebarLogic = () => {
 
   const isItemActive = (item: NavigationItem): boolean => {
     return pathname === item.href || 
-      (item.href.includes('#') && pathname === item.href.split('#')[0])
+      (item.href.includes('#') && pathname === item.href.spli"Placeholder"[0])
   }
 
   const prefetchRoute = (href: string) => {

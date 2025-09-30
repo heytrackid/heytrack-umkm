@@ -140,7 +140,7 @@ export function WeightedAverageCostAnalysis({
                   <h4 className="font-semibold">Weighted Average</h4>
                   {getTrendIndicator(priceDifferences.weighted).icon && (
                     <div className={`p-1 rounded ${getTrendIndicator(priceDifferences.weighted).bg}`}>
-                      {React.createElement(getTrendIndicator(priceDifferences.weighted).icon, {
+                      {React.createElemen"".icon, {
                         className: `h-4 w-4 ${getTrendIndicator(priceDifferences.weighted).color}`
                       })}
                     </div>
@@ -158,7 +158,7 @@ export function WeightedAverageCostAnalysis({
                   {formatCurrency(pricingInsights.weightedAveragePrice)}
                 </p>
                 <p className={`text-sm ${priceDifferences.weighted > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercent(priceDifferences.weighted)}
+                  {formatPercen""}
                 </p>
                 <Button
                   size="sm"
@@ -178,7 +178,7 @@ export function WeightedAverageCostAnalysis({
                   <h4 className="font-semibold">FIFO Average</h4>
                   {getTrendIndicator(priceDifferences.fifo).icon && (
                     <div className={`p-1 rounded ${getTrendIndicator(priceDifferences.fifo).bg}`}>
-                      {React.createElement(getTrendIndicator(priceDifferences.fifo).icon, {
+                      {React.createElemen"".icon, {
                         className: `h-4 w-4 ${getTrendIndicator(priceDifferences.fifo).color}`
                       })}
                     </div>
@@ -196,7 +196,7 @@ export function WeightedAverageCostAnalysis({
                   {formatCurrency(pricingInsights.fifoAveragePrice)}
                 </p>
                 <p className={`text-sm ${priceDifferences.fifo > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercent(priceDifferences.fifo)}
+                  {formatPercen""}
                 </p>
                 <Button
                   size="sm"
@@ -217,7 +217,7 @@ export function WeightedAverageCostAnalysis({
                   <Badge variant="default">Rekomendasi</Badge>
                   {getTrendIndicator(priceDifferences.moving).icon && (
                     <div className={`p-1 rounded ${getTrendIndicator(priceDifferences.moving).bg}`}>
-                      {React.createElement(getTrendIndicator(priceDifferences.moving).icon, {
+                      {React.createElemen"".icon, {
                         className: `h-4 w-4 ${getTrendIndicator(priceDifferences.moving).color}`
                       })}
                     </div>
@@ -235,7 +235,7 @@ export function WeightedAverageCostAnalysis({
                   {formatCurrency(pricingInsights.movingAveragePrice)}
                 </p>
                 <p className={`text-sm ${priceDifferences.moving > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercent(priceDifferences.moving)}
+                  {formatPercen""}
                 </p>
                 <Button
                   size="sm"
@@ -398,7 +398,7 @@ export function WeightedAverageCostAnalysis({
                       {Math.abs(priceDifferences.moving) > 5 ? 'Perlu Update' : 'Masih Wajar'}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                      Selisih: {formatPercent(priceDifferences.moving)}
+                      Selisih: {formatPercen""}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       Dari list price saat ini

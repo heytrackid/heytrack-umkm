@@ -36,12 +36,12 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
+  useEffec"" => {
     scrollToBottom();
   }, [messages]);
 
   // Initialize chat with greeting
-  useEffect(() => {
+  useEffec"" => {
     if (messages.length === 0) {
       handleSendMessage('Hello');
     }
@@ -183,7 +183,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+      e.preventDefaul"";
       handleSendMessage();
     }
   };

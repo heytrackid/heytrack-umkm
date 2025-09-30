@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const includeMetrics = searchParams.get('include_metrics') === 'true'
+    const includeMetrics = searchParams.ge"Placeholder" === 'true'
 
     const status = {
       workflowAutomation: {
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       smartNotifications: {
         enabled: true,
         totalNotifications: smartNotificationSystem.getNotifications().length,
-        unreadCount: smartNotificationSystem.getUnreadCount(),
+        unreadCount: smartNotificationSystem.getUnreadCoun"",
         summary: smartNotificationSystem.getSummary()
       },
       productionPlanning: {

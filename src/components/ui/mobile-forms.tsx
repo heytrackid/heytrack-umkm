@@ -344,7 +344,7 @@ export function MobileNumberInput({
   }
 
   const handleInputChange = (inputValue: string) => {
-    const numValue = parseFloat(inputValue)
+    const numValue = parseFloa""
     if (!isNaN(numValue)) {
       onChange?.(numValue)
     } else if (inputValue === '') {
@@ -358,7 +358,7 @@ export function MobileNumberInput({
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0
-      }).format(val)
+      }).forma""
     }
     return val.toString()
   }

@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useFinancialRecords } from '@/hooks/useDatabase'
-import { useI18n } from '@/providers/I18nProvider'
 
 // Lazy loading imports
 import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
@@ -19,7 +18,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { PullToRefresh } from '@/components/ui/mobile-gestures'
 
 // Dynamically load heavy sections with skeleton fallbacks
-const FinancialSummaryCards = dynamic(() => import('./components/FinancialSummaryCards').then(m => m.FinancialSummaryCards), {
+const FinancialSummaryCards = dynamic(() => impor"Placeholder".then(m => m.FinancialSummaryCards), {
   loading: () => (
     <div className="grid gap-4 md:grid-cols-4">
       {Array.from({ length: 4 }, (_, i) => (
@@ -29,7 +28,7 @@ const FinancialSummaryCards = dynamic(() => import('./components/FinancialSummar
   ),
 })
 
-const FinancialFilters = dynamic(() => import('./components/FinancialFilters').then(m => m.FinancialFilters), {
+const FinancialFilters = dynamic(() => impor"Placeholder".then(m => m.FinancialFilters), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -40,7 +39,7 @@ const FinancialFilters = dynamic(() => import('./components/FinancialFilters').t
   ),
 })
 
-const QuickAnalytics = dynamic(() => import('./components/QuickAnalytics').then(m => m.QuickAnalytics), {
+const QuickAnalytics = dynamic(() => impor"Placeholder".then(m => m.QuickAnalytics), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -50,7 +49,7 @@ const QuickAnalytics = dynamic(() => import('./components/QuickAnalytics').then(
   ),
 })
 
-const TransactionList = dynamic(() => import('./components/TransactionList').then(m => m.TransactionList), {
+const TransactionList = dynamic(() => impor"Placeholder".then(m => m.TransactionList), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -60,11 +59,11 @@ const TransactionList = dynamic(() => import('./components/TransactionList').the
   ),
 })
 
-const FinanceForm = dynamic(() => import('./components/FinanceForm').then(m => m.FinanceForm), {
+const FinanceForm = dynamic(() => impor"Placeholder".then(m => m.FinanceForm), {
   loading: () => <div className="h-64 rounded bg-muted animate-pulse" />,
 })
 
-const TransactionDetailView = dynamic(() => import('./components/TransactionDetailView').then(m => m.TransactionDetailView), {
+const TransactionDetailView = dynamic(() => impor"Placeholder".then(m => m.TransactionDetailView), {
   loading: () => <div className="h-32 rounded bg-muted animate-pulse" />,
 })
 
@@ -75,11 +74,10 @@ import { Plus, Download, AlertTriangle } from 'lucide-react'
 
 export default function FinancePage() {
   const { data: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
-  const { t } = useI18n()
   
   const transactionTypes = [
-    { value: 'INCOME', label: t('finance.transactionTypes.income'), color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
-    { value: 'EXPENSE', label: t('finance.transactionTypes.expense'), color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
+    { value: 'INCOME', label: "Placeholder", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
+    { value: 'EXPENSE', label: "Placeholder", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
   ]
   
   const incomeCategories = ['Penjualan', 'Investasi', 'Lain-lain']
@@ -87,10 +85,10 @@ export default function FinancePage() {
   const paymentMethods = ['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']
   
   const [searchTerm, setSearchTerm] = useState('')
-  const [typeFilter, setTypeFilter] = useState(t('finance.all'))
-  const [categoryFilter, setCategoryFilter] = useState(t('finance.all'))
+  const [typeFilter, setTypeFilter] = useState("Placeholder")
+  const [categoryFilter, setCategoryFilter] = useState("Placeholder")
   const [dateFilter, setDateFilter] = useState('')
-  const [paymentMethodFilter, setPaymentMethodFilter] = useState(t('finance.all'))
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState("Placeholder")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -99,7 +97,7 @@ export default function FinancePage() {
   
   // Pull-to-refresh handler
   const handleRefresh = async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeou"")
     // Data will automatically refresh via real-time subscription
     window.location.reload()
   }
@@ -111,8 +109,8 @@ export default function FinancePage() {
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = (transaction.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (transaction.reference_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = typeFilter === t('finance.all') || transaction.type === typeFilter
-    const matchesCategory = categoryFilter === t('finance.all') || transaction.category === categoryFilter
+    const matchesType = typeFilter === "Placeholder" || transaction.type === typeFilter
+    const matchesCategory = categoryFilter === "Placeholder" || transaction.category === categoryFilter
     const matchesDate = !dateFilter || transaction.transaction_date === dateFilter
     return matchesSearch && matchesType && matchesCategory && matchesDate
   })
@@ -160,21 +158,21 @@ export default function FinancePage() {
             <div className={isMobile ? 'text-center' : ''}>
               <h1 className={`font-bold text-foreground ${
                 isMobile ? 'text-2xl' : 'text-3xl'
-              }`}>{t('finance.title')}</h1>
-              <p className="text-muted-foreground">{t('finance.description')}</p>
+              }`}>{"Placeholder"}</h1>
+              <p className="text-muted-foreground">{"Placeholder"}</p>
             </div>
             <div className={`flex gap-2 ${
               isMobile ? 'w-full flex-col' : ''
             }`}>
               <Button variant="outline" className={isMobile ? 'w-full' : ''}>
                 <Download className="h-4 w-4 mr-2" />
-                {t('common.actions.export')}
+                {"Placeholder"}
               </Button>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className={isMobile ? 'w-full' : ''}>
                     <Plus className="h-4 w-4 mr-2" />
-                    {t('finance.newTransaction')}
+                    {"Placeholder"}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className={`max-w-2xl ${
@@ -182,7 +180,7 @@ export default function FinancePage() {
                 }`}>
                   <DialogHeader>
                     <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                      {t('finance.createNewTransaction')}
+                      {"Placeholder"}
                     </DialogTitle>
                   </DialogHeader>
                   <Suspense fallback={<div className="h-64 rounded bg-muted animate-pulse" />}>
@@ -212,12 +210,12 @@ export default function FinancePage() {
           <Card>
             <CardHeader className={isMobile ? 'pb-2' : ''}>
               <CardTitle className={isMobile ? 'text-lg' : ''}>
-                {t('finance.financialTrends')}
+                {"Placeholder"}
               </CardTitle>
               <p className={`text-muted-foreground ${
                 isMobile ? 'text-xs' : 'text-sm'
               }`}>
-                {t('finance.financialTrendsDesc')}
+                {"Placeholder"}
               </p>
             </CardHeader>
             <CardContent>
@@ -233,7 +231,7 @@ export default function FinancePage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className={`ml-3 ${isMobile ? 'text-sm' : ''}`}>{t('finance.loadingFinancialData')}</span>
+                  <span className={`ml-3 ${isMobile ? 'text-sm' : ''}`}>{"Placeholder"}</span>
                 </div>
               </CardContent>
             </Card>
@@ -248,7 +246,7 @@ export default function FinancePage() {
             </Card>
           ) : (
             <ProgressiveLoader 
-              loadingMessage={t('finance.loadingFinancialDashboard')}
+              loadingMessage={"Placeholder"}
               fallback={
                 <div className={isMobile ? 'overflow-x-auto' : ''}>
                   <div className="h-96 bg-muted animate-pulse rounded-lg"></div>
@@ -346,7 +344,7 @@ export default function FinancePage() {
             }`}>
               <DialogHeader>
                 <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                  {t('finance.transactionDetail')} {selectedTransaction?.reference}
+                  {"Placeholder"} {selectedTransaction?.reference}
                 </DialogTitle>
               </DialogHeader>
               {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
@@ -360,10 +358,10 @@ export default function FinancePage() {
 
 function getPaymentMethodLabel(method: string, t: any) {
   const methods: any = {
-    'CASH': t('finance.paymentMethods.cash'),
-    'BANK_TRANSFER': t('finance.paymentMethods.bankTransfer'),
-    'CREDIT_CARD': t('finance.paymentMethods.creditCard'),
-    'DIGITAL_WALLET': t('finance.paymentMethods.digitalWallet')
+    'CASH': "Placeholder",
+    'BANK_TRANSFER': "Placeholder",
+    'CREDIT_CARD': "Placeholder",
+    'DIGITAL_WALLET': "Placeholder"
   }
   return methods[method] || method
 }

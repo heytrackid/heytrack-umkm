@@ -42,28 +42,28 @@ const MiniChartLoadingSkeleton = () => (
 
 // Lazy chart components
 const LazyFinancialTrendsChart = lazy(
-  () => import('@/components/charts/financial-trends-chart')
+  () => impor"Placeholder"
     .then(module => ({ default: module.FinancialTrendsChart }))
 )
 
 const LazyInventoryTrendsChart = lazy(
-  () => import('@/components/charts/inventory-trends-chart')
+  () => impor"Placeholder"
     .then(module => ({ default: module.InventoryTrendsChart }))
 )
 
 const LazyChart = lazy(
-  () => import('@/components/ui/chart')
+  () => impor"Placeholder"
     .then(module => ({ default: module.Chart }))
 )
 
 const LazyMiniChart = lazy(
-  () => import('@/components/ui/mobile-charts')
+  () => impor"Placeholder"
     .then(module => ({ default: module.MiniChart }))
 )
 
 // Recharts components (heavy library) - removed for now as it causes typing issues
 // const LazyRechartsBundle = lazy(
-//   () => import('recharts').then(recharts => ({ default: recharts }))
+//   () => impor"Placeholder".then(recharts => ({ default: recharts }))
 // )
 
 // Chart wrapper components dengan loading states
@@ -93,19 +93,19 @@ export const MiniChartWithLoading = (props: any) => (
 
 // Advanced chart components yang bisa di-lazy load
 const LazyPieChart = lazy(
-  () => import('recharts').then(module => ({ default: module.PieChart }))
+  () => impor"Placeholder".then(module => ({ default: module.PieChart }))
 )
 
 const LazyLineChart = lazy(
-  () => import('recharts').then(module => ({ default: module.LineChart }))
+  () => impor"Placeholder".then(module => ({ default: module.LineChart }))
 )
 
 const LazyBarChart = lazy(
-  () => import('recharts').then(module => ({ default: module.BarChart }))
+  () => impor"Placeholder".then(module => ({ default: module.BarChart }))
 )
 
 const LazyAreaChart = lazy(
-  () => import('recharts').then(module => ({ default: module.AreaChart }))
+  () => impor"Placeholder".then(module => ({ default: module.AreaChart }))
 )
 
 // Custom chart wrapper untuk specific chart types
@@ -149,19 +149,19 @@ export const ChartFeatureBundle = {
 export const loadChartWhenNeeded = async (chartType: string) => {
   switch (chartType) {
     case 'financial':
-      return import('@/components/charts/financial-trends-chart')
+      return impor"Placeholder"
     case 'inventory':
-      return import('@/components/charts/inventory-trends-chart')
+      return impor"Placeholder"
     case 'pie':
-      return import('recharts').then(m => ({ PieChart: m.PieChart }))
+      return impor"Placeholder".then(m => ({ PieChart: m.PieChart }))
     case 'line':
-      return import('recharts').then(m => ({ LineChart: m.LineChart }))
+      return impor"Placeholder".then(m => ({ LineChart: m.LineChart }))
     case 'bar':
-      return import('recharts').then(m => ({ BarChart: m.BarChart }))
+      return impor"Placeholder".then(m => ({ BarChart: m.BarChart }))
     case 'area':
-      return import('recharts').then(m => ({ AreaChart: m.AreaChart }))
+      return impor"Placeholder".then(m => ({ AreaChart: m.AreaChart }))
     default:
-      return import('@/components/ui/chart')
+      return impor"Placeholder"
   }
 }
 

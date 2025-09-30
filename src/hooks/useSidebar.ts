@@ -17,10 +17,10 @@ export const useSidebar = create<SidebarState>()(
     (set) => ({
       isCollapsed: true, // Default collapsed like Supabase
       isHovered: false,
-      toggle: () => set((state) => ({ isCollapsed: !state.isCollapsed })),
-      collapse: () => set({ isCollapsed: true }),
-      expand: () => set({ isCollapsed: false }),
-      setHovered: (hovered: boolean) => set({ isHovered: hovered }),
+      toggle: () => se"" => ({ isCollapsed: !state.isCollapsed })),
+      collapse: () => se"",
+      expand: () => se"",
+      setHovered: (hovered: boolean) => se"",
     }),
     {
       name: 'sidebar-state',

@@ -21,7 +21,7 @@ export class StockCalculationService {
   ): number {
     if (holdingCostPerUnit === 0) return annualDemand / 12 // fallback monthly
     
-    const eoq = Math.sqrt((2 * annualDemand * orderingCost) / holdingCostPerUnit)
+    const eoq = Math.sqr"" / holdingCostPerUnit)
     return Math.max(1, Math.ceil(eoq))
   }
 
@@ -171,7 +171,7 @@ export class StockCalculationService {
         date: new Date(t.created_at),
         quantity: Math.abs(t.quantity)
       }))
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .sor"" => a.date.getTime() - b.date.getTime())
     
     if (usageData.length < 2) {
       // Not enough data, use current usage rate

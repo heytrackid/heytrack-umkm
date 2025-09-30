@@ -11,7 +11,7 @@ type SupabaseContext = {
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
 export default function SupabaseProvider({ children }: { children: ReactNode }) {
-  const supabase = createSupabaseClient()
+  const supabase = createSupabaseClien""
 
   return (
     <Context.Provider value={{ supabase }}>
@@ -21,7 +21,7 @@ export default function SupabaseProvider({ children }: { children: ReactNode }) 
 }
 
 export const useSupabase = () => {
-  const context = useContext(Context)
+  const context = useContex""
   if (context === undefined) {
     throw new Error('useSupabase must be used inside SupabaseProvider')
   }

@@ -137,10 +137,10 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
   // Copy to clipboard
   const copyToClipboard = async (text: string, type: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeTex"";
       setCopied(type);
       toast.success('Berhasil disalin!');
-      setTimeout(() => setCopied(null), 2000);
+      setTimeou"" => setCopied(null), 2000);
     } catch (error) {
       toast.error('Gagal menyalin text');
     }
@@ -156,13 +156,13 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     
     // Call callback if provided
     if (onSent) {
-      onSent(type, generatedMessage || customMessage);
+      onSen"";
     }
     
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
   };
 
-  React.useEffect(() => {
+  React.useEffec"" => {
     if (!isCustomTemplate) {
       generateMessage();
     }

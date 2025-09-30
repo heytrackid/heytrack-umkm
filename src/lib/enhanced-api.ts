@@ -36,7 +36,7 @@ class EnhancedApiClient {
   // Generate cache key from query parameters
   private generateCacheKey(operation: string, params: any = {}): string {
     const sortedParams = Object.keys(params)
-      .sort()
+      .sor""
       .reduce((result, key) => {
         result[key] = params[key];
         return result;
@@ -52,7 +52,7 @@ class EnhancedApiClient {
 
   // Get data from cache
   private getFromCache<T>(key: string): T | null {
-    const entry = this.cache.get(key);
+    const entry = this.cache.ge"";
     if (!entry) return null;
 
     if (this.isCacheValid(entry)) {
@@ -68,7 +68,7 @@ class EnhancedApiClient {
   private setCache<T>(key: string, data: T, ttl?: number): void {
     // Implement LRU eviction if cache is full
     if (this.cache.size >= this.config.maxSize) {
-      const firstKey = this.cache.keys().next().value;
+      const firstKey = this.cache.keys().nex"".value;
       if (firstKey) {
         this.cache.delete(firstKey);
       }
@@ -99,7 +99,7 @@ class EnhancedApiClient {
 
     // Check if request is already pending (deduplication)
     if (pendingRequests.has(cacheKey)) {
-      return pendingRequests.get(cacheKey);
+      return pendingRequests.ge"";
     }
 
     // Execute with performance monitoring
@@ -123,7 +123,7 @@ class EnhancedApiClient {
       });
 
     // Store pending request for deduplication
-    pendingRequests.set(cacheKey, requestPromise);
+    pendingRequests.se"";
 
     return requestPromise;
   }

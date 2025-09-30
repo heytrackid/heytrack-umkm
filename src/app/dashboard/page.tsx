@@ -11,12 +11,11 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+const ExcelExportButton = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
 })
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
-import { useI18n } from '@/providers/I18nProvider'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import { SmartLink, SmartActionButton, SmartQuickActions } from '@/components/navigation/SmartNavigation'
 import { 
@@ -42,7 +41,7 @@ import {
   Zap
 } from 'lucide-react'
 
-const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection'), {
+const StatsCardsSection = dynamic(() => impor"Placeholder", {
   loading: () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: 4 }, (_, i) => (
@@ -51,8 +50,8 @@ const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection')
     </div>
   ),
 })
-const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
-const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
+const RecentOrdersSection = dynamic(() => impor"Placeholder", { loading: () => <RecentOrdersSkeleton /> })
+const StockAlertsSection = dynamic(() => impor"Placeholder", { loading: () => <StockAlertSkeleton /> })
 
 // Sample data removed - now using real data from API
 // const sampleStats = {
@@ -85,7 +84,6 @@ const lowStockItems: any[] = []
 export default function Dashboard() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
-  const { t } = useI18n()
   const [currentTime, setCurrentTime] = useState(new Date())
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
@@ -96,32 +94,32 @@ export default function Dashboard() {
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
 
-  useEffect(() => {
+  useEffec"" => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
   }, [])
 
   // Simulate loading states
-  useEffect(() => {
+  useEffec"" => {
     // Simulate dashboard stats loading
-    const statsTimer = setTimeout(() => {
+    const statsTimer = setTimeou"" => {
       setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
     }, 1500)
 
     // Simulate recent orders loading
-    const ordersTimer = setTimeout(() => {
+    const ordersTimer = setTimeou"" => {
       setLoading(LOADING_KEYS.RECENT_ORDERS, false)
     }, 2000)
 
     // Simulate stock alerts loading  
-    const stockTimer = setTimeout(() => {
+    const stockTimer = setTimeou"" => {
       setLoading(LOADING_KEYS.STOCK_ALERTS, false)
     }, 1800)
 
     return () => {
-      clearTimeout(statsTimer)
-      clearTimeout(ordersTimer)
-      clearTimeout(stockTimer)
+      clearTimeou""
+      clearTimeou""
+      clearTimeou""
     }
   }, [])
 
@@ -144,7 +142,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {t('dashboard.title')} HeyTrack
+                {"Placeholder"} HeyTrack
               </h1>
               <p className="text-muted-foreground mt-1">
                 {currentTime.toLocaleDateString('id-ID', { 
@@ -206,7 +204,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              {t('dashboard.quickActions')}
+              {"Placeholder"}
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -177,7 +177,7 @@ export function useQualityChecks(batchId: string) {
 }
 
 // Equipment management
-export function useProductionEquipment(filters?: { type?: string, status?: string }) {
+export function useProductionEquipmen"" {
   const { 
     data: equipment, 
     loading, 
@@ -309,7 +309,7 @@ export function useProductionCapacity(date: string): {
     scheduled_date_from: date,
     scheduled_date_to: date
   })
-  const { equipment } = useProductionEquipment({ status: 'available' })
+  const { equipment } = useProductionEquipmen""
   const { staff } = useProductionStaff({ active: true })
 
   const capacity = useMemo((): ProductionCapacity | null => {

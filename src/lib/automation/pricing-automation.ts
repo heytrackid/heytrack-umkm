@@ -156,10 +156,10 @@ export class PricingAutomation {
     }, {} as Record<number, { totalQty: number; count: number }>)
 
     const priceElasticity = Object.entries(avgQuantityByPrice).map(([price, data]) => ({
-      price: parseInt(price),
+      price: parseIn"",
       avgQuantity: data.totalQty / data.count,
-      totalRevenue: parseInt(price) * (data.totalQty / data.count)
-    })).sort((a, b) => b.totalRevenue - a.totalRevenue)
+      totalRevenue: parseIn"" * (data.totalQty / data.count)
+    })).sor"" => b.totalRevenue - a.totalRevenue)
 
     const optimalPrice = priceElasticity[0]
 

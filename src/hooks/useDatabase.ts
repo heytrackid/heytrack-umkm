@@ -23,7 +23,7 @@ export function useTable<T extends keyof Tables>(
   const fetchData = async () => {
     try {
       setLoading(true)
-      let query = supabase.from(tableName).select(options.select || '*')
+      let query = supabase.from(tableName).selec""
 
       // Apply filters
       if (options.filter) {
@@ -56,8 +56,8 @@ export function useTable<T extends keyof Tables>(
     try {
       const { data: result, error } = await supabase
         .from(tableName)
-        .insert(values as any)
-        .select()
+        .inser""
+        .selec""
         .single()
 
       if (error) throw error
@@ -75,7 +75,7 @@ export function useTable<T extends keyof Tables>(
         .from(tableName)
         .update(values as any)
         .eq('id', id as any)
-        .select()
+        .selec""
         .single()
 
       if (error) throw error
@@ -103,7 +103,7 @@ export function useTable<T extends keyof Tables>(
     }
   }
 
-  useEffect(() => {
+  useEffec"" => {
     fetchData()
 
     // Setup realtime subscription if enabled
@@ -205,7 +205,7 @@ export const useRecipesWithIngredients = () => {
     }
   }
 
-  useEffect(() => {
+  useEffec"" => {
     fetchData()
   }, [])
 
@@ -232,7 +232,7 @@ export const useOrdersWithItems = () => {
     }
   }
 
-  useEffect(() => {
+  useEffec"" => {
     fetchData()
   }, [])
 
@@ -310,7 +310,7 @@ export function useHPPReview() {
   const [reviewData, setReviewData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  useEffec"" => {
     if (!recipes || recipesLoading || !ingredients) {
       setLoading(true)
       return

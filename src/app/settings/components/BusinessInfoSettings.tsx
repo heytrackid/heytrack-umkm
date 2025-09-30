@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Building } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface BusinessInfoSettingsProps {
   settings: any
@@ -16,20 +15,19 @@ interface BusinessInfoSettingsProps {
  * Business information settings component
  */
 export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfoSettingsProps) {
-  const { t } = useI18n()
   
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building className="h-5 w-5" />
-          {t('settings.businessInfo.title')}
+          {"Placeholder"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="businessName">{t('settings.businessInfo.businessName')}</Label>
+            <Label htmlFor="businessName">{"Placeholder"}</Label>
             <Input
               id="businessName"
               value={settings.general.businessName}
@@ -37,21 +35,21 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="businessType">{t('settings.businessInfo.businessType')}</Label>
+            <Label htmlFor="businessType">{"Placeholder"}</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={settings.general.businessType}
               onChange={(e) => onSettingChange('general', 'businessType', e.target.value)}
             >
-              <option value="bakery">{t('settings.businessInfo.types.bakery')}</option>
-              <option value="cafe">{t('settings.businessInfo.types.cafe')}</option>
-              <option value="restaurant">{t('settings.businessInfo.types.restaurant')}</option>
-              <option value="food-truck">{t('settings.businessInfo.types.foodTruck')}</option>
+              <option value="bakery">{"Placeholder"}</option>
+              <option value="cafe">{"Placeholder"}</option>
+              <option value="restaurant">{"Placeholder"}</option>
+              <option value="food-truck">{"Placeholder"}</option>
             </select>
           </div>
         </div>
         <div>
-          <Label htmlFor="address">{t('settings.businessInfo.address')}</Label>
+          <Label htmlFor="address">{"Placeholder"}</Label>
           <Textarea
             id="address"
             value={settings.general.address}
@@ -61,7 +59,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="phone">{t('settings.businessInfo.phone')}</Label>
+            <Label htmlFor="phone">{"Placeholder"}</Label>
             <Input
               id="phone"
               value={settings.general.phone}
@@ -69,7 +67,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="email">{t('settings.businessInfo.email')}</Label>
+            <Label htmlFor="email">{"Placeholder"}</Label>
             <Input
               id="email"
               type="email"
@@ -80,7 +78,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="website">{t('settings.businessInfo.website')}</Label>
+            <Label htmlFor="website">{"Placeholder"}</Label>
             <Input
               id="website"
               value={settings.general.website}
@@ -88,7 +86,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="taxNumber">{t('settings.businessInfo.taxNumber')}</Label>
+            <Label htmlFor="taxNumber">{"Placeholder"}</Label>
             <Input
               id="taxNumber"
               value={settings.general.taxNumber}

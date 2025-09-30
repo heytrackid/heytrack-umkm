@@ -26,7 +26,6 @@ import {
 } from"@/components/ui/dropdown-menu"
 import { useResponsive } from '@/hooks/use-mobile'
 import { Input } from './input'
-import { useI18n } from '@/hooks/use-i18n'
 
 // Types for mobile table
 export interface MobileTableColumn<T = any> {
@@ -79,7 +78,6 @@ export function MobileTable<T extends Record<string, any>>({
   cardMode = true
 }: MobileTableProps<T>) {
   const { isMobile } = useResponsive()
-  const { t } = useI18n()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortKey, setSortKey] = useState<string>('')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
@@ -197,7 +195,7 @@ export function MobileTable<T extends Record<string, any>>({
                 style={{ width: column.width }}
                 onClick={() => {
                   if (column.sortable && sortable) {
-                    handleSort(column.key)
+                    handleSor""
                   }
                 }}
               >
@@ -221,7 +219,7 @@ export function MobileTable<T extends Record<string, any>>({
             ))}
             {actions.length > 0 && (
               <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground w-20">
-                {t('common.actions')}
+                {"Placeholder"}
               </th>
             )}
           </tr>
@@ -291,7 +289,7 @@ export function MobileTable<T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">{t('common.loading')}</div>
+        <div className="text-muted-foreground">{"Placeholder"}</div>
       </div>
     )
   }
@@ -304,7 +302,7 @@ export function MobileTable<T extends Record<string, any>>({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || t('common.search')}
+              placeholder={searchPlaceholder || "Placeholder"}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-9"
@@ -317,7 +315,7 @@ export function MobileTable<T extends Record<string, any>>({
       {/* Table Content */}
       {data.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          {emptyMessage || t('common.noData')}
+          {emptyMessage || "Placeholder"}
         </div>
       ) : (
         <>
@@ -356,7 +354,7 @@ export const TableRenderers = {
   
   boolean: (value: boolean, t: (key: string) => string) => (
     <Badge variant={value ?"default" :"secondary"}>
-      {value ? t('common.yes') : t('common.no')}
+      {value ? "Placeholder" : "Placeholder"}
     </Badge>
   ),
   
@@ -365,7 +363,7 @@ export const TableRenderers = {
       <div className="font-medium">{current}</div>
       {current <= min && (
         <Badge variant="destructive" className="text-xs">
-          {t('inventory.lowStock')}
+          {"Placeholder"}
         </Badge>
       )}
     </div>
@@ -381,17 +379,17 @@ export const createCommonActions = {
     t: (key: string) => string
   ): MobileTableAction<T>[] => [
     ...(onView ? [{
-      label: t('common.viewDetail'),
+      label: "Placeholder",
       icon: <Eye className="h-4 w-4" />,
       onClick: onView
     }] : []),
     {
-      label: t('common.edit'),
+      label: "Placeholder",
       icon: <Edit className="h-4 w-4" />,
       onClick: onEdit
     },
     {
-      label: t('common.delete'),
+      label: "Placeholder",
       icon: <Trash2 className="h-4 w-4" />,
       onClick: onDelete,
       variant: 'destructive' as const

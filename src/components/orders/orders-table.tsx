@@ -45,7 +45,6 @@ import {
   Archive
 } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface Order {
   id: string
@@ -85,31 +84,30 @@ const OrdersTable = ({
   onBulkAction
 }: OrdersTableProps) => {
   const { formatCurrency } = useCurrency()
-  const { t } = useI18n()
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
 
   // Status configurations
   const statusConfig = {
-    'PENDING': { label: t('orders.status.pending'), color: 'bg-yellow-100 text-yellow-800', textColor: 'text-yellow-800' },
-    'CONFIRMED': { label: t('orders.status.confirmed'), color: 'bg-blue-100 text-blue-800', textColor: 'text-blue-800' },
-    'IN_PROGRESS': { label: t('orders.status.in_production'), color: 'bg-orange-100 text-orange-800', textColor: 'text-orange-800' },
-    'READY': { label: t('orders.status.completed'), color: 'bg-green-100 text-green-800', textColor: 'text-green-800' },
-    'DELIVERED': { label: t('orders.status.completed'), color: 'bg-gray-100 text-gray-800', textColor: 'text-gray-800' },
-    'CANCELLED': { label: t('orders.status.cancelled'), color: 'bg-red-100 text-red-800', textColor: 'text-red-800' }
+    'PENDING': { label: "Placeholder", color: 'bg-yellow-100 text-yellow-800', textColor: 'text-yellow-800' },
+    'CONFIRMED': { label: "Placeholder", color: 'bg-blue-100 text-blue-800', textColor: 'text-blue-800' },
+    'IN_PROGRESS': { label: "Placeholder", color: 'bg-orange-100 text-orange-800', textColor: 'text-orange-800' },
+    'READY': { label: "Placeholder", color: 'bg-green-100 text-green-800', textColor: 'text-green-800' },
+    'DELIVERED': { label: "Placeholder", color: 'bg-gray-100 text-gray-800', textColor: 'text-gray-800' },
+    'CANCELLED': { label: "Placeholder", color: 'bg-red-100 text-red-800', textColor: 'text-red-800' }
   }
 
   const paymentStatusConfig = {
-    'UNPAID': { label: t('orders.paymentStatus.unpaid'), color: 'bg-red-100 text-red-800' },
-    'PARTIAL': { label: t('orders.paymentStatus.partial'), color: 'bg-yellow-100 text-yellow-800' },
-    'PAID': { label: t('orders.paymentStatus.paid'), color: 'bg-green-100 text-green-800' }
+    'UNPAID': { label: "Placeholder", color: 'bg-red-100 text-red-800' },
+    'PARTIAL': { label: "Placeholder", color: 'bg-yellow-100 text-yellow-800' },
+    'PAID': { label: "Placeholder", color: 'bg-green-100 text-green-800' }
   }
 
   const priorityConfig = {
-    'low': { label: t('orders.priority.low'), color: 'bg-gray-100 text-gray-800' },
-    'normal': { label: t('orders.priority.normal'), color: 'bg-blue-100 text-blue-800' },
-    'high': { label: t('orders.priority.high'), color: 'bg-red-100 text-red-800' }
+    'low': { label: "Placeholder", color: 'bg-gray-100 text-gray-800' },
+    'normal': { label: "Placeholder", color: 'bg-blue-100 text-blue-800' },
+    'high': { label: "Placeholder", color: 'bg-red-100 text-red-800' }
   }
 
   // Selection handlers
@@ -198,11 +196,11 @@ const OrdersTable = ({
           <TableHeader>
             <TableRow>
               <TableHead className="w-12"></TableHead>
-              <TableHead>{t('orders.table.order')}</TableHead>
-              <TableHead>{t('orders.table.customer')}</TableHead>
-              <TableHead>{t('orders.table.status')}</TableHead>
-              <TableHead>{t('orders.table.total')}</TableHead>
-              <TableHead>{t('orders.table.payment')}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -229,7 +227,7 @@ const OrdersTable = ({
         <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-blue-900">
-              {selectedOrders.length} {t('orders.table.order').toLowerCase()} {t('common.actions.selected', {count: selectedOrders.length})}
+              {selectedOrders.length} {"Placeholder".toLowerCase()} {"Placeholder"}
             </span>
           </div>
           
@@ -240,7 +238,7 @@ const OrdersTable = ({
               onClick={() => handleBulkAction('confirm')}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              {t('common.actions.confirm')}
+              {"Placeholder"}
             </Button>
             
             <Button 
@@ -249,7 +247,7 @@ const OrdersTable = ({
               onClick={() => handleBulkAction('export')}
             >
               <Download className="h-4 w-4 mr-2" />
-              {t('common.actions.export')}
+              {"Placeholder"}
             </Button>
             
             <Button 
@@ -258,23 +256,23 @@ const OrdersTable = ({
               onClick={() => handleBulkAction('print')}
             >
               <Printer className="h-4 w-4 mr-2" />
-              {t('common.actions.print')}
+              {"Placeholder"}
             </Button>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  {t('common.actions.more')}
+                  {"Placeholder"}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => handleBulkAction('archive')}>
                   <Archive className="h-4 w-4 mr-2" />
-                  {t('tables.actions.archive')}
+                  {"Placeholder"}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleBulkAction('cancel')}>
                   <XCircle className="h-4 w-4 mr-2" />
-                  {t('orders.status.cancelled')}
+                  {"Placeholder"}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
@@ -282,7 +280,7 @@ const OrdersTable = ({
                   className="text-red-600"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {t('common.actions.delete')}
+                  {"Placeholder"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -292,7 +290,7 @@ const OrdersTable = ({
               size="sm"
               onClick={() => setSelectedOrders([])}
             >
-              {t('common.actions.clear')}
+              {"Placeholder"}
             </Button>
           </div>
         </div>
@@ -312,12 +310,12 @@ const OrdersTable = ({
                   }}
                 />
               </TableHead>
-              <TableHead>{t('orders.table.orderCode')}</TableHead>
-              <TableHead>{t('orders.table.customer')}</TableHead>
-              <TableHead>{t('orders.table.status')}</TableHead>
-              <TableHead>{t('forms.labels.date')}</TableHead>
-              <TableHead>{t('orders.table.payment')}</TableHead>
-              <TableHead className="w-12">{t('orders.table.actions')}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead className="w-12">{"Placeholder"}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -325,8 +323,8 @@ const OrdersTable = ({
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                   <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>{t('tables.empty.noResults')}</p>
-                  <p className="text-sm">{t('tables.empty.tryDifferentSearch')}</p>
+                  <p>{"Placeholder"}</p>
+                  <p className="text-sm">{"Placeholder"}</p>
                 </TableCell>
               </TableRow>
             ) : (
@@ -346,7 +344,7 @@ const OrdersTable = ({
                     <div className="space-y-1">
                       <div className="font-medium">{order.order_no}</div>
                       <div className="text-sm text-muted-foreground">
-                        {order.order_items?.length || 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) || 0} {t('forms.labels.quantity').toLowerCase()}
+                        {order.order_items?.length || 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) || 0} {"Placeholder".toLowerCase()}
                       </div>
                     </div>
                   </TableCell>
@@ -369,10 +367,10 @@ const OrdersTable = ({
                   
                   <TableCell>
                     <div className="space-y-1 text-sm">
-                      <div>{t('orders.table.order')}: {formatDate(order.order_date)}</div>
+                      <div>{"Placeholder"}: {formatDate(order.order_date)}</div>
                       {order.delivery_date && (
                         <div className="text-muted-foreground">
-                          {t('orders.table.dueDate')}: {formatDate(order.delivery_date)}
+                          {"Placeholder"}: {formatDate(order.delivery_date)}
                         </div>
                       )}
                     </div>
@@ -384,7 +382,7 @@ const OrdersTable = ({
                       {getPaymentBadge(order.payment_status)}
                       {order.paid_amount > 0 && order.payment_status !== 'PAID' && (
                         <div className="text-xs text-muted-foreground">
-                          {t('orders.paymentStatus.paid')}: {formatCurrency(order.paid_amount)}
+                          {"Placeholder"}: {formatCurrency(order.paid_amount)}
                         </div>
                       )}
                     </div>
@@ -400,12 +398,12 @@ const OrdersTable = ({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onViewOrder(order)}>
                           <Eye className="h-4 w-4 mr-2" />
-                          {t('tables.actions.viewDetails')}
+                          {"Placeholder"}
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem onClick={() => onEditOrder(order)}>
                           <Edit className="h-4 w-4 mr-2" />
-                          {t('tables.actions.editItem')}
+                          {"Placeholder"}
                         </DropdownMenuItem>
                         
                         
@@ -414,28 +412,28 @@ const OrdersTable = ({
                         {order.status === 'PENDING' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'CONFIRMED')}>
                             <CheckCircle className="h-4 w-4 mr-2" />
-                            {t('common.actions.confirm')} {t('orders.table.order')}
+                            {"Placeholder"} {"Placeholder"}
                           </DropdownMenuItem>
                         )}
                         
                         {order.status === 'CONFIRMED' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'IN_PROGRESS')}>
                             <RefreshCw className="h-4 w-4 mr-2" />
-                            {t('orders.status.in_production')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                         )}
                         
                         {order.status === 'IN_PROGRESS' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'READY')}>
                             <Package className="h-4 w-4 mr-2" />
-                            {t('orders.status.completed')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                         )}
                         
                         {order.status === 'READY' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'DELIVERED')}>
                             <Truck className="h-4 w-4 mr-2" />
-                            {t('orders.status.completed')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                         )}
                         
@@ -447,7 +445,7 @@ const OrdersTable = ({
                             className="text-red-600"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {t('common.actions.delete')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

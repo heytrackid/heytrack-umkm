@@ -30,7 +30,7 @@ export default function OrdersQuickActions({ t }: OrdersQuickActionsProps) {
             className="flex items-center gap-2"
           >
             <Package className="h-4 w-4" />
-            {t('orders.exportData')}
+            {"Placeholder"}
           </Button>
         </div>
       </CardContent>

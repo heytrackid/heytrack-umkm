@@ -28,7 +28,7 @@ const createQueryClient = () => new QueryClient({
 
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
   // Create a new QueryClient instance for each request to ensure data is not shared
-  const [queryClient] = useState(() => createQueryClient())
+  const [queryClient] = useState(() => createQueryClien"")
 
   return (
     <QueryClientProvider client={queryClient}>

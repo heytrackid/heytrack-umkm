@@ -28,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface CostTableProps {
   costs: any[]
@@ -61,7 +60,6 @@ export default function CostTable({
   formatCurrency,
   isMobile = false
 }: CostTableProps) {
-  const { t } = useI18n()
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -88,9 +86,9 @@ export default function CostTable({
       <Card>
         <CardContent className="py-12 text-center">
           <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium mb-2">{t('operationalCosts.empty.noCosts')}</h3>
+          <h3 className="font-medium mb-2">{"Placeholder"}</h3>
           <p className="text-muted-foreground mb-4">
-            {t('operationalCosts.empty.startTracking')}
+            {"Placeholder"}
           </p>
         </CardContent>
       </Card>
@@ -100,26 +98,26 @@ export default function CostTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('operationalCosts.table.title')}</CardTitle>
+        <CardTitle>{"Placeholder"}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('forms.labels.date')}</TableHead>
-                <TableHead>{t('forms.labels.category')}</TableHead>
-                <TableHead>{t('forms.labels.description')}</TableHead>
-                <TableHead>{t('forms.labels.amount')}</TableHead>
-                <TableHead>{t('operationalCosts.table.payment')}</TableHead>
-                <TableHead className="text-right">{t('tables.headers.actions')}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead className="text-right">{"Placeholder"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedCosts.map((cost) => (
                 <TableRow key={cost.id}>
                   <TableCell>
-                    {format(new Date(cost.date), 'MMM dd, yyyy')}
+                    {forma"", 'MMM dd, yyyy')}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -137,7 +135,7 @@ export default function CostTable({
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">
-                      {t(`forms.paymentMethods.${cost.payment_method}`) || cost.payment_method}
+                      {"" || cost.payment_method}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -149,16 +147,16 @@ export default function CostTable({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onEdit(cost)}>
+                          <DropdownMenuItem onClick={() => onEdi""}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            {t('common.actions.edit')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
                             onClick={() => onDelete(cost)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {t('common.actions.delete')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -185,7 +183,7 @@ export default function CostTable({
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{t('operationalCosts.pagination.showLabel')}</span>
+                  <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
@@ -214,7 +212,7 @@ export default function CostTable({
                   </Button>
                   
                   <span className="text-sm font-medium">
-                    {t('operationalCosts.pagination.pageLabel', { current: currentPage, total: totalPages })}
+                    {"Placeholder"}
                   </span>
                   
                   <Button

@@ -54,11 +54,11 @@ export default function OrdersList({
     onUpdateStatus(orderId, newStatus)
   }
 
-  useEffect(() => {
+  useEffec"" => {
     setCurrentPage(1)
   }, [orders, rowsPerPage])
 
-  useEffect(() => {
+  useEffec"" => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages)
     }

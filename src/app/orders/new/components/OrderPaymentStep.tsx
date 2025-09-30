@@ -44,7 +44,7 @@ export default function OrderPaymentStep({
             type="number"
             min="0"
             value={formData.discount_amount}
-            onChange={(e) => onInputChange('discount_amount', parseFloat(e.target.value) || 0)}
+            onChange={(e) => onInputChange('discount_amount', parseFloa"" || 0)}
             placeholder="0"
           />
         </div>
@@ -58,7 +58,7 @@ export default function OrderPaymentStep({
             max="100"
             step="0.1"
             value={formData.tax_rate}
-            onChange={(e) => onInputChange('tax_rate', parseFloat(e.target.value) || 0)}
+            onChange={(e) => onInputChange('tax_rate', parseFloa"" || 0)}
           />
         </div>
       </div>

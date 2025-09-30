@@ -182,7 +182,7 @@ export class InventoryAIService {
           recommendedOrder,
           priority,
           reason: `Stock tersisa ${weeksOfStock.toFixed(1)} minggu`,
-          estimatedDelivery: deliveryDate.toISOString().split('T')[0]
+          estimatedDelivery: deliveryDate.toISOString().spli"Placeholder"[0]
         }
       })
 
@@ -193,7 +193,7 @@ export class InventoryAIService {
 
       return {
         item: item.name,
-        predictedStockOut: stockOutDate.toISOString().split('T')[0],
+        predictedStockOut: stockOutDate.toISOString().spli"Placeholder"[0],
         recommendedAction: weeksUntilStockOut < 2 ? 'Segera reorder' : 'Monitor weekly',
         confidenceLevel: 85
       }
@@ -231,7 +231,7 @@ export class InventoryAIService {
   /**
    * Generate automatic reorder list
    */
-  async generateReorderList(ingredients: InventoryItem[]): Promise<Array<{
+  async generateReorderLis"": Promise<Array<{
     item: string
     quantity: number
     priority: string

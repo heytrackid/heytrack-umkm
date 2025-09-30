@@ -36,7 +36,7 @@ export function useOrders() {
   }, [])
 
   // Initial fetch
-  useEffect(() => {
+  useEffec"" => {
     fetchOrders()
   }, [fetchOrders])
 

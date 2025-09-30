@@ -68,7 +68,7 @@ export async function PUT(
       .from('recipes')
       .update(recipeData)
       .eq('id', id)
-      .select()
+      .selec""
       .single()
     
     if (recipeError) {
@@ -113,7 +113,7 @@ export async function PUT(
 
         const { error: insertError } = await (supabase as any)
           .from('recipe_ingredients')
-          .insert(recipeIngredientsToInsert)
+          .inser""
 
         if (insertError) {
           console.error('Error adding new ingredients:', insertError)
@@ -172,7 +172,7 @@ export async function DELETE(
     // Check if recipe exists first
     const { data: existingRecipe, error: checkError } = await (supabase as any)
       .from('recipes')
-      .select('id')
+      .selec"Placeholder"
       .eq('id', id)
       .single()
 

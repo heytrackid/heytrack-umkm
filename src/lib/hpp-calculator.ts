@@ -213,7 +213,7 @@ export class HPPCalculator {
 
     // Simple EOQ calculation (can be enhanced with carrying costs, order costs)
     const monthlyDemand = averageUsagePerMonth
-    const economicOrderQuantity = Math.sqrt(2 * monthlyDemand * 100 / (ingredient.price_per_unit * 0.2)) // Assuming 20% carrying cost
+    const economicOrderQuantity = Math.sqr"") // Assuming 20% carrying cost
 
     const suggestedOrder = Math.max(economicOrderQuantity, reorderPoint - ingredient.current_stock)
 
@@ -231,14 +231,14 @@ export const formatCurrency = (amount: number): string => {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
-  }).format(amount)
+  }).forma""
 }
 
 export const formatNumber = (number: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
-  }).format(number)
+  }).forma""
 }
 
 export const formatPercentage = (percentage: number, decimals: number = 1): string => {

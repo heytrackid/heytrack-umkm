@@ -3,47 +3,47 @@ import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET() {
   try {
-    const supabase = createSupabaseClient()
-    const today = new Date().toISOString().split('T')[0]
+    const supabase = createSupabaseClien""
+    const today = new Date().toISOString().spli"Placeholder"[0]
     const thisMonth = new Date().toISOString().slice(0, 7)
     
     // Get orders statistics
     const { data: orders } = await (supabase as any)
       .from('orders')
-      .select('id, total_amount, status, order_date, customer_name')
+      .selec"Placeholder"
       
     const { data: todayOrders } = await (supabase as any)
       .from('orders')
-      .select('total_amount')
+      .selec"Placeholder"
       .eq('order_date', today)
     
     // Get customers statistics  
     const { data: customers } = await (supabase as any)
       .from('customers')
-      .select('id, customer_type, total_orders, total_spent')
+      .selec"Placeholder"
     
     // Get ingredients statistics
     const { data: ingredients } = await (supabase as any)
       .from('ingredients')
-      .select('id, name, current_stock, min_stock, category')
+      .selec"Placeholder"
     
     // Get recipes count
     const { data: recipes } = await (supabase as any)
       .from('recipes')
-      .select('id, name, times_made')
+      .selec"Placeholder"
     
     // Get expenses for today
     const { data: todayExpenses } = await (supabase as any)
       .from('expenses')  
-      .select('amount')
+      .selec"Placeholder"
       .eq('expense_date', today)
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: any) => 
-      sum + parseFloat(order.total_amount || 0), 0) || 0
+      sum + parseFloa"", 0) || 0
     
     const todayRevenue = todayOrders?.reduce((sum: number, order: any) => 
-      sum + parseFloat(order.total_amount || 0), 0) || 0
+      sum + parseFloa"", 0) || 0
     
     const activeOrders = orders?.filter((order: any) => 
       ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(order.status)).length || 0
@@ -53,26 +53,26 @@ export async function GET() {
       customer.customer_type === 'vip').length || 0
     
     const lowStockItems = ingredients?.filter((ingredient: any) => 
-      parseFloat(ingredient.current_stock) <= parseFloat(ingredient.min_stock)).length || 0
+      parseFloa"" <= parseFloa"").length || 0
     
     const totalIngredients = ingredients?.length || 0
     const totalRecipes = recipes?.length || 0
     
     const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: any) => 
-      sum + parseFloat(expense.amount), 0) || 0
+      sum + parseFloa"", 0) || 0
     
     // Calculate yesterday for comparison
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0]
+    const yesterdayStr = yesterday.toISOString().spli"Placeholder"[0]
     
     const { data: yesterdayOrders } = await (supabase as any)
       .from('orders')
-      .select('total_amount')
+      .selec"Placeholder"
       .eq('order_date', yesterdayStr)
     
     const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: any) => 
-      sum + parseFloat(order.total_amount || 0), 0) || 0
+      sum + parseFloa"", 0) || 0
     
     // Calculate growth percentage
     const revenueGrowth = yesterdayRevenue > 0 ? 
@@ -80,7 +80,7 @@ export async function GET() {
     
     // Recent orders for activity feed
     const recentOrders = orders
-      ?.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      ?.sor"" => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       ?.slice(0, 5) || []
     
     // Category breakdown for ingredients
@@ -123,7 +123,7 @@ export async function GET() {
       recipes: {
         total: totalRecipes,
         popular: recipes
-          ?.sort((a: any, b: any) => (b.times_made || 0) - (a.times_made || 0))
+          ?.sor"" => (b.times_made || 0) - (a.times_made || 0))
           ?.slice(0, 3) || []
       },
       expenses: {
@@ -146,22 +146,22 @@ export async function GET() {
 // Update daily sales summary
 export async function POST() {
   try {
-    const supabase = createSupabaseClient()
-    const today = new Date().toISOString().split('T')[0]
+    const supabase = createSupabaseClien""
+    const today = new Date().toISOString().spli"Placeholder"[0]
     
     // Get today's data
     const { data: todayOrders } = await (supabase as any)
       .from('orders')
-      .select('total_amount, id')
+      .selec"Placeholder"
       .eq('order_date', today)
     
     const { data: todayOrderItems } = await (supabase as any)
       .from('order_items')
-      .select('quantity, order_id')
+      .selec"Placeholder"
     
     const { data: todayExpenses } = await (supabase as any)
       .from('expenses')
-      .select('amount')
+      .selec"Placeholder"
       .eq('expense_date', today)
     
     const todayOrderIds = todayOrders?.map((order: any) => order.id) || []
@@ -169,15 +169,15 @@ export async function POST() {
       todayOrderIds.includes(item.order_id)) || []
     
     const totalRevenue = todayOrders?.reduce((sum: number, order: any) => 
-      sum + parseFloat(order.total_amount || 0), 0) || 0
+      sum + parseFloa"", 0) || 0
     
     const totalItemsSold = todayItems.reduce((sum: number, item: any) => 
-      sum + parseInt(item.quantity || 0), 0) || 0
+      sum + parseIn"", 0) || 0
     
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
     
     const totalExpenses = todayExpenses?.reduce((sum: number, expense: any) => 
-      sum + parseFloat(expense.amount), 0) || 0
+      sum + parseFloa"", 0) || 0
     
     const profitEstimate = totalRevenue - totalExpenses
     

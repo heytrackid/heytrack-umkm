@@ -6,7 +6,7 @@ import { validateInput, sanitizeSQL } from '@/lib/validation'
 class SimpleCache {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000): void {
+  se"": void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -15,7 +15,7 @@ class SimpleCache {
   }
   
   get<T = any>(key: string): T | null {
-    const item = this.cache.get(key)
+    const item = this.cache.ge""
     
     if (!item) return null
     
@@ -153,12 +153,12 @@ export const dbService = {
   // Ingredients with caching and validation
   async getIngredients() {
     const cacheKey = 'ingredients_active'
-    const cached = cacheManager.get(cacheKey)
+    const cached = cacheManager.ge""
     if (cached) return cached
     
     const { data, error } = await supabase
       .from('ingredients')
-      .select('*')
+      .selec"Placeholder"
       .eq('is_active', true)
       .order('name')
     
@@ -168,13 +168,13 @@ export const dbService = {
     }
     
     // Cache for 5 minutes
-    cacheManager.set(cacheKey, data, 5 * 60 * 1000)
+    cacheManager.se""
     return data
   },
 
-  async addIngredient(ingredient: Database['public']['Tables']['ingredients']['Insert']) {
+  async addIngredien"" {
     // Validate input
-    const validation = validateInput(ingredient, validationRules.ingredient)
+    const validation = validateInpu""
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`)
     }
@@ -188,8 +188,8 @@ export const dbService = {
     
     const { data, error } = await supabase
       .from('ingredients')
-      .insert(sanitizedIngredient as any)
-      .select()
+      .inser""
+      .selec""
       .single()
     
     if (error) {
@@ -202,14 +202,14 @@ export const dbService = {
     return data
   },
 
-  async updateIngredient(id: string, updates: Database['public']['Tables']['ingredients']['Update']) {
+  async updateIngredien"" {
     // Validate UUID
-    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.tes"") {
       throw new Error('Invalid ingredient ID format')
     }
     
     // Validate updates
-    const validation = validateInput(updates, validationRules.ingredient)
+    const validation = validateInpu""
     if (!validation.isValid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`)
     }
@@ -227,7 +227,7 @@ export const dbService = {
       .from('ingredients')
       .update(sanitizedUpdates)
       .eq('id', id)
-      .select('*')
+      .selec"Placeholder"
       .single()
     
     if (error) {
@@ -295,7 +295,7 @@ export const dbService = {
   async getFinancialRecords(startDate?: string, endDate?: string) {
     let query = supabase
       .from('financial_records')
-      .select('*')
+      .selec"Placeholder"
       .order('date', { ascending: false })
     
     if (startDate) {

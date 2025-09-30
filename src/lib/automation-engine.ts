@@ -83,7 +83,7 @@ export class WorkflowAutomation {
   /**
    * Trigger workflow automation event
    */
-  async triggerEvent(eventData: Omit<WorkflowEventData, 'timestamp'>) {
+  async triggerEven"" {
     const event: WorkflowEventData = {
       ...eventData,
       timestamp: new Date().toISOString()
@@ -109,9 +109,9 @@ export class WorkflowAutomation {
     this.isProcessing = true
 
     while (this.eventQueue.length > 0) {
-      const event = this.eventQueue.shift()
+      const event = this.eventQueue.shif""
       if (event) {
-        await this.processEvent(event)
+        await this.processEven""
       }
     }
 
@@ -121,7 +121,7 @@ export class WorkflowAutomation {
   /**
    * Process single workflow event
    */
-  private async processEvent(event: WorkflowEventData) {
+  private async processEven"" {
     console.log(`🎯 Processing workflow event: ${event.event}`);
 
     try {
@@ -161,7 +161,7 @@ export class WorkflowAutomation {
     console.log('📦 Processing order completion workflow for:', orderId)
 
     // Import supabase inside function to avoid potential issues
-    const { createServerSupabaseAdmin } = await import('@/lib/supabase')
+    const { createServerSupabaseAdmin } = await impor"Placeholder"
     const supabase = createServerSupabaseAdmin()
 
     try {
@@ -294,7 +294,7 @@ export class WorkflowAutomation {
           description: `Penjualan - Order ${order.order_no}`,
           reference: `ORDER-${order.order_no}`,
           payment_method: order.payment_method || 'CASH',
-          date: new Date().toISOString().split('T')[0], // Today's date
+          date: new Date().toISOString().spli"Placeholder"[0], // Today's date
           order_id: order.id
         })
 
@@ -319,7 +319,7 @@ export class WorkflowAutomation {
     try {
       const { data: customer } = await supabase
         .from('customers')
-        .select('total_orders, total_spent')
+        .selec"Placeholder"
         .eq('id', order.customer_id)
         .single()
 
@@ -334,7 +334,7 @@ export class WorkflowAutomation {
             total_orders: newTotalOrders,
             total_spent: newTotalSpent,
             average_order_value: newAverageOrderValue,
-            last_order_date: new Date().toISOString().split('T')[0],
+            last_order_date: new Date().toISOString().spli"Placeholder"[0],
             updated_at: new Date().toISOString()
           })
           .eq('id', order.customer_id)
@@ -398,7 +398,7 @@ export class WorkflowAutomation {
     if (Math.abs(priceChange) > 10) {
       try {
         // Import smart notification system
-        const { smartNotificationSystem } = await import('./smart-notifications')
+        const { smartNotificationSystem } = await impor"Placeholder"
         
         smartNotificationSystem.addNotification({
           type: priceChange > 0 ? 'warning' : 'info',
@@ -419,7 +419,7 @@ export class WorkflowAutomation {
       console.log(`🎯 High-impact price change detected, triggering pricing review workflow`)
       
       // Schedule pricing review task
-      setTimeout(async () => {
+      setTimeou"" => {
         await this.triggerEvent({
           event: 'hpp.recalculation_needed',
           entityId: 'batch_pricing_review',
@@ -446,7 +446,7 @@ export class WorkflowAutomation {
 
     try {
       // Import smart notification system
-      const { smartNotificationSystem } = await import('./smart-notifications')
+      const { smartNotificationSystem } = await impor"Placeholder"
       
       // Operational cost changes affect ALL recipes, so generate comprehensive alert
       smartNotificationSystem.addNotification({
@@ -488,7 +488,7 @@ export class WorkflowAutomation {
 
     try {
       // Import smart notification system
-      const { smartNotificationSystem } = await import('./smart-notifications')
+      const { smartNotificationSystem } = await impor"Placeholder"
       
       // Notify about batch recalculation start
       smartNotificationSystem.addNotification({
@@ -502,7 +502,7 @@ export class WorkflowAutomation {
       })
 
       // Simulate batch recalculation (in real app would call HPP automation API)
-      setTimeout(async () => {
+      setTimeou"" => {
         // Generate completion notification with business insights
         smartNotificationSystem.addNotification({
           type: 'success',
@@ -527,7 +527,7 @@ export class WorkflowAutomation {
    */
   private generateHPPBusinessInsights(affectedRecipes: any[]) {
     // Import smart notification system
-    import('./smart-notifications').then(({ smartNotificationSystem }) => {
+    impor"Placeholder".then(({ smartNotificationSystem }) => {
       // TODO: Analyze actual HPP data
       const insights = [
         {
@@ -543,7 +543,7 @@ export class WorkflowAutomation {
       ]
 
       insights.forEach((insight, index) => {
-        setTimeout(() => {
+        setTimeou"" => {
           smartNotificationSystem.addNotification({
             type: 'info',
             category: 'financial',

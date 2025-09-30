@@ -21,7 +21,7 @@ interface PreloadingContextType {
 const PreloadingContext = createContext<PreloadingContextType | null>(null)
 
 export const usePreloading = () => {
-  const context = useContext(PreloadingContext)
+  const context = useContex""
   if (!context) {
     throw new Error('usePreloading must be used within PreloadingProvider')
   }
@@ -77,7 +77,7 @@ export const PreloadingProvider = ({
     
     try {
       await hookPreloadRoute(route)
-      setPreloadedRoutes(prev => new Set([...prev, route]))
+      setPreloadedRoutes(prev => new Se"")
       
       const endTime = performance.now()
       if (debug) {
@@ -93,16 +93,16 @@ export const PreloadingProvider = ({
   }
 
   // Track component loads
-  useEffect(() => {
+  useEffec"" => {
     const originalPush = LazyLoadingMetrics.loadedComponents.add
     LazyLoadingMetrics.loadedComponents.add = function(componentName: string) {
-      setPreloadedComponents(prev => new Set([...prev, componentName]))
+      setPreloadedComponents(prev => new Se"")
       return originalPush.call(this, componentName)
     }
   }, [])
 
   // Debug logging
-  useEffect(() => {
+  useEffec"" => {
     if (debug) {
       console.log(`🛣️ Route changed to: ${pathname}`)
       console.log(`📊 Preloaded routes: ${preloadedRoutes.size}`)
@@ -143,7 +143,7 @@ const PreloadingDebugPanel = () => {
   const [showDebug, setShowDebug] = useState(false)
   const [metrics, setMetrics] = useState<any>(null)
 
-  useEffect(() => {
+  useEffec"" => {
     const interval = setInterval(() => {
       if (showDebug) {
         setMetrics(getMetrics())
@@ -154,7 +154,7 @@ const PreloadingDebugPanel = () => {
   }, [showDebug, getMetrics])
 
   // Toggle debug panel with keyboard shortcut
-  useEffect(() => {
+  useEffec"" => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
         setShowDebug(prev => !prev)
@@ -241,7 +241,7 @@ const PreloadingDebugPanel = () => {
 export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' | 'inventory' | 'customers') => {
   const { preloadRoute } = usePreloading()
   
-  useEffect(() => {
+  useEffec"" => {
     const preloadTargets: Record<string, string[]> = {
       dashboard: ['/orders', '/finance', '/inventory'],
       orders: ['/orders/new', '/customers', '/finance'],
@@ -254,7 +254,7 @@ export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' |
     
     // Preload with staggered timing
     targets.forEach((route, index) => {
-      setTimeout(() => {
+      setTimeou"" => {
         preloadRoute(route)
       }, index * 200) // 200ms delay between each preload
     })
@@ -265,7 +265,7 @@ export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' |
 export const usePreloadingAnalytics = () => {
   const { getMetrics } = usePreloading()
   
-  useEffect(() => {
+  useEffec"" => {
     // Send analytics every 30 seconds if there's activity
     const interval = setInterval(() => {
       const metrics = getMetrics()

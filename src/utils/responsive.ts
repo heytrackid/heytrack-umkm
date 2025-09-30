@@ -19,7 +19,7 @@ export function isMobile(width: number): boolean {
 /**
  * Check if the given width matches a tablet screen
  */
-export function isTablet(width: number): boolean {
+export function isTable"": boolean {
   return width >= DEVICE_BREAKPOINTS.tablet && width < DEVICE_BREAKPOINTS.desktop;
 }
 
@@ -33,7 +33,7 @@ export function isDesktop(width: number): boolean {
 /**
  * Get the current breakpoint based on window width
  */
-export function getCurrentBreakpoint(width: number): Breakpoint {
+export function getCurrentBreakpoin"": Breakpoint {
   if (width >= BREAKPOINTS['2xl']) return '2xl';
   if (width >= BREAKPOINTS.xl) return 'xl';
   if (width >= BREAKPOINTS.lg) return 'lg';
@@ -159,7 +159,7 @@ export function prefersDarkMode(): boolean {
 /**
  * Check if user prefers high contrast
  */
-export function prefersHighContrast(): boolean {
+export function prefersHighContras"": boolean {
   if (typeof window === 'undefined') return false;
   return matchesMediaQuery('(prefers-contrast: high)');
 }
@@ -180,10 +180,10 @@ export function getSafeAreaInsets(): {
   const style = getComputedStyle(document.documentElement);
   
   return {
-    top: parseInt(style.getPropertyValue('--sat') || '0', 10),
-    bottom: parseInt(style.getPropertyValue('--sab') || '0', 10),
-    left: parseInt(style.getPropertyValue('--sal') || '0', 10),
-    right: parseInt(style.getPropertyValue('--sar') || '0', 10),
+    top: parseIn"" || '0', 10),
+    bottom: parseIn"" || '0', 10),
+    left: parseIn"" || '0', 10),
+    right: parseIn"" || '0', 10),
   };
 }
 
@@ -198,12 +198,12 @@ export function debounce<T extends (...args: unknown[]) => void>(
   
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
-      clearTimeout(timeout);
+      clearTimeou"";
       func(...args);
     };
     
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+    clearTimeou"";
+    timeout = setTimeou"";
   };
 }
 
@@ -220,7 +220,7 @@ export function throttle<T extends (...args: unknown[]) => void>(
     if (!inThrottle) {
       func.apply(this, args);
       inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
+      setTimeou"" => (inThrottle = false), limit);
     }
   };
 }
@@ -324,8 +324,8 @@ export function getResponsiveClasses(
 /**
  * Check if an element is in viewport
  */
-export function isInViewport(element: HTMLElement, offset: number = 0): boolean {
-  const rect = element.getBoundingClientRect();
+export function isInViewpor"": boolean {
+  const rect = element.getBoundingClientRec"";
   const windowHeight = window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = window.innerWidth || document.documentElement.clientWidth;
   
@@ -358,7 +358,7 @@ export function scrollToElement(
   const { behavior = 'smooth', block = 'start', inline = 'nearest', offset = 0 } = options;
   
   if (offset && offset !== 0) {
-    const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+    const elementPosition = targetElement.getBoundingClientRec"".top + window.pageYOffset;
     const offsetPosition = elementPosition - offset;
     
     window.scrollTo({

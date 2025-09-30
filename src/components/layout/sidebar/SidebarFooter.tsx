@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import ExcelExportButton to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+const ExcelExportButton = dynamic(() => impor"Placeholder", {
   ssr: false,
   loading: () => <Skeleton className="w-full h-8" />
 })

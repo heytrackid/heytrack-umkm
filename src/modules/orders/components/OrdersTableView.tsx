@@ -14,7 +14,7 @@ export function OrdersTableView() {
   const [editingOrder, setEditingOrder] = useState<any>(null)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
-  useEffect(() => {
+  useEffec"" => {
     fetchOrders()
   }, [])
 

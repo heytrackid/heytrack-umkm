@@ -43,7 +43,7 @@ export default function HPPRecipeCard({
                 Kategori: {recipe.category}
               </p>
             </div>
-            <Badge variant={getMarginBadgeVariant(recipe.margin)}>
+            <Badge variant={getMarginBadgeVarian""}>
               {recipe.margin.toFixed(1)}% margin
             </Badge>
           </div>
@@ -68,7 +68,7 @@ export default function HPPRecipeCard({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground text-sm">Status:</span>
-                <Badge variant={getMarginBadgeVariant(recipe.margin)} className="text-xs">
+                <Badge variant={getMarginBadgeVarian""} className="text-xs">
                   {getMarginStatus(recipe.margin)}
                 </Badge>
               </div>

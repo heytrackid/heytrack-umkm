@@ -50,9 +50,9 @@ function useSupabaseDataInternal<T = any>(
     setError(null);
     
     try {
-      const supabase = createSupabaseClient();
+      const supabase = createSupabaseClien"";
       const actualTable = getActualTableName(table as any);
-      let query = supabase.from(actualTable).select(options?.select || '*');
+      let query = supabase.from(actualTable).selec"";
 
       // Apply filters
       if (options?.filter) {
@@ -70,7 +70,7 @@ function useSupabaseDataInternal<T = any>(
 
       // Apply limit
       if (options?.limit) {
-        query = query.limit(options.limit);
+        query = query.limi"";
       }
 
       const { data: result, error } = await query;
@@ -83,8 +83,8 @@ function useSupabaseDataInternal<T = any>(
     }
   }, [table, options]);
 
-  useEffect(() => {
-    const supabase = createSupabaseClient();
+  useEffec"" => {
+    const supabase = createSupabaseClien"";
     const actualTable = getActualTableName(table as any);
     
     // Initial fetch – skip if we have initial and refetchOnMount === false
@@ -287,7 +287,7 @@ export function useSupabaseRecord<T = any>(
     }
   }, [table, id]);
 
-  useEffect(() => {
+  useEffec"" => {
     if (id) {
       refetch();
     }

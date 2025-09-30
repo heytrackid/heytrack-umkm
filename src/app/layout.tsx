@@ -6,7 +6,6 @@ import ErrorBoundary from '@/components/error/error-boundary';
 import { Toaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
 import ChatbotFAB from '@/components/ai-chatbot/ChatbotFAB';
-import I18nProvider from '@/providers/I18nProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import"./globals.css";
@@ -51,14 +50,13 @@ export default function RootLayout({
         >
           <QueryProvider>
             <SettingsProvider>
-              <I18nProvider>
-                <PreloadingProvider 
-                  enableSmartPreloading={true}
-                  enableIdlePreloading={true}
-                  enableNetworkAware={true}
-                  debug={process.env.NODE_ENV === 'development'}
-                >
-                  <ErrorBoundary>
+              <PreloadingProvider 
+                enableSmartPreloading={true}
+                enableIdlePreloading={true}
+                enableNetworkAware={true}
+                debug={process.env.NODE_ENV === 'development'}
+              >
+                <ErrorBoundary>
                   {/* Header temporarily disabled during development */}
                   {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
                     <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
@@ -96,7 +94,6 @@ export default function RootLayout({
                 {/* AI Chatbot Assistant */}
                 <ChatbotFAB userId="demo-user" />
                 {/* Web Vitals Reporter disabled during build to avoid overhead; enable when analytics endpoint is ready */}
-              </I18nProvider>
             </SettingsProvider>
           </QueryProvider>
         </ThemeProvider>

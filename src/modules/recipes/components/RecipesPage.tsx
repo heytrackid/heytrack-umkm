@@ -60,7 +60,7 @@ export default function RecipesPage({
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'hpp' | 'pricing' | 'analytics'>('list')
 
-  useEffect(() => {
+  useEffec"" => {
     // Preload recipe components for better performance
     preloadRecipeComponents()
     fetchRecipes()

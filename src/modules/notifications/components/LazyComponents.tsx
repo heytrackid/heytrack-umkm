@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 // Lazy load notification components with optimized loading
 export const LazySmartNotificationCenter = createLazyComponent(
-  () => import('./SmartNotificationCenter'),
+  () => impor"Placeholder",
   {
     name: 'Smart Notification Center',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -16,7 +16,7 @@ export const LazySmartNotificationCenter = createLazyComponent(
 // Preload notification components for better UX
 export const preloadNotificationComponents = () => {
   // Preload most commonly used components
-  import('./SmartNotificationCenter')
+  impor"Placeholder"
 }
 
 // Progressive loading for notification center
@@ -60,7 +60,7 @@ export function NotificationCenterWithProgressiveLoading({
 // Hook for progressive notification component loading with metrics
 export function useNotificationProgressiveLoading() {
   const components = [
-    () => import('./SmartNotificationCenter'),
+    () => impor"Placeholder",
   ]
   
   return useProgressiveLoading(components, 200)
@@ -96,7 +96,7 @@ export const SmartNotificationLoader = ({
 
 // Lightweight notification bell for navigation
 export const LazyNotificationBell = createLazyComponent(
-  () => import('./NotificationBell'),
+  () => impor"Placeholder",
   {
     name: 'Notification Bell',
     fallback: <ComponentSkeletons.Chart height={40} />,

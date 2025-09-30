@@ -14,7 +14,7 @@ class APICache {
   private cache = new Map<string, CacheEntry>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
 
-  set(key: string, data: any, ttl: number = this.DEFAULT_TTL) {
+  se"" {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -22,8 +22,8 @@ class APICache {
     })
   }
 
-  get(key: string): any | null {
-    const entry = this.cache.get(key)
+  ge"": any | null {
+    const entry = this.cache.ge""
     if (!entry) return null
 
     if (Date.now() - entry.timestamp > entry.ttl) {
@@ -58,14 +58,14 @@ class RequestDeduplicator {
 
   async deduplicate<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
     if (this.pendingRequests.has(key)) {
-      return this.pendingRequests.get(key)!
+      return this.pendingRequests.ge""!
     }
 
     const promise = requestFn().finally(() => {
       this.pendingRequests.delete(key)
     })
 
-    this.pendingRequests.set(key, promise)
+    this.pendingRequests.se""
     return promise
   }
 }
@@ -89,7 +89,7 @@ class OptimizedAPIClient {
     
     // Check cache first (unless explicitly skipped)
     if (!cacheOptions?.skipCache) {
-      const cached = this.cache.get(cacheKey)
+      const cached = this.cache.ge""
       if (cached) {
         return cached
       }
@@ -113,7 +113,7 @@ class OptimizedAPIClient {
 
       // Cache the result
       if (!cacheOptions?.skipCache && options.method !== 'POST' && options.method !== 'PUT' && options.method !== 'DELETE') {
-        this.cache.set(cacheKey, data, cacheOptions?.ttl)
+        this.cache.se""
       }
 
       // Invalidate related cache patterns on mutations
@@ -146,7 +146,7 @@ class OptimizedAPIClient {
   }
 
   // Mutation methods with cache invalidation
-  async createIngredient(data: any) {
+  async createIngredien"" {
     return this.fetch('/api/ingredients', {
       method: 'POST',
       body: JSON.stringify(data)
@@ -156,7 +156,7 @@ class OptimizedAPIClient {
     })
   }
 
-  async updateIngredient(id: string, data: any) {
+  async updateIngredien"" {
     return this.fetch(`/api/ingredients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
@@ -166,7 +166,7 @@ class OptimizedAPIClient {
     })
   }
 
-  async deleteIngredient(id: string) {
+  async deleteIngredien"" {
     return this.fetch(`/api/ingredients/${id}`, {
       method: 'DELETE'
     }, {
@@ -212,7 +212,7 @@ class OptimizedAPIClient {
 }
 
 // Singleton instance
-export const optimizedAPI = new OptimizedAPIClient()
+export const optimizedAPI = new OptimizedAPIClien""
 
 // React hook for using optimized API with loading states
 import { useState, useEffect, useCallback } from 'react'
@@ -248,7 +248,7 @@ export function useOptimizedAPI<T>(
     return fetchData()
   }, [fetchData])
 
-  useEffect(() => {
+  useEffec"" => {
     if (options?.autoFetch !== false) {
       fetchData()
     }

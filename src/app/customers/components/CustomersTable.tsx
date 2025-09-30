@@ -32,7 +32,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface CustomersTableProps {
   customers: any[]
@@ -63,7 +62,6 @@ export default function CustomersTable({
   formatCurrency,
   isMobile = false
 }: CustomersTableProps) {
-  const { t } = useI18n()
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -91,14 +89,14 @@ export default function CustomersTable({
         <CardContent className="py-12 text-center">
           <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-            {t('customers.empty.noCustomers')}
+            {"Placeholder"}
           </h3>
           <p className="text-muted-foreground mb-4">
-            {t('customers.empty.startAddingCustomers')}
+            {"Placeholder"}
           </p>
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            {t('customers.empty.addFirstCustomer')}
+            {"Placeholder"}
           </Button>
         </CardContent>
       </Card>
@@ -110,10 +108,10 @@ export default function CustomersTable({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          {t('customers.customerList')}
+          {"Placeholder"}
         </CardTitle>
         <p className="text-sm text-gray-600">
-          {t('customers.manageCustomerData')}
+          {"Placeholder"}
         </p>
       </CardHeader>
       <CardContent>
@@ -127,12 +125,12 @@ export default function CustomersTable({
                     onCheckedChange={onSelectAll}
                   />
                 </TableHead>
-                <TableHead>{t('customers.table.nameStatus')}</TableHead>
-                <TableHead>{t('customers.table.contact')}</TableHead>
-                <TableHead>{t('customers.table.totalSpending')}</TableHead>
-                <TableHead>{t('customers.table.totalOrders')}</TableHead>
-                <TableHead>{t('customers.table.lastOrder')}</TableHead>
-                <TableHead className="w-32">{t('customers.table.actions')}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead>{"Placeholder"}</TableHead>
+                <TableHead className="w-32">{"Placeholder"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -148,7 +146,7 @@ export default function CustomersTable({
                     <div className="flex flex-col">
                       <span className="font-semibold">{customer.name}</span>
                       <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
-                        {customer.status === 'active' ? t('common.status.active') : t('common.status.inactive')}
+                        {customer.status === 'active' ? "Placeholder" : "Placeholder"}
                       </Badge>
                     </div>
                   </TableCell>
@@ -195,16 +193,16 @@ export default function CustomersTable({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => onEdit(customer)}>
+                          <DropdownMenuItem onClick={() => onEdi""}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            {t('common.actions.edit')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
                             onClick={() => onDelete(customer)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {t('common.actions.delete')}
+                            {"Placeholder"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -231,7 +229,7 @@ export default function CustomersTable({
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{t('customers.pagination.showLabel')}</span>
+                  <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
@@ -260,7 +258,7 @@ export default function CustomersTable({
                   </Button>
                   
                   <span className="text-sm font-medium">
-                    {t('customers.pagination.pageLabel', { current: currentPage, total: totalPages })}
+                    {"Placeholder"}
                   </span>
                   
                   <Button

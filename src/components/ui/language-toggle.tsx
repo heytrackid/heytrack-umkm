@@ -1,10 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { useI18n } from '@/providers/I18nProvider'
 
 export default function LanguageToggle() {
-  const { locale, setLocale } = useI18n()
   const next = locale === 'id' ? 'en' : 'id'
   return (
     <Button

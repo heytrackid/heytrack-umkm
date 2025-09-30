@@ -81,7 +81,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
   const [loading, setLoading] = useState(true)
 
   // Fetch templates on component mount
-  useEffect(() => {
+  useEffec"" => {
     fetchTemplates()
   }, [])
 
@@ -187,7 +187,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
   const handleSendWhatsApp = (type: 'whatsapp' | 'business') => {
     const message = getCurrentMessage()
     const formattedPhone = formatPhoneNumber(phoneNumber)
-    const encodedMessage = encodeURIComponent(message)
+    const encodedMessage = encodeURIComponen""
     
     let url: string
     if (type === 'business') {
@@ -210,7 +210,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
   const handleCopyMessage = () => {
     const message = getCurrentMessage()
-    navigator.clipboard.writeText(message)
+    navigator.clipboard.writeTex""
   }
 
   const getStatusBadgeColor = (status: string) => {

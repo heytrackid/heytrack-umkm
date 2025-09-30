@@ -72,7 +72,7 @@ export async function PUT(
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .select()
+      .selec""
       .single()
     
     if (error) {
@@ -106,7 +106,7 @@ export async function PUT(
         
         const { error: itemsError } = await (supabase as any)
           .from('order_items')
-          .insert(itemsToInsert)
+          .inser""
         
         if (itemsError) {
           console.error('Error updating order items:', itemsError)

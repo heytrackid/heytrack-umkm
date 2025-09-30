@@ -5,7 +5,7 @@ import { Suspense } from 'react'
 
 // Lazy load recipe components with optimized loading
 export const LazyAdvancedHPPCalculator = createLazyComponent(
-  () => import('./AdvancedHPPCalculator'),
+  () => impor"Placeholder",
   {
     name: 'Advanced HPP Calculator',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -14,7 +14,7 @@ export const LazyAdvancedHPPCalculator = createLazyComponent(
 )
 
 export const LazySmartPricingAssistant = createLazyComponent(
-  () => import('./SmartPricingAssistant'),
+  () => impor"Placeholder",
   {
     name: 'Smart Pricing Assistant',
     fallback: <ComponentSkeletons.Dashboard />,
@@ -25,8 +25,8 @@ export const LazySmartPricingAssistant = createLazyComponent(
 // Preload critical recipe components for better UX
 export const preloadRecipeComponents = () => {
   // Preload most commonly used components
-  import('./AdvancedHPPCalculator')
-  import('./SmartPricingAssistant')
+  impor"Placeholder"
+  impor"Placeholder"
 }
 
 // Progressive loading for recipe dashboard
@@ -74,8 +74,8 @@ export function RecipeDashboardWithProgressiveLoading({
 // Hook for progressive recipe component loading with metrics
 export function useRecipeProgressiveLoading() {
   const components = [
-    () => import('./AdvancedHPPCalculator'),
-    () => import('./SmartPricingAssistant'),
+    () => impor"Placeholder",
+    () => impor"Placeholder",
   ]
   
   return useProgressiveLoading(components, 250)

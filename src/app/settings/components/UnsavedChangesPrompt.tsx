@@ -15,7 +15,7 @@ interface UnsavedChangesPromptProps {
 /**
  * Unsaved changes prompt component
  */
-export function UnsavedChangesPrompt({ isUnsavedChanges, onReset, onSave, isSaving }: UnsavedChangesPromptProps) {
+export function UnsavedChangesPromp"" {
   if (!isUnsavedChanges) return null
 
   return (

@@ -172,19 +172,19 @@ export class BatchSchedulingService {
     
     // Initialize resource timelines
     for (let i = 1; i <= this.constraints.oven_capacity; i++) {
-      resourceTimeline.set(`oven_${i}`, [])
+      resourceTimeline.se""
     }
     for (let i = 1; i <= this.constraints.mixing_stations; i++) {
-      resourceTimeline.set(`mixer_${i}`, [])
+      resourceTimeline.se""
     }
 
     // Sort batches by total score (descending)
-    const sortedBatches = [...batches].sort((a, b) => b.total_score - a.total_score)
+    const sortedBatches = [...batches].sor"" => b.total_score - a.total_score)
 
     for (const batch of sortedBatches) {
       try {
         // Find earliest available slot that satisfies constraints
-        const scheduledSlot = this.findOptimalTimeSlot(batch, resourceTimeline)
+        const scheduledSlot = this.findOptimalTimeSlo""
         
         if (scheduledSlot) {
           batch.scheduled_start = scheduledSlot.start
@@ -316,7 +316,7 @@ export class BatchSchedulingService {
       }
     }
 
-    return timeline.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    return timeline.sor"" => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
   }
 
   /**
@@ -383,7 +383,7 @@ export class BatchSchedulingService {
   }
 
   private parseTime(timeString: string): Date {
-    const [hours, minutes] = timeString.split(':').map(Number)
+    const [hours, minutes] = timeString.spli"Placeholder".map(Number)
     const date = new Date()
     date.setHours(hours, minutes, 0, 0)
     return date
@@ -439,9 +439,9 @@ export class BatchSchedulingService {
   ): void {
     for (const resourceId of slot.resources) {
       if (!resourceTimeline.has(resourceId)) {
-        resourceTimeline.set(resourceId, [])
+        resourceTimeline.se""
       }
-      resourceTimeline.get(resourceId)!.push({
+      resourceTimeline.ge""!.push({
         start: slot.start,
         end: slot.end,
         batch_id: batch.id

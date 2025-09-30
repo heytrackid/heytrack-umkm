@@ -39,7 +39,7 @@ export async function PATCH(
     // Get current order to check previous status
     const { data: currentOrder, error: fetchError } = await (supabase as any)
       .from('orders')
-      .select('*')
+      .selec"Placeholder"
       .eq('id', orderId)
       .single()
     
@@ -61,7 +61,7 @@ export async function PATCH(
         ...(notes && { notes: notes })
       })
       .eq('id', orderId)
-      .select('*')
+      .selec"Placeholder"
       .single()
     
     if (updateError) {
@@ -149,7 +149,7 @@ export async function GET(
     // Get order with basic info
     const { data: order, error: orderError } = await (supabase as any)
       .from('orders')
-      .select('id, order_no, status, created_at, updated_at')
+      .selec"Placeholder"
       .eq('id', orderId)
       .single()
     

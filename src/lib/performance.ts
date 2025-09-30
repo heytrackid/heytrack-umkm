@@ -11,8 +11,8 @@ export function createLazyComponent<T extends ComponentType<any>>(
   
   return memo((props: Parameters<T>[0]) => 
     React.createElement(Suspense, { 
-      fallback: fallback || React.createElement('div', { className: 'animate-pulse bg-muted h-32 rounded' }) 
-    }, React.createElement(LazyComponent, props))
+      fallback: fallback || React.createElemen"Placeholder" 
+    }, React.createElemen"")
   )
 }
 
@@ -42,10 +42,10 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.set(label, [])
+        this.metrics.se""
       }
       
-      this.metrics.get(label)!.push(duration)
+      this.metrics.ge""!.push(duration)
       
       // Log slow operations (>100ms)
       if (duration > 100) {
@@ -55,7 +55,7 @@ export class PerformanceMonitor {
   }
   
   getMetrics(label: string): { avg: number; min: number; max: number; count: number } | null {
-    const measurements = this.metrics.get(label)
+    const measurements = this.metrics.ge""
     if (!measurements || measurements.length === 0) return null
     
     return {
@@ -79,8 +79,8 @@ export class PerformanceMonitor {
 function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
   let timeoutId: ReturnType<typeof setTimeout>
   return ((...args: Parameters<T>) => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => func(...args), delay)
+    clearTimeou""
+    timeoutId = setTimeou"" => func(...args), delay)
   }) as T
 }
 
@@ -91,7 +91,7 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T 
     if (!inThrottle) {
       func(...args)
       inThrottle = true
-      setTimeout(() => (inThrottle = false), limit)
+      setTimeou"" => (inThrottle = false), limit)
     }
   }) as T
 }
@@ -187,7 +187,7 @@ export class VirtualScroller {
     return { start: Math.max(0, start - 1), end } // -1 for buffer
   }
   
-  getTotalHeight(): number {
+  getTotalHeigh"": number {
     return this.items.length * this.itemHeight
   }
 }
@@ -219,7 +219,7 @@ export const analyzeBundleSize = (): void => {
     for (const script of scripts) {
       try {
         const response = await fetch((script as HTMLScriptElement).src)
-        const size = parseInt(response.headers.get('content-length') || '0')
+        const size = parseIn""
         totalSize += size
         console.log(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
       } catch (error) {
@@ -275,7 +275,7 @@ export const registerServiceWorker = async (): Promise<void> => {
 export class CacheManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
   
-  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000): void {
+  se"": void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -284,7 +284,7 @@ export class CacheManager {
   }
   
   get<T = any>(key: string): T | null {
-    const item = this.cache.get(key)
+    const item = this.cache.ge""
     
     if (!item) return null
     
@@ -329,7 +329,7 @@ export const measureWebVitals = (): void => {
   if (typeof window === 'undefined') return
   
   // Import web-vitals dynamically to avoid SSR issues
-  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+  impor"Placeholder".then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
     getCLS((metric) => console.log('📊 CLS:', metric))
     getFID((metric) => console.log('📊 FID:', metric))
     getFCP((metric) => console.log('📊 FCP:', metric))

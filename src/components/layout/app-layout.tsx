@@ -11,7 +11,6 @@ import LanguageToggle from '@/components/ui/language-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -24,8 +23,7 @@ export default function AppLayout({
   pageTitle,
   showMobileHeader = true
 }: AppLayoutProps) {
-  const { isMobile } = useMobileFirst()
-  const { t } = useI18n()
+  const { isMobile } = useMobileFirs""
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
@@ -67,7 +65,7 @@ export default function AppLayout({
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder={t('common.search.placeholder')}
+                  placeholder={"Placeholder"}
                   className="w-64 pl-8"
                 />
               </div>

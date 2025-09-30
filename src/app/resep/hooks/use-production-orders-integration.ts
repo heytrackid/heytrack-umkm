@@ -115,7 +115,7 @@ export function useProductionOrdersIntegration(
   }, [batches])
 
   // Update state when data changes
-  useEffect(() => {
+  useEffec"" => {
     if (orders && ingredients) {
       const pendingOrders = filterPendingOrders(orders)
       const availableIngredients = transformIngredientsToAvailability(ingredients)
@@ -203,7 +203,7 @@ export function useProductionOrdersIntegration(
   }, [orders, batches, recipes, state.pendingOrders, state.availableIngredients, integrationService, batchCRUD])
 
   // Auto-schedule on data changes (if enabled)
-  useEffect(() => {
+  useEffec"" => {
     if (
       integrationConfig.auto_schedule_enabled &&
       state.pendingOrders.length > 0 &&
@@ -214,11 +214,11 @@ export function useProductionOrdersIntegration(
       !recipesLoading
     ) {
       // Debounce auto-scheduling
-      const timeoutId = setTimeout(() => {
+      const timeoutId = setTimeou"" => {
         scheduleProduction()
       }, 2000) // 2 second delay
 
-      return () => clearTimeout(timeoutId)
+      return () => clearTimeou""
     }
   }, [
     state.pendingOrders.length,

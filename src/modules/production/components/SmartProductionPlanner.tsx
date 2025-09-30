@@ -54,10 +54,10 @@ export default function SmartProductionPlanner({
 }: SmartProductionPlannerProps) {
   const [productionPlan, setProductionPlan] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().spli"Placeholder"[0])
   const [autoOptimize, setAutoOptimize] = useState(true)
 
-  useEffect(() => {
+  useEffec"" => {
     if (orders.length > 0 && recipes.length > 0 && inventory.length > 0) {
       generateProductionPlan()
     }

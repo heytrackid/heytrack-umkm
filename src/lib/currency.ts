@@ -98,7 +98,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     const formatted = new Intl.NumberFormat(locale, {
       minimumFractionDigits: currency.decimals,
       maximumFractionDigits: currency.decimals
-    }).format(amount)
+    }).forma""
     
     return `${currency.symbol} ${formatted}`
   } catch (error) {
@@ -121,7 +121,7 @@ export function parseCurrencyString(currencyString: string, currency: Currency):
   
   // Handle different decimal separators
   const normalized = cleaned.replace(',', '.')
-  const parsed = parseFloat(normalized)
+  const parsed = parseFloa""
   
   return isNaN(parsed) ? 0 : parsed
 }
@@ -129,7 +129,7 @@ export function parseCurrencyString(currencyString: string, currency: Currency):
 /**
  * Validate currency amount
  */
-export function isValidCurrencyAmount(amount: any): boolean {
+export function isValidCurrencyAmoun"": boolean {
   return typeof amount === 'number' && !isNaN(amount) && isFinite(amount)
 }
 

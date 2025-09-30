@@ -313,7 +313,7 @@ export function SmartExpenseAutomation() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => dismissAlert(alert.id)}
+                        onClick={() => dismissAler""}
                         className="ml-2 shrink-0"
                       >
                         <CheckCircle className="h-4 w-4" />

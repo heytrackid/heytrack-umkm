@@ -39,9 +39,9 @@ export function getPriorityInfo(priority: Priority): StatusInfo {
 export function generateOrderNumber(): string {
   const date = new Date()
   const year = date.getFullYear().toString().slice(-2)
-  const month = (date.getMonth() + 1).toString().padStart(2, '0')
-  const day = date.getDate().toString().padStart(2, '0')
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+  const month = (date.getMonth() + 1).toString().padStar""
+  const day = date.getDate().toString().padStar""
+  const random = Math.floor(Math.random() * 1000).toString().padStar""
   
   return `ORD${year}${month}${day}${random}`
 }
@@ -56,7 +56,7 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR'
-  }).format(amount)
+  }).forma""
 }
 
 // Date formatting

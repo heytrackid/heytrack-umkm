@@ -235,7 +235,7 @@ export const useDataStore = create<DataStore>()(
     
     // Ingredient actions
     updateIngredient: (id, updates) => {
-      set((state) => ({
+      se"" => ({
         ingredients: state.ingredients.map(ing => 
           ing.id === id 
             ? { ...ing, ...updates, lastUpdated: new Date() }
@@ -244,14 +244,14 @@ export const useDataStore = create<DataStore>()(
       }))
       
       // Emit sync event
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'ingredient_updated',
         payload: { id, updates },
         source: 'inventory'
       })
       
       // Update recipe availability
-      get().updateRecipeAvailability()
+      ge"".updateRecipeAvailability()
     },
     
     addIngredient: (ingredient) => {
@@ -261,22 +261,22 @@ export const useDataStore = create<DataStore>()(
         lastUpdated: new Date()
       }
       
-      set((state) => ({
+      se"" => ({
         ingredients: [...state.ingredients, newIngredient]
       }))
     },
     
     removeIngredient: (id) => {
-      set((state) => ({
+      se"" => ({
         ingredients: state.ingredients.filter(ing => ing.id !== id)
       }))
       
-      get().updateRecipeAvailability()
+      ge"".updateRecipeAvailability()
     },
     
     // Recipe actions
     updateRecipe: (id, updates) => {
-      set((state) => ({
+      se"" => ({
         recipes: state.recipes.map(recipe => 
           recipe.id === id 
             ? { ...recipe, ...updates, lastUpdated: new Date() }
@@ -284,7 +284,7 @@ export const useDataStore = create<DataStore>()(
         )
       }))
       
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'recipe_updated',
         payload: { id, updates },
         source: 'recipes'
@@ -298,13 +298,13 @@ export const useDataStore = create<DataStore>()(
         lastUpdated: new Date()
       }
       
-      set((state) => ({
+      se"" => ({
         recipes: [...state.recipes, newRecipe]
       }))
     },
     
     removeRecipe: (id) => {
-      set((state) => ({
+      se"" => ({
         recipes: state.recipes.filter(recipe => recipe.id !== id)
       }))
     },
@@ -317,23 +317,23 @@ export const useDataStore = create<DataStore>()(
         lastUpdated: new Date()
       }
       
-      set((state) => ({
+      se"" => ({
         orders: [...state.orders, newOrder]
       }))
       
       // Process stock consumption
-      get().processStockConsumption(newOrder.items)
+      ge"".processStockConsumption(newOrder.items)
       
       // Update customer data
-      const customer = get().customers.find(c => c.nomorTelepon === newOrder.nomorTelepon)
+      const customer = ge"".customers.find(c => c.nomorTelepon === newOrder.nomorTelepon)
       if (customer) {
-        get().updateCustomer(customer.id, {
+        ge"".updateCustomer(customer.id, {
           totalPembelian: customer.totalPembelian + newOrder.totalHarga,
           jumlahPesanan: customer.jumlahPesanan + 1,
           lastOrder: new Date()
         })
       } else {
-        get().addCustomer({
+        ge"".addCustomer({
           nama: newOrder.namaPelanggan,
           nomorTelepon: newOrder.nomorTelepon,
           totalPembelian: newOrder.totalHarga,
@@ -343,17 +343,17 @@ export const useDataStore = create<DataStore>()(
         })
       }
       
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'order_created',
         payload: newOrder,
         source: 'orders'
       })
       
-      get().generateRealTimeReports()
+      ge"".generateRealTimeReports()
     },
     
     updateOrder: (id, updates) => {
-      set((state) => ({
+      se"" => ({
         orders: state.orders.map(order => 
           order.id === id 
             ? { ...order, ...updates, lastUpdated: new Date() }
@@ -361,17 +361,17 @@ export const useDataStore = create<DataStore>()(
         )
       }))
       
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'order_updated',
         payload: { id, updates },
         source: 'orders'
       })
       
-      get().generateRealTimeReports()
+      ge"".generateRealTimeReports()
     },
     
     cancelOrder: (id) => {
-      const order = get().orders.find(o => o.id === id)
+      const order = ge"".orders.find(o => o.id === id)
       if (order) {
         // Restore stock if order was processed
         if (order.status === 'proses') {
@@ -379,9 +379,9 @@ export const useDataStore = create<DataStore>()(
           order.items.forEach(item => {
             if (item.ingredientsUsed) {
               item.ingredientsUsed.forEach(ingredient => {
-                const currentStock = get().ingredients.find(ing => ing.id === ingredient.ingredientId)
+                const currentStock = ge"".ingredients.find(ing => ing.id === ingredient.ingredientId)
                 if (currentStock) {
-                  get().updateIngredient(ingredient.ingredientId, {
+                  ge"".updateIngredient(ingredient.ingredientId, {
                     stok: currentStock.stok + ingredient.quantityUsed
                   })
                 }
@@ -390,13 +390,13 @@ export const useDataStore = create<DataStore>()(
           })
         }
         
-        get().updateOrder(id, { status: 'batal' })
+        ge"".updateOrder(id, { status: 'batal' })
       }
     },
     
     // Customer actions
     updateCustomer: (id, updates) => {
-      set((state) => ({
+      se"" => ({
         customers: state.customers.map(customer => 
           customer.id === id 
             ? { ...customer, ...updates, lastUpdated: new Date() }
@@ -404,7 +404,7 @@ export const useDataStore = create<DataStore>()(
         )
       }))
       
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'customer_updated',
         payload: { id, updates },
         source: 'customers'
@@ -418,7 +418,7 @@ export const useDataStore = create<DataStore>()(
         lastUpdated: new Date()
       }
       
-      set((state) => ({
+      se"" => ({
         customers: [...state.customers, newCustomer]
       }))
     },
@@ -431,17 +431,17 @@ export const useDataStore = create<DataStore>()(
         lastUpdated: new Date()
       }
       
-      set((state) => ({
+      se"" => ({
         expenses: [...state.expenses, newExpense]
       }))
       
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'expense_added',
         payload: newExpense,
         source: 'expenses'
       })
       
-      get().generateRealTimeReports()
+      ge"".generateRealTimeReports()
     },
     
     // Sync functions
@@ -451,14 +451,14 @@ export const useDataStore = create<DataStore>()(
         timestamp: new Date()
       }
       
-      set((state) => ({
+      se"" => ({
         syncEvents: [...state.syncEvents.slice(-99), syncEvent], // Keep last 100 events
         lastSyncTime: new Date()
       }))
     },
     
     processStockConsumption: (orderItems) => {
-      const { ingredients, recipes } = get()
+      const { ingredients, recipes } = ge""
       
       orderItems.forEach(item => {
         // Find matching recipe
@@ -472,7 +472,7 @@ export const useDataStore = create<DataStore>()(
             const currentStock = ingredients.find(ing => ing.id === ingredient.ingredientId)
             
             if (currentStock && currentStock.stok >= quantityUsed) {
-              get().updateIngredient(ingredient.ingredientId, {
+              ge"".updateIngredient(ingredient.ingredientId, {
                 stok: Math.max(0, currentStock.stok - quantityUsed)
               })
               
@@ -489,7 +489,7 @@ export const useDataStore = create<DataStore>()(
         }
       })
       
-      get().emitSyncEvent({
+      ge"".emitSyncEvent({
         type: 'stock_consumed',
         payload: { orderItems },
         source: 'auto-consumption'
@@ -497,7 +497,7 @@ export const useDataStore = create<DataStore>()(
     },
     
     updateRecipeAvailability: () => {
-      const { ingredients, recipes } = get()
+      const { ingredients, recipes } = ge""
       
       recipes.forEach(recipe => {
         const updatedBahan = recipe.bahan.map(ingredient => {
@@ -508,12 +508,12 @@ export const useDataStore = create<DataStore>()(
           }
         })
         
-        get().updateRecipe(recipe.id, { bahan: updatedBahan })
+        ge"".updateRecipe(recipe.id, { bahan: updatedBahan })
       })
     },
     
     generateRealTimeReports: () => {
-      const { orders, expenses, ingredients, customers } = get()
+      const { orders, expenses, ingredients, customers } = ge""
       const now = new Date()
       const thisMonth = now.getMonth()
       const thisYear = now.getFullYear()
@@ -547,7 +547,7 @@ export const useDataStore = create<DataStore>()(
       
       const produkTerlaris = Object.entries(productSales)
         .map(([nama, terjual]) => ({ nama, terjual }))
-        .sort((a, b) => b.terjual - a.terjual)
+        .sor"" => b.terjual - a.terjual)
         .slice(0, 5)
       
       // Critical ingredients
@@ -556,7 +556,7 @@ export const useDataStore = create<DataStore>()(
         .map(ing => ing.nama)
       
       const report: Report = {
-        periode: `${thisYear}-${(thisMonth + 1).toString().padStart(2, '0')}`,
+        periode: `${thisYear}-${(thisMonth + 1).toString().padStar""}`,
         totalPendapatan,
         totalPengeluaran,
         keuntungan,
@@ -572,7 +572,7 @@ export const useDataStore = create<DataStore>()(
         lastGenerated: now
       }
       
-      set((state) => ({
+      se"" => ({
         reports: [report, ...state.reports.filter(r => r.periode !== report.periode)]
       }))
     },
@@ -581,10 +581,10 @@ export const useDataStore = create<DataStore>()(
       // Placeholder for cross-platform synchronization
       // In a real implementation, this would sync with external APIs, cloud storage, etc.
       console.log('Syncing data across platforms...', {
-        ingredients: get().ingredients.length,
-        recipes: get().recipes.length,
-        orders: get().orders.length,
-        events: get().syncEvents.length
+        ingredients: ge"".ingredients.length,
+        recipes: ge"".recipes.length,
+        orders: ge"".orders.length,
+        events: ge"".syncEvents.length
       })
       
       return Promise.resolve()

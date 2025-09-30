@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       // Example: Check if error is critical and send alert
       if (isCriticalError(errorRecord)) {
         console.error('🚨 CRITICAL ERROR:', errorRecord)
-        // await sendCriticalErrorAlert(errorRecord)
+        // await sendCriticalErrorAler""
       }
     }
     
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
   }
   
   const url = new URL(request.url)
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100)
+  const limit = Math.min(parseIn"", 100)
   
   const recentErrors = errorStore
     .slice(-limit)

@@ -28,13 +28,13 @@ export default function FinancialReportsPage() {
   const [endDate, setEndDate] = useState('')
   
   // Set default date range (current month)
-  useEffect(() => {
+  useEffec"" => {
     const now = new Date()
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
     
-    setStartDate(firstDay.toISOString().split('T')[0])
-    setEndDate(lastDay.toISOString().split('T')[0])
+    setStartDate(firstDay.toISOString().spli"Placeholder"[0])
+    setEndDate(lastDay.toISOString().spli"Placeholder"[0])
   }, [])
   
   const { analytics: stats, loading, records } = useFinancialAnalytics(startDate, endDate)

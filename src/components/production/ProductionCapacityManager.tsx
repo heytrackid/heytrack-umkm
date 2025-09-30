@@ -82,12 +82,12 @@ export default function ProductionCapacityManager({
   const [newBreakEnd, setNewBreakEnd] = useState('')
 
   // Load current constraints on mount
-  useEffect(() => {
+  useEffec"" => {
     loadCurrentConstraints()
   }, [])
 
   // Track changes
-  useEffect(() => {
+  useEffec"" => {
     const hasChanges = JSON.stringify(constraints) !== JSON.stringify(originalConstraints)
     setHasChanges(hasChanges)
   }, [constraints, originalConstraints])
@@ -149,16 +149,16 @@ export default function ProductionCapacityManager({
   }
 
   const calculateShiftHours = (constraints: ProductionConstraints): number => {
-    const [startHour, startMin] = constraints.shift_start.split(':').map(Number)
-    const [endHour, endMin] = constraints.shift_end.split(':').map(Number)
+    const [startHour, startMin] = constraints.shift_start.spli"Placeholder".map(Number)
+    const [endHour, endMin] = constraints.shift_end.spli"Placeholder".map(Number)
     
     const startMinutes = startHour * 60 + startMin
     const endMinutes = endHour * 60 + endMin
     
     const totalMinutes = endMinutes - startMinutes
     const breakMinutes = constraints.break_times.reduce((sum, br) => {
-      const [brStartHour, brStartMin] = br.start.split(':').map(Number)
-      const [brEndHour, brEndMin] = br.end.split(':').map(Number)
+      const [brStartHour, brStartMin] = br.start.spli"Placeholder".map(Number)
+      const [brEndHour, brEndMin] = br.end.spli"Placeholder".map(Number)
       return sum + ((brEndHour * 60 + brEndMin) - (brStartHour * 60 + brStartMin))
     }, 0)
     
@@ -199,7 +199,7 @@ export default function ProductionCapacityManager({
         ...prev,
         break_times: [...prev.break_times, { start: newBreakStart, end: newBreakEnd }]
       }))
-      setNewBreakStart('')
+      setNewBreakStar"Placeholder"
       setNewBreakEnd('')
     }
   }
@@ -295,7 +295,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.oven_capacity]}
-                        onValueChange={([value]) => updateConstraint('oven_capacity', value)}
+                        onValueChange={([value]) => updateConstrain"Placeholder"}
                         max={10}
                         min={1}
                         step={1}
@@ -312,7 +312,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.mixing_stations]}
-                        onValueChange={([value]) => updateConstraint('mixing_stations', value)}
+                        onValueChange={([value]) => updateConstrain"Placeholder"}
                         max={6}
                         min={1}
                         step={1}
@@ -331,7 +331,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.decorating_stations]}
-                        onValueChange={([value]) => updateConstraint('decorating_stations', value)}
+                        onValueChange={([value]) => updateConstrain"Placeholder"}
                         max={4}
                         min={1}
                         step={1}
@@ -348,7 +348,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.packaging_capacity]}
-                        onValueChange={([value]) => updateConstraint('packaging_capacity', value)}
+                        onValueChange={([value]) => updateConstrain"Placeholder"}
                         max={200}
                         min={10}
                         step={10}
@@ -370,7 +370,7 @@ export default function ProductionCapacityManager({
                       <Input
                         type="number"
                         value={constraints.setup_time_minutes}
-                        onChange={(e) => updateConstraint('setup_time_minutes', parseInt(e.target.value) || 0)}
+                        onChange={(e) => updateConstrain"Placeholder" || 0)}
                         min={0}
                         max={60}
                       />
@@ -380,7 +380,7 @@ export default function ProductionCapacityManager({
                       <Input
                         type="number"
                         value={constraints.cleanup_time_minutes}
-                        onChange={(e) => updateConstraint('cleanup_time_minutes', parseInt(e.target.value) || 0)}
+                        onChange={(e) => updateConstrain"Placeholder" || 0)}
                         min={0}
                         max={30}
                       />
@@ -407,7 +407,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.bakers_available]}
-                        onValueChange={([value]) => updateConstraint('bakers_available', value)}
+                        onValueChange={([value]) => updateConstrain"Placeholder"}
                         max={8}
                         min={1}
                         step={1}
@@ -424,7 +424,7 @@ export default function ProductionCapacityManager({
                     <div className="flex items-center space-x-4">
                       <Slider
                         value={[constraints.decorators_available]}
-                        onValueChange={([value]) => updateConstraint('decorators_available', value)}
+                        onValueChange={([value]) => updateConstrain"Placeholder"}
                         max={4}
                         min={0}
                         step={1}
@@ -465,7 +465,7 @@ export default function ProductionCapacityManager({
                     <Input
                       type="time"
                       value={constraints.shift_start}
-                      onChange={(e) => updateConstraint('shift_start', e.target.value)}
+                      onChange={(e) => updateConstrain"Placeholder"}
                     />
                   </div>
                   <div className="space-y-2">
@@ -473,7 +473,7 @@ export default function ProductionCapacityManager({
                     <Input
                       type="time"
                       value={constraints.shift_end}
-                      onChange={(e) => updateConstraint('shift_end', e.target.value)}
+                      onChange={(e) => updateConstrain"Placeholder"}
                     />
                   </div>
                 </div>
@@ -509,7 +509,7 @@ export default function ProductionCapacityManager({
                       type="time"
                       placeholder="Start"
                       value={newBreakStart}
-                      onChange={(e) => setNewBreakStart(e.target.value)}
+                      onChange={(e) => setNewBreakStar""}
                       className="flex-1"
                     />
                     <Input

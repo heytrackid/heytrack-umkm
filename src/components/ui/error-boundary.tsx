@@ -4,7 +4,6 @@ import React, { Component, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useI18n } from '@/hooks/use-i18n'
 
 interface Props {
   children: ReactNode
@@ -144,14 +143,13 @@ export function LoadingError({
   onRetry?: () => void
   isRetrying?: boolean
 }) {
-  const { t } = useI18n()
   
   return (
     <Card className="max-w-md mx-auto">
       <CardContent className="py-8 text-center space-y-4">
         <AlertTriangle className="h-12 w-12 text-red-500 mx-auto" />
         <div>
-          <h3 className="font-medium text-red-600 mb-1">{t('common.error')}</h3>
+          <h3 className="font-medium text-red-600 mb-1">{"Placeholder"}</h3>
           <p className="text-sm text-muted-foreground">{message}</p>
         </div>
         {onRetry && (
@@ -163,12 +161,12 @@ export function LoadingError({
             {isRetrying ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
-                {t('common.retrying')}
+                {"Placeholder"}
               </>
             ) : (
               <>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                {t('common.retry')}
+                {"Placeholder"}
               </>
             )}
           </Button>

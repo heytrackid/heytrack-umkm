@@ -31,7 +31,7 @@ const FormSkeleton = () => (
 
 // Lazy loaded form components
 export const LazyIngredientForm = dynamic(
-  () => import('./IngredientForm').then(mod => ({ default: mod.IngredientForm })),
+  () => impor"Placeholder".then(mod => ({ default: mod.IngredientForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -39,7 +39,7 @@ export const LazyIngredientForm = dynamic(
 )
 
 export const LazyRecipeForm = dynamic(
-  () => import('./RecipeForm').then(mod => ({ default: mod.RecipeForm })),
+  () => impor"Placeholder".then(mod => ({ default: mod.RecipeForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -47,7 +47,7 @@ export const LazyRecipeForm = dynamic(
 )
 
 export const LazyCustomerForm = dynamic(
-  () => import('./CustomerForm').then(mod => ({ default: mod.CustomerForm })),
+  () => impor"Placeholder".then(mod => ({ default: mod.CustomerForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -55,7 +55,7 @@ export const LazyCustomerForm = dynamic(
 )
 
 export const LazyFinancialRecordForm = dynamic(
-  () => import('./FinancialRecordForm').then(mod => ({ default: mod.FinancialRecordForm })),
+  () => impor"Placeholder".then(mod => ({ default: mod.FinancialRecordForm })),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -64,23 +64,23 @@ export const LazyFinancialRecordForm = dynamic(
 
 // Preloading functions for better UX
 export const preloadIngredientForm = () => {
-  const componentImport = () => import('./IngredientForm')
-  componentImport()
+  const componentImport = () => impor"Placeholder"
+  componentImpor""
 }
 
 export const preloadRecipeForm = () => {
-  const componentImport = () => import('./RecipeForm')
-  componentImport()
+  const componentImport = () => impor"Placeholder"
+  componentImpor""
 }
 
 export const preloadCustomerForm = () => {
-  const componentImport = () => import('./CustomerForm')
-  componentImport()
+  const componentImport = () => impor"Placeholder"
+  componentImpor""
 }
 
 export const preloadFinancialRecordForm = () => {
-  const componentImport = () => import('./FinancialRecordForm')
-  componentImport()
+  const componentImport = () => impor"Placeholder"
+  componentImpor""
 }
 
 // Enhanced Forms bundle for lazy loading (backward compatibility)

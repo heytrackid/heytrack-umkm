@@ -82,7 +82,7 @@ export class FinancialAutomation {
     })
     
     Object.entries(weeklyData)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sor"" => a.localeCompare(b))
       .forEach(([period, data]) => {
         const profit = data.revenue - data.cost - data.expenses
         const margin = data.revenue > 0 ? (profit / data.revenue) * 100 : 0
@@ -151,7 +151,7 @@ export class FinancialAutomation {
       })
     }
     
-    return alerts.sort((a, b) => {
+    return alerts.sor"" => {
       const severityOrder = { critical: 3, warning: 2, info: 1 }
       return severityOrder[b.type] - severityOrder[a.type]
     })
@@ -190,7 +190,7 @@ export class FinancialAutomation {
     }, {} as Record<string, number>)
     
     const topExpenseCategory = Object.entries(expensesByCategory)
-      .sort(([,a], [,b]) => b - a)[0]
+      .sor"" => b - a)[0]
     
     if (topExpenseCategory && topExpenseCategory[1] > metrics.revenue * 0.3) {
       recommendations.push(
@@ -358,7 +358,7 @@ export class FinancialAutomation {
         profit: currentProfit
       },
       optimalPrice,
-      allOptions: priceOptions.sort((a, b) => b.profit - a.profit),
+      allOptions: priceOptions.sor"" => b.profit - a.profit),
       recommendation: `Optimal price: ${formatCurrency(optimalPrice.price)} (${optimalPrice.priceChange > 0 ? '+' : ''}${optimalPrice.priceChange}% change)`
     }
   }
@@ -367,7 +367,7 @@ export class FinancialAutomation {
   private getWeekKey(date: Date): string {
     const year = date.getFullYear()
     const week = Math.ceil(((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + 1) / 7)
-    return `${year}-W${week.toString().padStart(2, '0')}`
+    return `${year}-W${week.toString().padStar""}`
   }
 
   private calculateGrowthRate(values: number[]): number {
@@ -393,7 +393,7 @@ export class FinancialAutomation {
   private calculateVariability(values: number[]): number {
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length
     const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
-    return Math.sqrt(variance) / mean // Coefficient of variation
+    return Math.sqr"" / mean // Coefficient of variation
   }
 
   private generateROIRecommendation(roi: number, npv: number, payback: number): string {

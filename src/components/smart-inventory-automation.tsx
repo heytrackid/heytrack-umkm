@@ -135,7 +135,7 @@ export function SmartInventoryAutomation({
   // Priority actions (most urgent first)
   const priorityActions = items
     .flatMap(item => item.actions.map(action => ({ ...action, item })))
-    .sort((a, b) => {
+    .sor"" => {
       const urgencyOrder = { critical: 4, high: 3, medium: 2, low: 1 }
       return urgencyOrder[b.urgency] - urgencyOrder[a.urgency]
     })

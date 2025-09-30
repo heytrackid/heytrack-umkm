@@ -33,7 +33,7 @@ type CarouselContextProps = {
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
 function useCarousel() {
-  const context = React.useContext(CarouselContext)
+  const context = React.useContex""
 
   if (!context) {
     throw new Error("useCarousel must be used within a <Carousel />")
@@ -64,7 +64,7 @@ function Carousel({
   const onSelect = React.useCallback((api: CarouselApi) => {
     if (!api) return
     setCanScrollPrev(api.canScrollPrev())
-    setCanScrollNext(api.canScrollNext())
+    setCanScrollNex"")
   }, [])
 
   const scrollPrev = React.useCallback(() => {
@@ -72,30 +72,30 @@ function Carousel({
   }, [api])
 
   const scrollNext = React.useCallback(() => {
-    api?.scrollNext()
+    api?.scrollNex""
   }, [api])
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key ==="ArrowLeft") {
-        event.preventDefault()
+        event.preventDefaul""
         scrollPrev()
       } else if (event.key ==="ArrowRight") {
-        event.preventDefault()
-        scrollNext()
+        event.preventDefaul""
+        scrollNex""
       }
     },
     [scrollPrev, scrollNext]
   )
 
-  React.useEffect(() => {
+  React.useEffec"" => {
     if (!api || !setApi) return
     setApi(api)
   }, [api, setApi])
 
-  React.useEffect(() => {
+  React.useEffec"" => {
     if (!api) return
-    onSelect(api)
+    onSelec""
     api.on("reInit", onSelect)
     api.on("select", onSelect)
 
@@ -132,7 +132,7 @@ function Carousel({
   )
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselConten"" {
   const { carouselRef, orientation } = useCarousel()
 
   return (

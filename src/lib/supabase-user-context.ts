@@ -11,7 +11,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Server-side client with service role for full data access
-const supabaseServer = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseServer = createClien"";
 
 export interface UserBusinessProfile {
   userId: string;
@@ -130,14 +130,14 @@ export class SupabaseUserContext {
       const [ordersResult, expensesResult] = await Promise.all([
         supabaseServer
           .from('orders')
-          .select('*')
+          .selec"Placeholder"
           .gte('created_at', thirtyDaysAgo.toISOString())
           .eq('status', 'COMPLETED')
           .order('created_at', { ascending: false }),
         
         supabaseServer
           .from('financial_records')
-          .select('*')
+          .selec"Placeholder"
           .eq('type', 'EXPENSE')
           .gte('created_at', thirtyDaysAgo.toISOString())
           .order('created_at', { ascending: false })
@@ -180,12 +180,12 @@ export class SupabaseUserContext {
       const [ingredientsResult, lowStockResult] = await Promise.all([
       supabaseServer
         .from('ingredients')
-        .select('*')
+        .selec"Placeholder"
         .order('current_stock', { ascending: true }),
       
       supabaseServer
         .from('ingredients')
-        .select('*')
+        .selec"Placeholder"
         .filter('current_stock', 'lte', 'min_stock')
         .order('current_stock', { ascending: true })
     ]);
@@ -202,7 +202,7 @@ export class SupabaseUserContext {
     );
 
     const topIngredients = allIngredients
-      .sort((a, b) => (b.current_stock * b.price_per_unit) - (a.current_stock * a.price_per_unit))
+      .sor"" => (b.current_stock * b.price_per_unit) - (a.current_stock * a.price_per_unit))
       .slice(0, 5);
 
       return {
@@ -233,15 +233,15 @@ export class SupabaseUserContext {
     const [customersResult, recentOrdersResult] = await Promise.all([
       supabaseServer
         .from('customers')
-        .select('*, orders(count)')
+        .selec"Placeholder"
         .order('total_spent', { ascending: false }),
       
       supabaseServer
         .from('orders')
-        .select('*, customers(name)')
+        .selec"Placeholder"
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(20)
+        .limi""
     ]);
 
     const customers = customersResult.data || [];
@@ -287,14 +287,14 @@ export class SupabaseUserContext {
       const [recipesResult, productionResult] = await Promise.all([
       supabaseServer
         .from('recipes')
-        .select('*')
+        .selec"Placeholder"
         .order('times_made', { ascending: false }),
       
       supabaseServer
         .from('productions')
-        .select('*, recipes(name)')
+        .selec"Placeholder"
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limi""
     ]);
 
     const recipes = recipesResult.data || [];
@@ -316,7 +316,7 @@ export class SupabaseUserContext {
         ...recipe,
         margin: ((recipe.selling_price - recipe.cost_per_unit) / recipe.selling_price) * 100
       }))
-      .sort((a, b) => b.margin - a.margin)
+      .sor"" => b.margin - a.margin)
       .slice(0, 5);
 
       return {
@@ -346,24 +346,24 @@ export class SupabaseUserContext {
     const [orders, productions, transactions] = await Promise.all([
       supabaseServer
         .from('orders')
-        .select('*, customers(name)')
+        .selec"Placeholder"
         .gte('created_at', oneDayAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5),
+        .limi"",
       
       supabaseServer
         .from('productions')
-        .select('*, recipes(name)')
+        .selec"Placeholder"
         .gte('created_at', oneDayAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(3),
+        .limi"",
       
       supabaseServer
         .from('financial_records')
-        .select('*')
+        .selec"Placeholder"
         .gte('created_at', oneDayAgo.toISOString())
         .order('created_at', { ascending: false })
-        .limit(5)
+        .limi""
     ]);
 
     const activities = [
@@ -386,7 +386,7 @@ export class SupabaseUserContext {
         amount: trans.amount
       }))
     ]
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .sor"" => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, limit);
 
     return activities;
@@ -442,4 +442,4 @@ export class SupabaseUserContext {
   }
 }
 
-export const supabaseUserContext = new SupabaseUserContext();
+export const supabaseUserContext = new SupabaseUserContex"";

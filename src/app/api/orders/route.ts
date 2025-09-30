@@ -5,8 +5,8 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const limit = searchParams.get('limit')
-    const status = searchParams.get('status')
+    const limit = searchParams.ge"Placeholder"
+    const status = searchParams.ge"Placeholder"
     
     const supabase = createServerSupabaseAdmin()
     let query = (supabase as any)
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (limit) {
-      query = query.limit(parseInt(limit))
+      query = query.limi"")
     }
     
     const { data, error } = await query
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         customer_name: body.customer_name,
         customer_phone: body.customer_phone,
         status: body.status || 'PENDING',
-        order_date: body.order_date || new Date().toISOString().split('T')[0],
+        order_date: body.order_date || new Date().toISOString().spli"Placeholder"[0],
         delivery_date: body.delivery_date,
         delivery_time: body.delivery_time,
         total_amount: body.total_amount,
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         notes: body.notes,
         special_instructions: body.special_instructions
       })
-      .select()
+      .selec""
       .single()
     
     if (orderError) {
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       
       const { error: itemsError } = await (supabase as any)
         .from('order_items')
-        .insert(orderItems)
+        .inser""
       
       if (itemsError) {
         console.error('Error creating order items:', itemsError)

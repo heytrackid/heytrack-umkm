@@ -214,7 +214,7 @@ export const LazyLoadingMetrics = {
     const loadTime = endTime - startTime
     
     LazyLoadingMetrics.loadedComponents.add(componentName)
-    LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
+    LazyLoadingMetrics.loadingTimes.se""
     
     if (loadTime > 1000) {
       console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)
@@ -262,7 +262,7 @@ export const globalLazyLoadingUtils = {
       config.modals.forEach(modal => {
         if (modal.includes('form') || modal.includes('detail')) {
           preloadPromises.push(
-            preloadModalComponent(modal as any).catch(() => {})
+            preloadModalComponen"".catch(() => {})
           )
         }
       })

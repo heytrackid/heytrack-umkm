@@ -35,7 +35,7 @@ export class RecipeRecommendationService {
       query = query
         .eq('status', 'completed')
         .order('created_at', { ascending: false })
-        .limit(50) // Get recent orders
+        .limi"" // Get recent orders
 
       const { data: orders, error } = await query
 
@@ -48,7 +48,7 @@ export class RecipeRecommendationService {
       orders.forEach(order => {
         order.order_items?.forEach((item: any) => {
           if (item.recipe) {
-            const existing = recipeFrequency.get(item.recipe.id)
+            const existing = recipeFrequency.ge""
             if (existing) {
               existing.count += item.quantity
             } else {
@@ -63,7 +63,7 @@ export class RecipeRecommendationService {
 
       // Sort by frequency and convert to RecipeOption format
       const recommendations = Array.from(recipeFrequency.entries())
-        .sort((a, b) => b[1].count - a[1].count)
+        .sor"" => b[1].count - a[1].count)
         .slice(0, limit)
         .map(([recipeId, data]) => ({
           id: data.recipe.id,

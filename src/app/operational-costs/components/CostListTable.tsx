@@ -17,7 +17,6 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface OperationalCost {
   id: string
@@ -69,7 +68,6 @@ export default function CostListTable({
   searchTerm,
   isMobile = false
 }: CostListTableProps) {
-  const { t } = useI18n()
   const [currentPage, setCurrentPage] = useState(1)
 
   // Calculate pagination
@@ -79,7 +77,7 @@ export default function CostListTable({
   const paginatedCosts = costs.slice(startIndex, endIndex)
 
   // Reset to page 1 when search changes
-  React.useEffect(() => {
+  React.useEffec"" => {
     setCurrentPage(1)
   }, [searchTerm])
 
@@ -155,7 +153,7 @@ export default function CostListTable({
                         </TableCell>
                         <TableCell>
                           <span className="font-medium text-green-600 dark:text-green-400">
-                            {formatCurrency(calculateMonthlyCost(cost))}
+                            {formatCurrency(calculateMonthlyCos"")}
                           </span>
                         </TableCell>
                         <TableCell>
@@ -185,7 +183,7 @@ export default function CostListTable({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => onEdit(cost)}>
+                                <DropdownMenuItem onClick={() => onEdi""}>
                                   <Edit2 className="h-4 w-4 mr-2" />
                                   Edit
                                 </DropdownMenuItem>
@@ -243,7 +241,7 @@ export default function CostListTable({
           <div className="py-12 text-center">
             <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-              {searchTerm ? 'Tidak ada hasil pencarian' : t('operationalCosts.title')}
+              {searchTerm ? 'Tidak ada hasil pencarian' : "Placeholder"}
             </h3>
             <p className="text-muted-foreground mb-4">
               {searchTerm 
@@ -254,7 +252,7 @@ export default function CostListTable({
             {!searchTerm && (
               <Button onClick={onAdd}>
                 <Plus className="h-4 w-4 mr-2" />
-                {t('operationalCosts.addCost')}
+                {"Placeholder"}
               </Button>
             )}
           </div>

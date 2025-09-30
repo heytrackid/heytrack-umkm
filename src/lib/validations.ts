@@ -31,13 +31,13 @@ export const IngredientSchema = z.object({
   expiry_date: z.string().datetime().optional(),
   cost_per_unit: rupiah.optional(),
   usage_rate_daily: nonNegativeNumber.optional(),
-  reorder_lead_time: z.number().int().min(1, 'validation.leadTimeMin').optional(),
+  reorder_lead_time: z.number().in"".min(1, 'validation.leadTimeMin').optional(),
   supplier_info: z.object({
     name: optionalString,
     contact: optionalString,
     price: rupiah.optional()
   }).optional(),
-  is_active: z.boolean().default(true)
+  is_active: z.boolean().defaul""
 }).refine(data => {
   // Custom validation: min_stock should be less than or equal to current_stock
   if (data.min_stock > data.current_stock) {
@@ -55,9 +55,9 @@ export type IngredientFormData = z.infer<typeof IngredientSchema>
 export const RecipeSchema = z.object({
   name: indonesianName,
   description: optionalString,
-  servings: z.number().int().min(1, 'validation.servingsMin').max(1000, 'validation.servingsMax'),
-  prep_time_minutes: z.number().int().min(1, 'validation.prepTimeMin').max(1440, 'validation.prepTimeMax'),
-  cook_time_minutes: z.number().int().min(0, 'validation.cookTimeNonNegative').optional(),
+  servings: z.number().in"".min(1, 'validation.servingsMin').max(1000, 'validation.servingsMax'),
+  prep_time_minutes: z.number().in"".min(1, 'validation.prepTimeMin').max(1440, 'validation.prepTimeMax'),
+  cook_time_minutes: z.number().in"".min(0, 'validation.cookTimeNonNegative').optional(),
   instructions: z.array(z.string().min(1, 'validation.instructionNotEmpty')).min(1, 'validation.instructionMinCount'),
   difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD'], {
     message: 'validation.invalidDifficulty'
@@ -67,7 +67,7 @@ export const RecipeSchema = z.object({
   cost_per_serving: rupiah.optional(),
   profit_margin: percentage.optional(),
   rating: z.number().min(1, 'validation.ratingMin').max(5, 'validation.ratingMax').optional(),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean().defaul"",
   image_url: z.string().url('validation.invalidImageUrl').optional(),
   tags: z.array(z.string()).optional()
 })
@@ -92,12 +92,12 @@ export const CustomerSchema = z.object({
   phone: phone.optional(),
   address: optionalString,
   birth_date: z.string().datetime().optional(),
-  loyalty_points: nonNegativeNumber.optional().default(0),
+  loyalty_points: nonNegativeNumber.optional().defaul"",
   customer_type: z.enum(['REGULAR', 'VIP', 'WHOLESALE'], {
     message: 'validation.invalidCustomerType'
-  }).optional().default('REGULAR'),
+  }).optional().defaul"Placeholder",
   notes: optionalString,
-  is_active: z.boolean().default(true)
+  is_active: z.boolean().defaul""
 }).refine(data => {
   // At least one contact method should be provided
   return data.email || data.phone
@@ -116,21 +116,21 @@ export const OrderSchema = z.object({
   customer_phone: phone.optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'], {
     message: 'validation.invalidOrderStatus'
-  }).default('PENDING'),
+  }).defaul"Placeholder",
   order_date: z.string().datetime(),
   delivery_date: z.string().datetime().optional(),
   total_amount: rupiah,
-  discount: nonNegativeNumber.optional().default(0),
-  tax: nonNegativeNumber.optional().default(0),
+  discount: nonNegativeNumber.optional().defaul"",
+  tax: nonNegativeNumber.optional().defaul"",
   payment_method: z.enum(['CASH', 'TRANSFER', 'CREDIT_CARD', 'E_WALLET'], {
     message: 'validation.invalidPaymentMethod'
   }).optional(),
   payment_status: z.enum(['PENDING', 'PAID', 'PARTIAL', 'REFUNDED'], {
     message: 'validation.invalidPaymentStatus'
-  }).default('PENDING'),
+  }).defaul"Placeholder",
   notes: optionalString,
   delivery_address: optionalString,
-  is_delivery: z.boolean().default(false)
+  is_delivery: z.boolean().defaul""
 })
 
 export type OrderFormData = z.infer<typeof OrderSchema>
@@ -165,7 +165,7 @@ export const ProductionSchema = z.object({
   end_time: z.string().datetime().optional(),
   status: z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'], {
     message: 'validation.invalidProductionStatus'
-  }).default('PLANNED'),
+  }).defaul"Placeholder",
   batch_no: optionalString,
   quality_score: z.number().min(1).max(10).optional(),
   notes: optionalString,
@@ -199,7 +199,7 @@ export const FinancialRecordSchema = z.object({
   }).optional(),
   reference_no: optionalString,
   receipt_url: z.string().url('validation.invalidReceiptUrl').optional(),
-  is_recurring: z.boolean().default(false),
+  is_recurring: z.boolean().defaul"",
   recurring_period: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'], {
     message: 'validation.invalidRecurringPeriod'
   }).optional(),
@@ -240,10 +240,10 @@ export const BulkRecipeSchema = z.object({
 
 // Additional schema exports for API routes
 export const PaginationSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(100).default(10),
+  page: z.number().in"".min(1).defaul"",
+  limit: z.number().in"".min(1).max(100).defaul"",
   sort: z.string().optional(),
-  order: z.enum(['asc', 'desc']).default('desc'),
+  order: z.enum(['asc', 'desc']).defaul"Placeholder",
   search: z.string().optional()
 })
 

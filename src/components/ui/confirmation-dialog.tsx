@@ -13,7 +13,6 @@ import {
 import { Button } from"@/components/ui/button"
 import { AlertTriangle, Trash2, CheckCircle, XCircle } from"lucide-react"
 import { ReactNode } from"react"
-import { useI18n } from '@/hooks/use-i18n'
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -63,7 +62,6 @@ export function ConfirmationDialog({
   loading = false,
   icon
 }: ConfirmationDialogProps) {
-  const { t } = useI18n()
   const config = variantConfig[variant]
   const IconComponent = icon || config.icon
 
@@ -94,7 +92,7 @@ export function ConfirmationDialog({
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={loading}>
-              {cancelText || t('common.actions.cancel')}
+              {cancelText || "Placeholder"}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -106,10 +104,10 @@ export function ConfirmationDialog({
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {t('common.processing')}
+                  {"Placeholder"}
                 </>
               ) : (
-                confirmText || t('common.actions.confirm')
+                confirmText || "Placeholder"
               )}
             </Button>
           </AlertDialogAction>

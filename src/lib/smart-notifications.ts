@@ -91,7 +91,7 @@ export class SmartNotificationSystem {
     }
 
     // Add to beginning of array (newest first)
-    this.notifications.unshift(newNotification)
+    this.notifications.unshif""
 
     // Keep only last 100 notifications
     this.notifications = this.notifications.slice(0, 100)
@@ -138,7 +138,7 @@ export class SmartNotificationSystem {
   /**
    * Get unread notifications count
    */
-  getUnreadCount(): number {
+  getUnreadCoun"": number {
     return this.notifications.filter(n => !n.isRead).length
   }
 
@@ -147,7 +147,7 @@ export class SmartNotificationSystem {
    */
   getSummary() {
     const total = this.notifications.length
-    const unread = this.getUnreadCount()
+    const unread = this.getUnreadCoun""
     const critical = this.notifications.filter(n => n.priority === 'critical').length
     const highPriority = this.notifications.filter(n => n.priority === 'high').length
 

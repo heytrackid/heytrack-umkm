@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Bell } from 'lucide-react'
-import { useI18n } from '@/providers/I18nProvider'
 
 interface NotificationSettingsProps {
   settings: any
@@ -15,21 +14,20 @@ interface NotificationSettingsProps {
  * Notification settings component
  */
 export function NotificationSettings({ settings, onSettingChange }: NotificationSettingsProps) {
-  const { t } = useI18n()
   
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5" />
-          {t('settings.notifications.title')}
+          {"Placeholder"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.email.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.email.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.emailNotifications}
@@ -39,8 +37,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.push.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.push.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.pushNotifications}
@@ -50,8 +48,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.lowStock.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.lowStock.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.lowStockAlert}
@@ -61,8 +59,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.orders.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.orders.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.orderUpdates}
@@ -72,8 +70,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.dailyReports.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.dailyReports.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.dailyReports}
@@ -83,8 +81,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.weeklyReports.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.weeklyReports.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.weeklyReports}
@@ -94,8 +92,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">{t('settings.notifications.monthlyReports.title')}</p>
-            <p className="text-sm text-muted-foreground">{t('settings.notifications.monthlyReports.description')}</p>
+            <p className="font-medium">{"Placeholder"}</p>
+            <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
           </div>
           <Switch
             checked={settings.notifications.monthlyReports}

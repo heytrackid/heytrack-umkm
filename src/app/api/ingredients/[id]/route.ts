@@ -27,7 +27,7 @@ export async function GET(
     const supabase = createServerSupabaseAdmin()
     const { data, error } = await (supabase as any)
       .from('ingredients')
-      .select('*')
+      .selec"Placeholder"
       .eq('id', id)
       .single()
 
@@ -68,7 +68,7 @@ export async function PUT(
           .from('ingredients')
           .update(validatedData)
           .eq('id', id)
-          .select()
+          .selec""
           .single()
 
         if (error) {
@@ -105,7 +105,7 @@ export async function DELETE(
     // Check if ingredient exists
     const { data: existing } = await (supabase as any)
       .from('ingredients')
-      .select('id')
+      .selec"Placeholder"
       .eq('id', id)
       .single()
 
@@ -116,9 +116,9 @@ export async function DELETE(
     // Check if ingredient is used in recipes
     const { data: recipeIngredients } = await (supabase as any)
       .from('recipe_ingredients')
-      .select('id')
+      .selec"Placeholder"
       .eq('ingredient_id', id)
-      .limit(1)
+      .limi""
 
     if (recipeIngredients && recipeIngredients.length > 0) {
       return createErrorResponse(

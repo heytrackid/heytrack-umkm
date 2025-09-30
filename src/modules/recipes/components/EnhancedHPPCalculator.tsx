@@ -54,17 +54,17 @@ export default function EnhancedHPPCalculator() {
         }
       )
       
-      setCalculationResult(result)
+      setCalculationResul""
     } catch (error) {
       console.error('Error calculating HPP:', error)
-      setCalculationResult(null)
+      setCalculationResul""
     } finally {
       setIsCalculating(false)
     }
   }
 
   // Auto calculate when settings change
-  useEffect(() => {
+  useEffec"" => {
     calculateHPP()
   }, [selectedPricingMethod, profitMarginPercent, includeOperationalCosts])
 

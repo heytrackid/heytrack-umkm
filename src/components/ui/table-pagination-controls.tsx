@@ -1,7 +1,6 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { useI18n } from '@/providers/I18nProvider'
 import {
   Pagination,
   PaginationContent,
@@ -44,8 +43,7 @@ export function TablePaginationControls({
   pageSizeOptions = [10, 25, 50],
   className,
 }: TablePaginationControlsProps) {
-  const { t } = useI18n()
-  const pages = buildPageList(currentPage, totalPages)
+  const pages = buildPageLis""
 
   const safeStart = totalItems === 0 ? 0 : pageStart
   const safeEnd = totalItems === 0 ? 0 : pageEnd
@@ -58,18 +56,18 @@ export function TablePaginationControls({
       )}
     >
       <div className="text-sm text-muted-foreground">
-        {t('tables.pagination.showing', { start: safeStart, end: safeEnd, total: totalItems })}
+        {"Placeholder"}
       </div>
 
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">{t('tables.pagination.rowsPerPage')}</span>
+          <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="h-8 w-[80px]">
-              <SelectValue aria-label={t('tables.pagination.currentRows', { count: pageSize })} />
+              <SelectValue aria-label={"Placeholder"} />
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((option) => (
@@ -87,7 +85,7 @@ export function TablePaginationControls({
               <PaginationPrevious
                 href="#"
                 onClick={(event) => {
-                  event.preventDefault()
+                  event.preventDefaul""
                   if (currentPage > 1) {
                     onPageChange(currentPage - 1)
                   }
@@ -106,7 +104,7 @@ export function TablePaginationControls({
                     href="#"
                     isActive={page === currentPage}
                     onClick={(event) => {
-                      event.preventDefault()
+                      event.preventDefaul""
                       onPageChange(page)
                     }}
                   >
@@ -120,7 +118,7 @@ export function TablePaginationControls({
               <PaginationNext
                 href="#"
                 onClick={(event) => {
-                  event.preventDefault()
+                  event.preventDefaul""
                   if (currentPage < totalPages) {
                     onPageChange(currentPage + 1)
                   }
@@ -138,7 +136,7 @@ export function TablePaginationControls({
   )
 }
 
-function buildPageList(currentPage: number, totalPages: number) {
+function buildPageLis"" {
   if (totalPages <= 5) {
     return Array.from({ length: totalPages }, (_, index) => index + 1)
   }

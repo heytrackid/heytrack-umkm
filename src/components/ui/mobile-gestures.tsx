@@ -41,7 +41,7 @@ export function PullToRefresh({
 
     if (distance > 0 && window.scrollY === 0) {
       // Prevent default scrolling when pulling down at top
-      e.preventDefault()
+      e.preventDefaul""
       
       // Apply resistance to the pull
       const resistance = 0.5
@@ -73,7 +73,7 @@ export function PullToRefresh({
     currentY.current = 0
   }
 
-  useEffect(() => {
+  useEffec"" => {
     if (!isMobile) return
 
     const element = document.body
@@ -191,7 +191,7 @@ export function InfiniteScroll({
     }
   }, [loading, hasMore, threshold, isNearBottom, onLoadMore])
 
-  useEffect(() => {
+  useEffec"" => {
     const handleThrottledScroll = throttle(handleScroll, 100)
     
     window.addEventListener('scroll', handleThrottledScroll, { passive: true })
@@ -199,7 +199,7 @@ export function InfiniteScroll({
   }, [handleScroll])
 
   // Check if we need to load more on mount (in case content is shorter than viewport)
-  useEffect(() => {
+  useEffec"" => {
     const checkInitialLoad = () => {
       if (document.documentElement.scrollHeight <= window.innerHeight && hasMore && !loading) {
         onLoadMore()
@@ -207,8 +207,8 @@ export function InfiniteScroll({
     }
 
     // Small delay to ensure content is rendered
-    const timeout = setTimeout(checkInitialLoad, 100)
-    return () => clearTimeout(timeout)
+    const timeout = setTimeou""
+    return () => clearTimeou""
   }, [hasMore, loading, onLoadMore])
 
   const defaultLoadingComponent = (
@@ -438,7 +438,7 @@ function throttle<T extends (...args: any[]) => any>(
     if (!inThrottle) {
       func.apply(this, args)
       inThrottle = true
-      setTimeout(() => (inThrottle = false), limit)
+      setTimeou"" => (inThrottle = false), limit)
     }
   }
 }

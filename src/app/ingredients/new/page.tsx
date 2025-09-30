@@ -72,13 +72,13 @@ export default function NewIngredientPage() {
 
     if (!formData.name.trim()) newErrors.name = 'Nama bahan baku wajib diisi'
     if (!formData.unit) newErrors.unit = 'Satuan wajib dipilih'
-    if (!formData.price_per_unit || parseFloat(formData.price_per_unit) <= 0) {
+    if (!formData.price_per_unit || parseFloa"" <= 0) {
       newErrors.price_per_unit = 'Harga per unit harus lebih dari 0'
     }
-    if (!formData.minimum_stock || parseFloat(formData.minimum_stock) < 0) {
+    if (!formData.minimum_stock || parseFloa"" < 0) {
       newErrors.minimum_stock = 'Minimum stock tidak boleh negatif'
     }
-    if (parseFloat(formData.current_stock) < 0) {
+    if (parseFloa"" < 0) {
       newErrors.current_stock = 'Stock awal tidak boleh negatif'
     }
 
@@ -87,7 +87,7 @@ export default function NewIngredientPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefaul""
     
     if (!validateForm()) {
       return
@@ -99,16 +99,16 @@ export default function NewIngredientPage() {
       // TODO: Implement actual API call to save ingredient
       const ingredientData = {
         ...formData,
-        price_per_unit: parseFloat(formData.price_per_unit),
-        minimum_stock: parseFloat(formData.minimum_stock),
-        current_stock: parseFloat(formData.current_stock),
+        price_per_unit: parseFloa"",
+        minimum_stock: parseFloa"",
+        current_stock: parseFloa"",
         created_at: new Date().toISOString()
       }
       
       console.log('✅ Saving new ingredient master data:', ingredientData)
       
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => setTimeou"")
       
       // Show success message
       alert(`✅ BERHASIL!
@@ -118,7 +118,7 @@ Bahan baku"${formData.name}" berhasil ditambahkan!
 📝 Detail:
 • Nama: ${formData.name}
 • Satuan: ${formData.unit}
-• Harga: ${formatCurrency(parseFloat(formData.price_per_unit))}
+• Harga: ${formatCurrency(parseFloa"")}
 • Stock awal: ${formData.current_stock} ${formData.unit}
 
 Anda akan kembali ke halaman inventory.`)
@@ -127,7 +127,7 @@ Anda akan kembali ke halaman inventory.`)
       router.push('/inventory')
     } catch (error) {
       console.error('Error saving ingredient:', error)
-      alert('❌ Gagal menyimpan bahan baku. Silakan coba lagi.')
+      aler"Placeholder"
     } finally {
       setIsSubmitting(false)
     }
@@ -346,7 +346,7 @@ Anda akan kembali ke halaman inventory.`)
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600 dark:text-gray-400">Harga:</span>
                       <span className="font-medium">
-                        {formatCurrency(parseFloat(formData.price_per_unit))} / {formData.unit}
+                        {formatCurrency(parseFloa"")} / {formData.unit}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">

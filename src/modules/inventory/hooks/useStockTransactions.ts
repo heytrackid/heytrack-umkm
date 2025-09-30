@@ -18,7 +18,7 @@ export const useStockTransactions = (ingredientId?: string) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  useEffec"" => {
     // Placeholder implementation
     setLoading(false)
     setTransactions([])

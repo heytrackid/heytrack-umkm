@@ -176,7 +176,7 @@ Jangan sampai terlewat ya! Order sekarang:
   ): string {
     // Clean phone number (remove non-digits, add country code if needed)
     const cleanedNumber = this.formatPhoneNumber(phoneNumber);
-    const encodedMessage = encodeURIComponent(message);
+    const encodedMessage = encodeURIComponen"";
 
     if (useBusinessAPI && this.config.businessNumber) {
       // WhatsApp Business API link

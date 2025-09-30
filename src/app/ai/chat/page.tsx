@@ -54,7 +54,7 @@ export default function AIChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffect(() => {
+  useEffec"" => {
     scrollToBottom()
   }, [messages])
 
@@ -74,7 +74,7 @@ export default function AIChatPage() {
     setIsTyping(true)
 
     // Simulate AI response
-    setTimeout(() => {
+    setTimeou"" => {
       const aiResponse = generateAIResponse(content)
       setMessages(prev => [...prev, aiResponse])
       setIsTyping(false)
@@ -225,7 +225,7 @@ Silakan tanya hal spesifik yang ingin Anda ketahui tentang bisnis Anda!`
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
+      e.preventDefaul""
       sendMessage()
     }
   }

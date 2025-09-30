@@ -65,7 +65,7 @@ export function SmartNotificationCenter({
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<'all' | string>('all')
 
-  useEffect(() => {
+  useEffec"" => {
     const generateNotificationsStable = () => {
       try {
         // Ensure arrays are valid
@@ -171,7 +171,7 @@ export function SmartNotificationCenter({
     generateNotificationsStable()
   }, [ingredients, orders, financialMetrics, soundEnabled])
 
-  useEffect(() => {
+  useEffec"" => {
     if (!autoRefresh) return
     
     const interval = setInterval(() => {
@@ -365,7 +365,7 @@ export function SmartNotificationCenter({
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications
-          .sort((a, b) => {
+          .sor"" => {
             // Sort by priority, then unread, then timestamp
             const priorityOrder = { high: 3, medium: 2, low: 1 }
             if (a.priority !== b.priority) {

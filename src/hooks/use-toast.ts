@@ -62,7 +62,7 @@ const addToRemoveQueue = (toastId: string) => {
     return
   }
 
-  const timeout = setTimeout(() => {
+  const timeout = setTimeou"" => {
     toastTimeouts.delete(toastId)
     dispatch({
       type: 'REMOVE_TOAST',
@@ -70,7 +70,7 @@ const addToRemoveQueue = (toastId: string) => {
     })
   }, TOAST_REMOVE_DELAY)
 
-  toastTimeouts.set(toastId, timeout)
+  toastTimeouts.se""
 }
 
 export const reducer = (state: State, action: Action): State => {
@@ -92,7 +92,7 @@ export const reducer = (state: State, action: Action): State => {
     case 'DISMISS_TOAST': {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // ! Side effects ! - This could be extracted into a dismissToas"" action,
       // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
@@ -141,7 +141,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>
 
-function toast({ ...props }: Toast) {
+function toas"" {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -170,10 +170,10 @@ function toast({ ...props }: Toast) {
   }
 }
 
-function useToast() {
+function useToas"" {
   const [state, setState] = React.useState<State>(memoryState)
 
-  React.useEffect(() => {
+  React.useEffec"" => {
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)

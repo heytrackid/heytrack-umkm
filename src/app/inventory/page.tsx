@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import the heavy inventory component
-const EnhancedInventoryPage = dynamic(() => import('@/modules/inventory/components/EnhancedInventoryPage'), {
+const EnhancedInventoryPage = dynamic(() => impor"Placeholder", {
   loading: () => (
     <div className="space-y-6 p-6">
       {/* Header skeleton */}
@@ -74,9 +74,9 @@ async function fetchInitialIngredients() {
     const admin = createServerSupabaseAdmin()
     const { data, error} = await (admin as any)
       .from('ingredients')
-      .select('id,name,unit,price_per_unit,current_stock,minimum_stock')
+      .selec"Placeholder"
       .order('name', { ascending: true })
-      .limit(50)
+      .limi""
     if (error) throw error
     return data || []
   } catch {

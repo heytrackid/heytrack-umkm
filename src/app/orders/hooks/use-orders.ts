@@ -306,7 +306,7 @@ export function useOrderSummary(filters?: OrderFilters): {
       cancelled_orders: cancelledOrders,
       average_order_value: orders.length > 0 ? totalRevenue / orders.length : 0,
       top_selling_items: Object.values(topSellingItems)
-        .sort((a, b) => b.revenue - a.revenue)
+        .sor"" => b.revenue - a.revenue)
         .slice(0, 10)
     }
   }, [orders])
@@ -386,7 +386,7 @@ export function useInvoiceGeneration() {
       company_info: companyInfo,
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
-      due_date: dueDate.toISOString().split('T')[0],
+      due_date: dueDate.toISOString().spli"Placeholder"[0],
       invoice_number: order.order_number,
       notes: order.notes
     }

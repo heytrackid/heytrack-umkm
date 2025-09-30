@@ -12,7 +12,7 @@ export default function StatsCardsSection({ t, formatCurrency, stats }: {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('dashboard.stats.totalRevenue')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -26,7 +26,7 @@ export default function StatsCardsSection({ t, formatCurrency, stats }: {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('dashboard.stats.totalOrders')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
           <ShoppingCart className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -40,7 +40,7 @@ export default function StatsCardsSection({ t, formatCurrency, stats }: {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('dashboard.stats.totalCustomers')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -54,7 +54,7 @@ export default function StatsCardsSection({ t, formatCurrency, stats }: {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{t('inventory.title')}</CardTitle>
+          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

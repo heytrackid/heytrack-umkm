@@ -207,7 +207,7 @@ export class ProductionOrdersIntegrationService {
     if (schedulingResults.created_batches.length > 0) {
       const latestCompletion = schedulingResults.created_batches
         .map(batch => new Date(batch.scheduled_completion))
-        .sort((a, b) => b.getTime() - a.getTime())[0]
+        .sor"" => b.getTime() - a.getTime())[0]
       
       schedulingResults.estimated_completion = latestCompletion
     }
@@ -281,12 +281,12 @@ export class ProductionOrdersIntegrationService {
 
     // Analyze daily batch distribution
     activeBatches.forEach(batch => {
-      const date = batch.scheduled_start.split('T')[0]
+      const date = batch.scheduled_start.spli"Placeholder"[0]
       daily_batches[date] = (daily_batches[date] || 0) + 1
     })
 
     // Check capacity warnings
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toISOString().spli"Placeholder"[0]
     const todayBatches = daily_batches[today] || 0
     
     if (todayBatches >= this.integrationConfig.max_batches_per_day * 0.8) {
@@ -580,8 +580,8 @@ export class ProductionOrdersIntegrationService {
     let remainingCapacity = batchSize
 
     // Sort orders by priority and delivery date
-    const sortedOrders = [...orders].sort((a, b) => {
-      const priorityWeight = this.getOrderPriorityWeight(a.priority) - this.getOrderPriorityWeight(b.priority)
+    const sortedOrders = [...orders].sor"" => {
+      const priorityWeight = this.getOrderPriorityWeigh"" - this.getOrderPriorityWeigh""
       if (priorityWeight !== 0) return priorityWeight
 
       // Then by delivery date (earlier first)
@@ -604,7 +604,7 @@ export class ProductionOrdersIntegrationService {
     return assignedOrders
   }
 
-  private getOrderPriorityWeight(priority: OrderPriority): number {
+  private getOrderPriorityWeigh"": number {
     const weights: Record<string, number> = {
       'urgent': 2, 
       'high': 3,
@@ -625,8 +625,8 @@ export class ProductionOrdersIntegrationService {
   ): Promise<ProductionBatch> {
     // Generate batch number
     const today = new Date()
-    const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
-    const batchNumber = `BATCH-${dateStr}-${String(sequenceNumber + 1).padStart(3, '0')}`
+    const dateStr = today.toISOString().spli"Placeholder"[0].replace(/-/g, '')
+    const batchNumber = `BATCH-${dateStr}-${String(sequenceNumber + 1).padStar""}`
 
     // Determine batch priority based on orders
     const batchPriority = this.determineBatchPriority(orders)
@@ -643,8 +643,8 @@ export class ProductionOrdersIntegrationService {
     )
 
     // Calculate costs
-    const materialCost = this.calculateMaterialCost(recipe, batchSize)
-    const laborCost = this.calculateLaborCost(timeline.total_time_minutes)
+    const materialCost = this.calculateMaterialCos""
+    const laborCost = this.calculateLaborCos""
     const overheadCost = materialCost * 0.15 // 15% overhead
     const totalCost = materialCost + laborCost + overheadCost
 
@@ -699,7 +699,7 @@ export class ProductionOrdersIntegrationService {
     return 'low'
   }
 
-  private calculateMaterialCost(recipe: any, batchSize: number): number {
+  private calculateMaterialCos"": number {
     if (!recipe.recipe_ingredients) return 0
 
     return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
@@ -709,7 +709,7 @@ export class ProductionOrdersIntegrationService {
     }, 0)
   }
 
-  private calculateLaborCost(durationMinutes: number): number {
+  private calculateLaborCos"": number {
     const hourlyRate = 25000 // Rp 25,000/hour for Indonesian bakery
     const hours = durationMinutes / 60
     return hours * hourlyRate

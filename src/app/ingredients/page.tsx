@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 
 // Dynamically import the heavy CRUD component
-const IngredientsCRUD = dynamic(() => import('@/components/crud/ingredients-crud').then(m => ({ default: m.IngredientsCRUD })), {
+const IngredientsCRUD = dynamic(() => impor"Placeholder".then(m => ({ default: m.IngredientsCRUD })), {
   loading: () => (
     <Card>
       <CardHeader>
@@ -64,9 +64,9 @@ async function fetchInitialIngredients() {
     const admin = createServerSupabaseAdmin()
     const { data, error } = await (admin as any)
       .from('ingredients')
-      .select('id,name,unit,price_per_unit,current_stock,minimum_stock,category')
+      .selec"Placeholder"
       .order('name', { ascending: true })
-      .limit(50)
+      .limi""
     if (error) throw error
     return data || []
   } catch {

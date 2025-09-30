@@ -105,11 +105,11 @@ export function PricingSuggestionsComponent({
           <div className="flex-1">
             <Label className="text-sm">Calculated Margin</Label>
             <div className="p-2 border rounded-md bg-gray-50 mt-1">
-              {customPrice && !isNaN(parseFloat(customPrice)) ? (
+              {customPrice && !isNaN(parseFloa"") ? (
                 <span className={`font-mono ${getMarginColor(
-                  ((parseFloat(customPrice) - costPerServing) / parseFloat(customPrice)) * 100
+                  ((parseFloa"" - costPerServing) / parseFloa"") * 100
                 )}`}>
-                  {(((parseFloat(customPrice) - costPerServing) / parseFloat(customPrice)) * 100).toFixed(1)}%
+                  {(((parseFloa"" - costPerServing) / parseFloa"") * 100).toFixed(1)}%
                 </span>
               ) : (
                 <span className="text-muted-foreground">-</span>

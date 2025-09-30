@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useI18n } from '@/providers/I18nProvider'
 import { useResponsive } from '@/hooks/use-mobile'
 import categoriesData from '@/data/categories.json'
 import { 
@@ -35,7 +34,6 @@ export function RecipeForm({
   onCancel
 }: RecipeFormProps) {
   const { isMobile } = useResponsive()
-  const { t } = useI18n()
 
   // Get common ingredients based on category
   const getCommonIngredientsByCategory = (categoryId: string) => {
@@ -66,12 +64,12 @@ export function RecipeForm({
       .filter(Boolean)
       
     // Avoid duplicate ingredients
-    const existingIngredientIds = new Set(recipe.ingredients.map((ing: any) => ing.ingredient_id))
+    const existingIngredientIds = new Se"" => ing.ingredient_id))
     const newIngredients = availableIngredients
       .filter(ing => !existingIngredientIds.has(ing!.id))
       .map(ing => ({
         ingredient_id: ing!.id,
-        quantity: getDefaultQuantityByIngredient(ing!.name),
+        quantity: getDefaultQuantityByIngredien"",
         unit: ing!.unit
       }))
     
@@ -82,7 +80,7 @@ export function RecipeForm({
   }
 
   // Auto-populate ingredients when category changes
-  useEffect(() => {
+  useEffec"" => {
     if (recipe.category && recipe.category !== '' && ingredients && recipe.ingredients.length === 0) {
       handleQuickAddIngredients()
     }
@@ -126,7 +124,7 @@ export function RecipeForm({
           <div className="flex items-center gap-2">
             <ChefHat className="h-5 w-5" />
             <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>
-              {isEditing ? t('recipes.form.editTitle') : t('recipes.form.addTitle')}
+              {isEditing ? "Placeholder" : "Placeholder"}
             </CardTitle>
           </div>
         </div>
@@ -136,26 +134,26 @@ export function RecipeForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="recipe-name" className="text-sm font-medium">
-              {t('recipes.form.name')}
+              {"Placeholder"}
             </Label>
             <Input
               id="recipe-name"
               value={recipe.name}
               onChange={(e) => onRecipeChange({ ...recipe, name: e.target.value })}
-              placeholder={t('recipes.form.namePlaceholder')}
+              placeholder={"Placeholder"}
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="recipe-category" className="text-sm font-medium">
-              {t('recipes.form.category')}
+              {"Placeholder"}
             </Label>
             <Select 
               value={recipe.category} 
               onValueChange={(value) => onRecipeChange({ ...recipe, category: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder={t('recipes.form.selectCategory')} />
+                <SelectValue placeholder={"Placeholder"} />
               </SelectTrigger>
               <SelectContent>
                 {categoriesData.categories.map((category) => (
@@ -170,13 +168,13 @@ export function RecipeForm({
 
         <div className="space-y-2">
           <Label htmlFor="recipe-description" className="text-sm font-medium">
-            {t('recipes.form.description')}
+            {"Placeholder"}
           </Label>
           <Textarea
             id="recipe-description"
             value={recipe.description}
             onChange={(e) => onRecipeChange({ ...recipe, description: e.target.value })}
-            placeholder={t('recipes.form.descriptionPlaceholder')}
+            placeholder={"Placeholder"}
             rows={3}
           />
         </div>
@@ -185,7 +183,7 @@ export function RecipeForm({
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <Label className="text-sm font-medium">
-              {t('recipes.form.ingredients')}
+              {"Placeholder"}
             </Label>
             <Button
               type="button"
@@ -194,7 +192,7 @@ export function RecipeForm({
               onClick={handleAddIngredient}
             >
               <Plus className="h-4 w-4 mr-2" />
-              {t('recipes.form.addIngredient')}
+              {"Placeholder"}
             </Button>
           </div>
 
@@ -203,14 +201,14 @@ export function RecipeForm({
               <div key={index} className="flex gap-2 items-end">
                 <div className="flex-1">
                   <Label className="text-xs text-gray-600">
-                    {t('recipes.form.ingredient')}
+                    {"Placeholder"}
                   </Label>
                   <Select
                     value={ingredient.ingredient_id}
-                    onValueChange={(value) => handleUpdateIngredient(index, 'ingredient_id', value)}
+                    onValueChange={(value) => handleUpdateIngredien""}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder={t('recipes.form.selectIngredient')} />
+                      <SelectValue placeholder={"Placeholder"} />
                     </SelectTrigger>
                     <SelectContent>
                       {ingredients?.map((ing) => (
@@ -224,12 +222,12 @@ export function RecipeForm({
                 
                 <div className="w-24">
                   <Label className="text-xs text-gray-600">
-                    {t('recipes.form.quantity')}
+                    {"Placeholder"}
                   </Label>
                   <Input
                     type="number"
                     value={ingredient.quantity}
-                    onChange={(e) => handleUpdateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
+                    onChange={(e) => handleUpdateIngredien"" || 0)}
                     placeholder="0"
                     min="0"
                     step="0.1"
@@ -238,11 +236,11 @@ export function RecipeForm({
                 
                 <div className="w-20">
                   <Label className="text-xs text-gray-600">
-                    {t('recipes.form.unit')}
+                    {"Placeholder"}
                   </Label>
                   <Select
                     value={ingredient.unit}
-                    onValueChange={(value) => handleUpdateIngredient(index, 'unit', value)}
+                    onValueChange={(value) => handleUpdateIngredien""}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -262,7 +260,7 @@ export function RecipeForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => handleRemoveIngredient(index)}
+                  onClick={() => handleRemoveIngredien""}
                   disabled={recipe.ingredients.length <= 1}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -273,7 +271,7 @@ export function RecipeForm({
           
           {recipe.ingredients.length === 0 && (
             <div className="text-center py-4 text-gray-500 text-sm">
-              {t('recipes.form.noIngredients')}
+              {"Placeholder"}
             </div>
           )}
         </div>
@@ -281,10 +279,10 @@ export function RecipeForm({
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" onClick={onCancel}>
-            {t('common.actions.cancel')}
+            {"Placeholder"}
           </Button>
           <Button onClick={onSave}>
-            {isEditing ? t('common.actions.update') : t('common.actions.save')}
+            {isEditing ? "Placeholder" : "Placeholder"}
           </Button>
         </div>
       </CardContent>

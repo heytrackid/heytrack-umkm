@@ -97,7 +97,7 @@ export default function AutoSyncFinancialDashboard() {
     }
   }
 
-  useEffect(() => {
+  useEffec"" => {
     fetchAutoSyncData()
   }, [])
 

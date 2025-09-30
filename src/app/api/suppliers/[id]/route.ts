@@ -7,11 +7,11 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseClien"";
     
     const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
-      .select('*')
+      .selec"Placeholder"
       .eq('id', id)
       .single();
 
@@ -29,14 +29,14 @@ export async function PUT(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseClien"";
     const body = await request.json() as any;
 
     const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
       .update(body)
       .eq('id', id)
-      .select('*')
+      .selec"Placeholder"
       .single();
 
     if (error) throw error;
@@ -53,7 +53,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClient();
+    const supabase = createSupabaseClien"";
 
     const { error } = await (supabase as any)
       .from('suppliers')

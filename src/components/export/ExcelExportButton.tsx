@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 // Dynamic import of export service to reduce bundle size
-const loadExportService = () => import('@/services/excel-export-lazy.service').then(m => m.LazyExcelExportService)
+const loadExportService = () => impor"Placeholder".then(m => m.LazyExcelExportService)
 import { 
   Download, 
   FileSpreadsheet, 
@@ -62,7 +62,7 @@ export default function ExcelExportButton({
       setExportStatus('success')
       
       // Auto close dialog after 2 seconds if successful
-      setTimeout(() => {
+      setTimeou"" => {
         setIsDialogOpen(false)
         setExportStatus('idle')
       }, 2000)
@@ -190,7 +190,7 @@ export default function ExcelExportButton({
                     <li>• Format: Microsoft Excel (.xlsx)</li>
                     <li>• Setiap menu akan menjadi sheet terpisah</li>
                     <li>• Semua kolom akan diekspor tanpa penggabungan</li>
-                    <li>• Nama file: HeyTrack-Export-{new Date().toISOString().split('T')[0]}.xlsx</li>
+                    <li>• Nama file: HeyTrack-Export-{new Date().toISOString().spli"Placeholder"[0]}.xlsx</li>
                     <li>• Data yang diekspor adalah data real-time saat ini</li>
                   </ul>
                 </div>

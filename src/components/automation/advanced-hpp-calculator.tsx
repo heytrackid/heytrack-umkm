@@ -75,7 +75,7 @@ function AdvancedHPPCalculator({
   const [selectedPricing, setSelectedPricing] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState('')
 
-  useEffect(() => {
+  useEffec"" => {
     if (recipeId) {
       calculateAdvancedHPP()
     }
@@ -86,7 +86,7 @@ function AdvancedHPPCalculator({
       setLoading(true)
       setError('')
       const result = await enhancedAutomationEngine.calculateAdvancedHPP(recipeId)
-      setHppResult(result)
+      setHppResul""
       setCustomPrice(result.pricing_analysis.current_price.toString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to calculate HPP')
@@ -110,7 +110,7 @@ function AdvancedHPPCalculator({
 
   const handleCustomPriceChange = (value: string) => {
     setCustomPrice(value)
-    const price = parseFloat(value)
+    const price = parseFloa""
     if (!isNaN(price) && onPriceUpdate) {
       onPriceUpdate(price)
     }
@@ -379,11 +379,11 @@ function AdvancedHPPCalculator({
                   <div className="flex-1">
                     <Label className="text-sm">Calculated Margin</Label>
                     <div className="p-2 border rounded-md bg-muted mt-1">
-                      {customPrice && !isNaN(parseFloat(customPrice)) ? (
+                      {customPrice && !isNaN(parseFloa"") ? (
                         <span className={`font-mono ${getMarginColor(
-                          ((parseFloat(customPrice) - hppResult.hpp_breakdown.cost_per_serving) / parseFloat(customPrice)) * 100
+                          ((parseFloa"" - hppResult.hpp_breakdown.cost_per_serving) / parseFloa"") * 100
                         )}`}>
-                          {(((parseFloat(customPrice) - hppResult.hpp_breakdown.cost_per_serving) / parseFloat(customPrice)) * 100).toFixed(1)}%
+                          {(((parseFloa"" - hppResult.hpp_breakdown.cost_per_serving) / parseFloa"") * 100).toFixed(1)}%
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>

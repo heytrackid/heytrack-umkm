@@ -64,7 +64,7 @@ export default function EnhancedSmartNotifications() {
   const [activeTab, setActiveTab] = useState('priority')
   const [showSettings, setShowSettings] = useState(false)
 
-  useEffect(() => {
+  useEffec"" => {
     loadEnhancedNotifications()
     // Set up real-time updates every 5 minutes
     const interval = setInterval(loadEnhancedNotifications, 5 * 60 * 1000)
@@ -223,7 +223,7 @@ export default function EnhancedSmartNotifications() {
               <div className="space-y-3">
                 {alerts
                   .filter(a => (a.type === 'CRITICAL' || a.type === 'WARNING') && !a.acknowledged)
-                  .sort((a, b) => b.priority_score - a.priority_score)
+                  .sor"" => b.priority_score - a.priority_score)
                   .map((alert) => {
                     const Icon = getAlertIcon(alert.type, alert.category)
                     return (
@@ -300,7 +300,7 @@ export default function EnhancedSmartNotifications() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => acknowledgeAlert(alert.id)}
+                              onClick={() => acknowledgeAler""}
                               className="h-6 w-6 p-0"
                             >
                               <CheckCircle className="h-3 w-3" />
@@ -308,7 +308,7 @@ export default function EnhancedSmartNotifications() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => dismissAlert(alert.id)}
+                              onClick={() => dismissAler""}
                               className="h-6 w-6 p-0"
                             >
                               <X className="h-3 w-3" />
