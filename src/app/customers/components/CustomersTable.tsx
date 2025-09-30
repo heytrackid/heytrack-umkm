@@ -1,18 +1,11 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  Edit2,
-  Trash2,
-  MoreHorizontal,
-  DollarSign,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -27,68 +20,86 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { format } from 'date-fns'
+import {
+  Users,
+  Mail,
+  Phone,
+  Eye,
+  Edit2,
+  Trash2,
+  MoreHorizontal,
+  Plus,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react'
+import { useI18n } from '@/providers/I18nProvider'
 
-interface CostTableProps {
-  costs: any[]
-  onEdit: (cost: any) => void
-  onDelete: (cost: any) => void
+interface CustomersTableProps {
+  customers: any[]
+  selectedItems: string[]
+  onSelectItem: (itemId: string) => void
+  onSelectAll: () => void
+  onView: (customer: any) => void
+  onEdit: (customer: any) => void
+  onDelete: (customer: any) => void
+  onAddNew: () => void
   formatCurrency: (amount: number) => string
   isMobile?: boolean
 }
 
-const categoryIcons: Record<string, string> = {
-  rent: '🏢',
-  utilities: '💡',
-  salaries: '👥',
-  equipment: '🔧',
-  marketing: '📢',
-  packaging: '📦',
-  transportation: '🚗',
-  maintenance: '🛠️',
-  other: '📋'
-}
-
 /**
- * Cost Table Component
- * Extracted from operational-costs/page.tsx for code splitting
+ * Customers Table Component with Pagination
+ * Extracted from customers/page.tsx for code splitting
  */
-export default function CostTable({
-  costs,
+export default function CustomersTable({
+  customers,
+  selectedItems,
+  onSelectItem,
+  onSelectAll,
+  onView,
   onEdit,
   onDelete,
+  onAddNew,
   formatCurrency,
   isMobile = false
-}: CostTableProps) {
+}: CustomersTableProps) {
+  const { t } = useI18n()
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   
   // Calculate pagination
-  const totalItems = costs.length
+  const totalItems = customers.length
   const totalPages = Math.ceil(totalItems / pageSize)
   
   // Get paginated data
-  const paginatedCosts = useMemo(() => {
+  const paginatedCustomers = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     const endIndex = startIndex + pageSize
-    return costs.slice(startIndex, endIndex)
-  }, [costs, currentPage, pageSize])
+    return customers.slice(startIndex, endIndex)
+  }, [customers, currentPage, pageSize])
   
-  // Reset to page 1 when costs change
+  // Reset to page 1 when customers change
   useMemo(() => {
     setCurrentPage(1)
-  }, [costs.length])
-  
-  if (costs.length === 0) {
+  }, [customers.length])
+
+  if (customers.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium mb-2">No Costs Yet</h3>
+          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
+            {t('customers.empty.noCustomers')}
+          </h3>
           <p className="text-muted-foreground mb-4">
-            Start tracking your operational costs
+            {t('customers.empty.startAddingCustomers')}
           </p>
+          <Button onClick={onAddNew}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t('customers.empty.addFirstCustomer')}
+          </Button>
         </CardContent>
       </Card>
     )
@@ -97,65 +108,103 @@ export default function CostTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cost Records</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5" />
+          {t('customers.customerList')}
+        </CardTitle>
+        <p className="text-sm text-gray-600">
+          {t('customers.manageCustomerData')}
+        </p>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg overflow-hidden">
+        <div className="rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={selectedItems.length === customers.length && customers.length > 0}
+                    onCheckedChange={onSelectAll}
+                  />
+                </TableHead>
+                <TableHead>{t('customers.table.nameStatus')}</TableHead>
+                <TableHead>{t('customers.table.contact')}</TableHead>
+                <TableHead>{t('customers.table.totalSpending')}</TableHead>
+                <TableHead>{t('customers.table.totalOrders')}</TableHead>
+                <TableHead>{t('customers.table.lastOrder')}</TableHead>
+                <TableHead className="w-32">{t('customers.table.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedCosts.map((cost) => (
-                <TableRow key={cost.id}>
+              {paginatedCustomers.map((customer) => (
+                <TableRow key={customer.id} className="hover:bg-gray-50">
                   <TableCell>
-                    {format(new Date(cost.date), 'MMM dd, yyyy')}
+                    <Checkbox
+                      checked={selectedItems.includes(customer.id.toString())}
+                      onCheckedChange={() => onSelectItem(customer.id.toString())}
+                    />
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span>{categoryIcons[cost.category] || '📋'}</span>
-                      <span className="capitalize">{cost.category}</span>
+                    <div className="flex flex-col">
+                      <span className="font-semibold">{customer.name}</span>
+                      <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
+                        {customer.status === 'active' ? t('common.status.active') : t('common.status.inactive')}
+                      </Badge>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="max-w-xs truncate">{cost.description}</div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1 text-sm">
+                        <Mail className="h-3 w-3 text-gray-400" />
+                        <span className="truncate max-w-32">{customer.email}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm">
+                        <Phone className="h-3 w-3 text-gray-400" />
+                        <span>{customer.phone}</span>
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium text-red-600">
-                      {formatCurrency(cost.amount)}
+                    <span className="font-medium text-green-600">
+                      {formatCurrency(customer.totalSpent)}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="capitalize">
-                      {cost.payment_method}
-                    </Badge>
+                    <span className="font-medium">
+                      {customer.totalOrders}
+                    </span>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-2">
+                    <span className="text-sm text-gray-600">
+                      {customer.lastOrderDate}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onView(customer)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => onEdit(cost)}>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => onEdit(customer)}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            Edit
+                            {t('common.actions.edit')}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
-                            onClick={() => onDelete(cost)}
+                            onClick={() => onDelete(customer)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                            {t('common.actions.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -171,7 +220,7 @@ export default function CostTable({
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} biaya
+                  Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} pelanggan
                 </span>
               </div>
               

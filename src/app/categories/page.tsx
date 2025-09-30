@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   Plus, 
@@ -28,7 +29,9 @@ import {
   Home,
   MoreHorizontal,
   Search,
-  Eye
+  Eye,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -54,6 +57,11 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
+  
   const [newCategory, setNewCategory] = useState<Category>({
     id: '',
     name: '',
@@ -104,6 +112,22 @@ export default function CategoriesPage() {
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
+  
+  // Calculate pagination
+  const totalItems = filteredCategories.length
+  const totalPages = Math.ceil(totalItems / pageSize)
+  
+  // Get paginated data
+  const paginatedCategories = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    return filteredCategories.slice(startIndex, endIndex)
+  }, [filteredCategories, currentPage, pageSize])
+  
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1)
+  }, [filteredCategories.length])
 
   // Bulk action handlers
   const handleSelectAll = () => {
@@ -432,7 +456,7 @@ export default function CategoriesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCategories.map((category) => (
+                  {paginatedCategories.map((category) => (
                     <TableRow key={category.id} className="hover:bg-gray-50">
                       <TableCell>
                         <Checkbox
@@ -502,6 +526,62 @@ export default function CategoriesPage() {
                   ))}
                 </TableBody>
               </Table>
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} kategori
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-6">
+                    {/* Page Size Selector */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                      <Select value={pageSize.toString()} onValueChange={(value) => {
+                        setPageSize(Number(value))
+                        setCurrentPage(1)
+                      }}>
+                        <SelectTrigger className="w-20 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="10">10</SelectItem>
+                          <SelectItem value="20">20</SelectItem>
+                          <SelectItem value="50">50</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {/* Page Navigation */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      
+                      <span className="text-sm font-medium">
+                        Halaman {currentPage} dari {totalPages}
+                      </span>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="py-12 text-center">

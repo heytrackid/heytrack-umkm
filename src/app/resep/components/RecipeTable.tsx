@@ -1,11 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   Plus, 
   ChefHat, 
@@ -14,7 +15,9 @@ import {
   Eye,
   Calculator,
   MoreHorizontal,
-  Search
+  Search,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import {
   Table,
@@ -66,11 +69,31 @@ export default function RecipeTable({
 }: RecipeTableProps) {
   const { t } = useI18n()
   const { formatCurrency } = useSettings()
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
 
   const filteredRecipes = recipes.filter(recipe =>
     recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     recipe.category?.toLowerCase().includes(searchTerm.toLowerCase())
   )
+  
+  // Calculate pagination
+  const totalItems = filteredRecipes.length
+  const totalPages = Math.ceil(totalItems / pageSize)
+  
+  // Get paginated data
+  const paginatedRecipes = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    return filteredRecipes.slice(startIndex, endIndex)
+  }, [filteredRecipes, currentPage, pageSize])
+  
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1)
+  }, [filteredRecipes.length])
 
   return (
     <Card>
@@ -126,7 +149,7 @@ export default function RecipeTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecipes.map((recipe) => {
+                {paginatedRecipes.map((recipe) => {
                   const ingredientCount = recipe.recipe_ingredients?.length || 0
                   const hpp = recipe.recipe_ingredients?.reduce((sum: number, ri: any) => {
                     const ing = ri.ingredients
@@ -220,6 +243,63 @@ export default function RecipeTable({
                 })}
               </TableBody>
             </Table>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} resep
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-6">
+                  {/* Page Size Selector */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                    <Select value={pageSize.toString()} onValueChange={(value) => {
+                      setPageSize(Number(value))
+                      setCurrentPage(1)
+                    }}>
+                      <SelectTrigger className="w-20 h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Page Navigation */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <span className="text-sm font-medium">
+                      Halaman {currentPage} dari {totalPages}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="py-12 text-center">

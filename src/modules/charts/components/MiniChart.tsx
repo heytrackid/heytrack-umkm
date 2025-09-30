@@ -1,6 +1,7 @@
 'use client'
 
-import { LineChart, Line, BarChart, Bar, ResponsiveContainer } from 'recharts'
+import { lazy, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 
 interface MiniChartProps {
   data: any[]
@@ -11,18 +12,26 @@ interface MiniChartProps {
   className?: string
 }
 
-export default function MiniChart({
-  data,
-  type = 'line',
-  dataKey,
-  color = '#3b82f6',
-  height = 60,
-  className = ''
-}: MiniChartProps) {
+// Dynamically import Recharts to reduce initial bundle size
+const DynamicChart = dynamic(
+  () => import('./MiniChartCore'),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse">
+        <span className="text-xs text-gray-400">Loading chart...</span>
+      </div>
+    ),
+    ssr: false
+  }
+)
+
+export default function MiniChart(props: MiniChartProps) {
+  const { data, height = 60, className = '' } = props
+
   if (!data || data.length === 0) {
     return (
       <div 
-        className={`flex items-center justify-center bg-gray-100 rounded ${className}`}
+        className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded ${className}`}
         style={{ height }}
       >
         <span className="text-xs text-gray-400">No data</span>
@@ -32,24 +41,13 @@ export default function MiniChart({
 
   return (
     <div className={className} style={{ height }}>
-      <ResponsiveContainer width="100%" height="100%">
-        {type === 'line' ? (
-          <LineChart data={data}>
-            <Line
-              type="monotone"
-              dataKey={dataKey}
-              stroke={color}
-              strokeWidth={2}
-              dot={false}
-              activeDot={false}
-            />
-          </LineChart>
-        ) : (
-          <BarChart data={data}>
-            <Bar dataKey={dataKey} fill={color} />
-          </BarChart>
-        )}
-      </ResponsiveContainer>
+      <Suspense fallback={
+        <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse" style={{ height }}>
+          <span className="text-xs text-gray-400">Loading...</span>
+        </div>
+      }>
+        <DynamicChart {...props} />
+      </Suspense>
     </div>
   )
 }

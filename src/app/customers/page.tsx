@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
@@ -23,27 +24,23 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   Plus, 
   Users, 
   Search,
-  Phone,
-  Mail,
-  MapPin,
-  UserPlus,
   Edit2,
   Trash2,
-  RefreshCw,
-  MoreHorizontal,
-  Eye
+  RefreshCw
 } from 'lucide-react'
-import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useI18n } from '@/providers/I18nProvider'
+
+// Dynamically import the heavy table component
+const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
+  loading: () => <CustomersTableSkeleton rows={10} />,
+  ssr: false
+})
 export default function CustomersPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency, settings } = useSettings()
@@ -345,138 +342,18 @@ export default function CustomersPage() {
         {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
           <CustomersTableSkeleton rows={5} />
         ) : (
-          <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              {t('customers.customerList')}
-            </CardTitle>
-            <p className="text-sm text-gray-600">
-              {t('customers.manageCustomerData')}
-            </p>
-          </CardHeader>
-          <CardContent>
-            {filteredCustomers.length > 0 ? (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
-                        <Checkbox
-                          checked={selectedItems.length === filteredCustomers.length && filteredCustomers.length > 0}
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </TableHead>
-                      <TableHead>{t('customers.table.nameStatus')}</TableHead>
-                      <TableHead>{t('customers.table.contact')}</TableHead>
-                      <TableHead>{t('customers.table.totalSpending')}</TableHead>
-                      <TableHead>{t('customers.table.totalOrders')}</TableHead>
-                      <TableHead>{t('customers.table.lastOrder')}</TableHead>
-                      <TableHead className="w-32">{t('customers.table.actions')}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCustomers.map((customer) => (
-                      <TableRow key={customer.id} className="hover:bg-gray-50">
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedItems.includes(customer.id.toString())}
-                            onCheckedChange={() => handleSelectItem(customer.id.toString())}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-semibold">{customer.name}</span>
-                            <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
-                              {customer.status === 'active' ? t('common.status.active') : t('common.status.inactive')}
-                            </Badge>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1 text-sm">
-                              <Mail className="h-3 w-3 text-gray-400" />
-                              <span className="truncate max-w-32">{customer.email}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-sm">
-                              <Phone className="h-3 w-3 text-gray-400" />
-                              <span>{customer.phone}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium text-green-600">
-                            {formatCurrency(customer.totalSpent)}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-medium">
-                            {customer.totalOrders}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-sm text-gray-600">
-                            {customer.lastOrderDate}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewCustomer(customer)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleEditCustomer(customer)}>
-                                  <Edit2 className="h-4 w-4 mr-2" />
-                                  {t('common.actions.edit')}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="text-red-600"
-                                  onClick={() => handleDeleteCustomer(customer)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  {t('common.actions.delete')}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="py-12 text-center">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-                  {searchTerm ? t('customers.empty.noResults') : t('customers.empty.noCustomers')}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchTerm 
-                    ? t('customers.empty.tryDifferentKeyword')
-                    : t('customers.empty.startAddingCustomers')
-                  }
-                </p>
-                {!searchTerm && (
-                  <Button onClick={() => setCurrentView('add')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t('customers.empty.addFirstCustomer')}
-                  </Button>
-                )}
-              </div>
-            )}
-          </CardContent>
-          </Card>
+          <CustomersTable
+            customers={filteredCustomers}
+            selectedItems={selectedItems}
+            onSelectItem={handleSelectItem}
+            onSelectAll={handleSelectAll}
+            onView={handleViewCustomer}
+            onEdit={handleEditCustomer}
+            onDelete={handleDeleteCustomer}
+            onAddNew={() => setCurrentView('add')}
+            formatCurrency={formatCurrency}
+            isMobile={isMobile}
+          />
         )}
 
         {/* Info Card */}

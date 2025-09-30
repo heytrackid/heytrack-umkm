@@ -1,14 +1,16 @@
 'use client'
 
+import { useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { UMKMTooltip } from './UMKMTooltip'
 import { useCurrency } from '@/hooks/useCurrency'
-import { Calculator, Package, BookOpen, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
+import { Calculator, Package, BookOpen, MoreHorizontal, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface InventoryTableProps {
   ingredients: any[]
@@ -35,6 +37,40 @@ export function InventoryTable({
   getStockAlertLevel
 }: InventoryTableProps) {
   const { formatCurrency } = useCurrency()
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  
+  // Calculate pagination
+  const totalItems = ingredients.length
+  const totalPages = Math.ceil(totalItems / pageSize)
+  
+  // Get paginated data
+  const paginatedIngredients = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    return ingredients.slice(startIndex, endIndex)
+  }, [ingredients, currentPage, pageSize])
+  
+  // Reset to page 1 when filters change
+  useMemo(() => {
+    setCurrentPage(1)
+  }, [ingredients.length])
+  
+  // Pagination handlers
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1))
+  }
+  
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1))
+  }
+  
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(Number(value))
+    setCurrentPage(1) // Reset to first page when changing page size
+  }
   
   return (
     <Card>
@@ -78,7 +114,7 @@ export function InventoryTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {ingredients.map((ingredient) => {
+                {paginatedIngredients.map((ingredient) => {
                   const stockAlert = getStockAlertLevel(ingredient)
 
                   return (
@@ -150,6 +186,61 @@ export function InventoryTable({
                 })}
               </TableBody>
             </Table>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-4 border-t">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} bahan
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-6">
+                  {/* Page Size Selector */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                    <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                      <SelectTrigger className="w-20 h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="10">10</SelectItem>
+                        <SelectItem value="20">20</SelectItem>
+                        <SelectItem value="50">50</SelectItem>
+                        <SelectItem value="100">100</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Page Navigation */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <span className="text-sm font-medium">
+                      Halaman {currentPage} dari {totalPages}
+                    </span>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
