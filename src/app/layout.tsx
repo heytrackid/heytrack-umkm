@@ -2,7 +2,7 @@ import type { Metadata } from"next";
 import { Geist, Geist_Mono } from"next/font/google";
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
-import ErrorBoundary from '@/components/error/error-boundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
 import ChatbotFAB from '@/components/ai-chatbot/ChatbotFAB';
