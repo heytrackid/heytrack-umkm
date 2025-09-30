@@ -142,8 +142,8 @@ export default function CostFormView({
               <Input
                 type="number"
                 value={newCost.amount}
-                onChange={(e) => setNewCost }))}
-                placeholder={"Placeholder"}
+                onChange={(e) => setNewCost({...newCost, amount: parseFloat(e.target.value) || 0})}
+                placeholder="Masukkan nilai biaya"
               />
             </div>
             

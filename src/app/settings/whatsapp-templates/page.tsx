@@ -396,7 +396,7 @@ export default function WhatsAppTemplatesPage() {
                             </DropdownMenuItem>
                             
                             <DropdownMenuItem 
-                              onClick={() => handleToggleDefaul""}
+                              onClick={() => handleToggleDefault(template.id)}
                             >
                               {template.is_default ? (
                                 <>

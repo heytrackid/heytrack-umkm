@@ -202,7 +202,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElemen"Placeholder"
+    const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
     link.setAttribute('href', url)
     link.setAttribute('download', `data-${new Date().toISOString().split('T')[0]}.csv`)
@@ -393,7 +393,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                             variant="ghost"
                             size="sm"
                             className="h-auto p-0 font-medium"
-                            onClick={() => handleSor"")}
+                            onClick={() => handleSort(String(col.key))}
                           >
                             {col.header}
                             {sortBy === String(col.key) && (

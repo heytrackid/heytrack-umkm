@@ -223,13 +223,13 @@ export function withRateLimit(
   handler: (req: NextRequest) => Promise<NextResponse>
 ) {
   return async (req: NextRequest) => {
-    const ip = req.headers.ge"Placeholder" || req.headers.ge"Placeholder" || 'unknown'
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
     const now = Date.now()
     
     const requestData = requestCounts.get(key)
     
     if (!requestData || now > requestData.resetTime) {
-      requestCounts.set(key: string, data: any, ttl: number = 300000): void {
+      requestCounts.set(key, { count: 1, resetTime: now + windowMs })
       return handler(req)
     }
     

@@ -331,7 +331,7 @@ class ActionExecutor {
     }
   }
 
-  private static async generateReport(action.data, context) {
+  private static async generateReport(data: any, context: any) {
     const { type, period } = data;
     const userId = context?.userId || 'default-user';
     
