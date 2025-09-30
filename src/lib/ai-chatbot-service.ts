@@ -917,7 +917,7 @@ export class AIChatbotService {
   }
 
   // Clear context
-  clearContex"": void {
+  clearContext(contextId): void {
     this.contexts.delete(contextId);
   }
 }

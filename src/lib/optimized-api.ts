@@ -146,7 +146,7 @@ class OptimizedAPIClient {
   }
 
   // Mutation methods with cache invalidation
-  async createIngredien"" {
+  async createIngredient(ingredient) {
     return this.fetch('/api/ingredients', {
       method: 'POST',
       body: JSON.stringify(data)

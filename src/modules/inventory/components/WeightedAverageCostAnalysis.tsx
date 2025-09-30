@@ -158,7 +158,7 @@ export function WeightedAverageCostAnalysis({
                   {formatCurrency(pricingInsights.weightedAveragePrice)}
                 </p>
                 <p className={`text-sm ${priceDifferences.weighted > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercen""}
+                  {formatPercentage(priceDifferences.weighted)}
                 </p>
                 <Button
                   size="sm"
@@ -196,7 +196,7 @@ export function WeightedAverageCostAnalysis({
                   {formatCurrency(pricingInsights.fifoAveragePrice)}
                 </p>
                 <p className={`text-sm ${priceDifferences.fifo > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercen""}
+                  {formatPercentage(priceDifferences.weighted)}
                 </p>
                 <Button
                   size="sm"
@@ -235,7 +235,7 @@ export function WeightedAverageCostAnalysis({
                   {formatCurrency(pricingInsights.movingAveragePrice)}
                 </p>
                 <p className={`text-sm ${priceDifferences.moving > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercen""}
+                  {formatPercentage(priceDifferences.weighted)}
                 </p>
                 <Button
                   size="sm"
@@ -398,7 +398,7 @@ export function WeightedAverageCostAnalysis({
                       {Math.abs(priceDifferences.moving) > 5 ? 'Perlu Update' : 'Masih Wajar'}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                      Selisih: {formatPercen""}
+                      Selisih: {formatPercentage(priceDifferences.weighted)}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       Dari list price saat ini

@@ -61,7 +61,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
 
   const createIngredient = useCallback(async (ingredient: any) => {
     try {
-      await InventoryService.createIngredien""
+      await InventoryService.createIngredient(ingredient)
       refresh()
     } catch (err) {
       throw err

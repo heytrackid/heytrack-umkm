@@ -166,7 +166,7 @@ export function InventoryTable({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                              <DropdownMenuItem onClick={() => onEditIngredien""}>
+                              <DropdownMenuItem onClick={() => onEditIngredient(ingredient)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>

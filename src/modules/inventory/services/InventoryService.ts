@@ -105,7 +105,7 @@ export class InventoryService {
   /**
    * Create new ingredient (invalidate cache)
    */
-  static async createIngredien"": Promise<Ingredient> {
+  static async createIngredient(ingredient): Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
       .insert(data)
