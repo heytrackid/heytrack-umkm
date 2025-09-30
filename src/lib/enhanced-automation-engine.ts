@@ -13,7 +13,7 @@
  */
 
 import { supabase } from '@/lib/supabase'
-import { Database } from '@/types/database'
+import { Database } from '@/types'
 
 // Type definitions
 type Ingredient = Database['public']['Tables']['ingredients']['Row']

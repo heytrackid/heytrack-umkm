@@ -1,4 +1,4 @@
-import { Database } from '@/types/database'
+import { Database } from '@/types'
 
 // Database types
 export type Recipe = Database['public']['Tables']['recipes']['Row']

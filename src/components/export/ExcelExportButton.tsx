@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ExcelExportService } from '@/services/excel-export.service'
+// Dynamic import of export service to reduce bundle size
+const loadExportService = () => import('@/services/excel-export-lazy.service').then(m => m.LazyExcelExportService)
 import { 
   Download, 
   FileSpreadsheet, 
@@ -55,6 +56,8 @@ export default function ExcelExportButton({
     setExportStatus('idle')
 
     try {
+      // Dynamically load export service only when needed
+      const ExcelExportService = await loadExportService()
       await ExcelExportService.exportAllData()
       setExportStatus('success')
       

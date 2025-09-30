@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase, dbService } from '@/lib/supabase'
-import { Database } from '@/types/database'
+import { Database } from '@/types'
 
 type Tables = Database['public']['Tables']
 
@@ -16,7 +16,7 @@ export function useTable<T extends keyof Tables>(
     realtime?: boolean
   } = {}
 ) {
-  const [data, setData] = useState<Tables[T]['Row'][]>([])
+  const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -52,7 +52,7 @@ export function useTable<T extends keyof Tables>(
     }
   }
 
-  const insert = async (values: Tables[T]['Insert']) => {
+  const insert = async (values: any) => {
     try {
       const { data: result, error } = await supabase
         .from(tableName)
@@ -69,12 +69,12 @@ export function useTable<T extends keyof Tables>(
     }
   }
 
-  const update = async (id: string, values: Tables[T]['Update']) => {
+  const update = async (id: string, values: any) => {
     try {
       const { data: result, error } = await supabase
         .from(tableName)
         .update(values as any)
-        .eq('id', id)
+        .eq('id', id as any)
         .select()
         .single()
 
@@ -92,7 +92,7 @@ export function useTable<T extends keyof Tables>(
       const { error } = await supabase
         .from(tableName)
         .delete()
-        .eq('id', id)
+        .eq('id', id as any)
 
       if (error) throw error
       

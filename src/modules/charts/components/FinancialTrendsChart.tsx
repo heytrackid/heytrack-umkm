@@ -1,12 +1,25 @@
 'use client'
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from"recharts"
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from"@/components/ui/chart"
 import { formatCurrency } from '@/shared/utils/currency'
+import { Skeleton } from '@/components/ui/skeleton'
+
+// Dynamically import recharts components to reduce bundle size
+const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+})
+const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
+const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
+const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false })
 
 const financialData = [
   {

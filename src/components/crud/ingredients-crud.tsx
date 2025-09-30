@@ -8,7 +8,7 @@ import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog 
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
 import { useI18n } from '@/providers/I18nProvider';
 import { useSettings } from '@/contexts/settings-context';
-import { Database } from '@/types/database';
+import { Database } from '@/types';
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row'];
 type IngredientInsert = Database['public']['Tables']['ingredients']['Insert'];

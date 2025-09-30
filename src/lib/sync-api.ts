@@ -6,7 +6,7 @@ import type {
   SystemMetricInsert, 
   InventoryStockLog,
   InventoryStockLogInsert 
-} from '@/types/database'
+} from '@/types'
 
 // Sync Events API
 export const syncEventApi = {

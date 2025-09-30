@@ -25,7 +25,7 @@ import {
   TrendingUp
 } from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
-import { RecipeWithIngredients, Ingredient } from '@/types/database'
+import { RecipeWithIngredients, Ingredient } from '@/types'
 
 interface ProductionOrder {
   id: string

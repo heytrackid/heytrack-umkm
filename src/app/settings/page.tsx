@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { toast } from 'react-hot-toast'
+import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,7 +29,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Icons
 import { Settings, RotateCcw, Save } from 'lucide-react'
-import ExcelExportButton from '@/components/export/ExcelExportButton'
+// Dynamic import to reduce bundle size
+const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+  ssr: false,
+  loading: () => <div className="h-10 w-32 bg-gray-200 animate-pulse rounded" />
+})
 
 // Extracted components
 import { SettingsQuickLinks } from './components/SettingsQuickLinks'

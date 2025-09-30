@@ -6,7 +6,7 @@ import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { useFormValidation } from '@/hooks/useSupabaseCRUD';
-import { Database } from '@/types/database';
+import { Database } from '@/types';
 
 // Using generic types since suppliers might not be in the database schema yet
 type Supplier = {

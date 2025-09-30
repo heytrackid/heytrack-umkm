@@ -27,7 +27,7 @@ import {
   VolumeX
 } from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
-import { Ingredient } from '@/types/database'
+import { Ingredient } from '@/types'
 
 interface SmartNotification {
   id: string

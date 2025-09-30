@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createSupabaseClient } from '@/lib/supabase';
-import { Database } from '@/types/database';
+import { Database } from '@/types';
 import { useSupabaseData as useRealtimeData } from './useSupabaseData';
 
 type Tables = Database['public']['Tables'];

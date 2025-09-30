@@ -19,7 +19,7 @@ import {
   Zap
 } from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
-import { RecipeWithIngredients } from '@/types/database'
+import { RecipeWithIngredients } from '@/types'
 
 interface SmartPricingAssistantProps {
   recipe: RecipeWithIngredients

@@ -1,10 +1,9 @@
 'use client'
 
-import { createClient } from '@supabase/supabase-js'
-import { useMemo } from 'react'
-import type { Database } from '@/types/database'
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Database } from '@/types';
 
-export function useSupabaseClient() {
+export function useSupabaseClient(): SupabaseClient<Database> {
   // const { session } = useSession() // Disabled for development
 
   return useMemo(() => {

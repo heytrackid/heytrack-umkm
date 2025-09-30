@@ -27,7 +27,7 @@ import {
   Wallet
 } from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
-import { Ingredient } from '@/types/database'
+import { Ingredient } from '@/types'
 import { useCurrency } from '@/hooks/useCurrency'
 
 interface FinancialData {

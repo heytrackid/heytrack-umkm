@@ -1,7 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/database'
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types';
 import { validateInput, sanitizeSQL } from '@/lib/validation'
-// import { useSession } from '@clerk/nextjs' // Removed for development
 
 // Simple in-memory cache for server-side operations
 class SimpleCache {

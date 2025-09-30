@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react'
-import { createSupabaseClient } from '@/lib/supabase'
-import { Database } from '@/types/database'
-import { successToast, errorToast, warningToast, infoToast } from '@/hooks/use-toast'
+import { useState, useCallback } from 'react';
+import { createSupabaseClient } from '@/lib/supabase';
+import { Database } from '@/types';
+import { useToast, successToast, errorToast, warningToast, infoToast } from '@/hooks/use-toast'
 
 type Tables = Database['public']['Tables']
 

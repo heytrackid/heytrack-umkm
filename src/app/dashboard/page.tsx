@@ -9,7 +9,12 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
-import ExcelExportButton from '@/components/export/ExcelExportButton'
+
+// Dynamic import to reduce bundle size
+const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+  ssr: false,
+  loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
+})
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
 import { useI18n } from '@/providers/I18nProvider'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
