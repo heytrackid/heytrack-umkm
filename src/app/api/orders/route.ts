@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Map data to match our interface (order_items -> items)
-    const mappedData = data?.map(order => ({
+    const mappedData = data?.map((order: any) => ({
       ...order,
       items: order.order_items || []
     }))

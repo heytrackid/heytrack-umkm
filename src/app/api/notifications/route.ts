@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       if (error) throw error
 
       // Add source identifier to database notifications
-      const convertedDbNotifications = (dbNotifications || []).map(notification => ({
+      const convertedDbNotifications = (dbNotifications || []).map((notification: any) => ({
         ...notification,
         source: 'database'
       }))
