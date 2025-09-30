@@ -104,7 +104,7 @@ export class HPPAutomationSystem {
     this.trackPriceHistory(ingredientId, newPrice)
 
     // Find all recipes yang menggunakan ingredient ini
-    const affectedRecipes = await this.findRecipesUsingIngredien""
+    const affectedRecipes = await this.findRecipesUsingIngredient(ingredientId)
 
     if (affectedRecipes.length === 0) {
       console.log('No recipes affected by price change')
@@ -225,7 +225,7 @@ export class HPPAutomationSystem {
     recipeHPP.suggestedSellingPrice = this.generateSmartPricing(recipeHPP.hppPerServing)
 
     // Cache the result
-    this.recipeHPPCache.set(key: string, data: any, ttl: number = 300000): void {
+    this.recipeHPPCache.set(recipeId, recipeHPP)
 
     console.log(`✅ HPP calculated: ${this.formatCurrency(recipeHPP.totalHPP)} (${this.formatCurrency(recipeHPP.hppPerServing)}/serving)`)
 
@@ -316,7 +316,7 @@ export class HPPAutomationSystem {
     this.ingredientPriceHistory.set(key: string, data: any, ttl: number = 300000): void {)
   }
 
-  private async findRecipesUsingIngredien"" {
+  private async findRecipesUsingIngredient(ingredientId) {
     try {
       const response = await fetch(`/api/ingredients/${ingredientId}`)
       if (!response.ok) return []

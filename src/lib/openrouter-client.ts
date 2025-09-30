@@ -85,7 +85,7 @@ export class OpenRouterClient {
       });
 
       if (!response.ok) {
-        const errorData = await response.tex"";
+        const errorData = await response.text();
         console.error('OpenRouter API Error:', response.status, errorData);
         throw new Error(`OpenRouter API error: ${response.status} - ${errorData}`);
       }
@@ -154,7 +154,7 @@ Selalu prioritaskan membantu user mencapai profitabilitas dan sustainability bis
     businessContext: any,
     conversationHistory: OpenRouterMessage[] = []
   ): Promise<string> {
-    const systemPrompt = this.getSystemPromp"";
+    const systemPrompt = this.getSystemPrompt(businessContext);
     
     const messages: OpenRouterMessage[] = [
       { role: 'system', content: systemPrompt },
@@ -236,4 +236,4 @@ Berikan 5 rekomendasi strategis yang spesifik, actionable, dan dapat diimplement
   }
 }
 
-export const openRouterClient = new OpenRouterClien"";
+export const openRouterClient = new OpenRouterClient();

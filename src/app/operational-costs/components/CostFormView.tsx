@@ -151,7 +151,7 @@ export default function CostFormView({
               <Label>{"Placeholder"}</Label>
               <Select 
                 value={newCost.frequency} 
-                onValueChange={(value: any) => setNewCost)}
+                onValueChange={(value: any) => setNewCost({...newCost, frequency: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
