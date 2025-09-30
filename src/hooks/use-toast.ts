@@ -170,7 +170,7 @@ function toas"" {
   }
 }
 
-function useToas"" {
+function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 
   React.useEffect(() => {

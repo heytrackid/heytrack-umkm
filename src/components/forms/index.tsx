@@ -31,7 +31,7 @@ const FormSkeleton = () => (
 
 // Lazy loaded form components
 export const LazyIngredientForm = dynamic(
-  () => import('@/components').then(mod => ({ default: mod.IngredientForm })),
+  () => import('./IngredientForm'),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -39,7 +39,7 @@ export const LazyIngredientForm = dynamic(
 )
 
 export const LazyRecipeForm = dynamic(
-  () => import('@/components').then(mod => ({ default: mod.RecipeForm })),
+  () => import('./RecipeForm'),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -47,7 +47,7 @@ export const LazyRecipeForm = dynamic(
 )
 
 export const LazyCustomerForm = dynamic(
-  () => import('@/components').then(mod => ({ default: mod.CustomerForm })),
+  () => import('./CustomerForm'),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -55,7 +55,7 @@ export const LazyCustomerForm = dynamic(
 )
 
 export const LazyFinancialRecordForm = dynamic(
-  () => import('@/components').then(mod => ({ default: mod.FinancialRecordForm })),
+  () => import('./FinancialRecordForm'),
   { 
     ssr: false,
     loading: () => <FormSkeleton />
@@ -64,22 +64,22 @@ export const LazyFinancialRecordForm = dynamic(
 
 // Preloading functions for better UX
 export const preloadIngredientForm = () => {
-  const componentImport = () => import('@/components')
+  const componentImport = () => import('./IngredientForm')
   componentImport()
 }
 
 export const preloadRecipeForm = () => {
-  const componentImport = () => import('@/components')
+  const componentImport = () => import('./RecipeForm')
   componentImport()
 }
 
 export const preloadCustomerForm = () => {
-  const componentImport = () => import('@/components')
+  const componentImport = () => import('./CustomerForm')
   componentImport()
 }
 
 export const preloadFinancialRecordForm = () => {
-  const componentImport = () => import('@/components')
+  const componentImport = () => import('./FinancialRecordForm')
   componentImport()
 }
 

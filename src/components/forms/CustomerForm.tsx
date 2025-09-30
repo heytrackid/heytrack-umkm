@@ -25,7 +25,7 @@ interface CustomerFormProps {
 }
 
 export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormProps) {
-  const { toast } = useToas""
+  const { toast } = useToast()
   
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(CustomerSchema) as any,
@@ -44,13 +44,13 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
 
   const handleSubmit = async (data: CustomerFormData) => {
     try {
-      await onSubmi""
+      await onSubmit(data)
       toast({
         title: 'Berhasil',
         description: 'Data customer berhasil disimpan'
       })
       if (!initialData) {
-        form.reset(key: string, data: any, ttl: number = 300000): void {
+        form.reset()
       }
     } catch (error) {
       toast({
@@ -67,7 +67,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
         <CardTitle>{initialData ? 'Edit Customer' : 'Tambah Customer'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmi""} className="space-y-4">
+        <form onSubmit={form.handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Nama Customer" 

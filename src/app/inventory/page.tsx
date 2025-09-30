@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import the heavy inventory component
-const EnhancedInventoryPage = dynamic(() => import('@/components'), {
+const EnhancedInventoryPage = dynamic(() => import('@/modules/inventory/components/EnhancedInventoryPage'), {
   loading: () => (
     <div className="space-y-6 p-6">
       {/* Header skeleton */}

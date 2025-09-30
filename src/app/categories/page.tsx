@@ -301,7 +301,7 @@ export default function CategoriesPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => handleRemoveIngredien""}
+                    onClick={() => handleRemoveIngredient}
                     className="text-red-500 hover:text-red-700"
                   >
                     <X className="h-4 w-4" />

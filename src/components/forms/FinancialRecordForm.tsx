@@ -25,7 +25,7 @@ interface FinancialRecordFormProps {
 }
 
 export function FinancialRecordForm({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) {
-  const { toast } = useToas""
+  const { toast } = useToast()
   
   const form = useForm<FinancialRecordFormData>({
     resolver: zodResolver(FinancialRecordSchema) as any,
@@ -44,13 +44,13 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
 
   const handleSubmit = async (data: FinancialRecordFormData) => {
     try {
-      await onSubmi""
+      await onSubmit(data)
       toast({
         title: 'Berhasil',
         description: 'Catatan keuangan berhasil disimpan'
       })
       if (!initialData) {
-        form.reset(key: string, data: any, ttl: number = 300000): void {
+        form.reset()
       }
     } catch (error) {
       toast({
@@ -67,7 +67,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
         <CardTitle>{initialData ? 'Edit Catatan Keuangan' : 'Tambah Catatan Keuangan'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmi""} className="space-y-4">
+        <form onSubmit={form.handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Tipe Transaksi" 

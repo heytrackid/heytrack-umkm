@@ -25,7 +25,7 @@ interface IngredientFormProps {
 }
 
 export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientFormProps) {
-  const { toast } = useToas""
+  const { toast } = useToast()
   
   const form = useForm<IngredientFormData>({
     resolver: zodResolver(IngredientSchema) as any,
@@ -47,13 +47,13 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
 
   const handleSubmit = async (data: IngredientFormData) => {
     try {
-      await onSubmi""
+      await onSubmit(data)
       toast({
         title: 'Berhasil',
         description: 'Data bahan berhasil disimpan'
       })
       if (!initialData) {
-        form.reset(key: string, data: any, ttl: number = 300000): void {
+        form.reset()
       }
     } catch (error) {
       toast({
@@ -70,7 +70,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
         <CardTitle>{initialData ? 'Edit Bahan' : 'Tambah Bahan'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmi""} className="space-y-4">
+        <form onSubmit={form.handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Nama Bahan" 

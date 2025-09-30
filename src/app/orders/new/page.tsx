@@ -252,7 +252,7 @@ export default function NewOrderPage() {
                   taxAmount={taxAmount}
                   totalAmount={totalAmount}
                   isSubmitting={isSubmitting}
-                  onSubmit={() => handleSubmi"" => {} } as React.FormEvent)}
+                  onSubmit={() => handleSubmit => {} } as React.FormEvent)}
                   onCancel={() => router.back()}
                 />
               </div>

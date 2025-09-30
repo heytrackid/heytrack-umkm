@@ -122,7 +122,7 @@ export default function OperationalCostsPage() {
   }
 
   const handleQuickSetup = () => {
-    const existingNames = new Set))
+    const existingNames = new Set(costsList.map(c => c.name.toLowerCase()))
     const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
       alert
@@ -144,7 +144,7 @@ export default function OperationalCostsPage() {
       isFixed: false,
       icon: '⚡'
     })
-    setEditingCos""
+    setEditingCost
   }
 
   const handleSaveCost = () => {
@@ -167,7 +167,7 @@ export default function OperationalCostsPage() {
   }
 
   const handleEditCost = (cost: OperationalCost) => {
-    setEditingCos""
+    setEditingCost
     setNewCos""
     setCurrentView('edit')
   }

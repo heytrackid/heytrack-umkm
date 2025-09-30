@@ -187,7 +187,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
       }))
     }
 
-    await onSubmi""
+    await onSubmit(data)
   }
 
   return (
