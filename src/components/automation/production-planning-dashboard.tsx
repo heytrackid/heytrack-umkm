@@ -117,7 +117,7 @@ function ProductionPlanningDashboard() {
       }
 
       // Sort by priority score
-      plans.sor"" => b.priority_score - a.priority_score)
+      plans.sort((a, b) => b.priority_score - a.priority_score)
       setProductionPlans(plans)
 
       // Generate optimization

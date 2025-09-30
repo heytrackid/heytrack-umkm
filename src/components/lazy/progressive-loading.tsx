@@ -28,7 +28,7 @@ export const ProgressiveLoader = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
-        setShowTimeou""
+        setShowTimeout
       }
     }, timeout)
 
@@ -38,15 +38,15 @@ export const ProgressiveLoader = ({
     }, Math.random() * 2000 + 500)
 
     return () => {
-      clearTimeou""
-      clearTimeou""
+      clearTimeout
+      clearTimeout
     }
   }, [timeout, isLoading])
 
   const handleRetry = () => {
     setIsLoading(true)
     setHasError(false)
-    setShowTimeou""
+    setShowTimeout
   }
 
   if (hasError) {
@@ -292,10 +292,10 @@ export const ProgressiveImage = ({
 }
 
 // Hook untuk progressive data loading
-export const useProgressiveData = <T,>(
+export function useProgressiveData<T>(
   fetchFunction: () => Promise<T>,
   deps: any[] = []
-) => {
+) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -315,7 +315,7 @@ export const useProgressiveData = <T,>(
   }
 
   const retry = () => {
-    setRetryCoun""
+    setRetryCount
     loadData()
   }
 

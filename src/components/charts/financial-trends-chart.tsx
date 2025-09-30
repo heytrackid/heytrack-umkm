@@ -83,7 +83,7 @@ const chartConfig = {
   },
 }
 
-export function FinancialTrendsChar"" {
+export function FinancialTrendsChart {
   return (
     <ChartContainer config={chartConfig}>
       <LineChart

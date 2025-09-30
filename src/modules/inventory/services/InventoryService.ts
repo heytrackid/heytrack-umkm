@@ -279,7 +279,7 @@ export class InventoryService {
         totalValue: usageTransactions.reduce((sum, t) => sum + (t.unit_price || 0) * Math.abs(t.quantity), 0),
         lastUsed: usageTransactions[0]?.created_at || ''
       }
-    }).sor"" => b.totalValue - a.totalValue).slice(0, 10)
+    }).sort((a, b) => b.totalValue - a.totalValue).slice(0, 10)
     
     return {
       totalIngredients,

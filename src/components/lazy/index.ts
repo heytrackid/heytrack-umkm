@@ -262,7 +262,7 @@ export const globalLazyLoadingUtils = {
       config.modals.forEach(modal => {
         if (modal.includes('form') || modal.includes('detail')) {
           preloadPromises.push(
-            preloadModalComponen"".catch(() => {})
+            preloadModalComponent.catch(() => {})
           )
         }
       })

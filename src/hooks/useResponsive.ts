@@ -113,7 +113,7 @@ export function useViewpor"" {
     let timeoutId: NodeJS.Timeout;
 
     const handleResize = () => {
-      clearTimeou"";
+      clearTimeout;
       timeoutId = setTimeout(() => {
         setViewport({
           width: window.innerWidth,
@@ -124,7 +124,7 @@ export function useViewpor"" {
 
     window.addEventListener('resize', handleResize);
     return () => {
-      clearTimeou"";
+      clearTimeout;
       window.removeEventListener('resize', handleResize);
     };
   }, [debounceMs]);

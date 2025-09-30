@@ -60,7 +60,7 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardConten"" {
+function CardContent {
   return (
     <div
       data-slot="card-content"

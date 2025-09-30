@@ -24,7 +24,7 @@ export class QueryCache {
 
   private generateKey(table: string, filters: Record<string, any> = {}): string {
     const filterString = Object.keys(filters)
-      .sor""
+      .sort((a, b)
       .map(key => `${key}:${JSON.stringify(filters[key])}`)
       .join(',')
     return `${table}${filterString ? `_${filterString}` : ''}`

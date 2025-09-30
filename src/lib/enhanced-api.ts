@@ -36,7 +36,7 @@ class EnhancedApiClient {
   // Generate cache key from query parameters
   private generateCacheKey(operation: string, params: any = {}): string {
     const sortedParams = Object.keys(params)
-      .sor""
+      .sort((a, b) => a.localeCompare(b))
       .reduce((result, key) => {
         result[key] = params[key];
         return result;

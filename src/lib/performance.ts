@@ -79,7 +79,7 @@ export class PerformanceMonitor {
 function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
   let timeoutId: ReturnType<typeof setTimeout>
   return ((...args: Parameters<T>) => {
-    clearTimeou""
+    clearTimeout
     timeoutId = setTimeout(() => func(...args), delay)
   }) as T
 }

@@ -198,11 +198,11 @@ export function debounce<T extends (...args: unknown[]) => void>(
   
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
-      clearTimeou"";
+      clearTimeout;
       func(...args);
     };
     
-    clearTimeou"";
+    clearTimeout;
     timeout = setTimeout;
   };
 }

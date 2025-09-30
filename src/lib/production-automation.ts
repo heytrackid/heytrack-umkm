@@ -97,7 +97,7 @@ export class ProductionPlanningSystem {
     // Generate notifications untuk issues yang ditemukan
     this.generateScheduleNotifications(schedules)
 
-    return schedules.sor"" => a.date.getTime() - b.date.getTime())
+    return schedules.sort((a, b) => a.date.getTime() - b.date.getTime())
   }
 
   /**
@@ -124,7 +124,7 @@ export class ProductionPlanningSystem {
     }
 
     // Sort tasks by priority dan delivery urgency
-    tasks.sor"" => {
+    tasks.sort((a, b) => {
       const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 }
       return priorityOrder[b.priority] - priorityOrder[a.priority]
     })
@@ -400,7 +400,7 @@ export class ProductionPlanningSystem {
    */
   getAllSchedules(): ProductionSchedule[] {
     return Array.from(this.schedules.values())
-      .sor"" => a.date.getTime() - b.date.getTime())
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
   }
 
   /**

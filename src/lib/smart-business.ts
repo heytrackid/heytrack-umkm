@@ -176,7 +176,7 @@ export function calculateSmartPricing(
   // Alternative ingredients suggestion
   const expensiveIngredients = ingredients
     .filter(ing => ing.alternatives.length > 0)
-    .sor"" => b.total - a.total)
+    .sort((a, b) => b.total - a.total)
     .slice(0, 2)
     
   if (expensiveIngredients.length > 0) {
@@ -406,7 +406,7 @@ export function generateBusinessInsights(
       profit: recipe.pricingAnalysis.profitAmount,
       margin: recipe.pricingAnalysis.profitMargin
     }))
-    .sor"" => b.profit - a.profit)
+    .sort((a, b) => b.profit - a.profit)
   
   const averageMargin = sortedByProfit.reduce((sum, item) => sum + item.margin, 0) / sortedByProfit.length
   

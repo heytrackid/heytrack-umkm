@@ -87,7 +87,7 @@ export default function NewIngredientPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefaul""
+    e.preventDefault
     
     if (!validateForm()) {
       return

@@ -43,47 +43,47 @@ const AutomationLoadingSkeleton = ({ title }: { title: string }) => (
 
 // Lazy automation components dengan custom loading
 const LazySmartExpenseAutomation = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.SmartExpenseAutomation }))
 )
 
 const LazySmartFinancialDashboard = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.SmartFinancialDashboard }))
 )
 
 const LazySmartProductionPlanner = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.SmartProductionPlanner }))
 )
 
 const LazySmartInventoryManager = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.SmartInventoryManager }))
 )
 
 const LazyAdvancedHPPCalculator = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.AdvancedHPPCalculator }))
 )
 
 const LazySmartNotificationCenter = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.SmartNotificationCenter }))
 )
 
 const LazySmartPricingAssistant = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.SmartPricingAssistant }))
 )
 
 const LazyProductionPlanningDashboard = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.ProductionPlanningDashboard }))
 )
 
 const LazyInventoryAnalytics = lazy(
-  () => import('@/components')
+  () => import('@/components/automation/smart-notifications')
     .then(module => ({ default: module.InventoryAnalytics }))
 )
 

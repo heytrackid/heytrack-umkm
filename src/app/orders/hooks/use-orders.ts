@@ -306,7 +306,7 @@ export function useOrderSummary(filters?: OrderFilters): {
       cancelled_orders: cancelledOrders,
       average_order_value: orders.length > 0 ? totalRevenue / orders.length : 0,
       top_selling_items: Object.values(topSellingItems)
-        .sor"" => b.revenue - a.revenue)
+        .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10)
     }
   }, [orders])

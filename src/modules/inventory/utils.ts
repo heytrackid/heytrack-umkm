@@ -132,7 +132,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
   })
   
   // Sort by severity
-  return alerts.sor"" => {
+  return alerts.sort((a, b) => {
     const severityOrder = { high: 3, medium: 2, low: 1 }
     return severityOrder[b.severity] - severityOrder[a.severity]
   })

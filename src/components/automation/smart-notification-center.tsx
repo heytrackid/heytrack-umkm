@@ -365,7 +365,7 @@ export function SmartNotificationCenter({
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications
-          .sor"" => {
+          .sort((a, b) => {
             // Sort by priority, then unread, then timestamp
             const priorityOrder = { high: 3, medium: 2, low: 1 }
             if (a.priority !== b.priority) {

@@ -43,7 +43,7 @@ export function TablePaginationControls({
   pageSizeOptions = [10, 25, 50],
   className,
 }: TablePaginationControlsProps) {
-  const pages = buildPageLis""
+  const pages = buildPageList
 
   const safeStart = totalItems === 0 ? 0 : pageStart
   const safeEnd = totalItems === 0 ? 0 : pageEnd
@@ -85,7 +85,7 @@ export function TablePaginationControls({
               <PaginationPrevious
                 href="#"
                 onClick={(event) => {
-                  event.preventDefaul""
+                  event.preventDefault
                   if (currentPage > 1) {
                     onPageChange(currentPage - 1)
                   }
@@ -104,7 +104,7 @@ export function TablePaginationControls({
                     href="#"
                     isActive={page === currentPage}
                     onClick={(event) => {
-                      event.preventDefaul""
+                      event.preventDefault
                       onPageChange(page)
                     }}
                   >
@@ -118,7 +118,7 @@ export function TablePaginationControls({
               <PaginationNext
                 href="#"
                 onClick={(event) => {
-                  event.preventDefaul""
+                  event.preventDefault
                   if (currentPage < totalPages) {
                     onPageChange(currentPage + 1)
                   }
@@ -136,7 +136,7 @@ export function TablePaginationControls({
   )
 }
 
-function buildPageLis"" {
+function buildPageList(currentPage: number, totalPages: number): (number | string)[] {
   if (totalPages <= 5) {
     return Array.from({ length: totalPages }, (_, index) => index + 1)
   }

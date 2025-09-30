@@ -373,7 +373,7 @@ export function SmartProductionPlanner({
               <div className="space-y-4">
                 {plan
                   .filter((item: any) => item.production.canProduce)
-                  .sor"" => new Date(a.production.startTime).getTime() - new Date(b.production.startTime).getTime())
+                  .sort((a, b) => new Date(a.production.startTime).getTime() - new Date(b.production.startTime).getTime())
                   .map((item: any, index: number) => (
                     <div key={index} className="flex items-center space-x-4 p-3 border rounded-lg">
                       <div className="text-center min-w-[80px]">

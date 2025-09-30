@@ -33,7 +33,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
   const formatNumber = (value: number) =>
-    new Intl.NumberForma"Placeholder".format;
+    new Intl.NumberFormat.format;
 
   // Financial Performance Visualization
   const FinancialChart = ({ data }: { data: any }) => {

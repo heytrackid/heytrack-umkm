@@ -223,7 +223,7 @@ export default function EnhancedSmartNotifications() {
               <div className="space-y-3">
                 {alerts
                   .filter(a => (a.type === 'CRITICAL' || a.type === 'WARNING') && !a.acknowledged)
-                  .sor"" => b.priority_score - a.priority_score)
+                  .sort((a, b) => b.priority_score - a.priority_score)
                   .map((alert) => {
                     const Icon = getAlertIcon(alert.type, alert.category)
                     return (

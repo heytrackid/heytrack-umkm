@@ -33,7 +33,7 @@ type CarouselContextProps = {
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
 function useCarousel() {
-  const context = React.useContex""
+  const context = React.useContext
 
   if (!context) {
     throw new Error("useCarousel must be used within a <Carousel />")
@@ -78,10 +78,10 @@ function Carousel({
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key ==="ArrowLeft") {
-        event.preventDefaul""
+        event.preventDefault
         scrollPrev()
       } else if (event.key ==="ArrowRight") {
-        event.preventDefaul""
+        event.preventDefault
         scrollNex""
       }
     },

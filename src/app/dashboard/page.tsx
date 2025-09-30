@@ -11,7 +11,7 @@ import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/ui/ExcelExportButton'), {
+const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
   ssr: false,
   loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
 })
@@ -117,9 +117,9 @@ export default function Dashboard() {
     }, 1800)
 
     return () => {
-      clearTimeou""
-      clearTimeou""
-      clearTimeou""
+      clearTimeout
+      clearTimeout
+      clearTimeout
     }
   }, [])
 

@@ -202,7 +202,7 @@ export class SupabaseUserContext {
     );
 
     const topIngredients = allIngredients
-      .sor"" => (b.current_stock * b.price_per_unit) - (a.current_stock * a.price_per_unit))
+      .sort((a, b) => (b.current_stock * b.price_per_unit) - (a.current_stock * a.price_per_unit))
       .slice(0, 5);
 
       return {
@@ -316,7 +316,7 @@ export class SupabaseUserContext {
         ...recipe,
         margin: ((recipe.selling_price - recipe.cost_per_unit) / recipe.selling_price) * 100
       }))
-      .sor"" => b.margin - a.margin)
+      .sort((a, b) => b.margin - a.margin)
       .slice(0, 5);
 
       return {
@@ -386,7 +386,7 @@ export class SupabaseUserContext {
         amount: trans.amount
       }))
     ]
-    .sor"" => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, limit);
 
     return activities;

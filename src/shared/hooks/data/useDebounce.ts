@@ -11,7 +11,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 
     // Cancel the timeout if value changes (also on delay change or unmount)
     return () => {
-      clearTimeou""
+      clearTimeout
     }
   }, [value, delay])
 
@@ -31,7 +31,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     }, delay)
 
     return () => {
-      clearTimeou""
+      clearTimeout
     }
   }, [callback, delay])
 

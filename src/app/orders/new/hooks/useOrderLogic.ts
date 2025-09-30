@@ -183,7 +183,7 @@ export const useOrderLogic = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefaul""
+    e.preventDefault
     
     if (!formData.customer_name || orderItems.length === 0) {
       setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')

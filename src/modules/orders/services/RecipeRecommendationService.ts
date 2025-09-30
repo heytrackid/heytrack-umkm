@@ -63,7 +63,7 @@ export class RecipeRecommendationService {
 
       // Sort by frequency and convert to RecipeOption format
       const recommendations = Array.from(recipeFrequency.entries())
-        .sor"" => b[1].count - a[1].count)
+        .sort((a, b) => b[1].count - a[1].count)
         .slice(0, limit)
         .map(([recipeId, data]) => ({
           id: data.recipe.id,

@@ -84,7 +84,7 @@ export const FloatingAIChatbot: React.FC = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefaul""
+      e.preventDefault
       handleSendMessage()
     }
   }

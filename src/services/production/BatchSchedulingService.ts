@@ -316,7 +316,7 @@ export class BatchSchedulingService {
       }
     }
 
-    return timeline.sor"" => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    return timeline.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
   }
 
   /**

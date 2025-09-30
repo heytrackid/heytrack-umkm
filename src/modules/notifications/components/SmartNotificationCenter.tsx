@@ -338,7 +338,7 @@ export default function SmartNotificationCenter({
                   </div>
                 ) : (
                   filteredNotifications
-                    .sor"" => {
+                    .sort((a, b) => {
                       // Sort by priority then timestamp
                       const priorityOrder = { high: 3, medium: 2, low: 1 }
                       const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0

@@ -30,7 +30,7 @@ export class WeightedAverageCostService {
         t.unit_price !== null && 
         t.quantity > 0
       )
-      .sor"" => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     
     if (purchases.length === 0) {
       return {
@@ -87,7 +87,7 @@ export class WeightedAverageCostService {
     
     const transactions = allTransactions
       .filter(t => t.ingredient_id === ingredient.id)
-      .sor"" => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     
     const stockLayers: StockLayer[] = []
     let remainingStock = ingredient.current_stock || 0
@@ -142,7 +142,7 @@ export class WeightedAverageCostService {
     
     const transactions = allTransactions
       .filter(t => t.ingredient_id === ingredient.id)
-      .sor"" => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     
     let runningQuantity = 0
     let runningValue = 0
@@ -298,7 +298,7 @@ export class WeightedAverageCostService {
       case 'latest':
         const latestPurchase = transactions
           .filter(t => t.type === 'PURCHASE' && t.unit_price)
-          .sor"" => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0]
         return latestPurchase?.unit_price || ingredient.price_per_unit
       
       default:

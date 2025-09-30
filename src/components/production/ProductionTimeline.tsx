@@ -160,7 +160,7 @@ export default function ProductionTimeline({
       resourceKey,
       resourceType: slots[0]?.resource_type || 'oven',
       resourceId: slots[0]?.resource_id || '',
-      slots: slots.sor"" => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+      slots: slots.sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
     }))
   }, [schedulingResult])
 

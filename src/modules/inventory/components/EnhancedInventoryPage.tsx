@@ -192,7 +192,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
       setSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY, false)
     }, 2000)
     
-    return () => clearTimeou""
+    return () => clearTimeout
   }, [])
 
   if (loading && !isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY)) {

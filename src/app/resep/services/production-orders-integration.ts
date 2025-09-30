@@ -207,7 +207,7 @@ export class ProductionOrdersIntegrationService {
     if (schedulingResults.created_batches.length > 0) {
       const latestCompletion = schedulingResults.created_batches
         .map(batch => new Date(batch.scheduled_completion))
-        .sor"" => b.getTime() - a.getTime())[0]
+        .sort((a, b) => b.getTime() - a.getTime())[0]
       
       schedulingResults.estimated_completion = latestCompletion
     }

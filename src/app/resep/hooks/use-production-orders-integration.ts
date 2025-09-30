@@ -218,7 +218,7 @@ export function useProductionOrdersIntegration(
         scheduleProduction()
       }, 2000) // 2 second delay
 
-      return () => clearTimeou""
+      return () => clearTimeout
     }
   }, [
     state.pendingOrders.length,

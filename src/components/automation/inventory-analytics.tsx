@@ -150,7 +150,7 @@ function InventoryAnalytics() {
       })
 
       // Sort by performance score
-      detailedAnalytics.sor"" => b.performance_score - a.performance_score)
+      detailedAnalytics.sort((a, b) => b.performance_score - a.performance_score)
       setAnalytics(detailedAnalytics)
 
       // Generate overall insights

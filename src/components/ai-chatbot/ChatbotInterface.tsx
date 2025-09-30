@@ -183,7 +183,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefaul"";
+      e.preventDefault;
       handleSendMessage();
     }
   };

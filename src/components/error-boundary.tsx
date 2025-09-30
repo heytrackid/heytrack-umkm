@@ -231,7 +231,7 @@ export class AsyncErrorBoundary extends Component<Props, State> {
     })
     
     // Prevent default browser error handling
-    event.preventDefaul""
+    event.preventDefault
   }
   
   render() {

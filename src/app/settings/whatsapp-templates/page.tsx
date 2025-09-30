@@ -138,7 +138,7 @@ export default function WhatsAppTemplatesPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefaul""
+    e.preventDefault
     
     try {
       const variables = extractVariables(formData.template_content)

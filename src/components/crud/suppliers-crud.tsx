@@ -122,7 +122,7 @@ export function SuppliersCRUD() {
   };
 
   const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefaul"";
+    e.preventDefault;
     if (!validateAll()) return;
 
     try {
@@ -135,7 +135,7 @@ export function SuppliersCRUD() {
   };
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefaul"";
+    e.preventDefault;
     if (!validateAll() || !selectedSupplier) return;
 
     try {

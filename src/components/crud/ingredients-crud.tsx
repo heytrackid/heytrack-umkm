@@ -127,7 +127,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefaul"";
+    e.preventDefault;
     if (!validateAll()) return;
 
     try {
@@ -140,7 +140,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefaul"";
+    e.preventDefault;
     if (!validateAll() || !selectedIngredient) return;
 
     try {

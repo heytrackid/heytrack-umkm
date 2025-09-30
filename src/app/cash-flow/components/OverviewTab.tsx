@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Download, RefreshCw, Eye, BarChart3, Plus, DollarSign } from 'lucide-react'
 
-const SummaryCards = lazy(() => import('@/components'))
-const RecentTransactions = lazy(() => import('@/components'))
+const SummaryCards = lazy(() => import('./SummaryCards'))
+const RecentTransactions = lazy(() => import('./RecentTransactions'))
 
 interface OverviewTabProps {
   cashFlowData: any

@@ -109,7 +109,7 @@ export const useLinkPreloading = () => {
 // Button interaction preloading
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
-    preloadModalComponen""
+    preloadModalComponent
   }, [])
 
   const preloadTableOnHover = useCallback(() => {
@@ -148,7 +148,7 @@ export const useSmartPreloading = () => {
 
     // Get most visited routes and preload them with low priority
     const popularRoutes = Object.entries(routeFrequency)
-      .sor"" => (b as number) - (a as number))
+      .sort((a, b) => (b as number) - (a as number))
       .slice(0, 3)
       .map(([route]) => route)
 
@@ -172,7 +172,7 @@ export const useIdleTimePreloading = () => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
-      clearTimeou""
+      clearTimeout
       idleTimer = setTimeout(() => {
         console.log('🕒 User idle - preloading heavy components')
         
@@ -196,7 +196,7 @@ export const useIdleTimePreloading = () => {
     resetIdleTimer()
 
     return () => {
-      clearTimeou""
+      clearTimeout
       events.forEach(event => {
         document.removeEventListener(event, resetIdleTimer, true)
       })

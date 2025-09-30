@@ -94,7 +94,7 @@ function DelayedWrapper({
   
   useEffect(() => {
     const timer = setTimeout(() => setIsReady(true), minDelay)
-    return () => clearTimeou""
+    return () => clearTimeout
   }, [minDelay])
   
   return isReady ? children : null

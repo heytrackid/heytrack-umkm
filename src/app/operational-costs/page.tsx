@@ -94,7 +94,7 @@ export default function OperationalCostsPage() {
     const timer = setTimeout(() => {
       stopLoading(LOADING_KEYS.LOAD_COSTS)
     }, 1500)
-    return () => clearTimeou""
+    return () => clearTimeout
   }, [])
 
   // Quick Setup: template biaya operasional umum

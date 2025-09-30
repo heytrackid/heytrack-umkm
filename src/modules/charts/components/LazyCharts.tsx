@@ -124,7 +124,7 @@ export function ChartDashboardWithProgressiveLoading({
   }>
 }) {
   // Sort charts by priority
-  const sortedCharts = charts.sor"" => {
+  const sortedCharts = charts.sort((a, b) => {
     const priorityOrder = { high: 3, medium: 2, low: 1 }
     return priorityOrder[b.priority] - priorityOrder[a.priority]
   })
@@ -173,7 +173,7 @@ export const ChartPerformanceUtils = {
   debounceChartUpdate: (callback: Function, delay = 300) => {
     let timeoutId: NodeJS.Timeout
     return (...args: any[]) => {
-      clearTimeou""
+      clearTimeout
       timeoutId = setTimeout(() => callback(...args), delay)
     }
   },

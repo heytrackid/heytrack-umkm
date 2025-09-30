@@ -21,7 +21,7 @@ export default function SupabaseProvider({ children }: { children: ReactNode }) 
 }
 
 export const useSupabase = () => {
-  const context = useContex""
+  const context = useContext
   if (context === undefined) {
     throw new Error('useSupabase must be used inside SupabaseProvider')
   }

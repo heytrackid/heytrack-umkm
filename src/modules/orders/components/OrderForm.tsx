@@ -152,7 +152,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefaul""
+    e.preventDefault
 
     if (!formData.customer_name || orderItems.length === 0) {
       aler""

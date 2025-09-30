@@ -15,7 +15,7 @@ export const formatDate = (date: Date | string) => {
 }
 
 export const formatNumber = (num: number) => {
-  return new Intl.NumberForma"Placeholder".format
+  return new Intl.NumberFormat.format
 }
 
 // Utility functions
@@ -25,7 +25,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout
   return (...args: Parameters<T>) => {
-    clearTimeou""
+    clearTimeout
     timeout = setTimeout(() => func.apply(null, args), wait)
   }
 }

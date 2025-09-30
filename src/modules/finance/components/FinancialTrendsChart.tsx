@@ -46,7 +46,7 @@ const placeholderData: FinancialDataPoint[] = [
   { month: 'Jun', revenue: 52000000, expenses: 36000000, profit: 16000000, margin: 30.8 }
 ]
 
-export default function FinancialTrendsChar"" {
+export default function FinancialTrendsChart {
   const [selectedChart, setSelectedChart] = useState<'line' | 'bar' | 'area'>('line')
   const [timeRange, setTimeRange] = useState<'6m' | '1y' | '2y'>('6m')
 

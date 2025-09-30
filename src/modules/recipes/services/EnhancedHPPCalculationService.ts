@@ -274,7 +274,7 @@ export class EnhancedHPPCalculationService {
       operationalCost: totalOperationalCost,
       materialPercentage: Math.round(materialPercentage * 100) / 100,
       operationalPercentage: Math.round(operationalPercentage * 100) / 100,
-      ingredientBreakdown: ingredientBreakdown.sor"" => b.percentage - a.percentage)
+      ingredientBreakdown: ingredientBreakdown.sort((a, b) => b.percentage - a.percentage)
     }
   }
 

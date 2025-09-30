@@ -116,7 +116,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
               type="number"
               placeholder="1000000"
               value={amount}
-              onChange={(e) => setAmoun""}
+              onChange={(e) => setAmount}
             />
           )}
         </div>

@@ -171,7 +171,7 @@ export class StockCalculationService {
         date: new Date(t.created_at),
         quantity: Math.abs(t.quantity)
       }))
-      .sor"" => a.date.getTime() - b.date.getTime())
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
     
     if (usageData.length < 2) {
       // Not enough data, use current usage rate

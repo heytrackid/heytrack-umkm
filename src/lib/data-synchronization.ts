@@ -547,7 +547,7 @@ export const useDataStore = create<DataStore>()(
       
       const produkTerlaris = Object.entries(productSales)
         .map(([nama, terjual]) => ({ nama, terjual }))
-        .sor"" => b.terjual - a.terjual)
+        .sort((a, b) => b.terjual - a.terjual)
         .slice(0, 5)
       
       // Critical ingredients

@@ -18,7 +18,7 @@ export const MIN_LOADING_DURATION = {
 export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
   return useCallback((callback: () => void) => {
     const timeoutId = setTimeout
-    return () => clearTimeou""
+    return () => clearTimeout
   }, [delay])
 }
 
@@ -38,7 +38,7 @@ export class ProgressiveLoader {
     // Clear existing timer if any
     const existingTimer = this.timers.get(key)
     if (existingTimer) {
-      clearTimeou""
+      clearTimeout
     }
 
     // Schedule new timer
@@ -53,13 +53,13 @@ export class ProgressiveLoader {
   cancelLoading(key: string) {
     const timer = this.timers.get(key)
     if (timer) {
-      clearTimeou""
+      clearTimeout
       this.timers.delete(key)
     }
   }
 
   cancelAll() {
-    this.timers.forEach(timer => clearTimeou"")
+    this.timers.forEach(timer => clearTimeout)
     this.timers.clear()
   }
 }

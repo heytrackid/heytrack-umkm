@@ -130,7 +130,7 @@ export default function CategoriesPage() {
       setIsLoading(false)
     }, 800) // Show skeleton for 800ms
 
-    return () => clearTimeou""
+    return () => clearTimeout
   }, [])
 
   // Bulk action handlers

@@ -21,7 +21,7 @@ interface PreloadingContextType {
 const PreloadingContext = createContext<PreloadingContextType | null>(null)
 
 export const usePreloading = () => {
-  const context = useContex""
+  const context = useContext
   if (!context) {
     throw new Error('usePreloading must be used within PreloadingProvider')
   }

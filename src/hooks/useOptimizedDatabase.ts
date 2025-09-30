@@ -100,7 +100,7 @@ export function useOptimizedRecipes() {
       
       const result = await enhancedApiClient.getRecipes()
       setData(result)
-      hookCache.set(key: string, data: any, ttl: number = 300000): void {
+      hookCache.set(key, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch recipes')
       setError(error)
@@ -167,7 +167,7 @@ export function useOptimizedOrders(limit: number = 50) {
       
       const result = await enhancedApiClient.getOrders({ limit })
       setData(result)
-      hookCache.set(key: string, data: any, ttl: number = 300000): void {
+      hookCache.set(key, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch orders')
       setError(error)
@@ -250,7 +250,7 @@ export function useOptimizedCustomers() {
       
       const result = await enhancedApiClient.getCustomers()
       setData(result)
-      hookCache.set(key: string, data: any, ttl: number = 300000): void {
+      hookCache.set(key, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch customers')
       setError(error)
@@ -293,7 +293,7 @@ export function useOptimizedCustomers() {
     ) / Math.max(totalCustomers, 1)
 
     const topCustomers = [...data]
-      .sor"" => (b.total_spent || 0) - (a.total_spent || 0))
+      .sort((a, b) => (b.total_spent || 0) - (a.total_spent || 0))
       .slice(0, 5)
 
     return { activeCustomers, totalCustomers, avgOrderValue, topCustomers }

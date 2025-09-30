@@ -41,7 +41,7 @@ export function PullToRefresh({
 
     if (distance > 0 && window.scrollY === 0) {
       // Prevent default scrolling when pulling down at top
-      e.preventDefaul""
+      e.preventDefault
       
       // Apply resistance to the pull
       const resistance = 0.5
@@ -208,7 +208,7 @@ export function InfiniteScroll({
 
     // Small delay to ensure content is rendered
     const timeout = setTimeout
-    return () => clearTimeou""
+    return () => clearTimeout
   }, [hasMore, loading, onLoadMore])
 
   const defaultLoadingComponent = (

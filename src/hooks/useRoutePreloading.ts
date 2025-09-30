@@ -118,7 +118,7 @@ export const useRoutePreloading = () => {
           if (config.modals) {
             config.modals.forEach(modal => {
               preloadPromises.push(
-                preloadModalComponen"".catch(() => {})
+                preloadModalComponent.catch(() => {})
               )
             })
           }
@@ -170,8 +170,8 @@ export const useRoutePreloading = () => {
     }, 500)
 
     return () => {
-      clearTimeou""
-      clearTimeou""
+      clearTimeout
+      clearTimeout
     }
   }, [pathname, preloadForCurrentRoute])
 
@@ -214,7 +214,7 @@ export const useLinkPreloading = () => {
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
     if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponen"".catch(() => {})
+      preloadModalComponent.catch(() => {})
     }
   }, [])
 
@@ -254,7 +254,7 @@ export const useSmartPreloading = () => {
 
     // Get most visited routes
     const popularRoutes = Object.entries(routeFrequency)
-      .sor"" => (b as number) - (a as number))
+      .sort((a, b) => (b as number) - (a as number))
       .slice(0, 3)
       .map(([route]) => route)
 
@@ -278,7 +278,7 @@ export const useIdleTimePreloading = () => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
-      clearTimeou""
+      clearTimeout
       idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
         console.log('🕒 User idle - preloading heavy components')
@@ -304,7 +304,7 @@ export const useIdleTimePreloading = () => {
     resetIdleTimer()
 
     return () => {
-      clearTimeou""
+      clearTimeout
       events.forEach(event => {
         document.removeEventListener(event, resetIdleTimer, true)
       })

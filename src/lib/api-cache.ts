@@ -36,7 +36,7 @@ class APICache {
     if (!params) return baseKey
     
     const sortedParams = Object.keys(params)
-      .sor""
+      .sort((a, b)
       .map(key => `${key}=${JSON.stringify(params[key])}`)
       .join('&')
     
@@ -58,7 +58,7 @@ class APICache {
 
     // Sort by timestamp and remove oldest entries
     const entries = Array.from(this.cache.entries())
-      .sor"" => a[1].timestamp - b[1].timestamp)
+      .sort((a, b) => a[1].timestamp - b[1].timestamp)
 
     const toRemove = entries.slice(0, entries.length - this.MAX_SIZE)
     toRemove.forEach(([key]) => this.cache.delete(key))

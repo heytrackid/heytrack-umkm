@@ -61,7 +61,7 @@ export default function NewInventoryTransactionPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefaul""
+    e.preventDefault
     setIsSubmitting(true)
     
     try {
