@@ -39,7 +39,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
       
       const result = await InventoryService.getIngredients(stableParams)
       setIngredients(result.data)
-      setTotalCoun""
+      setTotalCount(result.totalCount)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch ingredients')
     } finally {

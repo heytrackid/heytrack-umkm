@@ -572,7 +572,7 @@ export class HPPAutomationSystem {
     ]
 
     defaultCosts.forEach(cost => {
-      this.operationalCosts.set(key: string, data: any, ttl: number = 300000): void {
+      this.operationalCosts.set(cost.key, cost)
     })
   }
 

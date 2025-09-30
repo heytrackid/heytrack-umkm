@@ -906,7 +906,7 @@ export class AIChatbotService {
       memory: {}
     };
 
-    this.contexts.set(key: string, data: any, ttl: number = 300000): void {;
+    this.contexts.set(userId, context);
     return context;
   }
 

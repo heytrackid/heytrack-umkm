@@ -140,7 +140,7 @@ export function WeightedAverageCostAnalysis({
                   <h4 className="font-semibold">Weighted Average</h4>
                   {getTrendIndicator(priceDifferences.weighted).icon && (
                     <div className={`p-1 rounded ${getTrendIndicator(priceDifferences.weighted).bg}`}>
-                      {React.createElemen"".icon, {
+                      {React.createElement(getTrendIndicator(priceDifferences.weighted).icon, {
                         className: `h-4 w-4 ${getTrendIndicator(priceDifferences.weighted).color}`
                       })}
                     </div>
@@ -178,7 +178,7 @@ export function WeightedAverageCostAnalysis({
                   <h4 className="font-semibold">FIFO Average</h4>
                   {getTrendIndicator(priceDifferences.fifo).icon && (
                     <div className={`p-1 rounded ${getTrendIndicator(priceDifferences.fifo).bg}`}>
-                      {React.createElemen"".icon, {
+                      {React.createElement(getTrendIndicator(priceDifferences.weighted).icon, {
                         className: `h-4 w-4 ${getTrendIndicator(priceDifferences.fifo).color}`
                       })}
                     </div>
@@ -217,7 +217,7 @@ export function WeightedAverageCostAnalysis({
                   <Badge variant="default">Rekomendasi</Badge>
                   {getTrendIndicator(priceDifferences.moving).icon && (
                     <div className={`p-1 rounded ${getTrendIndicator(priceDifferences.moving).bg}`}>
-                      {React.createElemen"".icon, {
+                      {React.createElement(getTrendIndicator(priceDifferences.weighted).icon, {
                         className: `h-4 w-4 ${getTrendIndicator(priceDifferences.moving).color}`
                       })}
                     </div>
