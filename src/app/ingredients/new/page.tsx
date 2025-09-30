@@ -39,17 +39,6 @@ const units = [
   { value: 'sachet', label: 'Sachet' }
 ]
 
-const categories = [
-  { value: 'tepung', label: 'Tepung & Gandum' },
-  { value: 'dairy', label: 'Susu & Olahan' },
-  { value: 'gula', label: 'Gula & Pemanis' },
-  { value: 'lemak', label: 'Lemak & Minyak' },
-  { value: 'telur', label: 'Telur & Protein' },
-  { value: 'bumbu', label: 'Bumbu & Rempah' },
-  { value: 'tambahan', label: 'Bahan Tambahan' },
-  { value: 'kemasan', label: 'Kemasan' },
-  { value: 'lainnya', label: 'Lainnya' }
-]
 
 export default function NewIngredientPage() {
   const router = useRouter()
@@ -59,7 +48,6 @@ export default function NewIngredientPage() {
   // Form state
   const [formData, setFormData] = useState({
     name: '',
-    category: '',
     unit: '',
     price_per_unit: '',
     minimum_stock: '',
@@ -83,7 +71,6 @@ export default function NewIngredientPage() {
     const newErrors: Record<string, string> = {}
 
     if (!formData.name.trim()) newErrors.name = 'Nama bahan baku wajib diisi'
-    if (!formData.category) newErrors.category = 'Kategori wajib dipilih'
     if (!formData.unit) newErrors.unit = 'Satuan wajib dipilih'
     if (!formData.price_per_unit || parseFloat(formData.price_per_unit) <= 0) {
       newErrors.price_per_unit = 'Harga per unit harus lebih dari 0'
@@ -130,7 +117,6 @@ Bahan baku"${formData.name}" berhasil ditambahkan!
 
 📝 Detail:
 • Nama: ${formData.name}
-• Kategori: ${categories.find(c => c.value === formData.category)?.label}
 • Satuan: ${formData.unit}
 • Harga: ${formatCurrency(parseFloat(formData.price_per_unit))}
 • Stock awal: ${formData.current_stock} ${formData.unit}
@@ -147,7 +133,6 @@ Anda akan kembali ke halaman inventory.`)
     }
   }
 
-  const selectedCategory = categories.find(cat => cat.value === formData.category)
   const selectedUnit = units.find(unit => unit.value === formData.unit)
 
   return (
@@ -234,51 +219,30 @@ Anda akan kembali ke halaman inventory.`)
                 </p>
               </div>
 
-              {/* Row: Kategori & Satuan */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Kategori *</Label>
-                  <Select 
-                    value={formData.category} 
-                    onValueChange={(value) => handleInputChange('category', value)}
-                  >
-                    <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="Pilih kategori" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.category && (
-                    <p className="text-sm text-red-600">{errors.category}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="unit">Satuan *</Label>
-                  <Select 
-                    value={formData.unit} 
-                    onValueChange={(value) => handleInputChange('unit', value)}
-                  >
-                    <SelectTrigger className={errors.unit ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="Pilih satuan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {units.map(unit => (
-                        <SelectItem key={unit.value} value={unit.value}>
-                          {unit.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.unit && (
-                    <p className="text-sm text-red-600">{errors.unit}</p>
-                  )}
-                </div>
+              {/* Satuan */}
+              <div className="space-y-2">
+                <Label htmlFor="unit">Satuan *</Label>
+                <Select 
+                  value={formData.unit} 
+                  onValueChange={(value) => handleInputChange('unit', value)}
+                >
+                  <SelectTrigger className={errors.unit ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Pilih satuan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map(unit => (
+                      <SelectItem key={unit.value} value={unit.value}>
+                        {unit.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.unit && (
+                  <p className="text-sm text-red-600">{errors.unit}</p>
+                )}
+                <p className="text-xs text-gray-500">
+                  Pilih satuan yang sesuai untuk mengukur bahan ini
+                </p>
               </div>
 
               {/* Row: Harga & Min Stock */}
@@ -365,32 +329,28 @@ Anda akan kembali ke halaman inventory.`)
               </div>
 
               {/* Preview */}
-              {formData.name && formData.category && formData.unit && formData.price_per_unit && (
-                <Card className="bg-gray-50 border-gray-200">
+              {formData.name && formData.unit && formData.price_per_unit && (
+                <Card className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base">Preview Bahan Baku</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Nama:</span>
+                      <span className="text-gray-600 dark:text-gray-400">Nama:</span>
                       <span className="font-medium">{formData.name}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Kategori:</span>
-                      <span className="font-medium">{selectedCategory?.label}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Satuan:</span>
+                      <span className="text-gray-600 dark:text-gray-400">Satuan:</span>
                       <span className="font-medium">{selectedUnit?.label}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Harga:</span>
+                      <span className="text-gray-600 dark:text-gray-400">Harga:</span>
                       <span className="font-medium">
                         {formatCurrency(parseFloat(formData.price_per_unit))} / {formData.unit}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Stock awal:</span>
+                      <span className="text-gray-600 dark:text-gray-400">Stock awal:</span>
                       <span className="font-medium">
                         {formData.current_stock} {formData.unit}
                       </span>
