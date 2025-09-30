@@ -3,8 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, ShoppingCart, Users, Package, TrendingUp, AlertCircle } from 'lucide-react'
 
-export default function StatsCardsSection({ t, formatCurrency, stats }: {
-  t: (k: string) => string
+export default function StatsCardsSection({ formatCurrency, stats }: {
   formatCurrency: (n: number) => string
   stats: { totalSales: number; totalOrders: number; totalCustomers: number; totalIngredients: number; salesGrowth: number; ordersGrowth: number; customersGrowth: number; ingredientsLow: number }
 }) {

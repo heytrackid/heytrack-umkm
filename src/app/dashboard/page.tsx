@@ -117,9 +117,9 @@ export default function Dashboard() {
     }, 1800)
 
     return () => {
-      clearTimeout
-      clearTimeout
-      clearTimeout
+      clearTimeout(statsTimer)
+      clearTimeout(ordersTimer)
+      clearTimeout(stockTimer)
     }
   }, [])
 
@@ -175,7 +175,7 @@ export default function Dashboard() {
               ))}
             </div>
           }>
-            <StatsCardsSection t={t} formatCurrency={formatCurrency} stats={placeholderStats} />
+            <StatsCardsSection formatCurrency={formatCurrency} stats={placeholderStats} />
           </Suspense>
         )}
 
