@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useHPPReview } from '@/hooks/useDatabase'
 import { useCurrency } from '@/hooks/useCurrency'
+import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -78,14 +79,7 @@ export default function HPPReviewPage() {
               Evaluasi dan tingkatkan harga pokok produksi berdasarkan perubahan pasar
             </p>
           </div>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center py-8">
-                <RefreshCw className="h-8 w-8 animate-spin text-primary mr-3" />
-                <span className={`${isMobile ? 'text-sm' : ''}`}>Menganalisis HPP produk...</span>
-              </div>
-            </CardContent>
-          </Card>
+          <DataGridSkeleton rows={8} />
         </div>
       </AppLayout>
     )

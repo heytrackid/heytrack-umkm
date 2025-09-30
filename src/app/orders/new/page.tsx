@@ -36,6 +36,7 @@ import {
   preloadOrderComponents
 } from './components/LazyOrderComponents'
 import LazyOrderComponents from './components/LazyOrderComponents'
+import { AuthFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
 export default function NewOrderPage() {
   const {
@@ -47,6 +48,7 @@ export default function NewOrderPage() {
     isSubmitting,
     error,
     activeTab,
+    loading, // Add loading state
     
     // Calculated values
     subtotal,
@@ -73,6 +75,35 @@ export default function NewOrderPage() {
     if (preloader) {
       preloader().catch(() => {})
     }
+  }
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          {/* Breadcrumb Skeleton */}
+          <div className="flex items-center space-x-2">
+            <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+          </div>
+
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-9 bg-gray-200 rounded w-20 animate-pulse"></div>
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-64 animate-pulse mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Skeleton */}
+          <AuthFormSkeleton />
+        </div>
+      </AppLayout>
+    )
   }
 
   return (

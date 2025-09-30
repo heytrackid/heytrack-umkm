@@ -40,6 +40,7 @@ export const useOrderLogic = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState('customer')
+  const [loading, setLoading] = useState(true) // Add loading state
   
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
@@ -79,6 +80,8 @@ export const useOrderLogic = () => {
       }
     } catch (error) {
       console.error('Failed to fetch recipes:', error)
+    } finally {
+      setLoading(false) // Set loading to false after fetch
     }
   }
 
@@ -256,6 +259,7 @@ export const useOrderLogic = () => {
     isSubmitting,
     error,
     activeTab,
+    loading, // Add loading to return
     
     // Calculated values
     subtotal,

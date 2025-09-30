@@ -39,6 +39,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useI18n } from '@/providers/I18nProvider'
 import { useSettings } from '@/contexts/settings-context'
 import categoriesData from '@/data/categories.json'
+import { CategoriesTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 interface Category {
   id: string
@@ -57,6 +58,7 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [isLoading, setIsLoading] = useState(true) // Add loading state
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -124,10 +126,14 @@ export default function CategoriesPage() {
     return filteredCategories.slice(startIndex, endIndex)
   }, [filteredCategories, currentPage, pageSize])
   
-  // Reset to page 1 when filters change
-  useMemo(() => {
-    setCurrentPage(1)
-  }, [filteredCategories.length])
+  // Simulate loading for better UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 800) // Show skeleton for 800ms
+
+    return () => clearTimeout(timer)
+  }, [])
 
   // Bulk action handlers
   const handleSelectAll = () => {
@@ -438,7 +444,9 @@ export default function CategoriesPage() {
           </p>
         </CardHeader>
         <CardContent>
-          {filteredCategories.length > 0 ? (
+          {isLoading ? (
+            <CategoriesTableSkeleton rows={8} />
+          ) : filteredCategories.length > 0 ? (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>

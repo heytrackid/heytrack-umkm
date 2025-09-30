@@ -25,6 +25,7 @@ import {
   LazyRecipeForm,
   RecipePageWithProgressiveLoading 
 } from './components/LazyComponents'
+import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
 export default function ProductionPage() {
   const {
@@ -78,7 +79,7 @@ export default function ProductionPage() {
           
           {/* Recipe List View */}
           {currentView === 'list' && (
-            <Suspense fallback={<div>Loading recipes...</div>}>
+            <Suspense fallback={<DataGridSkeleton rows={8} />}>
               <LazyRecipeList
                 recipes={recipes}
                 ingredients={ingredients}
@@ -99,7 +100,7 @@ export default function ProductionPage() {
           
           {/* Recipe Add/Edit Form */}
           {(currentView === 'add' || currentView === 'edit') && (
-            <Suspense fallback={<div>Loading form...</div>}>
+            <Suspense fallback={<DataGridSkeleton rows={6} />}>
               <LazyRecipeForm
                 recipe={newRecipe}
                 ingredients={ingredients}

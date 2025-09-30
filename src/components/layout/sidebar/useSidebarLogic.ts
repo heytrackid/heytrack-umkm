@@ -16,7 +16,11 @@ import {
   Target,
   DollarSign,
   Layers,
-  Banknote
+  Banknote,
+  Brain,
+  MessageSquare,
+  TrendingDown,
+  Lightbulb
 } from 'lucide-react'
 import { useI18n } from '@/providers/I18nProvider'
 
@@ -183,6 +187,53 @@ export const useSidebarLogic = () => {
           badge: t('navigation.monitoring.review.badge'),
           description: t('navigation.monitoring.review.description')
         },
+      ]
+    },
+    {
+      title: 'AI Assistant',
+      description: 'Asisten cerdas untuk optimasi bisnis',
+      isWorkflow: true,
+      items: [
+        {
+          name: 'AI Insights',
+          href: '/ai',
+          icon: Brain,
+          isSimple: true,
+          badge: 'SMART',
+          description: 'Dashboard AI untuk analisis bisnis cerdas'
+        },
+        {
+          name: 'Smart Pricing',
+          href: '/ai/pricing',
+          icon: TrendingUp,
+          isSimple: true,
+          badge: 'AI',
+          description: 'Analisis harga optimal berbasis AI'
+        },
+        {
+          name: 'Inventory AI',
+          href: '/ai/inventory',
+          icon: TrendingDown,
+          isSimple: true,
+          badge: 'AUTO',
+          description: 'Prediksi stok dan auto-reorder'
+        },
+        {
+          name: 'Chat Assistant',
+          href: '/ai/chat',
+          icon: MessageSquare,
+          isSimple: true,
+          badge: 'BETA',
+          description: 'Chatbot bisnis dengan AI'
+        },
+        {
+          name: 'Business Tips',
+          href: '/ai/insights',
+          icon: Lightbulb,
+          isSimple: true,
+          badge: 'NEW',
+          description: 'Tips bisnis personal dari AI'
+        }
       ]
     },
     {
