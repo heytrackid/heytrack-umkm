@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 import {
   AutomationConfig,
   Ingredient,
@@ -250,7 +252,7 @@ export class NotificationSystem {
         type: 'critical',
         category: 'financial',
         title: 'Kerugian Operasional',
-        message: `Bisnis mengalami kerugian Rp ${Math.abs(financialMetrics.netProfit).toLocaleString()}. Perlu analisis segera.`,
+        message: `Bisnis mengalami kerugian ${formatCurrency(Math.abs(financialMetrics.netProfit))}. Perlu analisis segera.`,
         action: 'analyze_losses',
         priority: 'high',
         timestamp: now,

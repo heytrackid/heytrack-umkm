@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 /**
  * Smart Notification System
  * Context-aware business intelligence alerts dan notifications
@@ -278,7 +280,7 @@ export class SmartNotificationSystem {
         category: 'financial',
         priority: 'critical',
         title: 'Kerugian Terdeteksi',
-        message: `Bisnis mengalami kerugian Rp ${Math.abs(metrics.netProfit).toLocaleString()} bulan ini`,
+        message: `Bisnis mengalami kerugian ${formatCurrency(Math.abs(metrics.netProfit))} bulan ini`,
         actionUrl: '/finance?tab=profit_loss',
         actionLabel: 'Review Laporan'
       })

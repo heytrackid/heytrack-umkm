@@ -3,6 +3,8 @@
  * Provides intelligent insights for Indonesian F&B businesses
  */
 
+import { formatCurrency } from '@/shared/utils/currency'
+
 interface OpenRouterResponse {
   choices: Array<{
     message: {
@@ -52,11 +54,11 @@ export class AIService {
     TARGET MARKET: ${data.targetMarket}
     
     COST BREAKDOWN:
-    ${data.ingredients.map(ing => `- ${ing.name}: Rp ${ing.cost.toLocaleString()} (${ing.quantity} unit)`).join('\n')}
+    ${data.ingredients.map(ing => `- ${ing.name}: ${formatCurrency(ing.cost)} (${ing.quantity} unit)`).join('\n')}
     
-    Total Cost: Rp ${data.ingredients.reduce((sum, ing) => sum + ing.cost, 0).toLocaleString()}
-    ${data.currentPrice ? `Harga Saat Ini: Rp ${data.currentPrice.toLocaleString()}` : ''}
-    ${data.competitorPrices?.length ? `Harga Kompetitor: ${data.competitorPrices.map(p => `Rp ${p.toLocaleString()}`).join(', ')}` : ''}
+    Total Cost: ${formatCurrency(data.ingredients.reduce((sum, ing) => sum + ing.cost, 0))}
+    ${data.currentPrice ? `Current Price: ${formatCurrency(data.currentPrice)}` : ''}
+    ${data.competitorPrices?.length ? `Competitor Prices: ${data.competitorPrices.map(p => formatCurrency(p)).join(', ')}` : ''}
 
     Berikan analisis dalam format JSON:
     {
@@ -111,7 +113,7 @@ export class AIService {
       * Stok: ${ing.currentStock} unit
       * Min Stock: ${ing.minStock} unit  
       * Pemakaian/minggu: ${ing.usagePerWeek} unit
-      * Harga: Rp ${ing.price.toLocaleString()}
+      * Harga: ${formatCurrency(ing.price)}
       * Supplier: ${ing.supplier}
       * Lead Time: ${ing.leadTime} hari
     `).join('\n')}
@@ -291,9 +293,9 @@ export class AIService {
     ${data.customers.slice(0, 10).map((customer, i) => `
     ${i+1}. ${customer.name}
        - Total Orders: ${customer.totalOrders}
-       - Total Spent: Rp ${customer.totalSpent.toLocaleString()}
+       - Total Spent: ${formatCurrency(customer.totalSpent)}
        - Last Order: ${customer.lastOrderDate}
-       - AOV: Rp ${customer.averageOrderValue.toLocaleString()}
+       - AOV: ${formatCurrency(customer.averageOrderValue)}
        - Favorites: ${customer.preferredProducts.join(', ')}
     `).join('\n')}
 
@@ -303,7 +305,7 @@ export class AIService {
     - Economic: ${data.marketConditions.economicCondition}
 
     SALES TREND (Last 30 days):
-    ${data.salesData.slice(-7).map(sale => `- ${sale.date}: Rp ${sale.amount.toLocaleString()}`).join('\n')}
+    ${data.salesData.slice(-7).map(sale => `- ${sale.date}: ${formatCurrency(sale.amount)}`).join('\n')}
 
     Berikan insights dalam format JSON:
     {
@@ -377,24 +379,24 @@ export class AIService {
     Sebagai financial consultant untuk UMKM F&B Indonesia, analisis kesehatan finansial berikut:
 
     REVENUE (30 hari terakhir):
-    Total: Rp ${data.revenue.reduce((sum, r) => sum + r.amount, 0).toLocaleString()}
-    Average daily: Rp ${(data.revenue.reduce((sum, r) => sum + r.amount, 0) / 30).toFixed(0).toLocaleString()}
+    Total: ${formatCurrency(data.revenue.reduce((sum, r) => sum + r.amount, 0))}
+    Average daily: ${formatCurrency((data.revenue.reduce((sum, r) => sum + r.amount, 0) / 30).toFixed(0))}
 
     EXPENSES by Category:
     ${Object.entries(data.expenses.reduce((acc: any, exp) => {
       acc[exp.category] = (acc[exp.category] || 0) + exp.amount
       return acc
-    }, {})).map(([cat, amount]) => `- ${cat}: Rp ${(amount as number).toLocaleString()}`).join('\n')}
+    }, {})).map(([cat, amount]) => `- ${cat}: ${formatCurrency((amount as number))}`).join('\n')}
 
     KEY METRICS:
     - Gross Margin: ${data.businessMetrics.grossMargin}%
     - Net Margin: ${data.businessMetrics.netMargin}%
     - Customer Count: ${data.businessMetrics.customerCount}
-    - AOV: Rp ${data.businessMetrics.averageOrderValue.toLocaleString()}
-    - Inventory Value: Rp ${data.inventory.totalValue.toLocaleString()}
+    - AOV: ${formatCurrency(data.businessMetrics.averageOrderValue)}
+    - Inventory Value: ${formatCurrency(data.inventory.totalValue)}
     - Inventory Turnover: ${data.inventory.turnoverRate}x/month
-    - Current Cash Flow: Rp ${data.cashFlow.current.toLocaleString()}
-    - 30-day Projection: Rp ${data.cashFlow.projected30Days.toLocaleString()}
+    - Current Cash Flow: ${formatCurrency(data.cashFlow.current)}
+    - 30-day Projection: ${formatCurrency(data.cashFlow.projected30Days)}
 
     Berikan analisis dalam format JSON:
     {
@@ -471,7 +473,7 @@ export class AIService {
     Sebagai business intelligence analyst untuk F&B Indonesia, buat forecasting berdasarkan data berikut:
 
     HISTORICAL SALES (6 bulan terakhir):
-    ${data.historicalSales.slice(-12).map(sale => `${sale.date}: Rp ${sale.amount.toLocaleString()} (${sale.orderCount} orders)`).join('\n')}
+    ${data.historicalSales.slice(-12).map(sale => `${sale.date}: ${formatCurrency(sale.amount)} (${sale.orderCount} orders)`).join('\n')}
 
     MARKET TRENDS:
     ${data.marketTrends.map(trend => `- ${trend}`).join('\n')}
@@ -565,14 +567,14 @@ export class AIService {
     TIPE BISNIS: ${data.businessType}
     
     RINGKASAN KEUANGAN:
-    - Total Pendapatan: Rp ${totalIncome.toLocaleString()}
-    - Total Pengeluaran: Rp ${totalExpenses.toLocaleString()}
-    - Net Profit: Rp ${netProfit.toLocaleString()}
+    - Total Pendapatan: ${formatCurrency(totalIncome)}
+    - Total Pengeluaran: ${formatCurrency(totalExpenses)}
+    - Net Profit: ${formatCurrency(netProfit)}
     
     TRANSAKSI DETAIL:
     ${data.records.slice(0, 20).map(record => `
     - ${record.type.toUpperCase()}: ${record.category}
-      Amount: Rp ${record.amount.toLocaleString()}
+      Amount: ${formatCurrency(record.amount)}
       Date: ${record.date}
       ${record.description ? `Desc: ${record.description}` : ''}
     `).join('\n')}
@@ -658,21 +660,21 @@ export class AIService {
     OVERVIEW:
     - Total Pelanggan: ${totalCustomers}
     - Total Transaksi: ${data.orders.length}
-    - Total Revenue: Rp ${totalRevenue.toLocaleString()}
-    - Average Order Value: Rp ${avgOrderValue.toLocaleString()}
-    - Customer Lifetime Value: Rp ${avgCustomerValue.toLocaleString()}
+    - Total Revenue: ${formatCurrency(totalRevenue)}
+    - Average Order Value: ${formatCurrency(avgOrderValue)}
+    - Customer Lifetime Value: ${formatCurrency(avgCustomerValue)}
     
     CUSTOMER DATA:
     ${data.customers.slice(0, 10).map(customer => `
     - ${customer.name}:
       * Total Orders: ${customer.totalOrders}
-      * Total Spent: Rp ${customer.totalSpent.toLocaleString()}
+      * Total Spent: ${formatCurrency(customer.totalSpent)}
       * Last Order: ${customer.lastOrderDate || 'N/A'}
     `).join('\n')}
     
     ORDER PATTERNS:
     ${data.orders.slice(0, 15).map(order => `
-    - Customer ${order.customerId}: Rp ${order.amount.toLocaleString()} on ${order.date}
+    - Customer ${order.customerId}: ${formatCurrency(order.amount)} on ${order.date}
     `).join('\n')}
     
     Berikan analisis dalam format JSON:

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
@@ -14,6 +14,11 @@ import {
   SearchFormSkeleton
 } from '@/components/ui/skeletons/table-skeletons'
 import { RecipeFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
+
+// Lazy load extracted components for better performance
+const RecipeForm = lazy(() => import('./components/RecipeForm'))
+const RecipeTable = lazy(() => import('./components/RecipeTable'))
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -820,9 +825,19 @@ export default function ProductionPage() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        {currentView === 'list' && <RecipeList />}
-        {currentView === 'add' && <AddRecipeForm />}
-        {currentView === 'edit' && <AddRecipeForm />}
+        
+        {/* Using extracted lazy-loaded components */}
+        {currentView === 'list' && (
+          <Suspense fallback={<RecipesTableSkeleton />}>
+            <RecipeList />
+          </Suspense>
+        )}
+        
+        {(currentView === 'add' || currentView === 'edit') && (
+          <Suspense fallback={<RecipeFormSkeleton />}>
+            <AddRecipeForm />
+          </Suspense>
+        )}
       </div>
     </AppLayout>
   )

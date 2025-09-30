@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/shared/utils/currency'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseClient } from '@/lib/supabase'
 
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
         type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
-        message: `A large expense of Rp ${parseFloat(body.amount).toLocaleString('id-ID')} has been recorded for ${body.category}`,
+        message: `A large expense of ${formatCurrency(parseFloat(body.amount))} has been recorded for ${body.category}`,
         entity_type: 'expense',
         entity_id: expense.id,
         priority: 'high'

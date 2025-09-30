@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Lightbulb } from 'lucide-react'
+import { formatCurrency } from '@/shared/utils/currency'
 
 interface MarginAnalysis {
   is_profitable: boolean
@@ -107,8 +108,8 @@ export function AnalysisInsights({
                   ></div>
                 </div>
                 <div className="flex justify-between text-xs mt-1">
-                  <span>Rp {pricingAnalysis.competitor_price_range.min.toLocaleString()}</span>
-                  <span>Rp {pricingAnalysis.competitor_price_range.max.toLocaleString()}</span>
+                  <span>{formatCurrency(pricingAnalysis.competitor_price_range.min)}</span>
+                  <span>{formatCurrency(pricingAnalysis.competitor_price_range.max)}</span>
                 </div>
               </div>
             </div>
@@ -123,13 +124,13 @@ export function AnalysisInsights({
           {!marginAnalysis.is_profitable && (
             <li className="flex items-center gap-2">
               <span className="h-1 w-1 bg-blue-600 rounded-full"></span>
-              Increase selling price to at least Rp {Math.round(pricingAnalysis.current_price + hppBreakdown.cost_per_serving).toLocaleString()}
+              Increase selling price to at least {formatCurrency(Math.round(pricingAnalysis.current_price + hppBreakdown.cost_per_serving))}
             </li>
           )}
           {marginAnalysis.current_margin < marginAnalysis.recommended_margin && (
             <li className="flex items-center gap-2">
               <span className="h-1 w-1 bg-blue-600 rounded-full"></span>
-              Consider pricing at Rp {pricingSuggestions.standard.price.toLocaleString()} for optimal margin
+              Consider pricing at {formatCurrency(pricingSuggestions.standard.price)} for optimal margin
             </li>
           )}
           {!availability.can_produce && (

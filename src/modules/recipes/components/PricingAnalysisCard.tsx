@@ -2,6 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { BarChart3, AlertTriangle } from 'lucide-react'
+import { formatCurrency } from '@/shared/utils/currency'
 
 interface PricingAnalysis {
   current_price: number
@@ -40,7 +41,7 @@ export function PricingAnalysisCard({
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Current Price:</span>
-          <span className="font-mono">Rp {pricingAnalysis.current_price.toLocaleString()}</span>
+          <span className="font-mono">{formatCurrency(pricingAnalysis.current_price)}</span>
         </div>
         <div className="flex justify-between">
           <span>Current Margin:</span>
@@ -50,13 +51,13 @@ export function PricingAnalysisCard({
         </div>
         <div className="flex justify-between">
           <span>Break-even Price:</span>
-          <span className="font-mono">Rp {pricingAnalysis.break_even_price.toLocaleString()}</span>
+          <span className="font-mono">{formatCurrency(pricingAnalysis.break_even_price)}</span>
         </div>
         <hr />
         <div className="text-xs text-muted-foreground">
           <div className="flex justify-between">
             <span>Competitor Range:</span>
-            <span>Rp {pricingAnalysis.competitor_price_range.min.toLocaleString()} - {pricingAnalysis.competitor_price_range.max.toLocaleString()}</span>
+            <span>{formatCurrency(pricingAnalysis.competitor_price_range.min)} - {formatCurrency(pricingAnalysis.competitor_price_range.max)}</span>
           </div>
         </div>
       </div>

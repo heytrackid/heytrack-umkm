@@ -374,7 +374,40 @@
     "costs": "Costs",
     "cashFlow": "Cash Flow",
     "monthlyReport": "Monthly Report",
-    "yearlyReport": "Yearly Report"
+    "yearlyReport": "Yearly Report",
+    "costSaved": "Cost Saved",
+    "monthlyGrowth": "Monthly Growth",
+    "profitMargin": "Profit Margin",
+    "yearlyTarget": "Yearly Target Progress",
+    "dashboard": {
+      "subtitle": "Real-time financial analysis with automated insights"
+    },
+    "insights": {
+      "goodPerformance": "Good Performance",
+      "goodPerformanceDesc": "Profit margin above industry target of 25%",
+      "growthTrend": "Growth Trend",
+      "growthTrendDesc": "Consistent growth over the last 3 months"
+    },
+    "summary": {
+      "title": "Financial Summary",
+      "description": "Detailed financial analysis will be displayed here"
+    },
+    "trends": {
+      "title": "Trend Analysis",
+      "description": "Financial trends and patterns will be displayed here"
+    },
+    "forecast": {
+      "title": "Financial Forecast",
+      "description": "Predicted financial performance will be displayed here"
+    },
+    "automation": {
+      "subtitle": "Automate operational costs and smart alerts for maximum efficiency",
+      "rulesDescription": "Set up and manage operational cost automation rules",
+      "addRule": "Add New Automation Rule"
+    },
+    "alerts": {
+      "allHandled": "All alerts have been handled! 🎉"
+    }
   },
   "hpp": {
     "title": "COGS Calculation",

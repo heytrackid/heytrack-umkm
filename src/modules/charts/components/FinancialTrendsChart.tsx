@@ -6,6 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from"@/components/ui/chart"
+import { formatCurrency } from '@/shared/utils/currency'
 
 const financialData = [
   {
@@ -94,12 +95,12 @@ export default function FinancialTrendsChart() {
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={(value) => `Rp ${value.toLocaleString()}`}
+          tickFormatter={(value) => formatCurrency(value)}
         />
         <ChartTooltip 
           cursor={false} 
           content={<ChartTooltipContent 
-            formatter={(value) => [`Rp ${Number(value).toLocaleString('id-ID')}`, null]}
+            formatter={(value) => [formatCurrency(Number(value)), null]}
           />} 
         />
         <Line

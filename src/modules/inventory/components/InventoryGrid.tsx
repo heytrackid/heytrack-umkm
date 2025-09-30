@@ -9,6 +9,7 @@ import {
   Clock,
   ShoppingCart
 } from 'lucide-react'
+import { formatCurrency } from '@/shared/utils/currency'
 
 interface InventoryItem {
   ingredient: any
@@ -112,7 +113,7 @@ export function InventoryGrid({
             <div className="flex justify-between text-sm">
               <span>Nilai Stok</span>
               <span className="font-medium">
-                Rp {(item.ingredient.current_stock * item.ingredient.price_per_unit).toLocaleString()}
+                {formatCurrency(item.ingredient.current_stock * item.ingredient.price_per_unit)}
               </span>
             </div>
 
@@ -130,7 +131,7 @@ export function InventoryGrid({
                   </div>
                   <div className="flex justify-between">
                     <span>Estimasi:</span>
-                    <span className="font-medium">Rp {item.reorderRecommendation.estimatedCost.toLocaleString()}</span>
+                    <span className="font-medium">{formatCurrency(item.reorderRecommendation.estimatedCost)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Urgency:</span>

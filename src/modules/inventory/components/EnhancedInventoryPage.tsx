@@ -82,7 +82,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     console.log(`Update ${selectedIngredient?.name} price to ${newPrice} using ${method} method`)
 
     // Show success message
-    alert(`✅ Harga ${selectedIngredient?.name} berhasil diupdate ke Rp ${newPrice.toLocaleString('id-ID')} menggunakan metode ${method}`)
+    alert(`✅ Price for ${selectedIngredient?.name} has been updated to ${formatCurrency(newPrice)} using ${method} method`)
   }, [selectedIngredient])
 
   // Bulk action handlers

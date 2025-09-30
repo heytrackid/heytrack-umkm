@@ -4,6 +4,8 @@
  * Supports multiple models including Grok-4-Fast
  */
 
+import { formatCurrency } from '@/shared/utils/currency'
+
 interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -174,8 +176,8 @@ Selalu prioritaskan membantu user mencapai profitabilitas dan sustainability bis
   ): Promise<string> {
     const prompts = {
       financial: `Analisis data keuangan berikut untuk bisnis ${businessContext.businessType}:
-Revenue: Rp ${data.revenue?.toLocaleString('id-ID') || 0}
-Costs: Rp ${data.costs?.toLocaleString('id-ID') || 0}
+Revenue: ${formatCurrency(data.revenue || 0)}
+Costs: ${formatCurrency(data.costs || 0)}
 Profit Margin: ${data.profitMargin?.toFixed(1) || 0}%
 
 Berikan analisis komprehensif dengan rekomendasi spesifik untuk meningkatkan profitabilitas.`,
@@ -183,7 +185,7 @@ Berikan analisis komprehensif dengan rekomendasi spesifik untuk meningkatkan pro
       inventory: `Analisis status inventori untuk bisnis ${businessContext.businessType}:
 - ${data.criticalItems?.length || 0} item kritis
 - ${data.alerts?.length || 0} item low stock
-- Total nilai inventori: Rp ${data.totalValue?.toLocaleString('id-ID') || 0}
+- Total nilai inventori: ${formatCurrency(data.totalValue || 0)}
 
 Berikan rekomendasi untuk optimasi inventory management dan cash flow.`,
 
@@ -191,13 +193,13 @@ Berikan rekomendasi untuk optimasi inventory management dan cash flow.`,
 - Total customers: ${data.totalCustomers || 0}
 - Active customers: ${data.activeCustomers || 0}
 - Retention rate: ${data.retentionRate?.toFixed(1) || 0}%
-- Average Order Value: Rp ${data.avgOrderValue?.toLocaleString('id-ID') || 0}
+- Average Order Value: ${formatCurrency(data.avgOrderValue || 0)}
 
 Berikan strategi untuk meningkatkan customer lifetime value dan retention.`,
 
       product: `Analisis performa produk untuk ${businessContext.businessType}:
 Top Products: ${data.topRecipes?.map((r: any) => `${r.name} (${r.times_made}x sold)`).join(', ') || 'No data'}
-Total Revenue: Rp ${data.totalRevenue?.toLocaleString('id-ID') || 0}
+Total Revenue: ${formatCurrency(data.totalRevenue || 0)}
 
 Berikan rekomendasi untuk optimasi product mix dan pricing strategy.`
     };
@@ -217,7 +219,7 @@ Berikan rekomendasi untuk optimasi product mix dan pricing strategy.`
     const prompt = `Berdasarkan data bisnis ${businessContext.businessType} berikut:
 
 FINANCIAL METRICS:
-- Revenue: Rp ${businessData.revenue?.toLocaleString('id-ID') || 0}
+- Revenue: ${formatCurrency(businessData.revenue || 0)}
 - Profit Margin: ${businessData.profitMargin?.toFixed(1) || 0}%
 - Monthly Growth: ${businessData.growthRate?.toFixed(1) || 0}%
 

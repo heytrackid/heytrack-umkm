@@ -26,6 +26,7 @@ import {
   LineChart as LineChartIcon,
   PieChart
 } from 'lucide-react'
+import { formatCurrency as formatCurrencyUtil } from '@/shared/utils/currency'
 
 interface FinancialDataPoint {
   month: string
@@ -50,7 +51,7 @@ export default function FinancialTrendsChart() {
   const [timeRange, setTimeRange] = useState<'6m' | '1y' | '2y'>('6m')
 
   const formatCurrency = (value: number) => {
-    return `Rp ${(value / 1000000).toFixed(0)}M`
+    return `${formatCurrencyUtil(value / 1000000)}M`
   }
 
   const renderChart = () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
@@ -9,6 +9,11 @@ import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { useI18n } from '@/providers/I18nProvider'
+
+// Lazy load extracted components for better performance
+const CostForm = lazy(() => import('./components/CostForm'))
+const CostTable = lazy(() => import('./components/CostTable'))
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -791,7 +796,17 @@ export default function OperationalCostsPage() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        {currentView === 'list' ? <CostList /> : <CostForm />}
+        
+        {/* Using extracted lazy-loaded components */}
+        {currentView === 'list' ? (
+          <Suspense fallback={<DataGridSkeleton />}>
+            <CostList />
+          </Suspense>
+        ) : (
+          <Suspense fallback={<FormFieldSkeleton />}>
+            <CostForm />
+          </Suspense>
+        )}
       </div>
     </AppLayout>
   )

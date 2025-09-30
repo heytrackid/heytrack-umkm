@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 /**
  * Smart Automation Engine for UMKM F&B
  * Updated to use the new modular automation system
@@ -299,7 +301,7 @@ export class WorkflowAutomation {
       if (financialError) {
         console.error('Error creating financial record:', financialError)
       } else {
-        console.log(`✅ Created financial record: +Rp ${order.total_amount.toLocaleString()}`)
+        console.log(`✅ Created financial record: +${formatCurrency(order.total_amount)}`)
       }
     } catch (error) {
       console.error('Error in createFinancialRecordFromOrder:', error)
@@ -452,7 +454,7 @@ export class WorkflowAutomation {
         category: 'financial', 
         priority: 'medium',
         title: 'Biaya Operasional Diperbarui',
-        message: `${costName} berubah dari Rp ${oldAmount.toLocaleString()} ke Rp ${newAmount.toLocaleString()}. Semua HPP otomatis diperbarui.`,
+        message: `${costName} berubah dari ${formatCurrency(oldAmount)} ke ${formatCurrency(newAmount)}. Semua HPP otomatis diperbarui.`,
         actionUrl: '/hpp-simple?tab=operational_costs',
         actionLabel: 'Lihat HPP'
       })

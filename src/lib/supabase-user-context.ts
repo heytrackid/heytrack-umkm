@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 /**
  * Supabase User Context Service
  * Retrieves user-specific business data for AI chatbot personalization
@@ -367,7 +369,7 @@ export class SupabaseUserContext {
     const activities = [
       ...(orders.data || []).map(order => ({
         type: 'order',
-        description: `Pesanan baru dari ${order.customers?.name || 'Customer'} - Rp ${order.total_amount?.toLocaleString('id-ID')}`,
+        description: `Pesanan baru dari ${order.customers?.name || 'Customer'} - ${formatCurrency(order.total_amount || 0)}`,
         timestamp: order.created_at,
         amount: order.total_amount
       })),

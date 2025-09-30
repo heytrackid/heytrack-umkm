@@ -571,6 +571,39 @@
     "financialTrendsDesc": "Analisis pendapatan, pengeluaran, keuntungan, dan HPP",
     "loadingFinancialData": "Memuat data keuangan...",
     "loadingFinancialDashboard": "Loading financial dashboard...",
+    "dashboard": {
+      "subtitle": "Analisis keuangan real-time dengan insights otomatis"
+    },
+    "costSaved": "Penghematan Biaya",
+    "monthlyGrowth": "Pertumbuhan Bulanan",
+    "profitMargin": "Margin Profit",
+    "yearlyTarget": "Progress Target Tahunan",
+    "insights": {
+      "goodPerformance": "Performa Baik",
+      "goodPerformanceDesc": "Margin profit di atas target industri 25%",
+      "growthTrend": "Tren Pertumbuhan",
+      "growthTrendDesc": "Pertumbuhan konsisten selama 3 bulan terakhir"
+    },
+    "summary": {
+      "title": "Ringkasan Keuangan",
+      "description": "Analisis keuangan detail akan ditampilkan di sini"
+    },
+    "trends": {
+      "title": "Analisis Tren",
+      "description": "Tren dan pola keuangan akan ditampilkan di sini"
+    },
+    "forecast": {
+      "title": "Proyeksi Keuangan",
+      "description": "Prediksi performa keuangan akan ditampilkan di sini"
+    },
+    "automation": {
+      "subtitle": "Otomatisasi biaya operasional dan alert cerdas untuk efisiensi maksimal",
+      "rulesDescription": "Atur dan kelola aturan otomatisasi biaya operasional",
+      "addRule": "Tambah Automation Rule Baru"
+    },
+    "alerts": {
+      "allHandled": "Semua alert sudah ditangani! 🎉"
+    },
     "transactionTypes": {
       "income": "Pemasukan",
       "expense": "Pengeluaran"

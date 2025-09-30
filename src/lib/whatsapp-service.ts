@@ -4,6 +4,8 @@
  * Supports customizable templates and URL generation
  */
 
+import { formatCurrency } from '@/shared/utils/currency'
+
 export interface WhatsAppTemplate {
   id: string;
   name: string;
@@ -228,13 +230,13 @@ Jangan sampai terlewat ya! Order sekarang:
   // Generate order items text
   formatOrderItems(items: OrderData['items']): string {
     return items.map(item => 
-      `• ${item.name} (${item.quantity}x) - Rp ${item.price.toLocaleString('id-ID')}`
+      `• ${item.name} (${item.quantity}x) - ${formatCurrency(item.price)}`
     ).join('\n');
   }
 
-  // Format currency to IDR
+  // Format currency (using dynamic currency system)
   formatCurrency(amount: number): string {
-    return `Rp ${amount.toLocaleString('id-ID')}`;
+    return formatCurrency(amount);
   }
 
   // Format date to Indonesian format
@@ -258,8 +260,8 @@ Jangan sampai terlewat ya! Order sekarang:
       customer_name: orderData.customer_name,
       order_id: orderData.id,
       order_items: this.formatOrderItems(orderData.items),
-      total_amount: this.formatCurrency(orderData.total_amount),
-      delivery_date: orderData.delivery_date ? this.formatDate(orderData.delivery_date) : 'Sesuai kesepakatan',
+      total_amount: formatCurrency(orderData.total_amount),
+      delivery_date: orderData.delivery_date ? this.formatDate(orderData.delivery_date) : 'As agreed',
       business_name: businessName
     };
 
@@ -283,7 +285,7 @@ Jangan sampai terlewat ya! Order sekarang:
     const templateData = {
       customer_name: orderData.customer_name,
       order_id: orderData.id,
-      total_amount: this.formatCurrency(orderData.total_amount),
+      total_amount: formatCurrency(orderData.total_amount),
       due_date: this.formatDate(dueDate),
       payment_details: paymentDetails,
       business_name: businessName
@@ -303,7 +305,7 @@ Jangan sampai terlewat ya! Order sekarang:
     whatsappURL: string;
     businessURL: string;
   } {
-    const mainProduct = orderData.items[0]?.name || 'pesanan';
+    const mainProduct = orderData.items[0]?.name || 'order';
     
     const templateData = {
       customer_name: orderData.customer_name,

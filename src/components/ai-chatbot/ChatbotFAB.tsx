@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import ChatbotInterface from './ChatbotInterface';
+
+// Lazy load ChatbotInterface for better performance
+const ChatbotInterface = lazy(() => import('./ChatbotInterface'));
 
 interface ChatbotFABProps {
   userId: string;
@@ -79,12 +81,18 @@ const ChatbotFAB: React.FC<ChatbotFABProps> = ({ userId, className = '' }) => {
           
           {/* Chat Interface */}
           <div className="z-50 relative">
-            <ChatbotInterface
-              userId={userId}
-              isMinimized={false}
-              onToggleMinimize={toggleChatbot}
-              className="md:fixed md:bottom-4 md:right-4 fixed inset-4 md:inset-auto md:w-96 md:h-[600px] w-auto h-auto"
-            />
+            <Suspense fallback={
+              <div className="md:fixed md:bottom-4 md:right-4 fixed inset-4 md:inset-auto md:w-96 md:h-[600px] w-auto h-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+              </div>
+            }>
+              <ChatbotInterface
+                userId={userId}
+                isMinimized={false}
+                onToggleMinimize={toggleChatbot}
+                className="md:fixed md:bottom-4 md:right-4 fixed inset-4 md:inset-auto md:w-96 md:h-[600px] w-auto h-auto"
+              />
+            </Suspense>
           </div>
 
           {/* Close button for mobile */}

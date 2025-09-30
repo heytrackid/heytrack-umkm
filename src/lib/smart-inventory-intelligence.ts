@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 /**
  * 🧠 Smart Inventory Intelligence 
  * Converts basic inventory data to intelligent insights with forecasting
@@ -389,7 +391,7 @@ export function generateInventoryInsights(smartItems: SmartIngredientItem[]) {
   }, 0)
   
   if (totalPotentialSavings > 50000) {
-    insights.push(`💰 Potensi penghematan Rp ${totalPotentialSavings.toLocaleString()} dengan optimasi`)
+    insights.push(`💰 Potensi penghematan ${formatCurrency(totalPotentialSavings)} dengan optimasi`)
   }
   
   return insights

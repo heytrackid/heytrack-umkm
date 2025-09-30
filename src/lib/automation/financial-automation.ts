@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 import {
   AutomationConfig,
   Ingredient,
@@ -357,7 +359,7 @@ export class FinancialAutomation {
       },
       optimalPrice,
       allOptions: priceOptions.sort((a, b) => b.profit - a.profit),
-      recommendation: `Optimal price: Rp ${optimalPrice.price.toLocaleString()} (${optimalPrice.priceChange > 0 ? '+' : ''}${optimalPrice.priceChange}% change)`
+      recommendation: `Optimal price: ${formatCurrency(optimalPrice.price)} (${optimalPrice.priceChange > 0 ? '+' : ''}${optimalPrice.priceChange}% change)`
     }
   }
 

@@ -1,4 +1,5 @@
 import React from 'react'
+import { formatCurrency } from '@/shared/utils/currency'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -216,7 +217,7 @@ export function SmartInventoryAutomation({
                       {action.estimatedImpact && (
                         <div className="text-xs text-gray-500 dark:text-gray-500 mb-2">
                           Dampak: 
-                          {action.estimatedImpact.costSaving && ` Hemat Rp ${action.estimatedImpact.costSaving.toLocaleString()}`}
+                          {action.estimatedImpact.costSaving && ` Hemat ${formatCurrency(action.estimatedImpact.costSaving)}`}
                           {action.estimatedImpact.riskReduction && ` Risiko -${action.estimatedImpact.riskReduction}%`}
                           {action.estimatedImpact.efficiency && ` Efisiensi +${action.estimatedImpact.efficiency}%`}
                         </div>
@@ -318,7 +319,7 @@ export function SmartInventoryAutomation({
                           key={index}
                           className="flex-1 bg-gray-400 dark:bg-gray-600 rounded-sm"
                           style={{ height: `${Math.max(normalizedHeight, 10)}%` }}
-                          title={`Minggu ${index + 1}: Rp ${price.toLocaleString()}`}
+                          title={`Minggu ${index + 1}: ${formatCurrency(price)}`}
                         />
                       )
                     })}

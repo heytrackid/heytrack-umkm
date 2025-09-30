@@ -26,6 +26,8 @@ import {
   BarChart3,
   Plus
 } from 'lucide-react'
+import { formatCurrency } from '@/shared/utils/currency'
+import { useTranslation } from '@/contexts/TranslationContext'
 
 interface AutomationRule {
   id: string
@@ -248,7 +250,7 @@ export default function SmartExpenseAutomation() {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                Rp {automationStats.costSaved.toLocaleString()}
+                {formatCurrency(automationStats.costSaved)}
               </div>
               <p className="text-xs text-muted-foreground">Cost Saved</p>
             </div>
@@ -295,7 +297,7 @@ export default function SmartExpenseAutomation() {
                             </Badge>
                             {alert.amount && (
                               <Badge variant="secondary" className="text-xs">
-                                Rp {alert.amount.toLocaleString()}
+                                {formatCurrency(alert.amount)}
                               </Badge>
                             )}
                           </div>
@@ -367,7 +369,7 @@ export default function SmartExpenseAutomation() {
                         {rule.config.amount && (
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-3 w-3" />
-                            Rp {rule.config.amount.toLocaleString()}
+                            {formatCurrency(rule.config.amount)}
                           </span>
                         )}
                       </div>
@@ -419,7 +421,7 @@ export default function SmartExpenseAutomation() {
                       <span className="font-medium capitalize">{category}</span>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Rp {spent.toLocaleString()} / Rp {budget.toLocaleString()}
+                      {formatCurrency(spent)} / {formatCurrency(budget)}
                     </div>
                   </div>
                   <Progress 

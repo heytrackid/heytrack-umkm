@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 /**
  * AI Chatbot Service for UMKM F&B
  * Handles natural language processing, action execution, and business intelligence
@@ -762,7 +764,7 @@ export class AIChatbotService {
       `${recipes.summary}\n\n` +
       `**Top 3 Produk Terlaris:**\n` +
       `${recipes.topRecipes.slice(0, 3).map((recipe, idx) => 
-        `${idx + 1}. ${recipe.name} - ${recipe.times_made}x terjual (Rp ${recipe.total_revenue?.toLocaleString('id-ID') || 0})`
+        `${idx + 1}. ${recipe.name} - ${recipe.times_made}x terjual (${formatCurrency(recipe.total_revenue || 0)})`
       ).join('\n')}\n\n` +
       (recipes.recommendations.length > 0 
         ? `💡 **Rekomendasi:**\n${recipes.recommendations.map(rec => `• ${rec}`).join('\n')}`
@@ -830,7 +832,7 @@ export class AIChatbotService {
         : '') +
       `**Top 3 Pelanggan Terbaik:**\n` +
       `${customerAnalysis.topCustomers.slice(0, 3).map((customer, idx) => 
-        `${idx + 1}. ${customer.name} - ${customer.total_orders} pesanan (Rp ${customer.total_spent?.toLocaleString('id-ID') || 0})`
+        `${idx + 1}. ${customer.name} - ${customer.total_orders} pesanan (${formatCurrency(customer.total_spent || 0)})`
       ).join('\n')}\n\n` +
       (customerAnalysis.recommendations.length > 0 
         ? `💡 **Rekomendasi:**\n${customerAnalysis.recommendations.map(rec => `• ${rec}`).join('\n')}`

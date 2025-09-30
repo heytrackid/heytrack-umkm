@@ -94,12 +94,12 @@ export function FinancialTrendsChart() {
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={(value) => `Rp ${value.toLocaleString()}`}
+          tickFormatter={(value) => `${formatCurrency(value)}`}
         />
         <ChartTooltip 
           cursor={false} 
           content={<ChartTooltipContent 
-            formatter={(value) => [`Rp ${Number(value).toLocaleString('id-ID')}`, null]}
+            formatter={(value) => [`${formatCurrency(Number(value).toLocaleString('id-ID'))}`, null]}
           />} 
         />
         <Line

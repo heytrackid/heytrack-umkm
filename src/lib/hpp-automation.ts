@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 /**
  * HPP (Harga Pokok Produksi) Automation System
  * Otomatis update HPP ketika ada perubahan harga bahan baku atau biaya operasional

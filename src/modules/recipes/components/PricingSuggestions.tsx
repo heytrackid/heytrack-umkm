@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Target } from 'lucide-react'
+import { formatCurrency } from '@/shared/utils/currency'
 
 interface PricingSuggestion {
   price: number
@@ -62,7 +63,7 @@ export function PricingSuggestionsComponent({
                 </Badge>
               </div>
               <div className="text-2xl font-bold mb-2">
-                Rp {suggestion.price.toLocaleString()}
+                {formatCurrency(suggestion.price)}
               </div>
               <p className="text-xs text-muted-foreground">
                 {suggestion.rationale}

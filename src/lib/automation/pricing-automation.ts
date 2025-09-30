@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/utils/currency'
+
 import {
   AutomationConfig,
   Recipe,
@@ -94,8 +96,8 @@ export class PricingAutomation {
       recommendations.push('⚠️ Cost terlalu tinggi, pertimbangkan optimasi ingredient atau supplier')
     }
     
-    recommendations.push(`💡 Harga optimal: Rp ${pricing.standard.price.toLocaleString()} untuk margin sehat`)
-    recommendations.push(`🎯 Break-even minimum: Rp ${Math.ceil(cost * 1.3).toLocaleString()}`)
+    recommendations.push(`💡 Harga optimal: ${formatCurrency(pricing.standard.price)} untuk margin sehat`)
+    recommendations.push(`🎯 Break-even minimum: ${formatCurrency(Math.ceil(cost * 1.3))}`)
     
     if (pricing.economy.price < cost * 1.2) {
       recommendations.push('⚠️ Harga ekonomi terlalu rendah, risiko rugi tinggi')
@@ -167,7 +169,7 @@ export class PricingAutomation {
         optimalPrice: optimalPrice.price,
         expectedQuantity: optimalPrice.avgQuantity,
         projectedRevenue: optimalPrice.totalRevenue,
-        reasoning: `Harga Rp ${optimalPrice.price.toLocaleString()} memberikan revenue tertinggi`
+        reasoning: `Harga ${formatCurrency(optimalPrice.price)} memberikan revenue tertinggi`
       }
     }
   }
