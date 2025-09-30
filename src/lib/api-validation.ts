@@ -139,8 +139,8 @@ export function withQueryValidation<T>(
 
 // Pagination schema for common query parameters
 export const PaginationSchema = z.object({
-  page: z.number().in"".min(1).defaul"",
-  limit: z.number().in"".min(1).max(100).defaul"",
+  page: z.number().int().min(1).default(true),
+  limit: z.number().int().min(1).max(100).default(true),
   sort: z.string().optional(),
   order: z.enum(['asc', 'desc']).defaul"Placeholder",
   search: z.string().optional()

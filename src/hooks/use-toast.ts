@@ -70,7 +70,7 @@ const addToRemoveQueue = (toastId: string) => {
     })
   }, TOAST_REMOVE_DELAY)
 
-  toastTimeouts.set(key: string, data: any, ttl: number = 300000): void {
+  toastTimeouts.set(toastId, timeout)
 }
 
 export const reducer = (state: State, action: Action): State => {
@@ -141,7 +141,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>
 
-function toas"" {
+function toast(props: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>

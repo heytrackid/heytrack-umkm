@@ -31,13 +31,13 @@ export const IngredientSchema = z.object({
   expiry_date: z.string().datetime().optional(),
   cost_per_unit: rupiah.optional(),
   usage_rate_daily: nonNegativeNumber.optional(),
-  reorder_lead_time: z.number().in"".min(1, 'validation.leadTimeMin').optional(),
+  reorder_lead_time: z.number().int().min(1, 'validation.leadTimeMin').optional(),
   supplier_info: z.object({
     name: optionalString,
     contact: optionalString,
     price: rupiah.optional()
   }).optional(),
-  is_active: z.boolean().defaul""
+  is_active: z.boolean().default(true)
 }).refine(data => {
   // Custom validation: min_stock should be less than or equal to current_stock
   if (data.min_stock > data.current_stock) {
@@ -55,9 +55,9 @@ export type IngredientFormData = z.infer<typeof IngredientSchema>
 export const RecipeSchema = z.object({
   name: indonesianName,
   description: optionalString,
-  servings: z.number().in"".min(1, 'validation.servingsMin').max(1000, 'validation.servingsMax'),
-  prep_time_minutes: z.number().in"".min(1, 'validation.prepTimeMin').max(1440, 'validation.prepTimeMax'),
-  cook_time_minutes: z.number().in"".min(0, 'validation.cookTimeNonNegative').optional(),
+  servings: z.number().int().min(1, 'validation.servingsMin').max(1000, 'validation.servingsMax'),
+  prep_time_minutes: z.number().int().min(1, 'validation.prepTimeMin').max(1440, 'validation.prepTimeMax'),
+  cook_time_minutes: z.number().int().min(0, 'validation.cookTimeNonNegative').optional(),
   instructions: z.array(z.string().min(1, 'validation.instructionNotEmpty')).min(1, 'validation.instructionMinCount'),
   difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD'], {
     message: 'validation.invalidDifficulty'
@@ -67,7 +67,7 @@ export const RecipeSchema = z.object({
   cost_per_serving: rupiah.optional(),
   profit_margin: percentage.optional(),
   rating: z.number().min(1, 'validation.ratingMin').max(5, 'validation.ratingMax').optional(),
-  is_active: z.boolean().defaul"",
+  is_active: z.boolean().default(true),
   image_url: z.string().url('validation.invalidImageUrl').optional(),
   tags: z.array(z.string()).optional()
 })
@@ -92,12 +92,12 @@ export const CustomerSchema = z.object({
   phone: phone.optional(),
   address: optionalString,
   birth_date: z.string().datetime().optional(),
-  loyalty_points: nonNegativeNumber.optional().defaul"",
+  loyalty_points: nonNegativeNumber.optional().default(true),
   customer_type: z.enum(['REGULAR', 'VIP', 'WHOLESALE'], {
     message: 'validation.invalidCustomerType'
   }).optional().defaul"Placeholder",
   notes: optionalString,
-  is_active: z.boolean().defaul""
+  is_active: z.boolean().default(true)
 }).refine(data => {
   // At least one contact method should be provided
   return data.email || data.phone
@@ -120,8 +120,8 @@ export const OrderSchema = z.object({
   order_date: z.string().datetime(),
   delivery_date: z.string().datetime().optional(),
   total_amount: rupiah,
-  discount: nonNegativeNumber.optional().defaul"",
-  tax: nonNegativeNumber.optional().defaul"",
+  discount: nonNegativeNumber.optional().default(true),
+  tax: nonNegativeNumber.optional().default(true),
   payment_method: z.enum(['CASH', 'TRANSFER', 'CREDIT_CARD', 'E_WALLET'], {
     message: 'validation.invalidPaymentMethod'
   }).optional(),
@@ -130,7 +130,7 @@ export const OrderSchema = z.object({
   }).defaul"Placeholder",
   notes: optionalString,
   delivery_address: optionalString,
-  is_delivery: z.boolean().defaul""
+  is_delivery: z.boolean().default(true)
 })
 
 export type OrderFormData = z.infer<typeof OrderSchema>
@@ -199,7 +199,7 @@ export const FinancialRecordSchema = z.object({
   }).optional(),
   reference_no: optionalString,
   receipt_url: z.string().url('validation.invalidReceiptUrl').optional(),
-  is_recurring: z.boolean().defaul"",
+  is_recurring: z.boolean().default(true),
   recurring_period: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'], {
     message: 'validation.invalidRecurringPeriod'
   }).optional(),
@@ -240,8 +240,8 @@ export const BulkRecipeSchema = z.object({
 
 // Additional schema exports for API routes
 export const PaginationSchema = z.object({
-  page: z.number().in"".min(1).defaul"",
-  limit: z.number().in"".min(1).max(100).defaul"",
+  page: z.number().int().min(1).default(true),
+  limit: z.number().int().min(1).max(100).default(true),
   sort: z.string().optional(),
   order: z.enum(['asc', 'desc']).defaul"Placeholder",
   search: z.string().optional()

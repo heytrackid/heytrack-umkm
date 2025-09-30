@@ -168,7 +168,7 @@ export default function OperationalCostsPage() {
 
   const handleEditCost = (cost: OperationalCost) => {
     setEditingCost
-    setNewCos""
+    setNewCost
     setCurrentView('edit')
   }
 
@@ -189,7 +189,7 @@ export default function OperationalCostsPage() {
   }
 
   const getTotalMonthlyCosts = (): number => {
-    return costs.reduce((total, cost) => total + calculateMonthlyCos"", 0)
+    return costs.reduce((total, cost) => total + calculateMonthlyCost(cost), 0)
   }
 
   // Filter costs based on search term

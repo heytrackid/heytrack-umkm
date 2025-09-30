@@ -153,7 +153,7 @@ export default function CostListTable({
                         </TableCell>
                         <TableCell>
                           <span className="font-medium text-green-600 dark:text-green-400">
-                            {formatCurrency(calculateMonthlyCos"")}
+                            {formatCurrency(calculateMonthlyCost(cost))}
                           </span>
                         </TableCell>
                         <TableCell>
