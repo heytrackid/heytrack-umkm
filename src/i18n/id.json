@@ -152,6 +152,7 @@
     "title": "Dashboard",
     "subtitle": "Overview Bisnis",
     "welcome": "Selamat datang kembali!",
+    "quickActions": "Aksi Cepat",
     "stats": {
       "totalRevenue": "Total Pendapatan",
       "totalOrders": "Total Pesanan",
@@ -235,6 +236,16 @@
     "ingredient": "Bahan",
     "selectIngredient": "Pilih bahan",
     "quantity": "Jumlah",
+    "unit": "Satuan",
+    "prepTime": "Waktu Persiapan",
+    "cookTime": "Waktu Memasak",
+    "servingSize": "Ukuran Porsi",
+    "ingredients": "Bahan-bahan",
+    "recipeList": "Daftar Resep",
+    "noIngredientsYet": "Belum ada bahan",
+    "addIngredient": "Tambah Bahan",
+    "addIngredientsFirst": "Tambahkan bahan terlebih dahulu",
+    "updateRecipeDesc": "Update informasi resep",
     "tips": {
       "title": "💡 Tips: Cara Mudah Buat Resep",
       "step1": "• Input nama produk (contoh:\"Roti Tawar\")",
@@ -243,15 +254,18 @@
       "step4": "• HPP akan dihitung otomatis!"
     },
     "table": {
+      "recipe": "Resep",
       "recipeList": "Daftar Resep",
       "manageRecipesEasily": "Kelola resep produk dengan mudah",
       "nameCategory": "Nama & Kategori",
+      "hpp": "HPP",
       "hppEstimate": "HPP Estimasi",
       "ingredientCount": "Jumlah Bahan",
       "readyHPP": "SIAP HPP",
       "needIngredients": "PERLU BAHAN",
       "ingredients": "{{count}} bahan",
-      "calculateHPP": "Hitung HPP"
+      "calculateHPP": "Hitung HPP",
+      "status": "Status"
     },
     "empty": {
       "noIngredients": "Belum ada data bahan baku",
@@ -631,6 +645,14 @@
     "totalCOGS": "Total HPP",
     "suggestedPrice": "Harga Saran",
     "profitMargin": "Margin Keuntungan"
+  },
+  "units": {
+    "g": "gram",
+    "kg": "kilogram",
+    "ml": "mililiter",
+    "l": "liter",
+    "pcs": "pcs",
+    "dozen": "lusin"
   },
   "ingredients": {
     "title": "Bahan Baku",

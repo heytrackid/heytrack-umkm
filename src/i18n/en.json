@@ -152,6 +152,7 @@
     "title": "Dashboard",
     "subtitle": "Business Overview",
     "welcome": "Welcome back!",
+    "quickActions": "Quick Actions",
     "stats": {
       "totalRevenue": "Total Revenue",
       "totalOrders": "Total Orders",
@@ -202,6 +203,11 @@
     "outOfStock": "Out of Stock",
     "stockValue": "Stock Value"
   },
+  "ingredients": {
+    "addIngredient": "Add Ingredient",
+    "searchIngredients": "Search ingredients...",
+    "noIngredientsFound": "No ingredients found"
+  },
   "recipes": {
     "title": "Recipes",
     "subtitle": "Manage product recipes",
@@ -235,6 +241,16 @@
     "ingredient": "Ingredient",
     "selectIngredient": "Select ingredient",
     "quantity": "Quantity",
+    "unit": "Unit",
+    "prepTime": "Prep Time",
+    "cookTime": "Cook Time",
+    "servingSize": "Serving Size",
+    "ingredients": "Ingredients",
+    "recipeList": "Recipe List",
+    "noIngredientsYet": "No ingredients yet",
+    "addIngredient": "Add Ingredient",
+    "addIngredientsFirst": "Add ingredients first",
+    "updateRecipeDesc": "Update recipe information",
     "tips": {
       "title": "💡 Tips: Easy Way to Create Recipes",
       "step1": "• Input product name (example: \"White Bread\")",
@@ -243,15 +259,18 @@
       "step4": "• COGS will be calculated automatically!"
     },
     "table": {
+      "recipe": "Recipe",
       "recipeList": "Recipe List",
       "manageRecipesEasily": "Manage product recipes easily",
       "nameCategory": "Name & Category",
+      "hpp": "COGS",
       "hppEstimate": "COGS Estimate",
       "ingredientCount": "Ingredient Count",
       "readyHPP": "READY COGS",
       "needIngredients": "NEEDS INGREDIENTS",
       "ingredients": "{{count}} ingredients",
-      "calculateHPP": "Calculate COGS"
+      "calculateHPP": "Calculate COGS",
+      "status": "Status"
     },
     "empty": {
       "noIngredients": "No ingredient data yet",
@@ -426,11 +445,25 @@
     "editCategory": "Edit Category",
     "deleteCategory": "Delete Category",
     "totalCategories": "Total Categories",
-    "activeCategories": "Active Categories"
+    "activeCategories": "Active Categories",
+    "productCategory": "Product Category",
+    "createNewCategory": "Create New Category",
+    "editCategoryDesc": "Edit product category",
+    "categoryName": "Category Name",
+    "categoryIcon": "Icon",
+    "categoryDescription": "Description",
+    "categoryNamePlaceholder": "Example: Main Dishes",
+    "categoryDescPlaceholder": "Example: Rice, noodles, pasta, etc",
+    "commonIngredients": "Common Ingredients",
+    "addIngredient": "Add Ingredient",
+    "ingredientPlaceholder": "Ingredient name (example: wheat flour)",
+    "noIngredientsYet": "No ingredients yet. Click \"Add Ingredient\" to add.",
+    "saveCategory": "Save Category"
   },
   "finance": {
     "title": "Finance",
     "subtitle": "Complete financial management",
+    "description": "Manage income, expenses and financial reports",
     "income": "Income",
     "expense": "Expense",
     "profit": "Profit",
@@ -438,6 +471,7 @@
     "balance": "Balance",
     "revenue": "Revenue",
     "costs": "Costs",
+    "all": "All",
     "cashFlow": "Cash Flow",
     "monthlyReport": "Monthly Report",
     "yearlyReport": "Yearly Report",
@@ -445,6 +479,23 @@
     "monthlyGrowth": "Monthly Growth",
     "profitMargin": "Profit Margin",
     "yearlyTarget": "Yearly Target Progress",
+    "newTransaction": "New Transaction",
+    "createNewTransaction": "Create New Transaction",
+    "transactionDetail": "Transaction Detail",
+    "financialTrends": "Financial Trends",
+    "financialTrendsDesc": "Analyze income and expense trends",
+    "loadingFinancialData": "Loading financial data...",
+    "loadingFinancialDashboard": "Loading financial dashboard...",
+    "paymentMethods": {
+      "cash": "Cash",
+      "bankTransfer": "Bank Transfer",
+      "creditCard": "Credit Card",
+      "digitalWallet": "Digital Wallet"
+    },
+    "transactionTypes": {
+      "income": "Income",
+      "expense": "Expense"
+    },
     "dashboard": {
       "subtitle": "Real-time financial analysis with automated insights"
     },
@@ -486,5 +537,13 @@
     "totalCOGS": "Total COGS",
     "suggestedPrice": "Suggested Price",
     "profitMargin": "Profit Margin"
+  },
+  "units": {
+    "g": "gram",
+    "kg": "kilogram",
+    "ml": "milliliter",
+    "l": "liter",
+    "pcs": "pieces",
+    "dozen": "dozen"
   }
 }
