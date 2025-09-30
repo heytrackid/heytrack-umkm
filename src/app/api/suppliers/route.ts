@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
     const { data: supplier, error } = await (supabase as any)
       .from('suppliers')
-      .insert(data)
+      .insert([body])
       .select('*')
       .single();
 

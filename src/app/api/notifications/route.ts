@@ -5,10 +5,10 @@ import { automationEngine } from '@/lib/automation-engine'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const limit = parseInt(value)
-  const unreadOnly = searchParams.get('param') === 'true'
-  const category = searchParams.get('param')
-  const source = searchParams.get('param') || 'database' // 'smart' | 'database' | 'all'
+  const limit = parseInt(searchParams.get('limit') || '50')
+  const unreadOnly = searchParams.get('unreadOnly') === 'true'
+  const category = searchParams.get('category')
+  const source = searchParams.get('source') || 'database' // 'smart' | 'database' | 'all'
 
   try {
     let notifications = []
@@ -148,7 +148,7 @@ export async function PATCH(request: NextRequest) {
   try {
     const supabase = createSupabaseClient()
     const { searchParams } = new URL(request.url)
-    const action = searchParams.get('param')
+    const action = searchParams.get('action')
     const body = await request.json()
 
     if (action === 'mark_read') {

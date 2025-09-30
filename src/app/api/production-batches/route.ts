@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const { data: batch, error } = await (supabase as any)
       .from('production_batches')
-      .insert(data)
+      .insert([body])
       .select(`
         *,
         recipe:recipes(name)
