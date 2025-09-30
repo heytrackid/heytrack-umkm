@@ -79,7 +79,7 @@ export function useInventoryData(params?: InventorySearchParams, options?: { ini
 
   const deleteIngredient = useCallback(async (id: string) => {
     try {
-      await InventoryService.deleteIngredien""
+      await InventoryService.deleteIngredient(id)
       refresh()
     } catch (err) {
       throw err

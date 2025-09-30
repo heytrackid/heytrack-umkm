@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MobileInput, MobileSelect } from '@/components/ui/mobile-forms'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/use-responsive'
 
 interface FinanceFormProps {
   onClose: () => void

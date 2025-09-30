@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/use-responsive'
 import { useCurrency } from '@/hooks/useCurrency'
 
 interface TransactionDetailViewProps {

@@ -30,7 +30,7 @@ export const preloadTableBundle = async () => {
     await Promise.all([
       import('@/components/optimized/OptimizedTable'),
       import('@/components/ui/table'),
-      import('@/components/ui/data-table'),
+      import('@/components/ui/simple-data-table'),
     ])
     console.log('✅ Table bundle preloaded')
   } catch (error) {
@@ -109,7 +109,7 @@ export const useLinkPreloading = () => {
 // Button interaction preloading
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
-    preloadModalComponent
+    preloadModalComponent(modalType)
   }, [])
 
   const preloadTableOnHover = useCallback(() => {
@@ -148,7 +148,7 @@ export const useSmartPreloading = () => {
 
     // Get most visited routes and preload them with low priority
     const popularRoutes = Object.entries(routeFrequency)
-      .sort((a, b) => (b as number) - (a as number))
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
       .slice(0, 3)
       .map(([route]) => route)
 
@@ -171,15 +171,13 @@ export const useIdleTimePreloading = () => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
-      clearTimeout
+      clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
         console.log('🕒 User idle - preloading heavy components')
         
         Promise.all([
           preloadChartBundle(),
           preloadTableBundle(),
-          preloadModalComponent(modalType),
-          preloadModalComponent(modalType),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
         }).catch(() => {})
@@ -195,7 +193,7 @@ export const useIdleTimePreloading = () => {
     resetIdleTimer()
 
     return () => {
-      clearTimeout
+      clearTimeout(idleTimer)
       events.forEach(event => {
         document.removeEventListener(event, resetIdleTimer, true)
       })

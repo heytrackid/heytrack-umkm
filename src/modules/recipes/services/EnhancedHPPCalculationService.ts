@@ -57,8 +57,8 @@ export class EnhancedHPPCalculationService {
     )
 
     // 2. Calculate operational costs allocation
-    const operationalCostPerUnit = includeOperationalCosts ? 
-      this.calculateOperationalCostPerUni"" : 0
+const operationalCostPerUnit = includeOperationalCosts ? 
+      this.calculateOperationalCostPerUnit(operationalCosts, recipe.servings || 1, overheadAllocationMethod) : 0
 
     // 3. Calculate total HPP
     const totalMaterialCost = materialCosts.totalCost

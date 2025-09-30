@@ -27,7 +27,7 @@ interface SettingsContextType {
   formatCurrency: (amount: number) => string
 }
 
-const currencies: Currency[] = [
+export const currencies: Currency[] = [
   { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 },
   { code: 'USD', symbol: '$', name: 'US Dollar', decimals: 2 },
   { code: 'EUR', symbol: '€', name: 'Euro', decimals: 2 },

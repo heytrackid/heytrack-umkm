@@ -67,12 +67,12 @@ export function calculateStockValue(ingredient: Ingredient): number {
 /**
  * Format stock unit untuk display
  */
-export function formatStockUni"": string {
-  const formatted = quantity.toLocaleString('id-ID', { 
+export function formatStockUnit(quantity: number, unit: string): string {
+  const formatted = quantity.toLocaleString('id-ID', {
     minimumFractionDigits: unit === 'g' || unit === 'ml' ? 0 : 2,
     maximumFractionDigits: unit === 'g' || unit === 'ml' ? 0 : 2
   })
-  
+
   return `${formatted} ${unit}`
 }
 
@@ -100,7 +100,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `critical_stock_${ingredient.id}`,
         ingredient,
         type: 'low_stock',
-        message: `Stok ${ingredient.name} sangat rendah (${formatStockUni""})`,
+message: `Stok ${ingredient.name} sangat rendah (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
         severity: 'high',
         actionRequired: 'Segera lakukan pembelian dalam 1-2 hari',
         daysUntilCritical: 1
@@ -110,7 +110,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `warning_stock_${ingredient.id}`,
         ingredient,
         type: 'low_stock',
-        message: `Stok ${ingredient.name} mulai menipis (${formatStockUni""})`,
+message: `Stok ${ingredient.name} mulai menipis (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
         severity: 'medium',
         actionRequired: 'Rencanakan pembelian dalam minggu ini',
         daysUntilCritical: 3
@@ -124,7 +124,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `overstock_${ingredient.id}`,
         ingredient,
         type: 'overstocked',
-        message: `Stok ${ingredient.name} berlebihan (${formatStockUni""})`,
+message: `Stok ${ingredient.name} berlebihan (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
         severity: 'low',
         actionRequired: 'Pertimbangkan untuk mengurangi pembelian sementara'
       })
@@ -201,7 +201,7 @@ export function calculateDaysUntilReorder(
 /**
  * Convert unit untuk konsistensi (contoh: g ke kg)
  */
-export function normalizeUni"": number {
+export function normalizeUnit(quantity: number, fromUnit: string, toUnit: string): number {
   const conversions: Record<string, Record<string, number>> = {
     g: { kg: 0.001, g: 1 },
     kg: { g: 1000, kg: 1 },
@@ -215,5 +215,5 @@ export function normalizeUni"": number {
     can: { can: 1 }
   }
   
-  return quantity * (conversions[fromUnit]?.[toUnit] || 1)
+  return quantity * (conversions[fromUnit]?.[toUnit] ?? 1)
 }

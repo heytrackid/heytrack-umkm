@@ -129,7 +129,7 @@ class AutoReorderService {
           const urgency = this.calculateUrgency(currentStock, minStock)
           const suggestedQuantity = this.calculateReorderQuantity(ingredient, rule)
           const preferredSupplier = suppliers?.find(s => s.id === rule?.preferred_supplier_id)
-          const estimatedCost = this.estimateReorderCos""
+          const estimatedCost = this.estimateReorderCost(suggestedQuantity, ingredient)
 
           const alert: ReorderAlert = {
             id: `alert_${ingredient.id}_${Date.now()}`,
@@ -215,7 +215,7 @@ class AutoReorderService {
     // Create purchase order in database
     const { data: createdPO, error: poError } = await supabase
       .from('purchase_orders')
-      .insert(data)
+      .insert(purchaseOrder)
       .select('*')
       .single()
 
@@ -229,7 +229,7 @@ class AutoReorderService {
 
     const { error: itemsError } = await supabase
       .from('purchase_order_items')
-      .insert(data)
+      .insert(items)
 
     if (itemsError) throw itemsError
 
@@ -274,7 +274,7 @@ class AutoReorderService {
       .from('inventory_reorder_alerts')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(options.limit)
+      .limit(100)
 
     if (error) throw error
     return data || []
@@ -332,7 +332,7 @@ class AutoReorderService {
     return Math.ceil((ingredient.min_stock || 0) * 1.5)
   }
 
-  private estimateReorderCos"": number {
+  private estimateReorderCost(quantity: number, ingredient: any): number {
     const unitPrice = ingredient.price_per_unit || 0
     return quantity * unitPrice
   }
@@ -361,10 +361,10 @@ class AutoReorderService {
       .from('purchase_orders')
       .select('*')
       .gte('created_at', `${today.toISOString().slice(0, 10)}T00:00:00`)
-      .l"Placeholder".slice(0, 10)}T23:59:59`)
+      .lte('created_at', `${today.toISOString().slice(0, 10)}T23:59:59`)
 
     const dailyCount = (data?.length || 0) + 1
-    return `PO-${dateStr}-${dailyCount.toString().padStar""}`
+    return `PO-${dateStr}-${dailyCount.toString().padStart(3, '0')}`
   }
 
   private calculateExpectedDelivery(deliveryDays?: number): string {
@@ -387,7 +387,7 @@ class AutoReorderService {
     // Insert new alerts
     const { error } = await supabase
       .from('inventory_reorder_alerts')
-      .insert(data)
+      .insert(alerts)
 
     if (error) {
       console.error('Error saving reorder alerts:', error)

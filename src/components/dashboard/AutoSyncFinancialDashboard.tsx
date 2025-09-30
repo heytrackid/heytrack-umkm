@@ -12,7 +12,6 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   XCircle, 
-  Sync,
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -147,7 +146,7 @@ export default function AutoSyncFinancialDashboard() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Sync className="h-5 w-5 animate-spin" />
+          <RefreshCw className="h-5 w-5 animate-spin" />
           <span>Loading sync status...</span>
         </div>
         {Array.from({ length: 3 }).map((_, i) => (

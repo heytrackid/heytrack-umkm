@@ -54,10 +54,10 @@ export default function EnhancedHPPCalculator() {
         }
       )
       
-      setCalculationResul""
+      setCalculationResult(result)
     } catch (error) {
       console.error('Error calculating HPP:', error)
-      setCalculationResul""
+      setCalculationResult(null)
     } finally {
       setIsCalculating(false)
     }

@@ -82,9 +82,9 @@ export class InventoryService {
   }
   
   /**
-   * Get single ingredient by ID (với caching)
+   * Get single ingredient by ID (with caching)
    */
-  static async getIngredien"": Promise<Ingredient | null> {
+  static async getIngredient(id: string): Promise<Ingredient | null> {
     return await inventoryCache.cachedFetch(
       `ingredient/${id}`,
       async () => {
@@ -105,10 +105,10 @@ export class InventoryService {
   /**
    * Create new ingredient (invalidate cache)
    */
-  static async createIngredient(ingredient): Promise<Ingredient> {
+  static async createIngredient(ingredient: InsertIngredient): Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
-      .insert(data)
+      .insert(ingredient)
       .select('*')
       .single()
     
@@ -117,13 +117,13 @@ export class InventoryService {
     // Invalidate related caches
     inventoryCache.invalidate(CACHE_PATTERNS.INVENTORY)
     
-    return data
+    return data as Ingredient
   }
   
   /**
    * Update ingredient (invalidate cache)
    */
-  static async updateIngredient(id, updates): Promise<Ingredient> {
+  static async updateIngredient(id: string, updates: Partial<UpdateIngredient>): Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -137,13 +137,13 @@ export class InventoryService {
     inventoryCache.invalidate(`ingredient/${id}`)
     inventoryCache.invalidate(CACHE_PATTERNS.INVENTORY)
     
-    return data
+    return data as Ingredient
   }
   
   /**
    * Delete ingredient
    */
-  static async deleteIngredien"": Promise<void> {
+  static async deleteIngredient(id: string): Promise<void> {
     const { error } = await supabase
       .from('ingredients')
       .delete()
@@ -173,7 +173,7 @@ export class InventoryService {
     }
     
     if (limit) {
-      query = query.limit(options.limit)
+      query = query.limit(limit)
     }
     
     const { data, error } = await query
@@ -188,7 +188,7 @@ export class InventoryService {
   static async createStockTransaction(transaction: Omit<StockTransaction, 'id' | 'created_at'>) {
     const { data, error } = await supabase
       .from('stock_transactions')
-      .insert(data)
+      .insert(transaction)
       .select('*')
       .single()
     
@@ -209,7 +209,7 @@ export class InventoryService {
     type: string
   ) {
     // Get current ingredient
-    const ingredient = await this.getIngredien""
+    const ingredient = await this.getIngredient(ingredientId)
     if (!ingredient) throw new Error('Ingredient not found')
     
     // Calculate new stock berdasarkan transaction type

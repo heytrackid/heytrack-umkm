@@ -6,19 +6,19 @@ import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { useFinancialRecords } from '@/hooks/useDatabase'
+// import { useFinancialRecords } from '@/hooks/useDatabase'
 
-// Lazy loading imports
-import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
-import { FinancialTrendsChartWithLoading } from '@/components/lazy/chart-features'
-import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
+// Lazy loading imports - temporarily disabled to isolate build issue
+// import { SmartFinancialDashboardWithLoading } from '@/components/lazy/automation-features'
+// import { FinancialTrendsChartWithLoading } from '@/components/lazy/chart-features'
+// import { ProgressiveLoader } from '@/components/lazy/progressive-loading'
 
-// Mobile UX imports
-import { useResponsive } from '@/hooks/use-mobile'
-import { PullToRefresh } from '@/components/ui/mobile-gestures'
+// Mobile UX imports - temporarily disabled
+// import { useResponsive } from '@/hooks/use-responsive'
+// import { PullToRefresh } from '@/components/ui/mobile-gestures'
 
 // Dynamically load heavy sections with skeleton fallbacks
-const FinancialSummaryCards = dynamic(() => import('./components/FinancialSummaryCards'), {
+const FinancialSummaryCards = dynamic(() => import('./components/FinancialSummaryCards').then(m => ({ default: m.FinancialSummaryCards })), {
   loading: () => (
     <div className="grid gap-4 md:grid-cols-4">
       {Array.from({ length: 4 }, (_, i) => (
@@ -28,7 +28,7 @@ const FinancialSummaryCards = dynamic(() => import('./components/FinancialSummar
   ),
 })
 
-const FinancialFilters = dynamic(() => import('./components/FinancialFilters'), {
+const FinancialFilters = dynamic(() => import('./components/FinancialFilters').then(m => ({ default: m.FinancialFilters })), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -39,7 +39,7 @@ const FinancialFilters = dynamic(() => import('./components/FinancialFilters'), 
   ),
 })
 
-const QuickAnalytics = dynamic(() => import('./components/QuickAnalytics'), {
+const QuickAnalytics = dynamic(() => import('./components/QuickAnalytics').then(m => ({ default: m.QuickAnalytics })), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -49,7 +49,7 @@ const QuickAnalytics = dynamic(() => import('./components/QuickAnalytics'), {
   ),
 })
 
-const TransactionList = dynamic(() => import('./components/TransactionList'), {
+const TransactionList = dynamic(() => import('./components/TransactionList').then(m => ({ default: m.TransactionList })), {
   loading: () => (
     <Card>
       <CardContent className="p-6">
@@ -59,11 +59,11 @@ const TransactionList = dynamic(() => import('./components/TransactionList'), {
   ),
 })
 
-const FinanceForm = dynamic(() => import('./components/FinanceForm'), {
+const FinanceForm = dynamic(() => import('./components/FinanceForm').then(m => ({ default: m.FinanceForm })), {
   loading: () => <div className="h-64 rounded bg-muted animate-pulse" />,
 })
 
-const TransactionDetailView = dynamic(() => import('./components/TransactionDetailView'), {
+const TransactionDetailView = dynamic(() => import('./components/TransactionDetailView').then(m => ({ default: m.TransactionDetailView })), {
   loading: () => <div className="h-32 rounded bg-muted animate-pulse" />,
 })
 
@@ -73,7 +73,10 @@ import { Plus, Download, AlertTriangle } from 'lucide-react'
 // const sampleTransactions = [...]
 
 export default function FinancePage() {
-  const { data: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
+  // const { data: financialRecords, loading: recordsLoading, error: recordsError } = useFinancialRecords()
+  const financialRecords: any[] = []
+  const recordsLoading = false
+  const recordsError = null
   
   const transactionTypes = [
     { value: 'INCOME', label: "Placeholder", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
@@ -92,12 +95,14 @@ export default function FinancePage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  // Mobile responsive hooks
-  const { isMobile, isTablet } = useResponsive()
+  // Mobile responsive hooks - temporarily disabled
+  // const { isMobile, isTablet } = useResponsive()
+  const isMobile = false
+  const isTablet = false
   
   // Pull-to-refresh handler
   const handleRefresh = async () => {
-    await new Promise(resolve => setTimeout)
+    await new Promise<void>(resolve => setTimeout(resolve, 500))
     // Data will automatically refresh via real-time subscription
     window.location.reload()
   }
@@ -149,7 +154,7 @@ export default function FinancePage() {
 
   return (
     <AppLayout>
-      <PullToRefresh onRefresh={handleRefresh}>
+      {/* <PullToRefresh onRefresh={handleRefresh}> */}
         <div className="space-y-6">
           {/* Header */}
           <div className={`flex gap-4 ${
@@ -168,7 +173,7 @@ export default function FinancePage() {
                 <Download className="h-4 w-4 mr-2" />
                 {"Placeholder"}
               </Button>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              {/* <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className={isMobile ? 'w-full' : ''}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -187,12 +192,12 @@ export default function FinancePage() {
                     <FinanceForm onClose={() => setIsAddDialogOpen(false)} />
                   </Suspense>
                 </DialogContent>
-              </Dialog>
+              </Dialog> */}
             </div>
           </div>
 
-          {/* Financial Summary Cards (Suspense) */}
-          <Suspense fallback={
+          {/* Financial Summary Cards (Suspense) - temporarily disabled to isolate error */}
+          {/* <Suspense fallback={
             <div className="grid gap-4 md:grid-cols-4">
               {Array.from({ length: 4 }, (_, i) => (
                 <div key={i} className="h-24 rounded-lg bg-muted animate-pulse" />
@@ -204,10 +209,10 @@ export default function FinancePage() {
               isMobile={isMobile}
               transactions={transactions}
             />
-          </Suspense>
+          </Suspense> */}
 
-          {/* Financial Trends Chart (already lazy) */}
-          <Card>
+          {/* Financial Trends Chart - temporarily disabled */}
+          {/* <Card>
             <CardHeader className={isMobile ? 'pb-2' : ''}>
               <CardTitle className={isMobile ? 'text-lg' : ''}>
                 {"Placeholder"}
@@ -223,10 +228,10 @@ export default function FinancePage() {
                 <FinancialTrendsChartWithLoading />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
-          {/* Smart Financial Dashboard */}
-          {recordsLoading ? (
+          {/* Smart Financial Dashboard - temporarily disabled */}
+          {/* {recordsLoading ? (
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center py-8">
@@ -266,10 +271,10 @@ export default function FinancePage() {
                 />
               </div>
             </ProgressiveLoader>
-          )}
+          )} */}
 
-          {/* Quick Analytics (Suspense) */}
-          <Suspense fallback={
+          {/* Quick Analytics (Suspense) - temporarily disabled */}
+          {/* <Suspense fallback={
             <Card>
               <CardContent className="p-6">
                 <div className="h-24 rounded bg-muted animate-pulse" />
@@ -282,10 +287,10 @@ export default function FinancePage() {
             transactions={transactions}
             isMobile={isMobile}
           />
-          </Suspense>
+          </Suspense> */}
 
-          {/* Filters (Suspense) */}
-          <Suspense fallback={
+          {/* Filters (Suspense) - temporarily disabled */}
+          {/* <Suspense fallback={
             <Card>
               <CardContent className="p-6">
                 <div className="h-10 rounded bg-muted animate-pulse mb-3" />
@@ -309,10 +314,10 @@ export default function FinancePage() {
             incomeCategories={incomeCategories}
             expenseCategories={expenseCategories}
           />
-          </Suspense>
+          </Suspense> */}
 
-          {/* Transactions List (Suspense) */}
-          <Suspense fallback={
+          {/* Transactions List (Suspense) - temporarily disabled */}
+          {/* <Suspense fallback={
             <Card>
               <CardContent className="p-6">
                 <div className="h-64 rounded bg-muted animate-pulse" />
@@ -332,13 +337,13 @@ export default function FinancePage() {
               console.log('Bulk action:', action, 'for transactions:', transactionIds)
               // TODO: Implement bulk actions (export, delete)
             }}
-            getPaymentMethodLabel={(method: string) => getPaymentMethodLabel(method, t)}
+            getPaymentMethodLabel={(method: string) => getPaymentMethodLabel(method)}
             transactionTypes={transactionTypes}
           />
-          </Suspense>
+          </Suspense> */}
 
-          {/* Transaction Detail Dialog */}
-          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          {/* Transaction Detail Dialog - temporarily disabled */}
+          {/* <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
             <DialogContent className={`max-w-2xl ${
               isMobile ? 'w-full mx-4 rounded-lg' : ''
             }`}>
@@ -349,14 +354,14 @@ export default function FinancePage() {
               </DialogHeader>
               {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
             </DialogContent>
-          </Dialog>
+          </Dialog> */}
         </div>
-      </PullToRefresh>
+      {/* </PullToRefresh> */}
     </AppLayout>
   )
 }
 
-function getPaymentMethodLabel(method: string, t: any) {
+function getPaymentMethodLabel(method: string) {
   const methods: any = {
     'CASH': "Placeholder",
     'BANK_TRANSFER': "Placeholder",

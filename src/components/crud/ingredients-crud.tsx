@@ -432,3 +432,5 @@ label={"Placeholder"}
     </div>
   );
 }
+
+export default IngredientsCRUD

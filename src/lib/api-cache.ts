@@ -18,8 +18,8 @@ interface CacheOptions {
 
 class APICache {
   private cache = new Map<string, CacheEntry>()
-  private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
-  private readonly MAX_SIZE = 100 // Maximum cache entries
+  private DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
+  private MAX_SIZE = 100 // Maximum cache entries
   private version: string = 'v1'
 
   constructor(options?: CacheOptions) {
@@ -34,12 +34,12 @@ class APICache {
   private generateKey(endpoint: string, params?: Record<string, any>): string {
     const baseKey = `${this.version}:${endpoint}`
     if (!params) return baseKey
-    
+
     const sortedParams = Object.keys(params)
-      .sort((a, b)
+      .sort((a, b) => a.localeCompare(b))
       .map(key => `${key}=${JSON.stringify(params[key])}`)
       .join('&')
-    
+
     return `${baseKey}?${sortedParams}`
   }
 
@@ -72,7 +72,7 @@ class APICache {
     const entry = this.cache.get(key)
 
     if (!entry) return null
-    
+
     if (!this.isValid(entry)) {
       this.cache.delete(key)
       return null
@@ -95,7 +95,7 @@ class APICache {
       key
     }
 
-    this.cache.set(key: string, data: any, ttl: number = 300000): void {
+    this.cache.set(key, entry)
     this.evictOldEntries()
   }
 
@@ -105,14 +105,14 @@ class APICache {
   invalidate(pattern: string): number {
     let removed = 0
     const regex = new RegExp(pattern.replace(/\*/g, '.*'))
-    
+
     for (const [key] of this.cache) {
-      if (regex.tes"") {
+      if (regex.test(key)) {
         this.cache.delete(key)
         removed++
       }
     }
-    
+
     return removed
   }
 
@@ -129,7 +129,7 @@ class APICache {
   getStats() {
     const entries = Array.from(this.cache.values())
     const validEntries = entries.filter(entry => this.isValid(entry))
-    
+
     return {
       size: this.cache.size,
       validEntries: validEntries.length,
@@ -144,18 +144,20 @@ class APICache {
    * Preload data into cache
    */
   preload<T>(endpoint: string, data: T, params?: Record<string, any>, ttl?: number): void {
-    this.set(key: string, data: any, ttl: number = 300000): void {
+    this.set(endpoint, data, params, ttl)
   }
 
   /**
    * Cache wrapper for fetch operations
    */
   async cachedFetch<T>(
-    endpoint: string, 
-    fetchFn: () => Promise<T>, 
+    endpoint: string,
+    fetchFn: () => Promise<T>,
     params?: Record<string, any>,
     options?: { ttl?: number; forceRefresh?: boolean }
   ): Promise<T> {
+    const key = this.generateKey(endpoint, params)
+
     // Check cache first (unless force refresh)
     if (!options?.forceRefresh) {
       const cached = this.get<T>(endpoint, params)
@@ -167,11 +169,11 @@ class APICache {
     // Fetch fresh data
     try {
       const data = await fetchFn()
-      this.set(key: string, data: any, ttl: number = 300000): void {
+      this.set(endpoint, data, params, options?.ttl)
       return data
     } catch (error) {
       // On error, try to return stale cache if available
-      const stale = this.cache.get(key))
+      const stale = this.cache.get(key)
       if (stale) {
         console.warn(`API fetch failed, returning stale cache for ${endpoint}`, error)
         return stale.data as T
@@ -201,48 +203,13 @@ export const financialCache = new APICache({
   version: 'financial-v1'
 })
 
-export const customerCache = new APICache({
-  ttl: 30 * 60 * 1000, // 30 minutes for customer data
-  maxSize: 100,
-  version: 'customer-v1'
-})
-
-// Cache invalidation patterns
+// Cache invalidation patterns used around the app
 export const CACHE_PATTERNS = {
   INVENTORY: '*inventory*',
   RECIPES: '*recipe*',
   ORDERS: '*order*',
   FINANCIAL: '*financial*',
-  CUSTOMERS: '*customer*',
   ALL: '*'
 } as const
-
-// Cache warming utilities
-export const warmCache = {
-  inventory: () => {
-    // Pre-warm inventory cache with common queries
-    console.log('🔥 Warming inventory cache...')
-  },
-  
-  dashboard: () => {
-    // Pre-warm dashboard data
-    console.log('🔥 Warming dashboard cache...')
-  }
-}
-
-// Performance monitoring
-export const cacheMetrics = {
-  getStats: () => ({
-    api: apiCache.getStats(),
-    inventory: inventoryCache.getStats(),
-    financial: financialCache.getStats(),
-    customer: customerCache.getStats()
-  }),
-  
-  getTotalMemoryUsage: () => {
-    const stats = cacheMetrics.getStats()
-    return Object.values(stats).reduce((total, cache) => total + cache.size, 0)
-  }
-}
 
 export { APICache }

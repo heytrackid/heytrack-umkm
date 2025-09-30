@@ -1,14 +1,50 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Breakpoint,
-  ScreenSize,
-  UseResponsive,
-  UseMediaQuery,
-  BREAKPOINTS,
-  DEVICE_BREAKPOINTS,
-  AnimationPreferences,
-  AccessibilityPreferences,
-} from '../types/responsive';
+
+// Simple breakpoints
+const BREAKPOINTS = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536,
+} as const;
+
+const DEVICE_BREAKPOINTS = {
+  mobile: 0,
+  tablet: 768,
+  desktop: 1024,
+} as const;
+
+type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+type ScreenSize = 'mobile' | 'tablet' | 'desktop';
+
+interface UseResponsive {
+  breakpoint: Breakpoint;
+  screenSize: ScreenSize;
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+  width: number;
+  height: number;
+}
+
+interface UseMediaQuery {
+  matches: boolean;
+  media: string;
+}
+
+interface AnimationPreferences {
+  prefersReducedMotion: boolean;
+  enableTransitions: boolean;
+  animationDuration: 'fast' | 'normal' | 'slow';
+}
+
+interface AccessibilityPreferences {
+  highContrast: boolean;
+  largeText: boolean;
+  focusVisible: boolean;
+  touchFriendly: boolean;
+}
 
 // Hook to get current breakpoint and screen information
 export function useResponsive(): UseResponsive {
@@ -32,7 +68,7 @@ export function useResponsive(): UseResponsive {
     return 'mobile';
   }, []);
 
-  const breakpoint = getCurrentBreakpoin"";
+  const breakpoint = getCurrentBreakpoint(dimensions.width);
   const screenSize = getScreenSize(dimensions.width);
 
   useEffect(() => {
@@ -96,14 +132,14 @@ export function useIsTouchDevice(): boolean {
       );
     };
 
-    setIsTouchDevice(checkTouchSuppor"");
+    setIsTouchDevice(checkTouchSupport());
   }, []);
 
   return isTouchDevice;
 }
 
 // Hook to handle viewport changes with debouncing
-export function useViewpor"" {
+export function useViewport(debounceMs: number = 150) {
   const [viewport, setViewport] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
     height: typeof window !== 'undefined' ? window.innerHeight : 768,
@@ -113,7 +149,7 @@ export function useViewpor"" {
     let timeoutId: NodeJS.Timeout;
 
     const handleResize = () => {
-      clearTimeout;
+      clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         setViewport({
           width: window.innerWidth,
@@ -124,7 +160,7 @@ export function useViewpor"" {
 
     window.addEventListener('resize', handleResize);
     return () => {
-      clearTimeout;
+      clearTimeout(timeoutId);
       window.removeEventListener('resize', handleResize);
     };
   }, [debounceMs]);

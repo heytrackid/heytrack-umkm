@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 
 // Dynamically import the heavy CRUD component
-const IngredientsCRUD = dynamic(() => import('@/components/crud/ingredients-crud'), {
+const IngredientsCRUD = dynamic(() => import('@/components/crud/ingredients-crud').then(m => m.IngredientsCRUD), {
   loading: () => (
     <Card>
       <CardHeader>
