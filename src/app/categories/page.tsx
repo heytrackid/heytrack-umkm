@@ -48,6 +48,17 @@ const TableHead = dynamic(() => import('@/components/ui/table').then(m => ({ def
 const TableHeader = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableHeader })))
 const TableRow = dynamic(() => import('@/components/ui/table').then(m => ({ default: m.TableRow })))
 
+// Lazy load CategoryForm component
+const CategoryForm = dynamic(() => import('./components/CategoryForm').then(m => ({ default: m.CategoryForm })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="h-96 animate-pulse bg-muted rounded" />
+      </CardContent>
+    </Card>
+  )
+})
+
 interface Category {
   id: string
   name: string
@@ -193,154 +204,22 @@ export default function CategoriesPage() {
     alert
   }
 
-  const handleAddIngredient = () => {
-    setNewCategory(prev => ({
-      ...prev,
-      commonIngredients: [...prev.commonIngredients, '']
-    }))
-  }
-
-  const handleUpdateIngredient = (index: number, value: string) => {
-    setNewCategory(prev => ({
-      ...prev,
-      commonIngredients: prev.commonIngredients.map((ing, i) => i === index ? value : ing)
-    }))
-  }
-
-  const handleRemoveIngredient = (index: number) => {
-    setNewCategory(prev => ({
-      ...prev,
-      commonIngredients: prev.commonIngredients.filter((_, i) => i !== index)
-    }))
-  }
-
-  // Breadcrumb component
+  // Breadcrumb helper
   const getBreadcrumbItems = () => {
     const items = [
-      { label: "Placeholder", href: '/' },
-      { label: "Placeholder", href: '/resep' },
-      { label: "Placeholder", href: currentView === 'list' ? undefined : '/categories' }
+      { label: "Home", href: '/' },
+      { label: "Resep", href: '/resep' },
+      { label: "Kategori", href: currentView === 'list' ? undefined : '/categories' }
     ]
     
     if (currentView !== 'list') {
       items.push({ 
-        label: currentView === 'add' ? "Placeholder" : "Placeholder"
+        label: currentView === 'add' ? "Tambah Kategori" : "Edit Kategori"
       })
     }
     
     return items
   }
-
-  // Form Component
-  const CategoryForm = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            resetForm()
-            setCurrentView('list')
-          }}
-          className="p-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {currentView === 'add' ? 'Tambah' : 'Edit'} {'Kategori Produk'}
-          </h2>
-          <p className="text-muted-foreground">
-            {currentView === 'add' ? 'Buat kategori baru' : 'Edit kategori yang dipilih'}
-          </p>
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{'Nama Kategori'}</Label>
-              <Input
-                value={newCategory.name}
-                onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={'Masukkan nama kategori'}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label>{'Ikon Kategori'}</Label>
-              <Input
-                value={newCategory.icon}
-                onChange={(e) => setNewCategory(prev => ({ ...prev, icon: e.target.value }))}
-                placeholder="🍽️"
-                className="text-center"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{'Deskripsi Kategori'}</Label>
-            <Input
-              value={newCategory.description}
-              onChange={(e) => setNewCategory(prev => ({ ...prev, description: e.target.value }))}
-              placeholder={'Masukkan deskripsi kategori'}
-            />
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <Label>{'Bahan Baku Umum'}</Label>
-              <Button size="sm" onClick={handleAddIngredient}>
-                <Plus className="h-4 w-4 mr-1" />
-                {"Placeholder"}
-              </Button>
-            </div>
-            
-            <div className="space-y-2">
-              {newCategory.commonIngredients.map((ingredient, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={ingredient}
-                    onChange={(e) => handleUpdateIngredient}
-                    placeholder={"Placeholder"}
-                    className="flex-1"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleRemoveIngredient}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              
-              {newCategory.commonIngredients.length === 0 && (
-                <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded">
-                  {'Belum ada bahan baku'}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <Button onClick={handleSaveCategory} className="flex-1">
-              <Save className="h-4 w-4 mr-2" />
-              {"Placeholder"}
-            </Button>
-            <Button variant="outline" onClick={() => {
-              resetForm()
-              setCurrentView('list')
-            }}>
-              Batal
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
 
   // List Component
   const CategoryList = () => (
@@ -643,7 +522,21 @@ export default function CategoriesPage() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        {currentView === 'list' ? <CategoryList /> : <CategoryForm />}
+        {currentView === 'list' ? (
+          <CategoryList />
+        ) : (
+          <CategoryForm
+            category={newCategory}
+            currentView={currentView as 'add' | 'edit'}
+            isMobile={isMobile}
+            onCategoryChange={setNewCategory}
+            onSave={handleSaveCategory}
+            onCancel={() => {
+              resetForm()
+              setCurrentView('list')
+            }}
+          />
+        )}
       </div>
     </AppLayout>
   )
