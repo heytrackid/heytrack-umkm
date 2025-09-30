@@ -313,7 +313,7 @@ export class HPPAutomationSystem {
     })
     
     // Keep only last 30 entries
-    this.ingredientPriceHistory.set(key: string, data: any, ttl: number = 300000): void {)
+    this.ingredientPriceHistory.set(ingredientId, history.slice(-30))
   }
 
   private async findRecipesUsingIngredient(ingredientId) {

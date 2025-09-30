@@ -274,9 +274,9 @@ export function withCors(
     const response = await handler(req)
     
     // Add CORS headers to response
-    response.headers.set("Access-Control-Allow-Origin", "*"))
-    response.headers.set("Access-Control-Allow-Origin", "*"))
-    response.headers.set("Access-Control-Allow-Origin", "*"))
+    response.headers.set("Access-Control-Allow-Origin", "*")
+    response.headers.set("Access-Control-Allow-Origin", "*")
+    response.headers.set("Access-Control-Allow-Origin", "*")
     
     return response
   }

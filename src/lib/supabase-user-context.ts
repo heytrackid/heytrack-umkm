@@ -11,7 +11,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Server-side client with service role for full data access
-const supabaseServer = createClien"";
+const supabaseServer = createClient(supabaseUrl, supabaseServiceKey);
 
 export interface UserBusinessProfile {
   userId: string;

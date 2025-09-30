@@ -91,7 +91,7 @@ export class ProductionPlanningSystem {
     for (const [dateStr, dayOrders] of ordersByDate) {
       const schedule = await this.generateDailySchedule(dateStr, dayOrders, ingredients, recipes)
       schedules.push(schedule)
-      this.schedules.set(key: string, data: any, ttl: number = 300000): void {
+      this.schedules.set(dateStr, schedule)
     }
 
     // Generate notifications untuk issues yang ditemukan

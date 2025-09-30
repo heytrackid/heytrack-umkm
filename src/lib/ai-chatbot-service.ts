@@ -441,7 +441,7 @@ class IntentRecognizer {
     const msg = message.toLowerCase();
     
     // Greeting patterns
-    if (/^(hai|hello|halo|selamat|good morning|pagi)/i.tes"") {
+    if (/^(hai|hello|halo|selamat|good morning|pagi)/i.test(msg)) {
       return {
         intent: 'greeting',
         confidence: 0.9,
@@ -450,7 +450,7 @@ class IntentRecognizer {
     }
 
     // Order-related patterns
-    if (/tambah pesanan|buat pesanan|order baru|pesan/i.tes"") {
+    if (/tambah pesanan|buat pesanan|order baru|pesan/i.test(msg)) {
       return {
         intent: 'add_order',
         confidence: 0.8,
@@ -459,7 +459,7 @@ class IntentRecognizer {
     }
 
     // Stock inquiry patterns
-    if (/stok|stock|persediaan|bahan|ingredient/i.tes"") {
+    if (/stok|stock|persediaan|bahan|ingredient/i.test(msg)) {
       return {
         intent: 'check_stock',
         confidence: 0.8,
@@ -468,7 +468,7 @@ class IntentRecognizer {
     }
 
     // Financial patterns
-    if (/laporan keuangan|financial|pendapatan|revenue|profit|untung|rugi/i.tes"") {
+    if (/laporan keuangan|financial|pendapatan|revenue|profit|untung|rugi/i.test(msg)) {
       return {
         intent: 'financial_report',
         confidence: 0.8,
@@ -477,7 +477,7 @@ class IntentRecognizer {
     }
 
     // Analysis patterns
-    if (/analisis|analyze|insight|performa|performance/i.tes"") {
+    if (/analisis|analyze|insight|performa|performance/i.test(msg)) {
       return {
         intent: 'profit_analysis',
         confidence: 0.7,
@@ -486,7 +486,7 @@ class IntentRecognizer {
     }
 
     // Advice patterns
-    if (/saran|advice|rekomendasi|strategi|tips|bagaimana/i.tes"") {
+    if (/saran|advice|rekomendasi|strategi|tips|bagaimana/i.test(msg)) {
       return {
         intent: 'business_advice',
         confidence: 0.7,
@@ -495,7 +495,7 @@ class IntentRecognizer {
     }
 
     // Customer patterns
-    if (/pelanggan|customer|pembeli/i.tes"") {
+    if (/pelanggan|customer|pembeli/i.test(msg)) {
       return {
         intent: 'customer_analysis',
         confidence: 0.7,
@@ -547,11 +547,11 @@ class IntentRecognizer {
   private static extractPeriodEntities(message: string): Record<string, any> {
     const entities: Record<string, any> = {};
     
-    if (/minggu|week/i.tes"") {
+    if (/minggu|week/i.test(msg)) {
       entities.period = 'week';
-    } else if (/bulan|month/i.tes"") {
+    } else if (/bulan|month/i.test(msg)) {
       entities.period = 'month';
-    } else if (/kuartal|quarter/i.tes"") {
+    } else if (/kuartal|quarter/i.test(msg)) {
       entities.period = 'quarter';
     } else {
       entities.period = 'month'; // default
