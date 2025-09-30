@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useResponsive } from '@/hooks/use-mobile'
 import { Search, Filter, X, Calendar } from 'lucide-react'
 import { OrderFilters as OrderFiltersType } from './types'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface OrderFiltersProps {
   filters: OrderFiltersType
@@ -20,6 +21,7 @@ export default function OrderFilters({
   onFiltersChange, 
   onReset 
 }: OrderFiltersProps) {
+  const { t } = useI18n()
   const { isMobile } = useResponsive()
 
   const handleFilterChange = (key: keyof OrderFiltersType, value: string) => {
@@ -42,7 +44,7 @@ export default function OrderFilters({
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Cari berdasarkan nomor order atau nama pelanggan..."
+              placeholder={t('orders.searchPlaceholder')}
               value={filters.searchTerm}
               onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
               className="pl-10"
@@ -55,16 +57,16 @@ export default function OrderFilters({
             <div>
               <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t('orders.table.status')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="PENDING">Menunggu</SelectItem>
-                  <SelectItem value="CONFIRMED">Dikonfirmasi</SelectItem>
-                  <SelectItem value="IN_PROGRESS">Dalam Proses</SelectItem>
-                  <SelectItem value="READY">Siap</SelectItem>
-                  <SelectItem value="DELIVERED">Terkirim</SelectItem>
-                  <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
+                  <SelectItem value="all">{t('orders.allStatus')}</SelectItem>
+                  <SelectItem value="PENDING">{t('orders.status.pending')}</SelectItem>
+                  <SelectItem value="CONFIRMED">{t('orders.status.confirmed')}</SelectItem>
+                  <SelectItem value="IN_PROGRESS">{t('orders.status.in_production')}</SelectItem>
+                  <SelectItem value="READY">{t('orders.status.completed')}</SelectItem>
+                  <SelectItem value="DELIVERED">{t('orders.status.completed')}</SelectItem>
+                  <SelectItem value="CANCELLED">{t('orders.status.cancelled')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -73,13 +75,13 @@ export default function OrderFilters({
             <div>
               <Select value={filters.paymentStatus} onValueChange={(value) => handleFilterChange('paymentStatus', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Status Bayar" />
+                  <SelectValue placeholder={t('orders.table.payment')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua Pembayaran</SelectItem>
-                  <SelectItem value="UNPAID">Belum Bayar</SelectItem>
-                  <SelectItem value="PARTIAL">Bayar Sebagian</SelectItem>
-                  <SelectItem value="PAID">Lunas</SelectItem>
+                  <SelectItem value="all">{t('orders.allPaymentStatus')}</SelectItem>
+                  <SelectItem value="UNPAID">{t('orders.paymentStatus.unpaid')}</SelectItem>
+                  <SelectItem value="PARTIAL">{t('orders.paymentStatus.partial')}</SelectItem>
+                  <SelectItem value="PAID">{t('orders.paymentStatus.paid')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -88,13 +90,13 @@ export default function OrderFilters({
             <div>
               <Select value={filters.priority} onValueChange={(value) => handleFilterChange('priority', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Prioritas" />
+                  <SelectValue placeholder={t('orders.priority')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua Prioritas</SelectItem>
-                  <SelectItem value="high">Tinggi</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="low">Rendah</SelectItem>
+                  <SelectItem value="all">{t('orders.allPriority')}</SelectItem>
+                  <SelectItem value="high">{t('orders.priority.high')}</SelectItem>
+                  <SelectItem value="normal">{t('orders.priority.normal')}</SelectItem>
+                  <SelectItem value="low">{t('orders.priority.low')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -105,7 +107,7 @@ export default function OrderFilters({
                 type="date"
                 value={filters.dateFrom || ''}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                placeholder="Dari tanggal"
+                placeholder={t('orders.fromDate')}
               />
             </div>
 
@@ -115,7 +117,7 @@ export default function OrderFilters({
                 type="date"
                 value={filters.dateTo || ''}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                placeholder="Sampai tanggal"
+                placeholder={t('orders.toDate')}
               />
             </div>
           </div>
@@ -127,35 +129,35 @@ export default function OrderFilters({
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'PENDING' ? 'all' : 'PENDING')}
             >
-              Menunggu
+              {t('orders.status.pending')}
             </Button>
             <Button
               variant={filters.status === 'IN_PROGRESS' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
             >
-              Dalam Proses
+              {t('orders.status.in_production')}
             </Button>
             <Button
               variant={filters.status === 'READY' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'READY' ? 'all' : 'READY')}
             >
-              Siap
+              {t('orders.status.completed')}
             </Button>
             <Button
               variant={filters.paymentStatus === 'UNPAID' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('paymentStatus', filters.paymentStatus === 'UNPAID' ? 'all' : 'UNPAID')}
             >
-              Belum Bayar
+              {t('orders.paymentStatus.unpaid')}
             </Button>
             <Button
               variant={filters.priority === 'high' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('priority', filters.priority === 'high' ? 'all' : 'high')}
             >
-              Prioritas Tinggi
+              {t('orders.priority.high')}
             </Button>
           </div>
 
@@ -163,7 +165,7 @@ export default function OrderFilters({
           {hasActiveFilters && (
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-sm text-muted-foreground">
-                Filter aktif diterapkan
+                {t('orders.filtersActive')}
               </span>
               <Button
                 variant="ghost"
@@ -172,7 +174,7 @@ export default function OrderFilters({
                 className="text-red-600 hover:text-red-700"
               >
                 <X className="h-4 w-4 mr-2" />
-                Reset Filter
+                {t('orders.resetFilters')}
               </Button>
             </div>
           )}

@@ -234,25 +234,32 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
 
       {/* Smart Notifications Panel - Mobile-First Responsive */}
       {isOpen && (
-        <div className="absolute right-0 top-12 w-[95vw] sm:w-96 max-h-[85vh] sm:max-h-96 overflow-hidden bg-background border border-border rounded-lg  z-50">
-          <div className="p-3 sm:p-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <h3 className="font-medium text-sm sm:text-base">Smart Notifications</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                {loading && (
-                  <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 dark:border-t-gray-400 rounded-full animate-spin" />
-                )}
-                <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/20 md:hidden" 
+            onClick={() => setIsOpen(false)}
+          />
+          
+          <div className="fixed md:absolute right-0 top-0 md:top-12 w-full md:w-[420px] h-full md:h-auto md:max-h-[600px] overflow-hidden bg-background border-l md:border border-border md:rounded-lg shadow-2xl z-50">
+            <div className="p-4 border-b border-border flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  <h3 className="font-medium text-base">Smart Notifications</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  {loading && (
+                    <div className="h-4 w-4 border-2 border-gray-300 border-t-gray-600 dark:border-t-gray-400 rounded-full animate-spin" />
+                  )}
+                  <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto">
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 120px)' }}>
             {notifications.length === 0 ? (
               <div className="p-4 sm:p-6 text-center text-muted-foreground">
                 <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 opacity-50" />
@@ -273,19 +280,19 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
                   .map((notification) => (
                     <Card 
                       key={notification.id}
-                      className={`mx-2 mb-2 ${getNotificationColor(notification.type)} ${
+                      className={`mx-3 my-2 ${getNotificationColor(notification.type)} ${
                         notification.read ? 'opacity-60' : ''
                       }`}
                     >
-                      <CardContent className="p-3 sm:p-4">
+                      <CardContent className="p-3">
                         <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0">
+                          <div className="flex-shrink-0 mt-0.5">
                             {getNotificationIcon(notification.type)}
                           </div>
                           <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                              <p className="font-medium text-sm">{notification.title}</p>
-                              <div className="flex gap-1">
+                            <div className="flex flex-col gap-2">
+                              <p className="font-medium text-sm leading-tight break-words">{notification.title}</p>
+                              <div className="flex gap-1 flex-wrap">
                                 <Badge 
                                   variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
                                   className="text-xs"
@@ -297,7 +304,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
                                 </Badge>
                               </div>
                             </div>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground break-words">
                               {notification.message}
                             </p>
                             <div className="flex items-center justify-between">
@@ -337,7 +344,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
           </div>
 
           {notifications.length > 0 && (
-            <div className="p-3 border-t border-border">
+            <div className="p-3 border-t border-border flex-shrink-0">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -348,7 +355,8 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
               </Button>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   )

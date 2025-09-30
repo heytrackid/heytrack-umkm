@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Building } from 'lucide-react'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface BusinessInfoSettingsProps {
   settings: any
@@ -15,18 +16,20 @@ interface BusinessInfoSettingsProps {
  * Business information settings component
  */
 export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfoSettingsProps) {
+  const { t } = useI18n()
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building className="h-5 w-5" />
-          Informasi Bisnis
+          {t('settings.businessInfo.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="businessName">Nama Bisnis</Label>
+            <Label htmlFor="businessName">{t('settings.businessInfo.businessName')}</Label>
             <Input
               id="businessName"
               value={settings.general.businessName}
@@ -34,21 +37,21 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="businessType">Jenis Bisnis</Label>
+            <Label htmlFor="businessType">{t('settings.businessInfo.businessType')}</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={settings.general.businessType}
               onChange={(e) => onSettingChange('general', 'businessType', e.target.value)}
             >
-              <option value="bakery">Bakery</option>
-              <option value="cafe">Cafe</option>
-              <option value="restaurant">Restaurant</option>
-              <option value="food-truck">Food Truck</option>
+              <option value="bakery">{t('settings.businessInfo.types.bakery')}</option>
+              <option value="cafe">{t('settings.businessInfo.types.cafe')}</option>
+              <option value="restaurant">{t('settings.businessInfo.types.restaurant')}</option>
+              <option value="food-truck">{t('settings.businessInfo.types.foodTruck')}</option>
             </select>
           </div>
         </div>
         <div>
-          <Label htmlFor="address">Alamat</Label>
+          <Label htmlFor="address">{t('settings.businessInfo.address')}</Label>
           <Textarea
             id="address"
             value={settings.general.address}
@@ -58,7 +61,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="phone">Telepon</Label>
+            <Label htmlFor="phone">{t('settings.businessInfo.phone')}</Label>
             <Input
               id="phone"
               value={settings.general.phone}
@@ -66,7 +69,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('settings.businessInfo.email')}</Label>
             <Input
               id="email"
               type="email"
@@ -77,7 +80,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor="website">{t('settings.businessInfo.website')}</Label>
             <Input
               id="website"
               value={settings.general.website}
@@ -85,7 +88,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="taxNumber">NPWP</Label>
+            <Label htmlFor="taxNumber">{t('settings.businessInfo.taxNumber')}</Label>
             <Input
               id="taxNumber"
               value={settings.general.taxNumber}

@@ -13,6 +13,7 @@ import {
 import { Button } from"@/components/ui/button"
 import { AlertTriangle, Trash2, CheckCircle, XCircle } from"lucide-react"
 import { ReactNode } from"react"
+import { useI18n } from '@/hooks/use-i18n'
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -55,13 +56,14 @@ export function ConfirmationDialog({
   onOpenChange,
   title,
   description,
-  confirmText ="Konfirmasi",
-  cancelText ="Batal", 
+  confirmText,
+  cancelText, 
   variant ="default",
   onConfirm,
   loading = false,
   icon
 }: ConfirmationDialogProps) {
+  const { t } = useI18n()
   const config = variantConfig[variant]
   const IconComponent = icon || config.icon
 
@@ -92,7 +94,7 @@ export function ConfirmationDialog({
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={loading}>
-              {cancelText}
+              {cancelText || t('common.actions.cancel')}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -104,10 +106,10 @@ export function ConfirmationDialog({
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Memproses...
+                  {t('common.processing')}
                 </>
               ) : (
-                confirmText
+                confirmText || t('common.actions.confirm')
               )}
             </Button>
           </AlertDialogAction>
@@ -117,7 +119,7 @@ export function ConfirmationDialog({
   )
 }
 
-// Hook untuk memudahkan penggunaan
+// Hook for easy usage
 export function useConfirmationDialog() {
   const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => {
     return new Promise<boolean>((resolve) => {

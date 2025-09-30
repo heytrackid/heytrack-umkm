@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useI18n } from '@/providers/I18nProvider';
 
 interface ModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
   closeOnBackdropClick = true,
   fullScreenOnMobile = false,
 }) => {
+  const { t } = useI18n();
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
 
@@ -119,7 +121,7 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 className="absolute right-3 top-3 sm:right-4 sm:top-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full p-1 transition-colors"
-                aria-label="Close modal"
+                aria-label={t('common.actions.closeModal')}
               >
                 <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
@@ -154,6 +156,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
   closeOnBackdropClick = true,
   position = 'bottom',
 }) => {
+  const { t } = useI18n();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -232,7 +235,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full p-1 transition-colors"
-                aria-label="Close drawer"
+                aria-label={t('common.actions.closeDrawer')}
               >
                 <X className="h-6 w-6" />
               </button>

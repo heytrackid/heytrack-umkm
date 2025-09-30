@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
+import { useI18n } from '@/providers/I18nProvider'
 
 /**
  * Security settings component for password changes
  */
 export function SecuritySettings() {
+  const { t } = useI18n()
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -18,17 +20,17 @@ export function SecuritySettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lock className="h-5 w-5" />
-          Keamanan
+          {t('settings.security.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="currentPassword">Password Saat Ini</Label>
+          <Label htmlFor="currentPassword">{t('settings.security.currentPassword')}</Label>
           <div className="relative">
             <Input
               id="currentPassword"
               type={showPassword ?"text" :"password"}
-              placeholder="Masukkan password saat ini"
+              placeholder={t('settings.security.currentPasswordPlaceholder')}
             />
             <Button
               type="button"
@@ -46,24 +48,24 @@ export function SecuritySettings() {
           </div>
         </div>
         <div>
-          <Label htmlFor="newPassword">Password Baru</Label>
+          <Label htmlFor="newPassword">{t('settings.security.newPassword')}</Label>
           <Input
             id="newPassword"
             type="password"
-            placeholder="Masukkan password baru"
+            placeholder={t('settings.security.newPasswordPlaceholder')}
           />
         </div>
         <div>
-          <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
+          <Label htmlFor="confirmPassword">{t('settings.security.confirmPassword')}</Label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder="Konfirmasi password baru"
+            placeholder={t('settings.security.confirmPasswordPlaceholder')}
           />
         </div>
         <Button>
           <Shield className="h-4 w-4 mr-2" />
-          Update Password
+          {t('settings.security.updatePassword')}
         </Button>
       </CardContent>
     </Card>

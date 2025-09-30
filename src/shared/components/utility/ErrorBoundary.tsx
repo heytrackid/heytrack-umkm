@@ -65,10 +65,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="text-center py-8">
               <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
               <h3 className="text-lg font-medium text-destructive mb-2">
-                Something went wrong
+                Terjadi Kesalahan
               </h3>
               <p className="text-muted-foreground mb-4">
-                {this.state.error?.message || 'An unexpected error occurred.'}
+                {this.state.error?.message || 'Terjadi kesalahan yang tidak terduga.'}
               </p>
               
               <div className="flex gap-2 justify-center">
@@ -78,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   className="gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Try Again
+                  Coba Lagi
                 </Button>
                 
                 {process.env.NODE_ENV === 'development' && (
@@ -97,7 +97,7 @@ export class ErrorBoundary extends Component<Props, State> {
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mt-4 text-left">
                   <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                    Error Details (Development Only)
+                    Detail Error (Development Only)
                   </summary>
                   <pre className="mt-2 p-4 bg-muted rounded text-xs overflow-auto max-h-64">
                     {this.state.error.toString()}

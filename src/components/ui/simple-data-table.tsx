@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from"@/components/ui/select"
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface SimpleColumn<T> {
   key: keyof T | string
@@ -68,19 +69,20 @@ export function SimpleDataTable<T extends Record<string, any>>({
   description,
   data,
   columns,
-  searchPlaceholder ="Cari data...",
+  searchPlaceholder,
   onAdd,
   onView,
   onEdit,
   onDelete,
-  addButtonText ="Tambah",
-  emptyMessage ="Tidak ada data tersedia",
+  addButtonText,
+  emptyMessage,
   exportData = false,
   loading = false,
   enablePagination = true,
   pageSizeOptions,
   initialPageSize
 }: SimpleDataTableProps<T>) {
+  const { t } = useI18n()
   const { isMobile, shouldUseCompactUI } = useMobileFirst()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -241,13 +243,13 @@ export function SimpleDataTable<T extends Record<string, any>>({
               {exportData && (
                 <Button variant="outline" size={isMobile ?"sm" :"sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
-                  {isMobile ? 'Export' : 'Export'}
+                  {t('common.actions.export')}
                 </Button>
               )}
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {isMobile ? 'Tambah' : addButtonText}
+                  {addButtonText || t('common.actions.add')}
                 </Button>
               )}
             </div>
@@ -262,7 +264,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder}
+              placeholder={searchPlaceholder || t('common.search.placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -285,7 +287,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                       <SelectValue placeholder={`Filter ${col.header}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Semua {col.header}</SelectItem>
+                      <SelectItem value="all">{t('common.actions.all')} {col.header}</SelectItem>
                       {col.filterOptions?.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -301,7 +303,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
         {/* Table / Mobile Cards */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage}</p>
+            <p className="text-muted-foreground">{emptyMessage || t('tables.empty.noData')}</p>
           </div>
         ) : isMobile ? (
           /* Mobile Card Layout */
@@ -333,19 +335,19 @@ export function SimpleDataTable<T extends Record<string, any>>({
                           {onView && (
                             <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
                               <Eye className="h-4 w-4 mr-2" />
-                              Lihat
+                              {t('common.actions.view')}
                             </Button>
                           )}
                           {onEdit && (
                             <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
                               <Edit className="h-4 w-4 mr-2" />
-                              Edit
+                              {t('common.actions.edit')}
                             </Button>
                           )}
                           {onDelete && (
                             <Button variant="outline" size="sm" onClick={() => onDelete(item)} className="flex-1 text-red-600">
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Hapus
+                              {t('common.actions.delete')}
                             </Button>
                           )}
                         </div>
@@ -409,7 +411,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                     ))}
                     {(onView || onEdit || onDelete) && (
                       <th className="text-right p-2 font-medium text-muted-foreground">
-                        Aksi
+                        {t('tables.headers.actions')}
                       </th>
                     )}
                   </tr>
@@ -437,18 +439,18 @@ export function SimpleDataTable<T extends Record<string, any>>({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                              <DropdownMenuLabel>{t('tables.headers.actions')}</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               {onView && (
                                 <DropdownMenuItem onClick={() => onView(item)}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  Lihat
+                                  {t('common.actions.view')}
                                 </DropdownMenuItem>
                               )}
                               {onEdit && (
                                 <DropdownMenuItem onClick={() => onEdit(item)}>
                                   <Edit className="h-4 w-4 mr-2" />
-                                  Edit
+                                  {t('common.actions.edit')}
                                 </DropdownMenuItem>
                               )}
                               {onDelete && (
@@ -457,7 +459,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                                   className="text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
-                                  Hapus
+                                  {t('common.actions.delete')}
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>

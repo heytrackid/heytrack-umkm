@@ -12,6 +12,7 @@ import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
 import { Order, OrderFormData, Priority } from './types'
 import { generateOrderNumber, calculateOrderTotal, validateOrderData } from './utils'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface OrderFormProps {
   order?: Order // For editing existing order
@@ -32,6 +33,7 @@ export default function OrderForm({
   onCancel, 
   loading = false 
 }: OrderFormProps) {
+  const { t } = useI18n()
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
   const [formData, setFormData] = useState<OrderFormData>({
@@ -163,10 +165,10 @@ export default function OrderForm({
         </Button>
         <div>
           <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {order ? 'Edit Pesanan' : 'Tambah Pesanan Baru'}
+            {order ? t('orders.editOrder') : t('orders.addOrder')}
           </h2>
           <p className="text-muted-foreground">
-            {order ? 'Perbarui informasi pesanan' : 'Buat pesanan baru dari pelanggan'}
+            {order ? t('orders.updateOrderInfo') : t('orders.createNewOrder')}
           </p>
         </div>
       </div>
@@ -175,7 +177,7 @@ export default function OrderForm({
       {errors.length > 0 && (
         <Card className="border-red-200 bg-red-50">
           <CardContent className="p-4">
-            <h4 className="font-medium text-red-800 mb-2">Mohon perbaiki kesalahan berikut:</h4>
+            <h4 className="font-medium text-red-800 mb-2">{t('forms.validation.fixErrors')}</h4>
             <ul className="list-disc list-inside text-sm text-red-700">
               {errors.map((error, index) => (
                 <li key={index}>{error}</li>
@@ -189,43 +191,43 @@ export default function OrderForm({
         {/* Customer Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Informasi Pelanggan</CardTitle>
+            <CardTitle>{t('orders.customerInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Nama Pelanggan *</Label>
+              <Label>{t('forms.labels.name')} *</Label>
               <Input
                 value={formData.customer_name}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                placeholder="Nama lengkap pelanggan"
+                placeholder={t('orders.customerNamePlaceholder')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Nomor Telepon *</Label>
+              <Label>{t('forms.labels.phone')} *</Label>
               <Input
                 value={formData.customer_phone}
                 onChange={(e) => handleInputChange('customer_phone', e.target.value)}
-                placeholder="08xxxxxxxxxx"
+                placeholder={t('forms.placeholders.enterPhone')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{t('forms.labels.email')}</Label>
               <Input
                 type="email"
                 value={formData.customer_email}
                 onChange={(e) => handleInputChange('customer_email', e.target.value)}
-                placeholder="email@example.com"
+                placeholder={t('forms.placeholders.enterEmail')}
               />
             </div>
             
             <div className="space-y-2">
-              <Label>Alamat</Label>
+              <Label>{t('forms.labels.address')}</Label>
               <Textarea
                 value={formData.customer_address}
                 onChange={(e) => handleInputChange('customer_address', e.target.value)}
-                placeholder="Alamat lengkap untuk pengiriman"
+                placeholder={t('forms.placeholders.enterAddress')}
                 rows={3}
               />
             </div>
@@ -235,12 +237,12 @@ export default function OrderForm({
         {/* Order Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Detail Pesanan</CardTitle>
+            <CardTitle>{t('orders.orderDetails')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Tanggal Pengiriman *</Label>
+                <Label>{t('orders.deliveryDate')} *</Label>
                 <Input
                   type="date"
                   value={formData.delivery_date}
@@ -250,7 +252,7 @@ export default function OrderForm({
               </div>
               
               <div className="space-y-2">
-                <Label>Waktu Pengiriman</Label>
+                <Label>{t('orders.deliveryTime')}</Label>
                 <Input
                   type="time"
                   value={formData.delivery_time}
@@ -260,7 +262,7 @@ export default function OrderForm({
             </div>
             
             <div className="space-y-2">
-              <Label>Prioritas</Label>
+              <Label>{t('orders.priority')}</Label>
               <Select 
                 value={formData.priority} 
                 onValueChange={(value: Priority) => handleInputChange('priority', value)}
@@ -269,19 +271,19 @@ export default function OrderForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Rendah</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">Tinggi</SelectItem>
+                  <SelectItem value="low">{t('orders.priority.low')}</SelectItem>
+                  <SelectItem value="normal">{t('orders.priority.normal')}</SelectItem>
+                  <SelectItem value="high">{t('orders.priority.high')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label>Catatan</Label>
+              <Label>{t('forms.labels.notes')}</Label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
-                placeholder="Catatan khusus untuk pesanan ini"
+                placeholder={t('orders.orderNotesPlaceholder')}
                 rows={3}
               />
             </div>
@@ -293,18 +295,18 @@ export default function OrderForm({
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Item Pesanan</CardTitle>
+            <CardTitle>{t('orders.orderItems')}</CardTitle>
             <Button onClick={addOrderItem} size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Tambah Item
+              {t('orders.addItem')}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {formData.order_items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>Belum ada item pesanan</p>
-              <p className="text-sm">Klik"Tambah Item" untuk menambahkan produk</p>
+              <p>{t('orders.noOrderItems')}</p>
+              <p className="text-sm">{t('orders.addItemInstruction')}</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -312,17 +314,17 @@ export default function OrderForm({
                 <div key={index} className="border rounded-lg p-4">
                   <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-5'}`}>
                     <div className="col-span-2">
-                      <Label>Produk</Label>
+                      <Label>{t('orders.product')}</Label>
                       <Select
                         value={item.recipe_id}
                         onValueChange={(value) => handleRecipeSelect(index, value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Pilih produk" />
+                          <SelectValue placeholder={t('orders.selectProduct')} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="placeholder" disabled>
-                            Pilih produk
+                            {t('orders.selectProduct')}
                           </SelectItem>
                           {recipes.map((recipe) => (
                             <SelectItem key={recipe.id} value={recipe.id}>
@@ -334,7 +336,7 @@ export default function OrderForm({
                     </div>
                     
                     <div>
-                      <Label>Jumlah</Label>
+                      <Label>{t('forms.labels.quantity')}</Label>
                       <Input
                         type="number"
                         value={item.quantity}
@@ -344,7 +346,7 @@ export default function OrderForm({
                     </div>
                     
                     <div>
-                      <Label>Harga</Label>
+                      <Label>{t('forms.labels.price')}</Label>
                       <Input
                         type="number"
                         value={item.price}
@@ -366,11 +368,11 @@ export default function OrderForm({
                   </div>
                   
                   <div className="mt-3">
-                    <Label>Catatan Item</Label>
+                    <Label>{t('orders.itemNotes')}</Label>
                     <Input
                       value={item.notes || ''}
                       onChange={(e) => updateOrderItem(index, 'notes', e.target.value)}
-                      placeholder="Catatan khusus untuk item ini"
+                      placeholder={t('orders.itemNotesPlaceholder')}
                     />
                   </div>
                 </div>
@@ -378,7 +380,7 @@ export default function OrderForm({
               
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-bold">
-                  <span>Total Pesanan:</span>
+                  <span>{t('orders.orderTotal')}:</span>
                   <span>{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
@@ -395,10 +397,10 @@ export default function OrderForm({
           className="flex-1"
         >
           <Save className="h-4 w-4 mr-2" />
-          {loading ? 'Menyimpan...' : (order ? 'Update Pesanan' : 'Simpan Pesanan')}
+          {loading ? t('common.actions.saving') : (order ? t('orders.updateOrder') : t('orders.saveOrder'))}
         </Button>
         <Button variant="outline" onClick={onCancel} disabled={loading}>
-          Batal
+          {t('common.actions.cancel')}
         </Button>
       </div>
     </div>

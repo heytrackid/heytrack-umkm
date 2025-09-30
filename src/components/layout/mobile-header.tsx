@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import LanguageToggle from '@/components/ui/language-toggle'
+import SmartNotifications from '@/components/automation/smart-notifications'
 import { 
   Search, 
   Bell, 
@@ -34,7 +35,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from"@/components/ui/sheet"
-import NotificationCenter from '@/components/ui/notification-center'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,7 +76,6 @@ export default function MobileHeader({
 }: MobileHeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const { isMobile } = useMobileFirst()
   const router = useRouter()
 
@@ -213,35 +212,8 @@ export default function MobileHeader({
           <LanguageToggle />
           <ThemeToggle />
           
-          {/* Notification */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              // Open in-app notification drawer
-              setIsNotifOpen(true)
-              // Preserve existing external onClick if provided
-              if (notification?.onClick) notification.onClick()
-            }}
-            className="p-2 relative"
-            aria-label="Open notifications"
-          >
-            <Bell className="h-5 w-5" />
-            {notification?.count && notification.count > 0 && (
-              <Badge 
-                variant="destructive" 
-                className={cn(
-                 "absolute -top-0 -right-0",
-                 "h-4 w-4 p-0",
-                 "flex items-center justify-center",
-                 "text-xs font-bold",
-                 "min-w-4"
-                )}
-              >
-                {notification.count > 99 ? '99+' : notification.count}
-              </Badge>
-            )}
-          </Button>
+          {/* Smart Notification - Shared component with desktop */}
+          <SmartNotifications />
 
           {/* Custom Actions */}
           {actions && actions.length > 0 && (
@@ -280,15 +252,6 @@ export default function MobileHeader({
           </Button>
         </div>
       </div>
-
-      {/* Notifications Drawer */}
-      <Sheet open={isNotifOpen} onOpenChange={setIsNotifOpen}>
-        <SheetContent side="right" className="w-96 max-w-full">
-          <div className="h-full overflow-y-auto py-4">
-            <NotificationCenter />
-          </div>
-        </SheetContent>
-      </Sheet>
     </header>
   )
 }

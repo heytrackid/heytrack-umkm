@@ -220,14 +220,18 @@ export default function CustomersTable({
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} pelanggan
+                  {t('customers.pagination.showing', {
+                    from: ((currentPage - 1) * pageSize) + 1,
+                    to: Math.min(currentPage * pageSize, totalItems),
+                    total: totalItems
+                  })}
                 </span>
               </div>
               
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                  <span className="text-sm text-muted-foreground">{t('customers.pagination.showLabel')}</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
@@ -256,7 +260,7 @@ export default function CustomersTable({
                   </Button>
                   
                   <span className="text-sm font-medium">
-                    Halaman {currentPage} dari {totalPages}
+                    {t('customers.pagination.pageLabel', { current: currentPage, total: totalPages })}
                   </span>
                   
                   <Button

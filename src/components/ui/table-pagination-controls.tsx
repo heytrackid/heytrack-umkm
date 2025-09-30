@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { useI18n } from '@/providers/I18nProvider'
 import {
   Pagination,
   PaginationContent,
@@ -43,6 +44,7 @@ export function TablePaginationControls({
   pageSizeOptions = [10, 25, 50],
   className,
 }: TablePaginationControlsProps) {
+  const { t } = useI18n()
   const pages = buildPageList(currentPage, totalPages)
 
   const safeStart = totalItems === 0 ? 0 : pageStart
@@ -56,18 +58,18 @@ export function TablePaginationControls({
       )}
     >
       <div className="text-sm text-muted-foreground">
-        Menampilkan {safeStart}-{safeEnd} dari {totalItems} data
+        {t('tables.pagination.showing', { start: safeStart, end: safeEnd, total: totalItems })}
       </div>
 
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Baris per halaman</span>
+          <span className="text-sm text-muted-foreground">{t('tables.pagination.rowsPerPage')}</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="h-8 w-[80px]">
-              <SelectValue aria-label={`Saat ini ${pageSize} baris`} />
+              <SelectValue aria-label={t('tables.pagination.currentRows', { count: pageSize })} />
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((option) => (

@@ -43,7 +43,7 @@ export default function RecipeForm({
 
   const handleSubmit = () => {
     if (!formData.name || !formData.category) {
-      alert('Please fill in required fields')
+      alert(t('validation.fillRequiredFields'))
       return
     }
     onSave(formData)

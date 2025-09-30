@@ -72,9 +72,9 @@ const EnhancedInventoryPage = dynamic(() => import('@/modules/inventory/componen
 async function fetchInitialIngredients() {
   try {
     const admin = createServerSupabaseAdmin()
-    const { data, error } = await (admin as any)
+    const { data, error} = await (admin as any)
       .from('ingredients')
-      .select('id,name,unit,price_per_unit,current_stock,minimum_stock,category')
+      .select('id,name,unit,price_per_unit,current_stock,minimum_stock')
       .order('name', { ascending: true })
       .limit(50)
     if (error) throw error

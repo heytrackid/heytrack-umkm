@@ -1,25 +1,25 @@
 import { z } from 'zod'
 
 // Base validation utilities
-export const requiredString = z.string().min(1, 'Field ini wajib diisi')
+export const requiredString = z.string().min(1, 'validation.fieldRequired')
 export const optionalString = z.string().optional()
-export const positiveNumber = z.number().positive('Harus berupa angka positif')
-export const nonNegativeNumber = z.number().min(0, 'Tidak boleh negatif')
-export const email = z.string().email('Format email tidak valid')
-export const phone = z.string().min(10, 'Nomor telepon minimal 10 digit')
-export const uuid = z.string().uuid('Format ID tidak valid')
+export const positiveNumber = z.number().positive('validation.positiveNumber')
+export const nonNegativeNumber = z.number().min(0, 'validation.nonNegative')
+export const email = z.string().email('validation.invalidEmail')
+export const phone = z.string().min(10, 'validation.phoneMinLength')
+export const uuid = z.string().uuid('validation.invalidId')
 
 // Indonesian specific validations
-export const rupiah = z.number().min(0, 'Jumlah tidak boleh negatif').transform(val => Math.round(val))
-export const percentage = z.number().min(0, 'Persentase tidak boleh negatif').max(100, 'Persentase maksimal 100%')
-export const indonesianName = z.string().min(2, 'Nama minimal 2 karakter').max(100, 'Nama maksimal 100 karakter')
+export const rupiah = z.number().min(0, 'validation.nonNegativeAmount').transform(val => Math.round(val))
+export const percentage = z.number().min(0, 'validation.nonNegativePercentage').max(100, 'validation.maxPercentage')
+export const indonesianName = z.string().min(2, 'validation.nameMinLength').max(100, 'validation.nameMaxLength')
 
 // Ingredient validation schema
 export const IngredientSchema = z.object({
   name: indonesianName,
   description: optionalString,
   unit: z.enum(['kg', 'gram', 'liter', 'ml', 'pcs', 'pack'], {
-    message: 'Unit tidak valid'
+    message: 'validation.invalidUnit'
   }),
   price_per_unit: rupiah,
   current_stock: nonNegativeNumber,
@@ -31,7 +31,7 @@ export const IngredientSchema = z.object({
   expiry_date: z.string().datetime().optional(),
   cost_per_unit: rupiah.optional(),
   usage_rate_daily: nonNegativeNumber.optional(),
-  reorder_lead_time: z.number().int().min(1, 'Lead time minimal 1 hari').optional(),
+  reorder_lead_time: z.number().int().min(1, 'validation.leadTimeMin').optional(),
   supplier_info: z.object({
     name: optionalString,
     contact: optionalString,
@@ -45,7 +45,7 @@ export const IngredientSchema = z.object({
   }
   return true
 }, {
-  message: 'Stok minimum tidak boleh lebih besar dari stok saat ini',
+  message: 'validation.minStockTooHigh',
   path: ['min_stock']
 })
 
@@ -55,20 +55,20 @@ export type IngredientFormData = z.infer<typeof IngredientSchema>
 export const RecipeSchema = z.object({
   name: indonesianName,
   description: optionalString,
-  servings: z.number().int().min(1, 'Porsi minimal 1').max(1000, 'Porsi maksimal 1000'),
-  prep_time_minutes: z.number().int().min(1, 'Waktu persiapan minimal 1 menit').max(1440, 'Waktu persiapan maksimal 24 jam'),
-  cook_time_minutes: z.number().int().min(0, 'Waktu memasak tidak boleh negatif').optional(),
-  instructions: z.array(z.string().min(1, 'Instruksi tidak boleh kosong')).min(1, 'Minimal 1 instruksi'),
+  servings: z.number().int().min(1, 'validation.servingsMin').max(1000, 'validation.servingsMax'),
+  prep_time_minutes: z.number().int().min(1, 'validation.prepTimeMin').max(1440, 'validation.prepTimeMax'),
+  cook_time_minutes: z.number().int().min(0, 'validation.cookTimeNonNegative').optional(),
+  instructions: z.array(z.string().min(1, 'validation.instructionNotEmpty')).min(1, 'validation.instructionMinCount'),
   difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD'], {
-    message: 'Level kesulitan tidak valid'
+    message: 'validation.invalidDifficulty'
   }).optional(),
   category: optionalString,
   selling_price: rupiah.optional(),
   cost_per_serving: rupiah.optional(),
   profit_margin: percentage.optional(),
-  rating: z.number().min(1, 'Rating minimal 1').max(5, 'Rating maksimal 5').optional(),
+  rating: z.number().min(1, 'validation.ratingMin').max(5, 'validation.ratingMax').optional(),
   is_active: z.boolean().default(true),
-  image_url: z.string().url('URL gambar tidak valid').optional(),
+  image_url: z.string().url('validation.invalidImageUrl').optional(),
   tags: z.array(z.string()).optional()
 })
 
@@ -79,7 +79,7 @@ export const RecipeIngredientSchema = z.object({
   recipe_id: uuid,
   ingredient_id: uuid,
   quantity: positiveNumber,
-  unit: z.string().min(1, 'Unit wajib diisi'),
+  unit: z.string().min(1, 'validation.unitRequired'),
   notes: optionalString
 })
 
@@ -94,7 +94,7 @@ export const CustomerSchema = z.object({
   birth_date: z.string().datetime().optional(),
   loyalty_points: nonNegativeNumber.optional().default(0),
   customer_type: z.enum(['REGULAR', 'VIP', 'WHOLESALE'], {
-    message: 'Tipe customer tidak valid'
+    message: 'validation.invalidCustomerType'
   }).optional().default('REGULAR'),
   notes: optionalString,
   is_active: z.boolean().default(true)
@@ -102,7 +102,7 @@ export const CustomerSchema = z.object({
   // At least one contact method should be provided
   return data.email || data.phone
 }, {
-  message: 'Email atau nomor telepon wajib diisi',
+  message: 'validation.contactRequired',
   path: ['email']
 })
 
@@ -110,12 +110,12 @@ export type CustomerFormData = z.infer<typeof CustomerSchema>
 
 // Order validation schema
 export const OrderSchema = z.object({
-  order_no: z.string().min(1, 'Nomor order wajib diisi'),
+  order_no: z.string().min(1, 'validation.orderNumberRequired'),
   customer_id: uuid.optional(),
   customer_name: optionalString,
   customer_phone: phone.optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'], {
-    message: 'Status order tidak valid'
+    message: 'validation.invalidOrderStatus'
   }).default('PENDING'),
   order_date: z.string().datetime(),
   delivery_date: z.string().datetime().optional(),
@@ -123,10 +123,10 @@ export const OrderSchema = z.object({
   discount: nonNegativeNumber.optional().default(0),
   tax: nonNegativeNumber.optional().default(0),
   payment_method: z.enum(['CASH', 'TRANSFER', 'CREDIT_CARD', 'E_WALLET'], {
-    message: 'Metode pembayaran tidak valid'
+    message: 'validation.invalidPaymentMethod'
   }).optional(),
   payment_status: z.enum(['PENDING', 'PAID', 'PARTIAL', 'REFUNDED'], {
-    message: 'Status pembayaran tidak valid'
+    message: 'validation.invalidPaymentStatus'
   }).default('PENDING'),
   notes: optionalString,
   delivery_address: optionalString,
@@ -149,7 +149,7 @@ export const OrderItemSchema = z.object({
   const expectedTotal = data.quantity * data.unit_price
   return Math.abs(data.total_price - expectedTotal) < 0.01 // Allow small floating point differences
 }, {
-  message: 'Total harga tidak sesuai dengan quantity × unit price',
+  message: 'validation.totalPriceMismatch',
   path: ['total_price']
 })
 
@@ -164,7 +164,7 @@ export const ProductionSchema = z.object({
   start_time: z.string().datetime().optional(),
   end_time: z.string().datetime().optional(),
   status: z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'], {
-    message: 'Status produksi tidak valid'
+    message: 'validation.invalidProductionStatus'
   }).default('PLANNED'),
   batch_no: optionalString,
   quality_score: z.number().min(1).max(10).optional(),
@@ -179,7 +179,7 @@ export const ProductionSchema = z.object({
   }
   return true
 }, {
-  message: 'Waktu selesai harus setelah waktu mulai',
+  message: 'validation.endTimeAfterStart',
   path: ['end_time']
 })
 
@@ -188,20 +188,20 @@ export type ProductionFormData = z.infer<typeof ProductionSchema>
 // Financial Record validation schema
 export const FinancialRecordSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE'], {
-    message: 'Tipe transaksi tidak valid'
+    message: 'validation.invalidTransactionType'
   }),
   category: requiredString,
   amount: rupiah,
   description: requiredString,
   date: z.string().datetime(),
   payment_method: z.enum(['CASH', 'TRANSFER', 'CREDIT_CARD', 'E_WALLET'], {
-    message: 'Metode pembayaran tidak valid'
+    message: 'validation.invalidPaymentMethod'
   }).optional(),
   reference_no: optionalString,
-  receipt_url: z.string().url('URL struk tidak valid').optional(),
+  receipt_url: z.string().url('validation.invalidReceiptUrl').optional(),
   is_recurring: z.boolean().default(false),
   recurring_period: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'], {
-    message: 'Periode recurring tidak valid'
+    message: 'validation.invalidRecurringPeriod'
   }).optional(),
   tags: z.array(z.string()).optional(),
   notes: optionalString
@@ -213,14 +213,14 @@ export type FinancialRecordFormData = z.infer<typeof FinancialRecordSchema>
 export const StockTransactionSchema = z.object({
   ingredient_id: uuid,
   transaction_type: z.enum(['IN', 'OUT', 'ADJUSTMENT'], {
-    message: 'Tipe transaksi tidak valid'
+    message: 'validation.invalidTransactionType'
   }),
   quantity: positiveNumber,
   unit: requiredString,
   unit_cost: rupiah.optional(),
   total_cost: rupiah.optional(),
   reference_type: z.enum(['PURCHASE', 'PRODUCTION', 'SALE', 'WASTE', 'ADJUSTMENT'], {
-    message: 'Tipe referensi tidak valid'
+    message: 'validation.invalidReferenceType'
   }).optional(),
   reference_id: uuid.optional(),
   notes: optionalString,
@@ -231,11 +231,11 @@ export type StockTransactionFormData = z.infer<typeof StockTransactionSchema>
 
 // Bulk operation schemas
 export const BulkIngredientSchema = z.object({
-  ingredients: z.array(IngredientSchema).min(1, 'Minimal 1 ingredient')
+  ingredients: z.array(IngredientSchema).min(1, 'validation.minOneIngredient')
 })
 
 export const BulkRecipeSchema = z.object({
-  recipes: z.array(RecipeSchema).min(1, 'Minimal 1 recipe')
+  recipes: z.array(RecipeSchema).min(1, 'validation.minOneRecipe')
 })
 
 // Additional schema exports for API routes
@@ -248,7 +248,7 @@ export const PaginationSchema = z.object({
 })
 
 export const IdParamSchema = z.object({
-  id: z.string().uuid('Invalid ID format')
+  id: z.string().uuid('validation.invalidIdFormat')
 })
 
 // Validation utility functions

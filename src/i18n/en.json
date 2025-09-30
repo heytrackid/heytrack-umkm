@@ -60,7 +60,129 @@
     "noData": "No data available",
     "total": "Total",
     "subtotal": "Subtotal",
-    "grandTotal": "Grand Total"
+    "grandTotal": "Grand Total",
+    "error": "Error",
+    "retry": "Try Again",
+    "retrying": "Retrying...",
+    "errorLoading": "Error Loading",
+    "errorLoadingComponent": "Something went wrong while loading this component",
+    "search": "Search...",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "viewDetail": "View Details",
+    "edit": "Edit",
+    "delete": "Delete",
+    "fillRequiredFields": "Please fill in required fields",
+    "processing": "Processing..."
+  },
+  "validation": {
+    "fieldRequired": "This field is required",
+    "positiveNumber": "Must be a positive number",
+    "nonNegative": "Cannot be negative",
+    "invalidEmail": "Invalid email format",
+    "phoneMinLength": "Phone number minimum 10 digits",
+    "invalidId": "Invalid ID format",
+    "nonNegativeAmount": "Amount cannot be negative",
+    "nonNegativePercentage": "Percentage cannot be negative",
+    "maxPercentage": "Maximum percentage is 100%",
+    "nameMinLength": "Name minimum 2 characters",
+    "nameMaxLength": "Name maximum 100 characters",
+    "invalidUnit": "Invalid unit",
+    "leadTimeMin": "Lead time minimum 1 day",
+    "minStockTooHigh": "Minimum stock cannot be higher than current stock",
+    "servingsMin": "Minimum 1 serving",
+    "servingsMax": "Maximum 1000 servings",
+    "prepTimeMin": "Preparation time minimum 1 minute",
+    "prepTimeMax": "Preparation time maximum 24 hours",
+    "cookTimeNonNegative": "Cooking time cannot be negative",
+    "instructionNotEmpty": "Instructions cannot be empty",
+    "instructionMinCount": "Minimum 1 instruction",
+    "invalidDifficulty": "Invalid difficulty level",
+    "ratingMin": "Rating minimum 1",
+    "ratingMax": "Rating maximum 5",
+    "invalidImageUrl": "Invalid image URL",
+    "unitRequired": "Unit is required",
+    "invalidCustomerType": "Invalid customer type",
+    "contactRequired": "Email or phone number is required",
+    "orderNumberRequired": "Order number is required",
+    "invalidOrderStatus": "Invalid order status",
+    "invalidPaymentMethod": "Invalid payment method",
+    "invalidPaymentStatus": "Invalid payment status",
+    "totalPriceMismatch": "Total price doesn't match quantity × unit price",
+    "invalidProductionStatus": "Invalid production status",
+    "endTimeAfterStart": "End time must be after start time",
+    "invalidTransactionType": "Invalid transaction type",
+    "invalidReceiptUrl": "Invalid receipt URL",
+    "invalidRecurringPeriod": "Invalid recurring period",
+    "invalidReferenceType": "Invalid reference type",
+    "minOneIngredient": "Minimum 1 ingredient",
+    "minOneRecipe": "Minimum 1 recipe",
+    "invalidIdFormat": "Invalid ID format",
+    "invalidType": "Invalid data type",
+    "minLength": "Minimum length not met",
+    "maxLength": "Maximum length exceeded",
+    "invalidFormat": "Invalid format",
+    "dangerousContent": "Contains potentially dangerous content",
+    "fillRequiredFields": "Please fill in required fields"
+  },
+  "forms": {
+    "labels": {
+      "category": "Category",
+      "description": "Description",
+      "amount": "Amount",
+      "date": "Date",
+      "paymentMethod": "Payment Method",
+      "notes": "Notes",
+      "name": "Name",
+      "unit": "Unit",
+      "pricePerUnit": "Price per Unit ({{symbol}})",
+      "currentStock": "Current Stock",
+      "minStock": "Min Stock"
+    },
+    "placeholders": {
+      "selectCategory": "Select category",
+      "description": "e.g., Monthly rent for January",
+      "pickDate": "Pick a date",
+      "notes": "Additional information...",
+      "ingredientName": "e.g., Flour, Sugar, Butter",
+      "optionalDescription": "Optional description or notes about the ingredient"
+    },
+    "hints": {
+      "enterIngredientName": "Enter the ingredient name",
+      "selectMeasurementUnit": "Select measurement unit",
+      "enterPrice": "Enter price in {{currency}}",
+      "availableQuantity": "Available quantity",
+      "reorderThreshold": "Reorder threshold",
+      "addNotes": "Add any additional notes or specifications"
+    },
+    "sections": {
+      "basicInformation": "Basic Information",
+      "stockPricing": "Stock & Pricing",
+      "additionalInformation": "Additional Information"
+    },
+    "descriptions": {
+      "enterBasicDetails": "Enter the basic details for the ingredient",
+      "setStockLevels": "Set stock levels and cost information",
+      "updateBasicDetails": "Update the basic details for the ingredient",
+      "updateStockLevels": "Update stock levels and cost information"
+    },
+    "paymentMethods": {
+      "cash": "Cash",
+      "transfer": "Bank Transfer",
+      "creditCard": "Credit Card",
+      "digitalWallet": "Digital Wallet"
+    }
+  },
+  "dialogs": {
+    "deleteConfirmation": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "confirmAction": "Confirm Action",
+    "cannotBeUndone": "This action cannot be undone"
+  },
+  "tables": {
+    "headers": {
+      "actions": "Actions"
+    }
   },
   "navigation": {
     "dashboard": {
@@ -209,9 +331,15 @@
     "stockValue": "Stock Value"
   },
   "ingredients": {
-    "addIngredient": "Add Ingredient",
     "searchIngredients": "Search ingredients...",
-    "noIngredientsFound": "No ingredients found"
+    "addIngredient": "Add Ingredient",
+    "noIngredientsFound": "No ingredients found",
+    "errorLoading": "Failed to load ingredients: {{error}}",
+    "addNewIngredient": "Add New Ingredient",
+    "editIngredient": "Edit Ingredient",
+    "createIngredient": "Create Ingredient",
+    "updateIngredient": "Update Ingredient",
+    "deleteIngredient": "Delete Ingredient"
   },
   "recipes": {
     "title": "Recipes",
@@ -292,9 +420,66 @@
     "title": "Orders",
     "subtitle": "Manage customer orders",
     "addOrder": "Add Order",
+    "editOrder": "Edit Order",
+    "updateOrder": "Update Order",
+    "saveOrder": "Save Order",
+    "createNewOrder": "Create a new order with complete information",
+    "updateOrderInfo": "Update order information",
+    "customerInfo": "Customer Information",
+    "orderDetails": "Order Details",
+    "orderItems": "Order Items",
+    "addItem": "Add Item",
+    "noOrderItems": "No items added yet",
+    "addItemInstruction": "Click 'Add Item' to start",
+    "product": "Product",
+    "selectProduct": "Select product",
+    "itemNotes": "Item Notes",
+    "itemNotesPlaceholder": "Special notes for this item...",
+    "orderTotal": "Order Total",
+    "customer": "Customer",
+    "items": "Items",
+    "delivery": "Delivery",
+    "payment": "Payment",
+    "selectExisting": "Select Existing",
+    "newCustomer": "New Customer",
+    "searchExistingCustomer": "Search Existing Customer",
+    "searchCustomerPlaceholder": "Type name or phone number...",
+    "customerName": "Customer Name",
+    "customerNamePlaceholder": "Example: Mrs. Sarah Wilson",
+    "phoneNumber": "Phone Number",
+    "phonePlaceholder": "+1 555-123-4567",
+    "fullAddress": "Full Address",
+    "addressPlaceholder": "Complete customer address...",
+    "orderDate": "Order Date",
+    "priority": "Priority",
+    "deliveryDate": "Delivery Date",
+    "deliveryTime": "Delivery Time",
+    "deliveryFee": "Delivery Fee",
+    "specialNotes": "Special Notes",
+    "notesPlaceholder": "Notes for this order...",
+    "specialInstructions": "Special Instructions",
+    "specialInstructionsPlaceholder": "Special instructions for production...",
+    "paymentMethod": "Payment Method",
+    "discount": "Discount",
+    "tax": "Tax",
+    "paidAmount": "Paid Amount",
+    "paymentSummary": "Payment Summary",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "noItemsAdded": "No items added yet",
+    "clickAddItemToStart": "Click 'Add Item' to start",
     "totalOrders": "Total Orders",
     "pendingOrders": "Pending Orders",
     "completedOrders": "Completed Orders",
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
     "errors": {
       "noRecipesAvailable": "No recipes available yet. Please add recipes first.",
       "customerAndItemRequired": "Customer name and at least 1 order item must be filled"
@@ -316,42 +501,143 @@
       "profile": "Profile",
       "notifications": "Notifications",
       "system": "System",
+      "ui": "UI",
       "appearance": "Appearance"
-    }
-  },
-  "forms": {
-    "validation": {
-      "required": "This field is required",
-      "invalidEmail": "Invalid email format",
-      "minLength": "Minimum {{length}} characters",
-      "maxLength": "Maximum {{length}} characters"
     },
-    "placeholders": {
-      "enterName": "Enter name",
-      "enterEmail": "Enter email",
-      "enterPhone": "Enter phone number",
-      "enterAddress": "Enter address",
-      "selectOption": "Select option",
-      "enterDescription": "Enter description",
-      "searchPlaceholder": "Search by name, category, or description...",
-      "enterAmount": "Enter amount",
-      "enterQuantity": "Enter quantity",
-      "enterPrice": "Enter price"
+    "actions": {
+      "unsaved": "Unsaved Changes",
+      "reset": "Reset",
+      "saving": "Saving..."
     },
-    "labels": {
-      "name": "Name",
-      "email": "Email",
-      "phone": "Phone",
+    "messages": {
+      "loadError": "Error loading settings",
+      "saveSuccess": "Settings saved successfully",
+      "saveError": "Error saving settings"
+    },
+    "businessInfo": {
+      "title": "Business Information",
+      "businessName": "Business Name",
+      "businessType": "Business Type",
       "address": "Address",
-      "description": "Description",
-      "category": "Category",
-      "amount": "Amount",
-      "quantity": "Quantity",
-      "price": "Price",
-      "date": "Date",
-      "time": "Time",
-      "status": "Status",
-      "notes": "Notes"
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "taxNumber": "Tax Number",
+      "types": {
+        "bakery": "Bakery",
+        "cafe": "Cafe",
+        "restaurant": "Restaurant",
+        "foodTruck": "Food Truck"
+      }
+    },
+    "profile": {
+      "title": "User Profile",
+      "uploadPhoto": "Upload Photo",
+      "photoFormat": "JPG, PNG max 2MB",
+      "fullName": "Full Name",
+      "role": "Role",
+      "phone": "Phone",
+      "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "staff": "Staff",
+        "admin": "Admin"
+      }
+    },
+    "security": {
+      "title": "Security",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "updatePassword": "Update Password"
+    },
+    "notifications": {
+      "title": "Notification Settings",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Receive notifications via email"
+      },
+      "push": {
+        "title": "Push Notifications",
+        "description": "Browser push notifications"
+      },
+      "lowStock": {
+        "title": "Low Stock Alert",
+        "description": "Notifications when stock is running low"
+      },
+      "orders": {
+        "title": "Order Updates",
+        "description": "Notifications for order status changes"
+      },
+      "dailyReports": {
+        "title": "Daily Reports",
+        "description": "Daily sales summary"
+      },
+      "weeklyReports": {
+        "title": "Weekly Reports",
+        "description": "Weekly sales summary"
+      },
+      "monthlyReports": {
+        "title": "Monthly Reports",
+        "description": "Monthly sales summary"
+      }
+    },
+    "backup": {
+      "title": "Backup & Data",
+      "autoBackup": {
+        "title": "Auto Backup",
+        "description": "Automatically backup application data"
+      },
+      "frequency": {
+        "title": "Backup Frequency",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      },
+      "dataRetention": {
+        "title": "Data Retention (days)",
+        "description": "Data will be kept for this period before automatic deletion"
+      },
+      "actions": {
+        "backupNow": "Backup Now",
+        "restoreData": "Restore Data"
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "resetApp": {
+        "title": "Reset Application",
+        "description": "Delete all data and restore to initial settings. This action cannot be undone.",
+        "button": "Reset Application"
+      }
+    },
+    "uiTheme": {
+      "title": "UI Theme",
+      "theme": "Theme",
+      "language": "Language",
+      "languageNote": "Language settings affect the interface display",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      }
+    },
+    "dateTime": {
+      "title": "Date & Time",
+      "dateFormat": "Date Format",
+      "timeFormat": "Time Format",
+      "formats": {
+        "24h": "24 Hour",
+        "12h": "12 Hour"
+      }
+    },
+    "numberCurrency": {
+      "title": "Number & Currency",
+      "numberFormat": "Number Format",
+      "currency": "Currency"
     }
   },
   "tables": {
@@ -373,7 +659,9 @@
       "editItem": "Edit Item",
       "deleteItem": "Delete Item",
       "duplicate": "Duplicate",
-      "archive": "Archive"
+      "archive": "Archive",
+      "closeModal": "Close modal",
+      "closeDrawer": "Close drawer"
     },
     "bulk": {
       "selected": "{{count}} items selected",
@@ -430,6 +718,10 @@
       "autoPopulateDesc": "System will automatically add common ingredients for {{category}}",
       "ingredientsToAdd": "Ingredients: {{ingredients}}"
     }
+  },
+  "errors": {
+    "componentNotAvailable": "{{component}} not available",
+    "componentNotFound": "Component not found"
   },
   "buttons": {
     "primary": {

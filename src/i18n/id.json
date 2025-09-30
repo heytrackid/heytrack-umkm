@@ -27,7 +27,11 @@
       "upload": "Unggah",
       "view": "Lihat",
       "close": "Tutup",
-      "update": "Update"
+      "update": "Update",
+      "selected": "dipilih",
+      "more": "Lebih Banyak",
+      "all": "Semua",
+      "saving": "Menyimpan..."
     },
     "status": {
       "active": "Aktif",
@@ -60,7 +64,128 @@
     "noData": "Tidak ada data",
     "total": "Total",
     "subtotal": "Subtotal",
-    "grandTotal": "Grand Total"
+    "grandTotal": "Grand Total",
+    "error": "Error",
+    "retry": "Coba Lagi",
+    "retrying": "Mencoba lagi...",
+    "errorLoading": "Error Memuat",
+    "errorLoadingComponent": "Terjadi kesalahan saat memuat komponen ini",
+    "search": "Cari...",
+    "actions": "Aksi",
+    "yes": "Ya",
+    "no": "Tidak",
+    "viewDetail": "Lihat Detail",
+    "edit": "Edit",
+    "delete": "Hapus",
+    "processing": "Memproses..."
+  },
+  "validation": {
+    "fieldRequired": "Field ini wajib diisi",
+    "positiveNumber": "Harus berupa angka positif",
+    "nonNegative": "Tidak boleh negatif",
+    "invalidEmail": "Format email tidak valid",
+    "phoneMinLength": "Nomor telepon minimal 10 digit",
+    "invalidId": "Format ID tidak valid",
+    "nonNegativeAmount": "Jumlah tidak boleh negatif",
+    "nonNegativePercentage": "Persentase tidak boleh negatif",
+    "maxPercentage": "Persentase maksimal 100%",
+    "nameMinLength": "Nama minimal 2 karakter",
+    "nameMaxLength": "Nama maksimal 100 karakter",
+    "invalidUnit": "Unit tidak valid",
+    "leadTimeMin": "Lead time minimal 1 hari",
+    "minStockTooHigh": "Stok minimum tidak boleh lebih besar dari stok saat ini",
+    "servingsMin": "Porsi minimal 1",
+    "servingsMax": "Porsi maksimal 1000",
+    "prepTimeMin": "Waktu persiapan minimal 1 menit",
+    "prepTimeMax": "Waktu persiapan maksimal 24 jam",
+    "cookTimeNonNegative": "Waktu memasak tidak boleh negatif",
+    "instructionNotEmpty": "Instruksi tidak boleh kosong",
+    "instructionMinCount": "Minimal 1 instruksi",
+    "invalidDifficulty": "Level kesulitan tidak valid",
+    "ratingMin": "Rating minimal 1",
+    "ratingMax": "Rating maksimal 5",
+    "invalidImageUrl": "URL gambar tidak valid",
+    "unitRequired": "Unit wajib diisi",
+    "invalidCustomerType": "Tipe customer tidak valid",
+    "contactRequired": "Email atau nomor telepon wajib diisi",
+    "orderNumberRequired": "Nomor order wajib diisi",
+    "invalidOrderStatus": "Status order tidak valid",
+    "invalidPaymentMethod": "Metode pembayaran tidak valid",
+    "invalidPaymentStatus": "Status pembayaran tidak valid",
+    "totalPriceMismatch": "Total harga tidak sesuai dengan quantity × unit price",
+    "invalidProductionStatus": "Status produksi tidak valid",
+    "endTimeAfterStart": "Waktu selesai harus setelah waktu mulai",
+    "invalidTransactionType": "Tipe transaksi tidak valid",
+    "invalidReceiptUrl": "URL struk tidak valid",
+    "invalidRecurringPeriod": "Periode recurring tidak valid",
+    "invalidReferenceType": "Tipe referensi tidak valid",
+    "minOneIngredient": "Minimal 1 ingredient",
+    "minOneRecipe": "Minimal 1 recipe",
+    "invalidIdFormat": "Format ID tidak valid",
+    "invalidType": "Tipe data tidak valid",
+    "minLength": "Panjang minimal tidak tercapai",
+    "maxLength": "Panjang maksimal terlampaui",
+    "invalidFormat": "Format tidak valid",
+    "dangerousContent": "Konten berpotensi berbahaya",
+    "fillRequiredFields": "Silakan isi field yang wajib diisi"
+  },
+  "forms": {
+    "labels": {
+      "category": "Kategori",
+      "description": "Deskripsi",
+      "amount": "Jumlah",
+      "date": "Tanggal",
+      "paymentMethod": "Metode Pembayaran",
+      "notes": "Catatan",
+      "name": "Nama",
+      "unit": "Satuan",
+      "pricePerUnit": "Harga per Unit ({{symbol}})",
+      "currentStock": "Stok Saat Ini",
+      "minStock": "Stok Minimum"
+    },
+    "placeholders": {
+      "selectCategory": "Pilih kategori",
+      "description": "Contoh: Sewa bulanan untuk Januari",
+      "pickDate": "Pilih tanggal",
+      "notes": "Informasi tambahan...",
+      "ingredientName": "Contoh: Tepung, Gula, Mentega",
+      "optionalDescription": "Deskripsi opsional atau catatan tentang bahan"
+    },
+    "hints": {
+      "enterIngredientName": "Masukkan nama bahan",
+      "selectMeasurementUnit": "Pilih satuan pengukuran",
+      "enterPrice": "Masukkan harga dalam {{currency}}",
+      "availableQuantity": "Jumlah yang tersedia",
+      "reorderThreshold": "Batas untuk pemesanan ulang",
+      "addNotes": "Tambahkan catatan atau spesifikasi tambahan"
+    },
+    "sections": {
+      "basicInformation": "Informasi Dasar",
+      "stockPricing": "Stok & Harga",
+      "additionalInformation": "Informasi Tambahan"
+    },
+    "descriptions": {
+      "enterBasicDetails": "Masukkan detail dasar untuk bahan",
+      "setStockLevels": "Atur tingkat stok dan informasi biaya",
+      "updateBasicDetails": "Perbarui detail dasar untuk bahan",
+      "updateStockLevels": "Perbarui tingkat stok dan informasi biaya"
+    },
+    "paymentMethods": {
+      "cash": "Tunai",
+      "transfer": "Transfer Bank",
+      "creditCard": "Kartu Kredit",
+      "digitalWallet": "Dompet Digital"
+    }
+  },
+  "dialogs": {
+    "deleteConfirmation": "Apakah Anda yakin ingin menghapus \"{{name}}\"? Tindakan ini tidak dapat dibatalkan.",
+    "confirmAction": "Konfirmasi Tindakan",
+    "cannotBeUndone": "Tindakan ini tidak dapat dibatalkan"
+  },
+  "tables": {
+    "headers": {
+      "actions": "Aksi"
+    }
   },
   "navigation": {
     "dashboard": {
@@ -197,6 +322,19 @@
       "allTemplatesExist": "Semua item template sudah ada. Anda bisa menambah/ubah secara manual.",
       "addTemplateConfirm": "Tambah template biaya operasional standar? Anda bisa mengubah nilainya setelah ditambahkan.",
       "deleteConfirm": "Apakah Anda yakin ingin menghapus biaya ini?"
+    },
+    "empty": {
+      "noCosts": "Belum Ada Biaya",
+      "startTracking": "Mulai lacak biaya operasional Anda"
+    },
+    "table": {
+      "title": "Catatan Biaya",
+      "payment": "Pembayaran"
+    },
+    "pagination": {
+      "showing": "Menampilkan {{from}} - {{to}} dari {{total}} biaya",
+      "showLabel": "Tampilkan:",
+      "pageLabel": "Halaman {{current}} dari {{total}}"
     }
   },
   "inventory": {
@@ -207,6 +345,17 @@
     "lowStock": "Stok Menipis",
     "outOfStock": "Stok Habis",
     "stockValue": "Nilai Stok"
+  },
+  "ingredients": {
+    "searchIngredients": "Cari bahan...",
+    "addIngredient": "Tambah Bahan",
+    "noIngredientsFound": "Tidak ada bahan ditemukan",
+    "errorLoading": "Gagal memuat bahan: {{error}}",
+    "addNewIngredient": "Tambah Bahan Baru",
+    "editIngredient": "Edit Bahan",
+    "createIngredient": "Buat Bahan",
+    "updateIngredient": "Update Bahan",
+    "deleteIngredient": "Hapus Bahan"
   },
   "recipes": {
     "title": "Resep",
@@ -281,6 +430,11 @@
       "tryDifferentKeyword": "Coba kata kunci lain untuk menemukan resep",
       "startAddingRecipes": "Mulai dengan menambahkan resep pertama untuk produk Anda",
       "addFirstRecipe": "Tambah Resep Pertama"
+    },
+    "pagination": {
+      "showing": "Menampilkan {{from}} - {{to}} dari {{total}} resep",
+      "showLabel": "Tampilkan:",
+      "pageLabel": "Halaman {{current}} dari {{total}}"
     }
   },
   "orders": {
@@ -325,7 +479,76 @@
       "actions": "Actions",
       "due": "Due"
     },
+    "pagination": {
+      "showing": "Menampilkan {{from}} - {{to}} dari {{total}} pesanan",
+      "showLabel": "Tampilkan:",
+      "pageLabel": "Halaman {{current}} dari {{total}}"
+    },
+    "priority": {
+      "low": "Rendah",
+      "normal": "Normal",
+      "high": "Tinggi"
+    },
     "exportData": "Export Data",
+    "editOrder": "Edit Pesanan",
+    "updateOrderInfo": "Perbarui informasi pesanan",
+    "createNewOrder": "Buat pesanan baru dari pelanggan",
+    "customerInfo": "Informasi Pelanggan",
+    "customerNamePlaceholder": "Nama lengkap pelanggan",
+    "orderDetails": "Detail Pesanan",
+    "deliveryDate": "Tanggal Pengiriman",
+    "deliveryTime": "Waktu Pengiriman",
+    "priority": "Prioritas",
+    "orderNotesPlaceholder": "Catatan khusus untuk pesanan ini",
+    "orderItems": "Item Pesanan",
+    "addItem": "Tambah Item",
+    "noOrderItems": "Belum ada item pesanan",
+    "addItemInstruction": "Klik \"Tambah Item\" untuk menambahkan produk",
+    "product": "Produk",
+    "selectProduct": "Pilih produk",
+    "itemNotes": "Catatan Item",
+    "itemNotesPlaceholder": "Catatan khusus untuk item ini",
+    "orderTotal": "Total Pesanan",
+    "updateOrder": "Update Pesanan",
+    "saveOrder": "Simpan Pesanan",
+    "allStatus": "Semua Status",
+    "allPaymentStatus": "Semua Pembayaran",
+    "allPriority": "Semua Prioritas",
+    "filtersActive": "Filter aktif diterapkan",
+    "resetFilters": "Reset Filter",
+    "customer": "Pelanggan",
+    "items": "Item",
+    "delivery": "Pengiriman",
+    "payment": "Pembayaran",
+    "selectExisting": "Pilih Existing",
+    "newCustomer": "Customer Baru",
+    "searchExistingCustomer": "Cari Pelanggan Existing",
+    "searchCustomerPlaceholder": "Ketik nama atau nomor telepon...",
+    "customerName": "Nama Pelanggan",
+    "customerNamePlaceholder": "Contoh: Ibu Sari Wahyuni",
+    "phoneNumber": "No. Telepon",
+    "phonePlaceholder": "+62 812-3456-7890",
+    "fullAddress": "Alamat Lengkap",
+    "addressPlaceholder": "Alamat lengkap pelanggan...",
+    "orderDate": "Tanggal Pesan",
+    "deliveryFee": "Biaya Kirim",
+    "specialNotes": "Catatan Khusus",
+    "notesPlaceholder": "Catatan untuk pesanan ini...",
+    "specialInstructions": "Instruksi Khusus",
+    "specialInstructionsPlaceholder": "Instruksi khusus untuk produksi...",
+    "paymentMethod": "Metode Pembayaran",
+    "discount": "Diskon",
+    "tax": "Pajak",
+    "paidAmount": "Dibayar",
+    "paymentSummary": "Ringkasan Pembayaran",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "paid": "Dibayar",
+    "remaining": "Sisa",
+    "quantity": "Jumlah",
+    "unitPrice": "Harga Satuan",
+    "noItemsAdded": "Belum ada item yang ditambahkan",
+    "clickAddItemToStart": "Klik 'Tambah Item' untuk memulai",
     "errors": {
       "noRecipesAvailable": "Belum ada resep tersedia. Tambahkan resep terlebih dahulu.",
       "customerAndItemRequired": "Nama pelanggan dan minimal 1 item pesanan harus diisi"
@@ -373,6 +596,11 @@
       "analyzeBestCustomers": "• Analisa pelanggan terbaik",
       "personalizeOffers": "• Personalisasi penawaran",
       "followUpOrders": "• Follow up order berkala"
+    },
+    "pagination": {
+      "showing": "Menampilkan {{from}} - {{to}} dari {{total}} pelanggan",
+      "showLabel": "Tampilkan:",
+      "pageLabel": "Halaman {{current}} dari {{total}}"
     }
   },
   "settings": {
@@ -420,6 +648,106 @@
         "system": "Mengikuti Sistem"
       },
       "languageNote": "Bahasa akan berubah setelah refresh halaman"
+    },
+    "businessInfo": {
+      "title": "Informasi Bisnis",
+      "businessName": "Nama Bisnis",
+      "businessType": "Jenis Bisnis",
+      "address": "Alamat",
+      "phone": "Telepon",
+      "email": "Email",
+      "website": "Website",
+      "taxNumber": "NPWP",
+      "types": {
+        "bakery": "Bakery",
+        "cafe": "Cafe",
+        "restaurant": "Restaurant",
+        "foodTruck": "Food Truck"
+      }
+    },
+    "profile": {
+      "title": "Profil Pengguna",
+      "uploadPhoto": "Upload Foto",
+      "photoFormat": "JPG, PNG max 2MB",
+      "fullName": "Nama Lengkap",
+      "role": "Jabatan",
+      "phone": "Telepon",
+      "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "staff": "Staff",
+        "admin": "Admin"
+      }
+    },
+    "security": {
+      "title": "Keamanan",
+      "currentPassword": "Password Saat Ini",
+      "currentPasswordPlaceholder": "Masukkan password saat ini",
+      "newPassword": "Password Baru",
+      "newPasswordPlaceholder": "Masukkan password baru",
+      "confirmPassword": "Konfirmasi Password",
+      "confirmPasswordPlaceholder": "Konfirmasi password baru",
+      "updatePassword": "Update Password"
+    },
+    "notifications": {
+      "title": "Pengaturan Notifikasi",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Terima notifikasi melalui email"
+      },
+      "push": {
+        "title": "Push Notifications",
+        "description": "Notifikasi push di browser"
+      },
+      "lowStock": {
+        "title": "Peringatan Stok Rendah",
+        "description": "Notifikasi ketika stok hampir habis"
+      },
+      "orders": {
+        "title": "Update Pesanan",
+        "description": "Notifikasi perubahan status pesanan"
+      },
+      "dailyReports": {
+        "title": "Laporan Harian",
+        "description": "Ringkasan penjualan harian"
+      },
+      "weeklyReports": {
+        "title": "Laporan Mingguan",
+        "description": "Ringkasan penjualan mingguan"
+      },
+      "monthlyReports": {
+        "title": "Laporan Bulanan",
+        "description": "Ringkasan penjualan bulanan"
+      }
+    },
+    "backup": {
+      "title": "Backup & Data",
+      "autoBackup": {
+        "title": "Auto Backup",
+        "description": "Backup otomatis data aplikasi"
+      },
+      "frequency": {
+        "title": "Frekuensi Backup",
+        "daily": "Harian",
+        "weekly": "Mingguan",
+        "monthly": "Bulanan"
+      },
+      "dataRetention": {
+        "title": "Retensi Data (hari)",
+        "description": "Data akan disimpan selama periode ini sebelum dihapus otomatis"
+      },
+      "actions": {
+        "backupNow": "Backup Sekarang",
+        "restoreData": "Restore Data"
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "resetApp": {
+        "title": "Reset Aplikasi",
+        "description": "Menghapus semua data dan mengembalikan ke pengaturan awal. Tindakan ini tidak dapat dibatalkan.",
+        "button": "Reset Aplikasi"
+      }
     }
   },
   "forms": {
@@ -427,7 +755,8 @@
       "required": "Field ini wajib diisi",
       "invalidEmail": "Format email tidak valid",
       "minLength": "Minimal {{length}} karakter",
-      "maxLength": "Maksimal {{length}} karakter"
+      "maxLength": "Maksimal {{length}} karakter",
+      "fixErrors": "Mohon perbaiki kesalahan berikut:"
     },
     "placeholders": {
       "enterName": "Masukkan nama",
@@ -471,12 +800,19 @@
       "type": "Tipe",
       "frequency": "Frekuensi"
     },
+    "pagination": {
+      "showing": "Menampilkan {{start}}-{{end}} dari {{total}} data",
+      "rowsPerPage": "Baris per halaman",
+      "currentRows": "Saat ini {{count}} baris"
+    },
     "actions": {
       "viewDetails": "Lihat Detail",
       "editItem": "Edit Item",
       "deleteItem": "Hapus Item",
       "duplicate": "Duplikat",
-      "archive": "Arsip"
+      "archive": "Arsip",
+      "closeModal": "Tutup modal",
+      "closeDrawer": "Tutup drawer"
     },
     "bulk": {
       "selected": "{{count}} item dipilih",
@@ -509,7 +845,11 @@
       "loadFailed": "Gagal memuat data. Silakan coba lagi.",
       "networkError": "Error jaringan. Periksa koneksi Anda.",
       "unexpectedError": "Terjadi error yang tidak terduga."
-    },
+    }
+  },
+  "errors": {
+    "componentNotAvailable": "{{component}} tidak tersedia",
+    "componentNotFound": "Komponen tidak ditemukan"
     "confirmation": {
       "deleteItem": "Apakah Anda yakin ingin menghapus item ini?",
       "deleteItems": "Apakah Anda yakin ingin menghapus {{count}} item?",

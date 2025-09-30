@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Database, Download, Upload } from 'lucide-react'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface BackupSettingsProps {
   settings: any
@@ -16,19 +17,21 @@ interface BackupSettingsProps {
  * Backup and data settings component
  */
 export function BackupSettings({ settings, onSettingChange }: BackupSettingsProps) {
+  const { t } = useI18n()
+  
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
-          Backup & Data
+          {t('settings.backup.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Auto Backup</p>
-            <p className="text-sm text-muted-foreground">Backup otomatis data aplikasi</p>
+            <p className="font-medium">{t('settings.backup.autoBackup.title')}</p>
+            <p className="text-sm text-muted-foreground">{t('settings.backup.autoBackup.description')}</p>
           </div>
           <Switch
             checked={settings.system.autoBackup}
@@ -36,20 +39,20 @@ export function BackupSettings({ settings, onSettingChange }: BackupSettingsProp
           />
         </div>
         <div>
-          <Label htmlFor="backupFrequency">Frekuensi Backup</Label>
+          <Label htmlFor="backupFrequency">{t('settings.backup.frequency.title')}</Label>
           <select
             id="backupFrequency"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.system.backupFrequency}
             onChange={(e) => onSettingChange('system', 'backupFrequency', e.target.value)}
           >
-            <option value="daily">Harian</option>
-            <option value="weekly">Mingguan</option>
-            <option value="monthly">Bulanan</option>
+            <option value="daily">{t('settings.backup.frequency.daily')}</option>
+            <option value="weekly">{t('settings.backup.frequency.weekly')}</option>
+            <option value="monthly">{t('settings.backup.frequency.monthly')}</option>
           </select>
         </div>
         <div>
-          <Label htmlFor="dataRetention">Retensi Data (hari)</Label>
+          <Label htmlFor="dataRetention">{t('settings.backup.dataRetention.title')}</Label>
           <Input
             id="dataRetention"
             type="number"
@@ -57,17 +60,17 @@ export function BackupSettings({ settings, onSettingChange }: BackupSettingsProp
             onChange={(e) => onSettingChange('system', 'dataRetention', e.target.value)}
           />
           <p className="text-sm text-muted-foreground mt-1">
-            Data akan disimpan selama periode ini sebelum dihapus otomatis
+            {t('settings.backup.dataRetention.description')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
-            Backup Sekarang
+            {t('settings.backup.actions.backupNow')}
           </Button>
           <Button variant="outline">
             <Upload className="h-4 w-4 mr-2" />
-            Restore Data
+            {t('settings.backup.actions.restoreData')}
           </Button>
         </div>
       </CardContent>

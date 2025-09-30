@@ -249,14 +249,18 @@ export default function RecipeTable({
               <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
-                    Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} resep
+                    {t('recipes.pagination.showing', {
+                      from: ((currentPage - 1) * pageSize) + 1,
+                      to: Math.min(currentPage * pageSize, totalItems),
+                      total: totalItems
+                    })}
                   </span>
                 </div>
                 
                 <div className="flex items-center gap-6">
                   {/* Page Size Selector */}
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                    <span className="text-sm text-muted-foreground">{t('recipes.pagination.showLabel')}</span>
                     <Select value={pageSize.toString()} onValueChange={(value) => {
                       setPageSize(Number(value))
                       setCurrentPage(1)
@@ -285,7 +289,7 @@ export default function RecipeTable({
                     </Button>
                     
                     <span className="text-sm font-medium">
-                      Halaman {currentPage} dari {totalPages}
+                      {t('recipes.pagination.pageLabel', { current: currentPage, total: totalPages })}
                     </span>
                     
                     <Button

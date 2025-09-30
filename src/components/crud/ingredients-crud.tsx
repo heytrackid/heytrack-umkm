@@ -81,29 +81,29 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   const columns = [
     {
       key: 'name',
-      header: 'Name',
+      header: t('forms.labels.name'),
       priority: 'high' as const,
     },
     {
       key: 'unit',
-      header: 'Unit',
+      header: t('forms.labels.unit'),
       priority: 'high' as const,
     },
     {
       key: 'price_per_unit',
-      header: 'Price per Unit',
+      header: t('forms.labels.pricePerUnit'),
       render: (value: number) => formatCurrency(value),
       hideOnMobile: true,
     },
     {
       key: 'current_stock',
-      header: 'Current Stock',
+      header: t('forms.labels.currentStock'),
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
       priority: 'medium' as const,
     },
     {
       key: 'minimum_stock',
-      header: 'Min Stock',
+      header: t('forms.labels.minStock'),
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
       hideOnMobile: true,
     },
@@ -201,18 +201,18 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <Modal
         isOpen={isCreateModalOpen}
         onClose={closeModals}
-        title="Add New Ingredient"
+        title={t('ingredients.addNewIngredient')}
         size="lg"
         fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitCreate}>
           <FormSection
-            title="Basic Information"
-            description="Enter the basic details for the ingredient"
+            title={t('forms.sections.basicInformation')}
+            description={t('forms.descriptions.enterBasicDetails')}
           >
             <FormGrid cols={2}>
               <FormField
-                label="Name"
+                label={t('forms.labels.name')}
                 name="name"
                 type="text"
                 value={formData.name}
@@ -220,12 +220,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder="e.g., Flour, Sugar, Butter"
-                hint="Enter the ingredient name"
+                placeholder={t('forms.placeholders.ingredientName')}
+                hint={t('forms.hints.enterIngredientName')}
               />
 
               <FormField
-                label="Unit"
+                label={t('forms.labels.unit')}
                 name="unit"
                 type="select"
                 value={formData.unit}
@@ -234,17 +234,17 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 error={touched.unit ? errors.unit : undefined}
                 required
                 options={unitOptions}
-                hint="Select measurement unit"
+                hint={t('forms.hints.selectMeasurementUnit')}
               />
             </FormGrid>
           </FormSection>
 
           <FormSection
-            title="Stock & Pricing"
-            description="Set stock levels and cost information"
+            title={t('forms.sections.stockPricing')}
+            description={t('forms.descriptions.setStockLevels')}
           >
             <FormField
-              label={`Price per Unit (${settings.currency.symbol})`}
+label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -254,12 +254,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               required
               min={0}
               step={0.01}
-              hint={`Enter price in ${settings.currency.name}`}
+              hint={t('forms.hints.enterPrice', { currency: settings.currency.name })}
             />
 
             <FormGrid cols={2}>
               <FormField
-                label="Current Stock"
+                label={t('forms.labels.currentStock')}
                 name="current_stock"
                 type="number"
                 value={formData.current_stock}
@@ -269,11 +269,11 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 required
                 min={0}
                 step={0.01}
-                hint="Available quantity"
+                hint={t('forms.hints.availableQuantity')}
               />
 
               <FormField
-                label="Minimum Stock"
+                label={t('forms.labels.minStock')}
                 name="minimum_stock"
                 type="number"
                 value={formData.minimum_stock}
@@ -283,29 +283,29 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 required
                 min={0}
                 step={0.01}
-                hint="Reorder threshold"
+                hint={t('forms.hints.reorderThreshold')}
               />
             </FormGrid>
           </FormSection>
 
-          <FormSection title="Additional Information">
+          <FormSection title={t('forms.sections.additionalInformation')}>
             <FormField
-              label="Description"
+              label={t('forms.labels.description')}
               name="description"
               type="textarea"
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.description ? errors.description : undefined}
-              placeholder="Optional description or notes about the ingredient"
+              placeholder={t('forms.placeholders.optionalDescription')}
               rows={3}
-              hint="Add any additional notes or specifications"
+              hint={t('forms.hints.addNotes')}
             />
           </FormSection>
 
           <FormActions
             onCancel={closeModals}
-            submitText="Create Ingredient"
+            submitText={t('ingredients.createIngredient')}
             loading={loading}
             sticky={true}
           />
@@ -316,18 +316,18 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <Modal
         isOpen={isEditModalOpen}
         onClose={closeModals}
-        title="Edit Ingredient"
+        title={t('ingredients.editIngredient')}
         size="lg"
         fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitEdit}>
           <FormSection
-            title="Basic Information"
-            description="Update the basic details for the ingredient"
+            title={t('forms.sections.basicInformation')}
+            description={t('forms.descriptions.updateBasicDetails')}
           >
             <FormGrid cols={2}>
               <FormField
-                label="Name"
+                label={t('forms.labels.name')}
                 name="name"
                 type="text"
                 value={formData.name}
@@ -335,11 +335,11 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder="e.g., Flour, Sugar, Butter"
+                placeholder={t('forms.placeholders.ingredientName')}
               />
 
               <FormField
-                label="Unit"
+                label={t('forms.labels.unit')}
                 name="unit"
                 type="select"
                 value={formData.unit}
@@ -353,11 +353,11 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
           </FormSection>
 
           <FormSection
-            title="Stock & Pricing"
-            description="Update stock levels and cost information"
+            title={t('forms.sections.stockPricing')}
+            description={t('forms.descriptions.updateStockLevels')}
           >
             <FormField
-              label={`Price per Unit (${settings.currency.symbol})`}
+              label={t('forms.labels.pricePerUnit', { symbol: settings.currency.symbol })}
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -371,7 +371,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
             <FormGrid cols={2}>
               <FormField
-                label="Current Stock"
+                label={t('forms.labels.currentStock')}
                 name="current_stock"
                 type="number"
                 value={formData.current_stock}
@@ -384,7 +384,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               />
 
               <FormField
-                label="Minimum Stock"
+                label={t('forms.labels.minStock')}
                 name="minimum_stock"
                 type="number"
                 value={formData.minimum_stock}
@@ -398,23 +398,23 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             </FormGrid>
           </FormSection>
 
-          <FormSection title="Additional Information">
+          <FormSection title={t('forms.sections.additionalInformation')}>
             <FormField
-              label="Description"
+              label={t('forms.labels.description')}
               name="description"
               type="textarea"
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.description ? errors.description : undefined}
-              placeholder="Optional description or notes"
+              placeholder={t('forms.placeholders.optionalDescription')}
               rows={3}
             />
           </FormSection>
 
           <FormActions
             onCancel={closeModals}
-            submitText="Update Ingredient"
+            submitText={t('ingredients.updateIngredient')}
             loading={loading}
             sticky={true}
           />
@@ -426,9 +426,9 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
         isOpen={isDeleteDialogOpen}
         onClose={closeModals}
         onConfirm={handleConfirmDelete}
-        title="Delete Ingredient"
-        message={`Are you sure you want to delete"${selectedIngredient?.name}"? This action cannot be undone.`}
-        confirmText="Delete"
+        title={t('ingredients.deleteIngredient')}
+        message={t('dialogs.deleteConfirmation', { name: selectedIngredient?.name })}
+        confirmText={t('common.actions.delete')}
         type="danger"
       />
     </div>

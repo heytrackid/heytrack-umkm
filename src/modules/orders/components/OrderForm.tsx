@@ -196,10 +196,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
     <form onSubmit={handleSubmit}>
       <Tabs defaultValue="customer" className="w-full">
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-          <TabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</TabsTrigger>
-          <TabsTrigger value="items" className="text-xs sm:text-sm">Item ({orderItems.length})</TabsTrigger>
-          <TabsTrigger value="delivery" className="text-xs sm:text-sm">Pengiriman</TabsTrigger>
-          <TabsTrigger value="payment" className="text-xs sm:text-sm">Pembayaran</TabsTrigger>
+          <TabsTrigger value="customer" className="text-xs sm:text-sm">{t('orders.customer')}</TabsTrigger>
+          <TabsTrigger value="items" className="text-xs sm:text-sm">{t('orders.items')} ({orderItems.length})</TabsTrigger>
+          <TabsTrigger value="delivery" className="text-xs sm:text-sm">{t('orders.delivery')}</TabsTrigger>
+          <TabsTrigger value="payment" className="text-xs sm:text-sm">{t('orders.payment')}</TabsTrigger>
         </TabsList>
 
         {error && (
@@ -211,7 +211,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
         <TabsContent value="customer" className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <h3 className="text-lg font-medium">Pelanggan</h3>
+            <h3 className="text-lg font-medium">{t('orders.customer')}</h3>
             <Button
               type="button"
               variant="outline"
@@ -219,16 +219,16 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               onClick={() => setShowNewCustomer(!showNewCustomer)}
               className="self-end sm:self-auto"
             >
-              {showNewCustomer ? 'Pilih Existing' : 'Customer Baru'}
+              {showNewCustomer ? t('orders.selectExisting') : t('orders.newCustomer')}
             </Button>
           </div>
 
           {!showNewCustomer && (
             <div>
-              <Label className="text-sm font-medium">Cari Pelanggan Existing</Label>
+              <Label className="text-sm font-medium">{t('orders.searchExistingCustomer')}</Label>
               <div className="relative">
                 <Input
-                  placeholder="Ketik nama atau nomor telepon..."
+                  placeholder={t('orders.searchCustomerPlaceholder')}
                   value={customerSearch}
                   onChange={(e) => setCustomerSearch(e.target.value)}
                   className="mt-1"
@@ -259,10 +259,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="customerName" className="text-sm font-medium">Nama Pelanggan *</Label>
+              <Label htmlFor="customerName" className="text-sm font-medium">{t('orders.customerName')} *</Label>
               <Input
                 id="customerName"
-                placeholder="Contoh: Ibu Sari Wahyuni"
+                placeholder={t('orders.customerNamePlaceholder')}
                 value={formData.customer_name}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
                 required
@@ -270,10 +270,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="customerPhone" className="text-sm font-medium">No. Telepon</Label>
+              <Label htmlFor="customerPhone" className="text-sm font-medium">{t('orders.phoneNumber')}</Label>
               <Input
                 id="customerPhone"
-                placeholder="+62 812-3456-7890"
+                placeholder={t('orders.phonePlaceholder')}
                 value={formData.customer_phone}
                 onChange={(e) => handleInputChange('customer_phone', e.target.value)}
                 className="mt-1"
@@ -281,10 +281,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           </div>
           <div>
-            <Label htmlFor="customerAddress" className="text-sm font-medium">Alamat Lengkap</Label>
+            <Label htmlFor="customerAddress" className="text-sm font-medium">{t('orders.fullAddress')}</Label>
             <Textarea
               id="customerAddress"
-              placeholder="Alamat lengkap pelanggan..."
+              placeholder={t('orders.addressPlaceholder')}
               value={formData.customer_address}
               onChange={(e) => handleInputChange('customer_address', e.target.value)}
               className="mt-1"
@@ -292,7 +292,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="orderDate" className="text-sm font-medium">Tanggal Pesan *</Label>
+              <Label htmlFor="orderDate" className="text-sm font-medium">{t('orders.orderDate')} *</Label>
               <Input
                 id="orderDate"
                 type="date"
@@ -303,7 +303,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="priority" className="text-sm font-medium">Prioritas</Label>
+              <Label htmlFor="priority" className="text-sm font-medium">{t('orders.priority')}</Label>
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.priority}
@@ -319,18 +319,18 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
         <TabsContent value="items" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <h3 className="text-lg font-medium">Item Pesanan ({orderItems.length})</h3>
+            <h3 className="text-lg font-medium">{t('orders.orderItems')} ({orderItems.length})</h3>
             <Button type="button" size="sm" onClick={addOrderItem} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Tambah Item
+              {t('orders.addItem')}
             </Button>
           </div>
 
           {orderItems.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Package className="h-8 w-8 mx-auto mb-2" />
-              <p>Belum ada item yang ditambahkan</p>
-              <p className="text-sm">Klik"Tambah Item" untuk memulai</p>
+              <p>{t('orders.noItemsAdded')}</p>
+              <p className="text-sm">{t('orders.clickAddItemToStart')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -340,7 +340,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                     <div className="p-3 space-y-3">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
+                          <Label className="text-xs font-medium text-muted-foreground">{t('orders.product')}</Label>
                           <select
                             className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                             value={item.recipe_id}
@@ -366,7 +366,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
+                          <Label className="text-xs font-medium text-muted-foreground">{t('orders.quantity')}</Label>
                           <Input
                             type="number"
                             className="text-sm mt-1"
@@ -376,7 +376,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-medium text-muted-foreground">Total</Label>
+                          <Label className="text-xs font-medium text-muted-foreground">{t('orders.total')}</Label>
                           <Input
                             className="text-sm font-medium mt-1 bg-gray-50"
                             value={formatCurrency(item.total_price)}
@@ -386,7 +386,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                       </div>
 
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Harga Satuan</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('orders.unitPrice')}</Label>
                         <Input
                           type="number"
                           className={`text-sm mt-1`}
@@ -402,7 +402,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                   <div className="hidden sm:flex sm:items-center gap-3 p-4">
                     <div className="flex-1 grid grid-cols-4 gap-3">
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Produk</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('orders.product')}</Label>
                         <select
                           className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                           value={item.recipe_id}
@@ -416,7 +416,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         </select>
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Jumlah</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('orders.quantity')}</Label>
                         <Input
                           type="number"
                           className="text-sm mt-1"
@@ -426,7 +426,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Harga Satuan</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('orders.unitPrice')}</Label>
                         <Input
                           type="number"
                           className={`text-sm mt-1`}
@@ -437,7 +437,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">Total</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">{t('orders.total')}</Label>
                         <Input
                           className="text-sm font-medium mt-1 bg-gray-50"
                           value={formatCurrency(item.total_price)}
@@ -460,7 +460,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center text-sm font-medium">
-                  <span>Subtotal:</span>
+                  <span>{t('orders.subtotal')}:</span>
                   <span>{formatCurrency(subtotal)}</span>
                 </div>
               </div>
@@ -471,7 +471,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
         <TabsContent value="delivery" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="deliveryDate" className="text-sm font-medium">Tanggal Kirim</Label>
+              <Label htmlFor="deliveryDate" className="text-sm font-medium">{t('orders.deliveryDate')}</Label>
               <Input
                 id="deliveryDate"
                 type="date"
@@ -481,7 +481,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="deliveryTime" className="text-sm font-medium">Waktu Kirim</Label>
+              <Label htmlFor="deliveryTime" className="text-sm font-medium">{t('orders.deliveryTime')}</Label>
               <Input
                 id="deliveryTime"
                 type="time"
@@ -491,7 +491,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
-              <Label htmlFor="deliveryFee" className="text-sm font-medium">Biaya Kirim</Label>
+              <Label htmlFor="deliveryFee" className="text-sm font-medium">{t('orders.deliveryFee')}</Label>
               <Input
                 id="deliveryFee"
                 type="number"
@@ -505,20 +505,20 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           </div>
           <div>
-            <Label htmlFor="notes" className="text-sm font-medium">Catatan Khusus</Label>
+            <Label htmlFor="notes" className="text-sm font-medium">{t('orders.specialNotes')}</Label>
             <Textarea
               id="notes"
-              placeholder="Catatan untuk pesanan ini..."
+              placeholder={t('orders.notesPlaceholder')}
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               className="mt-1"
             />
           </div>
           <div>
-            <Label htmlFor="specialInstructions" className="text-sm font-medium">Instruksi Khusus</Label>
+            <Label htmlFor="specialInstructions" className="text-sm font-medium">{t('orders.specialInstructions')}</Label>
             <Textarea
               id="specialInstructions"
-              placeholder="Instruksi khusus untuk produksi..."
+              placeholder={t('orders.specialInstructionsPlaceholder')}
               value={formData.special_instructions}
               onChange={(e) => handleInputChange('special_instructions', e.target.value)}
               className="mt-1"
@@ -529,20 +529,20 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
         <TabsContent value="payment" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="paymentMethod" className="text-sm font-medium">Metode Pembayaran</Label>
+              <Label htmlFor="paymentMethod" className="text-sm font-medium">{t('orders.paymentMethod')}</Label>
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.payment_method}
                 onChange={(e) => handleInputChange('payment_method', e.target.value)}
               >
-                <option value="cash">Tunai</option>
-                <option value="transfer">Transfer Bank</option>
-                <option value="card">Kartu Kredit</option>
-                <option value="ewallet">E-Wallet</option>
+                <option value="cash">{t('forms.paymentMethods.cash')}</option>
+                <option value="transfer">{t('forms.paymentMethods.transfer')}</option>
+                <option value="creditCard">{t('forms.paymentMethods.creditCard')}</option>
+                <option value="digitalWallet">{t('forms.paymentMethods.digitalWallet')}</option>
               </select>
             </div>
             <div>
-              <Label htmlFor="discount" className="text-sm font-medium">Diskon</Label>
+              <Label htmlFor="discount" className="text-sm font-medium">{t('orders.discount')}</Label>
               <Input
                 id="discount"
                 type="number"
@@ -554,7 +554,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="tax" className="text-sm font-medium">Pajak (%)</Label>
+              <Label htmlFor="tax" className="text-sm font-medium">{t('orders.tax')} (%)</Label>
               <Input
                 id="tax"
                 type="number"
@@ -567,7 +567,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="paidAmount" className="text-sm font-medium">Dibayar</Label>
+              <Label htmlFor="paidAmount" className="text-sm font-medium">{t('orders.paidAmount')}</Label>
               <Input
                 id="paidAmount"
                 type="number"
@@ -581,36 +581,36 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           </div>
           <div className="bg-muted p-4 rounded-lg">
-            <h4 className="font-medium mb-2">Ringkasan Pembayaran</h4>
+            <h4 className="font-medium mb-2">{t('orders.paymentSummary')}</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
+                <span>{t('orders.subtotal')}:</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Diskon:</span>
+                <span>{t('orders.discount')}:</span>
                 <span>- {formatCurrency(formData.discount)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Pajak ({formData.tax_amount}%):</span>
+                <span>{t('orders.tax')} ({formData.tax_amount}%):</span>
                 <span>{formatCurrency(taxAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Biaya Kirim:</span>
+                <span>{t('orders.deliveryFee')}:</span>
                 <span>{formatCurrency(formData.delivery_fee)}</span>
               </div>
               <hr />
               <div className="flex justify-between font-medium">
-                <span>Total:</span>
+                <span>{t('orders.total')}:</span>
                 <span>{formatCurrency(totalAmount)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>Dibayar:</span>
+                <span>{t('orders.paid')}:</span>
                 <span>{formatCurrency(formData.paid_amount)}</span>
               </div>
               {totalAmount > formData.paid_amount && (
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>Sisa:</span>
+                  <span>{t('orders.remaining')}:</span>
                   <span>{formatCurrency(totalAmount - formData.paid_amount)}</span>
                 </div>
               )}
@@ -620,10 +620,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onCancel} className="order-2 sm:order-1">
-            Batal
+            {t('common.actions.cancel')}
           </Button>
           <Button type="submit" disabled={loading} className="order-1 sm:order-2">
-            {loading ? 'Menyimpan...' : order ? 'Update Pesanan' : 'Simpan Pesanan'}
+            {loading ? t('common.actions.saving') : order ? t('orders.updateOrder') : t('orders.saveOrder')}
           </Button>
         </div>
       </Tabs>

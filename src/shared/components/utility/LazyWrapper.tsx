@@ -1,11 +1,12 @@
 'use client'
 
-import { Suspense, ComponentType, lazy, ReactElement } from 'react'
+import { Suspense, ComponentType, lazy, ReactElement, useState, useEffect } from 'react'
 import { ErrorBoundary } from './ErrorBoundary'
 import { LoadingSpinner } from '../data/LoadingSpinner'
 import { Card, CardContent } from '../ui/card'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface LazyWrapperProps {
   children: ReactElement
@@ -33,12 +34,14 @@ export function LazyWrapper({
   name = 'Component',
   minLoadingTime = 300 
 }: LazyWrapperProps) {
+  const { t } = useI18n()
+  
   const defaultFallback = fallback || (
     <Card className="animate-pulse">
       <CardContent className="pt-6">
         <div className="flex items-center justify-center py-8">
           <LoadingSpinner />
-          <span className="ml-3 text-muted-foreground">Loading {name}...</span>
+          <span className="ml-3 text-muted-foreground">{t('common.loading')} {name}...</span>
         </div>
       </CardContent>
     </Card>
@@ -50,10 +53,10 @@ export function LazyWrapper({
         <div className="text-center py-8">
           <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h3 className="text-lg font-medium text-destructive mb-2">
-            Error Loading {name}
+            {t('common.errorLoading')} {name}
           </h3>
           <p className="text-muted-foreground mb-4">
-            Something went wrong while loading this component.
+            {t('common.errorLoadingComponent')}
           </p>
           <Button 
             variant="outline" 
@@ -61,7 +64,7 @@ export function LazyWrapper({
             className="gap-2"
           >
             <RefreshCw className="h-4 w-4" />
-            Retry
+            {t('common.retry')}
           </Button>
         </div>
       </CardContent>
@@ -244,4 +247,3 @@ export const ComponentSkeletons = {
   )
 }
 
-import { useState, useEffect } from 'react'

@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
+import { useI18n } from '@/providers/I18nProvider'
 
 interface CostTableProps {
   costs: any[]
@@ -60,6 +61,8 @@ export default function CostTable({
   formatCurrency,
   isMobile = false
 }: CostTableProps) {
+  const { t } = useI18n()
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
@@ -85,9 +88,9 @@ export default function CostTable({
       <Card>
         <CardContent className="py-12 text-center">
           <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium mb-2">No Costs Yet</h3>
+          <h3 className="font-medium mb-2">{t('operationalCosts.empty.noCosts')}</h3>
           <p className="text-muted-foreground mb-4">
-            Start tracking your operational costs
+            {t('operationalCosts.empty.startTracking')}
           </p>
         </CardContent>
       </Card>
@@ -97,19 +100,19 @@ export default function CostTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cost Records</CardTitle>
+        <CardTitle>{t('operationalCosts.table.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('forms.labels.date')}</TableHead>
+                <TableHead>{t('forms.labels.category')}</TableHead>
+                <TableHead>{t('forms.labels.description')}</TableHead>
+                <TableHead>{t('forms.labels.amount')}</TableHead>
+                <TableHead>{t('operationalCosts.table.payment')}</TableHead>
+                <TableHead className="text-right">{t('tables.headers.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -134,7 +137,7 @@ export default function CostTable({
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="capitalize">
-                      {cost.payment_method}
+                      {t(`forms.paymentMethods.${cost.payment_method}`) || cost.payment_method}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -148,14 +151,14 @@ export default function CostTable({
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => onEdit(cost)}>
                             <Edit2 className="h-4 w-4 mr-2" />
-                            Edit
+                            {t('common.actions.edit')}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-600"
                             onClick={() => onDelete(cost)}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
+                            {t('common.actions.delete')}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -171,14 +174,18 @@ export default function CostTable({
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} biaya
+                  {t('operationalCosts.pagination.showing', {
+                    from: ((currentPage - 1) * pageSize) + 1,
+                    to: Math.min(currentPage * pageSize, totalItems),
+                    total: totalItems
+                  })}
                 </span>
               </div>
               
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                  <span className="text-sm text-muted-foreground">{t('operationalCosts.pagination.showLabel')}</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
@@ -207,7 +214,7 @@ export default function CostTable({
                   </Button>
                   
                   <span className="text-sm font-medium">
-                    Halaman {currentPage} dari {totalPages}
+                    {t('operationalCosts.pagination.pageLabel', { current: currentPage, total: totalPages })}
                   </span>
                   
                   <Button

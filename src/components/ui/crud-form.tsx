@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
+import { useI18n } from '@/providers/I18nProvider';
 
 interface FormFieldProps {
   label: string;
@@ -44,6 +45,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   icon,
   fullWidth = true,
 }) => {
+  const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -142,7 +144,7 @@ export const FormField: React.FC<FormFieldProps> = ({
               className={`${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`}
             >
               <option value="" disabled>
-                {placeholder || `Select ${label.toLowerCase()}`}
+                {placeholder || t('forms.placeholders.selectOption')}
               </option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -337,7 +339,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
   sticky = false,
 }) => {
   const containerClasses = `
-    ${sticky ? 'sticky bottom-0 bg-white border-t border-gray-200 p-4 sm:relative sm:border-t-0 sm:p-0' : ''}
+    ${sticky ? 'sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 sm:relative sm:border-t-0 sm:p-0 z-10 shadow-lg sm:shadow-none' : ''}
     ${fullWidthOnMobile ? 'flex flex-col-reverse sm:flex-row sm:justify-end space-y-3 space-y-reverse sm:space-y-0 sm:space-x-3' : 'flex justify-end space-x-3'}
     mt-6 pt-4 ${!sticky ? 'border-t border-gray-200' : ''}
   `;

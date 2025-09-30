@@ -4,6 +4,7 @@ import { lazy, Suspense, useState, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useI18n } from '@/providers/I18nProvider'
 
 // Modal Loading Skeleton
 const ModalLoadingSkeleton = ({ title }: { title?: string }) => (
@@ -40,43 +41,67 @@ const FormLoadingSkeleton = ({ fields = 4 }: { fields?: number }) => (
 // Lazy loaded form components
 export const LazyIngredientForm = lazy(() => 
   import('@/components/forms/ingredient-form').then(m => ({ default: m.IngredientForm }))
-    .catch(() => ({ default: () => <div>Ingredient form not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Ingredient form' })}</div>;
+    }}))
 )
 
 export const LazyOrderForm = lazy(() => 
   import('@/components/forms/order-form').then(m => ({ default: m.OrderForm }))
-    .catch(() => ({ default: () => <div>Order form not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Order form' })}</div>;
+    }}))
 )
 
 export const LazyCustomerForm = lazy(() => 
   import('@/components/forms/customer-form').then(m => ({ default: m.CustomerForm }))
-    .catch(() => ({ default: () => <div>Customer form not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Customer form' })}</div>;
+    }}))
 )
 
 export const LazyRecipeForm = lazy(() => 
   import('@/components/forms/recipe-form').then(m => ({ default: m.RecipeForm }))
-    .catch(() => ({ default: () => <div>Recipe form not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Recipe form' })}</div>;
+    }}))
 )
 
 export const LazyFinanceForm = lazy(() => 
   import('@/components/forms/finance-form').then(m => ({ default: m.FinanceForm }))
-    .catch(() => ({ default: () => <div>Finance form not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Finance form' })}</div>;
+    }}))
 )
 
 // Lazy loaded detail/view components
 export const LazyOrderDetail = lazy(() => 
   import('@/components/details/order-detail').then(m => ({ default: m.OrderDetail }))
-    .catch(() => ({ default: () => <div>Order details not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Order details' })}</div>;
+    }}))
 )
 
 export const LazyCustomerDetail = lazy(() => 
   import('@/components/details/customer-detail').then(m => ({ default: m.CustomerDetail }))
-    .catch(() => ({ default: () => <div>Customer details not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Customer details' })}</div>;
+    }}))
 )
 
 export const LazyInventoryDetail = lazy(() => 
   import('@/components/details/inventory-detail').then(m => ({ default: m.InventoryDetail }))
-    .catch(() => ({ default: () => <div>Inventory details not available</div> }))
+    .catch(() => ({ default: () => {
+      const { t } = useI18n();
+      return <div>{t('errors.componentNotAvailable', { component: 'Inventory details' })}</div>;
+    }}))
 )
 
 // Lazy Modal Wrapper Component
@@ -100,6 +125,8 @@ export const LazyModal = ({
   size = 'md',
   mobile = false 
 }: LazyModalProps) => {
+  const { t } = useI18n();
+  
   const getComponent = () => {
     switch (component) {
       case 'ingredient-form': return LazyIngredientForm
@@ -110,7 +137,7 @@ export const LazyModal = ({
       case 'order-detail': return LazyOrderDetail
       case 'customer-detail': return LazyCustomerDetail
       case 'inventory-detail': return LazyInventoryDetail
-      default: return () => <div>Component not found</div>
+      default: return () => <div>{t('errors.componentNotFound')}</div>
     }
   }
 

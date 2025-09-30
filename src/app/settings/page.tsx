@@ -226,25 +226,26 @@ export default function SettingsPage() {
         </Breadcrumb>
         
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{t('settings.title')}</h1>
-            <p className="text-muted-foreground">{t('settings.subtitle')}</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{t('settings.title')}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{t('settings.subtitle')}</p>
           </div>
-          <div className="flex gap-2">
-            <ExcelExportButton variant="outline" className="mr-2" />
+          <div className="flex flex-wrap gap-2">
+            <ExcelExportButton variant="outline" className="hidden sm:inline-flex" />
             {isUnsavedChanges && (
-              <Badge variant="outline" className="text-orange-600 border-orange-600">
+              <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs md:text-sm">
                 {t('settings.actions.unsaved')}
               </Badge>
             )}
-            <Button variant="outline" onClick={handleReset}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              {t('settings.actions.reset')}
+            <Button variant="outline" onClick={handleReset} size="sm" className="flex-1 sm:flex-none">
+              <RotateCcw className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{t('settings.actions.reset')}</span>
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? t('settings.actions.saving') : t('common.actions.save')}
+            <Button onClick={handleSave} disabled={isSaving} size="sm" className="flex-1 sm:flex-none">
+              <Save className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{isSaving ? t('settings.actions.saving') : t('common.actions.save')}</span>
+              <span className="sm:hidden">{isSaving ? 'Saving...' : 'Save'}</span>
             </Button>
           </div>
         </div>
@@ -285,12 +286,12 @@ export default function SettingsPage() {
 
             {/* Settings Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="general">{t('settings.tabs.general')}</TabsTrigger>
-                <TabsTrigger value="profile">{t('settings.tabs.profile')}</TabsTrigger>
-                <TabsTrigger value="notifications">{t('settings.tabs.notifications')}</TabsTrigger>
-                <TabsTrigger value="system">{t('settings.tabs.system')}</TabsTrigger>
-                <TabsTrigger value="ui">{t('settings.tabs.ui')}</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
+                <TabsTrigger value="general" className="text-xs sm:text-sm">{t('settings.tabs.general')}</TabsTrigger>
+                <TabsTrigger value="profile" className="text-xs sm:text-sm">{t('settings.tabs.profile')}</TabsTrigger>
+                <TabsTrigger value="notifications" className="text-xs sm:text-sm">{t('settings.tabs.notifications')}</TabsTrigger>
+                <TabsTrigger value="system" className="text-xs sm:text-sm">{t('settings.tabs.system')}</TabsTrigger>
+                <TabsTrigger value="ui" className="text-xs sm:text-sm">{t('settings.tabs.ui')}</TabsTrigger>
               </TabsList>
 
               {/* General Settings */}

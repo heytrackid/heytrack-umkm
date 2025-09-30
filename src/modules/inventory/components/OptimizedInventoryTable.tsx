@@ -110,7 +110,6 @@ const InventoryTableRow = memo(({
       <td className="p-4">
         <div>
           <p className="font-medium text-gray-900">{ingredient.name}</p>
-          <p className="text-sm text-gray-500">{ingredient.category}</p>
         </div>
       </td>
       <td className="p-4">
