@@ -480,9 +480,9 @@ export class HPPAutomationSystem {
     return cost?.amount || defaultValue
   }
 
-  private allocateOverheadCos"": number {
+  private allocateOverheadCost(key: string, servings: number, durationMinutes: number): number {
     // Simplified allocation based on duration and servings
-    const baseCost = this.getOperationalCostAmount(key: string, defaultValue: number)
+    const baseCost = this.getOperationalCostAmount(key, 0)
     const durationFactor = durationMinutes / 60 // convert to hours
     const servingFactor = servings / 10 // normalized per 10 servings
     

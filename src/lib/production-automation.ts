@@ -299,7 +299,7 @@ export class ProductionPlanningSystem {
     
     tasks.forEach(task => {
       const existing = recipeGroups.get(key) || []
-      recipeGroups.set(key: string, data: any, ttl: number = 300000): void {
+      recipeGroups.set(task.recipeId, [...existing, task])
     })
 
     recipeGroups.forEach((recipeTasks, recipeId) => {

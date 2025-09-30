@@ -82,7 +82,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     console.log(`Update ${selectedIngredient?.name} price to ${newPrice} using ${method} method`)
 
     // Show success message
-    alert} using ${method} method`)
+    alert(`Price updated to ${newPrice} using ${method} method`)
   }, [selectedIngredient])
 
   // Bulk action handlers

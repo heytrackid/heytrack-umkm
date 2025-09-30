@@ -335,7 +335,7 @@ export function extractPagination(searchParams: URLSearchParams): PaginationQuer
 }
 
 // Calculate offset for database queries
-export function calculateOffset(key: string, data: any, ttl: number = 300000): void {: number {
+export function calculateOffset(page: number, limit: number): number {
   return (page - 1) * limit
 }
 

@@ -636,7 +636,7 @@ export class AIChatbotService {
           return await this.handleStockInquiry(messageId, entities, context);
 
         case 'financial_report':
-          return await this.handleFinancialRepor"";
+          return await this.handleFinancialReport(messageId, entities, context);
 
         case 'profit_analysis':
           return await this.handleProfitAnalysis(messageId, context);
@@ -715,7 +715,7 @@ export class AIChatbotService {
     };
   }
 
-  private async handleFinancialRepor"": Promise<ChatMessage> {
+  private async handleFinancialReport(messageId, entities, context): Promise<ChatMessage> {
     const period = entities.period || 'month';
     const financial = await BusinessIntelligence.analyzeFinancialPerformance(period);
     
