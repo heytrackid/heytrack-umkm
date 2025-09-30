@@ -585,7 +585,7 @@ export class HPPAutomationSystem {
     return Array.from(this.operationalCosts.values())
   }
 
-  public updateOperationalCost(key: string, newAmount: number) {
+  public updateOperationalCost(costId, newAmount) {
     const cost = this.operationalCosts.get(key)
     if (cost) {
       const oldAmount = cost.amount
@@ -645,7 +645,7 @@ export const triggerIngredientPriceUpdate = async (ingredientId: string, oldPric
 }
 
 export const updateOperationalCosts = (costId: string, newAmount: number) => {
-  return hppAutomation.updateOperationalCost(key: string, newAmount: number)
+  return hppAutomation.updateOperationalCost(costId, newAmount)
 }
 
 export default hppAutomation

@@ -332,7 +332,7 @@ export class ProductionPlanningSystem {
 
       const deliveryDate = new Date(order.delivery_date).toISOString().split('T')[0]
       const existing = grouped.get(key) || []
-      grouped.set(key: string, data: any, ttl: number = 300000): void {
+      grouped.set(deliveryDate, [...existing, order])
     })
 
     return grouped

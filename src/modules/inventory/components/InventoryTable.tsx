@@ -172,7 +172,7 @@ export function InventoryTable({
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 className="text-red-600"
-                                onClick={() => onDeleteIngredien""}
+                                onClick={() => onDeleteIngredient(ingredient)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Hapus

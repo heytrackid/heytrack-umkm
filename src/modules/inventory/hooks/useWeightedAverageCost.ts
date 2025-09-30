@@ -272,7 +272,7 @@ export function useWeightedAverageCos"" {
     
     const mean = prices.reduce((sum, price) => sum + price, 0) / prices.length
     const variance = prices.reduce((sum, price) => sum + Math.pow(price - mean, 2), 0) / prices.length
-    const coefficient = mean > 0 ? Math.sqr"" / mean : 0
+    const coefficient = mean > 0 ? Math.sqrt(variance) / mean : 0
     
     // High volatility = use moving average
     if (coefficient > 0.15) return 'moving'

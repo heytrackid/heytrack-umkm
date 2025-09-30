@@ -123,7 +123,7 @@ export class InventoryService {
   /**
    * Update ingredient (invalidate cache)
    */
-  static async updateIngredien"": Promise<Ingredient> {
+  static async updateIngredient(id, updates): Promise<Ingredient> {
     const { data, error } = await supabase
       .from('ingredients')
       .update({ ...updates, updated_at: new Date().toISOString() })

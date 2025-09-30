@@ -156,7 +156,7 @@ class OptimizedAPIClient {
     })
   }
 
-  async updateIngredien"" {
+  async updateIngredient(id, updates) {
     return this.fetch(`/api/ingredients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
