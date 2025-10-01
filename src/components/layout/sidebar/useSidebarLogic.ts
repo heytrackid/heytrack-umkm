@@ -187,7 +187,7 @@ export const useSidebarLogic = () => {
     },
     {
       title: "Monitoring",
-      description: "Laporan dan analisis bisnis",
+      description: "Laporan keuangan dan profitabilitas",
       isWorkflow: true,
       isCollapsible: true,
       items: [
@@ -197,7 +197,8 @@ export const useSidebarLogic = () => {
           icon: DollarSign,
           isSimple: true,
           badge: "UANG",
-          description: "Arus kas masuk dan keluar"
+          stepNumber: 1,
+          description: "Semua transaksi masuk dan keluar"
         },
         {
           name: "Laba Riil",
@@ -205,31 +206,8 @@ export const useSidebarLogic = () => {
           icon: TrendingUp,
           isSimple: true,
           badge: "PROFIT",
-          description: "Laporan laba riil dengan WAC"
-        },
-        {
-          name: "Keuangan",
-          href: '/finance',
-          icon: Banknote,
-          isSimple: true,
-          badge: "FINANCE",
-          description: "Laporan keuangan detail"
-        },
-        {
-          name: "Laporan",
-          href: '/reports',
-          icon: BarChart3,
-          isSimple: true,
-          badge: "REPORT",
-          description: "Laporan bisnis lengkap"
-        },
-        {
-          name: "Tinjauan",
-          href: '/review',
-          icon: TrendingUp,
-          isSimple: true,
-          badge: "REVIEW",
-          description: "Tinjauan performa dan pertumbuhan"
+          stepNumber: 2,
+          description: "Profit margin dengan metode WAC"
         },
       ]
     },
