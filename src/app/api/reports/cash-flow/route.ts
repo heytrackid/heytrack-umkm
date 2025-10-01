@@ -64,6 +64,17 @@ export async function GET(request: NextRequest) {
       comparison = await calculateComparison(supabase, startDate, endDate, period)
     }
     
+    // Transform transactions for frontend
+    const transactionsList = transactions?.map(t => ({
+      id: t.id,
+      reference_id: t.reference_id || t.id,
+      date: t.expense_date,
+      description: t.description,
+      category: t.category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : t.category,
+      amount: Number(t.amount),
+      type: t.category === 'Revenue' ? 'income' : 'expense'
+    })) || []
+
     // Build response
     const response = {
       summary: {
@@ -75,12 +86,15 @@ export async function GET(request: NextRequest) {
         total_income: totalIncome,
         total_expenses: totalExpenses,
         net_cash_flow: netCashFlow,
+        income_by_category: groupByCategory(income),
+        expenses_by_category: groupByCategory(expenses),
         transaction_count: {
           income: income.length,
           expenses: expenses.length,
           total: transactions?.length || 0
         }
       },
+      transactions: transactionsList,
       cash_flow_by_period: cashFlowByPeriod,
       category_breakdown: categoryBreakdown,
       trend: trend,
@@ -194,6 +208,16 @@ function calculateCategoryBreakdown(transactions: any[]) {
   })
   
   return Object.values(breakdown).sort((a: any, b: any) => b.total - a.total)
+}
+
+// Helper: Group by category for summary
+function groupByCategory(transactions: any[]) {
+  const grouped: Record<string, number> = {}
+  transactions.forEach(t => {
+    const category = t.category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : t.category
+    grouped[category] = (grouped[category] || 0) + Number(t.amount)
+  })
+  return grouped
 }
 
 // Helper: Calculate trend
