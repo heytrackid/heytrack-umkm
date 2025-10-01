@@ -144,3 +144,136 @@ export const LazyWrapper = ({
     {children}
   </Suspense>
 )
+
+// ==========================================
+// Preload Functions for Route Optimization
+// ==========================================
+
+// Preload chart bundle (Recharts)
+export const preloadChartBundle = async () => {
+  try {
+    await Promise.all([
+      import('@/components').then(m => m.Chart),
+      import('@/components').then(m => m.FinancialTrendsChart),
+      import('@/components').then(m => m.InventoryTrendsChart),
+    ])
+    console.log('✅ Chart bundle preloaded')
+  } catch (error) {
+    console.warn('⚠️ Failed to preload chart bundle:', error)
+  }
+}
+
+// Preload table bundle (@tanstack/react-table)
+export const preloadTableBundle = async () => {
+  try {
+    await import('@/components').then(m => m.SimpleDataTable)
+    console.log('✅ Table bundle preloaded')
+  } catch (error) {
+    console.warn('⚠️ Failed to preload table bundle:', error)
+  }
+}
+
+// Preload modal component by type
+export const preloadModalComponent = async (modalType: string) => {
+  try {
+    switch (modalType) {
+      case 'ingredient-form':
+        await import('@/components').then(m => m.IngredientForm)
+        break
+      case 'recipe-form':
+        await import('@/components').then(m => m.RecipeForm)
+        break
+      case 'customer-form':
+        await import('@/components').then(m => m.CustomerForm)
+        break
+      case 'finance-form':
+        await import('@/components').then(m => m.FinancialRecordForm)
+        break
+      case 'order-form':
+        // Add order form if exists
+        break
+      default:
+        console.warn('Unknown modal type:', modalType)
+    }
+    console.log('✅ Modal component preloaded:', modalType)
+  } catch (error) {
+    console.warn('⚠️ Failed to preload modal:', modalType, error)
+  }
+}
+
+// Route-based lazy loading configuration
+export type RouteLazyLoadingConfig = {
+  [route: string]: {
+    components: string[]
+    priority: 'high' | 'medium' | 'low'
+  }
+}
+
+// Global lazy loading utilities
+export const globalLazyLoadingUtils = {
+  // Preload components for a specific route
+  preloadForRoute: async (route: keyof RouteLazyLoadingConfig) => {
+    const routeConfigs: RouteLazyLoadingConfig = {
+      '/dashboard': {
+        components: ['chart', 'table'],
+        priority: 'high'
+      },
+      '/orders': {
+        components: ['table', 'order-form'],
+        priority: 'high'
+      },
+      '/finance': {
+        components: ['chart', 'table', 'finance-form'],
+        priority: 'high'
+      },
+      '/inventory': {
+        components: ['table', 'ingredient-form'],
+        priority: 'medium'
+      },
+      '/ingredients': {
+        components: ['table', 'ingredient-form', 'recipe-form'],
+        priority: 'medium'
+      },
+      '/customers': {
+        components: ['table', 'customer-form'],
+        priority: 'medium'
+      },
+      '/resep': {
+        components: ['table', 'recipe-form'],
+        priority: 'medium'
+      }
+    }
+
+    const config = routeConfigs[route]
+    if (!config) return
+
+    const preloadPromises = config.components.map(component => {
+      if (component === 'chart') return preloadChartBundle()
+      if (component === 'table') return preloadTableBundle()
+      if (component.includes('form')) return preloadModalComponent(component)
+      return Promise.resolve()
+    })
+
+    await Promise.all(preloadPromises)
+    console.log(`✅ Preloaded components for route: ${route}`)
+  },
+
+  // Preload all heavy components
+  preloadAll: async () => {
+    try {
+      await Promise.all([
+        preloadChartBundle(),
+        preloadTableBundle(),
+      ])
+      console.log('✅ All heavy components preloaded')
+    } catch (error) {
+      console.warn('⚠️ Failed to preload all components:', error)
+    }
+  },
+
+  // Check if component is already loaded
+  isComponentLoaded: (componentName: string): boolean => {
+    // Simple check - in production you might want to track this more precisely
+    return false
+  }
+}

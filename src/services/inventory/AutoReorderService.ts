@@ -4,7 +4,15 @@
  * and generates purchase orders when ingredients reach minimum thresholds
  */
 
-import { supabase } from '@/lib/supabase'
+import { createServerSupabaseAdmin } from '@/lib/supabase'
+
+// Use admin client for server-side automation
+const getSupabaseAdmin = () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('AutoReorderService should only be used server-side')
+  }
+  return createServerSupabaseAdmin()
+}
 
 export interface ReorderRule {
   id: string
@@ -90,26 +98,39 @@ class AutoReorderService {
     low: 1.0     // At minimum stock
   }
 
+  // Helper to get admin client
+  private getAdmin() {
+    return getSupabaseAdmin()
+  }
+
   /**
    * Check all ingredients and generate reorder alerts
    */
   async checkReorderNeeds(): Promise<ReorderSummary> {
     try {
-      const { data: ingredients, error: ingredientsError } = await supabase
+      console.log('[AutoReorder] Starting checkReorderNeeds...')
+      
+      const supabaseAdmin = getSupabaseAdmin()
+      
+      const { data: ingredients, error: ingredientsError } = await supabaseAdmin
         .from('ingredients')
         .select('*')
         .eq('is_active', true)
 
       if (ingredientsError) throw ingredientsError
+      
+      console.log(`[AutoReorder] Found ${ingredients?.length || 0} active ingredients`)
 
-      const { data: reorderRules, error: rulesError } = await supabase
+      const { data: reorderRules, error: rulesError } = await supabaseAdmin
         .from('inventory_reorder_rules')
         .select('*')
         .eq('is_active', true)
 
       if (rulesError) throw rulesError
+      
+      console.log(`[AutoReorder] Found ${reorderRules?.length || 0} active reorder rules`)
 
-      const { data: suppliers, error: suppliersError } = await supabase
+      const { data: suppliers, error: suppliersError } = await supabaseAdmin
         .from('suppliers')
         .select('*')
         .eq('is_active', true)
@@ -123,6 +144,11 @@ class AutoReorderService {
         const rule = reorderRules?.find(r => r.ingredient_id === ingredient.id)
         const currentStock = ingredient.current_stock ?? 0 || 0
         const minStock = ingredient.min_stock ?? 0 || 0
+
+        // Debug logging for first few items
+        if (alerts.length < 3) {
+          console.log(`Checking ${ingredient.name}: stock=${currentStock}, min=${minStock}, rule_point=${rule?.reorder_point}, needs=${this.needsReorder(currentStock, minStock, rule)}`)
+        }
 
         // Check if reorder is needed
         if (this.needsReorder(currentStock, minStock, rule)) {
@@ -309,8 +335,8 @@ class AutoReorderService {
   /**
    * Private helper methods
    */
-  private needsReorder(currentStock: number, minStock: number, rule?: ReorderRule): boolean {
-    const threshold = rule?.min_stock_threshold || minStock
+  private needsReorder(currentStock: number, minStock: number, rule?: any): boolean {
+    const threshold = rule?.reorder_point || rule?.min_stock_threshold || minStock
     return currentStock <= threshold
   }
 
@@ -323,7 +349,7 @@ class AutoReorderService {
     return 'low'
   }
 
-  private calculateReorderQuantity(ingredient: any, rule?: ReorderRule): number {
+  private calculateReorderQuantity(ingredient: any, rule?: any): number {
     if (rule?.reorder_quantity) {
       return rule?.reorder_quantity
     }
@@ -377,15 +403,17 @@ class AutoReorderService {
   private async saveReorderAlerts(alerts: ReorderAlert[]): Promise<void> {
     if (alerts.length === 0) return
 
+    const admin = this.getAdmin()
+
     // Clear existing alerts for today
     const today = new Date().toISOString().slice(0, 10)
-    await supabase
+    await admin
       .from('inventory_reorder_alerts')
       .delete()
       .gte('created_at', `${today}T00:00:00`)
 
     // Insert new alerts
-    const { error } = await supabase
+    const { error } = await admin
       .from('inventory_reorder_alerts')
       .insert(alerts)
 
