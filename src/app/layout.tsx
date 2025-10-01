@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
+import { Analytics } from '@vercel/analytics/next';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import"./globals.css";
 
@@ -95,6 +96,7 @@ export default function RootLayout({
             </SettingsProvider>
           </QueryProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
