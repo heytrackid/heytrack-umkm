@@ -157,6 +157,21 @@ export default function ProfitReportPage() {
     }
   }
 
+  // Prepare chart data for product profitability - MOVED BEFORE EARLY RETURNS
+  const productChartData = React.useMemo(() => {
+    if (!profitData || !profitData.products || profitData.products.length === 0) return []
+    return profitData.products
+      .slice(0, 10) // Top 10 products
+      .map(product => ({
+        name: product.product_name.length > 15 
+          ? product.product_name.substring(0, 15) + '...' 
+          : product.product_name,
+        revenue: product.revenue,
+        cogs: product.cogs,
+        profit: product.profit
+      }))
+  }, [profitData])
+
   if (loading) {
     return (
       <AppLayout>
@@ -192,21 +207,6 @@ export default function ProfitReportPage() {
   }
 
   const { summary, products = [], ingredients = [], operating_expenses = [], trends } = profitData
-
-  // Prepare chart data for product profitability
-  const productChartData = React.useMemo(() => {
-    if (!products || products.length === 0) return []
-    return products
-      .slice(0, 10) // Top 10 products
-      .map(product => ({
-        name: product.product_name.length > 15 
-          ? product.product_name.substring(0, 15) + '...' 
-          : product.product_name,
-        revenue: product.revenue,
-        cogs: product.cogs,
-        profit: product.profit
-      }))
-  }, [products])
 
   return (
     <AppLayout>

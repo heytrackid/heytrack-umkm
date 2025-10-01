@@ -233,6 +233,33 @@ export default function CashFlowPage() {
     }
   }
 
+  // Prepare chart data - group by date - MOVED BEFORE EARLY RETURNS
+  const chartData = React.useMemo(() => {
+    if (!cashFlowData || !cashFlowData.transactions) return []
+    
+    const dataByDate: Record<string, { date: string; income: number; expense: number; net: number }> = {}
+    
+    cashFlowData.transactions.forEach(transaction => {
+      const date = new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })
+      
+      if (!dataByDate[date]) {
+        dataByDate[date] = { date, income: 0, expense: 0, net: 0 }
+      }
+      
+      if (transaction.type === 'income') {
+        dataByDate[date].income += transaction.amount
+      } else {
+        dataByDate[date].expense += transaction.amount
+      }
+      dataByDate[date].net = dataByDate[date].income - dataByDate[date].expense
+    })
+    
+    return Object.values(dataByDate).sort((a, b) => {
+      // Sort by date
+      return a.date.localeCompare(b.date)
+    }).slice(-14) // Last 14 days
+  }, [cashFlowData])
+
   const exportReport = async (format: 'csv' | 'xlsx') => {
     try {
       const params = new URLSearchParams()
@@ -290,31 +317,6 @@ export default function CashFlowPage() {
   if (!cashFlowData) return null
 
   const { summary, transactions } = cashFlowData
-
-  // Prepare chart data - group by date
-  const chartData = React.useMemo(() => {
-    const dataByDate: Record<string, { date: string; income: number; expense: number; net: number }> = {}
-    
-    transactions.forEach(transaction => {
-      const date = new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })
-      
-      if (!dataByDate[date]) {
-        dataByDate[date] = { date, income: 0, expense: 0, net: 0 }
-      }
-      
-      if (transaction.type === 'income') {
-        dataByDate[date].income += transaction.amount
-      } else {
-        dataByDate[date].expense += transaction.amount
-      }
-      dataByDate[date].net = dataByDate[date].income - dataByDate[date].expense
-    })
-    
-    return Object.values(dataByDate).sort((a, b) => {
-      // Sort by date
-      return a.date.localeCompare(b.date)
-    }).slice(-14) // Last 14 days
-  }, [transactions])
 
   return (
     <AppLayout>
