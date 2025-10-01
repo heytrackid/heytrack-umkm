@@ -174,7 +174,7 @@ export default function EnhancedInventoryPage({ initialIngredients = [] }: { ini
 
   // Get stock alert level with neutral colors
   const getStockAlertLevel = (ingredient: any) => {
-    if (!ingredient.current_stock ?? 0 || !ingredient.min_stock) {
+    if (!(ingredient.current_stock ?? 0) || !ingredient.min_stock) {
       return { level: 'unknown', color: 'bg-gray-400', text: 'Data Kosong' }
     }
 

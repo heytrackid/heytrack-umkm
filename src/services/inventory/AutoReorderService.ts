@@ -142,8 +142,8 @@ class AutoReorderService {
 
       for (const ingredient of ingredients || []) {
         const rule = reorderRules?.find(r => r.ingredient_id === ingredient.id)
-        const currentStock = ingredient.current_stock ?? 0 || 0
-        const minStock = ingredient.min_stock ?? 0 || 0
+        const currentStock = (ingredient.current_stock ?? 0) || 0
+        const minStock = (ingredient.min_stock ?? 0) || 0
 
         // Debug logging for first few items
         if (alerts.length < 3) {
@@ -355,7 +355,7 @@ class AutoReorderService {
     }
 
     // Default logic: reorder to 150% of minimum stock
-    return Math.ceil((ingredient.min_stock ?? 0 || 0) * 1.5)
+    return Math.ceil(((ingredient.min_stock ?? 0) || 0) * 1.5)
   }
 
   private estimateReorderCost(quantity: number, ingredient: any): number {

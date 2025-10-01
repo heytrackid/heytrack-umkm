@@ -225,7 +225,7 @@ export class WorkflowAutomation {
       for (const recipeIngredient of recipe.recipe_ingredients) {
         const ingredient = recipeIngredient.ingredient
         const usedQuantity = recipeIngredient.quantity * orderItem.quantity
-        const newStock = Math.max(0, ingredient.current_stock ?? 0 - usedQuantity)
+        const newStock = Math.max(0, (ingredient.current_stock ?? 0) - usedQuantity)
 
         // Update ingredient stock
         const { error: updateError } = await supabase
@@ -260,7 +260,7 @@ export class WorkflowAutomation {
         console.log(`✅ Updated ${ingredient.name}: ${ingredient.current_stock ?? 0} → ${newStock}`)
 
         // Check for low stock dan trigger alert
-        if (newStock <= ingredient.min_stock ?? 0 && newStock > 0) {
+        if (newStock <= (ingredient.min_stock ?? 0) && newStock > 0) {
           this.triggerEvent({
             event: 'inventory.low_stock',
             entityId: ingredient.id,
@@ -268,7 +268,7 @@ export class WorkflowAutomation {
               ingredient,
               currentStock: newStock,
               minStock: ingredient.min_stock ?? 0,
-              severity: newStock <= ingredient.min_stock ?? 0 * 0.5 ? 'critical' : 'warning'
+              severity: newStock <= ((ingredient.min_stock ?? 0) * 0.5) ? 'critical' : 'warning'
             }
           })
         }

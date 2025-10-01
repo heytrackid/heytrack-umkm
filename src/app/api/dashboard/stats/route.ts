@@ -53,7 +53,7 @@ export async function GET() {
       customer.customer_type === 'vip').length || 0
     
     const lowStockItems = ingredients?.filter((ingredient: any) => 
-      parseFloat(ingredient.current_stock ?? 0 || 0) <= parseFloat(ingredient.min_stock ?? 0 || 0)).length || 0
+      parseFloat((ingredient.current_stock ?? 0) || 0) <= parseFloat((ingredient.min_stock ?? 0) || 0)).length || 0
     
     const totalIngredients = ingredients?.length || 0
     const totalRecipes = recipes?.length || 0

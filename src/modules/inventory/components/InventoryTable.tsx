@@ -139,7 +139,7 @@ export function InventoryTable({
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">
-                          {ingredient.current_stock ?? 0 || 0} {ingredient.unit || 'unit'}
+                          {(ingredient.current_stock ?? 0) || 0} {ingredient.unit || 'unit'}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -149,7 +149,7 @@ export function InventoryTable({
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">
-                          {formatCurrency((ingredient.current_stock ?? 0 || 0) * (ingredient.price_per_unit || 0))}
+                          {formatCurrency(((ingredient.current_stock ?? 0) || 0) * (ingredient.price_per_unit || 0))}
                         </span>
                       </TableCell>
                       <TableCell>

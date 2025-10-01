@@ -116,7 +116,7 @@ export function WeightedAverageCostAnalysis({
                 {formatCurrency(pricingInsights.stockValue.moving)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {ingredient.current_stock ?? 0 || 0} {ingredient.unit}
+                {(ingredient.current_stock ?? 0) || 0} {ingredient.unit}
               </p>
             </div>
           </div>
@@ -337,7 +337,7 @@ export function WeightedAverageCostAnalysis({
                         </p>
                         <div className="w-24 mt-1">
                           <Progress 
-                            value={(layer.quantity / (ingredient.current_stock ?? 0 || 1)) * 100} 
+                            value={(layer.quantity / ((ingredient.current_stock ?? 0) || 1)) * 100} 
                             className="h-2"
                           />
                         </div>
