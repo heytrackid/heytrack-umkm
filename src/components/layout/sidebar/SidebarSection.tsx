@@ -77,7 +77,7 @@ export default function SidebarSection({
         )}
       >
         <div className="space-y-1 pt-1">
-          {section.items.map((item) => (
+          {Array.isArray(section.items) && section.items.map((item) => (
             <SidebarItem
               key={item.href}
               item={item}
@@ -146,7 +146,7 @@ export default function SidebarSection({
         )}
       >
         <div className="space-y-1 pt-1">
-          {section.items.map((item) => (
+          {Array.isArray(section.items) && section.items.map((item) => (
             <SidebarItem
               key={item.href}
               item={item}

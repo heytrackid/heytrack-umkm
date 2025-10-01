@@ -6,7 +6,13 @@ import SidebarNavigation from './SidebarNavigation'
 import SidebarFooter from './SidebarFooter'
 
 export default function MobileSidebar() {
-  const { navigationSections, isItemActive, prefetchRoute } = useSidebarLogic()
+  const { 
+    navigationSections, 
+    isItemActive, 
+    prefetchRoute,
+    isSectionCollapsed,
+    toggleSection
+  } = useSidebarLogic()
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -17,6 +23,8 @@ export default function MobileSidebar() {
         isItemActive={isItemActive}
         onItemMouseEnter={prefetchRoute}
         variant="mobile"
+        isSectionCollapsed={isSectionCollapsed}
+        onToggleSection={toggleSection}
       />
 
       <SidebarFooter variant="mobile" />

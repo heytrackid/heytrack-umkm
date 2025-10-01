@@ -23,6 +23,15 @@ export default function SidebarNavigation({
   const spacingClass = variant === 'mobile' ? 'space-y-4' : 'space-y-4 lg:space-y-6'
   const paddingClass = variant === 'mobile' ? 'px-4 py-4' : 'px-3 lg:px-4 py-4'
 
+  // Safety check for sections array
+  if (!sections || !Array.isArray(sections) || sections.length === 0) {
+    return (
+      <nav className={`flex-1 ${paddingClass} ${spacingClass} overflow-y-auto`}>
+        <div className="text-sm text-muted-foreground">Loading navigation...</div>
+      </nav>
+    )
+  }
+
   return (
     <nav className={`flex-1 ${paddingClass} ${spacingClass} overflow-y-auto`}>
       {sections.map((section) => (
