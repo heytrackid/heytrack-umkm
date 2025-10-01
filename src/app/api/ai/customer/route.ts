@@ -20,11 +20,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Call AI service for customer analysis
-    const analysis = await aiService.analyzeCustomer({
-      customers: customers || [],
-      orders: orders || [],
-      period: period || '30d'
-    })
+    // Map customers to CustomerData format expected by the service
+    const customerData = (customers || []).map((c: any) => ({
+      id: c.id,
+      name: c.name,
+      totalSpent: c.totalSpent || 0,
+      orderCount: c.orderCount || c.totalOrders || 0,
+      lastOrderDate: c.lastOrderDate ? new Date(c.lastOrderDate) : new Date(),
+      firstOrderDate: c.firstOrderDate || c.created_at ? new Date(c.firstOrderDate || c.created_at) : new Date(),
+      favoriteProducts: c.favoriteProducts || [],
+      orderFrequency: c.orderFrequency || 0
+    }))
+    
+    const analysis = await aiService.customer.analyzeCustomers(customerData)
 
     if (!analysis) {
       return NextResponse.json(

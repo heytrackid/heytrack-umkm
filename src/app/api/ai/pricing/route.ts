@@ -108,13 +108,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (analysis.error) {
-      return NextResponse.json(
-        { error: 'AI analysis failed', details: analysis.error, fallback: true },
-        { status: 500 }
-      )
-    }
-
     // Add metadata
     const result = {
       ...analysis,
@@ -170,7 +163,9 @@ export async function GET() {
           const analysis = await aiService.pricing.analyzePricing({
             productName: recipe.name,
             ingredients,
-            currentPrice: recipe.selling_price || totalHPP * 2
+            currentPrice: recipe.selling_price || totalHPP * 2,
+            location: 'Indonesia',
+            targetMarket: 'mid-market'
           })
 
           return {
@@ -179,7 +174,7 @@ export async function GET() {
             currentPrice: recipe.selling_price,
             hpp: totalHPP,
             analysis: analysis.marginAnalysis,
-            recommendations: analysis.recommendations?.slice(0, 2)
+            pricingStrategy: analysis.pricingStrategy
           }
         } catch (error) {
           return {
