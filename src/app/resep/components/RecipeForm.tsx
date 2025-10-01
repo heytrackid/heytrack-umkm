@@ -124,7 +124,7 @@ export function RecipeForm({
           <div className="flex items-center gap-2">
             <ChefHat className="h-5 w-5" />
             <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>
-              {isEditing ? "Placeholder" : "Placeholder"}
+              {isEditing ? 'Edit Resep' : 'Tambah Resep Baru'}
             </CardTitle>
           </div>
         </div>
@@ -134,26 +134,26 @@ export function RecipeForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="recipe-name" className="text-sm font-medium">
-              {"Placeholder"}
+              Nama Resep
             </Label>
             <Input
               id="recipe-name"
               value={recipe.name}
               onChange={(e) => onRecipeChange({ ...recipe, name: e.target.value })}
-              placeholder={"Placeholder"}
+              placeholder="Contoh: Roti Tawar, Croissant, dll"
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="recipe-category" className="text-sm font-medium">
-              {"Placeholder"}
+              Kategori
             </Label>
             <Select 
               value={recipe.category} 
               onValueChange={(value) => onRecipeChange({ ...recipe, category: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder={"Placeholder"} />
+                <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
               <SelectContent>
                 {categoriesData.categories.map((category) => (
@@ -168,13 +168,13 @@ export function RecipeForm({
 
         <div className="space-y-2">
           <Label htmlFor="recipe-description" className="text-sm font-medium">
-            {"Placeholder"}
+            Deskripsi (Opsional)
           </Label>
           <Textarea
             id="recipe-description"
             value={recipe.description}
             onChange={(e) => onRecipeChange({ ...recipe, description: e.target.value })}
-            placeholder={"Placeholder"}
+            placeholder="Deskripsi singkat tentang resep ini"
             rows={3}
           />
         </div>
@@ -183,7 +183,7 @@ export function RecipeForm({
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <Label className="text-sm font-medium">
-              {"Placeholder"}
+              Bahan-Bahan
             </Label>
             <Button
               type="button"
@@ -192,7 +192,7 @@ export function RecipeForm({
               onClick={handleAddIngredient}
             >
               <Plus className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Tambah Bahan
             </Button>
           </div>
 
@@ -222,7 +222,7 @@ export function RecipeForm({
                 
                 <div className="w-24">
                   <Label className="text-xs text-gray-600">
-                    {"Placeholder"}
+                    Jumlah
                   </Label>
                   <Input
                     type="number"
@@ -236,7 +236,7 @@ export function RecipeForm({
                 
                 <div className="w-20">
                   <Label className="text-xs text-gray-600">
-                    {"Placeholder"}
+                    Satuan
                   </Label>
                   <Select
                     value={ingredient.unit}
@@ -271,7 +271,7 @@ export function RecipeForm({
           
           {recipe.ingredients.length === 0 && (
             <div className="text-center py-4 text-gray-500 text-sm">
-              {"Placeholder"}
+              Belum ada bahan. Klik "Tambah Bahan" untuk menambahkan.
             </div>
           )}
         </div>
@@ -279,10 +279,10 @@ export function RecipeForm({
         {/* Action Buttons */}
         <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" onClick={onCancel}>
-            {"Placeholder"}
+            Batal
           </Button>
           <Button onClick={onSave}>
-            {isEditing ? "Placeholder" : "Placeholder"}
+            {isEditing ? 'Simpan Perubahan' : 'Tambah Resep'}
           </Button>
         </div>
       </CardContent>

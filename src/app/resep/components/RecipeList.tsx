@@ -82,14 +82,14 @@ export function RecipeList({
           <div className="flex items-center gap-2">
             <ChefHat className="h-5 w-5" />
             <CardTitle className={isMobile ? 'text-lg' : 'text-xl'}>
-              {"Placeholder"}
+              Daftar Resep
             </CardTitle>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder={"Placeholder"}
+                placeholder="Cari resep..."
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className={`pl-9 ${isMobile ? 'w-full' : 'w-64'}`}
@@ -106,7 +106,7 @@ export function RecipeList({
               </Button>
               <Button onClick={onAddNew}>
                 <Plus className="h-4 w-4 mr-2" />
-                {"Placeholder"}
+                Tambah Resep
               </Button>
             </div>
           </div>
@@ -124,11 +124,11 @@ export function RecipeList({
                       onCheckedChange={onSelectAll}
                     />
                   </TableHead>
-                  <TableHead>{"Placeholder"}</TableHead>
-                  <TableHead>{"Placeholder"}</TableHead>
-                  <TableHead>{"Placeholder"}</TableHead>
-                  <TableHead>{"Placeholder"}</TableHead>
-                  <TableHead>{"Placeholder"}</TableHead>
+                  <TableHead>Nama Resep</TableHead>
+                  <TableHead>HPP</TableHead>
+                  <TableHead>Jumlah Bahan</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -165,18 +165,18 @@ export function RecipeList({
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Badge variant={ingredientCount > 0 ? 'default' : 'destructive'} className="text-xs">
-                            {"Placeholder"}
+                            {ingredientCount} bahan
                           </Badge>
                         </div>
                       </TableCell>
                       <TableCell>
                         {ingredientCount > 0 ? (
                           <Badge variant="default" className="text-xs bg-green-100 text-green-800">
-                            {"Placeholder"}
+                            Lengkap
                           </Badge>
                         ) : (
                           <Badge variant="destructive" className="text-xs">
-                            {"Placeholder"}
+                            Belum Lengkap
                           </Badge>
                         )}
                       </TableCell>
@@ -198,21 +198,21 @@ export function RecipeList({
                             <DropdownMenuContent>
                               <DropdownMenuItem onClick={() => onEditRecipe(recipe)}>
                                 <Edit2 className="h-4 w-4 mr-2" />
-                                {"Placeholder"}
+                                Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => window.location.href = '/hpp'}
                                 disabled={ingredientCount === 0}
                               >
                                 <Calculator className="h-4 w-4 mr-2" />
-                                {"Placeholder"}
+                                Hitung HPP
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-red-600"
                                 onClick={() => onDeleteRecipe(recipe)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                {"Placeholder"}
+                                Hapus
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -228,18 +228,18 @@ export function RecipeList({
           <div className="py-12 text-center">
             <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-              {searchTerm ? "Placeholder" : "Placeholder"}
+              {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada resep'}
             </h3>
             <p className="text-muted-foreground mb-4">
               {searchTerm 
-                ? "Placeholder"
-                : "Placeholder"
+                ? 'Coba kata kunci lain untuk menemukan resep'
+                : 'Mulai dengan membuat resep pertama Anda'
               }
             </p>
             {!searchTerm && (
               <Button onClick={onAddNew}>
                 <Plus className="h-4 w-4 mr-2" />
-                {"Placeholder"}
+                Tambah Resep Pertama
               </Button>
             )}
           </div>
