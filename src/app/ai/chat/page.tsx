@@ -168,13 +168,13 @@ export default function AIChatPage() {
                         )}
                       </div>
                       
-                      <div className={`flex-1 max-w-[80%] ${message.sender === 'user' ? 'text-right' : ''}`}>
-                        <div className={`rounded-lg p-3 ${
+                      <div className={`flex-1 max-w-[80%] min-w-0 overflow-hidden ${message.sender === 'user' ? 'text-right' : ''}`}>
+                        <div className={`rounded-lg p-3 break-words overflow-hidden ${
                           message.sender === 'user' 
                             ? 'bg-blue-600 text-white ml-auto' 
                             : 'bg-gray-100 text-gray-900'
                         }`}>
-                          <div className="whitespace-pre-wrap text-sm">
+                          <div className="whitespace-pre-wrap text-sm word-break-break-word">
                             {message.content}
                           </div>
                         </div>

@@ -6,7 +6,6 @@ import { SettingsProvider } from '@/contexts/settings-context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
-import ChatbotFAB from '@/components/ai-chatbot/ChatbotFAB';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import"./globals.css";
@@ -92,8 +91,6 @@ export default function RootLayout({
                     },
                   }}
                 />
-                {/* AI Chatbot Assistant */}
-                <ChatbotFAB userId="demo-user" />
                 {/* Web Vitals Reporter disabled during build to avoid overhead; enable when analytics endpoint is ready */}
             </SettingsProvider>
           </QueryProvider>
