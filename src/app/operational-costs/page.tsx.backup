@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   Plus, 
@@ -279,11 +278,9 @@ export default function OperationalCostsPage() {
                 <React.Fragment key={index}>
                   <BreadcrumbItem>
                     {item.href ? (
-                      <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
+                      <BreadcrumbLink href={item.href}>
                         {item.label}
-                      </PrefetchLink>
-                    </BreadcrumbLink>
+                      </BreadcrumbLink>
                     ) : (
                       <BreadcrumbPage>{item.label}</BreadcrumbPage>
                     )}
@@ -342,10 +339,8 @@ export default function OperationalCostsPage() {
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
-                    <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
+                    <BreadcrumbLink href={item.href}>
                       {item.label}
-                    </PrefetchLink>
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>

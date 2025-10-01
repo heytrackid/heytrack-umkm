@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import PrefetchLink from '@/components/ui/prefetch-link'
+import Link from 'next/link'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -145,7 +145,7 @@ export default function HPPAndPricingPage() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <PrefetchLink href="/">Dashboard</PrefetchLink>
+                  <Link href="/">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -184,7 +184,7 @@ export default function HPPAndPricingPage() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <PrefetchLink href="/">Dashboard</PrefetchLink>
+                <Link href="/">Dashboard</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

@@ -57,11 +57,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings)
-        // Force IDR if no currency is set or invalid currency
-        if (!parsed.currency || !parsed.currency.code) {
+        // Force IDR if no currency is set or invalid currency or if currency is not IDR
+        if (!parsed.currency || !parsed.currency.code || parsed.currency.code !== 'IDR') {
+          console.log('Currency tidak sesuai atau tidak ada, reset ke IDR (Rp)')
           parsed.currency = currencies[0] // IDR
         }
-        setSettings({ ...defaultSettings, ...parsed })
+        const newSettings = { ...defaultSettings, ...parsed, currency: currencies[0] }
+        setSettings(newSettings)
+        // Save back to ensure it's IDR
+        localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
       } catch (error: any) {
         console.error('Failed to parse saved settings:', error)
         // Reset to default on error
@@ -70,6 +74,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
     } else {
       // First time user - set default IDR
+      setSettings(defaultSettings)
       localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
     }
   }, [])

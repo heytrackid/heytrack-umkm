@@ -296,11 +296,9 @@ export default function OrdersPage() {
             <React.Fragment key={index}>
               <BreadcrumbItem>
                 {item.href ? (
-                  <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
+                  <BreadcrumbLink href={item.href}>
                     {item.label}
-                  </PrefetchLink>
-                    </BreadcrumbLink>
+                  </BreadcrumbLink>
                 ) : (
                   <BreadcrumbPage>{item.label}</BreadcrumbPage>
                 )}

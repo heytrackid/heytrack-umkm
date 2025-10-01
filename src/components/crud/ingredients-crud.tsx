@@ -216,7 +216,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder="Contoh: Tepung Terigu"
                 hint="Nama bahan baku yang mudah dikenali"
               />
 
@@ -293,7 +292,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 value={formData.supplier}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="Nama supplier"
                 hint="Nama pemasok bahan ini (opsional)"
               />
 
@@ -304,7 +302,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 value={formData.category}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="Contoh: Bahan Dasar"
                 hint="Kategori untuk pengelompokan (opsional)"
               />
             </FormGrid>
@@ -316,7 +313,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
-              placeholder="Deskripsi atau catatan tambahan"
               rows={3}
               hint="Catatan atau informasi tambahan tentang bahan ini (opsional)"
             />
@@ -354,7 +350,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder="Contoh: Tepung Terigu"
               />
 
               <FormField
@@ -426,7 +421,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 value={formData.supplier}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="Nama supplier"
               />
 
               <FormField
@@ -436,7 +430,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 value={formData.category}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="Contoh: Bahan Dasar"
               />
             </FormGrid>
 
@@ -447,7 +440,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
-              placeholder="Deskripsi atau catatan tambahan"
               rows={3}
             />
           </FormSection>

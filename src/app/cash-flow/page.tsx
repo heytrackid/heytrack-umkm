@@ -12,6 +12,7 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { useResponsive } from '@/hooks/use-mobile'
+import PrefetchLink from '@/components/ui/prefetch-link'
 
 // Lazy load all heavy components for better performance
 const AddTransactionForm = lazy(() => import('./components/AddTransactionForm'))
@@ -204,8 +205,8 @@ export default function CashFlowPage() {
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
-                    <BreadcrumbLink href={item.href}>
-                      {item.label}
+                    <BreadcrumbLink asChild>
+                      <PrefetchLink href={item.href}>{item.label}</PrefetchLink>
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>

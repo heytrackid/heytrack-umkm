@@ -25,7 +25,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
 import { 
   Plus, 
@@ -192,10 +191,8 @@ export default function CustomersPage() {
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
-                    <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
+                    <BreadcrumbLink href={item.href}>
                       {item.label}
-                    </PrefetchLink>
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>

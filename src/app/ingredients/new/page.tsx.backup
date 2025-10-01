@@ -25,7 +25,7 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { ArrowLeft, Save, Package } from 'lucide-react';
-import PrefetchLink from '@/components/ui/prefetch-link';
+import Link from 'next/link';
 
 interface IngredientFormData {
   name: string;
@@ -153,6 +153,7 @@ export default function NewIngredientPage() {
                     value={formData.name}
                     onChange={handleChange}
                     required
+                    placeholder="Contoh: Tepung Terigu"
                   />
                 </div>
 
@@ -161,7 +162,7 @@ export default function NewIngredientPage() {
                   <Label htmlFor="unit">Satuan *</Label>
                   <Select value={formData.unit} onValueChange={(value) => setFormData(prev => ({ ...prev, unit: value }))}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Pilih satuan" />
                     </SelectTrigger>
                     <SelectContent>
                       {unitOptions.map(option => (
@@ -185,6 +186,7 @@ export default function NewIngredientPage() {
                     required
                     min="0"
                     step="0.01"
+                    placeholder="0"
                   />
                 </div>
 
@@ -200,6 +202,7 @@ export default function NewIngredientPage() {
                     required
                     min="0"
                     step="0.01"
+                    placeholder="0"
                   />
                 </div>
 
@@ -215,6 +218,7 @@ export default function NewIngredientPage() {
                     required
                     min="0"
                     step="0.01"
+                    placeholder="0"
                   />
                 </div>
 
@@ -226,6 +230,7 @@ export default function NewIngredientPage() {
                     name="supplier"
                     value={formData.supplier}
                     onChange={handleChange}
+                    placeholder="Nama supplier"
                   />
                 </div>
 
@@ -237,6 +242,7 @@ export default function NewIngredientPage() {
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
+                    placeholder="Contoh: Bahan Dasar"
                   />
                 </div>
 
@@ -249,6 +255,7 @@ export default function NewIngredientPage() {
                     value={formData.description}
                     onChange={handleChange}
                     rows={3}
+                    placeholder="Deskripsi bahan baku"
                   />
                 </div>
               </div>
