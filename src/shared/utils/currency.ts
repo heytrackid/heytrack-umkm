@@ -128,12 +128,9 @@ export function formatCurrency(
   const decimals = minimumFractionDigits !== undefined 
     ? minimumFractionDigits 
     : currency.decimals
-  const maxDecimals = maximumFractionDigits !== undefined
-    ? maximumFractionDigits
-    : currency.decimals
 
   // Format the number
-  let formattedAmount = amount.toFixed(decimals)
+  const formattedAmount = amount.toFixed(decimals)
   
   // Split into integer and decimal parts
   const [integerPart, decimalPart] = formattedAmount.split('.')
@@ -175,17 +172,17 @@ export function parseCurrency(
   const currency = SUPPORTED_CURRENCIES[currencyCode] || SUPPORTED_CURRENCIES[DEFAULT_CURRENCY]
   
   // Remove symbols and currency codes
-  let cleanString = currencyString
+  const cleanedStep1 = currencyString
     .replace(new RegExp(`\\${currency.symbol}`, 'g'), '')
     .replace(new RegExp(currency.code, 'g'), '')
     .trim()
   
   // Replace separators
-  cleanString = cleanString
+  const cleanString = cleanedStep1
     .replace(new RegExp(`\\${currency.thousandsSeparator}`, 'g'), '')
     .replace(new RegExp(`\\${currency.decimalSeparator}`, 'g'), '.')
   
-  return parseFloat(cleanStr) || 0
+  return parseFloat(cleanString) || 0
 }
 
 /**
@@ -239,7 +236,7 @@ export function formatCurrencyInput(
   const currency = SUPPORTED_CURRENCIES[currencyCode] || SUPPORTED_CURRENCIES[DEFAULT_CURRENCY]
   
   // Remove non-numeric characters except decimal separator
-  let cleaned = value.replace(/[^\d]/g, '')
+  const cleaned = value.replace(/[^\d]/g, '')
   
   if (cleaned === '') return ''
   

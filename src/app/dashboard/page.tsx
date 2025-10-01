@@ -19,6 +19,8 @@ const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportB
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import { SmartLink, SmartActionButton, SmartQuickActions } from '@/components/navigation/SmartNavigation'
+import { useSampleData, sampleDashboardStats } from '@/lib/sample-data'
+import { DevModeBanner } from '@/components/ui/dev-mode-banner'
 import { 
   StatsCardSkeleton,
   DashboardHeaderSkeleton,
@@ -66,16 +68,21 @@ const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection
 //   ingredientsLow: 5
 // }
 
-// Placeholder data until API integration
-const placeholderStats = {
-  totalSales: 0,
-  totalOrders: 0,
-  totalCustomers: 0,
-  totalIngredients: 0,
-  salesGrowth: 0,
-  ordersGrowth: 0,
-  customersGrowth: 0,
-  ingredientsLow: 0
+// Get stats based on environment
+const getStats = () => {
+  if (typeof window !== 'undefined' && useSampleData()) {
+    return sampleDashboardStats
+  }
+  return {
+    totalSales: 0,
+    totalOrders: 0,
+    totalCustomers: 0,
+    totalIngredients: 0,
+    salesGrowth: 0,
+    ordersGrowth: 0,
+    customersGrowth: 0,
+    ingredientsLow: 0
+  }
 }
 
 const recentOrders: any[] = []
@@ -87,6 +94,7 @@ export default function Dashboard() {
   const { formatCurrency } = useCurrency()
   const { settings } = useSettings()
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [stats, setStats] = useState(getStats())
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
     [LOADING_KEYS.RECENT_ORDERS]: true,
@@ -136,6 +144,7 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
+      <DevModeBanner />
       <div className="space-y-6">
         {/* Header */}
         {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
@@ -177,7 +186,7 @@ export default function Dashboard() {
               ))}
             </div>
           }>
-            <StatsCardsSection formatCurrency={formatCurrency} stats={placeholderStats} />
+            <StatsCardsSection formatCurrency={formatCurrency} stats={stats} />
           </Suspense>
         )}
 

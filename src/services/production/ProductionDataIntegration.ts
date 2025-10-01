@@ -378,9 +378,9 @@ export class ProductionDataIntegration {
 
   private async getBlockingIngredients(recipeId: string, quantity: number): Promise<string[]> {
     try {
-      // Get current inventory levels
+      // Get current inventory levels  
       const { data: inventory } = await supabase
-        .from('inventory')
+        .from('ingredients')
         .select('*')
 
       // Get recipe ingredient requirements
@@ -392,7 +392,7 @@ export class ProductionDataIntegration {
       const blocking: string[] = []
       
       for (const ingredient of recipeIngredients || []) {
-        const inventoryItem = inventory?.find(inv => inv.ingredient_id === ingredient.ingredient_id)
+        const inventoryItem = inventory?.find(inv => inv.id === ingredient.ingredient_id)
         const requiredQuantity = ingredient.quantity * quantity
         
         if (!inventoryItem || inventoryItem.current_stock < requiredQuantity) {
@@ -439,11 +439,11 @@ export class ProductionDataIntegration {
 
       // Check against current inventory
       const { data: inventory } = await supabase
-        .from('inventory')
+        .from('ingredients')
         .select('*')
 
       for (const [ingredientId, requirement] of ingredientRequirements) {
-        const inventoryItem = inventory?.find(inv => inv.ingredient_id === ingredientId)
+        const inventoryItem = inventory?.find(inv => inv.id === ingredientId)
         
         if (!inventoryItem || inventoryItem.current_stock < requirement.required) {
           const shortage = requirement.required - (inventoryItem?.current_stock || 0)

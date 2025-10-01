@@ -45,13 +45,15 @@ export type ScreenSize = 'mobile' | 'tablet' | 'desktop';
 export type ColumnPriority = 'high' | 'medium' | 'low';
 
 // Responsive column configuration
+import type { ReactNode } from 'react'
+
 export interface ResponsiveColumn {
   key: string;
   label: string;
   priority: ColumnPriority;
   hideOnMobile?: boolean;
   minWidth?: string;
-  render?: (value: unknown, item: unknown) => React.ReactNode;
+  render?: (value: unknown, item: unknown) => ReactNode;
 }
 
 // Form field responsive configuration
