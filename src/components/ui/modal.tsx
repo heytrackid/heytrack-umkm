@@ -119,7 +119,7 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 className="absolute right-3 top-3 sm:right-4 sm:top-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full p-1 transition-colors"
-                aria-label={"Placeholder"}
+                aria-label=""
               >
                 <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
@@ -232,7 +232,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full p-1 transition-colors"
-                aria-label={"Placeholder"}
+                aria-label=""
               >
                 <X className="h-6 w-6" />
               </button>

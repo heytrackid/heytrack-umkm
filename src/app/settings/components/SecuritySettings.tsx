@@ -18,17 +18,16 @@ export function SecuritySettings() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lock className="h-5 w-5" />
-          {"Placeholder"}
+          Keamanan
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="currentPassword">{"Placeholder"}</Label>
+          <Label htmlFor="currentPassword">Password Saat Ini</Label>
           <div className="relative">
             <Input
               id="currentPassword"
               type={showPassword ?"text" :"password"}
-              placeholder={"Placeholder"}
             />
             <Button
               type="button"
@@ -46,24 +45,22 @@ export function SecuritySettings() {
           </div>
         </div>
         <div>
-          <Label htmlFor="newPassword">{"Placeholder"}</Label>
+          <Label htmlFor="newPassword">Password Baru</Label>
           <Input
             id="newPassword"
             type="password"
-            placeholder={"Placeholder"}
           />
         </div>
         <div>
-          <Label htmlFor="confirmPassword">{"Placeholder"}</Label>
+          <Label htmlFor="confirmPassword">Konfirmasi Password Baru</Label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder={"Placeholder"}
           />
         </div>
         <Button>
           <Shield className="h-4 w-4 mr-2" />
-          {"Placeholder"}
+          Ubah Password
         </Button>
       </CardContent>
     </Card>

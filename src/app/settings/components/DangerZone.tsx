@@ -14,18 +14,18 @@ export function DangerZone() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
           <AlertTriangle className="h-5 w-5" />
-          {"Placeholder"}
+          Informasi
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-2">{"Placeholder"}</h3>
+          <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-2">Informasi</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            {"Placeholder"}
+            Informasi
           </p>
           <Button variant="destructive">
             <Trash2 className="h-4 w-4 mr-2" />
-            {"Placeholder"}
+            Informasi
           </Button>
         </div>
       </CardContent>

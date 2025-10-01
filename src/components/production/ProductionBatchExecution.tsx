@@ -553,7 +553,7 @@ export default function ProductionBatchExecution({
 
                         <div className="flex gap-2">
                           <Textarea
-                            placeholder="Add production note..."
+
                             value={currentNotes}
                             onChange={(e) => setCurrentNotes(e.target.value)}
                             className="flex-1"

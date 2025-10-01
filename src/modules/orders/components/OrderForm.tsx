@@ -194,10 +194,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
     <form onSubmit={handleSubmit}>
       <Tabs defaultValue="customer" className="w-full">
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-          <TabsTrigger value="customer" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
-          <TabsTrigger value="items" className="text-xs sm:text-sm">{"Placeholder"} ({orderItems.length})</TabsTrigger>
-          <TabsTrigger value="delivery" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
-          <TabsTrigger value="payment" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
+          <TabsTrigger value="customer" className="text-xs sm:text-sm">Informasi</TabsTrigger>
+          <TabsTrigger value="items" className="text-xs sm:text-sm">Informasi ({orderItems.length})</TabsTrigger>
+          <TabsTrigger value="delivery" className="text-xs sm:text-sm">Informasi</TabsTrigger>
+          <TabsTrigger value="payment" className="text-xs sm:text-sm">Informasi</TabsTrigger>
         </TabsList>
 
         {error && (
@@ -209,7 +209,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
         <TabsContent value="customer" className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
-            <h3 className="text-lg font-medium">{"Placeholder"}</h3>
+            <h3 className="text-lg font-medium">Informasi</h3>
             <Button
               type="button"
               variant="outline"
@@ -217,16 +217,16 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               onClick={() => setShowNewCustomer(!showNewCustomer)}
               className="self-end sm:self-auto"
             >
-              {showNewCustomer ? "Placeholder" : "Placeholder"}
+              {showNewCustomer ? Informasi : Informasi}
             </Button>
           </div>
 
           {!showNewCustomer && (
             <div>
-              <Label className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label className="text-sm font-medium">Informasi</Label>
               <div className="relative">
                 <Input
-                  placeholder={"Placeholder"}
+                  placeholder=""
                   value={customerSearch}
                   onChange={(e) => setCustomerSearch(e.target.value)}
                   className="mt-1"
@@ -257,10 +257,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="customerName" className="text-sm font-medium">{"Placeholder"} *</Label>
+              <Label htmlFor="customerName" className="text-sm font-medium">Informasi *</Label>
               <Input
                 id="customerName"
-                placeholder={"Placeholder"}
+                placeholder=""
                 value={formData.customer_name}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
                 required
@@ -268,10 +268,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="customerPhone" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="customerPhone" className="text-sm font-medium">Informasi</Label>
               <Input
                 id="customerPhone"
-                placeholder={"Placeholder"}
+                placeholder=""
                 value={formData.customer_phone}
                 onChange={(e) => handleInputChange('customer_phone', e.target.value)}
                 className="mt-1"
@@ -279,10 +279,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           </div>
           <div>
-            <Label htmlFor="customerAddress" className="text-sm font-medium">{"Placeholder"}</Label>
+            <Label htmlFor="customerAddress" className="text-sm font-medium">Informasi</Label>
             <Textarea
               id="customerAddress"
-              placeholder={"Placeholder"}
+              placeholder=""
               value={formData.customer_address}
               onChange={(e) => handleInputChange('customer_address', e.target.value)}
               className="mt-1"
@@ -290,7 +290,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="orderDate" className="text-sm font-medium">{"Placeholder"} *</Label>
+              <Label htmlFor="orderDate" className="text-sm font-medium">Informasi *</Label>
               <Input
                 id="orderDate"
                 type="date"
@@ -301,7 +301,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="priority" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="priority" className="text-sm font-medium">Informasi</Label>
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.priority}
@@ -317,18 +317,18 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
         <TabsContent value="items" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <h3 className="text-lg font-medium">{"Placeholder"} ({orderItems.length})</h3>
+            <h3 className="text-lg font-medium">Informasi ({orderItems.length})</h3>
             <Button type="button" size="sm" onClick={addOrderItem} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Informasi
             </Button>
           </div>
 
           {orderItems.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Package className="h-8 w-8 mx-auto mb-2" />
-              <p>{"Placeholder"}</p>
-              <p className="text-sm">{"Placeholder"}</p>
+              <p>Informasi</p>
+              <p className="text-sm">Informasi</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -338,7 +338,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                     <div className="p-3 space-y-3">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
-                          <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                          <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                           <select
                             className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                             value={item.recipe_id}
@@ -364,7 +364,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                          <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                           <Input
                             type="number"
                             className="text-sm mt-1"
@@ -374,7 +374,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                           />
                         </div>
                         <div>
-                          <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                          <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                           <Input
                             className="text-sm font-medium mt-1 bg-gray-50"
                             value={formatCurrency(item.total_price)}
@@ -384,7 +384,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                       </div>
 
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <Input
                           type="number"
                           className={`text-sm mt-1`}
@@ -400,7 +400,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                   <div className="hidden sm:flex sm:items-center gap-3 p-4">
                     <div className="flex-1 grid grid-cols-4 gap-3">
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <select
                           className="w-full p-2 text-sm border border-input rounded-md bg-background mt-1"
                           value={item.recipe_id}
@@ -414,7 +414,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         </select>
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <Input
                           type="number"
                           className="text-sm mt-1"
@@ -424,7 +424,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <Input
                           type="number"
                           className={`text-sm mt-1`}
@@ -435,7 +435,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-medium text-muted-foreground">{"Placeholder"}</Label>
+                        <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <Input
                           className="text-sm font-medium mt-1 bg-gray-50"
                           value={formatCurrency(item.total_price)}
@@ -458,7 +458,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
               <div className="pt-3 border-t">
                 <div className="flex justify-between items-center text-sm font-medium">
-                  <span>{"Placeholder"}:</span>
+                  <span>Informasi:</span>
                   <span>{formatCurrency(subtotal)}</span>
                 </div>
               </div>
@@ -469,7 +469,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
         <TabsContent value="delivery" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="deliveryDate" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="deliveryDate" className="text-sm font-medium">Informasi</Label>
               <Input
                 id="deliveryDate"
                 type="date"
@@ -479,7 +479,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="deliveryTime" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="deliveryTime" className="text-sm font-medium">Informasi</Label>
               <Input
                 id="deliveryTime"
                 type="time"
@@ -489,11 +489,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div className="sm:col-span-2 lg:col-span-1">
-              <Label htmlFor="deliveryFee" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="deliveryFee" className="text-sm font-medium">Informasi</Label>
               <Input
                 id="deliveryFee"
                 type="number"
-                placeholder="15000"
+
                 value={formData.delivery_fee}
                 onChange={(e) => handleInputChange('delivery_fee', parseFloat || 0)}
                 min="0"
@@ -503,20 +503,20 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           </div>
           <div>
-            <Label htmlFor="notes" className="text-sm font-medium">{"Placeholder"}</Label>
+            <Label htmlFor="notes" className="text-sm font-medium">Informasi</Label>
             <Textarea
               id="notes"
-              placeholder={"Placeholder"}
+              placeholder=""
               value={formData.notes}
               onChange={(e) => handleInputChange('notes', e.target.value)}
               className="mt-1"
             />
           </div>
           <div>
-            <Label htmlFor="specialInstructions" className="text-sm font-medium">{"Placeholder"}</Label>
+            <Label htmlFor="specialInstructions" className="text-sm font-medium">Informasi</Label>
             <Textarea
               id="specialInstructions"
-              placeholder={"Placeholder"}
+              placeholder=""
               value={formData.special_instructions}
               onChange={(e) => handleInputChange('special_instructions', e.target.value)}
               className="mt-1"
@@ -527,24 +527,24 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
         <TabsContent value="payment" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <Label htmlFor="paymentMethod" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="paymentMethod" className="text-sm font-medium">Informasi</Label>
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.payment_method}
                 onChange={(e) => handleInputChange('payment_method', e.target.value)}
               >
-                <option value="cash">{"Placeholder"}</option>
-                <option value="transfer">{"Placeholder"}</option>
-                <option value="creditCard">{"Placeholder"}</option>
-                <option value="digitalWallet">{"Placeholder"}</option>
+                <option value="cash">Informasi</option>
+                <option value="transfer">Informasi</option>
+                <option value="creditCard">Informasi</option>
+                <option value="digitalWallet">Informasi</option>
               </select>
             </div>
             <div>
-              <Label htmlFor="discount" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="discount" className="text-sm font-medium">Informasi</Label>
               <Input
                 id="discount"
                 type="number"
-                placeholder="10000"
+
                 value={formData.discount}
                 onChange={(e) => handleInputChange('discount', parseFloat || 0)}
                 min="0"
@@ -552,11 +552,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="tax" className="text-sm font-medium">{"Placeholder"} (%)</Label>
+              <Label htmlFor="tax" className="text-sm font-medium">Informasi (%)</Label>
               <Input
                 id="tax"
                 type="number"
-                placeholder="11"
+
                 value={formData.tax_amount}
                 onChange={(e) => handleInputChange('tax_amount', parseFloat || 0)}
                 min="0"
@@ -565,11 +565,11 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
               />
             </div>
             <div>
-              <Label htmlFor="paidAmount" className="text-sm font-medium">{"Placeholder"}</Label>
+              <Label htmlFor="paidAmount" className="text-sm font-medium">Informasi</Label>
               <Input
                 id="paidAmount"
                 type="number"
-                placeholder="0"
+
                 value={formData.paid_amount}
                 onChange={(e) => handleInputChange('paid_amount', parseFloat || 0)}
                 min="0"
@@ -579,36 +579,36 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           </div>
           <div className="bg-muted p-4 rounded-lg">
-            <h4 className="font-medium mb-2">{"Placeholder"}</h4>
+            <h4 className="font-medium mb-2">Informasi</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>{"Placeholder"}:</span>
+                <span>Informasi:</span>
                 <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between">
-                <span>{"Placeholder"}:</span>
+                <span>Informasi:</span>
                 <span>- {formatCurrency(formData.discount)}</span>
               </div>
               <div className="flex justify-between">
-                <span>{"Placeholder"} ({formData.tax_amount}%):</span>
+                <span>Informasi ({formData.tax_amount}%):</span>
                 <span>{formatCurrency(taxAmount)}</span>
               </div>
               <div className="flex justify-between">
-                <span>{"Placeholder"}:</span>
+                <span>Informasi:</span>
                 <span>{formatCurrency(formData.delivery_fee)}</span>
               </div>
               <hr />
               <div className="flex justify-between font-medium">
-                <span>{"Placeholder"}:</span>
+                <span>Informasi:</span>
                 <span>{formatCurrency(totalAmount)}</span>
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                <span>{"Placeholder"}:</span>
+                <span>Informasi:</span>
                 <span>{formatCurrency(formData.paid_amount)}</span>
               </div>
               {totalAmount > formData.paid_amount && (
                 <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                  <span>{"Placeholder"}:</span>
+                  <span>Informasi:</span>
                   <span>{formatCurrency(totalAmount - formData.paid_amount)}</span>
                 </div>
               )}
@@ -618,10 +618,10 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onCancel} className="order-2 sm:order-1">
-            {"Placeholder"}
+            Informasi
           </Button>
           <Button type="submit" disabled={loading} className="order-1 sm:order-2">
-            {loading ? "Placeholder" : order ? "Placeholder" : "Placeholder"}
+            {loading ? Informasi : order ? Informasi : Informasi}
           </Button>
         </div>
       </Tabs>

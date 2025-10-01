@@ -24,7 +24,8 @@ import {
   TrendingDown, 
   AlertTriangle, 
   DollarSign,
-  Plus
+  Plus,
+  ShoppingCart
 } from 'lucide-react';
 
 export default function IngredientsPage() {
@@ -71,10 +72,16 @@ export default function IngredientsPage() {
               Kelola stok dan harga bahan baku untuk produksi
             </p>
           </div>
-          <Button onClick={() => window.location.href = '/ingredients/new'}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Bahan Baku
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => window.location.href = '/ingredients/purchases'}>
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Pembelian
+            </Button>
+            <Button onClick={() => window.location.href = '/ingredients/new'}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Bahan Baku
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}

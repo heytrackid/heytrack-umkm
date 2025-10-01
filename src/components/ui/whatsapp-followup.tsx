@@ -295,7 +295,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="08123456789"
+
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-600 dark:text-gray-400">

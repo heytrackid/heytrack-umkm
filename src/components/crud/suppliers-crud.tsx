@@ -208,7 +208,7 @@ export function SuppliersCRUD() {
             onBlur={handleBlur}
             error={touched.name ? errors.name : undefined}
             required
-            placeholder="e.g., CV. Bahan Berkah"
+
           />
 
           <FormField
@@ -219,7 +219,7 @@ export function SuppliersCRUD() {
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched.contact_person ? errors.contact_person : undefined}
-            placeholder="e.g., John Doe"
+
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -231,7 +231,7 @@ export function SuppliersCRUD() {
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.phone ? errors.phone : undefined}
-              placeholder="+62 812-3456-7890"
+
             />
 
             <FormField
@@ -242,7 +242,7 @@ export function SuppliersCRUD() {
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.email ? errors.email : undefined}
-              placeholder="contact@supplier.com"
+
             />
           </div>
 
@@ -254,7 +254,7 @@ export function SuppliersCRUD() {
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched.address ? errors.address : undefined}
-            placeholder="Full address of the supplier"
+
             rows={3}
           />
 
@@ -266,7 +266,7 @@ export function SuppliersCRUD() {
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched.notes ? errors.notes : undefined}
-            placeholder="Additional notes or comments"
+
             rows={2}
           />
 
@@ -295,7 +295,7 @@ export function SuppliersCRUD() {
             onBlur={handleBlur}
             error={touched.name ? errors.name : undefined}
             required
-            placeholder="e.g., CV. Bahan Berkah"
+
           />
 
           <FormField
@@ -306,7 +306,7 @@ export function SuppliersCRUD() {
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched.contact_person ? errors.contact_person : undefined}
-            placeholder="e.g., John Doe"
+
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -318,7 +318,7 @@ export function SuppliersCRUD() {
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.phone ? errors.phone : undefined}
-              placeholder="+62 812-3456-7890"
+
             />
 
             <FormField
@@ -329,7 +329,7 @@ export function SuppliersCRUD() {
               onChange={handleChange}
               onBlur={handleBlur}
               error={touched.email ? errors.email : undefined}
-              placeholder="contact@supplier.com"
+
             />
           </div>
 
@@ -341,7 +341,7 @@ export function SuppliersCRUD() {
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched.address ? errors.address : undefined}
-            placeholder="Full address of the supplier"
+
             rows={3}
           />
 
@@ -353,7 +353,7 @@ export function SuppliersCRUD() {
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched.notes ? errors.notes : undefined}
-            placeholder="Additional notes or comments"
+
             rows={2}
           />
 

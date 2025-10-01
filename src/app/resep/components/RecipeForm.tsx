@@ -140,7 +140,7 @@ export function RecipeForm({
               id="recipe-name"
               value={recipe.name}
               onChange={(e) => onRecipeChange({ ...recipe, name: e.target.value })}
-              placeholder="Contoh: Roti Tawar, Croissant, dll"
+
             />
           </div>
           
@@ -153,7 +153,7 @@ export function RecipeForm({
               onValueChange={(value) => onRecipeChange({ ...recipe, category: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Pilih kategori" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {categoriesData.categories.map((category) => (
@@ -174,7 +174,7 @@ export function RecipeForm({
             id="recipe-description"
             value={recipe.description}
             onChange={(e) => onRecipeChange({ ...recipe, description: e.target.value })}
-            placeholder="Deskripsi singkat tentang resep ini"
+
             rows={3}
           />
         </div>
@@ -208,7 +208,7 @@ export function RecipeForm({
                     onValueChange={(value) => handleUpdateIngredient(index, 'ingredient_id', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Pilih bahan baku" />
+                      <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {ingredients?.map((ing) => (
@@ -228,7 +228,7 @@ export function RecipeForm({
                     type="number"
                     value={ingredient.quantity}
                     onChange={(e) => handleUpdateIngredient(index, 'quantity', parseFloat(e.target.value) || 0)}
-                    placeholder="0"
+
                     min="0"
                     step="0.1"
                   />

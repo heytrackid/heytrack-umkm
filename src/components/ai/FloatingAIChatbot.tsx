@@ -197,7 +197,7 @@ export const FloatingAIChatbot: React.FC = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Tanyakan sesuatu..."
+
                   className="flex-1"
                   disabled={isTyping}
                 />

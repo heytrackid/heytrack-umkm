@@ -79,7 +79,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
                 onValueChange={(value) => form.setValue('type', value as any)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih tipe transaksi" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="INCOME">Pemasukan</SelectItem>
@@ -95,7 +95,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
             >
               <Input 
                 {...form.register('category')}
-                placeholder="Kategori transaksi"
+
               />
             </FormField>
 
@@ -109,7 +109,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
                 min="0"
                 step="0.01"
                 {...form.register('amount', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -133,7 +133,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
                 onValueChange={(value) => form.setValue('payment_method', value as any)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih metode pembayaran" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CASH">Cash</SelectItem>
@@ -150,7 +150,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
             >
               <Input 
                 {...form.register('reference_no')}
-                placeholder="Nomor transaksi/struk"
+
               />
             </FormField>
           </div>
@@ -162,7 +162,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
           >
             <Textarea 
               {...form.register('description')}
-              placeholder="Deskripsi transaksi"
+
               rows={3}
             />
           </FormField>
@@ -173,7 +173,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
           >
             <Textarea 
               {...form.register('notes')}
-              placeholder="Catatan tambahan"
+
               rows={2}
             />
           </FormField>
@@ -196,7 +196,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
                 onValueChange={(value) => form.setValue('recurring_period', value as any)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih periode berulang" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DAILY">Harian</SelectItem>

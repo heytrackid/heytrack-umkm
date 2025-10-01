@@ -418,7 +418,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Tanya tentang bisnis Anda..."
+
               disabled={isLoading}
               className="flex-1"
             />

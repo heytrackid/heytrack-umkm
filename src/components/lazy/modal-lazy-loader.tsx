@@ -41,35 +41,35 @@ const FormLoadingSkeleton = ({ fields = 4 }: { fields?: number }) => (
 export const LazyIngredientForm = lazy(() => 
   import('@/components').then(m => ({ default: m.IngredientForm }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
 export const LazyOrderForm = lazy(() => 
   import('@/components').then(m => ({ default: m.OrderForm }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
 export const LazyCustomerForm = lazy(() => 
   import('@/components').then(m => ({ default: m.CustomerForm }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
 export const LazyRecipeForm = lazy(() => 
   import('@/components').then(m => ({ default: m.RecipeForm }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
 export const LazyFinanceForm = lazy(() => 
   import('@/components').then(m => ({ default: m.FinanceForm }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
@@ -77,21 +77,21 @@ export const LazyFinanceForm = lazy(() =>
 export const LazyOrderDetail = lazy(() => 
   import('@/components').then(m => ({ default: m.OrderDetail }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
 export const LazyCustomerDetail = lazy(() => 
   import('@/components').then(m => ({ default: m.CustomerDetail }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
 export const LazyInventoryDetail = lazy(() => 
   import('@/components').then(m => ({ default: m.InventoryDetail }))
     .catch(() => ({ default: () => {
-      return <div>{"Placeholder"}</div>;
+      return <div>Informasi</div>;
     }}))
 )
 
@@ -127,7 +127,7 @@ export const LazyModal = ({
       case 'order-detail': return LazyOrderDetail
       case 'customer-detail': return LazyCustomerDetail
       case 'inventory-detail': return LazyInventoryDetail
-      default: return () => <div>{"Placeholder"}</div>
+      default: return () => <div>Informasi</div>
     }
   }
 

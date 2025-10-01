@@ -42,7 +42,7 @@ export default function OrderFilters({
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={"Placeholder"}
+              placeholder=""
               value={filters.searchTerm}
               onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
               className="pl-10"
@@ -55,16 +55,16 @@ export default function OrderFilters({
             <div>
               <Select value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={"Placeholder"} />
+                  <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{"Placeholder"}</SelectItem>
-                  <SelectItem value="PENDING">{"Placeholder"}</SelectItem>
-                  <SelectItem value="CONFIRMED">{"Placeholder"}</SelectItem>
-                  <SelectItem value="IN_PROGRESS">{"Placeholder"}</SelectItem>
-                  <SelectItem value="READY">{"Placeholder"}</SelectItem>
-                  <SelectItem value="DELIVERED">{"Placeholder"}</SelectItem>
-                  <SelectItem value="CANCELLED">{"Placeholder"}</SelectItem>
+                  <SelectItem value="all">Informasi</SelectItem>
+                  <SelectItem value="PENDING">Informasi</SelectItem>
+                  <SelectItem value="CONFIRMED">Informasi</SelectItem>
+                  <SelectItem value="IN_PROGRESS">Informasi</SelectItem>
+                  <SelectItem value="READY">Informasi</SelectItem>
+                  <SelectItem value="DELIVERED">Informasi</SelectItem>
+                  <SelectItem value="CANCELLED">Informasi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -73,13 +73,13 @@ export default function OrderFilters({
             <div>
               <Select value={filters.paymentStatus} onValueChange={(value) => handleFilterChange('paymentStatus', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={"Placeholder"} />
+                  <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{"Placeholder"}</SelectItem>
-                  <SelectItem value="UNPAID">{"Placeholder"}</SelectItem>
-                  <SelectItem value="PARTIAL">{"Placeholder"}</SelectItem>
-                  <SelectItem value="PAID">{"Placeholder"}</SelectItem>
+                  <SelectItem value="all">Informasi</SelectItem>
+                  <SelectItem value="UNPAID">Informasi</SelectItem>
+                  <SelectItem value="PARTIAL">Informasi</SelectItem>
+                  <SelectItem value="PAID">Informasi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -88,13 +88,13 @@ export default function OrderFilters({
             <div>
               <Select value={filters.priority} onValueChange={(value) => handleFilterChange('priority', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={"Placeholder"} />
+                  <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{"Placeholder"}</SelectItem>
-                  <SelectItem value="high">{"Placeholder"}</SelectItem>
-                  <SelectItem value="normal">{"Placeholder"}</SelectItem>
-                  <SelectItem value="low">{"Placeholder"}</SelectItem>
+                  <SelectItem value="all">Informasi</SelectItem>
+                  <SelectItem value="high">Informasi</SelectItem>
+                  <SelectItem value="normal">Informasi</SelectItem>
+                  <SelectItem value="low">Informasi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -105,7 +105,7 @@ export default function OrderFilters({
                 type="date"
                 value={filters.dateFrom || ''}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                placeholder={"Placeholder"}
+                placeholder=""
               />
             </div>
 
@@ -115,7 +115,7 @@ export default function OrderFilters({
                 type="date"
                 value={filters.dateTo || ''}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                placeholder={"Placeholder"}
+                placeholder=""
               />
             </div>
           </div>
@@ -127,35 +127,35 @@ export default function OrderFilters({
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'PENDING' ? 'all' : 'PENDING')}
             >
-              {"Placeholder"}
+              Informasi
             </Button>
             <Button
               variant={filters.status === 'IN_PROGRESS' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
             >
-              {"Placeholder"}
+              Informasi
             </Button>
             <Button
               variant={filters.status === 'READY' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'READY' ? 'all' : 'READY')}
             >
-              {"Placeholder"}
+              Informasi
             </Button>
             <Button
               variant={filters.paymentStatus === 'UNPAID' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('paymentStatus', filters.paymentStatus === 'UNPAID' ? 'all' : 'UNPAID')}
             >
-              {"Placeholder"}
+              Informasi
             </Button>
             <Button
               variant={filters.priority === 'high' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('priority', filters.priority === 'high' ? 'all' : 'high')}
             >
-              {"Placeholder"}
+              Informasi
             </Button>
           </div>
 
@@ -163,7 +163,7 @@ export default function OrderFilters({
           {hasActiveFilters && (
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-sm text-muted-foreground">
-                {"Placeholder"}
+                Informasi
               </span>
               <Button
                 variant="ghost"
@@ -172,7 +172,7 @@ export default function OrderFilters({
                 className="text-red-600 hover:text-red-700"
               >
                 <X className="h-4 w-4 mr-2" />
-                {"Placeholder"}
+                Informasi
               </Button>
             </div>
           )}

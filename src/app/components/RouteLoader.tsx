@@ -22,7 +22,7 @@ const DefaultFallback = () => {
         <CardContent className="p-8">
           <div className="flex items-center justify-center space-x-3">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
-            <span className="text-lg text-muted-foreground">{"Placeholder"}</span>
+            <span className="text-lg text-muted-foreground">Informasi</span>
           </div>
         </CardContent>
       </Card>

@@ -219,7 +219,7 @@ export function MobileTable<T extends Record<string, any>>({
             ))}
             {actions.length > 0 && (
               <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground w-20">
-                {"Placeholder"}
+                Informasi
               </th>
             )}
           </tr>
@@ -289,7 +289,7 @@ export function MobileTable<T extends Record<string, any>>({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">{"Placeholder"}</div>
+        <div className="text-muted-foreground">Informasi</div>
       </div>
     )
   }
@@ -302,7 +302,7 @@ export function MobileTable<T extends Record<string, any>>({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || "Placeholder"}
+              placeholder={searchPlaceholder || Informasi}
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-9"
@@ -315,7 +315,7 @@ export function MobileTable<T extends Record<string, any>>({
       {/* Table Content */}
       {data.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          {emptyMessage || "Placeholder"}
+          {emptyMessage || Informasi}
         </div>
       ) : (
         <>
@@ -354,7 +354,7 @@ export const TableRenderers = {
   
   boolean: (value: boolean) => (
     <Badge variant={value ?"default" :"secondary"}>
-      {value ? "Placeholder" : "Placeholder"}
+      {value ? Informasi : Informasi}
     </Badge>
   ),
   
@@ -363,7 +363,7 @@ export const TableRenderers = {
       <div className="font-medium">{current}</div>
       {current <= min && (
         <Badge variant="destructive" className="text-xs">
-          {"Placeholder"}
+          Informasi
         </Badge>
       )}
     </div>
@@ -378,17 +378,17 @@ export const createCommonActions = {
     onView?: (item: T) => void
   ): MobileTableAction<T>[] => [
     ...(onView ? [{
-      label: "Placeholder",
+      label: Informasi,
       icon: <Eye className="h-4 w-4" />,
       onClick: onView
     }] : []),
     {
-      label: "Placeholder",
+      label: Informasi,
       icon: <Edit className="h-4 w-4" />,
       onClick: onEdit
     },
     {
-      label: "Placeholder",
+      label: Informasi,
       icon: <Trash2 className="h-4 w-4" />,
       onClick: onDelete,
       variant: 'destructive' as const

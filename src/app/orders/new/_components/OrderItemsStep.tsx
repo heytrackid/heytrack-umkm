@@ -111,7 +111,7 @@ export default function OrderItemsStep({
                 <Input
                   value={item.special_requests || ''}
                   onChange={(e) => onUpdateItem(index, 'special_requests', e.target.value)}
-                  placeholder="Permintaan khusus untuk item ini..."
+
                   className="mt-1"
                 />
               </div>

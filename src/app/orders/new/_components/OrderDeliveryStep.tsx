@@ -45,7 +45,7 @@ export default function OrderDeliveryStep({
               min="0"
               value={formData.delivery_fee}
               onChange={(e) => onInputChange('delivery_fee', parseFloat(e.target.value) || 0)}
-              placeholder="15000"
+
             />
           </div>
         )}
@@ -78,7 +78,7 @@ export default function OrderDeliveryStep({
             id="delivery_address"
             value={formData.delivery_address}
             onChange={(e) => onInputChange('delivery_address', e.target.value)}
-            placeholder="Alamat lengkap untuk pengiriman..."
+
             rows={3}
           />
         </div>
@@ -90,7 +90,7 @@ export default function OrderDeliveryStep({
           id="special_instructions"
           value={formData.special_instructions}
           onChange={(e) => onInputChange('special_instructions', e.target.value)}
-          placeholder="Instruksi khusus untuk produksi atau pengiriman..."
+
           rows={3}
         />
       </div>

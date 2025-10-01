@@ -21,25 +21,25 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Palette className="h-5 w-5" />
-          {"Placeholder"}
+          Informasi
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="theme">{"Placeholder"}</Label>
+          <Label htmlFor="theme">Informasi</Label>
           <select
             id="theme"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.theme}
             onChange={(e) => onSettingChange('ui', 'theme', e.target.value)}
           >
-            <option value="light">{"Placeholder"}</option>
-            <option value="dark">{"Placeholder"}</option>
-            <option value="system">{"Placeholder"}</option>
+            <option value="light">Informasi</option>
+            <option value="dark">Informasi</option>
+            <option value="system">Informasi</option>
           </select>
         </div>
         <div>
-          <Label htmlFor="language">{"Placeholder"}</Label>
+          <Label htmlFor="language">Informasi</Label>
           <select
             id="language"
             className="w-full p-2 border border-input rounded-md bg-background"
@@ -53,7 +53,7 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
             <option value="en">🇺🇸 English</option>
           </select>
           <p className="text-sm text-muted-foreground mt-1">
-            {"Placeholder"}
+            Informasi
           </p>
         </div>
       </CardContent>

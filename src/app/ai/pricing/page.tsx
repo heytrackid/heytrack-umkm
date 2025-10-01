@@ -191,7 +191,7 @@ export default function AIPricingPage() {
                     id="productName"
                     value={formData.productName}
                     onChange={(e) => handleInputChange('productName', e.target.value)}
-                    placeholder="Croissant Premium"
+
                   />
                 </div>
                 <div>
@@ -201,7 +201,7 @@ export default function AIPricingPage() {
                     type="number"
                     value={formData.currentPrice}
                     onChange={(e) => handleInputChange('currentPrice', e.target.value)}
-                    placeholder="25000"
+
                   />
                 </div>
                 <div>
@@ -245,7 +245,7 @@ export default function AIPricingPage() {
                         <Input
                           value={ingredient.name}
                           onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                          placeholder="Tepung Terigu"
+
                           className="text-sm"
                         />
                       </div>
@@ -255,7 +255,7 @@ export default function AIPricingPage() {
                           type="number"
                           value={ingredient.cost}
                           onChange={(e) => handleIngredientChange(index, 'cost', e.target.value)}
-                          placeholder="15000"
+
                           className="text-sm"
                         />
                       </div>

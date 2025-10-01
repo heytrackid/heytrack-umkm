@@ -106,7 +106,7 @@ export default function AddTransactionForm({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Pilih kategori" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {(transaction.type === 'income'
@@ -128,7 +128,7 @@ export default function AddTransactionForm({
               onChange={(e) =>
                 onTransactionChange({ ...transaction, description: e.target.value })
               }
-              placeholder="Contoh: Pembayaran dari customer XYZ"
+
               rows={3}
             />
           </div>
@@ -142,7 +142,7 @@ export default function AddTransactionForm({
                 onChange={(e) =>
                   onTransactionChange({ ...transaction, amount: e.target.value })
                 }
-                placeholder="0"
+
               />
             </div>
 

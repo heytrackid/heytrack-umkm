@@ -507,14 +507,14 @@ export default function ProductionCapacityManager({
                   <div className="flex items-center gap-2">
                     <Input
                       type="time"
-                      placeholder="Start"
+
                       value={newBreakStart}
                       onChange={(e) => setNewBreakStart(e.target.value)}
                       className="flex-1"
                     />
                     <Input
                       type="time"
-                      placeholder="End"
+
                       value={newBreakEnd}
                       onChange={(e) => setNewBreakEnd(e.target.value)}
                       className="flex-1"

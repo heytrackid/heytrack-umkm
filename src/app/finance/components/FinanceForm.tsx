@@ -57,7 +57,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
             <MobileSelect
               value={selectedType}
               onChange={setSelectedType}
-              placeholder="Pilih tipe transaksi"
+
               options={transactionTypes.map(type => ({
                 value: type.value,
                 label: type.label
@@ -66,7 +66,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
           ) : (
             <Select value={selectedType} onValueChange={setSelectedType}>
               <SelectTrigger>
-                <SelectValue placeholder="Pilih tipe transaksi" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {transactionTypes.map(type => (
@@ -82,7 +82,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
             <MobileSelect
               value={category}
               onChange={setCategory}
-              placeholder="Pilih kategori"
+
               options={(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(cat => ({
                 value: cat,
                 label: cat
@@ -91,7 +91,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
           ) : (
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger>
-                <SelectValue placeholder="Pilih kategori" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {(selectedType === 'INCOME' ? incomeCategories : expenseCategories).map(cat => (
@@ -107,14 +107,14 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
             <MobileInput
               value={amount}
               onChange={setAmount}
-              placeholder="1000000"
+
               type="number"
             />
           ) : (
             <Input
               id="amount"
               type="number"
-              placeholder="1000000"
+
               value={amount}
               onChange={(e) => setAmount}
             />
@@ -126,7 +126,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
             <MobileSelect
               value={paymentMethod}
               onChange={setPaymentMethod}
-              placeholder="Pilih metode pembayaran"
+
               options={paymentMethods.map(method => ({
                 value: method,
                 label: getPaymentMethodLabel(method)
@@ -135,7 +135,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
           ) : (
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
               <SelectTrigger>
-                <SelectValue placeholder="Pilih metode pembayaran" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {paymentMethods.map(method => (
@@ -151,7 +151,7 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
             <MobileInput
               value={date}
               onChange={setDate}
-              placeholder="Pilih tanggal"
+
               type="date"
             />
           ) : (
@@ -169,12 +169,12 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
             <MobileInput
               value={reference}
               onChange={setReference}
-              placeholder="SAL-20240125"
+
             />
           ) : (
             <Input
               id="reference"
-              placeholder="SAL-20240125"
+
               value={reference}
               onChange={(e) => setReference(e.target.value)}
             />
@@ -187,14 +187,14 @@ export function FinanceForm({ onClose }: FinanceFormProps) {
           <MobileInput
             value={description}
             onChange={setDescription}
-            placeholder="Deskripsi transaksi..."
+
             multiline
             rows={3}
           />
         ) : (
           <Textarea
             id="description"
-            placeholder="Deskripsi transaksi..."
+
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />

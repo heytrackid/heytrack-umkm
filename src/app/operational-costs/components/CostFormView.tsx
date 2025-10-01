@@ -112,7 +112,7 @@ export default function CostFormView({
               <Input
                 value={newCost.name}
                 onChange={(e) => setNewCost({...newCost, name: e.target.value})}
-                placeholder="Contoh: Listrik, Sewa Toko, Gaji Karyawan"
+
               />
             </div>
             
@@ -143,7 +143,7 @@ export default function CostFormView({
                 type="number"
                 value={newCost.amount}
                 onChange={(e) => setNewCost({...newCost, amount: parseFloat(e.target.value) || 0})}
-                placeholder="Masukkan nilai biaya"
+
               />
             </div>
             
@@ -172,7 +172,7 @@ export default function CostFormView({
             <Textarea
               value={newCost.description}
               onChange={(e) => setNewCost({...newCost, name: e.target.value})}
-              placeholder="Deskripsi tambahan..."
+
               rows={2}
             />
           </div>

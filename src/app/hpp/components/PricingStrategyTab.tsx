@@ -61,7 +61,7 @@ export default function PricingStrategyTab({
                 }
               }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih resep untuk kalkulasi harga" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="placeholder" disabled>
@@ -122,7 +122,7 @@ export default function PricingStrategyTab({
                     type="number"
                     value={productCost}
                     onChange={(e) => setProductCost(parseFloat(e.target.value) || 0)}
-                    placeholder="15000"
+
                     className="text-lg"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
@@ -136,7 +136,7 @@ export default function PricingStrategyTab({
                     type="number"
                     value={targetMargin}
                     onChange={(e) => setTargetMargin(Number(e.target.value) || 0)}
-                    placeholder="40"
+
                     min="0"
                     max="100"
                     className="text-lg"

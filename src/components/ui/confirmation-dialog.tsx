@@ -92,7 +92,7 @@ export function ConfirmationDialog({
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={loading}>
-              {cancelText || "Placeholder"}
+              {cancelText || Informasi}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -104,10 +104,10 @@ export function ConfirmationDialog({
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {"Placeholder"}
+                  Informasi
                 </>
               ) : (
-                confirmText || "Placeholder"
+                confirmText || Informasi
               )}
             </Button>
           </AlertDialogAction>

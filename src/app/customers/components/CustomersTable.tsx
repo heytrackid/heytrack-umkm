@@ -89,14 +89,14 @@ export default function CustomersTable({
         <CardContent className="py-12 text-center">
           <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-            {"Placeholder"}
+            Informasi
           </h3>
           <p className="text-muted-foreground mb-4">
-            {"Placeholder"}
+            Informasi
           </p>
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            {"Placeholder"}
+            Informasi
           </Button>
         </CardContent>
       </Card>
@@ -108,10 +108,10 @@ export default function CustomersTable({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          {"Placeholder"}
+          Informasi
         </CardTitle>
         <p className="text-sm text-gray-600">
-          {"Placeholder"}
+          Informasi
         </p>
       </CardHeader>
       <CardContent>
@@ -125,12 +125,12 @@ export default function CustomersTable({
                     onCheckedChange={onSelectAll}
                   />
                 </TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead>{"Placeholder"}</TableHead>
-                <TableHead className="w-32">{"Placeholder"}</TableHead>
+                <TableHead>Informasi</TableHead>
+                <TableHead>Informasi</TableHead>
+                <TableHead>Informasi</TableHead>
+                <TableHead>Informasi</TableHead>
+                <TableHead>Informasi</TableHead>
+                <TableHead className="w-32">Informasi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -146,7 +146,7 @@ export default function CustomersTable({
                     <div className="flex flex-col">
                       <span className="font-semibold">{customer.name}</span>
                       <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
-                        {customer.status === 'active' ? "Placeholder" : "Placeholder"}
+                        {customer.status === 'active' ? Informasi : Informasi}
                       </Badge>
                     </div>
                   </TableCell>
@@ -225,7 +225,7 @@ export default function CustomersTable({
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
+                  <span className="text-sm text-muted-foreground">Informasi</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
@@ -254,7 +254,7 @@ export default function CustomersTable({
                   </Button>
                   
                   <span className="text-sm font-medium">
-                    {"Placeholder"}
+                    Informasi
                   </span>
                   
                   <Button

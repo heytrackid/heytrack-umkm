@@ -79,8 +79,8 @@ export default function FinancePage() {
   const recordsError = null
   
   const transactionTypes = [
-    { value: 'INCOME', label: "Placeholder", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
-    { value: 'EXPENSE', label: "Placeholder", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
+    { value: 'INCOME', label: "Pemasukan", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-green-800 dark:text-green-100' },
+    { value: 'EXPENSE', label: "Pengeluaran", color: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:bg-red-800 dark:text-red-100' }
   ]
   
   const incomeCategories = ['Penjualan', 'Investasi', 'Lain-lain']
@@ -88,10 +88,10 @@ export default function FinancePage() {
   const paymentMethods = ['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET']
   
   const [searchTerm, setSearchTerm] = useState('')
-  const [typeFilter, setTypeFilter] = useState("Placeholder")
-  const [categoryFilter, setCategoryFilter] = useState("Placeholder")
+  const [typeFilter, setTypeFilter] = useState("Semua Tipe")
+  const [categoryFilter, setCategoryFilter] = useState("Semua Kategori")
   const [dateFilter, setDateFilter] = useState('')
-  const [paymentMethodFilter, setPaymentMethodFilter] = useState("Placeholder")
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState("Semua Metode")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
@@ -114,8 +114,8 @@ export default function FinancePage() {
   const filteredTransactions = transactions.filter(transaction => {
     const matchesSearch = (transaction.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (transaction.reference_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = typeFilter === "Placeholder" || transaction.type === typeFilter
-    const matchesCategory = categoryFilter === "Placeholder" || transaction.category === categoryFilter
+    const matchesType = typeFilter === "Semua Tipe" || transaction.type === typeFilter
+    const matchesCategory = categoryFilter === "Semua Kategori" || transaction.category === categoryFilter
     const matchesDate = !dateFilter || transaction.transaction_date === dateFilter
     return matchesSearch && matchesType && matchesCategory && matchesDate
   })
@@ -163,21 +163,21 @@ export default function FinancePage() {
             <div className={isMobile ? 'text-center' : ''}>
               <h1 className={`font-bold text-foreground ${
                 isMobile ? 'text-2xl' : 'text-3xl'
-              }`}>{"Placeholder"}</h1>
-              <p className="text-muted-foreground">{"Placeholder"}</p>
+              }`}>Keuangan</h1>
+              <p className="text-muted-foreground">Kelola transaksi keuangan bisnis Anda</p>
             </div>
             <div className={`flex gap-2 ${
               isMobile ? 'w-full flex-col' : ''
             }`}>
               <Button variant="outline" className={isMobile ? 'w-full' : ''}>
                 <Download className="h-4 w-4 mr-2" />
-                {"Placeholder"}
+                Ekspor Data
               </Button>
               {/* <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className={isMobile ? 'w-full' : ''}>
                     <Plus className="h-4 w-4 mr-2" />
-                    {"Placeholder"}
+                    Informasi
                   </Button>
                 </DialogTrigger>
                 <DialogContent className={`max-w-2xl ${
@@ -185,7 +185,7 @@ export default function FinancePage() {
                 }`}>
                   <DialogHeader>
                     <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                      {"Placeholder"}
+                      Informasi
                     </DialogTitle>
                   </DialogHeader>
                   <Suspense fallback={<div className="h-64 rounded bg-muted animate-pulse" />}>
@@ -215,12 +215,12 @@ export default function FinancePage() {
           {/* <Card>
             <CardHeader className={isMobile ? 'pb-2' : ''}>
               <CardTitle className={isMobile ? 'text-lg' : ''}>
-                {"Placeholder"}
+                Informasi
               </CardTitle>
               <p className={`text-muted-foreground ${
                 isMobile ? 'text-xs' : 'text-sm'
               }`}>
-                {"Placeholder"}
+                Informasi
               </p>
             </CardHeader>
             <CardContent>
@@ -236,7 +236,7 @@ export default function FinancePage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <span className={`ml-3 ${isMobile ? 'text-sm' : ''}`}>{"Placeholder"}</span>
+                  <span className={`ml-3 ${isMobile ? 'text-sm' : ''}`}>Informasi</span>
                 </div>
               </CardContent>
             </Card>
@@ -251,7 +251,7 @@ export default function FinancePage() {
             </Card>
           ) : (
             <ProgressiveLoader 
-              loadingMessage={"Placeholder"}
+              loadingMessage="Memuat data keuangan..."
               fallback={
                 <div className={isMobile ? 'overflow-x-auto' : ''}>
                   <div className="h-96 bg-muted animate-pulse rounded-lg"></div>
@@ -349,7 +349,7 @@ export default function FinancePage() {
             }`}>
               <DialogHeader>
                 <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                  {"Placeholder"} {selectedTransaction?.reference}
+                  Informasi {selectedTransaction?.reference}
                 </DialogTitle>
               </DialogHeader>
               {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
@@ -363,10 +363,10 @@ export default function FinancePage() {
 
 function getPaymentMethodLabel(method: string) {
   const methods: any = {
-    'CASH': "Placeholder",
-    'BANK_TRANSFER': "Placeholder",
-    'CREDIT_CARD': "Placeholder",
-    'DIGITAL_WALLET': "Placeholder"
+    'CASH': "Tunai",
+    'BANK_TRANSFER': "Transfer Bank",
+    'CREDIT_CARD': "Kartu Kredit",
+    'DIGITAL_WALLET': "Dompet Digital"
   }
   return methods[method] || method
 }

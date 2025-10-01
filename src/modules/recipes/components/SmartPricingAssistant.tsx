@@ -216,7 +216,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                     type="number"
                     value={customPrice}
                     onChange={(e) => setCustomPrice(Number(e.target.value))}
-                    placeholder="Masukkan harga custom"
+
                   />
                 </div>
                 <div className="text-sm space-y-1">

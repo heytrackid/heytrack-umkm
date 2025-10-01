@@ -70,7 +70,7 @@ export default function CostForm({
             onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Pilih kategori" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {costCategories.map(cat => (
@@ -88,7 +88,7 @@ export default function CostForm({
           <Input
             value={formData.description}
             onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Masukkan deskripsi biaya"
+
           />
         </div>
 
@@ -99,7 +99,7 @@ export default function CostForm({
             type="number"
             value={formData.amount}
             onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-            placeholder="0"
+
           />
         </div>
 
@@ -155,7 +155,7 @@ export default function CostForm({
           <Textarea
             value={formData.notes}
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-            placeholder="Catatan tambahan (opsional)"
+
             rows={3}
           />
         </div>

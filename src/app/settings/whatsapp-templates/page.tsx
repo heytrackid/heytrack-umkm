@@ -452,7 +452,7 @@ export default function WhatsAppTemplatesPage() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Contoh: Order Confirmation"
+
                     required
                   />
                 </div>
@@ -483,7 +483,7 @@ export default function WhatsAppTemplatesPage() {
                   id="description"
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Deskripsi singkat tentang template ini"
+
                 />
               </div>
               
@@ -493,7 +493,7 @@ export default function WhatsAppTemplatesPage() {
                   id="template_content"
                   value={formData.template_content}
                   onChange={(e) => handleInputChange('template_content', e.target.value)}
-                  placeholder="Tulis template pesan di sini. Gunakan {{variable_name}} untuk placeholder..."
+
                   rows={8}
                   required
                 />

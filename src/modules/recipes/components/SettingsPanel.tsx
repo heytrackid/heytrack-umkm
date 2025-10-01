@@ -140,7 +140,7 @@ export function SettingsPanel({
               value={profitMarginPercent}
               onChange={(e) => onProfitMarginChange(Number(e.target.value))}
               className="mt-2"
-              placeholder="30"
+
             />
             <p className="text-xs text-gray-500 mt-1">
               Rekomendasi: 25-40% untuk produk bakery

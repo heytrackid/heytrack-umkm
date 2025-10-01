@@ -39,7 +39,7 @@ export function LazyWrapper({
       <CardContent className="pt-6">
         <div className="flex items-center justify-center py-8">
           <LoadingSpinner />
-          <span className="ml-3 text-muted-foreground">{"Placeholder"} {name}...</span>
+          <span className="ml-3 text-muted-foreground">Informasi {name}...</span>
         </div>
       </CardContent>
     </Card>
@@ -51,10 +51,10 @@ export function LazyWrapper({
         <div className="text-center py-8">
           <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h3 className="text-lg font-medium text-destructive mb-2">
-            {"Placeholder"} {name}
+            Informasi {name}
           </h3>
           <p className="text-muted-foreground mb-4">
-            {"Placeholder"}
+            Informasi
           </p>
           <Button 
             variant="outline" 
@@ -62,7 +62,7 @@ export function LazyWrapper({
             className="gap-2"
           >
             <RefreshCw className="h-4 w-4" />
-            {"Placeholder"}
+            Informasi
           </Button>
         </div>
       </CardContent>

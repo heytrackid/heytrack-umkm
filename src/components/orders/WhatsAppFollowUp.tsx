@@ -245,7 +245,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                     <Input
                       value={paymentDetails}
                       onChange={(e) => setPaymentDetails(e.target.value)}
-                      placeholder="BCA 1234567890 a/n Nama"
+
                     />
                   </div>
                 )}
@@ -254,7 +254,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                 <div className="space-y-2">
                   <Label>Pengaturan Bisnis</Label>
                   <Input
-                    placeholder="Nomor WhatsApp Business (opsional)"
+
                     value={businessSettings.businessNumber}
                     onChange={(e) => setBusinessSettings({
                       ...businessSettings,
@@ -305,7 +305,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
                     <Textarea
                       value={customMessage}
                       onChange={(e) => setCustomMessage(e.target.value)}
-                      placeholder="Tulis pesan WhatsApp custom di sini..."
+
                       className="min-h-[200px]"
                     />
                   </div>

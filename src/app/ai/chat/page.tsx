@@ -301,7 +301,7 @@ export default function AIChatPage() {
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ketik pertanyaan Anda di sini..."
+
                     className="flex-1"
                     disabled={isTyping}
                   />

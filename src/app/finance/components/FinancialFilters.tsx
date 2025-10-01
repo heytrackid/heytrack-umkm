@@ -55,14 +55,14 @@ export function FinancialFilters({
               }`} />
               {isMobile ? (
                 <MobileInput
-                  placeholder="Cari deskripsi atau referensi..."
+
                   value={searchTerm}
                   onChange={setSearchTerm}
                   className="pl-10"
                 />
               ) : (
                 <Input
-                  placeholder="Cari deskripsi atau referensi..."
+
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-8"
@@ -78,7 +78,7 @@ export function FinancialFilters({
                 <MobileSelect
                   value={typeFilter}
                   onChange={setTypeFilter}
-                  placeholder="Semua Tipe"
+
                   options={[
                     { value:"Semua", label:"Semua Tipe" },
                     ...transactionTypes.map(type => ({
@@ -90,7 +90,7 @@ export function FinancialFilters({
                 <MobileSelect
                   value={categoryFilter}
                   onChange={setCategoryFilter}
-                  placeholder="Semua Kategori"
+
                   options={[
                     { value:"Semua", label:"Semua Kategori" },
                     ...[...incomeCategories, ...expenseCategories].map(category => ({
@@ -102,14 +102,14 @@ export function FinancialFilters({
                 <MobileInput
                   value={dateFilter}
                   onChange={setDateFilter}
-                  placeholder="Pilih tanggal"
+
                 />
               </>
             ) : (
               <>
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
                   <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Semua Tipe" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Semua">Semua Tipe</SelectItem>
@@ -120,7 +120,7 @@ export function FinancialFilters({
                 </Select>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Semua Kategori" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Semua">Semua Kategori</SelectItem>

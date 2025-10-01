@@ -177,7 +177,7 @@ export default function CategoriesPage() {
     const categoryNames = selectedCategories.map(category => category.name).join(', ')
     
     const confirmed = window.confirm(
-      "Placeholder"
+      "Apakah Anda yakin ingin menghapus kategori yang dipilih?"
     )
     
     if (confirmed) {
@@ -267,7 +267,7 @@ export default function CategoriesPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Cari kategori berdasarkan nama atau deskripsi..."
+
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

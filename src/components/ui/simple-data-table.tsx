@@ -241,13 +241,13 @@ export function SimpleDataTable<T extends Record<string, any>>({
               {exportData && (
                 <Button variant="outline" size={isMobile ?"sm" :"sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
-                  {"Placeholder"}
+                  Informasi
                 </Button>
               )}
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText || "Placeholder"}
+                  {addButtonText || Informasi}
                 </Button>
               )}
             </div>
@@ -262,7 +262,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || "Placeholder"}
+              placeholder={searchPlaceholder || Informasi}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
@@ -285,7 +285,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                       <SelectValue placeholder={`Filter ${col.header}`} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{"Placeholder"} {col.header}</SelectItem>
+                      <SelectItem value="all">Informasi {col.header}</SelectItem>
                       {col.filterOptions?.map(option => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -301,7 +301,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
         {/* Table / Mobile Cards */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage || "Placeholder"}</p>
+            <p className="text-muted-foreground">{emptyMessage || Informasi}</p>
           </div>
         ) : isMobile ? (
           /* Mobile Card Layout */
@@ -333,19 +333,19 @@ export function SimpleDataTable<T extends Record<string, any>>({
                           {onView && (
                             <Button variant="outline" size="sm" onClick={() => onView(item)} className="flex-1">
                               <Eye className="h-4 w-4 mr-2" />
-                              {"Placeholder"}
+                              Informasi
                             </Button>
                           )}
                           {onEdit && (
                             <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
                               <Edit className="h-4 w-4 mr-2" />
-                              {"Placeholder"}
+                              Informasi
                             </Button>
                           )}
                           {onDelete && (
                             <Button variant="outline" size="sm" onClick={() => onDelete(item)} className="flex-1 text-red-600">
                               <Trash2 className="h-4 w-4 mr-2" />
-                              {"Placeholder"}
+                              Informasi
                             </Button>
                           )}
                         </div>
@@ -409,7 +409,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                     ))}
                     {(onView || onEdit || onDelete) && (
                       <th className="text-right p-2 font-medium text-muted-foreground">
-                        {"Placeholder"}
+                        Informasi
                       </th>
                     )}
                   </tr>
@@ -437,18 +437,18 @@ export function SimpleDataTable<T extends Record<string, any>>({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>{"Placeholder"}</DropdownMenuLabel>
+                              <DropdownMenuLabel>Informasi</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               {onView && (
                                 <DropdownMenuItem onClick={() => onView(item)}>
                                   <Eye className="h-4 w-4 mr-2" />
-                                  {"Placeholder"}
+                                  Informasi
                                 </DropdownMenuItem>
                               )}
                               {onEdit && (
                                 <DropdownMenuItem onClick={() => onEdit(item)}>
                                   <Edit className="h-4 w-4 mr-2" />
-                                  {"Placeholder"}
+                                  Informasi
                                 </DropdownMenuItem>
                               )}
                               {onDelete && (
@@ -457,7 +457,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                                   className="text-red-600"
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
-                                  {"Placeholder"}
+                                  Informasi
                                 </DropdownMenuItem>
                               )}
                             </DropdownMenuContent>

@@ -89,7 +89,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             >
               <Input 
                 {...form.register('name')}
-                placeholder="Masukkan nama resep"
+
               />
             </FormField>
 
@@ -99,7 +99,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             >
               <Input 
                 {...form.register('category')}
-                placeholder="Kategori resep"
+
               />
             </FormField>
 
@@ -113,7 +113,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 min="1"
                 max="1000"
                 {...form.register('servings', { valueAsNumber: true })}
-                placeholder="1"
+
               />
             </FormField>
 
@@ -127,7 +127,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 min="1"
                 max="1440"
                 {...form.register('prep_time_minutes', { valueAsNumber: true })}
-                placeholder="30"
+
               />
             </FormField>
 
@@ -139,7 +139,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 type="number"
                 min="0"
                 {...form.register('cook_time_minutes', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -152,7 +152,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 onValueChange={(value) => form.setValue('difficulty_level', value as any)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih level kesulitan" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="EASY">Mudah</SelectItem>
@@ -171,7 +171,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 min="0"
                 step="0.01"
                 {...form.register('selling_price', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -185,7 +185,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
                 max="100"
                 step="0.1"
                 {...form.register('profit_margin', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
           </div>
@@ -196,7 +196,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
           >
             <Textarea 
               {...form.register('description')}
-              placeholder="Deskripsi resep"
+
               rows={3}
             />
           </FormField>

@@ -226,7 +226,7 @@ export default function RecipesPage({
                 <Label htmlFor="search">Cari Resep</Label>
                 <Input
                   id="search"
-                  placeholder="Nama atau deskripsi..."
+
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -235,7 +235,7 @@ export default function RecipesPage({
                 <Label htmlFor="category">Kategori</Label>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="Pilih kategori" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua Kategori</SelectItem>

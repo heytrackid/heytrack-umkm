@@ -446,7 +446,7 @@ export default function OrdersPage({
                   <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Cari customer atau nomor pesanan..."
+
                       value={filters.customer_search || ''}
                       onChange={(e) => setFilters(prev => ({ ...prev, customer_search: e.target.value }))}
                       className="pl-8"
@@ -464,7 +464,7 @@ export default function OrdersPage({
                   }}
                 >
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Semua Status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Semua Status</SelectItem>

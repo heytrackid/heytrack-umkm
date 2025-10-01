@@ -129,13 +129,13 @@ export default function OrdersPage() {
               ))}
             </div>
           }>
-            {/* <OrdersStatsSection
+            <OrdersStatsSection
               totalOrders={totalOrders}
               totalRevenue={totalRevenue}
               averageOrderValue={averageOrderValue}
               pendingRevenue={pendingRevenue}
               formatCurrency={formatCurrency}
-            /> */}
+            />
           </Suspense>
         )}
         
@@ -144,7 +144,7 @@ export default function OrdersPage() {
           <div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />
         ) : (
           <Suspense fallback={<div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />}>
-            {/* <OrdersQuickActions /> */}
+            <OrdersQuickActions />
           </Suspense>
         )}
         
@@ -153,7 +153,7 @@ export default function OrdersPage() {
           <SearchFormSkeleton />
         ) : (
           <Suspense fallback={<SearchFormSkeleton />}>
-            {/* <OrdersFilters
+            <OrdersFilters
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               statusFilter={statusFilter}
@@ -163,7 +163,7 @@ export default function OrdersPage() {
               dateTo={dateTo}
               setDateTo={setDateTo}
               statusConfig={ORDER_STATUS_CONFIG}
-            /> */}
+            />
           </Suspense>
         )}
         
@@ -172,13 +172,13 @@ export default function OrdersPage() {
           <OrdersTableSkeleton rows={5} />
         ) : (
           <Suspense fallback={<OrdersTableSkeleton rows={5} />}>
-            {/* <OrdersTableSection
+            <OrdersTableSection
               orders={filteredOrders}
               formatCurrency={formatCurrency}
               formatDate={formatDate}
               ORDER_STATUS_CONFIG={ORDER_STATUS_CONFIG}
               PAYMENT_STATUS_CONFIG={PAYMENT_STATUS_CONFIG}
-            /> */}
+            />
           </Suspense>
         )}
       </div>

@@ -56,18 +56,18 @@ export function TablePaginationControls({
       )}
     >
       <div className="text-sm text-muted-foreground">
-        {"Placeholder"}
+        Menampilkan {safeStart} - {safeEnd} dari {totalItems} data
       </div>
 
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
+          <span className="text-sm text-muted-foreground">Per halaman</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="h-8 w-[80px]">
-              <SelectValue aria-label={"Placeholder"} />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((option) => (

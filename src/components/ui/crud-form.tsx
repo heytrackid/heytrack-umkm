@@ -142,7 +142,7 @@ export const FormField: React.FC<FormFieldProps> = ({
               className={`${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`}
             >
               <option value="" disabled>
-                {placeholder || "Placeholder"}
+                {placeholder || Informasi}
               </option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>

@@ -29,7 +29,7 @@ export default function OrderCustomerStep({
             if (customer) onSelectCustomer(customer)
           }}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Pilih Customer" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {customers.map(customer => (
@@ -49,7 +49,7 @@ export default function OrderCustomerStep({
             id="customer_name"
             value={formData.customer_name}
             onChange={(e) => onInputChange('customer_name', e.target.value)}
-            placeholder="Nama lengkap pelanggan"
+
             required
           />
         </div>
@@ -60,7 +60,7 @@ export default function OrderCustomerStep({
             type="tel"
             value={formData.customer_phone}
             onChange={(e) => onInputChange('customer_phone', e.target.value)}
-            placeholder="08123456789"
+
           />
         </div>
         <div>
@@ -70,7 +70,7 @@ export default function OrderCustomerStep({
             type="email"
             value={formData.customer_email}
             onChange={(e) => onInputChange('customer_email', e.target.value)}
-            placeholder="customer@email.com"
+
           />
         </div>
         <div>
@@ -91,7 +91,7 @@ export default function OrderCustomerStep({
           id="customer_address"
           value={formData.customer_address}
           onChange={(e) => onInputChange('customer_address', e.target.value)}
-          placeholder="Alamat lengkap pelanggan..."
+
           rows={3}
         />
       </div>
@@ -119,7 +119,7 @@ export default function OrderCustomerStep({
             id="notes"
             value={formData.notes}
             onChange={(e) => onInputChange('notes', e.target.value)}
-            placeholder="Catatan tambahan..."
+
           />
         </div>
       </div>

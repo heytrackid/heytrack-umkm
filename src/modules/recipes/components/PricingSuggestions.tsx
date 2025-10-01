@@ -96,7 +96,7 @@ export function PricingSuggestionsComponent({
             <Input
               id="customPrice"
               type="number"
-              placeholder="Enter custom price"
+
               value={customPrice}
               onChange={(e) => onCustomPriceChange(e.target.value)}
               className="mt-1"

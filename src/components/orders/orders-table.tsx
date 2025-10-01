@@ -90,24 +90,24 @@ const OrdersTable = ({
 
   // Status configurations
   const statusConfig = {
-    'PENDING': { label: "Placeholder", color: 'bg-yellow-100 text-yellow-800', textColor: 'text-yellow-800' },
-    'CONFIRMED': { label: "Placeholder", color: 'bg-blue-100 text-blue-800', textColor: 'text-blue-800' },
-    'IN_PROGRESS': { label: "Placeholder", color: 'bg-orange-100 text-orange-800', textColor: 'text-orange-800' },
-    'READY': { label: "Placeholder", color: 'bg-green-100 text-green-800', textColor: 'text-green-800' },
-    'DELIVERED': { label: "Placeholder", color: 'bg-gray-100 text-gray-800', textColor: 'text-gray-800' },
-    'CANCELLED': { label: "Placeholder", color: 'bg-red-100 text-red-800', textColor: 'text-red-800' }
+    'PENDING': { label: Informasi, color: 'bg-yellow-100 text-yellow-800', textColor: 'text-yellow-800' },
+    'CONFIRMED': { label: Informasi, color: 'bg-blue-100 text-blue-800', textColor: 'text-blue-800' },
+    'IN_PROGRESS': { label: Informasi, color: 'bg-orange-100 text-orange-800', textColor: 'text-orange-800' },
+    'READY': { label: Informasi, color: 'bg-green-100 text-green-800', textColor: 'text-green-800' },
+    'DELIVERED': { label: Informasi, color: 'bg-gray-100 text-gray-800', textColor: 'text-gray-800' },
+    'CANCELLED': { label: Informasi, color: 'bg-red-100 text-red-800', textColor: 'text-red-800' }
   }
 
   const paymentStatusConfig = {
-    'UNPAID': { label: "Placeholder", color: 'bg-red-100 text-red-800' },
-    'PARTIAL': { label: "Placeholder", color: 'bg-yellow-100 text-yellow-800' },
-    'PAID': { label: "Placeholder", color: 'bg-green-100 text-green-800' }
+    'UNPAID': { label: Informasi, color: 'bg-red-100 text-red-800' },
+    'PARTIAL': { label: Informasi, color: 'bg-yellow-100 text-yellow-800' },
+    'PAID': { label: Informasi, color: 'bg-green-100 text-green-800' }
   }
 
   const priorityConfig = {
-    'low': { label: "Placeholder", color: 'bg-gray-100 text-gray-800' },
-    'normal': { label: "Placeholder", color: 'bg-blue-100 text-blue-800' },
-    'high': { label: "Placeholder", color: 'bg-red-100 text-red-800' }
+    'low': { label: Informasi, color: 'bg-gray-100 text-gray-800' },
+    'normal': { label: Informasi, color: 'bg-blue-100 text-blue-800' },
+    'high': { label: Informasi, color: 'bg-red-100 text-red-800' }
   }
 
   // Selection handlers
@@ -196,11 +196,11 @@ const OrdersTable = ({
           <TableHeader>
             <TableRow>
               <TableHead className="w-12"></TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
@@ -238,7 +238,7 @@ const OrdersTable = ({
               onClick={() => handleBulkAction('confirm')}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Informasi
             </Button>
             
             <Button 
@@ -247,7 +247,7 @@ const OrdersTable = ({
               onClick={() => handleBulkAction('export')}
             >
               <Download className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Informasi
             </Button>
             
             <Button 
@@ -256,23 +256,23 @@ const OrdersTable = ({
               onClick={() => handleBulkAction('print')}
             >
               <Printer className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Informasi
             </Button>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  {"Placeholder"}
+                  Informasi
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => handleBulkAction('archive')}>
                   <Archive className="h-4 w-4 mr-2" />
-                  {"Placeholder"}
+                  Informasi
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleBulkAction('cancel')}>
                   <XCircle className="h-4 w-4 mr-2" />
-                  {"Placeholder"}
+                  Informasi
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem 
@@ -280,7 +280,7 @@ const OrdersTable = ({
                   className="text-red-600"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {"Placeholder"}
+                  Informasi
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -290,7 +290,7 @@ const OrdersTable = ({
               size="sm"
               onClick={() => setSelectedOrders([])}
             >
-              {"Placeholder"}
+              Informasi
             </Button>
           </div>
         </div>
@@ -310,12 +310,12 @@ const OrdersTable = ({
                   }}
                 />
               </TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead>{"Placeholder"}</TableHead>
-              <TableHead className="w-12">{"Placeholder"}</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead>Informasi</TableHead>
+              <TableHead className="w-12">Informasi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -323,8 +323,8 @@ const OrdersTable = ({
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                   <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>{"Placeholder"}</p>
-                  <p className="text-sm">{"Placeholder"}</p>
+                  <p>Informasi</p>
+                  <p className="text-sm">Informasi</p>
                 </TableCell>
               </TableRow>
             ) : (
@@ -367,10 +367,10 @@ const OrdersTable = ({
                   
                   <TableCell>
                     <div className="space-y-1 text-sm">
-                      <div>{"Placeholder"}: {formatDate(order.order_date)}</div>
+                      <div>Informasi: {formatDate(order.order_date)}</div>
                       {order.delivery_date && (
                         <div className="text-muted-foreground">
-                          {"Placeholder"}: {formatDate(order.delivery_date)}
+                          Informasi: {formatDate(order.delivery_date)}
                         </div>
                       )}
                     </div>
@@ -382,7 +382,7 @@ const OrdersTable = ({
                       {getPaymentBadge(order.payment_status)}
                       {order.paid_amount > 0 && order.payment_status !== 'PAID' && (
                         <div className="text-xs text-muted-foreground">
-                          {"Placeholder"}: {formatCurrency(order.paid_amount)}
+                          Informasi: {formatCurrency(order.paid_amount)}
                         </div>
                       )}
                     </div>
@@ -398,12 +398,12 @@ const OrdersTable = ({
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => onViewOrder(order)}>
                           <Eye className="h-4 w-4 mr-2" />
-                          {"Placeholder"}
+                          Informasi
                         </DropdownMenuItem>
                         
                         <DropdownMenuItem onClick={() => onEditOrder(order)}>
                           <Edit className="h-4 w-4 mr-2" />
-                          {"Placeholder"}
+                          Informasi
                         </DropdownMenuItem>
                         
                         
@@ -412,28 +412,28 @@ const OrdersTable = ({
                         {order.status === 'PENDING' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'CONFIRMED')}>
                             <CheckCircle className="h-4 w-4 mr-2" />
-                            {"Placeholder"} {"Placeholder"}
+                            Informasi Informasi
                           </DropdownMenuItem>
                         )}
                         
                         {order.status === 'CONFIRMED' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'IN_PROGRESS')}>
                             <RefreshCw className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Informasi
                           </DropdownMenuItem>
                         )}
                         
                         {order.status === 'IN_PROGRESS' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'READY')}>
                             <Package className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Informasi
                           </DropdownMenuItem>
                         )}
                         
                         {order.status === 'READY' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'DELIVERED')}>
                             <Truck className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Informasi
                           </DropdownMenuItem>
                         )}
                         
@@ -445,7 +445,7 @@ const OrdersTable = ({
                             className="text-red-600"
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {"Placeholder"}
+                            Informasi
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

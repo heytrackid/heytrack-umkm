@@ -4,7 +4,14 @@ import React, { memo, useMemo, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 function OrdersTableSection({
   orders,
@@ -69,13 +76,14 @@ function OrdersTableSection({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{"Placeholder"}</TableHead>
-            <TableHead>{"Placeholder"}</TableHead>
-            <TableHead>{"Placeholder"}</TableHead>
-            <TableHead>{"Placeholder"}</TableHead>
-            <TableHead>{"Placeholder"}</TableHead>
-            <TableHead>{"Placeholder"}</TableHead>
-            <TableHead className="text-right">{"Placeholder"}</TableHead>
+            <TableHead>No. Pesanan</TableHead>
+            <TableHead>Pelanggan</TableHead>
+            <TableHead>Tanggal Order</TableHead>
+            <TableHead>Tanggal Kirim</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Payment</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+            <TableHead className="text-center">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -102,6 +110,29 @@ function OrdersTableSection({
               </TableCell>
               <TableCell className="text-right font-medium">
                 {formatCurrency(order.total_amount)}
+              </TableCell>
+              <TableCell className="text-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => window.location.href = `/orders/${order.id}`}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Lihat Detail
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => window.location.href = `/orders/${order.id}/edit`}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Hapus
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}

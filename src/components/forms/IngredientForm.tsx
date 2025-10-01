@@ -79,7 +79,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
             >
               <Input 
                 {...form.register('name')}
-                placeholder="Masukkan nama bahan"
+
               />
             </FormField>
 
@@ -93,7 +93,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
                 onValueChange={(value) => form.setValue('unit', value as any)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih unit" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="kg">Kilogram</SelectItem>
@@ -116,7 +116,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
                 min="0"
                 step="0.01"
                 {...form.register('price_per_unit', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -130,7 +130,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
                 min="0"
                 step="0.01"
                 {...form.register('current_stock', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -144,7 +144,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
                 min="0"
                 step="0.01"
                 {...form.register('min_stock', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -157,7 +157,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
                 min="0"
                 step="0.01"
                 {...form.register('max_stock', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
 
@@ -167,7 +167,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
             >
               <Input 
                 {...form.register('supplier')}
-                placeholder="Nama supplier"
+
               />
             </FormField>
 
@@ -177,7 +177,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
             >
               <Input 
                 {...form.register('category')}
-                placeholder="Kategori bahan"
+
               />
             </FormField>
           </div>
@@ -188,7 +188,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
           >
             <Textarea 
               {...form.register('description')}
-              placeholder="Deskripsi bahan (opsional)"
+
               rows={3}
             />
           </FormField>
@@ -199,7 +199,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
           >
             <Textarea 
               {...form.register('storage_requirements')}
-              placeholder="Persyaratan penyimpanan (opsional)"
+
               rows={2}
             />
           </FormField>

@@ -81,7 +81,7 @@ export function CategoryForm({
               <Input
                 value={category.name}
                 onChange={(e) => onCategoryChange({ ...category, name: e.target.value })}
-                placeholder="Masukkan nama kategori"
+
               />
             </div>
             
@@ -90,7 +90,7 @@ export function CategoryForm({
               <Input
                 value={category.icon}
                 onChange={(e) => onCategoryChange({ ...category, icon: e.target.value })}
-                placeholder="🍽️"
+
                 className="text-center"
               />
             </div>
@@ -101,7 +101,7 @@ export function CategoryForm({
             <Input
               value={category.description}
               onChange={(e) => onCategoryChange({ ...category, description: e.target.value })}
-              placeholder="Masukkan deskripsi kategori"
+
             />
           </div>
 
@@ -120,7 +120,7 @@ export function CategoryForm({
                   <Input
                     value={ingredient}
                     onChange={(e) => handleUpdateIngredient(index, e.target.value)}
-                    placeholder="Nama bahan baku"
+
                     className="flex-1"
                   />
                   <Button

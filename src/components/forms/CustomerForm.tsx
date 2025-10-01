@@ -76,7 +76,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
             >
               <Input 
                 {...form.register('name')}
-                placeholder="Masukkan nama customer"
+
               />
             </FormField>
 
@@ -87,7 +87,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
               <Input 
                 type="email"
                 {...form.register('email')}
-                placeholder="email@example.com"
+
               />
             </FormField>
 
@@ -97,7 +97,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
             >
               <Input 
                 {...form.register('phone')}
-                placeholder="08123456789"
+
               />
             </FormField>
 
@@ -110,7 +110,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
                 onValueChange={(value) => form.setValue('customer_type', value as any)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih tipe customer" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="REGULAR">Regular</SelectItem>
@@ -128,7 +128,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
                 type="number"
                 min="0"
                 {...form.register('loyalty_points', { valueAsNumber: true })}
-                placeholder="0"
+
               />
             </FormField>
           </div>
@@ -139,7 +139,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
           >
             <Textarea 
               {...form.register('address')}
-              placeholder="Alamat customer"
+
               rows={3}
             />
           </FormField>
@@ -150,7 +150,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
           >
             <Textarea 
               {...form.register('notes')}
-              placeholder="Catatan tambahan"
+
               rows={2}
             />
           </FormField>

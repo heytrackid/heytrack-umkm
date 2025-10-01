@@ -45,7 +45,7 @@ export default function OrderPaymentStep({
             min="0"
             value={formData.discount_amount}
             onChange={(e) => onInputChange('discount_amount', parseFloat(e.target.value) || 0)}
-            placeholder="0"
+
           />
         </div>
 
