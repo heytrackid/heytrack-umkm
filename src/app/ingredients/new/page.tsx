@@ -3,7 +3,28 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ArrowLeft, Save } from 'lucide-react';
+import AppLayout from '@/components/layout/app-layout';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb';
+import { ArrowLeft, Save, Package } from 'lucide-react';
 import Link from 'next/link';
 
 interface IngredientFormData {
@@ -73,202 +94,190 @@ export default function NewIngredientPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-3xl">
-      {/* Breadcrumb */}
-      <div className="mb-6">
-        <Link 
-          href="/ingredients" 
-          className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Kembali ke Bahan Baku
-        </Link>
-      </div>
+    <AppLayout>
+      <div className="space-y-6 max-w-4xl">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/ingredients">Bahan Baku</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Tambah Bahan Baku</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Tambah Bahan Baku
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Tambahkan bahan baku baru ke inventori Anda
-        </p>
-      </div>
-
-      {/* Error Alert */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-red-800 dark:text-red-200">{error}</p>
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Package className="h-8 w-8" />
+            Tambah Bahan Baku
+          </h1>
+          <p className="text-muted-foreground">
+            Tambahkan bahan baku baru ke inventori Anda
+          </p>
         </div>
-      )}
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Name */}
-            <div className="md:col-span-2">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Nama Bahan Baku *
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="Contoh: Tepung Terigu"
-              />
-            </div>
+        {/* Error Alert */}
+        {error && (
+          <Card className="border-destructive">
+            <CardContent className="pt-6">
+              <p className="text-sm text-destructive">{error}</p>
+            </CardContent>
+          </Card>
+        )}
 
-            {/* Unit */}
-            <div>
-              <label htmlFor="unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Satuan *
-              </label>
-              <select
-                id="unit"
-                name="unit"
-                value={formData.unit}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                {unitOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Informasi Bahan Baku</CardTitle>
+              <CardDescription>
+                Lengkapi form di bawah untuk menambahkan bahan baku baru
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Name */}
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="name">Nama Bahan Baku *</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Contoh: Tepung Terigu"
+                  />
+                </div>
 
-            {/* Price per unit */}
-            <div>
-              <label htmlFor="price_per_unit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Harga per Satuan *
-              </label>
-              <input
-                type="number"
-                id="price_per_unit"
-                name="price_per_unit"
-                value={formData.price_per_unit}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="0"
-              />
-            </div>
+                {/* Unit */}
+                <div className="space-y-2">
+                  <Label htmlFor="unit">Satuan *</Label>
+                  <Select value={formData.unit} onValueChange={(value) => setFormData(prev => ({ ...prev, unit: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih satuan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {unitOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            {/* Current Stock */}
-            <div>
-              <label htmlFor="current_stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Stok Saat Ini *
-              </label>
-              <input
-                type="number"
-                id="current_stock"
-                name="current_stock"
-                value={formData.current_stock}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="0"
-              />
-            </div>
+                {/* Price per unit */}
+                <div className="space-y-2">
+                  <Label htmlFor="price_per_unit">Harga per Satuan *</Label>
+                  <Input
+                    type="number"
+                    id="price_per_unit"
+                    name="price_per_unit"
+                    value={formData.price_per_unit}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                  />
+                </div>
 
-            {/* Minimum Stock */}
-            <div>
-              <label htmlFor="minimum_stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Stok Minimum *
-              </label>
-              <input
-                type="number"
-                id="minimum_stock"
-                name="minimum_stock"
-                value={formData.minimum_stock}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="0"
-              />
-            </div>
+                {/* Current Stock */}
+                <div className="space-y-2">
+                  <Label htmlFor="current_stock">Stok Saat Ini *</Label>
+                  <Input
+                    type="number"
+                    id="current_stock"
+                    name="current_stock"
+                    value={formData.current_stock}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                  />
+                </div>
 
-            {/* Supplier */}
-            <div>
-              <label htmlFor="supplier" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Supplier
-              </label>
-              <input
-                type="text"
-                id="supplier"
-                name="supplier"
-                value={formData.supplier}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="Nama supplier"
-              />
-            </div>
+                {/* Minimum Stock */}
+                <div className="space-y-2">
+                  <Label htmlFor="minimum_stock">Stok Minimum *</Label>
+                  <Input
+                    type="number"
+                    id="minimum_stock"
+                    name="minimum_stock"
+                    value={formData.minimum_stock}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="0"
+                  />
+                </div>
 
-            {/* Category */}
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Kategori
-              </label>
-              <input
-                type="text"
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="Contoh: Bahan Dasar"
-              />
-            </div>
+                {/* Supplier */}
+                <div className="space-y-2">
+                  <Label htmlFor="supplier">Supplier</Label>
+                  <Input
+                    id="supplier"
+                    name="supplier"
+                    value={formData.supplier}
+                    onChange={handleChange}
+                    placeholder="Nama supplier"
+                  />
+                </div>
 
-            {/* Description */}
-            <div className="md:col-span-2">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Deskripsi
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                placeholder="Deskripsi bahan baku"
-              />
-            </div>
+                {/* Category */}
+                <div className="space-y-2">
+                  <Label htmlFor="category">Kategori</Label>
+                  <Input
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    placeholder="Contoh: Bahan Dasar"
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="description">Deskripsi</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Deskripsi bahan baku"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push('/ingredients')}
+            >
+              Batal
+            </Button>
+            <Button type="submit" disabled={loading}>
+              <Save className="w-4 h-4 mr-2" />
+              {loading ? 'Menyimpan...' : 'Simpan Bahan Baku'}
+            </Button>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3">
-          <Link
-            href="/ingredients"
-            className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-          >
-            Batal
-          </Link>
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors"
-          >
-            <Save className="w-4 h-4 mr-2" />
-            {loading ? 'Menyimpan...' : 'Simpan Bahan Baku'}
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    </AppLayout>
   );
 }

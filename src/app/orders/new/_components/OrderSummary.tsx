@@ -14,7 +14,7 @@ interface OrderSummaryProps {
   taxAmount: number
   totalAmount: number
   isSubmitting: boolean
-  onSubmit: () => void
+  onSubmit: (e: React.FormEvent) => void
   onCancel: () => void
 }
 

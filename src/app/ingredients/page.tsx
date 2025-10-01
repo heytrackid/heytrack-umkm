@@ -27,7 +27,8 @@ import {
 } from 'lucide-react';
 
 export default function IngredientsPage() {
-  const { data: ingredients, loading } = useIngredients({ refetchOnMount: true });
+  // Share single useIngredients hook call - IngredientsCRUD will use this
+  const { data: ingredients, loading } = useIngredients({ refetchOnMount: false });
   const { formatCurrency } = useSettings();
 
   // Calculate stats
