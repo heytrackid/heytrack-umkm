@@ -58,7 +58,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
+              <p className="text-sm text-muted-foreground">Total Resep</p>
               <p className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {stats.totalRecipes}
               </p>
@@ -72,7 +72,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
+              <p className="text-sm text-muted-foreground">Dengan Bahan</p>
               <p className={`font-bold text-green-600 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {stats.recipesWithIngredients}
               </p>
@@ -86,7 +86,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
+              <p className="text-sm text-muted-foreground">Tanpa Bahan</p>
               <p className={`font-bold text-orange-600 ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {stats.recipesWithoutIngredients}
               </p>
@@ -100,7 +100,7 @@ export default function RecipeStats({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">{"Placeholder"}</p>
+              <p className="text-sm text-muted-foreground">Rata-rata HPP</p>
               <p className={`font-bold text-primary ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {formatCurrency(Math.round(stats.averageHPP))}
               </p>

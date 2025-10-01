@@ -108,17 +108,17 @@ export default function CostFormView({
         <CardContent className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{"Placeholder"}</Label>
+              <Label>Nama Biaya</Label>
               <Input
                 value={newCost.name}
                 onChange={(e) => setNewCost({...newCost, name: e.target.value})}
-                placeholder={"Placeholder"}
+                placeholder="Contoh: Listrik, Sewa Toko, Gaji Karyawan"
               />
             </div>
             
             <div className="space-y-2">
-              <Label>{"Placeholder"}</Label>
-              <Select 
+              <Label>Kategori</Label>
+              <Select
                 value={newCost.category} 
                 onValueChange={(value) => setNewCost({...newCost, category: value})}
               >
@@ -138,7 +138,7 @@ export default function CostFormView({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>{"Placeholder"}</Label>
+              <Label>Jumlah Biaya</Label>
               <Input
                 type="number"
                 value={newCost.amount}
@@ -148,8 +148,8 @@ export default function CostFormView({
             </div>
             
             <div className="space-y-2">
-              <Label>{"Placeholder"}</Label>
-              <Select 
+              <Label>Frekuensi</Label>
+              <Select
                 value={newCost.frequency} 
                 onValueChange={(value: any) => setNewCost({...newCost, frequency: value})}
               >
@@ -193,10 +193,10 @@ export default function CostFormView({
           <div className="flex gap-3 pt-4">
             <Button onClick={onSave} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Simpan
             </Button>
             <Button variant="outline" onClick={onCancel}>
-              {"Placeholder"}
+              Batal
             </Button>
           </div>
         </CardContent>

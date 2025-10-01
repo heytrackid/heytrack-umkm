@@ -173,7 +173,7 @@ export default function OperationalCostsPage() {
   }
 
   const handleDeleteCost = (costId: string) => {
-    if (confirm("Placeholder")) {
+    if (confirm('Yakin ingin menghapus biaya operasional ini?')) {
       setCosts(costs.filter(cost => cost.id !== costId))
     }
   }
@@ -376,25 +376,25 @@ export default function OperationalCostsPage() {
             <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
               <div className={isMobile ? 'text-center' : ''}>
                 <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-                  {"Placeholder"}
+                  Biaya Operasional
                 </h1>
                 <p className="text-muted-foreground">
-                  {"Placeholder"}
+                  Kelola semua biaya operasional bisnis Anda
                 </p>
               </div>
               <div className={`flex ${isMobile ? 'w-full flex-col gap-2' : 'items-center gap-2'}`}>
                 <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {"Placeholder"}
+                  Tambah Biaya
                 </Button>
                 <Button 
                   variant="outline" 
                   className={isMobile ? 'w-full' : ''}
                   onClick={handleQuickSetup}
-                  title={"Placeholder"}
+                  title="Setup Cepat Biaya Operasional"
                 >
                   <Zap className="h-4 w-4 mr-2" />
-                  {"Placeholder"}
+                  Setup Cepat
                 </Button>
               </div>
             </div>

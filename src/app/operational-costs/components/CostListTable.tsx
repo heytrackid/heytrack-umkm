@@ -241,7 +241,7 @@ export default function CostListTable({
           <div className="py-12 text-center">
             <Receipt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-              {searchTerm ? 'Tidak ada hasil pencarian' : "Placeholder"}
+              {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada biaya operasional'}
             </h3>
             <p className="text-muted-foreground mb-4">
               {searchTerm 
@@ -252,7 +252,7 @@ export default function CostListTable({
             {!searchTerm && (
               <Button onClick={onAdd}>
                 <Plus className="h-4 w-4 mr-2" />
-                {"Placeholder"}
+                Tambah Biaya Pertama
               </Button>
             )}
           </div>
