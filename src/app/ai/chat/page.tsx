@@ -149,12 +149,12 @@ export default function AIChatPage() {
             
             <CardContent className="flex-1 flex flex-col p-0">
               {/* Messages Area */}
-              <ScrollArea className="flex-1 px-4 pb-4">
-                <div className="space-y-4">
+              <ScrollArea className="flex-1 px-4 pb-4 w-full max-w-full overflow-x-hidden">
+                <div className="space-y-4 w-full max-w-full overflow-hidden">
                   {messages.map((message) => (
                     <div 
                       key={message.id}
-                      className={`flex gap-3 ${message.sender === 'user' ? 'flex-row-reverse' : ''}`}
+                      className={`flex gap-3 w-full max-w-full ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                     >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         message.sender === 'user' 
@@ -168,13 +168,13 @@ export default function AIChatPage() {
                         )}
                       </div>
                       
-                      <div className={`flex-1 max-w-[80%] min-w-0 overflow-hidden ${message.sender === 'user' ? 'text-right' : ''}`}>
-                        <div className={`rounded-lg p-3 break-words overflow-hidden ${
+                      <div className={`flex flex-col max-w-[calc(100%-3rem)] min-w-0 overflow-hidden ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                        <div className={`rounded-lg p-3 max-w-full break-words overflow-hidden overflow-wrap-anywhere ${
                           message.sender === 'user' 
-                            ? 'bg-blue-600 text-white ml-auto' 
+                            ? 'bg-blue-600 text-white' 
                             : 'bg-gray-100 text-gray-900'
-                        }`}>
-                          <div className="whitespace-pre-wrap text-sm word-break-break-word">
+                        }`} style={{wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '100%'}}>
+                          <div className="text-sm" style={{wordBreak: 'break-word', overflowWrap: 'anywhere'}}>
                             {message.content}
                           </div>
                         </div>
