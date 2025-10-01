@@ -22,7 +22,7 @@ export function ProfileSettings({ settings, onSettingChange }: ProfileSettingsPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5" />
-          {"Placeholder"}
+          Profil Pengguna
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -33,17 +33,17 @@ export function ProfileSettings({ settings, onSettingChange }: ProfileSettingsPr
           <div>
             <Button variant="outline" size="sm">
               <Upload className="h-4 w-4 mr-2" />
-              {"Placeholder"}
+              Unggah Foto
             </Button>
             <p className="text-sm text-muted-foreground mt-1">
-              {"Placeholder"}
+              JPG, PNG atau GIF (maks. 2MB)
             </p>
           </div>
         </div>
         <Separator />
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="fullName">{"Placeholder"}</Label>
+            <Label htmlFor="fullName">Nama Lengkap</Label>
             <Input
               id="fullName"
               value={settings.user.fullName}
@@ -51,22 +51,22 @@ export function ProfileSettings({ settings, onSettingChange }: ProfileSettingsPr
             />
           </div>
           <div>
-            <Label htmlFor="role">{"Placeholder"}</Label>
+            <Label htmlFor="role">Peran</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={settings.user.role}
               onChange={(e) => onSettingChange('user', 'role', e.target.value)}
             >
-              <option value="Owner">{"Placeholder"}</option>
-              <option value="Manager">{"Placeholder"}</option>
-              <option value="Staff">{"Placeholder"}</option>
-              <option value="Admin">{"Placeholder"}</option>
+              <option value="Owner">Pemilik</option>
+              <option value="Manager">Manajer</option>
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
             </select>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="userEmail">{"Placeholder"}</Label>
+            <Label htmlFor="userEmail">Email</Label>
             <Input
               id="userEmail"
               type="email"
@@ -75,7 +75,7 @@ export function ProfileSettings({ settings, onSettingChange }: ProfileSettingsPr
             />
           </div>
           <div>
-            <Label htmlFor="userPhone">{"Placeholder"}</Label>
+            <Label htmlFor="userPhone">Nomor Telepon</Label>
             <Input
               id="userPhone"
               value={settings.user.phone}

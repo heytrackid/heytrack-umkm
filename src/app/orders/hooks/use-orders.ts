@@ -123,9 +123,9 @@ export function useOrders(filters?: OrderFilters) {
         const searchableText = [
           order.order_number,
           order.customer_name,
-          order.notes,
-          order.internal_notes
-        ].join(' ').toLowerCase()
+          order.notes || '',
+          order.internal_notes || ''
+        ].filter(Boolean).join(' ').toLowerCase()
         
         if (!searchableText.includes(searchLower)) {
           return false

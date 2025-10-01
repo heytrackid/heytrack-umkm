@@ -143,7 +143,7 @@ export default function SettingsPage() {
       
       if (error) {
         console.error('Error loading settings:', error)
-        toast.error("Placeholder")
+        toast.error('Gagal memuat pengaturan')
         return
       }
       
@@ -154,7 +154,7 @@ export default function SettingsPage() {
       
     } catch (error) {
       console.error('Error loading settings:', error)
-      toast.error("Placeholder")
+      toast.error('Gagal memuat pengaturan')
     } finally {
       stopLoading(LOADING_KEYS.LOAD_SETTINGS)
     }
@@ -195,11 +195,11 @@ export default function SettingsPage() {
       
       console.log('✅ Settings saved successfully:', data)
       setIsUnsavedChanges(false)
-      toast.success("Placeholder")
+      toast.success('Pengaturan berhasil disimpan')
       
     } catch (error) {
       console.error('❌ Error saving settings:', error)
-      toast.error("Placeholder")
+      toast.error('Gagal menyimpan pengaturan')
     } finally {
       setIsSaving(false)
     }
@@ -219,11 +219,11 @@ export default function SettingsPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">{"Placeholder"}</BreadcrumbLink>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{"Placeholder"}</BreadcrumbPage>
+              <BreadcrumbPage>Pengaturan</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -231,23 +231,23 @@ export default function SettingsPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{"Placeholder"}</h1>
-            <p className="text-sm md:text-base text-muted-foreground">{"Placeholder"}</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Pengaturan</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Kelola konfigurasi aplikasi Anda</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <ExcelExportButton variant="outline" className="hidden sm:inline-flex" />
             {isUnsavedChanges && (
               <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs md:text-sm">
-                {"Placeholder"}
+                Perubahan belum disimpan
               </Badge>
             )}
             <Button variant="outline" onClick={handleReset} size="sm" className="flex-1 sm:flex-none">
               <RotateCcw className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{"Placeholder"}</span>
+              <span className="hidden sm:inline">Reset</span>
             </Button>
             <Button onClick={handleSave} disabled={isSaving} size="sm" className="flex-1 sm:flex-none">
               <Save className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">{isSaving ? "Placeholder" : "Placeholder"}</span>
+              <span className="hidden sm:inline">{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
               <span className="sm:hidden">{isSaving ? 'Saving...' : 'Save'}</span>
             </Button>
           </div>
@@ -290,11 +290,11 @@ export default function SettingsPage() {
             {/* Settings Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1">
-                <TabsTrigger value="general" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
-                <TabsTrigger value="profile" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
-                <TabsTrigger value="notifications" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
-                <TabsTrigger value="system" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
-                <TabsTrigger value="ui" className="text-xs sm:text-sm">{"Placeholder"}</TabsTrigger>
+                <TabsTrigger value="general" className="text-xs sm:text-sm">Umum</TabsTrigger>
+                <TabsTrigger value="profile" className="text-xs sm:text-sm">Profil</TabsTrigger>
+                <TabsTrigger value="notifications" className="text-xs sm:text-sm">Notifikasi</TabsTrigger>
+                <TabsTrigger value="system" className="text-xs sm:text-sm">Sistem</TabsTrigger>
+                <TabsTrigger value="ui" className="text-xs sm:text-sm">Tampilan</TabsTrigger>
               </TabsList>
 
               {/* General Settings */}
