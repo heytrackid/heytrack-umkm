@@ -95,7 +95,8 @@ export function InventoryTable({
       </CardHeader>
       <CardContent>
         {ingredients.length > 0 ? (
-          <div className="rounded-md border">
+          <div className="overflow-x-auto">
+          <div className="rounded-md border min-w-[800px]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -252,6 +253,7 @@ export function InventoryTable({
                 </div>
               </div>
             )}
+          </div>
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">

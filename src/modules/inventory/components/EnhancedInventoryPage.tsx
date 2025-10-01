@@ -48,7 +48,7 @@ export default function EnhancedInventoryPage({ initialIngredients = [] }: { ini
   const { isMobile, isTablet } = useResponsive()
   
   // Use real data instead of sample data (hydrate with initial data from server when available)
-const { ingredients, loading, error, refresh } = useInventoryData(undefined, { initial: initialIngredients as any, refetchOnMount: false })
+  const { ingredients, loading, error, refresh } = useInventoryData(undefined, { initial: initialIngredients as any, refetchOnMount: false })
   const { alerts } = useInventoryAlerts()
   
   // Skeleton loading management
@@ -64,9 +64,9 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
   const [showAddIngredientModal, setShowAddIngredientModal] = useState(false)
 
   // Filter ingredients
-  const filteredIngredients = (ingredients || []).filter(ingredient =>
-    ingredient.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredIngredients = Array.isArray(ingredients) ? ingredients.filter(ingredient =>
+    ingredient && ingredient.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) : []
 
   // Calculate weighted average for ingredient
   const handleShowPricingAnalysis = (ingredient: any) => {
@@ -114,11 +114,11 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
       try {
         const deletePromises = selectedItems.map(id => fetch(`/api/ingredients/${id}`, { method: 'DELETE' }))
         await Promise.all(deletePromises)
-        alert
+        alert('✅ Bahan baku berhasil dihapus!')
         setSelectedItems([])
-        refetch()
+        refresh()
       } catch (error) {
-        alert
+        alert('❌ Gagal menghapus bahan baku. Silakan coba lagi.')
       }
     }
   }
@@ -132,7 +132,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
     // TODO: Open bulk edit modal or navigate to bulk edit page
     console.log('Bulk editing ingredients:', selectedItems)
 
-    alert
+    alert('🚧 Fitur bulk edit akan segera hadir!')
   }
 
   // Individual action handlers
@@ -154,10 +154,10 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
       try {
         const response = await fetch(`/api/ingredients/${ingredient.id}`, { method: 'DELETE' })
         if (!response.ok) throw new Error('Failed')
-        alert
-        refetch()
+        alert(`✅ Bahan baku "${ingredient.name}" berhasil dihapus!`)
+        refresh()
       } catch (error) {
-        alert
+        alert(`❌ Gagal menghapus bahan baku "${ingredient.name}". Silakan coba lagi.`)
       }
     } else {
       console.log('❌ User cancelled deletion for ingredient:', ingredient.name)
@@ -190,7 +190,7 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
       setSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY, false)
     }, 2000)
     
-    return () => clearTimeout
+    return () => clearTimeout(timer)
   }, [])
 
   if (loading && !isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY)) {

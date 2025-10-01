@@ -23,9 +23,11 @@ export function BulkActions({
 }: BulkActionsProps) {
   if (selectedItems.length === 0) return null
 
-  const selectedNames = filteredIngredients
-    .filter(ing => selectedItems.includes(ing.id))
-    .map(ing => ing.name)
+  const selectedNames = Array.isArray(filteredIngredients) 
+    ? filteredIngredients
+      .filter(ing => ing && selectedItems.includes(ing.id))
+      .map(ing => ing.name)
+    : []
 
   return (
     <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">

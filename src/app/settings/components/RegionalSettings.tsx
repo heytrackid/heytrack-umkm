@@ -19,6 +19,23 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
   const { settings: contextSettings, currencies, updateCurrency, resetToDefault } = useSettings()
   const [isResetting, setIsResetting] = useState(false)
 
+  // Safety check for currencies
+  if (!currencies || !Array.isArray(currencies) || currencies.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Pengaturan Regional
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Loading settings...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const handleResetCurrency = () => {
     setIsResetting(true)
     resetToDefault()
@@ -51,7 +68,7 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
       <CardContent className="space-y-4">
         <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-md border border-blue-200 dark:border-blue-800">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Mata Uang Saat Ini:</strong> {contextSettings.currency.name} ({contextSettings.currency.symbol})
+            <strong>Mata Uang Saat Ini:</strong> {contextSettings?.currency?.name || 'IDR'} ({contextSettings?.currency?.symbol || 'Rp'})
           </p>
         </div>
 
@@ -60,7 +77,7 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
             <Label htmlFor="currency">Mata Uang</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
-              value={contextSettings.currency.code}
+              value={contextSettings?.currency?.code || 'IDR'}
               onChange={(e) => {
                 const selected = currencies.find(c => c.code === e.target.value)
                 if (selected) {
@@ -69,7 +86,7 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
                 }
               }}
             >
-              {currencies.map(currency => (
+              {Array.isArray(currencies) && currencies.map(currency => (
                 <option key={currency.code} value={currency.code}>
                   {currency.name} ({currency.symbol})
                 </option>
