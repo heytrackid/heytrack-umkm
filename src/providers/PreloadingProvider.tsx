@@ -21,7 +21,7 @@ interface PreloadingContextType {
 const PreloadingContext = createContext<PreloadingContextType | null>(null)
 
 export const usePreloading = () => {
-  const context = useContext
+  const context = useContext(PreloadingContext)
   if (!context) {
     throw new Error('usePreloading must be used within PreloadingProvider')
   }
@@ -77,7 +77,7 @@ export const PreloadingProvider = ({
     
     try {
       await hookPreloadRoute(route)
-      setPreloadedRoutes(prev => new Set)
+      setPreloadedRoutes(prev => new Set([...prev, route]))
       
       const endTime = performance.now()
       if (debug) {
@@ -96,7 +96,7 @@ export const PreloadingProvider = ({
   useEffect(() => {
     const originalPush = LazyLoadingMetrics.loadedComponents.add
     LazyLoadingMetrics.loadedComponents.add = function(componentName: string) {
-      setPreloadedComponents(prev => new Set)
+      setPreloadedComponents(prev => new Set([...prev, componentName]))
       return originalPush.call(this, componentName)
     }
   }, [])
