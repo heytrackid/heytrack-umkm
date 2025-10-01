@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export interface OrderItem {
@@ -140,14 +140,14 @@ export const useOrderLogic = () => {
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseInt || 0
+        const qty = parseInt(String(value)) || 0
         updated[index] = {
           ...updated[index],
           quantity: qty,
           total_price: qty * updated[index].unit_price
         }
       } else if (field === 'unit_price') {
-        const price = parseFloat || 0
+        const price = parseFloat(String(value)) || 0
         updated[index] = {
           ...updated[index],
           unit_price: price,
@@ -183,7 +183,7 @@ export const useOrderLogic = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault
+    e.preventDefault()
     
     if (!formData.customer_name || orderItems.length === 0) {
       setError('Nama pelanggan dan minimal 1 item pesanan harus diisi')

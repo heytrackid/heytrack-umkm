@@ -122,13 +122,13 @@ export default function OperationalCostsPage() {
   }
 
   const handleQuickSetup = () => {
-    const existingNames = new Set(costsList.map(c => c.name.toLowerCase()))
+    const existingNames = new Set(costs.map(c => c.name.toLowerCase()))
     const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
-      alert
+      alert('Semua template sudah ditambahkan')
       return
     }
-    const confirmed = window.confirm("Placeholder")
+    const confirmed = window.confirm("Tambahkan template biaya operasional?")
     if (!confirmed) return
     setCosts(prev => [...prev, ...template])
   }

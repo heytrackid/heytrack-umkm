@@ -324,8 +324,9 @@ export function useSupabaseCRUD<T = any, TInsert = any, TUpdate = any>(
 }
 
 // Specific hooks with combined data and mutations
-export const useIngredients = (options?: { initial?: any[] }) => {
-  const data = useSupabaseData('ingredients', options);
+export const useIngredients = (options?: { initial?: any[]; refetchOnMount?: boolean }) => {
+  const initialData = Array.isArray(options?.initial) ? options.initial : []
+  const data = useSupabaseData('ingredients', { ...options, initial: initialData });
   const mutations = useSupabaseMutation('ingredients', data.refetch);
   return { ...data, ...mutations };
 };

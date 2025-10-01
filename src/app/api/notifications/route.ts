@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const source = searchParams.get('source') || 'database' // 'smart' | 'database' | 'all'
 
   try {
-    let notifications = []
+    let notifications: any[] = []
     let unreadCount = 0
     let smartSummary = null
 

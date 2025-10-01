@@ -113,7 +113,7 @@ export async function PUT(
 
         const { error: insertError } = await (supabase as any)
           .from('recipe_ingredients')
-          .insert(data)
+          .insert(recipeIngredientsToInsert)
 
         if (insertError) {
           console.error('Error adding new ingredients:', insertError)

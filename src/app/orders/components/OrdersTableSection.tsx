@@ -21,18 +21,18 @@ function OrdersTableSection({
   const [pageSize, setPageSize] = useState(20)
   
   const ORDER_STATUS_CONFIG = useMemo(() => ({
-    pending: { label: "Placeholder", color: 'bg-gray-100 text-gray-800' },
-    confirmed: { label: "Placeholder", color: 'bg-gray-200 text-gray-900' },
-    in_production: { label: "Placeholder", color: 'bg-gray-300 text-gray-900' },
-    completed: { label: "Placeholder", color: 'bg-gray-400 text-white' },
-    cancelled: { label: "Placeholder", color: 'bg-gray-500 text-white' }
-  }), [t])
+    pending: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
+    confirmed: { label: "Confirmed", color: 'bg-gray-200 text-gray-900' },
+    in_production: { label: "In Production", color: 'bg-gray-300 text-gray-900' },
+    completed: { label: "Completed", color: 'bg-gray-400 text-white' },
+    cancelled: { label: "Cancelled", color: 'bg-gray-500 text-white' }
+  }), [])
 
   const PAYMENT_STATUS_CONFIG = useMemo(() => ({
-    unpaid: { label: "Placeholder", color: 'bg-gray-100 text-gray-800' },
-    partial: { label: "Placeholder", color: 'bg-gray-200 text-gray-900' },
-    paid: { label: "Placeholder", color: 'bg-gray-300 text-gray-900' }
-  }), [t])
+    unpaid: { label: "Unpaid", color: 'bg-gray-100 text-gray-800' },
+    partial: { label: "Partial", color: 'bg-gray-200 text-gray-900' },
+    paid: { label: "Paid", color: 'bg-gray-300 text-gray-900' }
+  }), [])
   
   // Calculate pagination
   const totalItems = orders.length
@@ -113,19 +113,15 @@ function OrdersTableSection({
         <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              {t('orders.pagination.showing', {
-                from: ((currentPage - 1) * pageSize) + 1,
-                to: Math.min(currentPage * pageSize, totalItems),
-                total: totalItems
-              })}
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} orders
             </span>
           </div>
           
           <div className="flex items-center gap-6">
             {/* Page Size Selector */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{"Placeholder"}</span>
-              <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+              <span className="text-sm text-muted-foreground">Per page</span>
+              <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(Number(value))}>
                 <SelectTrigger className="w-20 h-8">
                   <SelectValue />
                 </SelectTrigger>
@@ -143,20 +139,20 @@ function OrdersTableSection({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handlePreviousPage}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               
               <span className="text-sm font-medium">
-                {"Placeholder"}
+                Page {currentPage} of {totalPages}
               </span>
               
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleNextPage}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="h-4 w-4" />

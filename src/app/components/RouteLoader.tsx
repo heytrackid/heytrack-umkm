@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, Suspense, ComponentType } from 'react'
+import React, { lazy, Suspense, ComponentType } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 
 /**

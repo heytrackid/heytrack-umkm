@@ -58,11 +58,8 @@ const PricingAnalysisSkeleton = () => (
   </Card>
 )
 
-// Dynamic imports
-const PricingAIService = dynamic(() => 
-  import('@/lib/ai/services/PricingAIService').then(m => ({ default: m.PricingAIService })), {
-  ssr: false
-})
+// Note: PricingAIService is imported directly, not as a React component
+// Dynamic import is not needed for service classes
 
 export default function AIPricingPage() {
   const { isMobile } = useResponsive()

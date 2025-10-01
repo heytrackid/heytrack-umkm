@@ -147,7 +147,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
 
   function getValue(item: T, key: keyof T | string): any {
     if (typeof key === 'string' && key.includes('.')) {
-      return key.split('T').reduce((obj, k) => obj?.[k], item)
+      return key.split('.').reduce((obj, k) => obj?.[k], item)
     }
     return item[key as keyof T]
   }

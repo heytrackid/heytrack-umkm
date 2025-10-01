@@ -35,7 +35,6 @@ import {
   LazyOrderSummary,
   preloadOrderComponents
 } from './components/LazyOrderComponents'
-import LazyOrderComponents from './components/LazyOrderComponents'
 import { AuthFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
 export default function NewOrderPage() {

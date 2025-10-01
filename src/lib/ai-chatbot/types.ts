@@ -1,6 +1,6 @@
 /**
  * AI Chatbot Types
- * Shared interfaces and types for chatbot functionality
+ * Shared types for chatbot modules
  */
 
 export interface ChatMessage {
@@ -35,7 +35,6 @@ export interface ChatContext {
   memory: Record<string, any>;
 }
 
-// AI Intent Detection
 export type ChatIntent = 
   | 'greeting' 
   | 'add_order' 
@@ -49,3 +48,38 @@ export type ChatIntent =
   | 'customer_analysis'
   | 'cost_optimization'
   | 'sales_forecast';
+
+export interface IntentResult {
+  intent: ChatIntent;
+  confidence: number;
+  entities: Record<string, any>;
+  suggestedActions: string[];
+}
+
+export interface InventoryAnalysisResult {
+  summary: string;
+  alerts: string[];
+  recommendations: string[];
+  criticalItems: any[];
+  aiAnalysis?: string;
+}
+
+export interface FinancialAnalysisResult {
+  summary: string;
+  metrics: {
+    revenue: number;
+    expenses: number;
+    profit: number;
+    margin: number;
+  };
+  trends: string[];
+  recommendations: string[];
+  aiInsights?: string;
+}
+
+export interface BusinessAdviceResult {
+  advice: string;
+  keyPoints: string[];
+  actionItems: string[];
+  priority: 'high' | 'medium' | 'low';
+}

@@ -69,9 +69,9 @@ export const POST = withValidation(
   async (req: NextRequest, validatedData) => {
     try {
       const supabase = createServerSupabaseAdmin()
-      const { data, error } = await (supabase as any)
+      const { data: insertedData, error } = await (supabase as any)
         .from('ingredients')
-        .insert(data)
+        .insert(validatedData)
         .select('*')
         .single()
 
@@ -79,7 +79,7 @@ export const POST = withValidation(
         return handleDatabaseError(error)
       }
 
-      return createSuccessResponse(data, 'Ingredient berhasil ditambahkan')
+      return createSuccessResponse(insertedData, 201)
 
     } catch (error) {
       return handleDatabaseError(error)

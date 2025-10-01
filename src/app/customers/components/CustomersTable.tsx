@@ -218,11 +218,7 @@ export default function CustomersTable({
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  {t('customers.pagination.showing', {
-                    from: ((currentPage - 1) * pageSize) + 1,
-                    to: Math.min(currentPage * pageSize, totalItems),
-                    total: totalItems
-                  })}
+                  Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} customers
                 </span>
               </div>
               

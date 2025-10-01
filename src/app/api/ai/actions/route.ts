@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { aiChatbotService } from '@/lib/ai-chatbot-service';
+import { aiChatbot } from '@/lib/ai-chatbot';
 import { openRouterClient } from '@/lib/openrouter-client';
 import { supabaseUserContext } from '@/lib/supabase-user-context';
 
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Execute the action
-    const result = await aiChatbotService.executeAction(actionId, contextId);
+    const result = await aiChatbot.executeAction(userId, { id: actionId, type: 'recommendation', label: '', data: {} });
 
     // If the action involved analysis or recommendations, enhance with AI
     if (result.success && (result.recommendations || result.analysis)) {

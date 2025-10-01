@@ -3,15 +3,16 @@ import { createSupabaseClient } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const supabase = createSupabaseClient()
     
     const { data, error } = await supabase
       .from('whatsapp_templates')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
     
     if (error) {
@@ -33,8 +34,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const supabase = createSupabaseClient()
     const body = await request.json()
@@ -48,7 +50,7 @@ export async function PUT(
         .update({ is_default: false })
         .eq('category', category)
         .eq('is_default', true)
-        .neq('id', params.id)
+        .neq('id', id)
     }
     
     const { data, error } = await supabase
@@ -62,7 +64,7 @@ export async function PUT(
         is_active,
         is_default
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select('*')
     
     if (error) {
@@ -85,15 +87,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   try {
     const supabase = createSupabaseClient()
     
     const { data, error } = await supabase
       .from('whatsapp_templates')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .select('*')
     
     if (error) {

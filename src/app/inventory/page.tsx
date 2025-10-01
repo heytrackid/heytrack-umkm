@@ -76,7 +76,7 @@ async function fetchInitialIngredients() {
       .from('ingredients')
       .select('*')
       .order('name', { ascending: true })
-      .limit(options.limit)
+      .limit(100)
     if (error) throw error
     return data || []
   } catch {
