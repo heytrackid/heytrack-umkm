@@ -207,7 +207,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
 
     return (
       <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[80%] space-x-2`}>
+        <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[85%] space-x-2`}>
           {/* Avatar */}
           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
             isUser ? 'bg-blue-500 ml-2' : isSystem ? 'bg-green-500 mr-2' : 'bg-gray-500 mr-2'
@@ -379,7 +379,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
 
       {/* Messages area */}
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <ScrollArea className="flex-1 p-4">
+        <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4">
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
@@ -405,7 +405,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             
             <div ref={messagesEndRef} />
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Quick actions */}
         {messages.length > 1 && <QuickActions />}
