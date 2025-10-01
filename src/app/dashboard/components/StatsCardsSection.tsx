@@ -11,7 +11,7 @@ export default function StatsCardsSection({ formatCurrency, stats }: {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Penjualan</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -25,7 +25,7 @@ export default function StatsCardsSection({ formatCurrency, stats }: {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Pesanan</CardTitle>
           <ShoppingCart className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -39,7 +39,7 @@ export default function StatsCardsSection({ formatCurrency, stats }: {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Pelanggan</CardTitle>
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -53,7 +53,7 @@ export default function StatsCardsSection({ formatCurrency, stats }: {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{"Placeholder"}</CardTitle>
+          <CardTitle className="text-sm font-medium">Bahan Baku</CardTitle>
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

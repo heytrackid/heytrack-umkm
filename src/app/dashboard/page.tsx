@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useSettings } from '@/contexts/settings-context'
 
 // Dynamic import to reduce bundle size
 const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
@@ -84,6 +85,7 @@ const lowStockItems: any[] = []
 export default function Dashboard() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
+  const { settings } = useSettings()
   const [currentTime, setCurrentTime] = useState(new Date())
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
@@ -142,7 +144,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {"Placeholder"} HeyTrack
+                {settings.businessName || 'HeyTrack'}
               </h1>
               <p className="text-muted-foreground mt-1">
                 {currentTime.toLocaleDateString('id-ID', { 
@@ -204,7 +206,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              {"Placeholder"}
+              Aksi Cepat
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -207,7 +207,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
 
     return (
       <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[85%] space-x-2`}>
+        <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[85%] min-w-0 space-x-2`}>
           {/* Avatar */}
           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
             isUser ? 'bg-blue-500 ml-2' : isSystem ? 'bg-green-500 mr-2' : 'bg-gray-500 mr-2'
@@ -222,15 +222,15 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
           </div>
 
           {/* Message content */}
-          <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-            <div className={`px-4 py-3 rounded-lg max-w-full ${
+          <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} min-w-0`}>
+            <div className={`px-4 py-3 rounded-lg max-w-full break-words overflow-hidden ${
               isUser 
                 ? 'bg-blue-500 text-white' 
                 : isSystem
                   ? 'bg-green-100 text-green-800 border border-green-200'
                   : 'bg-gray-100 text-gray-900'
             }`}>
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere">
                 {message.content}
               </div>
 
