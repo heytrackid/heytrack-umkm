@@ -53,6 +53,7 @@ export default function CashFlowPage() {
       // Calculate date range based on period
       const today = new Date()
       let startDate = ''
+      let endDate = today.toISOString().split('T')[0]
       
       if (selectedPeriod === 'week') {
         startDate = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0]
@@ -62,40 +63,42 @@ export default function CashFlowPage() {
         startDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
       }
 
-      // Fetch income from orders (paid orders)
-      const ordersResponse = await fetch(`/api/orders?payment_status=paid&start_date=${startDate}`)
-      const ordersData = await ordersResponse.json()
+      // Use new cash flow report API endpoint
+      const params = new URLSearchParams()
+      if (startDate) params.append('start_date', startDate)
+      if (endDate) params.append('end_date', endDate)
+      params.append('group_by', selectedPeriod === 'week' ? 'day' : selectedPeriod === 'month' ? 'week' : 'month')
       
-      // Fetch expenses
-      const expensesResponse = await fetch(`/api/expenses?start_date=${startDate}`)
-      const expensesData = await expensesResponse.json()
+      const response = await fetch(`/api/reports/cash-flow?${params.toString()}`)
+      const data = await response.json()
 
-      // Transform data
-      const incomeTransactions = ordersData.map((order: any) => ({
-        id: order.id,
-        date: order.order_date,
-        description: `Order ${order.order_number} - ${order.customer_name}`,
-        category: 'Penjualan Produk',
-        amount: order.paid_amount || order.total_amount,
-        type: 'income'
-      }))
+      // Transform data for existing component structure
+      const incomeTransactions = data.transactions
+        ?.filter((t: any) => t.type === 'income')
+        .map((t: any) => ({
+          id: t.reference_id,
+          date: t.date,
+          description: t.description,
+          category: t.category,
+          amount: t.amount,
+          type: 'income'
+        })) || []
 
-      const expenseTransactions = expensesData.data?.map((expense: any) => ({
-        id: expense.id,
-        date: expense.expense_date,
-        description: expense.description,
-        category: expense.category,
-        amount: -Math.abs(expense.amount),
-        type: 'expense'
-      })) || []
-
-      const totalIncome = incomeTransactions.reduce((sum: number, t: any) => sum + t.amount, 0)
-      const totalExpenses = Math.abs(expenseTransactions.reduce((sum: number, t: any) => sum + t.amount, 0))
+      const expenseTransactions = data.transactions
+        ?.filter((t: any) => t.type === 'expense')
+        .map((t: any) => ({
+          id: t.reference_id,
+          date: t.date,
+          description: t.description,
+          category: t.category,
+          amount: -Math.abs(t.amount),
+          type: 'expense'
+        })) || []
 
       setCashFlowData({
-        totalIncome,
-        totalExpenses,
-        netFlow: totalIncome - totalExpenses,
+        totalIncome: data.summary?.total_income || 0,
+        totalExpenses: data.summary?.total_expenses || 0,
+        netFlow: data.summary?.net_cash_flow || 0,
         incomeTransactions,
         expenseTransactions,
       })

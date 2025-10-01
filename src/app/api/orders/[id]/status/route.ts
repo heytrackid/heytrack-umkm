@@ -51,14 +51,59 @@ export async function PATCH(
     }
     
     const previousStatus = currentOrder.status
+    let incomeRecordId = null
     
-    // Update order status
+    // If transitioning to DELIVERED, create income record
+    if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount > 0) {
+      const { data: incomeRecord, error: incomeError } = await (supabase as any)
+        .from('expenses')
+        .insert({
+          category: 'Revenue',
+          subcategory: 'Order Income',
+          amount: currentOrder.total_amount,
+          description: `Order #${currentOrder.order_no}${currentOrder.customer_name ? ' - ' + currentOrder.customer_name : ''}`,
+          expense_date: currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0],
+          payment_method: currentOrder.payment_method || 'CASH',
+          status: currentOrder.payment_status === 'PAID' ? 'paid' : 'pending',
+          tags: ['order_income', 'revenue', 'sales'],
+          metadata: {
+            order_no: currentOrder.order_no,
+            customer_name: currentOrder.customer_name,
+            customer_phone: currentOrder.customer_phone,
+            order_date: currentOrder.order_date,
+            delivery_date: currentOrder.delivery_date,
+            status_change: {
+              from: previousStatus,
+              to: status,
+              timestamp: new Date().toISOString()
+            }
+          },
+          reference_type: 'order',
+          reference_id: orderId
+        })
+        .select()
+        .single()
+      
+      if (incomeError) {
+        console.error('Error creating income record:', incomeError)
+        return NextResponse.json(
+          { error: 'Failed to create income record for delivered order' },
+          { status: 500 }
+        )
+      }
+      
+      incomeRecordId = incomeRecord.id
+      console.log(`💰 Income record created for order ${currentOrder.order_no}: ${currentOrder.total_amount}`)
+    }
+    
+    // Update order status with financial_record_id if income was created
     const { data: updatedOrder, error: updateError } = await (supabase as any)
       .from('orders')
       .update({
         status: status,
         updated_at: new Date().toISOString(),
-        ...(notes && { notes: notes })
+        ...(notes && { notes: notes }),
+        ...(incomeRecordId && { financial_record_id: incomeRecordId })
       })
       .eq('id', orderId)
       .select('*')
@@ -66,6 +111,13 @@ export async function PATCH(
     
     if (updateError) {
       console.error('Error updating order status:', updateError)
+      // Rollback income record if order update fails
+      if (incomeRecordId) {
+        await (supabase as any)
+          .from('expenses')
+          .delete()
+          .eq('id', incomeRecordId)
+      }
       return NextResponse.json(
         { error: 'Failed to update order status' },
         { status: 500 }
@@ -110,7 +162,7 @@ export async function PATCH(
       // Don't fail the status update if automation fails
     }
     
-    // Return success response with automation info
+    // Return success response with automation and income tracking info
     return NextResponse.json({
       success: true,
       order: updatedOrder,
@@ -123,7 +175,12 @@ export async function PATCH(
         triggered: status === 'DELIVERED' || status === 'CANCELLED',
         workflows: getTriggeredWorkflows(status, previousStatus)
       },
-      message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing' : ''}`
+      financial: {
+        income_recorded: !!incomeRecordId,
+        income_record_id: incomeRecordId,
+        amount: incomeRecordId ? currentOrder.total_amount : null
+      },
+      message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })
     
   } catch (error: any) {

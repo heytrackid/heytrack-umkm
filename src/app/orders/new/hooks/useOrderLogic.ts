@@ -76,10 +76,14 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/recipes')
       if (response.ok) {
         const data = await response.json()
-        setAvailableRecipes(data.recipes)
+        const recipes = Array.isArray(data) ? data : (data?.recipes ?? [])
+        setAvailableRecipes(recipes)
+      } else {
+        setAvailableRecipes([])
       }
     } catch (error: any) {
       console.error('Failed to fetch recipes:', error)
+      setAvailableRecipes([])
     } finally {
       setLoading(false) // Set loading to false after fetch
     }
@@ -90,10 +94,14 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/customers')
       if (response.ok) {
         const data = await response.json()
-        setCustomers(data.customers)
+        const customersArr = Array.isArray(data) ? data : (data?.customers ?? [])
+        setCustomers(customersArr)
+      } else {
+        setCustomers([])
       }
     } catch (error: any) {
       console.error('Failed to fetch customers:', error)
+      setCustomers([])
     }
   }
 

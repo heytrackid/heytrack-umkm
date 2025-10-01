@@ -21,39 +21,40 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Palette className="h-5 w-5" />
-          Informasi
+          Tampilan & Bahasa
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="theme">Informasi</Label>
+          <Label htmlFor="theme">Tema</Label>
           <select
             id="theme"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.theme}
             onChange={(e) => onSettingChange('ui', 'theme', e.target.value)}
           >
-            <option value="light">Informasi</option>
-            <option value="dark">Informasi</option>
-            <option value="system">Informasi</option>
+            <option value="light">Terang</option>
+            <option value="dark">Gelap</option>
+            <option value="system">Sistem</option>
           </select>
         </div>
         <div>
-          <Label htmlFor="language">Informasi</Label>
+          <Label htmlFor="language">Bahasa</Label>
           <select
             id="language"
             className="w-full p-2 border border-input rounded-md bg-background"
-            value="id"
+            value={useSettings().settings.language.code}
             onChange={(e) => {
-              const selectedLanguage = { code: e.target.value, name: 'Indonesian', flag: '🇮🇩' }
-              updateLanguage(selectedLanguage)
+              const { languages, updateLanguage } = useSettings()
+              const selected = languages.find(l => l.code === e.target.value)
+              if (selected) updateLanguage(selected)
             }}
           >
             <option value="id">🇮🇩 Indonesian</option>
             <option value="en">🇺🇸 English</option>
           </select>
           <p className="text-sm text-muted-foreground mt-1">
-            Informasi
+            Perubahan bahasa memengaruhi teks antarmuka aplikasi.
           </p>
         </div>
       </CardContent>

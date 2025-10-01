@@ -170,6 +170,16 @@ export default function OrdersPage() {
         {/* Orders Table */}
         {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
           <OrdersTableSkeleton rows={5} />
+        ) : filteredOrders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 border rounded-md bg-muted/30 text-center">
+            <ShoppingCart className="h-10 w-10 mb-3 opacity-60" />
+            <p className="text-lg font-medium">Belum ada pesanan</p>
+            <p className="text-sm text-muted-foreground mb-4">Klik tombol di bawah untuk membuat pesanan pertama Anda.</p>
+            <Button onClick={() => window.location.href = '/orders/new'}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Pesanan
+            </Button>
+          </div>
         ) : (
           <Suspense fallback={<OrdersTableSkeleton rows={5} />}>
             <OrdersTableSection

@@ -8,7 +8,7 @@ import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useSettings, currencies, languages } from '@/contexts/settings-context'
+import { useSettings } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/useLoading'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
@@ -73,22 +73,22 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     // General Settings
     general: {
-      businessName: 'Toko Kue Bahagia',
+      businessName: '',
       businessType: 'bakery',
-      address: 'Jl. Raya Mawar No. 123, Jakarta Selatan',
-      phone: '021-12345678',
-      email: 'info@tokekuebahagia.com',
-      website: 'www.tokekuebahagia.com',
-      taxNumber: '12.345.678.9-012.000',
+      address: '',
+      phone: '',
+      email: '',
+      website: '',
+      taxNumber: '',
       currency: 'IDR',
       timezone: 'Asia/Jakarta'
     },
     
     // User Profile
     user: {
-      fullName: 'Budi Santoso',
-      email: 'budi@tokekuebahagia.com',
-      phone: '08123456789',
+      fullName: '',
+      email: '',
+      phone: '',
       role: 'Owner',
       avatar: null
     },

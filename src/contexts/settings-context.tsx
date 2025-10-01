@@ -23,7 +23,9 @@ interface Settings {
 interface SettingsContextType {
   settings: Settings
   currencies: Currency[]
+  languages: Language[]
   updateCurrency: (currency: Currency) => void
+  updateLanguage: (language: Language) => void
   formatCurrency: (amount: number) => string
   resetToDefault: () => void
 }
@@ -41,9 +43,20 @@ export const currencies: Currency[] = [
   { code: 'PHP', symbol: '₱', name: 'Philippine Peso', decimals: 2 }
 ]
 
+export const languages: Language[] = [
+  { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
+  { code: 'en', name: 'English', flag: '🇺🇸' }
+]
+
+const DEFAULT_CURRENCY_CODE = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'IDR'
+const DEFAULT_LANGUAGE_CODE = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || 'id'
+
+const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) || currencies[0]
+const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) || languages[0]
+
 const defaultSettings: Settings = {
-  currency: currencies[0], // IDR as default
-  language: { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' }
+  currency: defaultCurrency,
+  language: defaultLanguage
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
@@ -57,23 +70,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings)
-        // Force IDR if no currency is set or invalid currency or if currency is not IDR
-        if (!parsed.currency || !parsed.currency.code || parsed.currency.code !== 'IDR') {
-          console.log('Currency tidak sesuai atau tidak ada, reset ke IDR (Rp)')
-          parsed.currency = currencies[0] // IDR
+        const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) || defaultCurrency
+        const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) || defaultLanguage
+        const newSettings: Settings = {
+          currency: parsedCurrency,
+          language: parsedLanguage
         }
-        const newSettings = { ...defaultSettings, ...parsed, currency: currencies[0] }
         setSettings(newSettings)
-        // Save back to ensure it's IDR
         localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
       } catch (error: any) {
         console.error('Failed to parse saved settings:', error)
-        // Reset to default on error
         setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }
     } else {
-      // First time user - set default IDR
       setSettings(defaultSettings)
       localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
     }
@@ -85,9 +95,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
+  const updateLanguage = (language: Language) => {
+    const newSettings = { ...settings, language }
+    setSettings(newSettings)
+    localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
+  }
+
   const formatCurrency = (amount: number | null | undefined): string => {
     const { symbol, decimals } = settings.currency
-    // Handle null, undefined, or invalid numbers
     const validAmount = amount ?? 0
     const formattedAmount = validAmount.toLocaleString('en-US', {
       minimumFractionDigits: decimals,
@@ -105,7 +120,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     <SettingsContext.Provider value={{
       settings,
       currencies,
+      languages,
       updateCurrency,
+      updateLanguage,
       formatCurrency,
       resetToDefault
     }}>

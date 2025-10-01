@@ -178,6 +178,14 @@ export const useSidebarLogic = () => {
           description: "Arus kas masuk dan keluar"
         },
         {
+          name: "Laba Riil",
+          href: '/profit',
+          icon: TrendingUp,
+          isSimple: true,
+          badge: "PROFIT",
+          description: "Laporan laba riil dengan WAC"
+        },
+        {
           name: "Keuangan",
           href: '/finance',
           icon: Banknote,

@@ -19,12 +19,12 @@ export function DateTimeSettings({ settings, onSettingChange }: DateTimeSettings
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5" />
-          Informasi
+          Format Tanggal & Waktu
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="dateFormat">Informasi</Label>
+          <Label htmlFor="dateFormat">Format Tanggal</Label>
           <select
             id="dateFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
@@ -37,15 +37,15 @@ export function DateTimeSettings({ settings, onSettingChange }: DateTimeSettings
           </select>
         </div>
         <div>
-          <Label htmlFor="timeFormat">Informasi</Label>
+          <Label htmlFor="timeFormat">Format Waktu</Label>
           <select
             id="timeFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.timeFormat}
             onChange={(e) => onSettingChange('ui', 'timeFormat', e.target.value)}
           >
-            <option value="24h">Informasi</option>
-            <option value="12h">Informasi</option>
+            <option value="24h">24 jam</option>
+            <option value="12h">12 jam</option>
           </select>
         </div>
       </CardContent>
