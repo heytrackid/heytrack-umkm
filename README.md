@@ -8,10 +8,15 @@
 [![ShadCN/UI](https://img.shields.io/badge/ShadCN%2FUI-Latest-orange)](https://ui.shadcn.com/)
 [![Playwright](https://img.shields.io/badge/Playwright-Tests-green)](https://playwright.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green)](https://supabase.com/)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success)]()
 
 ## 📝 Overview
 
 Comprehensive bakery management solution featuring smart automation, cost optimization, and real-time analytics. Built with modern web technologies and AI-powered insights to streamline bakery operations.
+
+**🚀 Status**: Production Ready ✅  
+**📊 Version**: 1.0.0  
+**🔄 Last Updated**: 2025-10-01
 
 ## ✨ Key Features
 
@@ -63,19 +68,21 @@ Comprehensive bakery management solution featuring smart automation, cost optimi
 - Production tracking
 - Quality control
 
-### 💰 **Financial Management**
-- Multi-line financial charts
-- Revenue and expense tracking
-- Profit analysis
-- Financial forecasting
+### 💰 **Financial Management** ⭐ ENHANCED
+- **Auto-Sync Income**: Orders automatically create income records when delivered
+- **Unified Cash Flow**: Single source for all income and expenses
+- **WAC-Based COGS**: Weighted Average Cost for accurate profit calculation
+- **Real Profit Reports**: Net profit with ingredient cost breakdowns
+- **Period Filtering**: Week/Month/Year/Custom date ranges
+- **Export Capabilities**: CSV and Excel export
 
-### 💳 **Smart Expense Automation** ⭐
-- **AI-Powered Cost Optimization**: Save up to Rp 450,000/month
-- **Automated Recurring Payments**: Rent, utilities, salaries
-- **Smart Budget Tracking**: Real-time progress bars
-- **Intelligent Alerts**: Overdue, budget exceeded, cost spikes
-- **Cost Category Analysis**: 8 detailed expense categories
-- **Optimization Suggestions**: Electricity, transport, communication
+### 💳 **Cash Flow Tracking** ⭐ CORE FEATURE
+- **Comprehensive Transaction Hub**: All income and expenses in one place
+- **Auto-Sync from Orders**: Delivered orders create income automatically
+- **Manual Entry Support**: Add custom income and expenses
+- **Category Breakdown**: Visual analysis by category
+- **Period Reports**: Weekly, monthly, yearly, or custom ranges
+- **Financial Health**: Real-time cash flow monitoring
 
 ### 🔄 **Real-Time Data Synchronization** ⭐ NEW!
 - **Cross-Module Sync**: Inventory ↔ Recipes ↔ Orders ↔ Reports
@@ -319,28 +326,68 @@ npm run build
 npm run start
 ```
 
+## 📚 Documentation
+
+### Developer Documentation ✅
+
+1. **[API Documentation](./docs/API_DOCUMENTATION.md)**
+   - All 42 API endpoints documented
+   - Request/response examples
+   - Auto-sync behavior explained
+   - Error handling guide
+
+2. **[Menu → API → Database Audit](./docs/MENU_API_DATABASE_AUDIT.md)**
+   - Complete system mapping
+   - All menu items tracked
+   - Database relationships
+   - Data flow diagrams
+
+3. **[Deployment Checklist](./docs/DEPLOYMENT_CHECKLIST.md)**
+   - Production deployment guide
+   - Environment setup
+   - Testing procedures
+   - Rollback plan
+
+4. **[Project Summary](./docs/PROJECT_SUMMARY.md)**
+   - Complete feature list
+   - Technical achievements
+   - Future roadmap
+   - Success metrics
+
+### Quick Links
+
+- **Dashboard**: `/` - Main dashboard with metrics
+- **Cash Flow**: `/cash-flow` - Complete income/expense tracking
+- **Profit Report**: `/profit` - WAC-based profit analysis
+- **Ingredients**: `/ingredients` - Inventory management
+- **Recipes**: `/resep` - Recipe management
+- **Orders**: `/orders` - Order processing
+- **AI Assistant**: `/ai` - AI-powered insights
+
 ## 📊 Business Impact
 
-### Cost Savings
-- **Rp 450,000/month** potential savings from AI optimization
-- **80% reduction** in manual expense tracking time
-- **99% accuracy** in recurring payment processing
-- **Real-time alerts** prevent missed payments and penalties
+### Financial Management ✅
+- **Auto-Sync Income**: 100% automated from delivered orders
+- **WAC-Based COGS**: Accurate cost tracking
+- **Real Profit Calculation**: Net profit with all costs
+- **Period Analysis**: Flexible date range reporting
+- **Export Reports**: CSV and Excel support
 
-### Operational Efficiency
+### Operational Efficiency ✅
 - **Real-Time Synchronization**: 100% data consistency across all modules
-- **Automated workflow** for expense management
+- **Automated workflow** for financial tracking
 - **Smart inventory consumption**: Zero manual stock updates needed
-- **Smart categorization** of expenses
+- **Smart categorization** of income and expenses
 - **Budget compliance** monitoring
 - **Exception handling** for anomalies
-- **Instant customer insights**: Auto-generated analytics and loyalty tracking
+- **Instant customer insights**: Auto-generated analytics
 
-### Data-Driven Decisions
+### Data-Driven Decisions ✅
 - **Interactive analytics** for trend identification
 - **Cost center analysis** for optimization opportunities
 - **Performance metrics** for business growth
 - **Predictive insights** for planning
+- **AI-powered recommendations** for pricing and inventory
 
 ## 🛣️ Roadmap
 

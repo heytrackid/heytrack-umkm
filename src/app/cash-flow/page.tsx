@@ -43,9 +43,11 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   Trash2,
-  Receipt
+  Receipt,
+  TrendingUp
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface Transaction {
   id: string
@@ -288,6 +290,31 @@ export default function CashFlowPage() {
   if (!cashFlowData) return null
 
   const { summary, transactions } = cashFlowData
+
+  // Prepare chart data - group by date
+  const chartData = React.useMemo(() => {
+    const dataByDate: Record<string, { date: string; income: number; expense: number; net: number }> = {}
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })
+      
+      if (!dataByDate[date]) {
+        dataByDate[date] = { date, income: 0, expense: 0, net: 0 }
+      }
+      
+      if (transaction.type === 'income') {
+        dataByDate[date].income += transaction.amount
+      } else {
+        dataByDate[date].expense += transaction.amount
+      }
+      dataByDate[date].net = dataByDate[date].income - dataByDate[date].expense
+    })
+    
+    return Object.values(dataByDate).sort((a, b) => {
+      // Sort by date
+      return a.date.localeCompare(b.date)
+    }).slice(-14) // Last 14 days
+  }, [transactions])
 
   return (
     <AppLayout>
@@ -533,6 +560,140 @@ export default function CashFlowPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Cash Flow Trend Chart */}
+        {chartData.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-start justify-between'}`}>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Tren Arus Kas
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    Grafik pemasukan, pengeluaran, dan arus kas bersih
+                  </CardDescription>
+                </div>
+                <div className={`flex ${isMobile ? 'flex-col w-full' : 'gap-2'} ${!isMobile && 'gap-2'}`}>
+                  <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                    <SelectTrigger className={`${isMobile ? 'w-full' : 'w-[140px]'} h-9`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="week">7 Hari</SelectItem>
+                      <SelectItem value="month">30 Hari</SelectItem>
+                      <SelectItem value="year">1 Tahun</SelectItem>
+                      <SelectItem value="custom">Kustom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {selectedPeriod === 'custom' && (
+                    <div className={`flex gap-2 ${isMobile ? 'mt-2' : ''}`}>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
+                        placeholder="Mulai"
+                      />
+                      <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
+                        placeholder="Akhir"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis 
+                      dataKey="date" 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      tickFormatter={(value) => {
+                        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`
+                        if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`
+                        return value.toString()
+                      }}
+                    />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-background border rounded-lg p-3 shadow-lg">
+                              <p className="font-medium mb-2">{payload[0].payload.date}</p>
+                              <div className="space-y-1 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                                  <span>Pemasukan: {formatCurrency(payload[0].value as number)}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                                  <span>Pengeluaran: {formatCurrency(payload[1].value as number)}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                                  <span>Arus Kas Bersih: {formatCurrency(payload[2].value as number)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      }}
+                    />
+                    <Legend 
+                      wrapperStyle={{ paddingTop: '20px' }}
+                      formatter={(value) => {
+                        const labels: Record<string, string> = {
+                          income: 'Pemasukan',
+                          expense: 'Pengeluaran',
+                          net: 'Arus Kas Bersih'
+                        }
+                        return labels[value] || value
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="income" 
+                      stroke="#22c55e" 
+                      strokeWidth={2}
+                      dot={{ fill: '#22c55e', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="expense" 
+                      stroke="#ef4444" 
+                      strokeWidth={2}
+                      dot={{ fill: '#ef4444', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="net" 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={{ fill: '#3b82f6', r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Transactions List */}
         <Card>
