@@ -53,3 +53,5 @@ supabase/.temp/
 
 /src/generated/prisma
 .env*.local
+.turbo
+.next
