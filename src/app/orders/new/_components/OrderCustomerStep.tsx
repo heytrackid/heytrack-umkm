@@ -22,7 +22,7 @@ export default function OrderCustomerStep({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">Informasi Pelanggan</h3>
+        <h3 className="text-lg font-medium">Informasi Pelanggan Pelanggan</h3>
         {customers.length > 0 && (
           <Select onValueChange={(value) => {
             const customer = customers.find(c => c.id === value)

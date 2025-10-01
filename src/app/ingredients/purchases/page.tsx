@@ -33,7 +33,9 @@ import {
   ShoppingCart,
   TrendingUp,
   DollarSign,
-  Calendar
+  Calendar,
+  TrendingDown,
+  Receipt
 } from 'lucide-react'
 
 export default function IngredientPurchasesPage() {
@@ -103,8 +105,9 @@ export default function IngredientPurchasesPage() {
           purchase_date: new Date().toISOString().split('T')[0],
           notes: ''
         })
-        fetchPurchases()
-        alert('Pembelian berhasil ditambahkan!')
+        await fetchPurchases()
+        await fetchIngredients() // Refresh untuk update WAC
+        alert('Pembelian berhasil ditambahkan! Stock dan WAC telah diperbarui.')
       }
     } catch (error) {
       console.error('Error creating purchase:', error)
@@ -112,27 +115,50 @@ export default function IngredientPurchasesPage() {
     }
   }
 
+  // Calculate stats
+  const thisMonth = purchases.filter((p: any) => {
+    const purchaseDate = new Date(p.purchase_date)
+    const now = new Date()
+    return purchaseDate.getMonth() === now.getMonth() && 
+           purchaseDate.getFullYear() === now.getFullYear()
+  })
+  
+  const uniqueSuppliers = new Set(purchases.filter((p: any) => p.supplier).map((p: any) => p.supplier))
+  
   const stats = [
     {
-      title: 'Total Pembelian',
-      value: purchases.length,
+      title: 'Pembelian (Bulan Ini)',
+      value: thisMonth.length,
       icon: ShoppingCart,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      bgColor: 'bg-blue-50',
+      description: `Total ${purchases.length} pembelian`
     },
     {
-      title: 'Total Pengeluaran',
-      value: `Rp ${purchases.reduce((sum, p: any) => sum + (p.total_price || 0), 0).toLocaleString()}`,
+      title: 'Pengeluaran (Bulan Ini)',
+      value: `Rp ${thisMonth.reduce((sum, p: any) => sum + (p.total_price || 0), 0).toLocaleString()}`,
       icon: DollarSign,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
+      description: 'Auto-recorded ke expense'
     },
     {
-      title: 'Item Dibeli',
-      value: new Set(purchases.map((p: any) => p.ingredient_id)).size,
+      title: 'Supplier Aktif',
+      value: uniqueSuppliers.size,
       icon: Package,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      bgColor: 'bg-purple-50',
+      description: `${new Set(purchases.map((p: any) => p.ingredient_id)).size} item dibeli`
+    },
+    {
+      title: 'Rata-rata Pembelian',
+      value: purchases.length > 0 
+        ? `Rp ${Math.round(purchases.reduce((sum, p: any) => sum + (p.total_price || 0), 0) / purchases.length).toLocaleString()}`
+        : 'Rp 0',
+      icon: TrendingUp,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+      description: 'Per transaksi'
     }
   ]
 
@@ -191,7 +217,7 @@ export default function IngredientPurchasesPage() {
                       required
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Pilih bahan baku" />
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {ingredients.map((ing: any) => (
@@ -212,7 +238,6 @@ export default function IngredientPurchasesPage() {
                         step="0.01"
                         value={newPurchase.quantity}
                         onChange={(e) => setNewPurchase({...newPurchase, quantity: e.target.value})}
-                        placeholder="100"
                         required
                       />
                     </div>
@@ -225,7 +250,6 @@ export default function IngredientPurchasesPage() {
                         step="0.01"
                         value={newPurchase.unit_price}
                         onChange={(e) => setNewPurchase({...newPurchase, unit_price: e.target.value})}
-                        placeholder="5000"
                         required
                       />
                     </div>
@@ -237,7 +261,6 @@ export default function IngredientPurchasesPage() {
                       id="supplier"
                       value={newPurchase.supplier}
                       onChange={(e) => setNewPurchase({...newPurchase, supplier: e.target.value})}
-                      placeholder="Nama supplier"
                     />
                   </div>
 
@@ -258,7 +281,6 @@ export default function IngredientPurchasesPage() {
                       id="notes"
                       value={newPurchase.notes}
                       onChange={(e) => setNewPurchase({...newPurchase, notes: e.target.value})}
-                      placeholder="Catatan tambahan"
                     />
                   </div>
 
@@ -286,23 +308,24 @@ export default function IngredientPurchasesPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
             <Card key={index}>
               <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold mt-2">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </p>
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
                   </div>
                 </div>
+                <p className="text-2xl font-bold">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stat.description}
+                </p>
               </CardContent>
             </Card>
           ))}

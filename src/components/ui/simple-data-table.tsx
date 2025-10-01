@@ -262,7 +262,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
           <div className={`relative ${isMobile ? 'w-full' : 'flex-1'}`}>
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={searchPlaceholder || Informasi}
+              placeholder={searchPlaceholder || "Cari..."}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"

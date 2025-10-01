@@ -21,13 +21,13 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building className="h-5 w-5" />
-          Informasi
+          Informasi Bisnis
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="businessName">Informasi</Label>
+            <Label htmlFor="businessName">Nama Bisnis</Label>
             <Input
               id="businessName"
               value={settings.general.businessName}
@@ -35,21 +35,21 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="businessType">Informasi</Label>
+            <Label htmlFor="businessType">Jenis Bisnis</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
               value={settings.general.businessType}
               onChange={(e) => onSettingChange('general', 'businessType', e.target.value)}
             >
-              <option value="bakery">Informasi</option>
-              <option value="cafe">Informasi</option>
-              <option value="restaurant">Informasi</option>
-              <option value="food-truck">Informasi</option>
+              <option value="bakery">Toko Roti</option>
+              <option value="cafe">Kafe</option>
+              <option value="restaurant">Restoran</option>
+              <option value="food-truck">Food Truck</option>
             </select>
           </div>
         </div>
         <div>
-          <Label htmlFor="address">Informasi</Label>
+          <Label htmlFor="address">Alamat</Label>
           <Textarea
             id="address"
             value={settings.general.address}
@@ -59,7 +59,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="phone">Informasi</Label>
+            <Label htmlFor="phone">Telepon</Label>
             <Input
               id="phone"
               value={settings.general.phone}
@@ -67,7 +67,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="email">Informasi</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
@@ -78,7 +78,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="website">Informasi</Label>
+            <Label htmlFor="website">Website</Label>
             <Input
               id="website"
               value={settings.general.website}
@@ -86,7 +86,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             />
           </div>
           <div>
-            <Label htmlFor="taxNumber">Informasi</Label>
+            <Label htmlFor="taxNumber">NPWP</Label>
             <Input
               id="taxNumber"
               value={settings.general.taxNumber}

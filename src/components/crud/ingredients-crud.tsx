@@ -203,7 +203,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       >
         <CrudForm onSubmit={handleSubmitCreate}>
           <FormSection
-            title="Informasi Dasar"
+            title="Informasi Dasar Dasar"
             description="Isi informasi dasar bahan baku"
           >
             <FormGrid cols={2}>
@@ -283,7 +283,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             </FormGrid>
           </FormSection>
 
-          <FormSection title="Informasi Tambahan">
+          <FormSection title="Informasi Tambahan Tambahan">
             <FormGrid cols={2}>
               <FormField
                 label="Supplier"
@@ -337,7 +337,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       >
         <CrudForm onSubmit={handleSubmitEdit}>
           <FormSection
-            title="Informasi Dasar"
+            title="Informasi Dasar Dasar"
             description="Edit informasi dasar bahan baku"
           >
             <FormGrid cols={2}>
@@ -412,7 +412,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             </FormGrid>
           </FormSection>
 
-          <FormSection title="Informasi Tambahan">
+          <FormSection title="Informasi Tambahan Tambahan">
             <FormGrid cols={2}>
               <FormField
                 label="Supplier"

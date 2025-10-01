@@ -20,14 +20,14 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="h-5 w-5" />
-          Informasi
+          Notifikasi
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Notifikasi Email</p>
+            <p className="text-sm text-muted-foreground">Terima notifikasi melalui email</p>
           </div>
           <Switch
             checked={settings.notifications.emailNotifications}
@@ -37,8 +37,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Notifikasi Push</p>
+            <p className="text-sm text-muted-foreground">Terima notifikasi push di perangkat</p>
           </div>
           <Switch
             checked={settings.notifications.pushNotifications}
@@ -48,8 +48,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Peringatan Stok Rendah</p>
+            <p className="text-sm text-muted-foreground">Notifikasi saat stok bahan baku rendah</p>
           </div>
           <Switch
             checked={settings.notifications.lowStockAlert}
@@ -59,8 +59,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Update Pesanan</p>
+            <p className="text-sm text-muted-foreground">Notifikasi perubahan status pesanan</p>
           </div>
           <Switch
             checked={settings.notifications.orderUpdates}
@@ -70,8 +70,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Laporan Harian</p>
+            <p className="text-sm text-muted-foreground">Terima laporan harian via email</p>
           </div>
           <Switch
             checked={settings.notifications.dailyReports}
@@ -81,8 +81,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Laporan Mingguan</p>
+            <p className="text-sm text-muted-foreground">Terima laporan mingguan via email</p>
           </div>
           <Switch
             checked={settings.notifications.weeklyReports}
@@ -92,8 +92,8 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
         <Separator />
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Informasi</p>
-            <p className="text-sm text-muted-foreground">Informasi</p>
+            <p className="font-medium">Laporan Bulanan</p>
+            <p className="text-sm text-muted-foreground">Terima laporan bulanan via email</p>
           </div>
           <Switch
             checked={settings.notifications.monthlyReports}

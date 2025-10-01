@@ -137,7 +137,7 @@ export default function NewIngredientPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Informasi Bahan Baku</CardTitle>
+              <CardTitle>Informasi Bahan Baku Bahan Baku</CardTitle>
               <CardDescription>
                 Lengkapi form di bawah untuk menambahkan bahan baku baru
               </CardDescription>

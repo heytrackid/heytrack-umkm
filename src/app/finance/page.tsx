@@ -349,7 +349,7 @@ export default function FinancePage() {
             }`}>
               <DialogHeader>
                 <DialogTitle className={isMobile ? 'text-lg' : ''}>
-                  Informasi {selectedTransaction?.reference}
+                  Detail {selectedTransaction?.reference}
                 </DialogTitle>
               </DialogHeader>
               {selectedTransaction && <TransactionDetailView transaction={selectedTransaction} />}
