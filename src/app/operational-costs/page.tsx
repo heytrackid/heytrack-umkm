@@ -78,6 +78,7 @@ export default function OperationalCostsPage() {
   const [editingCost, setEditingCost] = useState<OperationalCost | null>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [newCost, setNewCost] = useState<OperationalCost>({
     id: '',
     name: '',
@@ -89,14 +90,39 @@ export default function OperationalCostsPage() {
     icon: '⚡'
   })
 
-  // Simulate loading on component mount
+  // Fetch costs from database on component mount
   useEffect(() => {
-    startLoading(LOADING_KEYS.LOAD_COSTS)
-    const timer = setTimeout(() => {
-      stopLoading(LOADING_KEYS.LOAD_COSTS)
-    }, 1500)
-    return () => clearTimeout
+    fetchCosts()
   }, [])
+
+  const fetchCosts = async () => {
+    startLoading(LOADING_KEYS.LOAD_COSTS)
+    try {
+      const response = await fetch('/api/operational-costs')
+      if (!response.ok) throw new Error('Failed to fetch costs')
+      
+      const data = await response.json()
+      const transformedCosts = data.costs.map((cost: any) => {
+        const categoryData = costCategories.find(cat => cat.id === cost.category)
+        return {
+          id: cost.id,
+          name: cost.name,
+          category: cost.category,
+          amount: cost.amount,
+          frequency: cost.frequency,
+          description: cost.description,
+          isFixed: cost.isFixed,
+          icon: categoryData?.icon || '📦'
+        }
+      })
+      setCosts(transformedCosts)
+    } catch (error) {
+      console.error('Error fetching costs:', error)
+      alert('Gagal memuat data biaya operasional')
+    } finally {
+      stopLoading(LOADING_KEYS.LOAD_COSTS)
+    }
+  }
 
   // Quick Setup: template biaya operasional umum
   const getQuickSetupTemplate = (): OperationalCost[] => {
@@ -122,7 +148,7 @@ export default function OperationalCostsPage() {
     })
   }
 
-  const handleQuickSetup = () => {
+  const handleQuickSetup = async () => {
     const existingNames = new Set(costs.map(c => c.name?.toLowerCase()).filter(Boolean))
     const template = getQuickSetupTemplate().filter(t => t.name && !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
@@ -131,7 +157,28 @@ export default function OperationalCostsPage() {
     }
     const confirmed = window.confirm("Tambahkan template biaya operasional?")
     if (!confirmed) return
-    setCosts(prev => [...prev, ...template])
+    
+    setIsLoading(true)
+    try {
+      // Create all template costs in database
+      const promises = template.map(cost => 
+        fetch('/api/operational-costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cost)
+        })
+      )
+      await Promise.all(promises)
+      
+      // Refresh the list
+      await fetchCosts()
+      alert('Template berhasil ditambahkan!')
+    } catch (error) {
+      console.error('Error adding template:', error)
+      alert('Gagal menambahkan template')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const resetForm = () => {
@@ -145,37 +192,75 @@ export default function OperationalCostsPage() {
       isFixed: false,
       icon: '⚡'
     })
-    setEditingCost
+    setEditingCost(null)
   }
 
-  const handleSaveCost = () => {
-    if (currentView === 'add') {
-      const id = Date.now().toString()
-      const categoryData = costCategories.find(cat => cat.id === newCost.category)
-      const costToAdd = { 
-        ...newCost, 
-        id,
-        icon: categoryData?.icon || '📦'
+  const handleSaveCost = async () => {
+    setIsLoading(true)
+    try {
+      if (currentView === 'add') {
+        // Create new cost
+        const response = await fetch('/api/operational-costs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newCost)
+        })
+        
+        if (!response.ok) throw new Error('Failed to create cost')
+        
+        alert('Biaya operasional berhasil ditambahkan!')
+      } else if (currentView === 'edit' && editingCost) {
+        // Update existing cost
+        const response = await fetch('/api/operational-costs', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...newCost, id: editingCost.id })
+        })
+        
+        if (!response.ok) throw new Error('Failed to update cost')
+        
+        alert('Biaya operasional berhasil diperbarui!')
       }
-      setCosts([...costs, costToAdd])
-    } else if (currentView === 'edit' && editingCost) {
-      setCosts(costs.map(cost => 
-        cost.id === editingCost.id ? { ...newCost, id: editingCost.id } : cost
-      ))
+      
+      // Refresh the list
+      await fetchCosts()
+      resetForm()
+      setCurrentView('list')
+    } catch (error) {
+      console.error('Error saving cost:', error)
+      alert('Gagal menyimpan biaya operasional')
+    } finally {
+      setIsLoading(false)
     }
-    resetForm()
-    setCurrentView('list')
   }
 
   const handleEditCost = (cost: OperationalCost) => {
-    setEditingCost
-    setNewCost
+    setEditingCost(cost)
+    setNewCost({ ...cost })
     setCurrentView('edit')
   }
 
-  const handleDeleteCost = (costId: string) => {
-    if (confirm('Yakin ingin menghapus biaya operasional ini?')) {
-      setCosts(costs.filter(cost => cost.id !== costId))
+  const handleDeleteCost = async (costId: string) => {
+    if (!confirm('Yakin ingin menghapus biaya operasional ini?')) return
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/operational-costs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [costId] })
+      })
+      
+      if (!response.ok) throw new Error('Failed to delete cost')
+      
+      // Refresh the list
+      await fetchCosts()
+      alert('Biaya operasional berhasil dihapus!')
+    } catch (error) {
+      console.error('Error deleting cost:', error)
+      alert('Gagal menghapus biaya operasional')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -217,7 +302,7 @@ export default function OperationalCostsPage() {
     )
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return
     
     const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
@@ -227,10 +312,27 @@ export default function OperationalCostsPage() {
       `⚠️ Yakin ingin menghapus ${selectedItems.length} biaya operasional berikut?\n\n${costNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
     )
     
-    if (confirmed) {
-      setCosts(costs.filter(cost => !selectedItems.includes(cost.id)))
+    if (!confirmed) return
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/operational-costs', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedItems })
+      })
+      
+      if (!response.ok) throw new Error('Failed to delete costs')
+      
+      // Refresh the list
+      await fetchCosts()
       setSelectedItems([])
-      alert
+      alert(`${selectedItems.length} biaya operasional berhasil dihapus!`)
+    } catch (error) {
+      console.error('Error deleting costs:', error)
+      alert('Gagal menghapus biaya operasional')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -369,7 +471,7 @@ export default function OperationalCostsPage() {
                 resetForm()
                 setCurrentView('list')
               }}
-              isLoading={false}
+              isLoading={isLoading}
               costCategories={costCategories}
               frequencies={frequencies}
             />
