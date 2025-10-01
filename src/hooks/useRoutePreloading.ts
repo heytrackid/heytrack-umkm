@@ -118,7 +118,7 @@ export const useRoutePreloading = () => {
           if (config.modals) {
             config.modals.forEach(modal => {
               preloadPromises.push(
-                preloadModalComponent.catch(() => {})
+                preloadModalComponent(modal).catch(() => {})
               )
             })
           }
@@ -170,8 +170,8 @@ export const useRoutePreloading = () => {
     }, 500)
 
     return () => {
-      clearTimeout
-      clearTimeout
+      clearTimeout(highPriorityTimer)
+      clearTimeout(mediumPriorityTimer)
     }
   }, [pathname, preloadForCurrentRoute])
 
@@ -214,7 +214,7 @@ export const useLinkPreloading = () => {
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
     if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponent.catch(() => {})
+      preloadModalComponent(modalType).catch(() => {})
     }
   }, [])
 
@@ -278,7 +278,7 @@ export const useIdleTimePreloading = () => {
     let idleTimer: NodeJS.Timeout
 
     const resetIdleTimer = () => {
-      clearTimeout
+      clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
         console.log('🕒 User idle - preloading heavy components')
@@ -286,12 +286,9 @@ export const useIdleTimePreloading = () => {
         Promise.all([
           preloadChartBundle().catch(() => {}),
           preloadTableBundle().catch(() => {}),
-          // Preload common modals
-          preloadModalComponent(modalType).catch(() => {}),
-          preloadModalComponent(modalType).catch(() => {}),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
-        })
+        }).catch(() => {})
       }, 5000) // 5 seconds of inactivity
     }
 
@@ -304,7 +301,7 @@ export const useIdleTimePreloading = () => {
     resetIdleTimer()
 
     return () => {
-      clearTimeout
+      clearTimeout(idleTimer)
       events.forEach(event => {
         document.removeEventListener(event, resetIdleTimer, true)
       })

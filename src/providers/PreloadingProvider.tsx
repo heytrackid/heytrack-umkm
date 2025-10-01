@@ -3,12 +3,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { 
-  useRoutePreloading, 
   useSmartPreloading, 
   useIdleTimePreloading,
   useNetworkAwarePreloading,
   LazyLoadingMetrics
 } from '@/hooks/useSimplePreloading'
+import { useRoutePreloading } from '@/hooks/useRoutePreloading'
 
 interface PreloadingContextType {
   isPreloading: boolean

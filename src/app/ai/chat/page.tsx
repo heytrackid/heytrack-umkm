@@ -1,24 +1,20 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-
-// Lazy load heavy chat components
-const ScrollArea = dynamic(() => import('@/components/ui/scroll-area').then(m => ({ default: m.ScrollArea })))
-const Breadcrumb = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.Breadcrumb })))
-const BreadcrumbList = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbList })))
-const BreadcrumbItem = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbItem })))
-const BreadcrumbLink = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbLink })))
-const BreadcrumbPage = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbPage })))
-const BreadcrumbSeparator = dynamic(() => import('@/components/ui/breadcrumb').then(m => ({ default: m.BreadcrumbSeparator })))
-import { useResponsive } from '@/hooks/use-mobile'
-import { generateAIResponse } from './utils/aiResponseGenerator'
+import { 
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { 
   MessageSquare, 
   Bot, 
@@ -28,7 +24,8 @@ import {
   TrendingUp, 
   Package, 
   DollarSign,
-  Coffee
+  Coffee,
+  Lightbulb
 } from 'lucide-react'
 
 interface ChatMessage {
@@ -39,25 +36,86 @@ interface ChatMessage {
   suggestions?: string[]
 }
 
+// AI Response Generator
+const generateAIResponse = (userMessage: string): ChatMessage => {
+  const lowerMessage = userMessage.toLowerCase()
+  
+  let content = ''
+  let suggestions: string[] = []
+  
+  if (lowerMessage.includes('penjualan') || lowerMessage.includes('sales')) {
+    content = `Berdasarkan data penjualan Anda:\n\n✅ Penjualan bulan ini: Rp 45.8 juta (+12% dari bulan lalu)\n📈 Produk terlaris: Croissant (230 unit), Roti Tawar (180 unit)\n💰 Revenue tertinggi: Cake Custom (Rp 12.5 juta)\n\nRekomendasi:\n• Tingkatkan stok Croissant untuk pagi hari\n• Promosikan Cake Custom lebih agresif\n• Perhatikan margin profit di Roti Tawar`
+    suggestions = [
+      'Detail penjualan per produk',
+      'Bandingkan dengan bulan lalu',
+      'Tips meningkatkan penjualan'
+    ]
+  } else if (lowerMessage.includes('inventory') || lowerMessage.includes('stok')) {
+    content = `Status Inventory Anda saat ini:\n\n⚠️ Stok menipis:\n• Tepung Terigu: 15kg (min: 20kg)\n• Butter: 5kg (min: 10kg)\n• Telur: 3 tray (min: 5 tray)\n\n✅ Stok aman:\n• Gula: 45kg\n• Susu: 25 liter\n• Cokelat: 8kg\n\nRekomendasi:\n• Segera restock tepung dan butter\n• Pertimbangkan bulk order untuk diskon`
+    suggestions = [
+      'List supplier terbaik',
+      'Hitung kebutuhan mingguan',
+      'Optimasi inventory cost'
+    ]
+  } else if (lowerMessage.includes('profit') || lowerMessage.includes('margin')) {
+    content = `Analisa Profit & Margin:\n\n💰 Gross Profit: Rp 18.2 juta (39.7%)\n📊 Margin terbaik: Cake Custom (58%)\n📉 Margin terendah: Roti Tawar (22%)\n\nTips meningkatkan profit:\n1. Fokus promosi produk high-margin\n2. Review pricing Roti Tawar\n3. Bundle produk low & high margin\n4. Reduce waste dengan demand forecasting`
+    suggestions = [
+      'Detail HPP per produk',
+      'Strategi pricing optimal',
+      'Cara reduce waste'
+    ]
+  } else if (lowerMessage.includes('marketing') || lowerMessage.includes('promosi')) {
+    content = `Strategi Marketing untuk Bakery:\n\n🎯 Target segment:\n• Profesional muda (25-35 tahun)\n• Keluarga dengan anak\n• Coffee shop partners\n\n💡 Campaign ideas:\n• Promo "Weekday Breakfast Bundle"\n• Member card dengan poin\n• Instagram giveaway\n• Kerjasama dengan kantor untuk catering\n\n📱 Platform prioritas:\n• Instagram (visual appeal)\n• WhatsApp Business (order & promo)\n• Google My Business (local SEO)`
+    suggestions = [
+      'Buat promo bundle',
+      'Tips konten Instagram',
+      'Strategi customer retention'
+    ]
+  } else if (lowerMessage.includes('customer') || lowerMessage.includes('pelanggan')) {
+    content = `Insight Customer Anda:\n\n👥 Total pelanggan: 487 orang\n⭐ Pelanggan setia: 89 orang (18%)\n💸 Average order value: Rp 94,000\n🔄 Repeat rate: 34%\n\nPelanggan top 5:\n1. Ibu Siti - Rp 2.4 juta (26 transaksi)\n2. PT Maju Jaya - Rp 1.8 juta (8 order)\n3. Bapak Andi - Rp 1.2 juta (15 transaksi)\n\nRekomendasi:\n• Program loyalty untuk repeat customers\n• Special offer untuk customer baru\n• Survey feedback untuk improvement`
+    suggestions = [
+      'Buat program loyalty',
+      'Analisa customer behavior',
+      'Tips customer service'
+    ]
+  } else {
+    content = `Terima kasih atas pertanyaan Anda! Saya adalah AI Assistant yang bisa membantu Anda dengan:\n\n📊 Analisa bisnis & laporan\n💰 Strategi pricing & profit\n📦 Manajemen inventory\n👥 Customer insights\n📈 Marketing & growth strategy\n💡 Rekomendasi operasional\n\nSilakan tanyakan hal spesifik tentang bisnis bakery Anda!`
+    suggestions = [
+      'Analisa penjualan hari ini',
+      'Status inventory',
+      'Tips marketing',
+      'Customer insights'
+    ]
+  }
+  
+  return {
+    id: Date.now().toString(),
+    content,
+    sender: 'ai',
+    timestamp: new Date(),
+    suggestions
+  }
+}
+
 export default function AIChatPage() {
-  const { isMobile } = useResponsive()
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      content: 'Halo! Saya adalah AI Assistant untuk bisnis bakery Anda. Saya bisa membantu dengan analisis penjualan, optimasi stok, strategi pricing, dan berbagai insight bisnis lainnya. Apa yang ingin Anda tanyakan hari ini?',
+      content: 'Halo! 👋 Saya AI Assistant untuk bisnis bakery Anda.\n\nSaya bisa membantu dengan:\n• Analisa penjualan & profit\n• Optimasi inventory\n• Strategi marketing\n• Customer insights\n• Rekomendasi bisnis\n\nAda yang ingin ditanyakan?',
       sender: 'ai',
       timestamp: new Date(),
       suggestions: [
         'Bagaimana performa penjualan bulan ini?',
-        'Ada rekomendasi untuk optimasi stok?',
-        'Analisa profitabilitas produk terlaris',
-        'Tips meningkatkan margin profit'
+        'Cek status inventory',
+        'Tips meningkatkan profit',
+        'Strategi marketing untuk bakery'
       ]
     }
   ])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -82,14 +140,13 @@ export default function AIChatPage() {
     setInputValue('')
     setIsTyping(true)
 
-    // Simulate AI response
+    // Simulate AI response with delay
     setTimeout(() => {
       const aiResponse = generateAIResponse(content)
       setMessages(prev => [...prev, aiResponse])
       setIsTyping(false)
-    }, 1500)
+    }, 1200)
   }
-
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -100,7 +157,7 @@ export default function AIChatPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 h-full flex flex-col">
         {/* Breadcrumb */}
         <Breadcrumb>
           <BreadcrumbList>
@@ -117,18 +174,18 @@ export default function AIChatPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Chat Assistant</BreadcrumbPage>
+              <BreadcrumbPage>Chat</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
         {/* Header */}
-        <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
-          <div className={isMobile ? 'text-center' : ''}>
-            <h1 className={`font-bold text-gray-900 ${isMobile ? 'text-2xl' : 'text-3xl'} flex items-center justify-center gap-2`}>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <MessageSquare className="h-8 w-8 text-blue-600" />
               Chat Assistant
-              <Badge variant="default" className="text-xs">BETA</Badge>
+              <Badge variant="default" className="text-xs">AI</Badge>
             </h1>
             <p className="text-gray-600 mt-1">
               Tanya AI tentang bisnis bakery Anda
@@ -136,156 +193,169 @@ export default function AIChatPage() {
           </div>
         </div>
 
-        {/* Chat Interface */}
-        <div className="max-w-4xl mx-auto">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Bot className="h-4 w-4 text-blue-600" />
+        {/* Chat Container - Full Height with Scroll */}
+        <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full">
+          <Card className="flex-1 flex flex-col overflow-hidden">
+            <CardHeader className="pb-3 border-b flex-shrink-0">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Bot className="h-5 w-5 text-blue-600" />
                 AI Assistant
                 <Sparkles className="h-4 w-4 text-yellow-500" />
               </CardTitle>
             </CardHeader>
             
-            <CardContent className="flex-1 flex flex-col p-0">
-              {/* Messages Area */}
-              <ScrollArea className="flex-1 px-4 pb-4 w-full max-w-full overflow-x-hidden">
-                <div className="space-y-4 w-full max-w-full overflow-hidden">
-                  {messages.map((message) => (
-                    <div 
-                      key={message.id}
-                      className={`flex gap-3 w-full max-w-full ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
-                    >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+              {/* Scrollable Messages Area */}
+              <div 
+                ref={chatContainerRef}
+                className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+                style={{ maxHeight: 'calc(100vh - 400px)' }}
+              >
+                {messages.map((message) => (
+                  <div 
+                    key={message.id}
+                    className={`flex gap-3 ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                  >
+                    {/* Avatar */}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.sender === 'user' 
+                        ? 'bg-blue-100 text-blue-600' 
+                        : 'bg-gradient-to-br from-purple-100 to-blue-100 text-purple-600'
+                    }`}>
+                      {message.sender === 'user' ? (
+                        <User className="h-5 w-5" />
+                      ) : (
+                        <Bot className="h-5 w-5" />
+                      )}
+                    </div>
+                    
+                    {/* Message Content */}
+                    <div className={`flex flex-col max-w-[75%] ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                      <div className={`rounded-2xl px-4 py-3 ${
                         message.sender === 'user' 
-                          ? 'bg-blue-100 text-blue-600' 
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-900'
                       }`}>
-                        {message.sender === 'user' ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <Bot className="h-4 w-4" />
-                        )}
+                        <div className="text-sm whitespace-pre-line">
+                          {message.content}
+                        </div>
                       </div>
                       
-                      <div className={`flex flex-col max-w-[calc(100%-3rem)] min-w-0 overflow-hidden ${message.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                        <div className={`rounded-lg p-3 max-w-full break-words overflow-hidden overflow-wrap-anywhere ${
-                          message.sender === 'user' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-100 text-gray-900'
-                        }`} style={{wordBreak: 'break-word', overflowWrap: 'anywhere', maxWidth: '100%'}}>
-                          <div className="text-sm" style={{wordBreak: 'break-word', overflowWrap: 'anywhere'}}>
-                            {message.content}
+                      <div className="mt-1 text-xs text-gray-500 px-2">
+                        {message.timestamp.toLocaleTimeString('id-ID', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </div>
+                      
+                      {/* Quick Reply Suggestions */}
+                      {message.suggestions && message.suggestions.length > 0 && (
+                        <div className="mt-3 space-y-2 w-full">
+                          <p className="text-xs text-gray-500 font-medium px-2 flex items-center gap-1">
+                            <Lightbulb className="h-3 w-3" />
+                            Pertanyaan lanjutan:
+                          </p>
+                          <div className="flex flex-col gap-2">
+                            {message.suggestions.map((suggestion, index) => (
+                              <Button
+                                key={index}
+                                variant="outline"
+                                size="sm"
+                                className="justify-start text-left h-auto py-2 px-3 text-xs bg-white hover:bg-gray-50 border-gray-200"
+                                onClick={() => sendMessage(suggestion)}
+                                disabled={isTyping}
+                              >
+                                💬 {suggestion}
+                              </Button>
+                            ))}
                           </div>
                         </div>
-                        
-                        <div className="mt-1 text-xs text-gray-500">
-                          {message.timestamp.toLocaleTimeString('id-ID')}
-                        </div>
-                        
-                        {/* Suggestions */}
-                        {message.suggestions && message.suggestions.length > 0 && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-xs text-gray-500 font-medium">Saran pertanyaan:</p>
-                            <div className="grid grid-cols-1 gap-2">
-                              {message.suggestions.map((suggestion, index) => (
-                                <Button
-                                  key={index}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="justify-start text-left h-auto p-2 text-xs bg-gray-50 hover:bg-gray-100"
-                                  onClick={() => sendMessage(suggestion)}
-                                >
-                                  {suggestion}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
+                      <Bot className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                       </div>
                     </div>
-                  ))}
-                  
-                  {/* Typing indicator */}
-                  {isTyping && (
-                    <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                        <Bot className="h-4 w-4 text-gray-600" />
-                      </div>
-                      <div className="bg-gray-100 rounded-lg p-3">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
+                
                 <div ref={messagesEndRef} />
-              </ScrollArea>
+              </div>
               
-              {/* Input Area */}
-              <div className="border-t p-4">
-                <div className="flex gap-2">
+              {/* Fixed Input Area at Bottom */}
+              <div className="border-t p-4 bg-white flex-shrink-0">
+                <div className="flex gap-2 mb-3">
                   <Input
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Tanya tentang bisnis Anda... (misal: 'Bagaimana penjualan bulan ini?')"
+                    placeholder="Ketik pertanyaan Anda di sini..."
                     className="flex-1"
                     disabled={isTyping}
                   />
                   <Button 
                     onClick={() => sendMessage()}
                     disabled={!inputValue.trim() || isTyping}
-                    size="sm"
+                    size="default"
+                    className="px-6"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
                 
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-2 mt-3">
+                {/* Quick Action Buttons */}
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
-                    onClick={() => sendMessage('Analisa penjualan bulan ini')}
+                    className="text-xs h-8"
+                    onClick={() => sendMessage('Analisa penjualan hari ini')}
                     disabled={isTyping}
                   >
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    Sales Analysis
+                    Sales
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
-                    onClick={() => sendMessage('Cek status inventory')}
+                    className="text-xs h-8"
+                    onClick={() => sendMessage('Status inventory')}
                     disabled={isTyping}
                   >
                     <Package className="h-3 w-3 mr-1" />
-                    Inventory Check
+                    Inventory
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
-                    onClick={() => sendMessage('Tips meningkatkan profit')}
+                    className="text-xs h-8"
+                    onClick={() => sendMessage('Tips profit')}
                     disabled={isTyping}
                   >
                     <DollarSign className="h-3 w-3 mr-1" />
-                    Profit Tips
+                    Profit
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
-                    onClick={() => sendMessage('Saran marketing')}
+                    className="text-xs h-8"
+                    onClick={() => sendMessage('Strategi marketing')}
                     disabled={isTyping}
                   >
                     <Coffee className="h-3 w-3 mr-1" />
-                    Marketing Ideas
+                    Marketing
                   </Button>
                 </div>
               </div>
@@ -293,22 +363,22 @@ export default function AIChatPage() {
           </Card>
         </div>
 
-        {/* Info */}
-        <Card className="max-w-4xl mx-auto border-blue-200 bg-blue-50">
+        {/* Tips Card */}
+        <Card className="max-w-5xl mx-auto w-full border-blue-200 bg-blue-50">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mt-0.5">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Sparkles className="h-4 w-4 text-blue-600" />
               </div>
               <div className="space-y-2">
                 <h3 className="font-medium text-blue-900">
-                  Tips Menggunakan Chat Assistant
+                  💡 Tips Menggunakan Chat Assistant
                 </h3>
                 <div className="text-sm text-blue-800 space-y-1">
                   <p>• Tanya hal spesifik: "Bagaimana penjualan croissant minggu ini?"</p>
                   <p>• Minta analisa: "Analisa profitabilitas semua produk"</p>
                   <p>• Cari saran: "Tips meningkatkan customer retention"</p>
-                  <p>• Request action: "Buat laporan inventory untuk reorder"</p>
+                  <p>• Gunakan quick buttons untuk pertanyaan cepat</p>
                 </div>
               </div>
             </div>
