@@ -23,7 +23,6 @@ import { WeightedAverageCostAnalysis } from './WeightedAverageCostAnalysis'
 
 // Extracted components
 import { IngredientsTab } from './IngredientsTab'
-import { CategoriesTab } from './CategoriesTab'
 
 // Hooks
 import { useInventoryData, useInventoryAlerts } from '../hooks/useInventoryData'
@@ -44,7 +43,6 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function EnhancedInventoryPage({ initialIngredients = [] }: { initialIngredients?: any[] }) {
   const { isMobile, isTablet } = useResponsive()
@@ -274,51 +272,31 @@ const { ingredients, loading, error, refresh } = useInventoryData(undefined, { i
           </AlertDescription>
         </Alert>
 
-        {/* Tabs for Bahan Baku and Kategori */}
-        <Tabs defaultValue="ingredients" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="ingredients">Bahan Baku</TabsTrigger>
-            <TabsTrigger value="categories">Kategori</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="ingredients" className="space-y-4">
-            {isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY) ? (
-              <div className="space-y-4">
-                <SearchFormSkeleton />
-                <InventoryTableSkeleton rows={8} />
-              </div>
-            ) : (
-              <IngredientsTab
-                filteredIngredients={filteredIngredients}
-                selectedItems={selectedItems}
-                searchTerm={searchTerm}
-                typeFilter={typeFilter}
-                onSearchChange={setSearchTerm}
-                onTypeFilterChange={setTypeFilter}
-                onSelectAll={handleSelectAll}
-                onSelectItem={handleSelectItem}
-                onClearSelection={() => setSelectedItems([])}
-                onBulkEdit={handleBulkEdit}
-                onBulkDelete={handleBulkDelete}
-                onEditIngredient={handleEditIngredient}
-                onDeleteIngredient={handleDeleteIngredient}
-                onShowPricingAnalysis={handleShowPricingAnalysis}
-                getStockAlertLevel={getStockAlertLevel}
-              />
-            )}
-          </TabsContent>
-
-          <TabsContent value="categories" className="space-y-4">
-            {isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY) ? (
-              <div className="space-y-4">
-                <SearchFormSkeleton />
-                <InventoryTableSkeleton rows={5} />
-              </div>
-            ) : (
-              <CategoriesTab />
-            )}
-          </TabsContent>
-        </Tabs>
+        {/* Bahan Baku Section */}
+        {isSkeletonLoading(LOADING_KEYS.FETCH_INVENTORY) ? (
+          <div className="space-y-4">
+            <SearchFormSkeleton />
+            <InventoryTableSkeleton rows={8} />
+          </div>
+        ) : (
+          <IngredientsTab
+            filteredIngredients={filteredIngredients}
+            selectedItems={selectedItems}
+            searchTerm={searchTerm}
+            typeFilter={typeFilter}
+            onSearchChange={setSearchTerm}
+            onTypeFilterChange={setTypeFilter}
+            onSelectAll={handleSelectAll}
+            onSelectItem={handleSelectItem}
+            onClearSelection={() => setSelectedItems([])}
+            onBulkEdit={handleBulkEdit}
+            onBulkDelete={handleBulkDelete}
+            onEditIngredient={handleEditIngredient}
+            onDeleteIngredient={handleDeleteIngredient}
+            onShowPricingAnalysis={handleShowPricingAnalysis}
+            getStockAlertLevel={getStockAlertLevel}
+          />
+        )}
 
         {/* Weighted Average Cost Analysis Modal */}
         <Dialog open={showPricingAnalysis} onOpenChange={setShowPricingAnalysis}>
