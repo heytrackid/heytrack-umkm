@@ -191,10 +191,11 @@ export default function ProfitReportPage() {
     return null
   }
 
-  const { summary, products, ingredients, operating_expenses, trends } = profitData
+  const { summary, products = [], ingredients = [], operating_expenses = [], trends } = profitData
 
   // Prepare chart data for product profitability
   const productChartData = React.useMemo(() => {
+    if (!products || products.length === 0) return []
     return products
       .slice(0, 10) // Top 10 products
       .map(product => ({
