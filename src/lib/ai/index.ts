@@ -124,42 +124,34 @@ export class AIService {
   }
 
   /**
+   * Backward compatibility: Optimize inventory (delegates to production service)
+   */
+  async optimizeInventory(data: any): Promise<any> {
+    // Inventory optimization is handled by production planning
+    return this.production.generateProductionSchedule({
+      existingOrders: [],
+      availableCapacity: {},
+      ...data
+    });
+  }
+
+  /**
+   * Backward compatibility: Analyze financial data (delegates to pricing service)
+   */
+  async analyzeFinancial(data: any): Promise<any> {
+    // Financial analysis through pricing optimization
+    return this.pricing.analyzePricing({
+      ingredients: [],
+      currentPrice: 0,
+      ...data
+    });
+  }
+
+  /**
    * Quick health check across all modules
    */
-  async healthCheck(): Promise<{
-    status: 'healthy' | 'warning' | 'critical';
-    modules: {
-      pricing: boolean;
-      inventory: boolean;
-      production: boolean;
-      customer: boolean;
-    };
-    message: string;
-  }> {
-    const modules = {
-      pricing: !!this.pricing,
-      production: !!this.production,
-      customer: !!this.customer
-    };
-
-    const activeModules = Object.values(modules).filter(Boolean).length;
-    const totalModules = Object.keys(modules).length;
-
-    let status: 'healthy' | 'warning' | 'critical';
-    let message: string;
-
-    if (activeModules === totalModules) {
-      status = 'healthy';
-      message = '✅ All AI services are operational';
-    } else if (activeModules >= totalModules * 0.75) {
-      status = 'warning';
-      message = `⚠️ ${totalModules - activeModules} AI service(s) unavailable`;
-    } else {
-      status = 'critical';
-      message = `🔴 ${totalModules - activeModules} AI service(s) down - critical functionality affected`;
-    }
-
-    return { status, modules, message };
+  async healthCheck(): Promise<boolean> {
+    return !!(this.pricing && this.production && this.customer);
   }
 }
 
