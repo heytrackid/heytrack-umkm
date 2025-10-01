@@ -311,7 +311,7 @@ export default function ProfitReportPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-2xl font-bold">{formatCurrency(summary.total_revenue)}</p>
-                  {trends.revenue_trend !== 0 && (
+                  {trends?.revenue_trend && trends.revenue_trend !== 0 && (
                     <p className={`text-xs flex items-center gap-1 mt-1 ${
                       trends.revenue_trend > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
@@ -324,8 +324,8 @@ export default function ProfitReportPage() {
                     </p>
                   )}
                 </div>
-                <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-muted-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -346,8 +346,8 @@ export default function ProfitReportPage() {
                     Margin: {summary.gross_profit_margin.toFixed(1)}%
                   </p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-muted-foreground" />
                 </div>
               </div>
             </CardContent>
@@ -372,15 +372,11 @@ export default function ProfitReportPage() {
                     Margin: {summary.net_profit_margin.toFixed(1)}%
                   </p>
                 </div>
-                <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
-                  summary.net_profit >= 0 
-                    ? 'bg-green-100 dark:bg-green-900' 
-                    : 'bg-red-100 dark:bg-red-900'
-                }`}>
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
                   {summary.net_profit >= 0 ? (
-                    <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <TrendingUp className="h-6 w-6 text-muted-foreground" />
                   ) : (
-                    <TrendingDown className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    <TrendingDown className="h-6 w-6 text-muted-foreground" />
                   )}
                 </div>
               </div>
@@ -402,8 +398,8 @@ export default function ProfitReportPage() {
                     Metode: WAC
                   </p>
                 </div>
-                <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
-                  <Package className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                  <Package className="h-6 w-6 text-muted-foreground" />
                 </div>
               </div>
             </CardContent>

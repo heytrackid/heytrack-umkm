@@ -45,14 +45,29 @@ export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
   
-  // Collapsible sections state
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
-    'Kelola Data': false,
-    'Perhitungan': false,
-    'Operasional': false,
-    'Monitoring': true, // Default collapsed to save space
-    'Asisten AI': false,
+  // Collapsible sections state - initialize from localStorage if available
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebar-collapsed-sections')
+      if (saved) {
+        return JSON.parse(saved)
+      }
+    }
+    return {
+      'Kelola Data': false,
+      'Perhitungan': false,
+      'Operasional': false,
+      'Monitoring': false,
+      'Asisten AI': false,
+    }
   })
+
+  // Save to localStorage when state changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar-collapsed-sections', JSON.stringify(collapsedSections))
+    }
+  }, [collapsedSections])
 
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
@@ -86,6 +101,7 @@ export const useSidebarLogic = () => {
           icon: Package,
           isSimple: true,
           badge: "DATA",
+          stepNumber: 1,
           description: "Kelola bahan baku dan stok"
         },
         {
@@ -94,6 +110,7 @@ export const useSidebarLogic = () => {
           icon: Layers,
           isSimple: true,
           badge: "ORGANISIR",
+          stepNumber: 2,
           description: "Kategori produk dan bahan"
         },
         {
@@ -102,6 +119,7 @@ export const useSidebarLogic = () => {
           icon: Receipt,
           isSimple: true,
           badge: "BIAYA",
+          stepNumber: 3,
           description: "Biaya operasional harian"
         },
         {
@@ -110,6 +128,7 @@ export const useSidebarLogic = () => {
           icon: ChefHat,
           isSimple: true,
           badge: "RESEP",
+          stepNumber: 4,
           description: "Formula resep dan komposisi"
         },
       ]
@@ -126,6 +145,7 @@ export const useSidebarLogic = () => {
           icon: Calculator,
           isSimple: true,
           badge: "HITUNG",
+          stepNumber: 1,
           description: "Perhitungan Harga Pokok Produksi"
         },
         {
@@ -134,6 +154,7 @@ export const useSidebarLogic = () => {
           icon: Target,
           isSimple: true,
           badge: "LANJUTAN",
+          stepNumber: 2,
           description: "HPP dengan analisa mendalam"
         },
       ]
@@ -150,6 +171,7 @@ export const useSidebarLogic = () => {
           icon: ShoppingCart,
           isSimple: true,
           badge: "ORDER",
+          stepNumber: 1,
           description: "Kelola pesanan dan pengiriman"
         },
         {
@@ -158,6 +180,7 @@ export const useSidebarLogic = () => {
           icon: Users,
           isSimple: true,
           badge: "CRM",
+          stepNumber: 2,
           description: "Database pelanggan dan riwayat"
         },
       ]
@@ -167,7 +190,6 @@ export const useSidebarLogic = () => {
       description: "Laporan dan analisis bisnis",
       isWorkflow: true,
       isCollapsible: true,
-      defaultCollapsed: true,
       items: [
         {
           name: "Arus Kas",
@@ -263,17 +285,6 @@ export const useSidebarLogic = () => {
       ]
     }
   ]
-
-  // Initialize collapsed sections based on defaultCollapsed
-  useEffect(() => {
-    const initialCollapsedState: Record<string, boolean> = {}
-    navigationSections.forEach(section => {
-      if (section.isCollapsible) {
-        initialCollapsedState[section.title] = section.defaultCollapsed || false
-      }
-    })
-    setCollapsedSections(prev => ({ ...prev, ...initialCollapsedState }))
-  }, [])
 
   const isItemActive = (item: NavigationItem): boolean => {
     return pathname === item.href || 
