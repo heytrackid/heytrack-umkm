@@ -25,6 +25,7 @@ interface SettingsContextType {
   currencies: Currency[]
   updateCurrency: (currency: Currency) => void
   formatCurrency: (amount: number) => string
+  resetToDefault: () => void
 }
 
 export const currencies: Currency[] = [
@@ -56,10 +57,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings)
+        // Force IDR if no currency is set or invalid currency
+        if (!parsed.currency || !parsed.currency.code) {
+          parsed.currency = currencies[0] // IDR
+        }
         setSettings({ ...defaultSettings, ...parsed })
       } catch (error) {
         console.error('Failed to parse saved settings:', error)
+        // Reset to default on error
+        setSettings(defaultSettings)
+        localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }
+    } else {
+      // First time user - set default IDR
+      localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
     }
   }, [])
 
@@ -78,12 +89,18 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     return `${symbol} ${formattedAmount}`
   }
 
+  const resetToDefault = () => {
+    setSettings(defaultSettings)
+    localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
+  }
+
   return (
     <SettingsContext.Provider value={{
       settings,
       currencies,
       updateCurrency,
-      formatCurrency
+      formatCurrency,
+      resetToDefault
     }}>
       {children}
     </SettingsContext.Provider>

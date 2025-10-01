@@ -114,7 +114,8 @@ export function InventoryTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedIngredients.map((ingredient) => {
+                {Array.isArray(paginatedIngredients) && paginatedIngredients.length > 0 ? paginatedIngredients.map((ingredient) => {
+                  if (!ingredient) return null
                   const stockAlert = getStockAlertLevel(ingredient)
 
                   return (
@@ -183,25 +184,31 @@ export function InventoryTable({
                       </TableCell>
                     </TableRow>
                   )
-                })}
+                }) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                      Tidak ada data bahan baku
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-4 border-t">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-4 py-4 border-t">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} bahan
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full sm:w-auto">
                   {/* Page Size Selector */}
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Tampilkan:</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">Tampilkan:</span>
                     <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
-                      <SelectTrigger className="w-20 h-8">
+                      <SelectTrigger className="w-16 sm:w-20 h-8 text-xs sm:text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -221,12 +228,14 @@ export function InventoryTable({
                       size="sm"
                       onClick={handlePreviousPage}
                       disabled={currentPage === 1}
+                      className="h-8"
                     >
                       <ChevronLeft className="h-4 w-4" />
+                      <span className="sr-only sm:not-sr-only sm:ml-1">Prev</span>
                     </Button>
                     
-                    <span className="text-sm font-medium">
-                      Halaman {currentPage} dari {totalPages}
+                    <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                      Hal {currentPage}/{totalPages}
                     </span>
                     
                     <Button
@@ -234,7 +243,9 @@ export function InventoryTable({
                       size="sm"
                       onClick={handleNextPage}
                       disabled={currentPage === totalPages}
+                      className="h-8"
                     >
+                      <span className="sr-only sm:not-sr-only sm:mr-1">Next</span>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>

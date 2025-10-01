@@ -207,8 +207,8 @@ export default function CostListTable({
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-2">
-                <div className="text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-2 py-3">
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   Menampilkan {startIndex + 1} - {Math.min(endIndex, costs.length)} dari {costs.length} biaya
                 </div>
                 <div className="flex items-center gap-2">
@@ -217,20 +217,22 @@ export default function CostListTable({
                     size="sm"
                     onClick={handlePreviousPage}
                     disabled={currentPage === 1}
+                    className="h-8"
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    {!isMobile && 'Sebelumnya'}
+                    <span className="sr-only sm:not-sr-only sm:ml-1">Prev</span>
                   </Button>
-                  <div className="text-sm">
-                    Halaman {currentPage} dari {totalPages}
+                  <div className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                    Hal {currentPage}/{totalPages}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
+                    className="h-8"
                   >
-                    {!isMobile && 'Selanjutnya'}
+                    <span className="sr-only sm:not-sr-only sm:mr-1">Next</span>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
