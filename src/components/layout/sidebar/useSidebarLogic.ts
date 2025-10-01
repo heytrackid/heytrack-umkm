@@ -47,11 +47,11 @@ export const useSidebarLogic = () => {
   
   // Collapsible sections state
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
-    'Data Manager': false,
-    'Calculation': false,
-    'Operations': false,
+    'Kelola Data': false,
+    'Perhitungan': false,
+    'Operasional': false,
     'Monitoring': true, // Default collapsed to save space
-    'AI Assistant': false,
+    'Asisten AI': false,
   })
 
   // Prefetch next likely routes to reduce navigation latency
@@ -70,18 +70,18 @@ export const useSidebarLogic = () => {
           name: "Dashboard",
           href: '/',
           icon: LayoutDashboard,
-          description: "Overview bisnis dan metrics utama"
+          description: "Ringkasan bisnis dan metrik utama"
         }
       ]
     },
     {
-      title: "Data Manager",
+      title: "Kelola Data",
       description: "Kelola data dasar bisnis",
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: "Raw Materials",
+          name: "Bahan Baku",
           href: '/inventory',
           icon: Package,
           isSimple: true,
@@ -89,76 +89,76 @@ export const useSidebarLogic = () => {
           description: "Kelola bahan baku dan stok"
         },
         {
-          name: "Categories",
+          name: "Kategori",
           href: '/categories',
           icon: Layers,
           isSimple: true,
-          badge: "ORGANIZE",
+          badge: "ORGANISIR",
           description: "Kategori produk dan bahan"
         },
         {
-          name: "Operational Costs",
+          name: "Biaya Operasional",
           href: '/operational-costs',
           icon: Receipt,
           isSimple: true,
-          badge: "COSTS",
+          badge: "BIAYA",
           description: "Biaya operasional harian"
         },
         {
-          name: "Recipes",
+          name: "Resep",
           href: '/resep',
           icon: ChefHat,
           isSimple: true,
-          badge: "RECIPE",
-          description: "Formula resep dan ingredients"
+          badge: "RESEP",
+          description: "Formula resep dan komposisi"
         },
       ]
     },
     {
-      title: "Calculation",
-      description: "Hitung HPP dan pricing strategy",
+      title: "Perhitungan",
+      description: "Hitung HPP dan strategi harga",
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: "HPP Pricing",
+          name: "Kalkulator HPP",
           href: '/hpp',
           icon: Calculator,
           isSimple: true,
-          badge: "CALC",
+          badge: "HITUNG",
           description: "Perhitungan Harga Pokok Produksi"
         },
         {
-          name: "HPP Enhanced",
+          name: "HPP Lanjutan",
           href: '/hpp-enhanced',
           icon: Target,
           isSimple: true,
-          badge: "ENHANCED",
+          badge: "LANJUTAN",
           description: "HPP dengan analisa mendalam"
         },
       ]
     },
     {
-      title: "Operations",
-      description: "Kelola pesanan dan customer",
+      title: "Operasional",
+      description: "Kelola pesanan dan pelanggan",
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: "Orders",
+          name: "Pesanan",
           href: '/orders',
           icon: ShoppingCart,
           isSimple: true,
           badge: "ORDER",
-          description: "Kelola pesanan dan delivery"
+          description: "Kelola pesanan dan pengiriman"
         },
         {
-          name: "Customers",
+          name: "Pelanggan",
           href: '/customers',
           icon: Users,
           isSimple: true,
           badge: "CRM",
-          description: "Database customer dan history"
+          description: "Database pelanggan dan riwayat"
         },
       ]
     },
@@ -170,15 +170,15 @@ export const useSidebarLogic = () => {
       defaultCollapsed: true,
       items: [
         {
-          name: "Cash Flow",
+          name: "Arus Kas",
           href: '/cash-flow',
           icon: DollarSign,
           isSimple: true,
-          badge: "MONEY",
+          badge: "UANG",
           description: "Arus kas masuk dan keluar"
         },
         {
-          name: "Finance",
+          name: "Keuangan",
           href: '/finance',
           icon: Banknote,
           isSimple: true,
@@ -186,39 +186,39 @@ export const useSidebarLogic = () => {
           description: "Laporan keuangan detail"
         },
         {
-          name: "Reports",
+          name: "Laporan",
           href: '/reports',
           icon: BarChart3,
           isSimple: true,
           badge: "REPORT",
-          description: "Laporan bisnis comprehensive"
+          description: "Laporan bisnis lengkap"
         },
         {
-          name: "Review",
+          name: "Tinjauan",
           href: '/review',
           icon: TrendingUp,
           isSimple: true,
           badge: "REVIEW",
-          description: "Review performa dan growth"
+          description: "Tinjauan performa dan pertumbuhan"
         },
       ]
     },
     {
-      title: 'AI Assistant',
+      title: 'Asisten AI',
       description: 'Asisten cerdas untuk optimasi bisnis',
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: 'AI Insights',
+          name: 'Wawasan AI',
           href: '/ai',
           icon: Brain,
           isSimple: true,
-          badge: 'SMART',
-          description: 'Dashboard AI untuk analisis bisnis cerdas'
+          badge: 'PINTAR',
+          description: 'Dashboard AI untuk analisis bisnis'
         },
         {
-          name: 'Smart Pricing',
+          name: 'Harga Pintar',
           href: '/ai/pricing',
           icon: TrendingUp,
           isSimple: true,
@@ -226,7 +226,7 @@ export const useSidebarLogic = () => {
           description: 'Analisis harga optimal berbasis AI'
         },
         {
-          name: 'Chat Assistant',
+          name: 'Chat Asisten',
           href: '/ai/chat',
           icon: MessageSquare,
           isSimple: true,
@@ -234,23 +234,23 @@ export const useSidebarLogic = () => {
           description: 'Chatbot bisnis dengan AI'
         },
         {
-          name: 'Business Tips',
+          name: 'Tips Bisnis',
           href: '/ai/insights',
           icon: Lightbulb,
           isSimple: true,
-          badge: 'NEW',
+          badge: 'BARU',
           description: 'Tips bisnis personal dari AI'
         }
       ]
     },
     {
-      title: "Others",
+      title: "Lainnya",
       items: [
         {
-          name: "Settings",
+          name: "Pengaturan",
           href: '/settings',
           icon: Settings,
-          description: "Pengaturan aplikasi dan preferences"
+          description: "Pengaturan aplikasi dan preferensi"
         },
       ]
     }
