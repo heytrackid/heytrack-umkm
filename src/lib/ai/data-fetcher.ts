@@ -1,9 +1,29 @@
 /**
  * AI Data Fetcher
  * Helper untuk mengambil data dari Supabase untuk AI analysis
+ * Uses service role to bypass RLS for AI analysis
  */
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Create admin client for AI operations (bypasses RLS)
+const getAdminClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase credentials for AI Data Fetcher');
+  }
+  
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+};
+
+const supabase = getAdminClient();
 
 export class AIDataFetcher {
   /**
@@ -54,22 +74,10 @@ export class AIDataFetcher {
     limit?: number;
   }) {
     try {
+      // Simplified query without nested relationships to avoid RLS conflicts
       let query = supabase
         .from('recipes')
-        .select(`
-          *,
-          recipe_ingredients (
-            ingredient_id,
-            quantity,
-            unit,
-            ingredients (
-              name,
-              unit,
-              unit_price,
-              current_stock
-            )
-          )
-        `)
+        .select('*')
         .order('name', { ascending: true });
 
       if (filters?.category) {
@@ -85,6 +93,33 @@ export class AIDataFetcher {
       if (error) {
         console.error('Error fetching recipes:', error);
         return [];
+      }
+
+      // If we got recipes, fetch their ingredients separately
+      if (data && data.length > 0) {
+        const recipeIds = data.map((r: any) => r.id);
+        
+        const { data: ingredients, error: ingError } = await supabase
+          .from('recipe_ingredients')
+          .select(`
+            *,
+            ingredients (
+              name,
+              unit,
+              unit_price,
+              current_stock
+            )
+          `)
+          .in('recipe_id', recipeIds);
+
+        if (!ingError && ingredients) {
+          // Attach ingredients to their recipes
+          const enrichedRecipes = data.map((recipe: any) => ({
+            ...recipe,
+            recipe_ingredients: ingredients.filter((ing: any) => ing.recipe_id === recipe.id)
+          }));
+          return enrichedRecipes;
+        }
       }
 
       return data || [];

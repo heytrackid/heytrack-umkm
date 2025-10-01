@@ -7,10 +7,12 @@
 export * from './services/PricingAIService';
 export * from './services/ProductionAIService';
 export * from './services/CustomerAIService';
+export * from './services/InventoryAIService';
 
 import { pricingAI, PricingAIService } from './services/PricingAIService';
 import { productionAI, ProductionAIService } from './services/ProductionAIService';
 import { customerAI, CustomerAIService } from './services/CustomerAIService';
+import { inventoryAI, InventoryAIService } from './services/InventoryAIService';
 
 /**
  * Unified AI Service Facade
@@ -124,15 +126,11 @@ export class AIService {
   }
 
   /**
-   * Backward compatibility: Optimize inventory (delegates to production service)
+   * Backward compatibility: Optimize inventory (delegates to inventory service)
    */
   async optimizeInventory(data: any): Promise<any> {
-    // Inventory optimization is handled by production planning
-    return this.production.generateProductionSchedule({
-      existingOrders: [],
-      availableCapacity: {},
-      ...data
-    });
+    // Use dedicated inventory service
+    return inventoryAI.optimizeInventory(data);
   }
 
   /**
@@ -165,5 +163,6 @@ export default aiService;
 export {
   pricingAI,
   productionAI,
-  customerAI
+  customerAI,
+  inventoryAI
 };
