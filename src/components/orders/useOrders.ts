@@ -44,9 +44,9 @@ export function useOrders() {
   const filteredOrders = orders.filter(order => {
     // Search filter
     const searchMatch = !filters.searchTerm || 
-      order.order_no?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-      order.customer_name?.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-      order.customer_phone?.toLowerCase().includes(filters.searchTerm.toLowerCase())
+      (order.order_no && order.order_no.toLowerCase().includes(filters.searchTerm.toLowerCase())) ||
+      (order.customer_name && order.customer_name.toLowerCase().includes(filters.searchTerm.toLowerCase())) ||
+      (order.customer_phone && order.customer_phone.toLowerCase().includes(filters.searchTerm.toLowerCase()))
 
     // Status filter
     const statusMatch = filters.status === 'all' || order.status === filters.status

@@ -80,9 +80,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
-  const formatCurrency = (amount: number): string => {
+  const formatCurrency = (amount: number | null | undefined): string => {
     const { symbol, decimals } = settings.currency
-    const formattedAmount = amount.toLocaleString('en-US', {
+    // Handle null, undefined, or invalid numbers
+    const validAmount = amount ?? 0
+    const formattedAmount = validAmount.toLocaleString('en-US', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     })

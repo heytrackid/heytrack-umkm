@@ -227,7 +227,7 @@ const OrdersTable = ({
         <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-blue-900">
-              {selectedOrders.length} {"Placeholder".toLowerCase()} {"Placeholder"}
+              {selectedOrders.length} pesanan dipilih
             </span>
           </div>
           
@@ -344,7 +344,7 @@ const OrdersTable = ({
                     <div className="space-y-1">
                       <div className="font-medium">{order.order_no}</div>
                       <div className="text-sm text-muted-foreground">
-                        {order.order_items?.length || 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) || 0} {"Placeholder".toLowerCase()}
+                        {order.order_items?.length || 0} item • {order.order_items?.reduce((sum, item) => sum + item.quantity, 0) || 0} produk
                       </div>
                     </div>
                   </TableCell>

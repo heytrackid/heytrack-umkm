@@ -77,8 +77,8 @@ export default function OrdersPage() {
   }
   
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.order_number.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.order_number?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
     const matchesDateFrom = !dateFrom || order.order_date >= dateFrom
     const matchesDateTo = !dateTo || order.order_date <= dateTo

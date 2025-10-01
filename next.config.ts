@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   // Turbopack for faster development
   turbopack: {
     root: __dirname,
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
   },
   
   // Performance Optimizations
@@ -103,14 +109,6 @@ const nextConfig: NextConfig = {
     optimizeServerReact: true,
     scrollRestoration: true,
     webVitalsAttribution: ['CLS', 'LCP'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
   },
   
   // External packages for server components

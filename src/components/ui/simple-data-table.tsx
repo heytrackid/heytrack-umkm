@@ -110,7 +110,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     const matchesSearch = !searchTerm || 
       columns.some(col => {
         const value = getValue(item, col.key)
-        return String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
       })
 
     // Column filters
