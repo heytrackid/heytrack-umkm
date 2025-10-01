@@ -127,7 +127,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefault;
+    e.preventDefault();
     if (!validateAll()) return;
 
     try {
@@ -140,13 +140,13 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   };
 
   const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefault;
+    e.preventDefault();
     if (!validateAll() || !selectedIngredient) return;
 
     try {
       await update(selectedIngredient.id, formData as any);
       setIsEditModalOpen(false);
-      setSelectedIngredient(ingredient);
+      setSelectedIngredient(null);
       resetForm();
     } catch (error) {
       console.error('Failed to update ingredient:', error);
@@ -159,7 +159,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     try {
       await remove(selectedIngredient.id);
       setIsDeleteDialogOpen(false);
-      setSelectedIngredient(ingredient);
+      setSelectedIngredient(null);
     } catch (error) {
       console.error('Failed to delete ingredient:', error);
     }
@@ -169,7 +169,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
     setIsCreateModalOpen(false);
     setIsEditModalOpen(false);
     setIsDeleteDialogOpen(false);
-    setSelectedIngredient(ingredient);
+    setSelectedIngredient(null);
     resetForm();
   };
 

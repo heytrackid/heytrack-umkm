@@ -337,7 +337,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                             </Button>
                           )}
                           {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(cost)} className="flex-1">
+                            <Button variant="outline" size="sm" onClick={() => onEdit(item)} className="flex-1">
                               <Edit className="h-4 w-4 mr-2" />
                               {"Placeholder"}
                             </Button>
@@ -446,7 +446,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                                 </DropdownMenuItem>
                               )}
                               {onEdit && (
-                                <DropdownMenuItem onClick={() => onEdit(cost)}>
+                                <DropdownMenuItem onClick={() => onEdit(item)}>
                                   <Edit className="h-4 w-4 mr-2" />
                                   {"Placeholder"}
                                 </DropdownMenuItem>
