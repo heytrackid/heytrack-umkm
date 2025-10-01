@@ -424,8 +424,17 @@ export default function ProfitReportPage() {
         </div>
 
         {/* Product Profitability Chart */}
-        {productChartData.length > 0 && (
-          <Card>
+        <Card>
+          {productChartData.length === 0 ? (
+            <CardContent className="py-12">
+              <div className="text-center text-muted-foreground">
+                <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium mb-2">Belum Ada Data untuk Grafik</p>
+                <p className="text-sm">Grafik akan muncul setelah ada penjualan produk di periode yang dipilih</p>
+              </div>
+            </CardContent>
+          ) : (
+            <>
             <CardHeader>
               <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-start justify-between'}`}>
                 <div>
@@ -549,8 +558,9 @@ export default function ProfitReportPage() {
                 </ResponsiveContainer>
               </div>
             </CardContent>
-          </Card>
-        )}
+            </>
+          )}
+        </Card>
 
         {/* Product Profitability Table */}
         <Card>
