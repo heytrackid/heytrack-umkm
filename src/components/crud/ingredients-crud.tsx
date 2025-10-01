@@ -10,46 +10,45 @@ import { useSettings } from '@/contexts/settings-context';
 import { Database } from '@/types';
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row'];
-type IngredientInsert = Database['public']['Tables']['ingredients']['Insert'];
-type IngredientUpdate = Database['public']['Tables']['ingredients']['Update'];
 
 interface IngredientFormData {
   name: string;
   unit: string;
-  price_per_unit: number;  // Database field is price_per_unit, not cost_per_unit
-  supplier?: string;       // Database field is supplier, not supplier_id
+  price_per_unit: number;
+  supplier?: string;
   minimum_stock: number;
   current_stock: number;
   description?: string;
-  category?: string;       // Add category field from database
+  category?: string;
 }
 
 const validationRules = {
-  name: (value: string) => !value ? 'Name is required' : null,
-  unit: (value: string) => !value ? 'Unit is required' : null,
-  price_per_unit: (value: number) => value <= 0 ? 'Price per unit must be greater than 0' : null,
-  minimum_stock: (value: number) => value < 0 ? 'Minimum stock cannot be negative' : null,
-  current_stock: (value: number) => value < 0 ? 'Current stock cannot be negative' : null,
+  name: (value: string) => !value ? 'Nama harus diisi' : null,
+  unit: (value: string) => !value ? 'Satuan harus diisi' : null,
+  price_per_unit: (value: number) => value <= 0 ? 'Harga harus lebih dari 0' : null,
+  minimum_stock: (value: number) => value < 0 ? 'Stok minimum tidak boleh negatif' : null,
+  current_stock: (value: number) => value < 0 ? 'Stok saat ini tidak boleh negatif' : null,
   supplier: () => null,
   description: () => null,
   category: () => null,
 };
 
-// Unit options will be defined inside component to use "" function
-
 export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: any[] }) {
-  const { formatCurrency, settings } = useSettings();
-  const { data: ingredients, loading, error, create, update, remove } = useIngredients({ initial: initialIngredients, refetchOnMount: false });
+  const { formatCurrency } = useSettings();
+  const { data: ingredients, loading, error, create, update, remove } = useIngredients({ 
+    initial: initialIngredients, 
+    refetchOnMount: true 
+  });
   
-  // Unit options using i18n
   const unitOptions = [
-    { value: 'kg', label: "Placeholder" },
-    { value: 'g', label: "Placeholder" },
-    { value: 'l', label: "Placeholder" },
-    { value: 'ml', label: "Placeholder" },
-    { value: 'pcs', label: "Placeholder" },
-    { value: 'dozen', label: "Placeholder" },
+    { value: 'kg', label: 'Kilogram (kg)' },
+    { value: 'g', label: 'Gram (g)' },
+    { value: 'l', label: 'Liter (l)' },
+    { value: 'ml', label: 'Mililiter (ml)' },
+    { value: 'pcs', label: 'Pieces (pcs)' },
+    { value: 'dozen', label: 'Lusin (dozen)' },
   ];
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -57,7 +56,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
   const initialFormData: IngredientFormData = {
     name: '',
-    unit: '',
+    unit: 'kg',
     price_per_unit: 0,
     supplier: '',
     minimum_stock: 0,
@@ -79,29 +78,29 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   const columns = [
     {
       key: 'name',
-      header: "Placeholder",
+      header: 'Nama Bahan',
       priority: 'high' as const,
     },
     {
       key: 'unit',
-      header: "Placeholder",
+      header: 'Satuan',
       priority: 'high' as const,
     },
     {
       key: 'price_per_unit',
-      header: "Placeholder",
+      header: 'Harga/Unit',
       render: (value: number) => formatCurrency(value),
       hideOnMobile: true,
     },
     {
       key: 'current_stock',
-      header: "Placeholder",
+      header: 'Stok Saat Ini',
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
       priority: 'medium' as const,
     },
     {
       key: 'minimum_stock',
-      header: "Placeholder",
+      header: 'Stok Minimum',
       render: (value: number, item: Ingredient) => `${value} ${item.unit}`,
       hideOnMobile: true,
     },
@@ -114,7 +113,6 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
   const handleEdit = (ingredient: Ingredient) => {
     setSelectedIngredient(ingredient);
-    // Populate form with ingredient data
     Object.keys(initialFormData).forEach(key => {
       handleChange(key as keyof IngredientFormData, (ingredient as any)[key] || '');
     });
@@ -176,7 +174,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   if (error) {
     return (
       <div className="bg-gray-100 dark:bg-gray-800 border border-red-200 rounded-md p-4">
-        <p className="text-gray-600 dark:text-gray-400">{"Placeholder"}</p>
+        <p className="text-gray-600 dark:text-gray-400">Gagal memuat data bahan baku</p>
       </div>
     );
   }
@@ -186,12 +184,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <SimpleDataTable
         data={ingredients || []}
         columns={columns}
-        searchPlaceholder={"Placeholder"}
+        searchPlaceholder="Cari bahan baku..."
         onAdd={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        addButtonText={"Placeholder"}
-        emptyMessage={"Placeholder"}
+        addButtonText="Tambah Bahan Baku"
+        emptyMessage="Belum ada bahan baku. Klik tombol Tambah untuk menambahkan bahan baku pertama."
         exportData={true}
       />
 
@@ -199,18 +197,18 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       <Modal
         isOpen={isCreateModalOpen}
         onClose={closeModals}
-        title={"Placeholder"}
+        title="Tambah Bahan Baku Baru"
         size="lg"
         fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitCreate}>
           <FormSection
-            title={"Placeholder"}
-            description={"Placeholder"}
+            title="Informasi Dasar"
+            description="Isi informasi dasar bahan baku"
           >
             <FormGrid cols={2}>
               <FormField
-                label={"Placeholder"}
+                label="Nama Bahan"
                 name="name"
                 type="text"
                 value={formData.name}
@@ -218,12 +216,12 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder={"Placeholder"}
-                hint={"Placeholder"}
+                placeholder="Contoh: Tepung Terigu"
+                hint="Nama bahan baku yang mudah dikenali"
               />
 
               <FormField
-                label={"Placeholder"}
+                label="Satuan"
                 name="unit"
                 type="select"
                 value={formData.unit}
@@ -232,17 +230,17 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 error={touched.unit ? errors.unit : undefined}
                 required
                 options={unitOptions}
-                hint={"Placeholder"}
+                hint="Pilih satuan yang sesuai"
               />
             </FormGrid>
           </FormSection>
 
           <FormSection
-            title={"Placeholder"}
-            description={"Placeholder"}
+            title="Harga & Stok"
+            description="Atur harga dan stok bahan baku"
           >
             <FormField
-label={"Placeholder"}
+              label="Harga per Unit"
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -252,12 +250,12 @@ label={"Placeholder"}
               required
               min={0}
               step={0.01}
-              hint={"Placeholder"}
+              hint="Harga per satuan dalam Rupiah"
             />
 
             <FormGrid cols={2}>
               <FormField
-                label={"Placeholder"}
+                label="Stok Saat Ini"
                 name="current_stock"
                 type="number"
                 value={formData.current_stock}
@@ -267,11 +265,11 @@ label={"Placeholder"}
                 required
                 min={0}
                 step={0.01}
-                hint={"Placeholder"}
+                hint="Jumlah stok yang tersedia sekarang"
               />
 
               <FormField
-                label={"Placeholder"}
+                label="Stok Minimum"
                 name="minimum_stock"
                 type="number"
                 value={formData.minimum_stock}
@@ -281,29 +279,52 @@ label={"Placeholder"}
                 required
                 min={0}
                 step={0.01}
-                hint={"Placeholder"}
+                hint="Batas minimum untuk alert stok"
               />
             </FormGrid>
           </FormSection>
 
-          <FormSection title={"Placeholder"}>
+          <FormSection title="Informasi Tambahan">
+            <FormGrid cols={2}>
+              <FormField
+                label="Supplier"
+                name="supplier"
+                type="text"
+                value={formData.supplier}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Nama supplier"
+                hint="Nama pemasok bahan ini (opsional)"
+              />
+
+              <FormField
+                label="Kategori"
+                name="category"
+                type="text"
+                value={formData.category}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Contoh: Bahan Dasar"
+                hint="Kategori untuk pengelompokan (opsional)"
+              />
+            </FormGrid>
+
             <FormField
-              label={"Placeholder"}
+              label="Deskripsi"
               name="description"
               type="textarea"
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.description ? errors.description : undefined}
-              placeholder={"Placeholder"}
+              placeholder="Deskripsi atau catatan tambahan"
               rows={3}
-              hint={"Placeholder"}
+              hint="Catatan atau informasi tambahan tentang bahan ini (opsional)"
             />
           </FormSection>
 
           <FormActions
             onCancel={closeModals}
-            submitText={"Placeholder"}
+            submitText="Simpan Bahan Baku"
             loading={loading}
             sticky={true}
           />
@@ -314,18 +335,18 @@ label={"Placeholder"}
       <Modal
         isOpen={isEditModalOpen}
         onClose={closeModals}
-        title={"Placeholder"}
+        title="Edit Bahan Baku"
         size="lg"
         fullScreenOnMobile={true}
       >
         <CrudForm onSubmit={handleSubmitEdit}>
           <FormSection
-            title={"Placeholder"}
-            description={"Placeholder"}
+            title="Informasi Dasar"
+            description="Edit informasi dasar bahan baku"
           >
             <FormGrid cols={2}>
               <FormField
-                label={"Placeholder"}
+                label="Nama Bahan"
                 name="name"
                 type="text"
                 value={formData.name}
@@ -333,11 +354,11 @@ label={"Placeholder"}
                 onBlur={handleBlur}
                 error={touched.name ? errors.name : undefined}
                 required
-                placeholder={"Placeholder"}
+                placeholder="Contoh: Tepung Terigu"
               />
 
               <FormField
-                label={"Placeholder"}
+                label="Satuan"
                 name="unit"
                 type="select"
                 value={formData.unit}
@@ -351,11 +372,11 @@ label={"Placeholder"}
           </FormSection>
 
           <FormSection
-            title={"Placeholder"}
-            description={"Placeholder"}
+            title="Harga & Stok"
+            description="Edit harga dan stok bahan baku"
           >
             <FormField
-              label={"Placeholder"}
+              label="Harga per Unit"
               name="price_per_unit"
               type="number"
               value={formData.price_per_unit}
@@ -369,7 +390,7 @@ label={"Placeholder"}
 
             <FormGrid cols={2}>
               <FormField
-                label={"Placeholder"}
+                label="Stok Saat Ini"
                 name="current_stock"
                 type="number"
                 value={formData.current_stock}
@@ -382,7 +403,7 @@ label={"Placeholder"}
               />
 
               <FormField
-                label={"Placeholder"}
+                label="Stok Minimum"
                 name="minimum_stock"
                 type="number"
                 value={formData.minimum_stock}
@@ -396,23 +417,44 @@ label={"Placeholder"}
             </FormGrid>
           </FormSection>
 
-          <FormSection title={"Placeholder"}>
+          <FormSection title="Informasi Tambahan">
+            <FormGrid cols={2}>
+              <FormField
+                label="Supplier"
+                name="supplier"
+                type="text"
+                value={formData.supplier}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Nama supplier"
+              />
+
+              <FormField
+                label="Kategori"
+                name="category"
+                type="text"
+                value={formData.category}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Contoh: Bahan Dasar"
+              />
+            </FormGrid>
+
             <FormField
-              label={"Placeholder"}
+              label="Deskripsi"
               name="description"
               type="textarea"
               value={formData.description}
               onChange={handleChange}
               onBlur={handleBlur}
-              error={touched.description ? errors.description : undefined}
-              placeholder={"Placeholder"}
+              placeholder="Deskripsi atau catatan tambahan"
               rows={3}
             />
           </FormSection>
 
           <FormActions
             onCancel={closeModals}
-            submitText={"Placeholder"}
+            submitText="Simpan Perubahan"
             loading={loading}
             sticky={true}
           />
@@ -424,13 +466,13 @@ label={"Placeholder"}
         isOpen={isDeleteDialogOpen}
         onClose={closeModals}
         onConfirm={handleConfirmDelete}
-        title={"Placeholder"}
-        message={"Placeholder"}
-        confirmText={"Placeholder"}
+        title="Hapus Bahan Baku"
+        message={`Apakah Anda yakin ingin menghapus "${selectedIngredient?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        confirmText="Ya, Hapus"
         type="danger"
       />
     </div>
   );
 }
 
-export default IngredientsCRUD
+export default IngredientsCRUD;
