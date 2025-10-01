@@ -308,6 +308,11 @@ export type Enums<
   ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
   : never
 
+// Type aliases for inline table definitions
+export type ExpensesTable = Database['public']['Tables']['expenses']
+export type AppSettingsTable = Database['public']['Tables']['app_settings']
+export type WhatsAppTemplatesTable = Database['public']['Tables']['whatsapp_templates']
+
 // Re-export all types
 export type {
   // Core types

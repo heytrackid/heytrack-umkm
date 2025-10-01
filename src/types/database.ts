@@ -33,6 +33,9 @@ export type {
   SystemMetricsTable,
   RecentSyncEventsView,
   UserProfilesTable,
+  ExpensesTable,
+  AppSettingsTable,
+  WhatsAppTemplatesTable,
   // Enum types
   UserRole,
   BusinessUnit,
