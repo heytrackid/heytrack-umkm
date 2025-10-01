@@ -71,7 +71,7 @@ export const useSidebarLogic = () => {
 
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
-    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/finance', '/resep', '/customers']
+    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', '/cash-flow', '/profit']
     routesToPrefetch.forEach((r) => {
       try { router.prefetch(r) } catch {}
     })

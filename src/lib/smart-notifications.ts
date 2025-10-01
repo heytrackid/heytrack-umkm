@@ -211,8 +211,8 @@ export class SmartNotificationSystem {
         priority: 'critical',
         title: 'Stock Kritis!',
         message: `${item.name} tersisa ${item.current_stock} ${item.unit}. Segera restock!`,
-        actionUrl: `/inventory?search=${item.name}`,
-        actionLabel: 'Lihat Inventory',
+        actionUrl: `/ingredients?search=${item.name}`,
+        actionLabel: 'Lihat Bahan Baku',
         data: { ingredientId: item.id }
       })
     })
@@ -230,8 +230,8 @@ export class SmartNotificationSystem {
         priority: 'medium',
         title: 'Stock Menipis',
         message: `${lowStockItems.length} bahan baku mendekati batas minimum`,
-        actionUrl: '/inventory?filter=low_stock',
-        actionLabel: 'Cek Inventory'
+        actionUrl: '/ingredients',
+        actionLabel: 'Cek Bahan Baku'
       })
     }
 
@@ -247,7 +247,7 @@ export class SmartNotificationSystem {
         priority: 'low',
         title: 'Stock Berlebihan',
         message: `${overstockedItems.length} item memiliki stock berlebihan`,
-        actionUrl: '/inventory?filter=overstocked',
+        actionUrl: '/ingredients',
         actionLabel: 'Optimasi Stock'
       })
     }
@@ -267,8 +267,8 @@ export class SmartNotificationSystem {
         priority: 'high',
         title: 'Margin Keuntungan Rendah',
         message: `Margin kotor hanya ${metrics.grossMargin.toFixed(1)}%. Pertimbangkan menaikkan harga atau efisiensi cost.`,
-        actionUrl: '/finance?tab=analysis',
-        actionLabel: 'Analisis Keuangan',
+        actionUrl: '/profit',
+        actionLabel: 'Analisis Laba',
         data: { grossMargin: metrics.grossMargin }
       })
     }
@@ -281,7 +281,7 @@ export class SmartNotificationSystem {
         priority: 'critical',
         title: 'Kerugian Terdeteksi',
         message: `Bisnis mengalami kerugian ${formatCurrency(Math.abs(metrics.netProfit))} bulan ini`,
-        actionUrl: '/finance?tab=profit_loss',
+        actionUrl: '/profit',
         actionLabel: 'Review Laporan'
       })
     }
@@ -294,8 +294,8 @@ export class SmartNotificationSystem {
         priority: 'medium',
         title: 'Inventory Value Tinggi',
         message: 'Nilai inventory terlalu tinggi dibanding revenue. Pertimbangkan optimasi stock.',
-        actionUrl: '/finance?tab=ratios',
-        actionLabel: 'Analisis Rasio'
+        actionUrl: '/cash-flow',
+        actionLabel: 'Analisis Arus Kas'
       })
     }
   }

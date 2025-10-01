@@ -89,14 +89,14 @@ export default function CustomersTable({
         <CardContent className="py-12 text-center">
           <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-            Informasi
+            Belum Ada Pelanggan
           </h3>
           <p className="text-muted-foreground mb-4">
-            Informasi
+            Mulai tambahkan pelanggan pertama Anda
           </p>
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            Informasi
+            Tambah Pelanggan
           </Button>
         </CardContent>
       </Card>
@@ -108,10 +108,10 @@ export default function CustomersTable({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          Informasi
+          Daftar Pelanggan
         </CardTitle>
         <p className="text-sm text-gray-600">
-          Informasi
+          Kelola informasi pelanggan Anda
         </p>
       </CardHeader>
       <CardContent>
@@ -125,12 +125,12 @@ export default function CustomersTable({
                     onCheckedChange={onSelectAll}
                   />
                 </TableHead>
-                <TableHead>Informasi</TableHead>
-                <TableHead>Informasi</TableHead>
-                <TableHead>Informasi</TableHead>
-                <TableHead>Informasi</TableHead>
-                <TableHead>Informasi</TableHead>
-                <TableHead className="w-32">Informasi</TableHead>
+                <TableHead>Nama</TableHead>
+                <TableHead>Kontak</TableHead>
+                <TableHead>Total Belanja</TableHead>
+                <TableHead>Total Order</TableHead>
+                <TableHead>Order Terakhir</TableHead>
+                <TableHead className="w-32">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -146,7 +146,7 @@ export default function CustomersTable({
                     <div className="flex flex-col">
                       <span className="font-semibold">{customer.name}</span>
                       <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
-                        {customer.status === 'active' ? Informasi : Informasi}
+                        {customer.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
                       </Badge>
                     </div>
                   </TableCell>

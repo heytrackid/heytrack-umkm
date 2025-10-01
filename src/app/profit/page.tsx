@@ -428,7 +428,7 @@ export default function ProfitReportPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.map((product, index) => (
+                  {(products || []).map((product, index) => (
                     <tr key={index} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4 font-medium">{product.product_name}</td>
                       <td className="py-3 px-4 text-right">{product.quantity_sold}</td>
@@ -474,7 +474,7 @@ export default function ProfitReportPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ingredients.map((ingredient, index) => (
+                  {(ingredients || []).map((ingredient, index) => (
                     <tr key={index} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4">{ingredient.ingredient_name}</td>
                       <td className="py-3 px-4 text-right">{ingredient.quantity_used.toFixed(2)}</td>
@@ -500,7 +500,7 @@ export default function ProfitReportPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {operating_expenses.map((expense, index) => (
+              {(operating_expenses || []).map((expense, index) => (
                 <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
