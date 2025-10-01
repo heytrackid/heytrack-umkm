@@ -128,8 +128,8 @@ export default function CategoriesPage() {
 
   // Filter categories based on search term
   const filteredCategories = categoryList.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category.description.toLowerCase().includes(searchTerm.toLowerCase())
+    category.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.description?.toLowerCase().includes(searchTerm.toLowerCase())
   )
   
   // Calculate pagination

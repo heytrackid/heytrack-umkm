@@ -122,8 +122,8 @@ export default function OperationalCostsPage() {
   }
 
   const handleQuickSetup = () => {
-    const existingNames = new Set(costs.map(c => c.name.toLowerCase()))
-    const template = getQuickSetupTemplate().filter(t => !existingNames.has(t.name.toLowerCase()))
+    const existingNames = new Set(costs.map(c => c.name?.toLowerCase()).filter(Boolean))
+    const template = getQuickSetupTemplate().filter(t => t.name && !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
       alert('Semua template sudah ditambahkan')
       return
@@ -194,8 +194,8 @@ export default function OperationalCostsPage() {
 
   // Filter costs based on search term
   const filteredCosts = costs.filter(cost =>
-    cost.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cost.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cost.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cost.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (cost.description && cost.description.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
