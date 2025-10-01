@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useState, useEffect, lazy, Suspense } from 'react'
+import React, { lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { useSettings } from '@/contexts/settings-context'
-import { useLoading } from '@/hooks/useLoading'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 
@@ -26,332 +25,44 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
-import { 
-  Plus, 
+import {
+  Plus,
   Zap,
   Receipt,
   Search
 } from 'lucide-react'
 
-interface OperationalCost {
-  id: string
-  name: string
-  category: string
-  amount: number
-  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly'
-  description?: string
-  isFixed: boolean
-  icon: string
-}
-
-const costCategories = [
-  { id: 'utilities', name: 'Utilitas', icon: '⚡', description: 'Listrik, air, gas' },
-  { id: 'rent', name: 'Sewa & Properti', icon: '🏢', description: 'Sewa tempat, PBB' },
-  { id: 'staff', name: 'Gaji Karyawan', icon: '👥', description: 'Gaji, tunjangan' },
-  { id: 'transport', name: 'Transport & Logistik', icon: '🚚', description: 'BBM, ongkir' },
-  { id: 'communication', name: 'Komunikasi', icon: '📞', description: 'Telepon, internet' },
-  { id: 'insurance', name: 'Asuransi & Keamanan', icon: '🛡️', description: 'Asuransi, keamanan' },
-  { id: 'maintenance', name: 'Perawatan', icon: '🔧', description: 'Service peralatan' },
-  { id: 'other', name: 'Lainnya', icon: '📦', description: 'Biaya lainnya' }
-]
-
-const frequencies = [
-  { value: 'daily', label: 'Harian' },
-  { value: 'weekly', label: 'Mingguan' },
-  { value: 'monthly', label: 'Bulanan' },
-  { value: 'yearly', label: 'Tahunan' }
-]
-
-const LOADING_KEYS = {
-  LOAD_COSTS: 'loadCosts',
-  SAVE_COST: 'saveCost'
-} as const
+import { useOperationalCosts, type OperationalCost, costCategories, frequencies, getTotalMonthlyCosts, getCategoryInfo, calculateMonthlyCost } from './hooks/useOperationalCosts'
 
 export default function OperationalCostsPage() {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
-  const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
-  
-  // State management
-  const [costs, setCosts] = useState<OperationalCost[]>([])
-  const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
-  const [editingCost, setEditingCost] = useState<OperationalCost | null>(null)
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [newCost, setNewCost] = useState<OperationalCost>({
-    id: '',
-    name: '',
-    category: 'utilities',
-    amount: 0,
-    frequency: 'monthly',
-    description: '',
-    isFixed: false,
-    icon: '⚡'
-  })
 
-  // Fetch costs from database on component mount
-  useEffect(() => {
-    fetchCosts()
-  }, [])
-
-  const fetchCosts = async () => {
-    startLoading(LOADING_KEYS.LOAD_COSTS)
-    try {
-      const response = await fetch('/api/operational-costs')
-      if (!response.ok) throw new Error('Failed to fetch costs')
-      
-      const data = await response.json()
-      const transformedCosts = data.costs.map((cost: any) => {
-        const categoryData = costCategories.find(cat => cat.id === cost.category)
-        return {
-          id: cost.id,
-          name: cost.name,
-          category: cost.category,
-          amount: cost.amount,
-          frequency: cost.frequency,
-          description: cost.description,
-          isFixed: cost.isFixed,
-          icon: categoryData?.icon || '📦'
-        }
-      })
-      setCosts(transformedCosts)
-    } catch (error) {
-      console.error('Error fetching costs:', error)
-      alert('Gagal memuat data biaya operasional')
-    } finally {
-      stopLoading(LOADING_KEYS.LOAD_COSTS)
-    }
-  }
-
-  // Quick Setup: template biaya operasional umum
-  const getQuickSetupTemplate = (): OperationalCost[] => {
-    const now = Date.now()
-    const tmpl: Array<Pick<OperationalCost, 'name' | 'category' | 'amount' | 'frequency' | 'description' | 'isFixed'>> = [
-      { name: 'Listrik', category: 'utilities', amount: 500000, frequency: 'monthly', description: 'Biaya listrik bulanan', isFixed: false },
-      { name: 'Air & Gas', category: 'utilities', amount: 200000, frequency: 'monthly', description: 'Air PDAM & gas', isFixed: false },
-      { name: 'Sewa Toko', category: 'rent', amount: 1500000, frequency: 'monthly', description: 'Sewa tempat usaha', isFixed: true },
-      { name: 'Gaji Karyawan', category: 'staff', amount: 3000000, frequency: 'monthly', description: 'Total gaji per bulan', isFixed: true },
-      { name: 'Internet & Telepon', category: 'communication', amount: 250000, frequency: 'monthly', description: 'Paket data & telepon', isFixed: true },
-      { name: 'Transportasi', category: 'transport', amount: 300000, frequency: 'monthly', description: 'BBM/ongkir', isFixed: false },
-      { name: 'Keamanan/Asuransi', category: 'insurance', amount: 100000, frequency: 'monthly', description: 'Satpam/asuransi', isFixed: true },
-      { name: 'Perawatan Peralatan', category: 'maintenance', amount: 150000, frequency: 'monthly', description: 'Service & perawatan', isFixed: false },
-    ]
-
-    return tmpl.map((item, idx) => {
-      const categoryData = costCategories.find(c => c.id === item.category)
-      return {
-        id: (now + idx).toString(),
-        icon: categoryData?.icon || '📦',
-        ...item,
-      } as OperationalCost
-    })
-  }
-
-  const handleQuickSetup = async () => {
-    const existingNames = new Set(costs.map(c => c.name?.toLowerCase()).filter(Boolean))
-    const template = getQuickSetupTemplate().filter(t => t.name && !existingNames.has(t.name.toLowerCase()))
-    if (template.length === 0) {
-      alert('Semua template sudah ditambahkan')
-      return
-    }
-    const confirmed = window.confirm("Tambahkan template biaya operasional?")
-    if (!confirmed) return
-    
-    setIsLoading(true)
-    try {
-      // Create all template costs in database
-      const promises = template.map(cost => 
-        fetch('/api/operational-costs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cost)
-        })
-      )
-      await Promise.all(promises)
-      
-      // Refresh the list
-      await fetchCosts()
-      alert('Template berhasil ditambahkan!')
-    } catch (error) {
-      console.error('Error adding template:', error)
-      alert('Gagal menambahkan template')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const resetForm = () => {
-    setNewCost({
-      id: '',
-      name: '',
-      category: 'utilities',
-      amount: 0,
-      frequency: 'monthly',
-      description: '',
-      isFixed: false,
-      icon: '⚡'
-    })
-    setEditingCost(null)
-  }
-
-  const handleSaveCost = async () => {
-    setIsLoading(true)
-    try {
-      if (currentView === 'add') {
-        // Create new cost
-        const response = await fetch('/api/operational-costs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newCost)
-        })
-        
-        if (!response.ok) throw new Error('Failed to create cost')
-        
-        alert('Biaya operasional berhasil ditambahkan!')
-      } else if (currentView === 'edit' && editingCost) {
-        // Update existing cost
-        const response = await fetch('/api/operational-costs', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...newCost, id: editingCost.id })
-        })
-        
-        if (!response.ok) throw new Error('Failed to update cost')
-        
-        alert('Biaya operasional berhasil diperbarui!')
-      }
-      
-      // Refresh the list
-      await fetchCosts()
-      resetForm()
-      setCurrentView('list')
-    } catch (error) {
-      console.error('Error saving cost:', error)
-      alert('Gagal menyimpan biaya operasional')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleEditCost = (cost: OperationalCost) => {
-    setEditingCost(cost)
-    setNewCost({ ...cost })
-    setCurrentView('edit')
-  }
-
-  const handleDeleteCost = async (costId: string) => {
-    if (!confirm('Yakin ingin menghapus biaya operasional ini?')) return
-    
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/operational-costs', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: [costId] })
-      })
-      
-      if (!response.ok) throw new Error('Failed to delete cost')
-      
-      // Refresh the list
-      await fetchCosts()
-      alert('Biaya operasional berhasil dihapus!')
-    } catch (error) {
-      console.error('Error deleting cost:', error)
-      alert('Gagal menghapus biaya operasional')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const calculateMonthlyCost = (cost: OperationalCost): number => {
-    switch (cost.frequency) {
-      case 'daily': return cost.amount * 30
-      case 'weekly': return cost.amount * 4.33
-      case 'monthly': return cost.amount
-      case 'yearly': return cost.amount / 12
-      default: return cost.amount
-    }
-  }
-
-  const getTotalMonthlyCosts = (): number => {
-    return costs.reduce((total, cost) => total + calculateMonthlyCost(cost), 0)
-  }
-
-  // Filter costs based on search term
-  const filteredCosts = costs.filter(cost =>
-    cost.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cost.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (cost.description && cost.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
-
-  // Bulk action handlers
-  const handleSelectAll = () => {
-    if (selectedItems.length === filteredCosts.length) {
-      setSelectedItems([])
-    } else {
-      setSelectedItems(filteredCosts.map(cost => cost.id))
-    }
-  }
-
-  const handleSelectItem = (itemId: string) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) 
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    )
-  }
-
-  const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return
-    
-    const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
-    const costNames = selectedCosts.map(cost => cost.name).join(', ')
-    
-    const confirmed = window.confirm(
-      `⚠️ Yakin ingin menghapus ${selectedItems.length} biaya operasional berikut?\n\n${costNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
-    )
-    
-    if (!confirmed) return
-    
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/operational-costs', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: selectedItems })
-      })
-      
-      if (!response.ok) throw new Error('Failed to delete costs')
-      
-      // Refresh the list
-      await fetchCosts()
-      setSelectedItems([])
-      alert(`${selectedItems.length} biaya operasional berhasil dihapus!`)
-    } catch (error) {
-      console.error('Error deleting costs:', error)
-      alert('Gagal menghapus biaya operasional')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleBulkEdit = () => {
-    if (selectedItems.length === 0) return
-    
-    const selectedCosts = filteredCosts.filter(cost => selectedItems.includes(cost.id))
-    const costNames = selectedCosts.map(cost => cost.name).join(', ')
-    
-    alert
-  }
-
-  const handleViewCost = (cost: OperationalCost) => {
-    alert
-  }
-
-  const getCategoryInfo = (categoryId: string) => {
-    return costCategories.find(cat => cat.id === categoryId) || costCategories[0]
-  }
+  // Use the custom hook for all operational costs logic
+  const {
+    costs,
+    currentView,
+    editingCost,
+    selectedItems,
+    searchTerm,
+    isLoading,
+    newCost,
+    setNewCost,
+    setCurrentView,
+    setEditingCost,
+    setSelectedItems,
+    setSearchTerm,
+    fetchCosts,
+    handleSaveCost,
+    handleEditCost,
+    handleDeleteCost,
+    handleBulkDelete,
+    handleQuickSetup,
+    resetForm,
+    handleSelectAll,
+    handleSelectItem,
+    filteredCosts
+  } = useOperationalCosts()
 
   // Breadcrumb items
   const getBreadcrumbItems = () => {
@@ -371,7 +82,7 @@ export default function OperationalCostsPage() {
   }
 
   // Render loading skeleton for list view
-  if (currentView === 'list' && isSkeletonLoading(LOADING_KEYS.LOAD_COSTS)) {
+  if (currentView === 'list' && isLoading) {
     return (
       <AppLayout>
         <div className="space-y-6">
@@ -382,10 +93,10 @@ export default function OperationalCostsPage() {
                   <BreadcrumbItem>
                     {item.href ? (
                       <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
-                        {item.label}
-                      </PrefetchLink>
-                    </BreadcrumbLink>
+                        <PrefetchLink href={item.href}>
+                          {item.label}
+                        </PrefetchLink>
+                      </BreadcrumbLink>
                     ) : (
                       <BreadcrumbPage>{item.label}</BreadcrumbPage>
                     )}
@@ -446,8 +157,8 @@ export default function OperationalCostsPage() {
                   {item.href ? (
                     <BreadcrumbLink asChild>
                       <PrefetchLink href={item.href}>
-                      {item.label}
-                    </PrefetchLink>
+                        {item.label}
+                      </PrefetchLink>
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>
@@ -458,7 +169,7 @@ export default function OperationalCostsPage() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        
+
         {/* Form View */}
         {currentView !== 'list' ? (
           <Suspense fallback={<div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />}>
@@ -498,6 +209,7 @@ export default function OperationalCostsPage() {
                   variant="outline" 
                   className={isMobile ? 'w-full' : ''}
                   onClick={handleQuickSetup}
+                  disabled={isLoading}
                   title="Setup Cepat Biaya Operasional"
                 >
                   <Zap className="h-4 w-4 mr-2" />
@@ -515,7 +227,7 @@ export default function OperationalCostsPage() {
               <CostStats
                 totalCosts={costs.length}
                 fixedCosts={costs.filter(c => c.isFixed).length}
-                totalMonthly={getTotalMonthlyCosts()}
+                totalMonthly={getTotalMonthlyCosts(costs)}
                 formatCurrency={formatCurrency}
                 isMobile={isMobile}
               />
@@ -547,10 +259,10 @@ export default function OperationalCostsPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
+                    placeholder="Cari biaya operasional..."
                   />
                 </div>
               </div>
@@ -561,7 +273,7 @@ export default function OperationalCostsPage() {
                   selectedItems={selectedItems}
                   costs={filteredCosts}
                   onClearSelection={() => setSelectedItems([])}
-                  onBulkEdit={handleBulkEdit}
+                  onBulkEdit={() => alert('Bulk edit belum diimplementasi')}
                   onBulkDelete={handleBulkDelete}
                 />
               </Suspense>
@@ -576,7 +288,7 @@ export default function OperationalCostsPage() {
                 onSelectItem={handleSelectItem}
                 onEdit={handleEditCost}
                 onDelete={handleDeleteCost}
-                onView={handleViewCost}
+                onView={(cost) => alert(`Melihat detail ${cost.name}`)}
                 onAdd={() => setCurrentView('add')}
                 formatCurrency={formatCurrency}
                 calculateMonthlyCost={calculateMonthlyCost}
