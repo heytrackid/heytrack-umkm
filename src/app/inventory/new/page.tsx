@@ -73,7 +73,7 @@ export default function NewInventoryTransactionPage() {
       if (!response.ok) throw new Error('Failed')
       alert
       router.push('/inventory')
-    } catch (error) {
+    } catch (error: any) {
       alert
     } finally {
       setIsSubmitting(false)

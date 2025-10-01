@@ -324,7 +324,7 @@ export function useOrderStatus(orderId: string) {
         status: newStatus,
         internal_notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
       })
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to update order status: ${error}`)
     }
   }
@@ -410,7 +410,7 @@ export function useOrderValidation() {
     }
 
     // Items validation
-    orderData.items?.forEach((item, index) => {
+    orderData.items?.forEach((item, index: number) => {
       if (!item.recipe_id) {
         errors.push(`Item ${index + 1}: Recipe is required`)
       }

@@ -61,7 +61,7 @@ export function CostBreakdownCard({ calculationResult, formatCurrency, includeOp
           <div className="mt-6">
             <h4 className="font-medium mb-3">Rincian Per Bahan:</h4>
             <div className="space-y-2">
-              {calculationResult.costBreakdown.ingredientBreakdown.map((ingredient, index) => (
+              {calculationResult.costBreakdown.ingredientBreakdown.map((ingredient, index: number) => (
                 <div key={index} className="flex items-center justify-between text-sm">
                   <span>{ingredient.ingredientName}</span>
                   <div className="flex items-center gap-2">

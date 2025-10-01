@@ -77,7 +77,7 @@ export default function RecipesPage({
       if (fetchedRecipes.length > 0) {
         setSelectedRecipe(fetchedRecipes[0])
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recipes:', error)
     } finally {
       setLoading(false)

@@ -116,7 +116,7 @@ export function WeightedAverageCostAnalysis({
                 {formatCurrency(pricingInsights.stockValue.moving)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {ingredient.current_stock || 0} {ingredient.unit}
+                {ingredient.current_stock ?? 0 || 0} {ingredient.unit}
               </p>
             </div>
           </div>
@@ -273,7 +273,7 @@ export function WeightedAverageCostAnalysis({
                     Belum ada riwayat pembelian
                   </p>
                 ) : (
-                  weightedAvgData.purchaseHistory.map((purchase, index) => (
+                  weightedAvgData.purchaseHistory.map((purchase, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <p className="font-medium">
@@ -316,7 +316,7 @@ export function WeightedAverageCostAnalysis({
                     Tidak ada stock layers
                   </p>
                 ) : (
-                  fifoData.stockLayers.map((layer, index) => (
+                  fifoData.stockLayers.map((layer, index: number) => (
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div>
                         <p className="font-medium">
@@ -337,7 +337,7 @@ export function WeightedAverageCostAnalysis({
                         </p>
                         <div className="w-24 mt-1">
                           <Progress 
-                            value={(layer.quantity / (ingredient.current_stock || 1)) * 100} 
+                            value={(layer.quantity / (ingredient.current_stock ?? 0 || 1)) * 100} 
                             className="h-2"
                           />
                         </div>
@@ -352,7 +352,7 @@ export function WeightedAverageCostAnalysis({
 
         <TabsContent value="recommendations" className="space-y-4">
           <div className="space-y-4">
-            {pricingInsights.recommendations.map((recommendation, index) => (
+            {pricingInsights.recommendations.map((recommendation, index: number) => (
               <Alert key={index}>
                 <Info className="h-4 w-4" />
                 <AlertDescription>

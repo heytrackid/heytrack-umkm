@@ -117,7 +117,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       }
 
       setGeneratedMessage(result.message);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating message:', error);
       toast.error('Gagal generate pesan. Coba template lain.');
     }
@@ -141,7 +141,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Gagal menyalin text');
     }
   };

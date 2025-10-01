@@ -125,7 +125,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setPricingState(prev => ({
         ...prev,
@@ -165,7 +165,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setInventoryState(prev => ({
         ...prev,
@@ -205,7 +205,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setCustomerState(prev => ({
         ...prev,
@@ -256,7 +256,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setFinancialState(prev => ({
         ...prev,
@@ -305,7 +305,7 @@ export function useAIPowered() {
                 analysis: pricingAnalysis,
                 priority: 'high'
               })
-            } catch (error) {
+            } catch (error: any) {
               console.warn(`Pricing analysis failed for ${recipe.name}:`, error)
             }
           }
@@ -331,14 +331,14 @@ export function useAIPowered() {
             analysis: inventoryOptimization,
             priority: 'medium'
           })
-        } catch (error) {
+        } catch (error: any) {
           console.warn('Inventory optimization failed:', error)
         }
       }
 
       return insights
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Smart insights generation failed:', error)
       return []
     }

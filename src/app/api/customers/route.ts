@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in GET /api/customers:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(data, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in POST /api/customers:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

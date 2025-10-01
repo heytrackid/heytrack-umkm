@@ -90,7 +90,7 @@ Fokus pada konteks bisnis Indonesia, daya beli masyarakat, dan tren pasar F&B lo
     try {
       const response = await this.callAI(prompt, 'pricing-analysis');
       return JSON.parse(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Pricing analysis error:', error);
       // Return fallback analysis
       return this.generateFallbackPricing(data, totalCost);

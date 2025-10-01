@@ -274,7 +274,7 @@ export class ProductionPlanningSystem {
       if (ingredient && totalRequired > ingredient.current_stock) {
         conflicts.push({
           type: 'ingredient_shortage',
-          description: `Insufficient ${ingredient.name}: need ${totalRequired} ${ingredient.unit}, have ${ingredient.current_stock} ${ingredient.unit}`,
+          description: `Insufficient ${ingredient.name}: need ${totalRequired} ${ingredient.unit}, have ${ingredient.current_stock ?? 0} ${ingredient.unit}`,
           affectedTasks: tasks
             .filter(task => task.ingredientRequirements.some(req => req.ingredientId === ingredientId))
             .map(task => task.id)

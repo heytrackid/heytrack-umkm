@@ -56,7 +56,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
       } else {
         console.error('Invalid pricing analysis result')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing pricing:', error)
       // Set fallback analysis to prevent UI breaks
       setAnalysis(null)
@@ -306,7 +306,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {recipe.recipe_ingredients?.map((ri, index) => {
+                {recipe.recipe_ingredients?.map((ri, _index) => {
                   const cost = ri.ingredient.price_per_unit * ri.quantity
                   const percentage = (cost / analysis.breakdown.ingredientCost) * 100
                   return (

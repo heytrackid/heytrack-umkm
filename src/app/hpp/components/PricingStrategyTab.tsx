@@ -214,7 +214,7 @@ export default function PricingStrategyTab({
         </CardHeader>
         <CardContent>
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-4'}`}>
-            {marginCategories.map((category, index) => (
+            {marginCategories.map((category, index: number) => (
               <Card key={index} className="border-2">
                 <CardContent className="p-4">
                   <div className="space-y-2">

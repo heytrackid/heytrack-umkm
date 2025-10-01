@@ -99,7 +99,7 @@ export default function ProductionCapacityManager({
       setConstraints(currentConstraints)
       setOriginalConstraints(currentConstraints)
       calculateEfficiencyMetrics(currentConstraints)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading constraints:', error)
       toast.error('Failed to load production capacity settings')
     } finally {
@@ -173,7 +173,7 @@ export default function ProductionCapacityManager({
       calculateEfficiencyMetrics(constraints)
       onCapacityUpdate?.(constraints)
       toast.success('Production capacity updated successfully')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving constraints:', error)
       toast.error('Failed to save production capacity settings')
     } finally {
@@ -488,7 +488,7 @@ export default function ProductionCapacityManager({
                 <div className="space-y-4">
                   <h4 className="font-semibold">Break Times</h4>
                   
-                  {constraints.break_times.map((breakTime, index) => (
+                  {constraints.break_times.map((breakTime, index: number) => (
                     <div key={index} className="flex items-center gap-2 p-2 border rounded">
                       <span className="text-sm">
                         {breakTime.start} - {breakTime.end}
@@ -558,7 +558,7 @@ export default function ProductionCapacityManager({
                     {/* Recommendations */}
                     <div className="space-y-2">
                       <h4 className="font-semibold">Optimization Recommendations</h4>
-                      {efficiencyMetrics.recommendations.map((rec, index) => (
+                      {efficiencyMetrics.recommendations.map((rec, index: number) => (
                         <div key={index} className="flex items-start gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded">
                           <Zap className="h-4 w-4 text-gray-600 dark:text-gray-400 mt-0.5 flex-shrink-0" />
                           <span className="text-sm">{rec}</span>

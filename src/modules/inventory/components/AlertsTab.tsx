@@ -44,7 +44,7 @@ export function AlertsTab({ items, onReorderTriggered }: AlertsTabProps) {
 
   return (
     <div className="space-y-4">
-      {alertItems.map((item, index) => (
+      {alertItems.map((item, index: number) => (
         <Alert key={index} className={item.status === 'critical' ? 'border-red-200 bg-gray-100 dark:bg-gray-800' : 'border-yellow-200 bg-gray-100 dark:bg-gray-800'}>
           {item.status === 'critical' ? (
             <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -57,7 +57,7 @@ export function AlertsTab({ items, onReorderTriggered }: AlertsTabProps) {
                 <strong>{item.ingredient.name}</strong> - Status: {item.status}
                 <br />
                 <span className="text-sm">
-                  Stok: {item.ingredient.current_stock} {item.ingredient.unit}
+                  Stok: {item.ingredient.current_stock ?? 0} {item.ingredient.unit}
                   {item.daysRemaining !== Infinity && ` (${item.daysRemaining} hari lagi)`}
                 </span>
               </div>

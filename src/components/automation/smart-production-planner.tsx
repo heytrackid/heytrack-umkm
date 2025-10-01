@@ -74,7 +74,7 @@ export function SmartProductionPlanner({
 
       const plan = automationEngine.generateProductionPlan(orderData, recipes, inventory)
       setProductionPlan(plan)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating production plan:', error)
     } finally {
       setLoading(false)

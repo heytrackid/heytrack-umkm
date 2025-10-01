@@ -191,7 +191,7 @@ export class HPPCalculator {
    * Calculate low stock ingredients that need restocking
    */
   static checkLowStockIngredients(ingredients: Ingredient[]): Ingredient[] {
-    return ingredients.filter(ingredient => ingredient.current_stock <= ingredient.min_stock)
+    return ingredients.filter(ingredient => ingredient.current_stock ?? 0 <= ingredient.min_stock)
   }
 
   /**

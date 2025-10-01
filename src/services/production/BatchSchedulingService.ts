@@ -157,7 +157,7 @@ export class BatchSchedulingService {
         warnings,
         suggestions
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in batch scheduling:', error)
       throw error
     }
@@ -200,7 +200,7 @@ export class BatchSchedulingService {
           batch.status = 'blocked'
           scheduledBatches.push(batch)
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error scheduling batch ${batch.id}:`, error)
         batch.status = 'blocked'
         scheduledBatches.push(batch)

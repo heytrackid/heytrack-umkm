@@ -90,7 +90,7 @@ export class WeightedAverageCostService {
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     
     const stockLayers: StockLayer[] = []
-    let remainingStock = ingredient.current_stock || 0
+    let remainingStock = ingredient.current_stock ?? 0 || 0
 
     // Process purchases (FIFO layers)
     const purchases = transactions.filter(t => t.type === 'PURCHASE')
@@ -188,7 +188,7 @@ export class WeightedAverageCostService {
       })
     }
 
-    const finalStock = ingredient.current_stock || 0
+    const finalStock = ingredient.current_stock ?? 0 || 0
     const stockValue = finalStock * currentAveragePrice
 
     return {

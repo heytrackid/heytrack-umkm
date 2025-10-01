@@ -105,7 +105,7 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
         
         setNotifications([...formattedNotifications, ...additionalNotifications])
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Error fetching smart notifications (non-critical):', error)
       // Silently fail - notifications are not critical
     } finally {

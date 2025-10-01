@@ -260,7 +260,7 @@ export function validateFormData<T>(schema: z.ZodSchema<T>, data: unknown): {
   try {
     const result = schema.parse(data)
     return { success: true, data: result }
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.issues }
     }

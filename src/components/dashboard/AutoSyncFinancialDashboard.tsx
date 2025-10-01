@@ -291,7 +291,7 @@ export default function AutoSyncFinancialDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.recommendations.recommendations.map((rec, index) => (
+              {data.recommendations.recommendations.map((rec, index: number) => (
                 <Alert key={index} className={rec.includes('✅') ? 'border-green-200 bg-green-50' : ''}>
                   <AlertDescription className="flex items-center">
                     {rec.includes('✅') ? 
@@ -357,7 +357,7 @@ export default function AutoSyncFinancialDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.recentTransactions.slice(0, 5).map((tx, index) => (
+              {data.recentTransactions.slice(0, 5).map((tx, index: number) => (
                 <div key={tx.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-sm font-medium">

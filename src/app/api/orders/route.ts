@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     }))
 
     return NextResponse.json(mappedData)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in GET /api/orders:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(orderData, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in POST /api/orders:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

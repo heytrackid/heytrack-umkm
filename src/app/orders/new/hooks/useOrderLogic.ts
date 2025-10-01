@@ -78,7 +78,7 @@ export const useOrderLogic = () => {
         const data = await response.json()
         setAvailableRecipes(data.recipes)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch recipes:', error)
     } finally {
       setLoading(false) // Set loading to false after fetch
@@ -92,7 +92,7 @@ export const useOrderLogic = () => {
         const data = await response.json()
         setCustomers(data.customers)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch customers:', error)
     }
   }

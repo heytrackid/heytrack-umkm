@@ -36,7 +36,7 @@ export function InsightsTab({ stats, analysis, usageData, ingredients }: Insight
             <div className="font-medium text-green-700 mb-1">Optimization Potential</div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {analysis.filter(a => a.status === 'overstocked').length} item overstocked,
-              bisa hemat {formatCurrency(analysis.filter(a => a.status === 'overstocked').reduce((sum, a) => sum + ((a.ingredient.current_stock - a.ingredient.min_stock * 2) * a.ingredient.price_per_unit), 0))}
+              bisa hemat {formatCurrency(analysis.filter(a => a.status === 'overstocked').reduce((sum, a) => sum + ((a.ingredient.current_stock ?? 0 - a.ingredient.min_stock ?? 0 * 2) * a.ingredient.price_per_unit), 0))}
             </div>
           </div>
 
@@ -60,7 +60,7 @@ export function InsightsTab({ stats, analysis, usageData, ingredients }: Insight
               if (!ingredient) return null
 
               const dailyUsage = usage / 30
-              const daysLeft = ingredient.current_stock / dailyUsage
+              const daysLeft = ingredient.current_stock ?? 0 / dailyUsage
 
               return (
                 <div key={ingredientId} className="flex justify-between items-center text-sm">

@@ -149,7 +149,7 @@ export const useRoutePreloading = () => {
       const endTime = performance.now()
       console.log(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
       
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`⚠️ Failed to preload resources for ${currentRoute}:`, error)
     }
   }, [pathname, router])

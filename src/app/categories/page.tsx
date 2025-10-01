@@ -372,7 +372,7 @@ export default function CategoriesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1 max-w-48">
-                          {category.commonIngredients.slice(0, 3).map((ingredient, index) => (
+                          {category.commonIngredients.slice(0, 3).map((ingredient, index: number) => (
                             <Badge key={index} variant="secondary" className="text-xs">
                               {ingredient}
                             </Badge>
@@ -506,7 +506,7 @@ export default function CategoriesPage() {
       <div className="space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
-            {getBreadcrumbItems().map((item, index) => (
+            {getBreadcrumbItems().map((item, index: number) => (
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (

@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
       message: `Inventory auto-update completed for ${action}`
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in inventory auto-update:', error)
     return NextResponse.json(
       { error: 'Failed to update inventory' },
@@ -202,12 +202,12 @@ async function checkLowStockAlerts(supabase: any, results: any[]) {
         ingredient_id: ingredient.id,
         ingredient_name: ingredient.name,
         current_stock: ingredient.stock,
-        min_stock: ingredient.min_stock,
+        min_stock: ingredient.min_stock ?? 0,
         unit: ingredient.unit,
-        severity: ingredient.stock <= ingredient.min_stock * 0.5 ? 'critical' : 'warning',
-        message: ingredient.stock <= ingredient.min_stock * 0.5
+        severity: ingredient.stock <= ingredient.min_stock ?? 0 * 0.5 ? 'critical' : 'warning',
+        message: ingredient.stock <= ingredient.min_stock ?? 0 * 0.5
           ? `KRITIS: ${ingredient.name} hanya tersisa ${ingredient.stock} ${ingredient.unit}`
-          : `PERINGATAN: ${ingredient.name} mendekati minimum stock (${ingredient.stock}/${ingredient.min_stock} ${ingredient.unit})`
+          : `PERINGATAN: ${ingredient.name} mendekati minimum stock (${ingredient.stock}/${ingredient.min_stock ?? 0} ${ingredient.unit})`
       })
     }
   }
@@ -254,7 +254,7 @@ export async function GET(request: NextRequest) {
       }
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in GET /api/inventory/auto-update:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

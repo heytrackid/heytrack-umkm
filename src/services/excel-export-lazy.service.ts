@@ -79,7 +79,7 @@ export class LazyExcelExportService {
       
       const defaultFileName = `HeyTrack-Export-${new Date().toISOString().split('T')[0]}.xlsx`
       saveAs(blob, fileName || defaultFileName)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Excel export failed:', error)
       throw new Error('Failed to export Excel file')
     }
@@ -154,8 +154,8 @@ export class LazyExcelExportService {
             nama: ingredient.name,
             satuan: ingredient.unit || '',
             harga_per_unit: ingredient.cost_per_unit || 0,
-            stok_minimum: ingredient.min_stock || 0,
-            stok_saat_ini: ingredient.current_stock || 0,
+            stok_minimum: ingredient.min_stock ?? 0 || 0,
+            stok_saat_ini: ingredient.current_stock ?? 0 || 0,
             supplier: ingredient.supplier || '',
             deskripsi: ingredient.description || '',
             dibuat: ingredient.created_at || '',
@@ -251,7 +251,7 @@ export class LazyExcelExportService {
       ]
 
       return sheets
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch data for export:', error)
       throw new Error('Failed to fetch data for export')
     }

@@ -131,7 +131,7 @@ export function ChartDashboardWithProgressiveLoading({
 
   return (
     <div className="space-y-6">
-      {sortedCharts.map((chart, index) => {
+      {sortedCharts.map((chart, index: number) => {
         // Stagger loading times based on priority
         const loadingDelay = chart.priority === 'high' ? 0 : chart.priority === 'medium' ? 200 : 400
 

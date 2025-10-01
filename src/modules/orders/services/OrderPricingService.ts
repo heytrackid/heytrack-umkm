@@ -122,7 +122,7 @@ export class OrderPricingService {
         total_profit,
         overall_margin
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calculating order pricing:', error)
       throw new Error('Failed to calculate order pricing')
     }

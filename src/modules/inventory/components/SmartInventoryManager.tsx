@@ -67,7 +67,7 @@ export function SmartInventoryManager({
       }))
       
       setAnalysis(transformedAnalysis)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing inventory:', error)
     } finally {
       setLoading(false)
@@ -109,7 +109,7 @@ export function SmartInventoryManager({
     critical: analysis.filter(a => a.status === 'critical').length,
     low: analysis.filter(a => a.status === 'warning').length,
     needReorder: analysis.filter(a => a.reorderRecommendation.shouldReorder).length,
-    totalValue: analysis.reduce((sum, a) => sum + (a.ingredient.current_stock * a.ingredient.price_per_unit), 0)
+    totalValue: analysis.reduce((sum, a) => sum + (a.ingredient.current_stock ?? 0 * a.ingredient.price_per_unit), 0)
   }
 
   if (loading) {

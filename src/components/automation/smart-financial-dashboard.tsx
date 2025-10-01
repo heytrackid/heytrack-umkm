@@ -69,7 +69,7 @@ export function SmartFinancialDashboard({
         data.inventory
       )
       setAnalysis(financialAnalysis)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing financial health:', error)
     } finally {
       setLoading(false)
@@ -460,7 +460,7 @@ export function SmartFinancialDashboard({
                     score: Math.min(metrics.netMargin * 5, 100),
                     color: 'bg-orange-500'
                   }
-                ].map((item, index) => (
+                ].map((item, _index) => (
                   <div key={index} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{item.name}</span>
@@ -541,7 +541,7 @@ export function SmartFinancialDashboard({
                     priority: revenueProgress < 80 ? 'high' : 'medium',
                     action: 'grow_revenue'
                   }
-                ].map((action, index) => (
+                ].map((action, _index) => (
                   <div key={index} className="p-3 border rounded-lg">
                     <div className="flex justify-between items-start mb-2">
                       <div className="font-medium">{action.title}</div>

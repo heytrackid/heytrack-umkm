@@ -54,7 +54,7 @@ export class QueryCache {
       })
 
       return result
-    } catch (error) {
+    } catch (error: any) {
       // If fresh query fails, return stale cache if available
       if (cached) {
         console.warn(`Query failed for ${table}, returning stale cache`, error)
@@ -240,7 +240,7 @@ export const warmUpCache = async () => {
     ])
     
     console.log('✅ Cache warm-up completed')
-  } catch (error) {
+  } catch (error: any) {
     console.warn('⚠️ Cache warm-up failed:', error)
   }
 }

@@ -504,7 +504,7 @@ export function useSupabaseBulkOperations<T = any>(
       const responses = await Promise.all(promises);
       
       // Check if all requests were successful
-      responses.forEach((response, index) => {
+      responses.forEach((response, index: number) => {
         if (!response.ok) {
           throw new Error(`Failed to delete record with id: ${ids[index]}`);
         }

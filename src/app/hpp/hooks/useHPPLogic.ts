@@ -47,7 +47,7 @@ export const useHPPLogic = () => {
       
       // Show success (you can add toast notification here)
       alert('Recipe updated successfully!')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating recipe:', error)
       alert('Failed to update recipe')
     } finally {

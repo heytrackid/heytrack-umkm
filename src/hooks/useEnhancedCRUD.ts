@@ -91,7 +91,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       handleSuccess('create')
       return result
-    } catch (error) {
+    } catch (error: any) {
       handleError(error as Error, 'create')
       throw error
     } finally {
@@ -131,7 +131,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       handleSuccess('update')
       return result
-    } catch (error) {
+    } catch (error: any) {
       handleError(error as Error, 'update')
       throw error
     } finally {
@@ -172,7 +172,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       handleSuccess('delete')
       return true
-    } catch (error) {
+    } catch (error: any) {
       handleError(error as Error, 'delete')
       throw error
     } finally {
@@ -208,7 +208,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       return data
-    } catch (error) {
+    } catch (error: any) {
       handleError(error as Error, 'create')
       throw error
     } finally {
@@ -253,7 +253,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       return results
-    } catch (error) {
+    } catch (error: any) {
       handleError(error as Error, 'update')
       throw error
     } finally {
@@ -289,7 +289,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       return true
-    } catch (error) {
+    } catch (error: any) {
       handleError(error as Error, 'delete')
       throw error
     } finally {
@@ -358,7 +358,7 @@ export function useAsyncOperation() {
       }
 
       return result
-    } catch (error) {
+    } catch (error: any) {
       const errorMsg = error instanceof Error ? error.message : 'Terjadi kesalahan tak terduga'
       setError(errorMsg)
 

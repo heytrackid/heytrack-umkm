@@ -40,7 +40,7 @@ export async function GET(
 
     return createSuccessResponse(data)
 
-  } catch (error) {
+  } catch (error: any) {
     return handleDatabaseError(error)
   }
 }
@@ -80,7 +80,7 @@ export async function PUT(
 
         return createSuccessResponse(data, 'Ingredient berhasil diupdate')
 
-      } catch (error) {
+      } catch (error: any) {
         return handleDatabaseError(error)
       }
     }
@@ -139,7 +139,7 @@ export async function DELETE(
 
     return createSuccessResponse(null, 'Ingredient berhasil dihapus')
 
-  } catch (error) {
+  } catch (error: any) {
     return handleDatabaseError(error)
   }
 }

@@ -10,7 +10,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : initialValue
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`Error reading localStorage key"${key}":`, error)
       return initialValue
     }
@@ -27,7 +27,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`Error setting localStorage key"${key}":`, error)
     }
   }
@@ -39,7 +39,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.warn(`Error removing localStorage key"${key}":`, error)
     }
   }
@@ -52,7 +52,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (e.key === key && e.newValue !== null) {
         try {
           setStoredValue(JSON.parse(e.newValue))
-        } catch (error) {
+        } catch (error: any) {
           console.warn(`Error parsing localStorage value for key"${key}":`, error)
         }
       }

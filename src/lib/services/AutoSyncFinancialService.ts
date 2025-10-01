@@ -94,7 +94,7 @@ export class AutoSyncFinancialService {
         totalErrors: 0, // Could be enhanced to track actual errors
         syncHealth
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getSyncStatus:', error)
       return {
         isEnabled: false,
@@ -133,7 +133,7 @@ export class AutoSyncFinancialService {
         source: record.metadata?.source || 'manual',
         reference: record.reference || 'N/A'
       }))
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getRecentSyncedTransactions:', error)
       return []
     }
@@ -220,7 +220,7 @@ export class AutoSyncFinancialService {
 
       console.log(`Manual sync successful for transaction ${transactionId}`)
       return true
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in manualSyncStockTransaction:', error)
       return false
     }
@@ -310,7 +310,7 @@ export class AutoSyncFinancialService {
         missingSync,
         healthScore: Math.max(healthScore, 0)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting sync recommendations:', error)
       return {
         recommendations: ['Error menganalisis sync status'],
@@ -398,7 +398,7 @@ export class AutoSyncFinancialService {
         expenseBreakdown,
         recentTransactions
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getCashflowSummary:', error)
       return {
         totalExpenses: 0,

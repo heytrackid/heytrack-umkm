@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       result
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Action execution error:', error);
     
     // More detailed error logging
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Business insights error:', error);
     return NextResponse.json(
       { error: 'Failed to get business insights' },

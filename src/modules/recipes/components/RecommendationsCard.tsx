@@ -25,7 +25,7 @@ export function RecommendationsCard({ calculationResult }: RecommendationsCardPr
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {calculationResult.recommendations.map((recommendation, index) => (
+          {calculationResult.recommendations.map((recommendation, index: number) => (
             <Alert key={index}>
               <Info className="h-4 w-4" />
               <AlertDescription>

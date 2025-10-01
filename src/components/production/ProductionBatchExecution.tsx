@@ -232,7 +232,7 @@ export default function ProductionBatchExecution({
 
       onBatchUpdate?.(batchId, 'completed', `Batch completed at ${format(completedAt, 'HH:mm')}`)
       toast.success(`Completed production of ${state.batch.recipe_name}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error completing batch:', error)
       toast.error('Failed to complete batch')
     }
@@ -540,7 +540,7 @@ export default function ProductionBatchExecution({
                         <ScrollArea className="h-32 border rounded p-2">
                           {state?.notes.length ? (
                             <div className="space-y-1 text-sm">
-                              {state.notes.map((note, index) => (
+                              {state.notes.map((note, index: number) => (
                                 <p key={index} className="text-muted-foreground">
                                   {note}
                                 </p>

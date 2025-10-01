@@ -37,7 +37,7 @@ export class InventoryUpdateService {
         for (const ri of recipe.recipe_ingredients || []) {
           if (ri.ingredient) {
             const usedQuantity = ri.quantity * item.quantity
-            const newStock = Math.max(0, (ri.ingredient.current_stock || 0) - usedQuantity)
+            const newStock = Math.max(0, (ri.ingredient.current_stock ?? 0 || 0) - usedQuantity)
 
             await supabase
               .from('ingredients')
@@ -62,7 +62,7 @@ export class InventoryUpdateService {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating inventory for order:', error)
       throw new Error('Failed to update inventory')
     }

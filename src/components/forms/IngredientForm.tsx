@@ -55,7 +55,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
       if (!initialData) {
         form.reset()
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan data bahan',

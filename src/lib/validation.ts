@@ -6,33 +6,33 @@ export function validateInput(data: any, rules?: any): { isValid: boolean; error
     const value = data[field]
     
     // Required check
-    if (rule.required && (!value || value === '')) {
+    if (rule?.required && (!value || value === '')) {
       errors.push(`validation.fieldRequired`)
       continue
     }
     
     if (value) {
       // Type check
-      if (rule.type && typeof value !== rule.type) {
+      if (rule?.type && typeof value !== rule?.type) {
         errors.push(`validation.invalidType`)
       }
       
       // Length check
-      if (rule.minLength && value.length < rule.minLength) {
+      if (rule?.minLength && value.length < rule?.minLength) {
         errors.push(`validation.minLength`)
       }
       
-      if (rule.maxLength && value.length > rule.maxLength) {
+      if (rule?.maxLength && value.length > rule?.maxLength) {
         errors.push(`validation.maxLength`)
       }
       
       // Pattern check
-      if (rule.pattern && !rule.pattern.test(data[field])) {
+      if (rule?.pattern && !rule?.pattern?.test(data[field])) {
         errors.push(`validation.invalidFormat`)
       }
       
       // Email check
-      if (rule.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data[field])) {
+      if (rule?.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data[field])) {
         errors.push(`validation.invalidEmail`)
       }
       

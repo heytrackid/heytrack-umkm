@@ -263,7 +263,7 @@ export default function HPPReviewPage() {
                     <div className="pt-4 border-t">
                       <h4 className="font-medium mb-2">Alasan Rekomendasi:</h4>
                       <ul className="space-y-1">
-                        {item.reasons.map((reason, index) => (
+                        {item.reasons.map((reason, index: number) => (
                           <li key={index} className="text-sm text-muted-foreground flex items-start">
                             <span className="mr-2">•</span>
                             <span>{reason}</span>

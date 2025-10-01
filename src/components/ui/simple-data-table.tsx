@@ -307,7 +307,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
           /* Mobile Card Layout */
           <div className="space-y-4">
             <div className="space-y-3">
-              {paginatedData.map((item, index) => (
+              {paginatedData.map((item, index: number) => (
                 <Card key={index} className="border border-gray-200">
                   <CardContent className="p-4">
                     <div className="space-y-2">
@@ -415,7 +415,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((item, index) => (
+                  {paginatedData.map((item, index: number) => (
                     <tr key={index} className="border-b hover:bg-muted/50">
                       {columns.map(col => (
                         <td

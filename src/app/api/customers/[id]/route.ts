@@ -30,7 +30,7 @@ export async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in GET /api/customers/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -88,7 +88,7 @@ export async function PUT(
     }
 
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in PUT /api/customers/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -134,7 +134,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: 'Customer deleted successfully' })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in DELETE /api/customers/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

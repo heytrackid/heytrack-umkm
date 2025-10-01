@@ -162,7 +162,7 @@ export function InventoryTrendsChart({
         <Legend 
           content={({ payload }) => (
             <div className="flex flex-wrap justify-center gap-4 pt-4">
-              {payload?.map((entry, index) => (
+              {payload?.map((entry, index: number) => (
                 <div key={`legend-${index}`} className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"

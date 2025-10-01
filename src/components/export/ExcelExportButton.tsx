@@ -66,7 +66,7 @@ export default function ExcelExportButton({
         setIsDialogOpen(false)
         setExportStatus('idle')
       }, 2000)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Export failed:', error)
       setExportStatus('error')
     } finally {
@@ -149,7 +149,7 @@ export default function ExcelExportButton({
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {exportSheets.map((sheet, index) => {
+                {exportSheets.map((sheet, index: number) => {
                   const Icon = sheet.icon
                   return (
                     <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">

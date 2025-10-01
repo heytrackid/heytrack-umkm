@@ -14,7 +14,7 @@ export class RecipeAvailabilityService {
       if (!ri.ingredient || !ri.ingredient.is_active) return false
 
       // Check if current stock is above reorder point
-      const currentStock = ri.ingredient.current_stock || 0
+      const currentStock = ri.ingredient.current_stock ?? 0 || 0
       const reorderPoint = ri.ingredient.reorder_point || 0
       const requiredQuantity = ri.quantity || 0
 
@@ -91,7 +91,7 @@ export class RecipeAvailabilityService {
       )
 
       return recipeOptions
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching available recipes:', error)
       throw new Error('Failed to fetch available recipes')
     }

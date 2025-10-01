@@ -100,7 +100,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         throw new Error(result.error || 'Unknown API error');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
       setMessages(prev => [...prev, {
         id: `error_${Date.now()}`,
@@ -167,7 +167,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         throw new Error(apiResult.error || 'Unknown action error');
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error executing action:', error);
       setMessages(prev => [...prev, {
         id: `error_${Date.now()}`,

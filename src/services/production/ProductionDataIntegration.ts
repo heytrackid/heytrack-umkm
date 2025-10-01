@@ -150,7 +150,7 @@ export class ProductionDataIntegration {
         resourceConstraints,
         forecastedDemand
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching production demand:', error)
       throw error
     }
@@ -246,7 +246,7 @@ export class ProductionDataIntegration {
       }
 
       return schedule
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating production schedule:', error)
       throw error
     }
@@ -301,7 +301,7 @@ export class ProductionDataIntegration {
           .update({ status: 'in_production' })
           .eq('id', orderId)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating production progress:', error)
       throw error
     }
@@ -344,7 +344,7 @@ export class ProductionDataIntegration {
         skill_level: 'intermediate',
         profit_margin: recipe.profit_margin || 30
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting recipe requirements:', error)
       return null
     }
@@ -380,7 +380,7 @@ export class ProductionDataIntegration {
     try {
       // Get current inventory levels
       const { data: inventory } = await supabase
-        .from('inventory')
+        .from('ingredients')
         .select('*')
 
       // Get recipe ingredient requirements
@@ -392,7 +392,7 @@ export class ProductionDataIntegration {
       const blocking: string[] = []
       
       for (const ingredient of recipeIngredients || []) {
-        const inventoryItem = inventory?.find(inv => inv.ingredient_id === ingredient.ingredient_id)
+        const inventoryItem = inventory?.find(inv => inv.id === ingredient.ingredient_id)
         const requiredQuantity = ingredient.quantity * quantity
         
         if (!inventoryItem || inventoryItem.current_stock < requiredQuantity) {
@@ -401,7 +401,7 @@ export class ProductionDataIntegration {
       }
 
       return blocking
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking blocking ingredients:', error)
       return []
     }
@@ -439,11 +439,11 @@ export class ProductionDataIntegration {
 
       // Check against current inventory
       const { data: inventory } = await supabase
-        .from('inventory')
+        .from('ingredients')
         .select('*')
 
       for (const [ingredientId, requirement] of ingredientRequirements) {
-        const inventoryItem = inventory?.find(inv => inv.ingredient_id === ingredientId)
+        const inventoryItem = inventory?.find(inv => inv.id === ingredientId)
         
         if (!inventoryItem || inventoryItem.current_stock < requirement.required) {
           const shortage = requirement.required - (inventoryItem?.current_stock || 0)
@@ -468,7 +468,7 @@ export class ProductionDataIntegration {
         capacity_warnings.push(`Very high production volume: ${totalBatches} total batches scheduled`)
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking resource constraints:', error)
     }
 

@@ -42,7 +42,7 @@ export default function OrderItemsStep({
         </div>
       ) : (
         <div className="space-y-4">
-          {orderItems.map((item, index) => (
+          {orderItems.map((item, index: number) => (
             <div key={index} className="border rounded-lg p-4">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
                 <div>

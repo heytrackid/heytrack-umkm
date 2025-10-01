@@ -239,7 +239,7 @@ export default function OptimizedDashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat, index) => (
+          {stats.map((stat, index: number) => (
             <StatsCard
               key={stat.title}
               title={stat.title}

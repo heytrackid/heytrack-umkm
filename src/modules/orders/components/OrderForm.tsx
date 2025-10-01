@@ -332,7 +332,7 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
             </div>
           ) : (
             <div className="space-y-3">
-              {orderItems.map((item, index) => (
+              {orderItems.map((item, index: number) => (
                 <div key={item.id || index} className="border rounded-lg overflow-hidden">
                   <div className="block sm:hidden">
                     <div className="p-3 space-y-3">

@@ -379,7 +379,7 @@ export default function AIInsightsPage() {
                       Action Items
                     </h4>
                     <div className="space-y-2">
-                      {insight.actionItems.slice(0, 3).map((action, index) => (
+                      {insight.actionItems.slice(0, 3).map((action, index: number) => (
                         <div key={index} className="flex items-center gap-2 text-sm">
                           <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0" />
                           <span className="text-gray-700">{action}</span>
@@ -400,7 +400,7 @@ export default function AIInsightsPage() {
                       Expected Results
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {insight.metrics.map((metric, index) => (
+                      {insight.metrics.map((metric, index: number) => (
                         <span 
                           key={index} 
                           className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded"

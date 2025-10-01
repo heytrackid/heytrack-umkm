@@ -74,7 +74,7 @@ const PerformanceMonitor = memo(() => {
           
           try {
             lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
-          } catch (error) {
+          } catch (error: any) {
             console.warn('LCP observation not supported')
           }
 
@@ -88,7 +88,7 @@ const PerformanceMonitor = memo(() => {
           
           try {
             fidObserver.observe({ entryTypes: ['first-input'] })
-          } catch (error) {
+          } catch (error: any) {
             console.warn('FID observation not supported')
           }
 
@@ -104,7 +104,7 @@ const PerformanceMonitor = memo(() => {
           
           try {
             fcpObserver.observe({ entryTypes: ['paint'] })
-          } catch (error) {
+          } catch (error: any) {
             console.warn('FCP observation not supported')
           }
         }
@@ -140,7 +140,7 @@ const PerformanceMonitor = memo(() => {
         cacheHitRate: hitRate,
         memoryUsage: totalCacheSize
       }))
-    } catch (error) {
+    } catch (error: any) {
       console.warn('Failed to update cache metrics:', error)
     }
   }
@@ -225,7 +225,7 @@ const PerformanceMonitor = memo(() => {
       try {
         cacheMetrics.getStats()
         window.location.reload()
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to clear caches:', error)
       }
     }
@@ -316,7 +316,7 @@ const PerformanceMonitor = memo(() => {
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-gray-700">Recommendations</h4>
               <div className="space-y-1">
-                {stats.recommendations.slice(0, 3).map((rec, index) => (
+                {stats.recommendations.slice(0, 3).map((rec, index: number) => (
                   <p key={index} className="text-xs text-gray-600 leading-tight">
                     • {rec}
                   </p>

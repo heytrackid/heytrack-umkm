@@ -44,7 +44,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
       }))
       
       return result
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Calculation failed'
       setState(prev => ({ 
         ...prev, 
@@ -76,7 +76,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
       }))
       
       return result
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'FIFO calculation failed'
       setState(prev => ({ 
         ...prev, 
@@ -108,7 +108,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
       }))
       
       return result
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Moving average calculation failed'
       setState(prev => ({ 
         ...prev, 
@@ -140,7 +140,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
       }))
       
       return result
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Pricing insights generation failed'
       setState(prev => ({ 
         ...prev, 
@@ -177,7 +177,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
       options.onPriceUpdate?.(ingredient, newPrice, method)
       
       return newPrice
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Price update failed'
       setState(prev => ({ 
         ...prev, 
@@ -235,7 +235,7 @@ export function useWeightedAverageCost(options: UseWeightedAverageCostOptions = 
       }))
       
       return results
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Batch calculation failed'
       setState(prev => ({ 
         ...prev, 

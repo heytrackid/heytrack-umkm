@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API error:', error);
     return NextResponse.json(
       { 
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       conversation: []
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Get conversation error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

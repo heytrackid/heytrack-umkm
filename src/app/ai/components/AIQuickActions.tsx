@@ -96,7 +96,7 @@ export default function AIQuickActions({ onAnalyzeClick, loading = false }: AIQu
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {quickActions.map((action, index) => (
+          {quickActions.map((action, index: number) => (
             <div key={index} className="border rounded-lg p-4 hover:shadow-sm transition-all">
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-8 h-8 rounded-lg ${action.bgColor} flex items-center justify-center`}>

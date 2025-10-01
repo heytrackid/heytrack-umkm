@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in automation testing:', error)
     return NextResponse.json(
       { error: 'Test execution failed', details: error.message },
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
       version: '1.0.0'
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting automation status:', error)
     return NextResponse.json(
       { status: 'error', error: error.message },
@@ -134,7 +134,7 @@ async function testOrderCompletionWorkflow(data: any) {
       orderId: testOrderId,
       automationTriggered: true
     }
-  } catch (error) {
+  } catch (error: any) {
     return {
       test: 'order_completion',
       status: 'failed',
@@ -172,7 +172,7 @@ async function testInventoryAutomation(data: any) {
       ingredient: testIngredient.name,
       automationTriggered: true
     }
-  } catch (error) {
+  } catch (error: any) {
     return {
       test: 'inventory_automation',
       status: 'failed',
@@ -228,7 +228,7 @@ async function testSmartNotifications(data: any) {
       summary,
       totalNotifications: smartNotificationSystem.getNotifications().length
     }
-  } catch (error) {
+  } catch (error: any) {
     return {
       test: 'smart_notifications',
       status: 'failed',
@@ -263,7 +263,7 @@ async function testProductionPlanning(data: any) {
         workloadPercent: s.workloadPercent
       }))
     }
-  } catch (error) {
+  } catch (error: any) {
     return {
       test: 'production_planning',
       status: 'failed',
@@ -326,7 +326,7 @@ async function testFullIntegration(data: any) {
       notificationsCount: smartNotificationSystem.getNotifications().length
     })
 
-  } catch (error) {
+  } catch (error: any) {
     results.push({
       test: 'full_integration',
       status: 'failed',

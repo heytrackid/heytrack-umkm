@@ -224,7 +224,7 @@ export class EnhancedAutomationEngine {
         },
         margin_analysis: marginAnalysis
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Advanced HPP calculation error:', error)
       throw error
     }
@@ -305,7 +305,7 @@ export class EnhancedAutomationEngine {
         usage_predictions: usagePredictions,
         cost_optimization: costOptimization
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Intelligent inventory analysis error:', error)
       throw error
     }
@@ -373,7 +373,7 @@ export class EnhancedAutomationEngine {
         bottleneck_analysis: bottleneckAnalysis,
         profitability_forecast: profitabilityForecast
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Production optimization error:', error)
       throw error
     }
@@ -434,7 +434,7 @@ export class EnhancedAutomationEngine {
         trend_alerts: trendAlerts,
         business_insights: businessInsights
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Contextual alerts generation error:', error)
       throw error
     }
@@ -488,7 +488,7 @@ export class EnhancedAutomationEngine {
         operational_efficiency: operationalEfficiency,
         growth_strategy: growthStrategy
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Business intelligence generation error:', error)
       throw error
     }
@@ -540,12 +540,12 @@ export class EnhancedAutomationEngine {
       const ingredient = ri.ingredients as unknown as Ingredient
       const needed = ri.quantity * maxBatches
       
-      if (ingredient.current_stock < needed) {
+      if (ingredient.current_stock ?? 0 < needed) {
         limitingIngredients.push(ingredient.name)
       }
       
       // Check if approaching minimum stock
-      if (ingredient.current_stock <= ingredient.min_stock) {
+      if (ingredient.current_stock ?? 0 <= ingredient.min_stock) {
         warnings.push(`${ingredient.name} mendekati minimum stock`)
       }
     })
@@ -598,7 +598,7 @@ export class EnhancedAutomationEngine {
         reorderSuggestions,
         totalItemsNeedingAttention: analysisResult?.length || 0
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing inventory needs:', error)
       return {
         criticalItems: [],

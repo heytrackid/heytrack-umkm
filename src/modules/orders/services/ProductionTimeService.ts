@@ -62,7 +62,7 @@ export class ProductionTimeService {
         estimated_completion,
         parallel_processing_time
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calculating production time:', error)
       return {
         total_prep_time: 0,

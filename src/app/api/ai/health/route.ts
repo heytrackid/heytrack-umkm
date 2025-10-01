@@ -20,7 +20,7 @@ export async function GET() {
       }, { status: 503 })
     }
     
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({
       status: 'error',
       message: 'Health check failed',

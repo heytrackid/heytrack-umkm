@@ -56,7 +56,7 @@ export class OrderValidationService {
           }
 
           const requiredQuantity = ri.quantity * item.quantity
-          const currentStock = ri.ingredient.current_stock || 0
+          const currentStock = ri.ingredient.current_stock ?? 0 || 0
           const reorderPoint = ri.ingredient.reorder_point || 0
 
           if (currentStock < requiredQuantity) {
@@ -76,7 +76,7 @@ export class OrderValidationService {
         warnings,
         errors
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error validating order against inventory:', error)
       return {
         isValid: false,

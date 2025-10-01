@@ -52,7 +52,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
       if (!initialData) {
         form.reset()
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan catatan keuangan',

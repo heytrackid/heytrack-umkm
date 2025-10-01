@@ -80,7 +80,7 @@ export class AIService {
         summary,
         priorityActions
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting business insights:', error);
       return {
         summary: 'Unable to generate insights. Please check data and try again.',

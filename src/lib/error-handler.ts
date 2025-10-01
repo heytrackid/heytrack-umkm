@@ -107,7 +107,7 @@ export function withErrorHandler<T extends (...args: any[]) => Promise<any>>(
   return (async (...args: Parameters<T>) => {
     try {
       return await fn(...args)
-    } catch (error) {
+    } catch (error: any) {
       captureError(error as Error, context)
       throw error
     }
@@ -181,7 +181,7 @@ export async function trackPerformance<T>(
     }
 
     return result
-  } catch (error) {
+  } catch (error: any) {
     const duration = Date.now() - startTime
     captureError(error as Error, {
       extra: {

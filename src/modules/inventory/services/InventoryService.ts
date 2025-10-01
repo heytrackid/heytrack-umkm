@@ -345,7 +345,7 @@ export class InventoryService {
         })
         
         results.push({ id: update.id, success: true })
-      } catch (error) {
+      } catch (error: any) {
         results.push({ id: update.id, success: false, error: error.message })
       }
     }

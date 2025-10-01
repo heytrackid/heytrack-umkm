@@ -73,7 +73,7 @@ export function withValidation<T>(
       // Call the handler with validated data
       return await handler(req, validation.data!)
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('API Route Error:', error)
       
       if (error instanceof SyntaxError) {
@@ -127,7 +127,7 @@ export function withQueryValidation<T>(
       // Call the handler with validated query
       return await handler(req, validation.data!)
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('API Route Error:', error)
       return createErrorResponse(
         'Internal server error',
@@ -303,7 +303,7 @@ export function withAuth(
       
       return handler(req, 'user-id-placeholder')
       
-    } catch (error) {
+    } catch (error: any) {
       return createErrorResponse('Invalid authentication token', 401)
     }
   }

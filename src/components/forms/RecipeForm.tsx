@@ -44,7 +44,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
   })
 
   const { fields, append, remove } = form.watch('instructions') ? {
-    fields: form.watch('instructions').map((instruction, index) => ({ id: index.toString(), value: instruction })),
+    fields: form.watch('instructions').map((instruction, index: number) => ({ id: index.toString(), value: instruction })),
     append: (value: string) => {
       const current = form.getValues('instructions')
       form.setValue('instructions', [...current, value])
@@ -65,7 +65,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       if (!initialData) {
         form.reset()
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan resep',
@@ -207,7 +207,7 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
             error={form.formState.errors.instructions?.message}
           >
             <div className="space-y-2">
-              {fields.map((field, index) => (
+              {fields.map((field, index: number) => (
                 <div key={field.id} className="flex gap-2">
                   <div className="flex-1">
                     <Input 

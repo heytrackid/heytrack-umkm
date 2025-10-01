@@ -259,7 +259,7 @@ interface BreadcrumbItem {
 export const SmartBreadcrumbs = ({ items }: { items: BreadcrumbItem[] }) => {
   return (
     <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-      {items.map((item, index) => (
+      {items.map((item, index: number) => (
         <React.Fragment key={index}>
           {item.href ? (
             <SmartLink 

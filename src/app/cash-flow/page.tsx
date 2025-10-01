@@ -98,7 +98,7 @@ export default function CashFlowPage() {
         incomeTransactions,
         expenseTransactions,
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching cash flow data:', error)
     }
   }
@@ -200,7 +200,7 @@ export default function CashFlowPage() {
         {/* Breadcrumb */}
         <Breadcrumb>
           <BreadcrumbList>
-            {getBreadcrumbItems().map((item, index) => (
+            {getBreadcrumbItems().map((item, index: number) => (
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (

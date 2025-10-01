@@ -83,7 +83,7 @@ export default function OrderForm({
         const data = await response.json()
         setRecipes(data)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recipes:', error)
     }
   }
@@ -177,7 +177,7 @@ export default function OrderForm({
           <CardContent className="p-4">
             <h4 className="font-medium text-red-800 mb-2">{"Placeholder"}</h4>
             <ul className="list-disc list-inside text-sm text-red-700">
-              {errors.map((error, index) => (
+              {errors.map((error, index: number) => (
                 <li key={index}>{error}</li>
               ))}
             </ul>
@@ -308,7 +308,7 @@ export default function OrderForm({
             </div>
           ) : (
             <div className="space-y-4">
-              {formData.order_items.map((item, index) => (
+              {formData.order_items.map((item, index: number) => (
                 <div key={index} className="border rounded-lg p-4">
                   <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-5'}`}>
                     <div className="col-span-2">

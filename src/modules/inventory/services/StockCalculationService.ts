@@ -59,7 +59,7 @@ export class StockCalculationService {
       
       // Calculate turnover ratio
       const yearlyUsage = usageRate * 365
-      const averageStock = ingredient.current_stock + (ingredient.min_stock / 2)
+      const averageStock = ingredient.current_stock ?? 0 + (ingredient.min_stock ?? 0 / 2)
       const turnoverRatio = averageStock > 0 ? yearlyUsage / averageStock : 0
       
       // Generate recommendations
@@ -78,8 +78,8 @@ export class StockCalculationService {
         turnoverRatio,
         recommendations,
         metrics: {
-          daysOfStock: usageRate > 0 ? ingredient.current_stock / usageRate : 999,
-          stockValue: ingredient.current_stock * ingredient.price_per_unit,
+          daysOfStock: usageRate > 0 ? ingredient.current_stock ?? 0 / usageRate : 999,
+          stockValue: ingredient.current_stock ?? 0 * ingredient.price_per_unit,
           monthlyBurnRate: usageRate * 30
         }
       }
@@ -115,7 +115,7 @@ export class StockCalculationService {
     
     // Usage pattern recommendations
     if (usageRate > 0) {
-      const daysUntilOut = ingredient.current_stock / usageRate
+      const daysUntilOut = ingredient.current_stock ?? 0 / usageRate
       if (daysUntilOut < 7) {
         recommendations.push('📅 Stock akan habis dalam < 7 hari')
       }
@@ -123,7 +123,7 @@ export class StockCalculationService {
     
     // Price optimization
     if (ingredient.price_per_unit > 0) {
-      const stockValue = ingredient.current_stock * ingredient.price_per_unit
+      const stockValue = ingredient.current_stock ?? 0 * ingredient.price_per_unit
       if (stockValue > 5000000) { // 5M rupiah
         recommendations.push('💰 Nilai stock tinggi - monitor usage ketat')
       }
@@ -225,7 +225,7 @@ export class StockCalculationService {
     if (analysis.alertLevel === 'critical') score -= 40
     
     // Penalize high stock value without proportional usage
-    const stockValue = ingredient.current_stock * ingredient.price_per_unit
+    const stockValue = ingredient.current_stock ?? 0 * ingredient.price_per_unit
     if (stockValue > 2000000 && analysis.usageRate < 1) { // 2M+ rupiah, low usage
       score -= 25
     }

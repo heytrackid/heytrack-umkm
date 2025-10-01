@@ -96,7 +96,7 @@ function getCurrentCurrency(): string {
       const parsed = JSON.parse(savedSettings)
       return parsed.currency?.code || DEFAULT_CURRENCY
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error loading currency settings:', error)
   }
   return DEFAULT_CURRENCY

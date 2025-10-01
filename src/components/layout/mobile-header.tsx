@@ -216,7 +216,7 @@ export default function MobileHeader({
           {/* Custom Actions */}
           {actions && actions.length > 0 && (
             <div className="flex items-center space-x-1">
-              {actions.slice(0, 2).map((action, index) => (
+              {actions.slice(0, 2).map((action, index: number) => (
                 <div key={index}>{action}</div>
               ))}
               {actions.length > 2 && (
@@ -227,7 +227,7 @@ export default function MobileHeader({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    {actions.slice(2).map((action, index) => (
+                    {actions.slice(2).map((action, index: number) => (
                       <DropdownMenuItem key={index + 2} asChild>
                         {action}
                       </DropdownMenuItem>

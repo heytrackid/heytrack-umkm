@@ -121,8 +121,8 @@ class AutoReorderService {
 
       for (const ingredient of ingredients || []) {
         const rule = reorderRules?.find(r => r.ingredient_id === ingredient.id)
-        const currentStock = ingredient.current_stock || 0
-        const minStock = ingredient.min_stock || 0
+        const currentStock = ingredient.current_stock ?? 0 || 0
+        const minStock = ingredient.min_stock ?? 0 || 0
 
         // Check if reorder is needed
         if (this.needsReorder(currentStock, minStock, rule)) {
@@ -152,7 +152,7 @@ class AutoReorderService {
             try {
               await this.generateAutoPurchaseOrder(alert, rule, preferredSupplier)
               autoOrdersGenerated++
-            } catch (error) {
+            } catch (error: any) {
               console.error(`Failed to generate auto purchase order for ${ingredient.name}:`, error)
             }
           }
@@ -170,7 +170,7 @@ class AutoReorderService {
         manual_review_required: alerts.filter(a => !a.auto_reorder_enabled).length,
         alerts
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking reorder needs:', error)
       throw error
     }
@@ -240,7 +240,7 @@ class AutoReorderService {
         last_reorder_date: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .eq('id', rule.id)
+      .eq('id', rule?.id)
 
     return {
       ...createdPO,
@@ -325,11 +325,11 @@ class AutoReorderService {
 
   private calculateReorderQuantity(ingredient: any, rule?: ReorderRule): number {
     if (rule?.reorder_quantity) {
-      return rule.reorder_quantity
+      return rule?.reorder_quantity
     }
 
     // Default logic: reorder to 150% of minimum stock
-    return Math.ceil((ingredient.min_stock || 0) * 1.5)
+    return Math.ceil((ingredient.min_stock ?? 0 || 0) * 1.5)
   }
 
   private estimateReorderCost(quantity: number, ingredient: any): number {
@@ -339,11 +339,11 @@ class AutoReorderService {
 
   private shouldAutoReorder(alert: ReorderAlert, rule: ReorderRule): boolean {
     // Check if enough time has passed since last reorder
-    if (rule.last_reorder_date && rule.reorder_frequency_days) {
+    if (rule?.last_reorder_date && rule?.reorder_frequency_days) {
       const daysSinceLastReorder = Math.floor(
-        (Date.now() - new Date(rule.last_reorder_date).getTime()) / (1000 * 60 * 60 * 24)
+        (Date.now() - new Date(rule?.last_reorder_date).getTime()) / (1000 * 60 * 60 * 24)
       )
-      if (daysSinceLastReorder < rule.reorder_frequency_days) {
+      if (daysSinceLastReorder < rule?.reorder_frequency_days) {
         return false
       }
     }

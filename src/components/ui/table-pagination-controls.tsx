@@ -95,7 +95,7 @@ export function TablePaginationControls({
               />
             </PaginationItem>
 
-            {pages.map((page, index) => (
+            {pages.map((page, index: number) => (
               <PaginationItem key={`${page}-${index}`}>
                 {page === "ellipsis" ? (
                   <PaginationEllipsis />

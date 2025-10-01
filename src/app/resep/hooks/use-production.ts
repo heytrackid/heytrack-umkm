@@ -372,7 +372,7 @@ export function useBatchStatus(batchId: string) {
       }
 
       await updateBatch(batchId, updateData)
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to update batch status: ${error}`)
     }
   }
@@ -518,7 +518,7 @@ export function useProductionNotifications() {
   const markAsRead = async (notificationId: string) => {
     try {
       await update(notificationId, { read: true })
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to mark notification as read: ${error}`)
     }
   }
@@ -555,7 +555,7 @@ export function useTemperatureMonitoring(batchId: string) {
         ...reading,
         batch_id: batchId
       })
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to add temperature reading: ${error}`)
     }
   }

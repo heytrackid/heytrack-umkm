@@ -134,7 +134,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       await create(formData as any);
       setIsCreateModalOpen(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create ingredient:', error);
     }
   };
@@ -148,7 +148,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       setIsEditModalOpen(false);
       setSelectedIngredient(null);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update ingredient:', error);
     }
   };
@@ -160,7 +160,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       await remove(selectedIngredient.id);
       setIsDeleteDialogOpen(false);
       setSelectedIngredient(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete ingredient:', error);
     }
   };

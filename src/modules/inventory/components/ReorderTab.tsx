@@ -37,13 +37,13 @@ export function ReorderTab({ items, onReorderTriggered }: ReorderTabProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {reorderItems.map((item, index) => (
+          {reorderItems.map((item, index: number) => (
             <div key={index} className="flex justify-between items-center p-4 border rounded-lg">
               <div className="flex-1">
                 <div className="font-medium">{item.ingredient.name}</div>
                 <div className="text-sm text-muted-foreground">
-                  Current: {item.ingredient.current_stock} {item.ingredient.unit} |
-                  Min: {item.ingredient.min_stock} {item.ingredient.unit}
+                  Current: {item.ingredient.current_stock ?? 0} {item.ingredient.unit} |
+                  Min: {item.ingredient.min_stock ?? 0} {item.ingredient.unit}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   Supplier: {item.ingredient.supplier || 'Not specified'}

@@ -78,7 +78,7 @@ export class RecipeRecommendationService {
         }))
 
       return recommendations
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error getting recipe recommendations:', error)
       return []
     }

@@ -107,7 +107,7 @@ export class HPPCalculationService {
         suggestedPricing,
         profitability
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('HPP Calculation Service Error:', error)
       throw new Error(`Failed to calculate HPP: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -193,7 +193,7 @@ export class HPPCalculationService {
 
       if (error) throw error
       return true
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update recipe price error:', error)
       throw error
     }
@@ -214,7 +214,7 @@ export class HPPCalculationService {
         costTrends: costHistory,
         performance: this.calculateRecipePerformance(salesData, productionData)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Recipe analytics error:', error)
       throw error
     }

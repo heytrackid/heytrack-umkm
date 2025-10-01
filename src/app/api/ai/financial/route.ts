@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Financial API error:', error)
     return NextResponse.json(
       { 

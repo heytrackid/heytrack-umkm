@@ -75,7 +75,7 @@ export default function SmartNotificationCenter({
         )
 
         // Convert to our notification format
-        const formattedNotifications: SmartNotification[] = smartNotifications.map((notif, index) => ({
+        const formattedNotifications: SmartNotification[] = smartNotifications.map((notif, index: number) => ({
           id: `notif-${Date.now()}-${index}`,
           type: notif.type as any,
           category: notif.category as any,
@@ -159,7 +159,7 @@ export default function SmartNotificationCenter({
         if (soundEnabled && formattedNotifications.some(n => n.type === 'critical')) {
           playNotificationSound('critical')
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error generating notifications:', error)
       }
     }

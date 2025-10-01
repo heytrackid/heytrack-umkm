@@ -20,7 +20,7 @@ export const preloadChartBundle = async () => {
   try {
     await import('recharts')
     console.log('✅ Chart bundle preloaded')
-  } catch (error) {
+  } catch (error: any) {
     console.warn('❌ Failed to preload chart bundle:', error)
   }
 }
@@ -33,7 +33,7 @@ export const preloadTableBundle = async () => {
       import('@/components/ui/simple-data-table'),
     ])
     console.log('✅ Table bundle preloaded')
-  } catch (error) {
+  } catch (error: any) {
     console.warn('❌ Failed to preload table bundle:', error)
   }
 }
@@ -48,7 +48,7 @@ export const preloadModalComponent = async (modalType: string) => {
       await import('@/components/ui/dialog')
     }
     console.log(`✅ Modal ${modalType} preloaded`)
-  } catch (error) {
+  } catch (error: any) {
     console.warn(`❌ Failed to preload modal ${modalType}:`, error)
   }
 }
@@ -69,7 +69,7 @@ export const useRoutePreloading = () => {
     
     if (routesToPreload) {
       // Immediate preloading
-      routesToPreload.forEach((route, index) => {
+      routesToPreload.forEach((route, index: number) => {
         setTimeout(() => {
           preloadRoute(route)
         }, index * 100) // 100ms delay between each

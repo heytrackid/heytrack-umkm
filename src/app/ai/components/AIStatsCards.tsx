@@ -88,7 +88,7 @@ export default function AIStatsCards({ stats, loading = false }: AIStatsCardsPro
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {statCards.map((stat, index) => (
+      {statCards.map((stat, index: number) => (
         <Card key={index} className="hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">

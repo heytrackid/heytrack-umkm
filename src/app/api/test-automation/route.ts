@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ Test ${test} failed:`, error)
     return NextResponse.json(
       { 
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Custom test failed:', error)
     return NextResponse.json(
       { error: 'Custom test failed', details: error.message },

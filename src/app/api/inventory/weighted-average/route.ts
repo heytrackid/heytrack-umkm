@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Weighted Average Cost API Error:', error)
     return NextResponse.json(
       { 

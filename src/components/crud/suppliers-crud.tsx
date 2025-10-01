@@ -129,7 +129,7 @@ export function SuppliersCRUD() {
       await create(formData as SupplierInsert);
       setIsCreateModalOpen(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create supplier:', error);
     }
   };
@@ -143,7 +143,7 @@ export function SuppliersCRUD() {
       setIsEditModalOpen(false);
       setSelectedSupplier(null);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update supplier:', error);
     }
   };
@@ -155,7 +155,7 @@ export function SuppliersCRUD() {
       await remove(selectedSupplier.id);
       setIsDeleteDialogOpen(false);
       setSelectedSupplier(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to delete supplier:', error);
     }
   };

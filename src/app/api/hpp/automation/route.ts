@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in HPP automation:', error)
     return NextResponse.json(
       { error: 'HPP automation failed', details: error.message },
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting HPP automation status:', error)
     return NextResponse.json(
       { error: 'Failed to get automation status' },
@@ -224,7 +224,7 @@ async function handleBatchHPPRecalculation(data: any) {
       })
       
       successCount++
-    } catch (error) {
+    } catch (error: any) {
       results.push({
         recipeId: recipe.id,
         recipeName: recipe.name,

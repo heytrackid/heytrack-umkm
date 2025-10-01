@@ -267,7 +267,7 @@ export default function ProductionTimeline({
                   className="relative bg-muted/20 h-full rounded-t-lg border-b overflow-hidden"
                   style={{ width: Math.max(800, timelineGrid.totalWidth) }}
                 >
-                  {timelineHours.map((hour, index) => (
+                  {timelineHours.map((hour, index: number) => (
                     <div
                       key={hour.getTime()}
                       className="absolute top-0 h-full border-l border-border/20 flex items-center px-2 text-xs text-muted-foreground"
@@ -323,7 +323,7 @@ export default function ProductionTimeline({
                         style={{ width: Math.max(800, timelineGrid.totalWidth) }}
                       >
                         {/* Hour grid lines */}
-                        {timelineHours.map((_, index) => (
+                        {timelineHours.map((_, index: number) => (
                           <div
                             key={index}
                             className="absolute top-0 h-full border-l border-border/10"
@@ -461,7 +461,7 @@ export default function ProductionTimeline({
                     Scheduling Warnings
                   </div>
                   <ul className="text-sm text-yellow-700 space-y-1">
-                    {schedulingResult.warnings.map((warning, index) => (
+                    {schedulingResult.warnings.map((warning, index: number) => (
                       <li key={index}>• {warning}</li>
                     ))}
                   </ul>

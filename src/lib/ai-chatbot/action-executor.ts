@@ -33,7 +33,7 @@ export class ActionExecutor {
         default:
           throw new Error(`Unknown action type: ${action.type}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Action execution error:', error);
       return {
         success: false,
@@ -65,7 +65,7 @@ export class ActionExecutor {
         message: `Order #${response.data.order_number} berhasil dibuat untuk ${data.customer_name}`,
         data: response.data
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to create order: ' + (error instanceof Error ? error.message : ''));
     }
   }
@@ -88,9 +88,9 @@ export class ActionExecutor {
         }
         stockData = {
           name: ingredient.name,
-          current_stock: ingredient.current_stock,
+          current_stock: ingredient.current_stock ?? 0,
           unit: ingredient.unit,
-          status: ingredient.current_stock <= ingredient.minimum_stock ? 'low' : 'ok'
+          status: ingredient.current_stock ?? 0 <= ingredient.minimum_stock ? 'low' : 'ok'
         };
       } else if (data.ingredientName) {
         // Search by name
@@ -102,9 +102,9 @@ export class ActionExecutor {
         }
         stockData = {
           name: ingredient.name,
-          current_stock: ingredient.current_stock,
+          current_stock: ingredient.current_stock ?? 0,
           unit: ingredient.unit,
-          status: ingredient.current_stock <= ingredient.minimum_stock ? 'low' : 'ok'
+          status: ingredient.current_stock ?? 0 <= ingredient.minimum_stock ? 'low' : 'ok'
         };
       } else {
         // Return critical items
@@ -120,7 +120,7 @@ export class ActionExecutor {
         data: stockData,
         message: 'Stock data retrieved successfully'
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to check stock: ' + (error instanceof Error ? error.message : ''));
     }
   }
@@ -159,7 +159,7 @@ export class ActionExecutor {
         data: reportData,
         message: `${reportType} report generated successfully`
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to generate report: ' + (error instanceof Error ? error.message : ''));
     }
   }
@@ -197,7 +197,7 @@ export class ActionExecutor {
         data: analysisResult,
         message: 'Analysis completed successfully'
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to perform analysis: ' + (error instanceof Error ? error.message : ''));
     }
   }
@@ -215,7 +215,7 @@ export class ActionExecutor {
         recommendations,
         message: 'Recommendations generated successfully'
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('Failed to generate recommendations: ' + (error instanceof Error ? error.message : ''));
     }
   }

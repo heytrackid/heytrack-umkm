@@ -62,7 +62,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           parsed.currency = currencies[0] // IDR
         }
         setSettings({ ...defaultSettings, ...parsed })
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to parse saved settings:', error)
         // Reset to default on error
         setSettings(defaultSettings)

@@ -152,7 +152,7 @@ export default function SettingsPage() {
         console.log('✅ Settings loaded successfully:', data.settings_data)
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading settings:', error)
       toast.error('Gagal memuat pengaturan')
     } finally {
@@ -197,7 +197,7 @@ export default function SettingsPage() {
       setIsUnsavedChanges(false)
       toast.success('Pengaturan berhasil disimpan')
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error saving settings:', error)
       toast.error('Gagal menyimpan pengaturan')
     } finally {

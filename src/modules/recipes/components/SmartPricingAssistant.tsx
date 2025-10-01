@@ -47,7 +47,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
       setAnalysis(pricingAnalysis)
       setCustomPrice(pricingAnalysis.pricing.standard.price)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing pricing:', error)
     } finally {
       setLoading(false)
@@ -295,7 +295,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {recipe.recipe_ingredients?.map((ri, index) => {
+                {recipe.recipe_ingredients?.map((ri, _index) => {
                   const cost = ri.ingredient.price_per_unit * ri.quantity
                   const percentage = (cost / analysis.breakdown.ingredientCost) * 100
                   return (

@@ -106,7 +106,7 @@ export async function GET(
         is_profitable: recipe.selling_price > costPerServing
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error calculating HPP:', error)
     return NextResponse.json(
       { error: 'Failed to calculate HPP' },

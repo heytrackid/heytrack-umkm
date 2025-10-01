@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           }
         })
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in auto-sync API:', error)
     return NextResponse.json(
       { 
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in auto-sync POST API:', error)
     return NextResponse.json(
       { 

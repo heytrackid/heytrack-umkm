@@ -24,7 +24,7 @@ export async function GET(
     }
     
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in WhatsApp template GET API:', error)
     return NextResponse.json({ 
       error: 'Internal Server Error' 
@@ -77,7 +77,7 @@ export async function PUT(
     }
     
     return NextResponse.json(data[0])
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in WhatsApp template PUT API:', error)
     return NextResponse.json({ 
       error: 'Internal Server Error' 
@@ -109,7 +109,7 @@ export async function DELETE(
     }
     
     return NextResponse.json({ message: 'Template deleted successfully' })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in WhatsApp template DELETE API:', error)
     return NextResponse.json({ 
       error: 'Internal Server Error' 

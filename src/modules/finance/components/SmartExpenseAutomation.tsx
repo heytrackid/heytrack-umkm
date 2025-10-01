@@ -354,7 +354,7 @@ export default function SmartExpenseAutomation() {
                         <h4 className="font-medium">{rule.name}</h4>
                         <Badge variant="outline" className="text-xs">
                           <TypeIcon className="h-3 w-3 mr-1" />
-                          {rule.type.replace('_', ' ')}
+                          {rule.type?.replace('_', ' ')}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -365,10 +365,10 @@ export default function SmartExpenseAutomation() {
                             Next: {new Date(rule.nextTrigger).toLocaleDateString('id-ID')}
                           </span>
                         )}
-                        {rule.config.amount && (
+                        {rule.config?.amount && (
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-3 w-3" />
-                            {formatCurrency(rule.config.amount)}
+                            {formatCurrency(rule.config?.amount)}
                           </span>
                         )}
                       </div>

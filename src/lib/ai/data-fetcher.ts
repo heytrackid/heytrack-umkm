@@ -60,7 +60,7 @@ export class AIDataFetcher {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getIngredientsData:', error);
       return [];
     }
@@ -123,7 +123,7 @@ export class AIDataFetcher {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getRecipesData:', error);
       return [];
     }
@@ -181,7 +181,7 @@ export class AIDataFetcher {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getOrdersData:', error);
       return [];
     }
@@ -227,7 +227,7 @@ export class AIDataFetcher {
           sum + (order.total_amount || 0), 0) || 0,
         lastOrderDate: customer.orders?.[0]?.order_date || null,
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getCustomersData:', error);
       return [];
     }
@@ -272,7 +272,7 @@ export class AIDataFetcher {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getFinancialData:', error);
       return [];
     }
@@ -307,7 +307,7 @@ export class AIDataFetcher {
       }
 
       return data || [];
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getOperationalCostsData:', error);
       return [];
     }
@@ -377,7 +377,7 @@ export class AIDataFetcher {
           data: financialRecords
         }
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getDashboardStats:', error);
       return null;
     }

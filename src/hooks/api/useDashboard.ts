@@ -168,7 +168,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       },
       lastUpdated: Date.now()
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching dashboard stats:', error)
     
     // Return default/empty data on error
@@ -216,7 +216,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
     }
     
     return weekData
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching weekly sales:', error)
     return []
   }
@@ -228,7 +228,7 @@ const fetchTopProducts = async (): Promise<TopProductsData[]> => {
     // This would need to be implemented based on your order_items and recipes schema
     // For now, return empty array since we're removing mock data
     return []
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching top products:', error)
     return []
   }

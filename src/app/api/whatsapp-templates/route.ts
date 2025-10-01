@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     }
     
     return NextResponse.json(data)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in WhatsApp templates API:', error)
     return NextResponse.json({ 
       error: 'Internal Server Error' 
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json(data[0], { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in WhatsApp templates POST API:', error)
     return NextResponse.json({ 
       error: 'Internal Server Error' 

@@ -112,7 +112,7 @@ export function MobileTable<T extends Record<string, any>>({
   // Mobile Card View
   const MobileCardView = () => (
     <div className="space-y-3">
-      {data.map((item, index) => (
+      {data.map((item, index: number) => (
         <Card 
           key={index}
           className={cn(
@@ -184,7 +184,7 @@ export function MobileTable<T extends Record<string, any>>({
       <table className="w-full">
         <thead>
           <tr className="border-b">
-            {columns.map((column, index) => (
+            {columns.map((column, index: number) => (
               <th
                 key={index}
                 className={cn(
@@ -225,7 +225,7 @@ export function MobileTable<T extends Record<string, any>>({
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
+          {data.map((item, index: number) => (
             <tr
               key={index}
               className={cn(

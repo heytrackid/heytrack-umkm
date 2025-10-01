@@ -97,7 +97,7 @@ export class OpenRouterClient {
       }
 
       return data.choices[0].message.content;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling OpenRouter API:', error);
       throw error;
     }

@@ -139,7 +139,7 @@ export function useProgressiveLoading(
   const [loadedCount, setLoadedCount] = useState(0)
   
   useEffect(() => {
-    components.forEach((importFn, index) => {
+    components.forEach((importFn, index: number) => {
       setTimeout(() => {
         importFn().then(() => {
           setLoadedCount(prev => prev + 1)

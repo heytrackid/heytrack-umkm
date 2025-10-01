@@ -43,7 +43,7 @@ export function calculateReorderPoint(
   // Recommended order quantity (EOQ simplified)
   const recommendedOrderQuantity = Math.max(
     averageDailyUsage * 14, // 2 weeks supply
-    ingredient.min_stock * 2,
+    ingredient.min_stock ?? 0 * 2,
     REORDER_CALCULATIONS.MIN_ORDER_QUANTITY
   )
   
@@ -61,7 +61,7 @@ export function calculateReorderPoint(
  * Calculate total value dari stock berdasarkan current_stock dan price_per_unit
  */
 export function calculateStockValue(ingredient: Ingredient): number {
-  return ingredient.current_stock * ingredient.price_per_unit
+  return ingredient.current_stock ?? 0 * ingredient.price_per_unit
 }
 
 /**
@@ -83,9 +83,9 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
   const alerts: StockAlert[] = []
   
   ingredients.forEach(ingredient => {
-    const stockRatio = ingredient.current_stock / ingredient.min_stock
+    const stockRatio = ingredient.current_stock ?? 0 / ingredient.min_stock
     
-    if (ingredient.current_stock <= 0) {
+    if (ingredient.current_stock ?? 0 <= 0) {
       alerts.push({
         id: `out_of_stock_${ingredient.id}`,
         ingredient,
@@ -100,7 +100,7 @@ export function getStockAlerts(ingredients: Ingredient[]): StockAlert[] {
         id: `critical_stock_${ingredient.id}`,
         ingredient,
         type: 'low_stock',
-message: `Stok ${ingredient.name} sangat rendah (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
+message: `Stok ${ingredient.name} sangat rendah (${formatStockUnit(ingredient.current_stock ?? 0, ingredient.unit)})`,
         severity: 'high',
         actionRequired: 'Segera lakukan pembelian dalam 1-2 hari',
         daysUntilCritical: 1
@@ -110,7 +110,7 @@ message: `Stok ${ingredient.name} sangat rendah (${formatStockUnit(ingredient.cu
         id: `warning_stock_${ingredient.id}`,
         ingredient,
         type: 'low_stock',
-message: `Stok ${ingredient.name} mulai menipis (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
+message: `Stok ${ingredient.name} mulai menipis (${formatStockUnit(ingredient.current_stock ?? 0, ingredient.unit)})`,
         severity: 'medium',
         actionRequired: 'Rencanakan pembelian dalam minggu ini',
         daysUntilCritical: 3
@@ -124,7 +124,7 @@ message: `Stok ${ingredient.name} mulai menipis (${formatStockUnit(ingredient.cu
         id: `overstock_${ingredient.id}`,
         ingredient,
         type: 'overstocked',
-message: `Stok ${ingredient.name} berlebihan (${formatStockUnit(ingredient.current_stock, ingredient.unit)})`,
+message: `Stok ${ingredient.name} berlebihan (${formatStockUnit(ingredient.current_stock ?? 0, ingredient.unit)})`,
         severity: 'low',
         actionRequired: 'Pertimbangkan untuk mengurangi pembelian sementara'
       })
@@ -162,7 +162,7 @@ export function calculateUsageRate(
  * Get alert level untuk ingredient
  */
 export function getAlertLevel(ingredient: Ingredient): 'safe' | 'warning' | 'critical' {
-  const stockRatio = ingredient.current_stock / ingredient.min_stock
+  const stockRatio = ingredient.current_stock ?? 0 / ingredient.min_stock
   
   if (stockRatio <= STOCK_ALERT_THRESHOLDS.CRITICAL) {
     return 'critical'
@@ -194,7 +194,7 @@ export function calculateDaysUntilReorder(
 ): number {
   if (usageRate <= 0) return 999 // No usage, no need to reorder soon
   
-  const stockAboveMinimum = ingredient.current_stock - ingredient.min_stock
+  const stockAboveMinimum = ingredient.current_stock ?? 0 - ingredient.min_stock
   return Math.max(0, Math.floor(stockAboveMinimum / usageRate))
 }
 

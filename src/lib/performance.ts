@@ -222,7 +222,7 @@ export const analyzeBundleSize = (): void => {
         const size = parseInt
         totalSize += size
         console.log(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
-      } catch (error) {
+      } catch (error: any) {
         console.warn('Failed to analyze script:', (script as HTMLScriptElement).src)
       }
     }
@@ -266,7 +266,7 @@ export const registerServiceWorker = async (): Promise<void> => {
     registration.addEventListener('updatefound', () => {
       console.log('🔄 New Service Worker version available')
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Service Worker registration failed:', error)
   }
 }

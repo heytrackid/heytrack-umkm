@@ -103,7 +103,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                     <YAxis tickFormatter={(value) => `${value / 1000000}M`} />
                     <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
                     <Bar dataKey="value" fill="#8884d8">
-                      {chartData.map((entry, index) => (
+                      {chartData.map((entry, _index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Bar>
@@ -244,7 +244,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {pieData.map((entry, index) => (
+                      {pieData.map((entry, _index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>

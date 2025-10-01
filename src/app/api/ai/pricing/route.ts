@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Pricing API error:', error)
     return NextResponse.json(
       { 
@@ -176,7 +176,7 @@ export async function GET() {
             analysis: analysis.marginAnalysis,
             pricingStrategy: analysis.pricingStrategy
           }
-        } catch (error) {
+        } catch (error: any) {
           return {
             recipeId: recipe.id,
             recipeName: recipe.name,
@@ -193,7 +193,7 @@ export async function GET() {
       analyses
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Pricing GET API error:', error)
     return NextResponse.json(
       { 

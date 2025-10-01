@@ -284,7 +284,7 @@ export class HPPAutomationSystem {
       try {
         const result = await this.recalculateRecipeHPP(recipeId)
         results.push(result)
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error recalculating recipe ${recipeId}:`, error)
       }
     }
@@ -322,7 +322,7 @@ export class HPPAutomationSystem {
       if (!response.ok) return []
       const data = await response.json()
       return data.recipes || []
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recipes for ingredient:', error)
       return []
     }
@@ -495,7 +495,7 @@ export class HPPAutomationSystem {
       if (!response.ok) return []
       const recipes = await response.json()
       return recipes.map((r: any) => r.id)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching recipe IDs:', error)
       return []
     }

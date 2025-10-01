@@ -117,7 +117,7 @@ export default function EnhancedInventoryPage({ initialIngredients = [] }: { ini
         alert('✅ Bahan baku berhasil dihapus!')
         setSelectedItems([])
         refresh()
-      } catch (error) {
+      } catch (error: any) {
         alert('❌ Gagal menghapus bahan baku. Silakan coba lagi.')
       }
     }
@@ -156,7 +156,7 @@ export default function EnhancedInventoryPage({ initialIngredients = [] }: { ini
         if (!response.ok) throw new Error('Failed')
         alert(`✅ Bahan baku "${ingredient.name}" berhasil dihapus!`)
         refresh()
-      } catch (error) {
+      } catch (error: any) {
         alert(`❌ Gagal menghapus bahan baku "${ingredient.name}". Silakan coba lagi.`)
       }
     } else {
@@ -174,11 +174,11 @@ export default function EnhancedInventoryPage({ initialIngredients = [] }: { ini
 
   // Get stock alert level with neutral colors
   const getStockAlertLevel = (ingredient: any) => {
-    if (!ingredient.current_stock || !ingredient.min_stock) {
+    if (!ingredient.current_stock ?? 0 || !ingredient.min_stock) {
       return { level: 'unknown', color: 'bg-gray-400', text: 'Data Kosong' }
     }
 
-    const ratio = ingredient.current_stock / ingredient.min_stock
+    const ratio = ingredient.current_stock ?? 0 / ingredient.min_stock
     if (ratio <= 1) return { level: 'critical', color: 'bg-gray-800', text: 'Stock Kritis' }
     if (ratio <= 2) return { level: 'warning', color: 'bg-gray-600', text: 'Stock Rendah' }
     return { level: 'safe', color: 'bg-gray-400', text: 'Stock Aman' }

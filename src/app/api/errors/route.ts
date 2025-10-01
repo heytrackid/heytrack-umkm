@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       message: 'Error logged successfully'
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to log error:', error)
     
     return NextResponse.json(

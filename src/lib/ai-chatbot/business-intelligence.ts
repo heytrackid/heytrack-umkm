@@ -45,7 +45,7 @@ export class BusinessIntelligence {
             location: userProfile.location || 'Indonesia'
           }
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error('AI analysis failed:', error);
       }
       
@@ -60,7 +60,7 @@ export class BusinessIntelligence {
         criticalItems: critical,
         aiAnalysis
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Inventory analysis error:', error);
       return {
         summary: 'Error menganalisa inventory',
@@ -119,7 +119,7 @@ export class BusinessIntelligence {
             targetMargin: 25
           }
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error('AI financial analysis failed:', error);
       }
       
@@ -130,7 +130,7 @@ export class BusinessIntelligence {
         recommendations,
         aiInsights
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Financial analysis error:', error);
       return {
         summary: 'Error menganalisa keuangan',
@@ -190,7 +190,7 @@ Fokus pada solusi praktis untuk UMKM Indonesia.
         actionItems,
         priority
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Business advice generation error:', error);
       return {
         advice: 'Maaf, tidak dapat menghasilkan advice saat ini. Silakan coba lagi.',

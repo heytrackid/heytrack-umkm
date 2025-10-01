@@ -32,7 +32,7 @@ export async function GET() {
     }
 
     return NextResponse.json(recipes)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in GET /api/recipes:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(completeRecipe, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in POST /api/recipes:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

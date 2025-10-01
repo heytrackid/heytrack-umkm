@@ -24,7 +24,7 @@ export class IntentDetector {
     try {
       const aiIntent = await this.detectIntentWithAI(message, context);
       return aiIntent;
-    } catch (error) {
+    } catch (error: any) {
       console.error('AI intent detection failed, using pattern result:', error);
       return patternIntent;
     }
@@ -120,7 +120,7 @@ Respond in JSON format:
         entities: parsed.entities || {},
         suggestedActions: this.getSuggestedActions(parsed.intent)
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error('AI intent detection failed');
     }
   }

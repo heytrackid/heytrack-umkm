@@ -52,7 +52,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
       if (!initialData) {
         form.reset()
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan data customer',

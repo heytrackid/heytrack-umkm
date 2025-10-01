@@ -115,7 +115,7 @@ export function CategoryForm({
             </div>
             
             <div className="space-y-2">
-              {category.commonIngredients.map((ingredient, index) => (
+              {category.commonIngredients.map((ingredient, index: number) => (
                 <div key={index} className="flex gap-2">
                   <Input
                     value={ingredient}

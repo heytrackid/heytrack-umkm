@@ -93,7 +93,7 @@ export class SupabaseUserContext {
           productCount: 0
         }
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user profile:', error);
       throw error;
     }
@@ -115,7 +115,7 @@ export class SupabaseUserContext {
         customers,
         products
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching user business data:', error);
       throw error;
     }
@@ -161,7 +161,7 @@ export class SupabaseUserContext {
         monthlyGrowth,
         transactions: [...orders, ...expenses].slice(0, 10)
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getFinancialData:', error);
       // Return default data on error
       return {
@@ -212,7 +212,7 @@ export class SupabaseUserContext {
         totalValue,
         topIngredients
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getInventoryData:', error);
       return {
         totalItems: 0,
@@ -268,7 +268,7 @@ export class SupabaseUserContext {
         avgOrderValue,
         recentOrders: recentOrders.slice(0, 10)
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getCustomerData:', error);
       return {
         totalCustomers: 0,
@@ -326,7 +326,7 @@ export class SupabaseUserContext {
         bestPerforming,
         trends: productions.slice(0, 10)
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in getProductData:', error);
       return {
         totalProducts: 0,

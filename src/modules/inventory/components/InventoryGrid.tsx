@@ -60,7 +60,7 @@ export function InventoryGrid({
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((item, index) => (
+      {items.map((item, index: number) => (
         <Card key={index} className={`relative ${
           item.status === 'critical' ? 'border-red-200 bg-gray-100 dark:bg-gray-800' :
           item.status === 'warning' ? 'border-yellow-200 bg-gray-100 dark:bg-gray-800' : ''
@@ -80,16 +80,16 @@ export function InventoryGrid({
               <div className="flex justify-between text-sm mb-2">
                 <span>Stok Saat Ini</span>
                 <span className="font-medium">
-                  {item.ingredient.current_stock} {item.ingredient.unit}
+                  {item.ingredient.current_stock ?? 0} {item.ingredient.unit}
                 </span>
               </div>
               <Progress
-                value={Math.min((item.ingredient.current_stock / (item.ingredient.min_stock * 2)) * 100, 100)}
+                value={Math.min((item.ingredient.current_stock ?? 0 / (item.ingredient.min_stock ?? 0 * 2)) * 100, 100)}
                 className="h-2"
               />
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>Min: {item.ingredient.min_stock}</span>
-                <span>Optimal: {item.ingredient.min_stock * 2}</span>
+                <span>Min: {item.ingredient.min_stock ?? 0}</span>
+                <span>Optimal: {item.ingredient.min_stock ?? 0 * 2}</span>
               </div>
             </div>
 
@@ -113,7 +113,7 @@ export function InventoryGrid({
             <div className="flex justify-between text-sm">
               <span>Nilai Stok</span>
               <span className="font-medium">
-                {formatCurrency(item.ingredient.current_stock * item.ingredient.price_per_unit)}
+                {formatCurrency(item.ingredient.current_stock ?? 0 * item.ingredient.price_per_unit)}
               </span>
             </div>
 

@@ -147,7 +147,7 @@ export class WorkflowAutomation {
         default:
           console.log(`No handler for event: ${event.event}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Error processing event ${event.event}:`, error)
     }
   }
@@ -205,7 +205,7 @@ export class WorkflowAutomation {
       // 5. Send completion notification
       console.log(`✅ Order completion workflow finished for ${order.order_no}`);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in order completion workflow:', error)
     }
   }
@@ -225,7 +225,7 @@ export class WorkflowAutomation {
       for (const recipeIngredient of recipe.recipe_ingredients) {
         const ingredient = recipeIngredient.ingredient
         const usedQuantity = recipeIngredient.quantity * orderItem.quantity
-        const newStock = Math.max(0, ingredient.current_stock - usedQuantity)
+        const newStock = Math.max(0, ingredient.current_stock ?? 0 - usedQuantity)
 
         // Update ingredient stock
         const { error: updateError } = await supabase
@@ -257,18 +257,18 @@ export class WorkflowAutomation {
             notes: `Used for order ${order.order_no} - ${recipe.name} (${orderItem.quantity} units)`
           })
 
-        console.log(`✅ Updated ${ingredient.name}: ${ingredient.current_stock} → ${newStock}`)
+        console.log(`✅ Updated ${ingredient.name}: ${ingredient.current_stock ?? 0} → ${newStock}`)
 
         // Check for low stock dan trigger alert
-        if (newStock <= ingredient.min_stock && newStock > 0) {
+        if (newStock <= ingredient.min_stock ?? 0 && newStock > 0) {
           this.triggerEvent({
             event: 'inventory.low_stock',
             entityId: ingredient.id,
             data: {
               ingredient,
               currentStock: newStock,
-              minStock: ingredient.min_stock,
-              severity: newStock <= ingredient.min_stock * 0.5 ? 'critical' : 'warning'
+              minStock: ingredient.min_stock ?? 0,
+              severity: newStock <= ingredient.min_stock ?? 0 * 0.5 ? 'critical' : 'warning'
             }
           })
         }
@@ -302,7 +302,7 @@ export class WorkflowAutomation {
       } else {
         console.log(`✅ Created financial record: +${formatCurrency(order.total_amount)}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in createFinancialRecordFromOrder:', error)
     }
   }
@@ -340,7 +340,7 @@ export class WorkflowAutomation {
 
         console.log(`✅ Updated customer stats: orders=${newTotalOrders}, spent=Rp${newTotalSpent.toLocaleString()}`)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating customer stats:', error)
     }
   }
@@ -366,7 +366,7 @@ export class WorkflowAutomation {
 
     // Auto-generate reorder suggestion
     const suggestedQuantity = Math.max(
-      ingredient.min_stock * 2, // 2x minimum stock
+      ingredient.min_stock ?? 0 * 2, // 2x minimum stock
       50 // Minimum reorder quantity
     )
     
@@ -408,7 +408,7 @@ export class WorkflowAutomation {
           actionUrl: '/hpp-simple?tab=price_impact',
           actionLabel: 'Review HPP'
         })
-      } catch (error) {
+      } catch (error: any) {
         console.log('Smart notification system not available:', error)
       }
     }
@@ -471,7 +471,7 @@ export class WorkflowAutomation {
           actionLabel: 'Review Pricing'
         })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log('Smart notification system not available:', error)
     }
   }
@@ -516,7 +516,7 @@ export class WorkflowAutomation {
         // Generate business insights
         this.generateHPPBusinessInsights(affectedRecipes || [])
       }, 10000) // 10 second simulation
-    } catch (error) {
+    } catch (error: any) {
       console.log('Smart notification system not available:', error)
     }
   }
@@ -541,7 +541,7 @@ export class WorkflowAutomation {
         }
       ]
 
-      insights.forEach((insight, index) => {
+      insights.forEach((insight, index: number) => {
         setTimeout(async () => {
           smartNotificationSystem.addNotification({
             type: 'info',

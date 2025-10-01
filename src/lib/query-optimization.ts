@@ -448,7 +448,7 @@ export class QueryPerformanceMonitor {
       console.log(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
       
       return { result, duration };
-    } catch (error) {
+    } catch (error: any) {
       const duration = performance.now() - startTime;
       console.error(`Query"${queryName}" failed after ${duration.toFixed(2)}ms:`, error);
       throw error;

@@ -84,7 +84,7 @@ export class AIChatbotService {
         intent: intentResult.intent,
         data
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing message:', error);
       return {
         response: 'Maaf, terjadi kesalahan. Silakan coba lagi.',
@@ -108,7 +108,7 @@ export class AIChatbotService {
       action.result = result;
       
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error executing action:', error);
       return {
         success: false,
@@ -217,7 +217,7 @@ export class AIChatbotService {
       ];
       
       return { response, actions, data: stats };
-    } catch (error) {
+    } catch (error: any) {
       return { response: 'Halo! Ada yang bisa saya bantu?' };
     }
   }
@@ -259,7 +259,7 @@ export class AIChatbotService {
       }] : [];
       
       return { response, actions, data: analysis };
-    } catch (error) {
+    } catch (error: any) {
       return { response: 'Gagal mengecek stok. Silakan coba lagi.' };
     }
   }
@@ -292,7 +292,7 @@ export class AIChatbotService {
       }
       
       return { response, data: analysis };
-    } catch (error) {
+    } catch (error: any) {
       return { response: 'Gagal mengambil laporan keuangan.' };
     }
   }
@@ -327,7 +327,7 @@ export class AIChatbotService {
       }
       
       return { response, data: advice };
-    } catch (error) {
+    } catch (error: any) {
       return { response: 'Maaf, belum bisa memberikan advice saat ini.' };
     }
   }
@@ -370,7 +370,7 @@ export class AIChatbotService {
       }
       
       return { response, data: { orders } };
-    } catch (error) {
+    } catch (error: any) {
       return { response: 'Gagal mengambil data pesanan.' };
     }
   }

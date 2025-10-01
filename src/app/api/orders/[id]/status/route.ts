@@ -126,7 +126,7 @@ export async function PATCH(
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing' : ''}`
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in order status update:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -176,7 +176,7 @@ export async function GET(
       status_info: statusInfo
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting order status:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

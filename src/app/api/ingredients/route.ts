@@ -57,7 +57,7 @@ export const GET = withQueryValidation(
         pagination
       })
 
-    } catch (error) {
+    } catch (error: any) {
       return handleDatabaseError(error)
     }
   }
@@ -81,7 +81,7 @@ export const POST = withValidation(
 
       return createSuccessResponse(insertedData, 201)
 
-    } catch (error) {
+    } catch (error: any) {
       return handleDatabaseError(error)
     }
   }

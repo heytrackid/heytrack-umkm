@@ -90,9 +90,9 @@ export function useProductionOrdersIntegration(
       return ingredientsData.map(ingredient => ({
         ingredient_id: ingredient.id,
         ingredient_name: ingredient.name,
-        current_stock: ingredient.current_stock || 0,
+        current_stock: ingredient.current_stock ?? 0 || 0,
         allocated_stock: ingredient.allocated_stock || 0,
-        available_stock: Math.max(0, (ingredient.current_stock || 0) - (ingredient.allocated_stock || 0)),
+        available_stock: Math.max(0, (ingredient.current_stock ?? 0 || 0) - (ingredient.allocated_stock || 0)),
         unit: ingredient.unit || 'unit',
         reorder_point: ingredient.reorder_point || 10,
         lead_time_days: ingredient.lead_time_days || 3
@@ -170,7 +170,7 @@ export function useProductionOrdersIntegration(
           if (createdBatch) {
             createdBatches.push(createdBatch)
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Failed to create batch:', error)
         }
       }
@@ -191,7 +191,7 @@ export function useProductionOrdersIntegration(
 
       return finalResult
 
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       setState(prev => ({
         ...prev,

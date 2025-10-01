@@ -184,7 +184,7 @@ export default function InventoryPage() {
                 <p className="text-xs text-muted-foreground">semua transaksi</p>
                 {stats.totalTransactions > 0 && (
                   <MiniChartWithLoading 
-                    data={transactions.slice(-7).map((_, index) => ({
+                    data={transactions.slice(-7).map((_, index: number) => ({
                       day: index + 1,
                       count: 1
                     }))}
@@ -278,7 +278,7 @@ export default function InventoryPage() {
           {alerts && alerts.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Stock Alerts</h2>
-              {alerts.map((alert, index) => (
+              {alerts.map((alert, index: number) => (
                 <Card key={index} className="border-l-4 border-l-red-500">
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-2">

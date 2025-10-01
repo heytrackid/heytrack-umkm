@@ -66,7 +66,7 @@ export default function CustomersPage() {
       if (!response.ok) throw new Error('Failed to fetch customers')
       const data = await response.json()
       setCustomers(data)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching customers:', error)
     } finally {
       setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
@@ -115,7 +115,7 @@ export default function CustomersPage() {
         alert(`Berhasil menghapus ${selectedItems.length} pelanggan`)
         setSelectedItems([])
         fetchCustomers()
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error:', error)
         alert('Gagal menghapus pelanggan')
       }
@@ -151,7 +151,7 @@ export default function CustomersPage() {
         if (!response.ok) throw new Error('Failed')
         alert("Pesan")
         fetchCustomers()
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error:', error)
         alert("Pesan")
       }
@@ -187,7 +187,7 @@ export default function CustomersPage() {
         {/* Breadcrumb */}
         <Breadcrumb>
           <BreadcrumbList>
-            {getBreadcrumbItems().map((item, index) => (
+            {getBreadcrumbItems().map((item, index: number) => (
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (

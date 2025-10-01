@@ -326,7 +326,7 @@ export function MobileLineChart({
               wrapperStyle={{ fontSize: isMobile ? '12px' : '14px' }}
             />
           )}
-          {lines.map((line, index) => (
+          {lines.map((line, _index) => (
             <Line
               key={line.key}
               type={curved ?"monotone" :"linear"}
@@ -380,7 +380,7 @@ export function MobileAreaChart({
           stackOffset={stacked ? 'expand' : undefined}
         >
           <defs>
-            {areas.map((area, index) => (
+            {areas.map((area, _index) => (
               <linearGradient 
                 key={area.key}
                 id={`gradient-${area.key}`} 
@@ -418,7 +418,7 @@ export function MobileAreaChart({
             width={isMobile ? 40 : 60}
           />
           <Tooltip content={<MobileTooltip />} />
-          {areas.map((area, index) => (
+          {areas.map((area, _index) => (
             <Area
               key={area.key}
               type="monotone"
@@ -490,7 +490,7 @@ export function MobileBarChart({
             width={horizontal ? (isMobile ? 60 : 80) : (isMobile ? 40 : 60)}
           />
           <Tooltip content={<MobileTooltip />} />
-          {bars.map((bar, index) => (
+          {bars.map((bar, _index) => (
             <Bar
               key={bar.key}
               dataKey={bar.key}
@@ -563,7 +563,7 @@ export function MobilePieChart({
             fill="#8884d8"
             dataKey={valueKey}
           >
-            {data.map((entry, index) => (
+            {data.map((entry, _index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={colors[index % colors.length]} 

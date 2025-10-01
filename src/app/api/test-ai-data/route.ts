@@ -41,7 +41,7 @@ export async function GET() {
       }
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error testing AI data fetcher:', error);
     
     return NextResponse.json({

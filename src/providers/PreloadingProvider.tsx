@@ -83,7 +83,7 @@ export const PreloadingProvider = ({
       if (debug) {
         console.log(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
       }
-    } catch (error) {
+    } catch (error: any) {
       if (debug) {
         console.warn(`❌ Failed to preload route ${route}:`, error)
       }
@@ -253,7 +253,7 @@ export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' |
     const targets = preloadTargets[pageType] || []
     
     // Preload with staggered timing
-    targets.forEach((route, index) => {
+    targets.forEach((route, index: number) => {
       setTimeout(() => {
         preloadRoute(route)
       }, index * 200) // 200ms delay between each preload

@@ -59,7 +59,7 @@ export function PullToRefresh({
       setIsRefreshing(true)
       try {
         await onRefresh()
-      } catch (error) {
+      } catch (error: any) {
         console.error('Refresh failed:', error)
       } finally {
         setIsRefreshing(false)
@@ -400,7 +400,7 @@ export function SwipeActions({
             transform: `translateX(-${swipeDistance}px)`
           }}
         >
-          {actions.map((action, index) => (
+          {actions.map((action, index: number) => (
             <button
               key={action.id}
               onClick={() => handleActionClick(action)}

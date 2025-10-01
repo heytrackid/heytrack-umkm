@@ -49,7 +49,7 @@ export function useRecipeLogic() {
       resetForm()
       setCurrentView('list')
       await refetch()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving recipe:', error)
     }
   }, [newRecipe, resetForm, refetch])
@@ -80,7 +80,7 @@ export function useRecipeLogic() {
         // API call to delete recipe would go here
         console.log('Deleting recipe:', recipe.id)
         await refetch()
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting recipe:', error)
       }
     }

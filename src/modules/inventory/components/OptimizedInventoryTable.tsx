@@ -46,14 +46,14 @@ const InventoryTableRow = memo(({
 }) => {
   // Memoized calculations for performance
   const stockStatus = useMemo(() => {
-    if (ingredient.current_stock <= 0) {
+    if (ingredient.current_stock ?? 0 <= 0) {
       return { 
         status: 'out', 
         color: 'destructive', 
         icon: AlertTriangle,
         label: 'Habis' 
       }
-    } else if (ingredient.current_stock <= ingredient.min_stock) {
+    } else if (ingredient.current_stock ?? 0 <= ingredient.min_stock) {
       return { 
         status: 'low', 
         color: 'warning', 
@@ -68,11 +68,11 @@ const InventoryTableRow = memo(({
         label: 'Normal' 
       }
     }
-  }, [ingredient.current_stock, ingredient.min_stock])
+  }, [ingredient.current_stock ?? 0, ingredient.min_stock ?? 0])
 
   const stockValue = useMemo(() => {
-    return ingredient.current_stock * ingredient.price_per_unit
-  }, [ingredient.current_stock, ingredient.price_per_unit])
+    return ingredient.current_stock ?? 0 * ingredient.price_per_unit
+  }, [ingredient.current_stock ?? 0, ingredient.price_per_unit])
 
   // Memoized event handlers
   const handleSelect = useCallback(() => {
@@ -115,7 +115,7 @@ const InventoryTableRow = memo(({
       <td className="p-4">
         <div className="flex items-center gap-2">
           <StatusIcon className="w-4 h-4" />
-          <span>{ingredient.current_stock} {ingredient.unit}</span>
+          <span>{ingredient.current_stock ?? 0} {ingredient.unit}</span>
           <Badge variant={stockStatus.color as any} className="text-xs">
             {stockStatus.label}
           </Badge>
@@ -123,7 +123,7 @@ const InventoryTableRow = memo(({
       </td>
       <td className="p-4">
         <span className="text-sm text-gray-600">
-          Min: {ingredient.min_stock} {ingredient.unit}
+          Min: {ingredient.min_stock ?? 0} {ingredient.unit}
         </span>
       </td>
       <td className="p-4">
@@ -181,13 +181,13 @@ const OptimizedInventoryTable = memo(({
   // Memoized calculations
   const totalValue = useMemo(() => {
     return ingredients.reduce((sum, ingredient) => {
-      return sum + (ingredient.current_stock * ingredient.price_per_unit)
+      return sum + (ingredient.current_stock ?? 0 * ingredient.price_per_unit)
     }, 0)
   }, [ingredients])
 
   const lowStockCount = useMemo(() => {
     return ingredients.filter(ingredient => 
-      ingredient.current_stock <= ingredient.min_stock
+      ingredient.current_stock ?? 0 <= ingredient.min_stock
     ).length
   }, [ingredients])
 

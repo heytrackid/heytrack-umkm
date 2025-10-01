@@ -70,6 +70,129 @@ export type Database = {
       user_profiles: UserProfilesTable
       daily_sales_summary: DailySalesSummaryTable
       financial_records: FinancialRecordsTable
+      whatsapp_templates: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          category: string
+          template_content: string
+          variables: Json | null
+          is_active: boolean | null
+          is_default: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          category?: string
+          template_content: string
+          variables?: Json | null
+          is_active?: boolean | null
+          is_default?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          category?: string
+          template_content?: string
+          variables?: Json | null
+          is_active?: boolean | null
+          is_default?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          id: string
+          user_id: string
+          settings_data: Json
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          settings_data: Json
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          settings_data?: Json
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          id: string
+          amount: number
+          category: string
+          description: string
+          expense_date: string | null
+          receipt_number: string | null
+          supplier: string | null
+          tax_amount: number | null
+          is_recurring: boolean | null
+          recurring_frequency: string | null
+          payment_method: string | null
+          status: string | null
+          subcategory: string | null
+          tags: Json | null
+          metadata: Json | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          amount: number
+          category: string
+          description: string
+          expense_date?: string | null
+          receipt_number?: string | null
+          supplier?: string | null
+          tax_amount?: number | null
+          is_recurring?: boolean | null
+          recurring_frequency?: string | null
+          payment_method?: string | null
+          status?: string | null
+          subcategory?: string | null
+          tags?: Json | null
+          metadata?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          amount?: number
+          category?: string
+          description?: string
+          expense_date?: string | null
+          receipt_number?: string | null
+          supplier?: string | null
+          tax_amount?: number | null
+          is_recurring?: boolean | null
+          recurring_frequency?: string | null
+          payment_method?: string | null
+          status?: string | null
+          subcategory?: string | null
+          tags?: Json | null
+          metadata?: Json | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       inventory_status: InventoryStatusView

@@ -63,7 +63,7 @@ export async function GET() {
       summary
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in test-data:', error);
     return NextResponse.json({
       success: false,

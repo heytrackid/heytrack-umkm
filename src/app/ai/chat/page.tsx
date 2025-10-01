@@ -256,7 +256,7 @@ export default function AIChatPage() {
                             Pertanyaan lanjutan:
                           </p>
                           <div className="flex flex-col gap-2">
-                            {message.suggestions.map((suggestion, index) => (
+                            {message.suggestions.map((suggestion, index: number) => (
                               <Button
                                 key={index}
                                 variant="outline"

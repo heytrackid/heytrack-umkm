@@ -14,7 +14,7 @@ export async function GET() {
       success: true,
       data: summary
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error checking reorder needs:', error)
     return NextResponse.json(
       { 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in reorder API:', error)
     return NextResponse.json(
       { 

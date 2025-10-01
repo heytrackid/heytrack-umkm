@@ -41,7 +41,7 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
           </div>
           <p className="text-xs text-muted-foreground">bulan ini</p>
           <MiniChart
-            data={transactions.filter(t => t.type === 'INCOME').slice(-7).map((transaction, index) => ({
+            data={transactions.filter(t => t.type === 'INCOME').slice(-7).map((transaction, index: number) => ({
               day: index + 1,
               amount: transaction.amount
             }))}
@@ -69,7 +69,7 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
           </div>
           <p className="text-xs text-muted-foreground">bulan ini</p>
           <MiniChart
-            data={transactions.filter(t => t.type === 'EXPENSE').slice(-7).map((transaction, index) => ({
+            data={transactions.filter(t => t.type === 'EXPENSE').slice(-7).map((transaction, index: number) => ({
               day: index + 1,
               amount: transaction.amount
             }))}
@@ -99,7 +99,7 @@ export function FinancialSummaryCards({ stats, isMobile, transactions }: Financi
             Margin: {stats.profitMargin.toFixed(1)}%
           </p>
           <MiniChart
-            data={transactions.slice(-7).map((transaction, index) => ({
+            data={transactions.slice(-7).map((transaction, index: number) => ({
               day: index + 1,
               profit: transaction.type === 'income' ? transaction.amount : -Math.abs(transaction.amount)
             }))}

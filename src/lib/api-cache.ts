@@ -171,7 +171,7 @@ class APICache {
       const data = await fetchFn()
       this.set(endpoint, data, params, options?.ttl)
       return data
-    } catch (error) {
+    } catch (error: any) {
       // On error, try to return stale cache if available
       const stale = this.cache.get(key)
       if (stale) {

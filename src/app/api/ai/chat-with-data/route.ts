@@ -147,7 +147,7 @@ Jika user menanyakan tentang data yang tidak tersedia, beritahu dengan jelas dan
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Chat with Data API error:', error);
     
     return NextResponse.json({

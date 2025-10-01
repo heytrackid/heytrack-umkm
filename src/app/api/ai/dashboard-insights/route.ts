@@ -133,7 +133,7 @@ export async function GET() {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Dashboard Insights API error:', error);
     
     return NextResponse.json({

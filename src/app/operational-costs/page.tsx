@@ -274,7 +274,7 @@ export default function OperationalCostsPage() {
         <div className="space-y-6">
           <Breadcrumb>
             <BreadcrumbList>
-              {getBreadcrumbItems().map((item, index) => (
+              {getBreadcrumbItems().map((item, index: number) => (
                 <React.Fragment key={index}>
                   <BreadcrumbItem>
                     {item.href ? (
@@ -335,7 +335,7 @@ export default function OperationalCostsPage() {
       <div className="space-y-6">
         <Breadcrumb>
           <BreadcrumbList>
-            {getBreadcrumbItems().map((item, index) => (
+            {getBreadcrumbItems().map((item, index: number) => (
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (

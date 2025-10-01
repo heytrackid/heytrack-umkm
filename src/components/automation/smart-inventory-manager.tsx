@@ -50,7 +50,7 @@ export function SmartInventoryManager({
     try {
       const inventoryAnalysis = automationEngine.analyzeInventoryNeeds(ingredients, usageData)
       setAnalysis(inventoryAnalysis)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error analyzing inventory:', error)
     } finally {
       setLoading(false)
@@ -92,7 +92,7 @@ export function SmartInventoryManager({
     critical: analysis.filter(a => a.status === 'critical').length,
     low: analysis.filter(a => a.status === 'low').length,
     needReorder: analysis.filter(a => a.reorderRecommendation.shouldReorder).length,
-    totalValue: analysis.reduce((sum, a) => sum + (a.ingredient.current_stock * a.ingredient.price_per_unit), 0)
+    totalValue: analysis.reduce((sum, a) => sum + (a.ingredient.current_stock ?? 0 * a.ingredient.price_per_unit), 0)
   }
 
   if (loading) {
@@ -209,7 +209,7 @@ export function SmartInventoryManager({
 
           {/* Inventory Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredAnalysis.map((item, index) => (
+            {filteredAnalysis.map((item, index: number) => (
               <Card key={index} className={`relative ${
                 item.status === 'critical' ? 'border-red-200 bg-gray-100 dark:bg-gray-800' : 
                 item.status === 'low' ? 'border-yellow-200 bg-gray-100 dark:bg-gray-800' : ''
@@ -229,16 +229,16 @@ export function SmartInventoryManager({
                     <div className="flex justify-between text-sm mb-2">
                       <span>Stok Saat Ini</span>
                       <span className="font-medium">
-                        {item.ingredient.current_stock} {item.ingredient.unit}
+                        {item.ingredient.current_stock ?? 0} {item.ingredient.unit}
                       </span>
                     </div>
                     <Progress 
-                      value={Math.min((item.ingredient.current_stock / (item.ingredient.min_stock * 2)) * 100, 100)}
+                      value={Math.min((item.ingredient.current_stock ?? 0 / (item.ingredient.min_stock ?? 0 * 2)) * 100, 100)}
                       className="h-2"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>Min: {item.ingredient.min_stock}</span>
-                      <span>Optimal: {item.ingredient.min_stock * 2}</span>
+                      <span>Min: {item.ingredient.min_stock ?? 0}</span>
+                      <span>Optimal: {item.ingredient.min_stock ?? 0 * 2}</span>
                     </div>
                   </div>
 
@@ -262,7 +262,7 @@ export function SmartInventoryManager({
                   <div className="flex justify-between text-sm">
                     <span>Nilai Stok</span>
                     <span className="font-medium">
-                      Rp {(item.ingredient.current_stock * item.ingredient.price_per_unit).toLocaleString()}
+                      Rp {(item.ingredient.current_stock ?? 0 * item.ingredient.price_per_unit).toLocaleString()}
                     </span>
                   </div>
 
@@ -330,7 +330,7 @@ export function SmartInventoryManager({
 
         {/* Alerts Tab */}
         <TabsContent value="alerts" className="space-y-4">
-          {analysis.filter(item => item.status === 'critical' || item.status === 'low').map((item, index) => (
+          {analysis.filter(item => item.status === 'critical' || item.status === 'low').map((item, index: number) => (
             <Alert key={index} className={item.status === 'critical' ? 'border-red-200 bg-gray-100 dark:bg-gray-800' : 'border-yellow-200 bg-gray-100 dark:bg-gray-800'}>
               {item.status === 'critical' ? (
                 <AlertTriangle className="h-4 w-4 text-gray-600 dark:text-gray-400" />
@@ -343,7 +343,7 @@ export function SmartInventoryManager({
                     <strong>{item.ingredient.name}</strong> - Status: {item.status}
                     <br />
                     <span className="text-sm">
-                      Stok: {item.ingredient.current_stock} {item.ingredient.unit}
+                      Stok: {item.ingredient.current_stock ?? 0} {item.ingredient.unit}
                       {item.daysRemaining !== Infinity && ` (${item.daysRemaining} hari lagi)`}
                     </span>
                   </div>
@@ -387,13 +387,13 @@ export function SmartInventoryManager({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {analysis.filter(item => item.reorderRecommendation.shouldReorder).map((item, index) => (
+                {analysis.filter(item => item.reorderRecommendation.shouldReorder).map((item, index: number) => (
                   <div key={index} className="flex justify-between items-center p-4 border rounded-lg">
                     <div className="flex-1">
                       <div className="font-medium">{item.ingredient.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        Current: {item.ingredient.current_stock} {item.ingredient.unit} | 
-                        Min: {item.ingredient.min_stock} {item.ingredient.unit}
+                        Current: {item.ingredient.current_stock ?? 0} {item.ingredient.unit} | 
+                        Min: {item.ingredient.min_stock ?? 0} {item.ingredient.unit}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         Supplier: {item.ingredient.supplier || 'Not specified'}
@@ -452,7 +452,7 @@ export function SmartInventoryManager({
                   <div className="font-medium text-green-700 mb-1">Optimization Potential</div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     {analysis.filter(a => a.status === 'overstocked').length} item overstocked, 
-                    bisa hemat Rp {(analysis.filter(a => a.status === 'overstocked').reduce((sum, a) => sum + ((a.ingredient.current_stock - a.ingredient.min_stock * 2) * a.ingredient.price_per_unit), 0)).toLocaleString()}
+                    bisa hemat Rp {(analysis.filter(a => a.status === 'overstocked').reduce((sum, a) => sum + ((a.ingredient.current_stock ?? 0 - a.ingredient.min_stock ?? 0 * 2) * a.ingredient.price_per_unit), 0)).toLocaleString()}
                   </div>
                 </div>
 
@@ -476,7 +476,7 @@ export function SmartInventoryManager({
                     if (!ingredient) return null
                     
                     const dailyUsage = usage / 30
-                    const daysLeft = ingredient.current_stock / dailyUsage
+                    const daysLeft = ingredient.current_stock ?? 0 / dailyUsage
                     
                     return (
                       <div key={ingredientId} className="flex justify-between items-center text-sm">

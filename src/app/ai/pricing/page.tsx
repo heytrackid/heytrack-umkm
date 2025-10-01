@@ -238,7 +238,7 @@ export default function AIPricingPage() {
               <div>
                 <Label className="text-base font-medium">Bahan Baku *</Label>
                 <div className="space-y-3 mt-2">
-                  {formData.ingredients.map((ingredient, index) => (
+                  {formData.ingredients.map((ingredient, _index) => (
                     <div key={index} className="grid grid-cols-3 gap-2 items-end">
                       <div>
                         <Label className="text-sm">Nama Bahan</Label>

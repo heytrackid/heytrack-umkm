@@ -65,7 +65,7 @@ export async function GET() {
       }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI Customer Insights API error:', error);
     
     return NextResponse.json({

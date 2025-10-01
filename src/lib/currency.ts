@@ -51,7 +51,7 @@ export function getCurrentCurrency(): Currency {
       const parsed = JSON.parse(savedSettings)
       return parsed.currency || currencies[0]
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error loading currency settings:', error)
   }
   return currencies[0] // Default to IDR
@@ -101,7 +101,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     }).format(amount)
     
     return `${currency.symbol} ${formatted}`
-  } catch (error) {
+  } catch (error: any) {
     // Fallback to basic formatting
     return formatCurrency(amount, currency)
   }
