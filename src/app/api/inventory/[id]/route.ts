@@ -10,8 +10,11 @@ export async function GET(
     const supabase = createSupabaseClient();
     
     const { data: inventory, error } = await (supabase as any)
-      .from('ingredients')
-      .select('*')
+      .from('inventory')
+      .select(`
+        *,
+        ingredient:ingredients(name, unit)
+      `)
       .eq('id', id)
       .single();
 
@@ -33,10 +36,13 @@ export async function PUT(
     const body = await request.json() as any;
 
     const { data: inventory, error } = await (supabase as any)
-      .from('ingredients')
+      .from('inventory')
       .update(body)
       .eq('id', id)
-      .select('*')
+      .select(`
+        *,
+        ingredient:ingredients(name, unit)
+      `)
       .single();
 
     if (error) throw error;
@@ -56,7 +62,7 @@ export async function DELETE(
     const supabase = createSupabaseClient();
 
     const { error } = await (supabase as any)
-      .from('ingredients')
+      .from('inventory')
       .delete()
       .eq('id', id);
 

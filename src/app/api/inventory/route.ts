@@ -6,8 +6,11 @@ export async function GET() {
     const supabase = createSupabaseClient();
     
     const { data: inventory, error } = await (supabase as any)
-      .from('ingredients')
-      .select('*')
+      .from('inventory')
+      .select(`
+        *,
+        ingredient:ingredients(name, unit)
+      `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -24,9 +27,12 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const { data: inventory, error } = await (supabase as any)
-      .from('ingredients')
+      .from('inventory')
       .insert([body])
-      .select('*')
+      .select(`
+        *,
+        ingredient:ingredients(name, unit)
+      `)
       .single();
 
     if (error) throw error;

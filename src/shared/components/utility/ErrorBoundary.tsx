@@ -115,9 +115,6 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Default export
-export default ErrorBoundary
-
 // Hook-based error boundary for functional components
 export function useErrorBoundary() {
   const [error, setError] = React.useState<Error | null>(null)

@@ -155,9 +155,6 @@ export function useProgressiveLoading(
   }
 }
 
-// Default export
-export default LazyWrapper
-
 // Enhanced loading skeletons for different component types
 export const ComponentSkeletons = {
   Card: () => (
