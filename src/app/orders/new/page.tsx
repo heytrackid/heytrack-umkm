@@ -107,8 +107,6 @@ export default function NewOrderPage() {
 
   return (
     <AppLayout>
-      <LazyOrderComponents activeTab={activeTab} />
-      
       <div className="space-y-6">
         {/* Breadcrumb */}
         <Breadcrumb>
