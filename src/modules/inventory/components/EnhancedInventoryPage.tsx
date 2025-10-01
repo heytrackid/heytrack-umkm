@@ -169,7 +169,7 @@ export default function EnhancedInventoryPage({ initialIngredients = [] }: { ini
     console.log('🆕 Tambah Bahan Baku button clicked')
 
     // Navigate directly to the new ingredients page
-    window.location.href = '/ingredients/new'
+    window.location.href = '/inventory/new'
   }
 
   // Get stock alert level with neutral colors

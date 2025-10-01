@@ -6,7 +6,6 @@
 export const HEAVY_ROUTES = [
   // Large form pages
   '/orders/new',
-  '/ingredients/new',
   '/inventory/new',
   
   // Complex data pages

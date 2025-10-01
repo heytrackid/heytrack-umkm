@@ -132,9 +132,6 @@ export default function SettingsPage() {
     try {
       startLoading(LOADING_KEYS.LOAD_SETTINGS)
       
-      // Simulate loading delay for demo
-      await new Promise(resolve => setTimeout)
-      
       const { data, error } = await supabase
         .from('app_settings')
         .select('*')
