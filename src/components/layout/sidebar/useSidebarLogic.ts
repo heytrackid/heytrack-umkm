@@ -56,7 +56,7 @@ export const useSidebarLogic = () => {
 
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
-    const routesToPrefetch = ['/', '/orders', '/inventory', '/hpp', '/finance', '/resep', '/customers']
+    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/finance', '/resep', '/customers']
     routesToPrefetch.forEach((r) => {
       try { router.prefetch(r) } catch {}
     })
@@ -82,7 +82,7 @@ export const useSidebarLogic = () => {
       items: [
         {
           name: "Bahan Baku",
-          href: '/inventory',
+          href: '/ingredients',
           icon: Package,
           isSimple: true,
           badge: "DATA",

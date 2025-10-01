@@ -6,7 +6,6 @@
 export const HEAVY_ROUTES = [
   // Large form pages
   '/orders/new',
-  '/inventory/new',
   
   // Complex data pages
   '/cash-flow',
@@ -27,7 +26,6 @@ export const HEAVY_ROUTES = [
 export const CLIENT_ONLY_ROUTES = [
   // Pages with heavy client-side features
   '/dashboard-optimized',
-  '/inventory-enhanced',
   '/review'
 ] as const
 

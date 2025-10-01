@@ -1,5 +1,21 @@
-import { WeightedAverageCostService } from '../../inventory/services/WeightedAverageCostService'
-import { StockTransaction, Ingredient } from '../../inventory/types'
+// Types for Ingredient and StockTransaction
+interface Ingredient {
+  id: string
+  name: string
+  price_per_unit: number
+  [key: string]: any
+}
+
+interface StockTransaction {
+  id: string
+  ingredient_id: string
+  type: 'purchase' | 'usage' | 'adjustment'
+  quantity: number
+  unit_price?: number
+  total_cost?: number
+  transaction_date: string
+  [key: string]: any
+}
 
 interface Recipe {
   id: string
@@ -57,7 +73,7 @@ export class EnhancedHPPCalculationService {
     )
 
     // 2. Calculate operational costs allocation
-const operationalCostPerUnit = includeOperationalCosts ? 
+    const operationalCostPerUnit = includeOperationalCosts ? 
       this.calculateOperationalCostPerUnit(operationalCosts, recipe.servings || 1, overheadAllocationMethod) : 0
 
     // 3. Calculate total HPP
@@ -138,7 +154,7 @@ const operationalCostPerUnit = includeOperationalCosts ?
       let unitPrice = ingredient.price_per_unit
 
       if (pricingMethod !== 'list_price') {
-        unitPrice = WeightedAverageCostService.updateIngredientPriceWithMethod(
+        unitPrice = this.calculatePriceWithMethod(
           ingredient,
           stockTransactions,
           pricingMethod
@@ -146,7 +162,7 @@ const operationalCostPerUnit = includeOperationalCosts ?
       }
 
       // Get pricing insights untuk comparison
-      const pricingInsights = WeightedAverageCostService.generatePricingInsights(
+      const pricingInsights = this.generatePricingInsights(
         ingredient,
         stockTransactions.filter(t => t.ingredient_id === ingredient.id)
       )
@@ -348,6 +364,87 @@ const operationalCostPerUnit = includeOperationalCosts ?
     }
     return descriptions[method] || method
   }
+
+  /**
+   * Calculate price with different pricing methods
+   */
+  private static calculatePriceWithMethod(
+    ingredient: Ingredient,
+    stockTransactions: StockTransaction[],
+    method: PricingMethod
+  ): number {
+    const purchases = stockTransactions
+      .filter(t => t.ingredient_id === ingredient.id && t.type === 'purchase' && t.unit_price)
+      .sort((a, b) => new Date(a.transaction_date).getTime() - new Date(b.transaction_date).getTime())
+
+    if (purchases.length === 0) {
+      return ingredient.price_per_unit
+    }
+
+    switch (method) {
+      case 'weighted':
+        const totalCost = purchases.reduce((sum, t) => sum + ((t.total_cost || 0) || (t.quantity * (t.unit_price || 0))), 0)
+        const totalQuantity = purchases.reduce((sum, t) => sum + t.quantity, 0)
+        return totalQuantity > 0 ? totalCost / totalQuantity : ingredient.price_per_unit
+
+      case 'fifo':
+        return purchases[0].unit_price || ingredient.price_per_unit
+
+      case 'latest':
+        return purchases[purchases.length - 1].unit_price || ingredient.price_per_unit
+
+      case 'moving':
+        const recentPurchases = purchases.slice(-5)
+        const avgPrice = recentPurchases.reduce((sum, t) => sum + (t.unit_price || 0), 0) / recentPurchases.length
+        return avgPrice || ingredient.price_per_unit
+
+      default:
+        return ingredient.price_per_unit
+    }
+  }
+
+  /**
+   * Generate pricing insights
+   */
+  private static generatePricingInsights(
+    ingredient: Ingredient,
+    transactions: StockTransaction[]
+  ): any {
+    const purchases = transactions
+      .filter(t => t.type === 'purchase' && t.unit_price)
+      .sort((a, b) => new Date(a.transaction_date).getTime() - new Date(b.transaction_date).getTime())
+
+    if (purchases.length === 0) {
+      return {
+        weightedAveragePrice: ingredient.price_per_unit,
+        fifoAveragePrice: ingredient.price_per_unit,
+        movingAveragePrice: ingredient.price_per_unit,
+        latestPrice: ingredient.price_per_unit,
+        priceVolatility: { coefficient: 0, trend: 'stable' }
+      }
+    }
+
+    const totalCost = purchases.reduce((sum, t) => sum + ((t.total_cost || 0) || (t.quantity * (t.unit_price || 0))), 0)
+    const totalQuantity = purchases.reduce((sum, t) => sum + t.quantity, 0)
+    const weightedAvg = totalQuantity > 0 ? totalCost / totalQuantity : ingredient.price_per_unit
+
+    const prices = purchases.map(t => t.unit_price || 0)
+    const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length
+    const variance = prices.reduce((sum, price) => sum + Math.pow(price - avgPrice, 2), 0) / prices.length
+    const stdDev = Math.sqrt(variance)
+    const coefficient = avgPrice > 0 ? stdDev / avgPrice : 0
+
+    return {
+      weightedAveragePrice: weightedAvg,
+      fifoAveragePrice: purchases[0].unit_price || ingredient.price_per_unit,
+      movingAveragePrice: prices.slice(-5).reduce((a, b) => a + b, 0) / Math.min(5, prices.length),
+      latestPrice: purchases[purchases.length - 1].unit_price || ingredient.price_per_unit,
+      priceVolatility: {
+        coefficient,
+        trend: coefficient > 0.15 ? 'volatile' : 'stable'
+      }
+    }
+  }
 }
 
 // Types dan interfaces
@@ -367,7 +464,7 @@ interface IngredientCost {
   unit: string
   unitPrice: number
   totalCost: number
-  pricingInsights: any // PricingInsights from WeightedAverageCostService
+  pricingInsights: any // PricingInsights
   priceComparison: {
     listPrice: number
     weightedAverage: number
