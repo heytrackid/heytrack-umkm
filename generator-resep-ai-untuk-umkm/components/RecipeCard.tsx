@@ -17,6 +17,7 @@ const SectionTitle: React.FC<{children: React.ReactNode}> = ({ children }) => (
 interface RecipeCardProps {
   recipe: Recipe;
   images: string[];
+  brandName?: string;
   onCalculateHpp: (costs: { [key: string]: string }) => void;
   hppResult: HppResult | null;
   isCalculatingHpp: boolean;
@@ -28,6 +29,7 @@ interface RecipeCardProps {
 const RecipeCard: React.FC<RecipeCardProps> = ({
   recipe,
   images,
+  brandName,
   onCalculateHpp,
   hppResult,
   isCalculatingHpp,
@@ -59,7 +61,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">{recipe.description}</p>
         </div>
 
-        <ImageGallery images={images} recipeName={recipe.name} />
+        <ImageGallery images={images} recipeName={recipe.name} brandName={brandName} />
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-8">

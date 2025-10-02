@@ -3,6 +3,7 @@ import React from 'react';
 interface ImageGalleryProps {
   images: string[];
   recipeName: string;
+  brandName?: string;
 }
 
 const DownloadIcon: React.FC = () => (
@@ -11,7 +12,7 @@ const DownloadIcon: React.FC = () => (
     </svg>
 );
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ images, recipeName }) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images, recipeName, brandName }) => {
   const placeholders = Array(4).fill(0);
   const displayImages = images.length > 0 ? images : placeholders;
 
@@ -22,6 +23,16 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, recipeName }) => {
           {images.length > 0 ? (
             <>
               <img src={image} alt={`${recipeName} - tampilan ${index + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+              
+              {/* Brand Watermark */}
+              {brandName && brandName.trim() && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                  <div className="text-white text-sm font-semibold text-center">
+                    {brandName}
+                  </div>
+                </div>
+              )}
+              
               <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-300"></div>
               <a
                 href={image}

@@ -115,14 +115,21 @@ Jangan tambahkan penjelasan tambahan di luar objek JSON.`;
   }
 }
 
-export async function generateRecipeImages(recipeName: string): Promise<string[]> {
+export async function generateRecipeImages(recipeName: string, brandName?: string): Promise<string[]> {
   // OpenRouter doesn't support image generation directly
   // We'll return placeholder images for now, but in a real implementation
   // you might use a different service like OpenAI DALL-E or Stable Diffusion
   console.warn("OpenRouter doesn't support image generation. Returning placeholder images.");
   
-  // Return 4 placeholder images
-  return Array(4).fill(null).map((_, i) => `https://placehold.co/600x450/EEE/31343C?text=Foto+Makanan+${i+1}`);
+  // Return 4 placeholder images with brand watermark if provided
+  return Array(4).fill(null).map((_, i) => {
+    const baseUrl = `https://placehold.co/600x450/EEE/31343C?text=Foto+Makanan+${i+1}`;
+    if (brandName && brandName.trim()) {
+      // Add watermark to the URL (in real implementation, this would be server-side processing)
+      return `${baseUrl}&watermark=${encodeURIComponent(brandName)}`;
+    }
+    return baseUrl;
+  });
 }
 
 export async function generateMarketingStrategy(businessContext: string): Promise<MarketingStrategy> {
