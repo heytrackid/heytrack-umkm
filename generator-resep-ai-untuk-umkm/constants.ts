@@ -124,17 +124,74 @@ export const RECIPE_CATEGORIES: string[] = [
   "Burrito",
   "Nachos",
 
-  // Menu Vegetarian & Vegan
-  "Veggie Burger",
-  "Falafel",
-  "Lentil Soup",
-  "Stuffed Peppers",
-  "Eggplant Parmesan",
+  // Bakery & Roti
+  "Roti Tawar",
+  "Croissant",
+  "Baguette",
+  "Donut",
+  "Cinnamon Roll",
+  "Pain Au Chocolat",
+  "Sourdough Bread",
+  "Bagel",
+  "Muffin",
+  "Scone",
+  "Danish Pastry",
+  "Puff Pastry",
+  "Brioche",
+  "Focaccia",
+  "Ciabatta",
+
+  // Cafe Menu - Minuman
+  "Espresso",
+  "Cappuccino",
+  "Latte",
+  "Americano",
+  "Macchiato",
+  "Mocha",
+  "Flat White",
+  "Cold Brew",
+  "Nitro Cold Brew",
+  "Iced Coffee",
+  "Frappuccino",
+
+  // Cafe Menu - Teh
+  "Green Tea Latte",
+  "Black Tea Latte",
+  "Chai Tea Latte",
+  "Matcha Latte",
+  "Earl Grey Tea",
+  "English Breakfast Tea",
+  "Jasmine Tea",
+  "Chamomile Tea",
+  "Peppermint Tea",
+
+  // Cafe Menu - Makanan
+  "Club Sandwich",
+  "BLT Sandwich",
+  "Panini",
+  "Caprese Sandwich",
+  "Avocado Toast",
+  "Smoked Salmon Bagel",
+  "Breakfast Burrito",
+  "Quiche Lorraine",
+  "Frittata",
+  "Shakshuka",
+  "Pasta Primavera",
+  "Carbonara",
+  "Pesto Pasta",
   "Mushroom Risotto",
-  "Chickpea Curry",
-  "Tofu Stir Fry",
-  "Veggie Sushi",
-  "Bean Burrito"
+
+  // Cafe Menu - Dessert
+  "Tiramisu",
+  "Panna Cotta",
+  "Creme Brulee",
+  "Profiteroles",
+  "Eclairs",
+  "Madeleines",
+  "Macarons",
+  "Cannoli",
+  "Tart Tatin",
+  "Crumble"
 ];
 
 export const RECIPE_CATEGORIES_GROUPED = {
@@ -187,6 +244,29 @@ export const RECIPE_CATEGORIES_GROUPED = {
     "Veggie Burger", "Falafel", "Lentil Soup", "Stuffed Peppers",
     "Eggplant Parmesan", "Mushroom Risotto", "Chickpea Curry",
     "Tofu Stir Fry", "Veggie Sushi", "Bean Burrito"
+  ],
+  "Bakery & Roti": [
+    "Roti Tawar", "Croissant", "Baguette", "Donut", "Cinnamon Roll",
+    "Pain Au Chocolat", "Sourdough Bread", "Bagel", "Muffin", "Scone",
+    "Danish Pastry", "Puff Pastry", "Brioche", "Focaccia", "Ciabatta"
+  ],
+  "Minuman Kopi": [
+    "Espresso", "Cappuccino", "Latte", "Americano", "Macchiato",
+    "Mocha", "Flat White", "Cold Brew", "Nitro Cold Brew", "Iced Coffee", "Frappuccino"
+  ],
+  "Minuman Teh": [
+    "Green Tea Latte", "Black Tea Latte", "Chai Tea Latte", "Matcha Latte",
+    "Earl Grey Tea", "English Breakfast Tea", "Jasmine Tea", "Chamomile Tea", "Peppermint Tea"
+  ],
+  "Makanan Cafe": [
+    "Club Sandwich", "BLT Sandwich", "Panini", "Caprese Sandwich",
+    "Avocado Toast", "Smoked Salmon Bagel", "Breakfast Burrito",
+    "Quiche Lorraine", "Frittata", "Shakshuka", "Pasta Primavera",
+    "Carbonara", "Pesto Pasta"
+  ],
+  "Dessert Cafe": [
+    "Tiramisu", "Panna Cotta", "Creme Brulee", "Profiteroles",
+    "Eclairs", "Madeleines", "Macarons", "Cannoli", "Tart Tatin", "Crumble"
   ]
 };
 

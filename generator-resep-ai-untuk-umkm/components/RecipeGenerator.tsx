@@ -204,7 +204,10 @@ const RecipeGenerator = forwardRef((props, ref) => {
                       "Ayam bakar madu",
                       "Sate ayam bumbu kacang",
                       "Nasi uduk betawi",
-                      "Salad buah segar"
+                      "Croissant isi coklat",
+                      "Latte klasik",
+                      "Club sandwich",
+                      "Tiramisu"
                     ].map((example, index) => (
                       <button
                         key={index}

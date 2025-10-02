@@ -12,20 +12,76 @@ const RecipeNutritionInfo: React.FC<RecipeNutritionInfoProps> = ({ recipe }) => 
   const estimatePcs = (recipeName: string, servings: number): string => {
     const name = recipeName.toLowerCase();
 
-    // Estimasi berdasarkan kategori makanan
+    // Bakery & Roti
+    if (name.includes('croissant') || name.includes('danish') || name.includes('brioche')) {
+      return `${servings * 6} pcs`; // 6 pcs per loyang
+    }
+    if (name.includes('donut') || name.includes('cinnamon roll') || name.includes('muffin') || name.includes('scone')) {
+      return `${servings * 8} pcs`; // 8 pcs per loyang
+    }
+    if (name.includes('roti tawar') || name.includes('baguette') || name.includes('ciabatta')) {
+      return `${servings} loaf`; // 1 loaf per resep
+    }
+    if (name.includes('bagel')) {
+      return `${servings * 6} pcs`; // 6 bagels per resep
+    }
+    if (name.includes('bread') || name.includes('focaccia')) {
+      return `${servings} loaf`; // 1 loaf
+    }
+
+    // Minuman Kopi & Teh
+    if (name.includes('espresso') || name.includes('americano') || name.includes('macchiato')) {
+      return `${servings * 2} gelas`; // 2 gelas per porsi (double shot)
+    }
+    if (name.includes('latte') || name.includes('cappuccino') || name.includes('mocha') || name.includes('flat white')) {
+      return `${servings * 2} gelas`; // 2 gelas per porsi
+    }
+    if (name.includes('cold brew') || name.includes('iced coffee') || name.includes('frappuccino')) {
+      return `${servings * 3} gelas`; // 3 gelas per porsi (iced drinks)
+    }
+    if (name.includes('tea latte') || name.includes('matcha')) {
+      return `${servings * 2} gelas`; // 2 gelas per porsi
+    }
+    if (name.includes('tea') && !name.includes('latte')) {
+      return `${servings * 4} gelas`; // 4 gelas per porsi (hot tea)
+    }
+
+    // Makanan Cafe
+    if (name.includes('sandwich') || name.includes('panini') || name.includes('toast')) {
+      return `${servings} pcs`; // 1 pcs per porsi
+    }
+    if (name.includes('burrito') || name.includes('wrap')) {
+      return `${servings} pcs`; // 1 pcs per porsi
+    }
+    if (name.includes('quiche') || name.includes('frittata')) {
+      return `${Math.ceil(servings / 8)} pie`; // 1 pie untuk 8 porsi
+    }
+    if (name.includes('pasta') || name.includes('risotto')) {
+      return `${servings} porsi`; // Sudah dalam bentuk porsi
+    }
+
+    // Dessert Cafe
+    if (name.includes('macaron') || name.includes('madeleine') || name.includes('eclair')) {
+      return `${servings * 12} pcs`; // 12 pcs per resep
+    }
+    if (name.includes('tiramisu') || name.includes('panna cotta') || name.includes('creme brulee')) {
+      return `${servings * 6} porsi`; // 6 porsi per resep
+    }
+    if (name.includes('tart') || name.includes(' crumble')) {
+      return `${servings} tart`; // 1 tart per resep
+    }
+    if (name.includes('cannoli') || name.includes('profiterole')) {
+      return `${servings * 8} pcs`; // 8 pcs per resep
+    }
+
+    // Default dari kategori sebelumnya
     if (name.includes('nugget') || name.includes('chicken finger')) {
       return `${servings * 4} pcs`; // 4 pcs per porsi
     }
-    if (name.includes('burger') || name.includes('sandwich')) {
+    if (name.includes('burger') || name.includes('pizza')) {
       return `${servings} pcs`; // 1 pcs per porsi
     }
-    if (name.includes('pizza')) {
-      return `${servings} pizza`; // 1 pizza per porsi (untuk 2-4 orang)
-    }
-    if (name.includes('martabak') || name.includes('pancake')) {
-      return `${servings} loyang`; // 1 loyang per porsi
-    }
-    if (name.includes('sate') || name.includes('chicken')) {
+    if (name.includes('sate')) {
       return `${servings * 5} tusuk`; // 5 tusuk per porsi
     }
     if (name.includes('bakso') || name.includes('mie')) {
