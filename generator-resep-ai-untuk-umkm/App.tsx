@@ -62,6 +62,8 @@ const App: React.FC = () => {
       <div className="flex">
         {/* Sidebar */}
         <Sidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
           onSelectCategory={handleGenerateRecipe}
           onRandomGenerate={handleGenerateRandomRecipe}
           isLoading={false}
