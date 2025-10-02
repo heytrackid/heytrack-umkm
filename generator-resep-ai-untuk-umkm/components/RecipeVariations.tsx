@@ -85,7 +85,7 @@ const RecipeVariations: React.FC<RecipeVariationsProps> = ({ baseRecipe, onVaria
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-sm">
+    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
       <h3 className="text-lg font-bold text-slate-800 mb-4 pb-2 border-b-2 border-blue-300 inline-block" style={{fontFamily: "'Inter', sans-serif"}}>
         ✨ Recipe Variations
       </h3>
@@ -96,7 +96,7 @@ const RecipeVariations: React.FC<RecipeVariationsProps> = ({ baseRecipe, onVaria
 
       <div className="grid gap-4">
         {RECIPE_VARIATIONS.map((variationType) => (
-          <div key={variationType} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+          <div key={variationType} className="bg-white p-4 rounded-lg border border-gray-200">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center">
                 <span className="text-2xl mr-3">{getVariationIcon(variationType)}</span>

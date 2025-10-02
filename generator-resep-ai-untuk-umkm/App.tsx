@@ -59,7 +59,7 @@ const App: React.FC = () => {
         {/* Main Content */}
         <div className="flex-1 lg:ml-0">
           <main className="container mx-auto px-4 py-8">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-8">
               <div className="p-6 md:p-8">
                 <div className="max-w-6xl mx-auto">
                   <RecipeProvider

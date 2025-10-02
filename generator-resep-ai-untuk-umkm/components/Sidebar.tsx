@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => handleTabClick(item.id)}
                   className={`w-full flex items-start p-4 text-left rounded-lg border transition-all duration-200 ${
                     activeTab === item.id
-                      ? 'bg-orange-50 border-orange-200 text-orange-900 shadow-sm'
+                      ? 'bg-orange-50 border-orange-200 text-orange-900'
                       : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'
                   }`}
                 >

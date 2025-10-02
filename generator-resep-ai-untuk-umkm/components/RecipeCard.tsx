@@ -50,7 +50,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-orange-200 animate-fade-in">
+    <div className="bg-white rounded-xl border border-gray-200 animate-fade-in">
       <div className="p-6 md:p-8">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3" style={{fontFamily: "'Inter', sans-serif"}}>
@@ -103,7 +103,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
               <div className="lg:col-span-1">
                 <SectionTitle>Bahan-Bahan</SectionTitle>
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200 shadow-sm">
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200">
                   <ul className="space-y-3 text-gray-800">
                     {recipe.ingredients.map((ingredient, index) => (
                       <li key={index} className="flex items-start">
@@ -119,11 +119,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
               <div className="lg:col-span-2">
                 <SectionTitle>Cara Membuat</SectionTitle>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200 shadow-sm">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
                   <ol className="space-y-4 text-gray-800">
                     {recipe.instructions.map((step, index) => (
                       <li key={index} className="flex items-start">
-                        <span className="flex-shrink-0 mr-4 mt-1 flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white font-bold text-sm shadow-md">
+                        <span className="flex-shrink-0 mr-4 mt-1 flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white font-bold text-sm">
                           {index + 1}
                         </span>
                         <span className="text-sm leading-relaxed pt-1">{step}</span>
@@ -135,25 +135,23 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             </div>
 
             <div className="mt-10">
-              <SectionTitle>Informasi Nutrisi & Porsi</SectionTitle>
               <RecipeNutritionInfo recipe={recipe} />
             </div>
 
             <div className="mt-10">
               <SectionTitle>HPP & Harga Jual</SectionTitle>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200 shadow-sm">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
                 <p className="text-sm text-slate-600 mb-4 leading-relaxed">
                   Masukkan harga bahan untuk menghitung Harga Pokok Produksi dan menentukan harga jual yang tepat.
                 </p>
                 <HppCalculator
                   ingredients={recipe.ingredients}
-                  onCalculate={onCalculateHpp}
                   isLoading={isCalculatingHpp}
                 />
 
                 {isCalculatingHpp && (
                   <div className="flex flex-col items-center justify-center text-center mt-6">
-                    <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-3 rounded-full mb-4 shadow-lg">
+                    <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-3 rounded-full mb-4">
                       <LoadingSpinner />
                     </div>
                     <p className="text-lg font-semibold text-slate-800">Menghitung HPP...</p>
@@ -162,7 +160,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
                 )}
 
                 {hppError && (
-                  <div className="mt-6 text-center p-4 bg-red-50 border border-red-300 text-red-800 rounded-xl shadow-sm">
+                  <div className="mt-6 text-center p-4 bg-red-50 border border-red-300 text-red-800 rounded-xl">
                     <h4 className="font-bold text-lg mb-2">Terjadi Kesalahan</h4>
                     <p className="text-sm">{hppError}</p>
                   </div>

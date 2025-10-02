@@ -100,7 +100,7 @@ const RecipeGenerator = forwardRef((props, ref) => {
       <div className="max-w-4xl mx-auto">
         {/* Recipe Generator Form */}
         {!recipe && !isLoading && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>
                 🍳 Generator Resep AI
@@ -292,8 +292,8 @@ const RecipeGenerator = forwardRef((props, ref) => {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center text-center p-12 bg-gradient-to-br from-white to-orange-50 rounded-2xl border border-orange-200 shadow-lg">
-              <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-4 rounded-full mb-6 shadow-lg">
+          <div className="flex flex-col items-center justify-center text-center p-12 bg-gradient-to-br from-white to-orange-50 rounded-2xl border border-orange-200">
+              <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-4 rounded-full mb-6">
                 <LoadingSpinner />
               </div>
               <p className="text-xl font-bold text-slate-800 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>Sedang membuat resep lezat untuk Anda...</p>
@@ -304,7 +304,7 @@ const RecipeGenerator = forwardRef((props, ref) => {
 
         {/* Error State */}
         {error && (
-          <div className="text-center p-8 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-md">
+          <div className="text-center p-8 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             <h3 className="font-bold text-lg">Oops! Terjadi kesalahan.</h3>
             <p>{error}</p>
           </div>
