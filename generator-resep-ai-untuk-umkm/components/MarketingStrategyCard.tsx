@@ -65,8 +65,8 @@ const MarketingStrategyCard: React.FC<MarketingStrategyCardProps> = ({ strategy 
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 animate-fade-in p-4">
-      <h2 className="text-xl font-bold text-slate-800 text-center mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-        Strategi Pemasaran
+      <h2 className="text-3xl font-bold text-slate-800 text-center mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+        Strategi Pemasaran Lengkap
       </h2>
       
       <Card className="bg-gray-50 text-center mb-4">

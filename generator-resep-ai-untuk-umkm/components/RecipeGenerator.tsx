@@ -100,189 +100,206 @@ const RecipeGenerator = forwardRef((props, ref) => {
       <div className="max-w-4xl mx-auto">
         {/* Recipe Generator Form */}
         {!recipe && !isLoading && (
-          <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>
-                🍳 Generator Resep AI
-              </h2>
-              <p className="text-gray-600 text-lg">
-                Pilih kategori atau ketik ide resep Anda untuk membuat resep otomatis
-              </p>
+          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-orange-50 to-orange-100 px-8 py-12 border-b border-gray-100">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-6 shadow-sm">
+                  <span className="text-4xl">🤖</span>
+                </div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>
+                  🍳 Generator Resep AI
+                </h2>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                  Pilih kategori atau ketik ide resep Anda untuk membuat resep otomatis
+                </p>
+              </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Category Selection */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>
-                  📂 Pilih Kategori
-                </h3>
-
-                <div className="space-y-4">
-                  {/* Category Group Dropdown */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Jenis Masakan
-                    </label>
-                    <select
-                      value={selectedCategoryGroup}
-                      onChange={(e) => {
-                        setSelectedCategoryGroup(e.target.value);
-                        setSelectedSpecificCategory('');
-                        setShowCustomInput(false);
-                        setCustomInput('');
-                      }}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                    >
-                      <option value="">Pilih jenis masakan...</option>
-                      {Object.keys(RECIPE_CATEGORIES_GROUPED).map((group) => (
-                        <option key={group} value={group}>
-                          {group}
-                        </option>
-                      ))}
-                    </select>
+            {/* Form Content */}
+            <div className="px-8 py-12">
+              <div className="grid md:grid-cols-2 gap-12">
+                {/* Category Selection */}
+                <div className="space-y-6">
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>
+                      📂 Pilih Kategori
+                    </h3>
+                    <p className="text-gray-600">Temukan resep dari berbagai kategori yang tersedia</p>
                   </div>
 
-                  {/* Specific Category Dropdown or Custom Input */}
-                  {selectedCategoryGroup && (
+                  <div className="space-y-6">
+                    {/* Category Group Dropdown */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilih Resep <span className="text-xs text-gray-500">(atau pilih "Tulis Resep Sendiri")</span>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Jenis Masakan
                       </label>
-                      {!showCustomInput ? (
-                        <select
-                          value={selectedSpecificCategory}
-                          onChange={(e) => handleCategorySelect(e.target.value)}
-                          disabled={isLoading}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
-                        >
-                          <option value="">Pilih resep spesifik...</option>
-                          {RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup].map((category) => (
-                            <option key={category} value={category}>
-                              {category}
+                      <select
+                        value={selectedCategoryGroup}
+                        onChange={(e) => {
+                          setSelectedCategoryGroup(e.target.value);
+                          setSelectedSpecificCategory('');
+                          setShowCustomInput(false);
+                          setCustomInput('');
+                        }}
+                        className="w-full px-4 py-3 text-base text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                      >
+                        <option value="">Pilih jenis masakan...</option>
+                        {Object.keys(RECIPE_CATEGORIES_GROUPED).map((group) => (
+                          <option key={group} value={group}>
+                            {group}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Specific Category Dropdown or Custom Input */}
+                    {selectedCategoryGroup && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          Pilih Resep <span className="text-sm text-gray-500">(atau pilih "Tulis Resep Sendiri")</span>
+                        </label>
+                        {!showCustomInput ? (
+                          <select
+                            value={selectedSpecificCategory}
+                            onChange={(e) => handleCategorySelect(e.target.value)}
+                            disabled={isLoading}
+                            className="w-full px-4 py-3 text-base text-gray-700 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50 transition-colors duration-200"
+                          >
+                            <option value="">Pilih resep spesifik...</option>
+                            {RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup].map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
+                            ))}
+                            <option value="custom" className="font-medium text-orange-600">
+                              ──────────────────
                             </option>
-                          ))}
-                          <option value="custom" className="font-medium text-orange-600">
-                            ──────────────────
-                          </option>
-                          <option value="custom" className="font-medium text-orange-600">
-                            ✏️  Tulis Resep Sendiri
-                          </option>
-                        </select>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-orange-600">✏️ Resep Custom:</span>
+                            <option value="custom" className="font-medium text-orange-600">
+                              ✏️  Tulis Resep Sendiri
+                            </option>
+                          </select>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                              <span className="text-sm font-medium text-orange-900">✏️ Resep Custom:</span>
+                              <button
+                                onClick={() => {
+                                  setShowCustomInput(false);
+                                  setCustomInput('');
+                                }}
+                                className="text-sm text-orange-600 hover:text-orange-800 underline font-medium"
+                              >
+                                Kembali ke dropdown
+                              </button>
+                            </div>
+                            <input
+                              type="text"
+                              value={customInput}
+                              onChange={(e) => setCustomInput(e.target.value)}
+                              placeholder={`Contoh: ${RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup][0]} spesial...`}
+                              className="w-full px-4 py-3 text-base text-gray-700 placeholder-gray-400 bg-white border border-orange-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                              disabled={isLoading}
+                            />
                             <button
-                              onClick={() => {
-                                setShowCustomInput(false);
-                                setCustomInput('');
-                              }}
-                              className="text-sm text-gray-500 hover:text-gray-700 underline"
+                              onClick={() => handleCustomInput({ preventDefault: () => {} } as React.FormEvent)}
+                              disabled={isLoading || !customInput.trim()}
+                              className="w-full px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                             >
-                              Kembali ke dropdown
+                              🚀 Buat Resep AI
                             </button>
                           </div>
-                          <input
-                            type="text"
-                            value={customInput}
-                            onChange={(e) => setCustomInput(e.target.value)}
-                            placeholder={`Contoh: ${RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup][0]} spesial...`}
-                            className="w-full px-4 py-3 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                            disabled={isLoading}
-                          />
-                          <button
-                            onClick={() => handleCustomInput({ preventDefault: () => {} } as React.FormEvent)}
-                            disabled={isLoading || !customInput.trim()}
-                            className="w-full px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            Buat Resep AI
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    )}
 
-                  {/* Random Button */}
-                  <button
-                    onClick={handleRandomGenerate}
-                    disabled={isLoading}
-                    className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex items-center justify-center">
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
-                      </svg>
-                      Acak Resep
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Custom Input */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>
-                  🎨 Ide Kustom
-                </h3>
-
-                <form onSubmit={handleCustomInput} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Ketik ide resep Anda
-                    </label>
-                    <textarea
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      placeholder="Contoh: Ayam goreng crispy, Nasi liwet khas Solo, Smoothie bowl sehat..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
-                      rows={4}
+                    {/* Random Button */}
+                    <button
+                      onClick={handleRandomGenerate}
                       disabled={isLoading}
-                    />
+                      className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold rounded-xl hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                    >
+                      <div className="flex items-center justify-center">
+                        <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
+                        </svg>
+                        Acak Resep
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Custom Input */}
+                <div className="space-y-6">
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>
+                      🎨 Ide Kustom
+                    </h3>
+                    <p className="text-gray-600">Ingin resep yang unik? Tulis ide Anda sendiri</p>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading || !customInput.trim()}
-                    className="w-full px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? 'Membuat Resep...' : 'Buat Resep AI'}
-                  </button>
-                </form>
-
-                {/* Quick Examples */}
-                <div className="mt-6">
-                  <p className="text-sm text-gray-600 mb-3">Ide cepat:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "Ayam bakar madu",
-                      "Sate ayam bumbu kacang",
-                      "Nasi uduk betawi",
-                      "Croissant isi coklat",
-                      "Latte klasik",
-                      "Club sandwich",
-                      "Tiramisu"
-                    ].map((example, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCustomInput(example)}
+                  <form onSubmit={handleCustomInput} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Ketik ide resep Anda
+                      </label>
+                      <textarea
+                        value={customInput}
+                        onChange={(e) => setCustomInput(e.target.value)}
+                        placeholder="Contoh: Ayam goreng crispy, Nasi liwet khas Solo, Smoothie bowl sehat..."
+                        className="w-full px-4 py-3 text-base text-gray-700 placeholder-gray-400 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none transition-colors duration-200"
+                        rows={6}
                         disabled={isLoading}
-                        className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-1 rounded-full transition-colors duration-200 disabled:opacity-50"
-                      >
-                        {example}
-                      </button>
-                    ))}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading || !customInput.trim()}
+                      className="w-full px-6 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+                    >
+                      {isLoading ? 'Membuat Resep...' : '🚀 Buat Resep AI'}
+                    </button>
+                  </form>
+
+                  {/* Quick Examples */}
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <p className="text-sm font-semibold text-gray-700 mb-4">💡 Ide cepat:</p>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        "Ayam bakar madu",
+                        "Sate ayam bumbu kacang",
+                        "Nasi uduk betawi",
+                        "Croissant isi coklat",
+                        "Latte klasik",
+                        "Club sandwich",
+                        "Tiramisu"
+                      ].map((example, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCustomInput(example)}
+                          disabled={isLoading}
+                          className="px-4 py-2 bg-white hover:bg-orange-50 text-orange-700 border border-orange-200 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 hover:border-orange-300 hover:shadow-sm"
+                        >
+                          {example}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Info Box */}
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-12 p-6 bg-blue-50 border border-blue-200 rounded-xl">
                 <div className="flex items-start">
-                  <div className="text-blue-500 mr-3 mt-1">
+                  <div className="text-blue-500 mr-4 mt-1">
                     💡
                   </div>
-                  <div className="text-sm text-blue-800">
-                    <p className="font-medium mb-1">Tidak menemukan resep yang sesuai?</p>
-                    <p>Pilih jenis masakan terlebih dahulu, lalu pilih <strong>"✏️ Tulis Resep Sendiri"</strong> dari dropdown untuk membuat resep custom!</p>
+                  <div className="flex-1">
+                    <p className="font-semibold text-blue-900 mb-2">Tidak menemukan resep yang sesuai?</p>
+                    <p className="text-blue-800 text-sm leading-relaxed">
+                      Pilih jenis masakan terlebih dahulu, lalu pilih <strong>"✏️ Tulis Resep Sendiri"</strong> dari dropdown untuk membuat resep custom!
+                    </p>
                   </div>
                 </div>
               </div>
