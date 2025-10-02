@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { Recipe, HppResult } from '../types';
 import { RECIPE_CATEGORIES } from '../constants';
 import { generateRecipe, generateRecipeImages, calculateHpp } from '../services/openrouterService';
-import CategorySelector from './CategorySelector';
 import RecipeCard from './RecipeCard';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -101,13 +100,6 @@ const RecipeGenerator: React.FC = () => {
 
   return (
     <>
-      <CategorySelector
-        categories={RECIPE_CATEGORIES}
-        onSelectCategory={handleGenerateRecipe}
-        onRandomGenerate={handleRandomGenerate}
-        isLoading={isLoading}
-      />
-
       <div className="mt-8">
         {isLoading && (
           <div className="flex flex-col items-center justify-center text-center p-12 bg-gradient-to-br from-white to-orange-50 rounded-2xl border border-orange-200 shadow-lg">
