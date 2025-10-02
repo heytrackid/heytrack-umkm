@@ -22,7 +22,6 @@ import { SmartLink, SmartActionButton, SmartQuickActions } from '@/components/na
 import { 
   StatsCardSkeleton,
   DashboardHeaderSkeleton,
-  RecentOrdersSkeleton,
   StockAlertSkeleton,
   QuickActionsSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
@@ -51,7 +50,6 @@ const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection')
     </div>
   ),
 })
-const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
 const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
 
 // Sample data removed - now using real data from API
@@ -89,7 +87,6 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
-    [LOADING_KEYS.RECENT_ORDERS]: true,
     [LOADING_KEYS.STOCK_ALERTS]: true
   })
   
@@ -108,11 +105,6 @@ export default function Dashboard() {
       setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
     }, 1500)
 
-    // Simulate recent orders loading
-    const ordersTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.RECENT_ORDERS, false)
-    }, 2000)
-
     // Simulate stock alerts loading  
     const stockTimer = setTimeout(() => {
       setLoading(LOADING_KEYS.STOCK_ALERTS, false)
@@ -120,7 +112,6 @@ export default function Dashboard() {
 
     return () => {
       clearTimeout(statsTimer)
-      clearTimeout(ordersTimer)
       clearTimeout(stockTimer)
     }
   }, [])
@@ -181,16 +172,7 @@ export default function Dashboard() {
           </Suspense>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Orders (Suspense + dynamic) */}
-          {isLoading(LOADING_KEYS.RECENT_ORDERS) ? (
-            <RecentOrdersSkeleton />
-          ) : (
-            <Suspense fallback={<RecentOrdersSkeleton />}>
-              <RecentOrdersSection />
-            </Suspense>
-          )}
-
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Low Stock Alert (Suspense + dynamic) */}
           {isLoading(LOADING_KEYS.STOCK_ALERTS) ? (
             <StockAlertSkeleton />

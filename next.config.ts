@@ -1,3 +1,4 @@
+import {withSentryConfig} from '@sentry/nextjs';
 import type { NextConfig } from "next";
 import withBundleAnalyzer from '@next/bundle-analyzer';
 
@@ -75,11 +76,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.dev",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.dev https://va.vercel-scripts.com blob:",
               "style-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev",
               "img-src 'self' data: https: https://*.clerk.accounts.dev https://img.clerk.com",
               "font-src 'self' data: https://*.clerk.accounts.dev",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://*.clerk.accounts.dev https://clerk.dev wss://*.clerk.accounts.dev",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai /error-monitoring https://*.clerk.accounts.dev https://clerk.dev wss://*.clerk.accounts.dev https://va.vercel-scripts.com",
+              "worker-src 'self' blob: https://*.clerk.accounts.dev",
               "frame-src 'self' https://*.clerk.accounts.dev",
               "object-src 'none'",
               "base-uri 'self'",
@@ -186,4 +188,35 @@ const configWithAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })(nextConfig);
 
-export default configWithAnalyzer;
+export default withSentryConfig(configWithAnalyzer, {
+  // For all available options, see:
+  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
+
+  org: "heytrack",
+
+  project: "javascript-nextjs",
+
+  // Only print logs for uploading source maps in CI
+  silent: !process.env.CI,
+
+  // For all available options, see:
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
+
+  // Upload a larger set of source maps for prettier stack traces (increases build time)
+  widenClientFileUpload: true,
+
+  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
+  // This can increase your server load as well as your hosting bill.
+  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
+  // side errors will fail.
+  tunnelRoute: "/error-monitoring",
+
+  // Automatically tree-shake Sentry logger statements to reduce bundle size
+  disableLogger: true,
+
+  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
+  // See the following for more information:
+  // https://docs.sentry.io/product/crons/
+  // https://vercel.com/docs/cron-jobs
+  automaticVercelMonitors: true,
+});
