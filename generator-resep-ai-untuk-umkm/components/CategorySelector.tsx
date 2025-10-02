@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { RECIPE_CATEGORIES_GROUPED } from '../constants';
 
 interface CategorySelectorProps {
   categories: string[];
@@ -19,7 +20,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onSelec
 
   return (
     <div className="p-6 bg-gradient-to-br from-white to-orange-50 rounded-xl border border-orange-200 shadow-lg">
-      <h2 className="text-xl font-bold text-center text-slate-800 mb-6" style={{fontFamily: "'Playfair Display', serif"}}>Mulai Ciptakan Resep</h2>
+      <h2 className="text-xl font-bold text-center text-slate-800 mb-6" style={{fontFamily: "'Inter', sans-serif"}}>Mulai Ciptakan Resep</h2>
       
       <form onSubmit={handleCustomSubmit} className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto mb-6">
         <input
@@ -46,34 +47,39 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ categories, onSelec
       <div className="text-center mb-6">
         <div className="inline-flex items-center">
           <div className="h-px bg-gradient-to-r from-transparent to-orange-300 flex-1"></div>
-          <span className="px-4 text-sm font-medium text-gray-500 bg-gradient-to-r from-orange-50 to-white rounded-full border border-orange-200">ATAU PILIH KATEGORI</span>
+          <span className="px-4 text-sm font-medium text-gray-500 bg-gradient-to-r from-orange-50 to-white rounded-full border border-orange-200">PILIH KATEGORI</span>
           <div className="h-px bg-gradient-to-l from-transparent to-orange-300 flex-1"></div>
         </div>
       </div>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => onSelectCategory(category)}
-            disabled={isLoading}
-            className="p-3 text-sm font-medium text-orange-700 bg-white border border-orange-200 rounded-lg hover:bg-orange-500 hover:text-white hover:border-orange-500 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-sm hover:shadow-md"
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-      
-      <div className="text-center">
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 max-w-md mx-auto">
+        <select
+          onChange={(e) => e.target.value && onSelectCategory(e.target.value)}
+          disabled={isLoading}
+          className="flex-grow px-4 py-3 text-base text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200 disabled:opacity-50 shadow-sm"
+          defaultValue=""
+        >
+          <option value="" disabled>Pilih Kategori Resep...</option>
+          {Object.entries(RECIPE_CATEGORIES_GROUPED).map(([group, groupCategories]) => (
+            <optgroup key={group} label={group}>
+              {groupCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
+
         <button
           onClick={onRandomGenerate}
           disabled={isLoading}
-          className="inline-flex items-center px-6 py-3 font-medium text-slate-700 bg-white border-2 border-dashed border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-sm hover:shadow-md"
+          className="px-6 py-3 font-medium text-slate-700 bg-white border-2 border-dashed border-slate-300 rounded-lg hover:bg-slate-50 hover:border-slate-400 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-sm hover:shadow-md whitespace-nowrap"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor">
             <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
           </svg>
-          Surprise Me!
+          Acak
         </button>
       </div>
     </div>

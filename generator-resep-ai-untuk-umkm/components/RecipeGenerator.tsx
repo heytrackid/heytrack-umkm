@@ -15,7 +15,7 @@ const WelcomePlaceholder: React.FC = () => (
         <path d="M10 15v4a2 2 0 002 2h0a2 2 0 002-2v-4" />
       </svg>
     </div>
-    <h2 className="text-2xl font-bold text-slate-800 mb-4" style={{fontFamily: "'Playfair Display', serif"}}>Selamat Datang di Generator Resep AI!</h2>
+    <h2 className="text-2xl font-bold text-slate-800 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>Selamat Datang di Generator Resep AI!</h2>
     <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
       Siap untuk berkreasi? Pilih kategori makanan, ketik ide resep Anda, atau coba resep acak untuk inspirasi.
     </p>
@@ -114,7 +114,7 @@ const RecipeGenerator: React.FC = () => {
               <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-4 rounded-full mb-6 shadow-lg">
                 <LoadingSpinner />
               </div>
-              <p className="text-xl font-bold text-slate-800 mb-2" style={{fontFamily: "'Playfair Display', serif"}}>Sedang membuat resep lezat untuk Anda...</p>
+              <p className="text-xl font-bold text-slate-800 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>Sedang membuat resep lezat untuk Anda...</p>
               <p className="text-gray-600 text-lg">Mohon tunggu sebentar. Makanan enak butuh waktu!</p>
               {recipe && <p className="mt-4 text-sm text-orange-600 bg-orange-100 px-4 py-2 rounded-full inline-block">Sekarang sedang menyiapkan foto-foto indah untuk "{recipe.name}"...</p>}
           </div>
@@ -133,6 +133,18 @@ const RecipeGenerator: React.FC = () => {
             hppResult={hppResult}
             isCalculatingHpp={isCalculatingHpp}
             hppError={hppError}
+            onVariationSelect={(selectedRecipe) => {
+              setRecipe(selectedRecipe);
+              setImages([]); // Reset images, will be regenerated
+              setHppResult(null);
+              setHppError(null);
+            }}
+            onScaledRecipe={(scaledRecipe, scaleFactor) => {
+              setRecipe(scaledRecipe);
+              setImages([]); // Reset images for scaled recipe
+              setHppResult(null);
+              setHppError(null);
+            }}
           />
         )}
         {!isLoading && !recipe && !error && (
