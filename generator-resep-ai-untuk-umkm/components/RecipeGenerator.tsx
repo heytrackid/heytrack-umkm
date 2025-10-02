@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Recipe, HppResult } from '../types';
 import { RECIPE_CATEGORIES } from '../constants';
 import { generateRecipe, generateRecipeImages, calculateHpp } from '../services/openrouterService';
@@ -38,7 +38,7 @@ const WelcomePlaceholder: React.FC = () => (
   </div>
 );
 
-const RecipeGenerator: React.FC = () => {
+const RecipeGenerator = forwardRef((props, ref) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [images, setImages] = useState<string[]>([]);
@@ -48,6 +48,11 @@ const RecipeGenerator: React.FC = () => {
   const [hppResult, setHppResult] = useState<HppResult | null>(null);
   const [isCalculatingHpp, setIsCalculatingHpp] = useState<boolean>(false);
   const [hppError, setHppError] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    handleGenerateRecipe,
+    handleRandomGenerate
+  }));
 
   const handleGenerateRecipe = useCallback(async (category: string) => {
     setIsLoading(true);
