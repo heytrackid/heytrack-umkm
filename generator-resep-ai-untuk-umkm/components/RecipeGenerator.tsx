@@ -1,53 +1,9 @@
 import React, { useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Recipe, HppResult } from '../types';
-import { RECIPE_CATEGORIES } from '../constants';
+import { RECIPE_CATEGORIES_GROUPED } from '../constants';
 import { generateRecipe, generateRecipeImages, calculateHpp } from '../services/openrouterService';
 import RecipeCard from './RecipeCard';
 import LoadingSpinner from './LoadingSpinner';
-
-const WelcomePlaceholder: React.FC = () => (
-  <div className="text-center p-12 bg-gradient-to-br from-white to-orange-50 rounded-2xl border-2 border-dashed border-orange-200 shadow-inner">
-    <div className="mx-auto bg-gradient-to-r from-orange-400 to-orange-500 w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-lg">
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path d="M5 3a2 2 0 012-2h10a2 2 0 012 2v1h-14V3z" />
-        <path fillRule="evenodd" d="M5 6h14v7a2 2 0 01-2 2H7a2 2 0 01-2-2V6zm2 2a1 1 0 011-1h8a1 1 0 110 2H8a1 1 0 01-1-1z" clipRule="evenodd" />
-        <path d="M10 15v4a2 2 0 002 2h0a2 2 0 002-2v-4" />
-      </svg>
-    </div>
-    <h2 className="text-2xl font-bold text-slate-800 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>Selamat Datang di Generator Resep AI!</h2>
-    <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
-      Siap untuk berkreasi? Pilih kategori dari sidebar, atau ketik ide resep Anda sendiri di bawah ini.
-    </p>
-
-    <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto text-left mb-8">
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
-        <div className="text-orange-500 mb-2">🍳</div>
-        <h3 className="font-semibold text-slate-800 mb-1">Generator Resep</h3>
-        <p className="text-sm text-gray-600">AI membuat resep lengkap dengan bahan dan instruksi</p>
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
-        <div className="text-orange-500 mb-2">✨</div>
-        <h3 className="font-semibold text-slate-800 mb-1">Recipe Variations</h3>
-        <p className="text-sm text-gray-600">Dapatkan variasi resep untuk menu yang lebih beragam</p>
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-orange-100">
-        <div className="text-orange-500 mb-2">📏</div>
-        <h3 className="font-semibold text-slate-800 mb-1">Smart Scaling</h3>
-        <p className="text-sm text-gray-600">Sesuaikan porsi resep untuk berbagai kebutuhan</p>
-      </div>
-    </div>
-
-    <div className="text-center">
-      <p className="text-sm text-gray-600 mb-4">Gunakan sidebar untuk kategori cepat atau input custom di bawah:</p>
-      <div className="inline-flex items-center text-sm text-orange-600 bg-orange-50 px-4 py-2 rounded-full">
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-        Klik menu di kiri atas untuk akses sidebar
-      </div>
-    </div>
-  </div>
-);
 
 const RecipeGenerator = forwardRef((props, ref) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -56,6 +12,7 @@ const RecipeGenerator = forwardRef((props, ref) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [customInput, setCustomInput] = useState<string>('');
+  const [selectedCategoryGroup, setSelectedCategoryGroup] = useState<string>('');
 
   const [hppResult, setHppResult] = useState<HppResult | null>(null);
   const [isCalculatingHpp, setIsCalculatingHpp] = useState<boolean>(false);
@@ -92,8 +49,10 @@ const RecipeGenerator = forwardRef((props, ref) => {
   }, []);
 
   const handleRandomGenerate = useCallback(() => {
-    const randomIndex = Math.floor(Math.random() * RECIPE_CATEGORIES.length);
-    const randomCategory = RECIPE_CATEGORIES[randomIndex];
+    // Get all categories from grouped categories
+    const allCategories = Object.values(RECIPE_CATEGORIES_GROUPED).flat();
+    const randomIndex = Math.floor(Math.random() * allCategories.length);
+    const randomCategory = allCategories[randomIndex];
     handleGenerateRecipe(randomCategory);
   }, [handleGenerateRecipe]);
 
@@ -129,7 +88,141 @@ const RecipeGenerator = forwardRef((props, ref) => {
 
   return (
     <>
-      <div className="mt-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Recipe Generator Form */}
+        {!recipe && !isLoading && (
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2" style={{fontFamily: "'Inter', sans-serif"}}>
+                🍳 Generator Resep AI
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Pilih kategori atau ketik ide resep Anda untuk membuat resep otomatis
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Category Selection */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>
+                  📂 Pilih Kategori
+                </h3>
+
+                <div className="space-y-4">
+                  {/* Category Group Dropdown */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Jenis Masakan
+                    </label>
+                    <select
+                      value={selectedCategoryGroup}
+                      onChange={(e) => setSelectedCategoryGroup(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                      <option value="">Pilih jenis masakan...</option>
+                      {Object.keys(RECIPE_CATEGORIES_GROUPED).map((group) => (
+                        <option key={group} value={group}>
+                          {group}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Specific Category Dropdown */}
+                  {selectedCategoryGroup && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Pilih Resep
+                      </label>
+                      <select
+                        onChange={(e) => e.target.value && handleCategorySelect(e.target.value)}
+                        disabled={isLoading}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
+                        defaultValue=""
+                      >
+                        <option value="">Pilih resep spesifik...</option>
+                        {RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup].map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Random Button */}
+                  <button
+                    onClick={handleRandomGenerate}
+                    disabled={isLoading}
+                    className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-lg hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center justify-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
+                      </svg>
+                      Acak Resep
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Custom Input */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4" style={{fontFamily: "'Inter', sans-serif"}}>
+                  🎨 Ide Kustom
+                </h3>
+
+                <form onSubmit={handleCustomInput} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ketik ide resep Anda
+                    </label>
+                    <textarea
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      placeholder="Contoh: Ayam goreng crispy, Nasi liwet khas Solo, Smoothie bowl sehat..."
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
+                      rows={4}
+                      disabled={isLoading}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading || !customInput.trim()}
+                    className="w-full px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? 'Membuat Resep...' : 'Buat Resep AI'}
+                  </button>
+                </form>
+
+                {/* Quick Examples */}
+                <div className="mt-6">
+                  <p className="text-sm text-gray-600 mb-3">Ide cepat:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "Ayam bakar madu",
+                      "Sate ayam bumbu kacang",
+                      "Nasi uduk betawi",
+                      "Salad buah segar"
+                    ].map((example, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCustomInput(example)}
+                        disabled={isLoading}
+                        className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-1 rounded-full transition-colors duration-200 disabled:opacity-50"
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center text-center p-12 bg-gradient-to-br from-white to-orange-50 rounded-2xl border border-orange-200 shadow-lg">
               <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-4 rounded-full mb-6 shadow-lg">
@@ -140,13 +233,17 @@ const RecipeGenerator = forwardRef((props, ref) => {
               {recipe && <p className="mt-4 text-sm text-orange-600 bg-orange-100 px-4 py-2 rounded-full inline-block">Sekarang sedang menyiapkan foto-foto indah untuk "{recipe.name}"...</p>}
           </div>
         )}
+
+        {/* Error State */}
         {error && (
           <div className="text-center p-8 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-md">
             <h3 className="font-bold text-lg">Oops! Terjadi kesalahan.</h3>
             <p>{error}</p>
           </div>
         )}
-        {!isLoading && recipe && (
+
+        {/* Recipe Result */}
+        {recipe && !isLoading && (
           <RecipeCard
             recipe={recipe}
             images={images}
@@ -167,57 +264,6 @@ const RecipeGenerator = forwardRef((props, ref) => {
               setHppError(null);
             }}
           />
-        )}
-        {!isLoading && !recipe && !error && (
-           <>
-             <WelcomePlaceholder />
-
-             {/* Custom Input Form - Right after WelcomePlaceholder */}
-             <div className="mt-8 max-w-md mx-auto">
-               <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                 <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center" style={{fontFamily: "'Inter', sans-serif"}}>
-                   🎨 Ide Resep Custom
-                 </h3>
-                 <form onSubmit={handleCustomInput} className="space-y-4">
-                   <input
-                     type="text"
-                     value={customInput}
-                     onChange={(e) => setCustomInput(e.target.value)}
-                     placeholder="Ketik ide resep Anda..."
-                     className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
-                     disabled={isLoading}
-                   />
-                   <button
-                     type="submit"
-                     disabled={isLoading || !customInput.trim()}
-                     className="w-full px-6 py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                   >
-                     {isLoading ? 'Membuat Resep...' : 'Buat Resep AI'}
-                   </button>
-                 </form>
-                 <div className="mt-4 text-center">
-                   <p className="text-xs text-gray-500 mb-2">Contoh ide resep:</p>
-                   <div className="flex flex-wrap gap-2 justify-center">
-                     {[
-                       "Ayam goreng crispy",
-                       "Smoothie bowl sehat",
-                       "Kue ulang tahun anak",
-                       "Sup hangat musim hujan"
-                     ].map((example, index) => (
-                       <button
-                         key={index}
-                         onClick={() => setCustomInput(example)}
-                         disabled={isLoading}
-                         className="text-xs bg-gray-100 hover:bg-orange-100 text-gray-600 hover:text-orange-700 px-3 py-1 rounded-full transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                       >
-                         {example}
-                       </button>
-                     ))}
-                   </div>
-                 </div>
-               </div>
-             </div>
-           </>
         )}
       </div>
     </>
