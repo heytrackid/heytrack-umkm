@@ -13,6 +13,8 @@ const RecipeGenerator = forwardRef((props, ref) => {
   const [error, setError] = useState<string | null>(null);
   const [customInput, setCustomInput] = useState<string>('');
   const [selectedCategoryGroup, setSelectedCategoryGroup] = useState<string>('');
+  const [selectedSpecificCategory, setSelectedSpecificCategory] = useState<string>('');
+  const [showCustomInput, setShowCustomInput] = useState<boolean>(false);
 
   const [hppResult, setHppResult] = useState<HppResult | null>(null);
   const [isCalculatingHpp, setIsCalculatingHpp] = useState<boolean>(false);
@@ -65,7 +67,14 @@ const RecipeGenerator = forwardRef((props, ref) => {
   }, [customInput, handleGenerateRecipe]);
 
   const handleCategorySelect = useCallback((category: string) => {
-    handleGenerateRecipe(category);
+    if (category === 'custom') {
+      setShowCustomInput(true);
+      setSelectedSpecificCategory('');
+    } else {
+      setSelectedSpecificCategory(category);
+      setShowCustomInput(false);
+      handleGenerateRecipe(category);
+    }
   }, [handleGenerateRecipe]);
 
   const handleCalculateHpp = useCallback(async (ingredientCosts: { [key: string]: string }) => {
@@ -116,7 +125,12 @@ const RecipeGenerator = forwardRef((props, ref) => {
                     </label>
                     <select
                       value={selectedCategoryGroup}
-                      onChange={(e) => setSelectedCategoryGroup(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedCategoryGroup(e.target.value);
+                        setSelectedSpecificCategory('');
+                        setShowCustomInput(false);
+                        setCustomInput('');
+                      }}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     >
                       <option value="">Pilih jenis masakan...</option>
@@ -128,25 +142,63 @@ const RecipeGenerator = forwardRef((props, ref) => {
                     </select>
                   </div>
 
-                  {/* Specific Category Dropdown */}
+                  {/* Specific Category Dropdown or Custom Input */}
                   {selectedCategoryGroup && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pilih Resep
+                        Pilih Resep <span className="text-xs text-gray-500">(atau pilih "Tulis Resep Sendiri")</span>
                       </label>
-                      <select
-                        onChange={(e) => e.target.value && handleCategorySelect(e.target.value)}
-                        disabled={isLoading}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
-                        defaultValue=""
-                      >
-                        <option value="">Pilih resep spesifik...</option>
-                        {RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup].map((category) => (
-                          <option key={category} value={category}>
-                            {category}
+                      {!showCustomInput ? (
+                        <select
+                          value={selectedSpecificCategory}
+                          onChange={(e) => handleCategorySelect(e.target.value)}
+                          disabled={isLoading}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 disabled:opacity-50"
+                        >
+                          <option value="">Pilih resep spesifik...</option>
+                          {RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup].map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                          <option value="custom" className="font-medium text-orange-600">
+                            ──────────────────
                           </option>
-                        ))}
-                      </select>
+                          <option value="custom" className="font-medium text-orange-600">
+                            ✏️  Tulis Resep Sendiri
+                          </option>
+                        </select>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-orange-600">✏️ Resep Custom:</span>
+                            <button
+                              onClick={() => {
+                                setShowCustomInput(false);
+                                setCustomInput('');
+                              }}
+                              className="text-sm text-gray-500 hover:text-gray-700 underline"
+                            >
+                              Kembali ke dropdown
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            value={customInput}
+                            onChange={(e) => setCustomInput(e.target.value)}
+                            placeholder={`Contoh: ${RECIPE_CATEGORIES_GROUPED[selectedCategoryGroup][0]} spesial...`}
+                            className="w-full px-4 py-3 border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                            disabled={isLoading}
+                          />
+                          <button
+                            onClick={() => handleCustomInput({ preventDefault: () => {} } as React.FormEvent)}
+                            disabled={isLoading || !customInput.trim()}
+                            className="w-full px-4 py-2 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Buat Resep AI
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -218,6 +270,19 @@ const RecipeGenerator = forwardRef((props, ref) => {
                         {example}
                       </button>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Info Box */}
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start">
+                  <div className="text-blue-500 mr-3 mt-1">
+                    💡
+                  </div>
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Tidak menemukan resep yang sesuai?</p>
+                    <p>Pilih jenis masakan terlebih dahulu, lalu pilih <strong>"✏️ Tulis Resep Sendiri"</strong> dari dropdown untuk membuat resep custom!</p>
                   </div>
                 </div>
               </div>
