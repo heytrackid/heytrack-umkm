@@ -9,11 +9,15 @@ node_modules/
 .env.development.local
 .env.test.local
 .env.production.local
+.env*
 
 # Build outputs
 dist/
 dist-ssr/
 *.local
+/build
+/.next/
+/out/
 
 # Editor directories and files
 .vscode/
@@ -25,6 +29,7 @@ dist-ssr/
 *.njsproj
 *.sln
 *.sw?
+*.pem
 
 # Testing
 /cypress/downloads/
@@ -52,6 +57,7 @@ pids
 # Temporary folders
 .tmp/
 temp/
+*.temp
 
 # OS generated files
 Thumbs.db
@@ -65,3 +71,28 @@ stats.html
 
 # TypeScript
 *.tsbuildinfo
+next-env.d.ts
+
+# Sensitive configuration files
+.cursor/
+.mcp.json
+supabase/.temp/
+
+# Database and API configs
+**/pooler-url
+**/database-url
+
+/src/generated/prisma
+.turbo
+
+# Yarn
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Vercel
+.vercel

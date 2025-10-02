@@ -1,0 +1,86 @@
+{
+  "categories": [
+    {
+      "id": "makanan-utama",
+      "name": "Makanan Utama",
+      "icon": "🍽️",
+      "description": "Nasi, mie, pasta, dll",
+      "commonIngredients": ["beras", "mie", "pasta", "daging", "ayam", "sayuran", "bumbu", "minyak goreng", "garam", "merica"]
+    },
+    {
+      "id": "makanan-ringan",
+      "name": "Makanan Ringan",
+      "icon": "🍿",
+      "description": "Snack, cemilan, dll",
+      "commonIngredients": ["tepung", "telur", "minyak", "gula", "garam", "bumbu", "keju", "coklat"]
+    },
+    {
+      "id": "roti-bakery",
+      "name": "Roti & Bakery",
+      "icon": "🍞",
+      "description": "Roti tawar, manis, kue, dll",
+      "commonIngredients": ["tepung terigu", "telur", "mentega", "gula", "ragi", "susu", "garam", "air"]
+    },
+    {
+      "id": "minuman",
+      "name": "Minuman",
+      "icon": "🥤",
+      "description": "Jus, kopi, teh, smoothie, dll",
+      "commonIngredients": ["air", "gula", "es batu", "susu", "kopi", "teh", "buah", "sirup"]
+    },
+    {
+      "id": "es-krim-dessert",
+      "name": "Es Krim & Dessert",
+      "icon": "🍨",
+      "description": "Es krim, pudding, dessert",
+      "commonIngredients": ["susu", "gula", "telur", "krim", "vanilla", "coklat", "buah", "gelatin"]
+    },
+    {
+      "id": "makanan-tradisional",
+      "name": "Makanan Tradisional",
+      "icon": "🍜",
+      "description": "Soto, gado-gado, gudeg, dll",
+      "commonIngredients": ["santan", "bumbu halus", "daun salam", "serai", "jahe", "kunyit", "kemiri", "cabai"]
+    },
+    {
+      "id": "gorengan-fritters",
+      "name": "Gorengan & Fritters",
+      "icon": "🍤",
+      "description": "Pisang goreng, tahu isi, dll",
+      "commonIngredients": ["tepung", "air", "minyak goreng", "garam", "bawang putih", "bumbu"]
+    },
+    {
+      "id": "pizza-western",
+      "name": "Pizza & Western Food",
+      "icon": "🍕",
+      "description": "Pizza, burger, pasta, dll",
+      "commonIngredients": ["tepung", "keju", "tomat", "daging", "sayuran", "oregano", "olive oil"]
+    }
+  ],
+  "defaultIngredientQuantities": {
+    "tepung": { "quantity": 500, "unit": "gram" },
+    "tepung terigu": { "quantity": 500, "unit": "gram" },
+    "telur": { "quantity": 3, "unit": "butir" },
+    "mentega": { "quantity": 250, "unit": "gram" },
+    "margarin": { "quantity": 250, "unit": "gram" },
+    "gula": { "quantity": 200, "unit": "gram" },
+    "gula pasir": { "quantity": 200, "unit": "gram" },
+    "susu": { "quantity": 200, "unit": "ml" },
+    "air": { "quantity": 300, "unit": "ml" },
+    "ragi": { "quantity": 10, "unit": "gram" },
+    "baking powder": { "quantity": 10, "unit": "gram" },
+    "garam": { "quantity": 5, "unit": "gram" },
+    "vanilla": { "quantity": 5, "unit": "ml" },
+    "minyak goreng": { "quantity": 250, "unit": "ml" },
+    "beras": { "quantity": 1000, "unit": "gram" },
+    "daging": { "quantity": 500, "unit": "gram" },
+    "ayam": { "quantity": 1, "unit": "ekor" },
+    "bumbu": { "quantity": 50, "unit": "gram" },
+    "santan": { "quantity": 400, "unit": "ml" },
+    "keju": { "quantity": 200, "unit": "gram" },
+    "coklat": { "quantity": 100, "unit": "gram" },
+    "kopi": { "quantity": 50, "unit": "gram" },
+    "teh": { "quantity": 20, "unit": "gram" },
+    "es batu": { "quantity": 200, "unit": "gram" }
+  }
+}

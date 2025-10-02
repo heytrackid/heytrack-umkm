@@ -1,0 +1,50 @@
+'use client'
+
+import { NavigationSection } from './useSidebarLogic'
+import SidebarSection from './SidebarSection'
+
+interface SidebarNavigationProps {
+  sections: NavigationSection[]
+  isItemActive: (item: any) => boolean
+  onItemMouseEnter?: (href: string) => void
+  variant?: 'default' | 'mobile'
+  isSectionCollapsed: (sectionTitle: string) => boolean
+  onToggleSection: (sectionTitle: string) => void
+}
+
+export default function SidebarNavigation({ 
+  sections, 
+  isItemActive, 
+  onItemMouseEnter,
+  variant = 'default',
+  isSectionCollapsed,
+  onToggleSection
+}: SidebarNavigationProps) {
+  const spacingClass = variant === 'mobile' ? 'space-y-4' : 'space-y-4 lg:space-y-6'
+  const paddingClass = variant === 'mobile' ? 'px-4 py-4' : 'px-3 lg:px-4 py-4'
+
+  // Safety check for sections array
+  if (!sections || !Array.isArray(sections) || sections.length === 0) {
+    return (
+      <nav className={`flex-1 ${paddingClass} ${spacingClass} overflow-y-auto`}>
+        <div className="text-sm text-muted-foreground">Loading navigation...</div>
+      </nav>
+    )
+  }
+
+  return (
+    <nav className={`flex-1 ${paddingClass} ${spacingClass} overflow-y-auto`}>
+      {sections.map((section) => (
+        <SidebarSection
+          key={section.title}
+          section={section}
+          isItemActive={isItemActive}
+          onItemMouseEnter={onItemMouseEnter}
+          variant={variant}
+          isCollapsed={section.isCollapsible ? isSectionCollapsed(section.title) : false}
+          onToggle={() => onToggleSection(section.title)}
+        />
+      ))}
+    </nav>
+  )
+}
