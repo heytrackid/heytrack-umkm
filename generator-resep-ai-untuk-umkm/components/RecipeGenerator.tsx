@@ -87,7 +87,7 @@ const RecipeGenerator = forwardRef((props, ref) => {
 
   const handleCalculateHpp = useCallback(async (ingredientCosts: { [key: string]: string }) => {
     if (!recipe) return;
-    
+
     setIsCalculatingHpp(true);
     setHppError(null);
     setHppResult(null);
@@ -123,8 +123,8 @@ const RecipeGenerator = forwardRef((props, ref) => {
           </div>
         )}
         {!isLoading && recipe && (
-          <RecipeCard 
-            recipe={recipe} 
+          <RecipeCard
+            recipe={recipe}
             images={images}
             onCalculateHpp={handleCalculateHpp}
             hppResult={hppResult}
@@ -150,6 +150,6 @@ const RecipeGenerator = forwardRef((props, ref) => {
       </div>
     </>
   );
-};
+});
 
 export default RecipeGenerator;
