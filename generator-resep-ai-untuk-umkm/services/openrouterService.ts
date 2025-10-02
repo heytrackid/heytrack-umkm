@@ -3,6 +3,12 @@ import {
   MarketingStrategy,
   HppResult
 } from '../types';
+import { 
+  validateRecipeCategory, 
+  validateBusinessContext, 
+  validateCurrencyInput, 
+  rateLimiter 
+} from '../lib/security';
 
 async function parseJsonResponse<T>(text: string, errorMessage: string): Promise<T> {
   try {
@@ -18,17 +24,26 @@ async function parseJsonResponse<T>(text: string, errorMessage: string): Promise
     return JSON.parse(cleanedText) as T;
   } catch (e) {
     console.error(`Failed to parse JSON: ${errorMessage}`, text);
-    throw new Error(`AI provided a response in an unexpected format.`);
+    throw new Error(`AI provided a response in an unexpected format. Please try again.`);
   }
 }
 
 export async function generateRecipe(category: string): Promise<Recipe> {
-  const apiKey = process.env.OPENROUTER_API_KEY || process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY or API_KEY environment variable not set");
+  // Validate input
+  const validatedCategory = validateRecipeCategory(category);
+
+  // Rate limiting - using a simple session identifier
+  const sessionId = 'user-session'; // In production, use actual session/user ID
+  if (!rateLimiter.isAllowed(sessionId, 5, 60000)) { // 5 requests per minute
+    throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.');
   }
 
-  const prompt = `Buatkan resep yang detail dan lezat untuk kategori '${category}'. Resep harus terdengar kreatif, cocok untuk bisnis kuliner, dan menggugah selera. Mohon berikan nama resep, deskripsi singkat, daftar bahan beserta takarannya, instruksi langkah-demi-langkah, dan tabel perkiraan fakta nutrisi (kalori, protein, karbohidrat, lemak).
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API key tidak dikonfigurasi. Silakan hubungi administrator.");
+  }
+
+  const prompt = `Buatkan resep yang detail dan lezat untuk kategori '${validatedCategory}'. Resep harus terdengar kreatif, cocok untuk bisnis kuliner, dan menggugah selera. Mohon berikan nama resep, deskripsi singkat, daftar bahan beserta takarannya, instruksi langkah-demi-langkah, dan tabel perkiraan fakta nutrisi (kalori, protein, karbohidrat, lemak).
 
 Berikan jawaban Anda dalam format JSON yang ketat mengikuti skema berikut:
 {
@@ -70,8 +85,23 @@ Jangan tambahkan penjelasan tambahan di luar objek JSON.`;
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Recipe API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+
+      // Don't expose internal error details to user
+      if (response.status === 401) {
+        throw new Error('Akses ditolak. Silakan periksa konfigurasi API.');
+      } else if (response.status === 429) {
+        throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.');
+      } else if (response.status >= 500) {
+        throw new Error('Layanan sedang mengalami gangguan. Silakan coba lagi nanti.');
+      } else {
+        throw new Error('Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.');
+      }
     }
 
     const data = await response.json();
@@ -80,7 +110,7 @@ Jangan tambahkan penjelasan tambahan di luar objek JSON.`;
     return parseJsonResponse<Recipe>(content, "recipe");
   } catch (error) {
     console.error("Error generating recipe:", error);
-    throw new Error("Failed to generate recipe from AI model.");
+    throw new Error("Gagal membuat resep. Silakan coba lagi.");
   }
 }
 
@@ -95,15 +125,24 @@ export async function generateRecipeImages(recipeName: string): Promise<string[]
 }
 
 export async function generateMarketingStrategy(businessContext: string): Promise<MarketingStrategy> {
+  // Validate input
+  const validatedContext = validateBusinessContext(businessContext);
+
+  // Rate limiting
+  const sessionId = 'user-session';
+  if (!rateLimiter.isAllowed(sessionId, 3, 60000)) { // 3 requests per minute for marketing
+    throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.');
+  }
+
   const apiKey = process.env.OPENROUTER_API_KEY || process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY or API_KEY environment variable not set");
+    throw new Error("API key tidak dikonfigurasi. Silakan hubungi administrator.");
   }
 
   const prompt = `Anda adalah seorang konsultan pemasaran ahli untuk UMKM F&B di Indonesia. Berdasarkan informasi kondisi bisnis yang sangat detail berikut, buatkan strategi marketing dan branding yang komprehensif, strategis, dan praktis. Berikan output dalam format JSON yang terstruktur sesuai schema yang telah ditentukan. Fokus pada langah-langkah yang realistis untuk bisnis skala kecil.
 
 Kondisi Bisnis:
-${businessContext}
+${validatedContext}
 
 Berikan jawaban Anda dalam format JSON yang ketat mengikuti skema berikut:
 {
@@ -171,8 +210,23 @@ Jangan tambahkan penjelasan tambahan di luar objek JSON.`;
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Marketing API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+
+      // Don't expose internal error details to user
+      if (response.status === 401) {
+        throw new Error('Akses ditolak. Silakan periksa konfigurasi API.');
+      } else if (response.status === 429) {
+        throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.');
+      } else if (response.status >= 500) {
+        throw new Error('Layanan sedang mengalami gangguan. Silakan coba lagi nanti.');
+      } else {
+        throw new Error('Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.');
+      }
     }
 
     const data = await response.json();
@@ -181,20 +235,34 @@ Jangan tambahkan penjelasan tambahan di luar objek JSON.`;
     return parseJsonResponse<MarketingStrategy>(content, "marketing strategy");
   } catch (error) {
     console.error("Error generating marketing strategy:", error);
-    throw new Error("Failed to generate marketing strategy from AI model.");
+    throw new Error("Gagal membuat strategi pemasaran. Silakan coba lagi.");
   }
 }
 
 export async function calculateHpp(recipe: Recipe, ingredientCosts: { [key: string]: string }): Promise<HppResult> {
-  const apiKey = process.env.OPENROUTER_API_KEY || process.env.API_KEY;
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY or API_KEY environment variable not set");
+  // Validate ingredient costs
+  const validatedCosts: { [key: string]: string } = {};
+  for (const [ingredient, cost] of Object.entries(ingredientCosts)) {
+    if (cost.trim()) {
+      validatedCosts[ingredient] = validateCurrencyInput(cost);
+    }
   }
 
-  const costsString = Object.entries(ingredientCosts)
+  // Rate limiting
+  const sessionId = 'user-session';
+  if (!rateLimiter.isAllowed(sessionId, 3, 60000)) { // 3 requests per minute for HPP
+    throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.');
+  }
+
+  const apiKey = process.env.OPENROUTER_API_KEY || process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("API key tidak dikonfigurasi. Silakan hubungi administrator.");
+  }
+
+  const costsString = Object.entries(validatedCosts)
     .filter(([, cost]) => cost.trim() !== '')
     .map(([ingredient, cost]) => `- ${ingredient}: Rp ${cost}`)
-    .join('\\n');
+    .join('\n');
 
   const prompt = `Anda adalah seorang konsultan biaya F&B. Berdasarkan resep dan rincian biaya bahan berikut, hitunglah Harga Pokok Produksi (HPP) per porsi. 
   Setelah itu, berikan 3 saran harga jual (level Ekonomis, Standar, dan Premium) lengkap dengan justifikasi singkat untuk setiap harga. 
@@ -245,8 +313,23 @@ export async function calculateHpp(recipe: Recipe, ingredientCosts: { [key: stri
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('HPP API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData
+      });
+
+      // Don't expose internal error details to user
+      if (response.status === 401) {
+        throw new Error('Akses ditolak. Silakan periksa konfigurasi API.');
+      } else if (response.status === 429) {
+        throw new Error('Terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi.');
+      } else if (response.status >= 500) {
+        throw new Error('Layanan sedang mengalami gangguan. Silakan coba lagi nanti.');
+      } else {
+        throw new Error('Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.');
+      }
     }
 
     const data = await response.json();
@@ -255,7 +338,7 @@ export async function calculateHpp(recipe: Recipe, ingredientCosts: { [key: stri
     return parseJsonResponse<HppResult>(content, "HPP and selling prices");
   } catch (error) {
     console.error("Error calculating HPP:", error);
-    throw new Error("Failed to calculate HPP from AI model.");
+    throw new Error("Gagal menghitung HPP. Silakan coba lagi.");
   }
 }
 
