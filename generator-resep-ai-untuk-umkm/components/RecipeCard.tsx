@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Recipe, HppResult } from '../types';
 import ImageGallery from './ImageGallery';
-import NutritionTable from './NutritionTable';
+import RecipeNutritionInfo from './RecipeNutritionInfo';
 import HppCalculator from './HppCalculator';
 import HppResultDisplay from './HppResultDisplay';
 import LoadingSpinner from './LoadingSpinner';
@@ -135,13 +135,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             </div>
 
             <div className="mt-10">
-              <SectionTitle>Fakta Nutrisi</SectionTitle>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200 shadow-sm">
-                <NutritionTable nutrition={recipe.nutrition} />
-                <p className="text-xs text-gray-500 italic text-center mt-4 bg-white/50 px-4 py-2 rounded-full inline-block">
-                  *Perkiraan AI - Konsultasikan ahli gizi untuk informasi akurat
-                </p>
-              </div>
+              <SectionTitle>Informasi Nutrisi & Porsi</SectionTitle>
+              <RecipeNutritionInfo recipe={recipe} />
             </div>
 
             <div className="mt-10">

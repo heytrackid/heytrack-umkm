@@ -43,12 +43,13 @@ export async function generateRecipe(category: string): Promise<Recipe> {
     throw new Error("API key tidak dikonfigurasi. Silakan hubungi administrator.");
   }
 
-  const prompt = `Buatkan resep yang detail dan lezat untuk kategori '${validatedCategory}'. Resep harus terdengar kreatif, cocok untuk bisnis kuliner, dan menggugah selera. Mohon berikan nama resep, deskripsi singkat, daftar bahan beserta takarannya, instruksi langkah-demi-langkah, dan tabel perkiraan fakta nutrisi (kalori, protein, karbohidrat, lemak).
+  const prompt = `Buatkan resep yang detail dan lezat untuk kategori '${validatedCategory}'. Resep harus terdengar kreatif, cocok untuk bisnis kuliner, dan menggugah selera. Mohon berikan nama resep, deskripsi singkat, daftar bahan beserta takarannya, instruksi langkah-demi-langkah, dan tabel perkiraan fakta nutrisi (kalori, protein, karbohidrat, lemak). Juga sertakan jumlah porsi yang bisa dibuat dari resep ini.
 
 Berikan jawaban Anda dalam format JSON yang ketat mengikuti skema berikut:
 {
   "name": "string",
   "description": "string",
+  "servings": number,
   "ingredients": ["string"],
   "instructions": ["string"],
   "nutrition": {

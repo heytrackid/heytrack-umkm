@@ -13,6 +13,7 @@ export interface Recipe {
   ingredients: string[];
   instructions: string[];
   nutrition: NutritionInfo;
+  servings?: number; // Jumlah porsi yang bisa dibuat
 }
 
 export interface MarketingStrategy {
@@ -85,9 +86,10 @@ export const RECIPE_SCHEMA = {
         items: { type: 'string' },
         description: "Instruksi langkah-demi-langkah untuk menyiapkan resep."
       },
+      servings: { type: 'number', description: "Jumlah porsi yang bisa dibuat dari resep ini, contoh: 4" },
       nutrition: NUTRITION_SCHEMA,
     },
-    required: ['name', 'description', 'ingredients', 'instructions', 'nutrition'],
+    required: ['name', 'description', 'ingredients', 'instructions', 'servings', 'nutrition'],
 };
 
 export const MARKETING_STRATEGY_SCHEMA = {
