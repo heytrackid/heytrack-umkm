@@ -47,6 +47,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     if (onScaledRecipe) {
       onScaledRecipe(scaledRecipe, scaleFactor);
     }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-orange-200 animate-fade-in">
       <div className="p-6 md:p-8">
