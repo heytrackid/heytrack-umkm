@@ -99,7 +99,7 @@ class EnhancedApiClient {
 
     // Check if request is already pending (deduplication)
     if (pendingRequests.has(cacheKey)) {
-      return pendingRequests.get(key);
+      return pendingRequests.get(cacheKey);
     }
 
     // Execute with performance monitoring
@@ -123,7 +123,7 @@ class EnhancedApiClient {
       });
 
     // Store pending request for deduplication
-    pendingRequests.set(key, requestPromise);
+    pendingRequests.set(cacheKey, requestPromise);
 
     return requestPromise;
   }

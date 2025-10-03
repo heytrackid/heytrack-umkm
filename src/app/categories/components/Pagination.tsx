@@ -2,8 +2,7 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import type { PageSize } from '../constants'
-import { PAGINATION_DEFAULTS } from '../constants'
+import { PAGINATION_DEFAULTS, type PageSize } from '../constants'
 
 interface PaginationProps {
   currentPage: number

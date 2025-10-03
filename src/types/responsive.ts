@@ -51,7 +51,7 @@ export interface ResponsiveColumn {
   priority: ColumnPriority;
   hideOnMobile?: boolean;
   minWidth?: string;
-  render?: (value: unknown, item: unknown) => React.ReactNode;
+  render?: (value: unknown, item: unknown) => JSX.Element | string | number | null;
 }
 
 // Form field responsive configuration

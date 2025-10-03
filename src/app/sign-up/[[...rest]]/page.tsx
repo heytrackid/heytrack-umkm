@@ -1,5 +1,6 @@
 import { SignUp } from '@clerk/nextjs'
 import type { ComponentProps } from 'react'
+import Link from 'next/link'
 
 type SignUpProps = ComponentProps<typeof SignUp>
 
@@ -125,9 +126,9 @@ export default function SignUpPage() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
-                <a href="/sign-in" className="font-medium text-black hover:text-gray-700">
+                <Link href="/sign-in" className="font-medium text-black hover:text-gray-700">
                   Sign In
-                </a>
+                </Link>
               </p>
             </div>
           </div>

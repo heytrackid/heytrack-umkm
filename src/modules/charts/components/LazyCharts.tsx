@@ -170,7 +170,7 @@ export function useChartProgressiveLoading() {
 // Chart performance utilities
 export const ChartPerformanceUtils = {
   // Debounce chart updates to prevent excessive re-renders
-  debounceChartUpdate: (callback: Function, delay = 300) => {
+  debounceChartUpdate: (callback: (...args: any[]) => void, delay = 300) => {
     let timeoutId: NodeJS.Timeout
     return (...args: any[]) => {
       clearTimeout

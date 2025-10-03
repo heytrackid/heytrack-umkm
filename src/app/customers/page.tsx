@@ -194,9 +194,7 @@ export default function CustomersPage() {
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
-                      {item.label}
-                    </PrefetchLink>
+                      <PrefetchLink href={item.href}>{item.label}</PrefetchLink>
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>
@@ -219,7 +217,7 @@ export default function CustomersPage() {
             </p>
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
-            <Button  className={isMobile ? 'w-full' : ''}>
+            <Button className={isMobile ? 'w-full' : ''}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -239,42 +237,48 @@ export default function CustomersPage() {
           </div>
         ) : (
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Users className="h-8 w-8 text-primary mx-auto mb-2" />
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {customers.length}
-              </AlertDescription></Alert>
-              <p className="text-sm text-muted-foreground">Total Pelanggan</p>
-            </CardContent>
-          </Alert>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {customers.filter(c => c.status === 'active').length}
-              </AlertDescription></Alert>
-              <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
-            </CardContent>
-          </Alert>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">{settings.currency.symbol}</div>
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length)}
-              </AlertDescription></Alert>
-              <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
-            </CardContent>
-          </Alert>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {Math.round(customers.reduce((sum, c) => sum + c.totalOrders, 0) / customers.length)}
-              </AlertDescription></Alert>
-              <p className="text-sm text-muted-foreground">Rata-rata Order</p>
-            </CardContent>
-          </Alert>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {customers.length}
+                </div>
+                <p className="text-sm text-muted-foreground">Total Pelanggan</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {customers.filter((c) => c.status === 'active').length}
+                </div>
+                <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">
+                  {settings.currency.symbol}
+                </div>
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {formatCurrency(
+                    customers.reduce((sum, c) => sum + c.totalSpent, 0) / Math.max(customers.length, 1)
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {Math.round(
+                    customers.reduce((sum, c) => sum + c.totalOrders, 0) / Math.max(customers.length, 1)
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">Rata-rata Order</p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -283,59 +287,59 @@ export default function CustomersPage() {
           <SearchFormSkeleton />
         ) : (
           <div className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </AlertDescription></Alert>
-          </div>
+            {selectedItems.length > 0 && (
+              <Alert>
+                <AlertDescription className="flex flex-col gap-3 md:flex-row md:items-center">
+                  <div className="space-y-1">
+                    <span className="text-sm font-medium text-gray-900">
+                      {selectedItems.length} pelanggan dipilih
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({filteredCustomers
+                        .filter((customer) => selectedItems.includes(customer.id.toString()))
+                        .map((customer) => customer.name)
+                        .slice(0, 2)
+                        .join(', ')}
+                      {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                    </span>
+                  </div>
 
-          {/* Bulk Actions */}
-          {selectedItems.length > 0 && (
-            <Alert><AlertDescription className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-900">
-                  {selectedItems.length} pelanggan dipilih
-                </span>
-                <span className="text-xs text-gray-500">
-                  ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
-                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
-                </span>
-              </AlertDescription></Alert>
-              <div className="ml-auto flex items-center gap-2">
-                <Button
-                  
-                  size="sm"
-                  onClick={() => setSelectedItems([])}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  Batal
-                </Button>
-                <Button
-                  
-                  size="sm"
-                  onClick={handleBulkEdit}
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Semua
-                </Button>
-                <Button
-                  
-                  size="sm"
-                  onClick={handleBulkDelete}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus Semua
-                </Button>
-              </AlertDescription></Alert>
-            </AlertDescription></Alert>
-          )}
+                  <div className="ml-auto flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedItems([])}
+                      className="text-gray-600 hover:text-gray-800"
+                    >
+                      Batal
+                    </Button>
+                    <Button size="sm" onClick={handleBulkEdit}>
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Edit Semua
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleBulkDelete}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Hapus Semua
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         )}
 
@@ -363,20 +367,20 @@ export default function CustomersPage() {
             <div className="flex items-start gap-3">
               <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-lg">
                 <Users className="h-5 w-5 text-blue-600" />
-              </AlertDescription></Alert>
-              <div className="flex-1">
-                <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+              </div>
+              <div className="flex-1 space-y-1">
+                <h3 className="font-medium text-blue-900 dark:text-blue-100">
                   💡 Tips: Manfaatkan Data Pelanggan
                 </h3>
-                <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex items-center gap-4'}`}>
+                <div className={`text-sm text-blue-800 dark:text-blue-200 ${isMobile ? 'space-y-1' : 'flex flex-wrap gap-4'}`}>
                   <span>• Lacak riwayat pembelian</span>
                   <span>• Analisa pelanggan terbaik</span>
                   <span>• Personalisasi penawaran</span>
                   <span>• Follow up order berkala</span>
-                </AlertDescription></Alert>
-              </AlertDescription></Alert>
-            </AlertDescription></Alert>
-          </CardContent>
+                </div>
+              </div>
+            </div>
+          </AlertDescription>
         </Alert>
       </div>
     </AppLayout>

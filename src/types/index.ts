@@ -1,8 +1,7 @@
 import type { Json } from './common'
 
 // Import enums
-import type { DatabaseEnums } from './enums'
-import type { UserRole, BusinessUnit, OrderStatus, PaymentMethod, ProductionStatus, RecordType, TransactionType } from './enums'
+import type { DatabaseEnums, UserRole, BusinessUnit, OrderStatus, PaymentMethod, ProductionStatus, RecordType, TransactionType } from './enums'
 
 // Import table types
 import type { CustomersTable } from './customers'
@@ -36,11 +35,6 @@ import type { UserProfilesTable } from './auth'
 
 // Import functions
 import type { DatabaseFunctions } from './functions'
-
-// Import additional types
-import type { UserProfile, SecurityContext, AuditFields } from './auth'
-import type { SyncEvent, SystemMetric } from './sync'
-import type { InventoryStockLog } from './inventory'
 
 // Main Database type
 export type Database = {

@@ -7,8 +7,7 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbP
 import Link from 'next/link'
 
 // Services
-import { EnhancedHPPCalculationService } from '../services/EnhancedHPPCalculationService'
-import type { PricingMethod, HPPCalculationResult } from '../services/EnhancedHPPCalculationService'
+import { EnhancedHPPCalculationService, type PricingMethod, type HPPCalculationResult } from '../services/EnhancedHPPCalculationService'
 
 // Extracted components
 import { SettingsPanel } from './SettingsPanel'

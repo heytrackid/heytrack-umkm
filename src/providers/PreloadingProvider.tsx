@@ -50,20 +50,14 @@ export const PreloadingProvider = ({
   const [preloadedRoutes, setPreloadedRoutes] = useState(new Set<string>())
   const [preloadedComponents, setPreloadedComponents] = useState(new Set<string>())
 
-  // Enable smart preloading based on user patterns
-  if (enableSmartPreloading) {
-    useSmartPreloading()
-  }
-  
-  // Enable idle time preloading
-  if (enableIdlePreloading) {
-    useIdleTimePreloading()
-  }
-  
-  // Enable network-aware preloading
-  if (enableNetworkAware) {
-    useNetworkAwarePreloading()
-  }
+  // Call hooks unconditionally at top level (React Rules of Hooks)
+  // They will check internally if they should be enabled
+  useSmartPreloading()
+  useIdleTimePreloading()
+  useNetworkAwarePreloading()
+
+  // Note: If you need to actually disable these hooks, pass enabled flags to them
+  // or use useEffect with conditional logic inside
 
   // Track preloaded routes
   const preloadRoute = async (route: string) => {

@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useIngredients } from '@/hooks/useSupabaseCRUD';
+import { useIngredients, useFormValidation } from '@/hooks/useSupabaseCRUD';
 import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
-import { useFormValidation } from '@/hooks/useSupabaseCRUD';
 import { useSettings } from '@/contexts/settings-context';
 import { Database } from '@/types';
 

@@ -185,7 +185,7 @@ export function parseCurrency(
     .replace(new RegExp(`\\${currency.thousandsSeparator}`, 'g'), '')
     .replace(new RegExp(`\\${currency.decimalSeparator}`, 'g'), '.')
   
-  return parseFloat(cleanStr) || 0
+  return parseFloat(cleanString) || 0
 }
 
 /**

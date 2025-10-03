@@ -1,8 +1,7 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, TrendingDown, Package } from 'lucide-react'
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { DollarSign, TrendingUp, TrendingDown, Package, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import type { ProfitSummary, ProfitTrends } from '../constants'
 
 interface ProfitSummaryCardsProps {

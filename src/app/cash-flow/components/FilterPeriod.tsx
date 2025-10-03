@@ -9,8 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { PeriodType } from '../constants'
-import { filterPeriodOptions } from '../constants'
+import { filterPeriodOptions, type PeriodType } from '../constants'
 
 interface FilterPeriodProps {
   selectedPeriod: PeriodType

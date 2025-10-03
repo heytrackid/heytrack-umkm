@@ -439,9 +439,9 @@ export class BatchSchedulingService {
   ): void {
     for (const resourceId of slot.resources) {
       if (!resourceTimeline.has(resourceId)) {
-        resourceTimeline.set(key, value)
+        resourceTimeline.set(resourceId, [])
       }
-      resourceTimeline.get(key)!.push({
+      resourceTimeline.get(resourceId)!.push({
         start: slot.start,
         end: slot.end,
         batch_id: batch.id

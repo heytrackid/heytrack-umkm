@@ -1,8 +1,7 @@
 'use client'
 
-import React from 'react'
+import React, { type ComponentType } from 'react'
 import dynamic from 'next/dynamic'
-import { ComponentType } from 'react'
 
 /**
  * Dynamic Page Loading with next/dynamic

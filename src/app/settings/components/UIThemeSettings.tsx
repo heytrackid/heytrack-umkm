@@ -14,7 +14,7 @@ interface UIThemeSettingsProps {
  * UI theme settings component
  */
 export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsProps) {
-  const { updateLanguage } = useSettings()
+  const { languages, updateLanguage } = useSettings()
 
   return (
     <Card>
@@ -43,9 +43,8 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
           <select
             id="language"
             className="w-full p-2 border border-input rounded-md bg-background"
-            value={useSettings().settings.language.code}
+            value={settings.language.code}
             onChange={(e) => {
-              const { languages, updateLanguage } = useSettings()
               const selected = languages.find(l => l.code === e.target.value)
               if (selected) updateLanguage(selected)
             }}

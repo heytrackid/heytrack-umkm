@@ -398,7 +398,7 @@ export default function AutoSyncFinancialDashboard() {
             </Button>
             {data.recommendations.missingSync > 0 && (
               <Button variant="secondary">
-                <Sync className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Manual Sync ({data.recommendations.missingSync})
               </Button>
             )}

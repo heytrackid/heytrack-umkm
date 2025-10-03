@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/select'
 import { BarChart3 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import type { ProfitPeriodType, ChartDataPoint } from '../constants'
-import { profitPeriodOptions } from '../constants'
+import { profitPeriodOptions, type ProfitPeriodType, type ChartDataPoint } from '../constants'
 
 interface ProductProfitChartProps {
   chartData: ChartDataPoint[]

@@ -9,8 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { ProfitPeriodType } from '../constants'
-import { filterProfitPeriodOptions } from '../constants'
+import { filterProfitPeriodOptions, type ProfitPeriodType } from '../constants'
 
 interface ProfitPeriodFilterProps {
   selectedPeriod: ProfitPeriodType

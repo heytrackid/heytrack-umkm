@@ -1,6 +1,6 @@
 'use client'
 
-import { createLazyComponent, ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
+import { createLazyComponent, ComponentSkeletons, useProgressiveLoading } from '@/shared/components/utility/LazyWrapper'
 import { Suspense } from 'react'
 
 // Lazy load recipe components with optimized loading
@@ -120,5 +120,3 @@ export const SmartRecipeLoader = ({
     </div>
   )
 }
-
-import { useProgressiveLoading } from '@/shared/components/utility/LazyWrapper'

@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/select'
 import { TrendingUp } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import type { PeriodType, ChartDataPoint } from '../constants'
-import { periodOptions } from '../constants'
+import { periodOptions, type PeriodType, type ChartDataPoint } from '../constants'
 
 interface CashFlowChartProps {
   chartData: ChartDataPoint[]
