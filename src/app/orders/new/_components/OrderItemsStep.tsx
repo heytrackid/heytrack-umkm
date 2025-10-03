@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -32,14 +33,14 @@ export default function OrderItemsStep({
           <Plus className="h-4 w-4 mr-2" />
           Tambah Item
         </Button>
-      </div>
+      </Badge>
 
       {orderItems.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>Belum ada item ditambahkan</p>
           <p className="text-sm">Klik "Tambah Item" untuk memulai</p>
-        </div>
+        </Badge>
       ) : (
         <div className="space-y-4">
           {orderItems.map((item, index: number) => (
@@ -62,7 +63,7 @@ export default function OrderItemsStep({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </Badge>
 
                 <div>
                   <Label className="text-xs">Jumlah</Label>
@@ -73,7 +74,7 @@ export default function OrderItemsStep({
                     onChange={(e) => onUpdateItem(index, 'quantity', e.target.value)}
                     className="mt-1"
                   />
-                </div>
+                </Badge>
 
                 <div>
                   <Label className="text-xs">Harga Satuan</Label>
@@ -84,14 +85,14 @@ export default function OrderItemsStep({
                     onChange={(e) => onUpdateItem(index, 'unit_price', e.target.value)}
                     className="mt-1"
                   />
-                </div>
+                </Badge>
 
                 <div>
                   <Label className="text-xs">Total</Label>
-                  <div className="mt-1 p-2 bg-gray-50 rounded border text-sm font-medium">
+                  <Badge variant="secondary" className="mt-1 font-medium">
                     Rp {item.total_price.toLocaleString()}
-                  </div>
-                </div>
+                  </Badge>
+                </Badge>
 
                 <div className="flex items-end">
                   <Button
@@ -103,8 +104,8 @@ export default function OrderItemsStep({
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                </div>
-              </div>
+                </Badge>
+              </Badge>
 
               <div className="mt-3">
                 <Label className="text-xs">Permintaan Khusus</Label>
@@ -114,17 +115,17 @@ export default function OrderItemsStep({
 
                   className="mt-1"
                 />
-              </div>
-            </div>
+              </Badge>
+            </Badge>
           ))}
 
           <div className="border-t pt-4">
             <div className="text-right text-lg font-semibold">
               Subtotal: Rp {subtotal.toLocaleString()}
-            </div>
-          </div>
-        </div>
+            </Badge>
+          </Badge>
+        </Badge>
       )}
-    </div>
+    </Badge>
   )
 }

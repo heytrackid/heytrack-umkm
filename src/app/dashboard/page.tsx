@@ -194,9 +194,9 @@ export default function Dashboard() {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/resep">
+                <a href="/ai/recipes">
                   <ChefHat className="h-6 w-6" />
-                  <span>Resep & HPP</span>
+                  <span>AI Recipe</span>
                 </a>
               </Button>
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>

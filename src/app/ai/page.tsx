@@ -140,7 +140,7 @@ export default function AIPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>AI Assistant</BreadcrumbPage>
+              <BreadcrumbPage>New Features</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -149,12 +149,12 @@ export default function AIPage() {
         <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
           <div className={isMobile ? 'text-center' : ''}>
             <h1 className={`font-bold text-gray-900 ${isMobile ? 'text-2xl' : 'text-3xl'} flex items-center justify-center gap-2`}>
-              <Brain className="h-8 w-8 text-blue-600" />
-              AI Assistant
-              <Sparkles className="h-6 w-6 text-yellow-500" />
+              <Sparkles className="h-8 w-8 text-orange-500" />
+              New Features
+              <Brain className="h-6 w-6 text-blue-600" />
             </h1>
             <p className="text-gray-600 mt-1">
-              Asisten cerdas untuk optimasi dan analisis bisnis UMKM
+              Fitur-fitur terbaru HeyTrack untuk meningkatkan produktivitas UMKM Anda
             </p>
           </div>
           <Button 
@@ -164,7 +164,7 @@ export default function AIPage() {
             disabled={isLoading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh Insights
+            Refresh
           </Button>
         </div>
 
@@ -186,24 +186,188 @@ export default function AIPage() {
           <AIStatsCards stats={aiStats} loading={isLoading} />
         </Suspense>
 
-        <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'lg:grid-cols-2'}`}>
-          {/* AI Insights */}
-          <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse rounded" />}>
-            <AIInsightsCard
-              insights={insights}
-              onExecuteAction={executeAIAction}
-              onDismiss={dismissInsight}
-              loading={isLoading}
-            />
-          </Suspense>
+        {/* New Features Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {/* AI Recipe Generator */}
+          <Card className="group hover:shadow-lg transition-shadow cursor-pointer border-orange-200 hover:border-orange-300">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-orange-600" />
+                </div>
+                <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                  New
+                </span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-gray-900">AI Recipe Generator</h3>
+                <p className="text-sm text-gray-600">
+                  Generate resep autentik makanan dan minuman Indonesia dengan AI.
+                  Lengkap dengan 22 kategori kuliner Nusantara.
+                </p>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded">🍚 Nasi Goreng</span>
+                  <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded">🥘 Rendang</span>
+                  <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded">🥤 Wedang</span>
+                </div>
+                <PrefetchLink href="/ai/recipes">
+                  <Button className="w-full mt-4 bg-orange-600 hover:bg-orange-700">
+                    Try Recipe Generator
+                  </Button>
+                </PrefetchLink>
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Quick Actions */}
-          <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse rounded" />}>
-            <AIQuickActions 
-              onAnalyzeClick={handleAnalyzeClick}
-              loading={isLoading}
-            />
-          </Suspense>
+          {/* AI Chat Assistant */}
+          <Card className="group hover:shadow-lg transition-shadow cursor-pointer border-blue-200 hover:border-blue-300">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-blue-600" />
+                </div>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                  Available
+                </span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-gray-900">AI Chat Assistant</h3>
+                <p className="text-sm text-gray-600">
+                  Konsultasi bisnis kuliner dengan AI. Dapatkan saran untuk pricing,
+                  inventory, dan strategi pemasaran UMKM.
+                </p>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">💰 Smart Pricing</span>
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">📊 Analytics</span>
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">🎯 Strategy</span>
+                </div>
+                <PrefetchLink href="/ai/chat">
+                  <Button variant="outline" className="w-full mt-4 border-blue-200 text-blue-700 hover:bg-blue-50">
+                    Start Chat
+                  </Button>
+                </PrefetchLink>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* AI Insights & Analytics */}
+          <Card className="group hover:shadow-lg transition-shadow cursor-pointer border-purple-200 hover:border-purple-300">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-purple-600" />
+                </div>
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                  Available
+                </span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-gray-900">AI Business Insights</h3>
+                <p className="text-sm text-gray-600">
+                  Analisis mendalam data bisnis Anda. Prediksi penjualan,
+                  optimasi inventory, dan rekomendasi actionable.
+                </p>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  <span className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">📈 Forecasting</span>
+                  <span className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">📊 Trends</span>
+                  <span className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded">💡 Insights</span>
+                </div>
+                <PrefetchLink href="/ai/insights">
+                  <Button variant="outline" className="w-full mt-4 border-purple-200 text-purple-700 hover:bg-purple-50">
+                    View Insights
+                  </Button>
+                </PrefetchLink>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Smart Pricing Tool */}
+          <Card className="group hover:shadow-lg transition-shadow cursor-pointer border-green-200 hover:border-green-300">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                  <RefreshCw className="h-6 w-6 text-green-600" />
+                </div>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                  Available
+                </span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-gray-900">Smart Pricing Tool</h3>
+                <p className="text-sm text-gray-600">
+                  Optimalkan harga menu dengan AI. Analisis kompetitor,
+                  margin keuntungan, dan psikologi harga konsumen.
+                </p>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">💰 Dynamic Pricing</span>
+                  <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">📊 Margin Analysis</span>
+                  <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded">🎯 Optimization</span>
+                </div>
+                <PrefetchLink href="/ai/pricing">
+                  <Button variant="outline" className="w-full mt-4 border-green-200 text-green-700 hover:bg-green-50">
+                    Optimize Pricing
+                  </Button>
+                </PrefetchLink>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Coming Soon Features */}
+          <Card className="group hover:shadow-lg transition-shadow cursor-not-allowed opacity-75 border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <Brain className="h-6 w-6 text-gray-400" />
+                </div>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
+                  Soon
+                </span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-gray-500">AI Menu Designer</h3>
+                <p className="text-sm text-gray-500">
+                  Desain menu otomatis berdasarkan target audience,
+                  budget, dan trend pasar kuliner Indonesia.
+                </p>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  <span className="text-xs bg-gray-50 text-gray-400 px-2 py-1 rounded">🎨 Menu Design</span>
+                  <span className="text-xs bg-gray-50 text-gray-400 px-2 py-1 rounded">📱 Digital Menu</span>
+                  <span className="text-xs bg-gray-50 text-gray-400 px-2 py-1 rounded">📈 Marketing</span>
+                </div>
+                <Button variant="outline" className="w-full mt-4" disabled>
+                  Coming Soon
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="group hover:shadow-lg transition-shadow cursor-not-allowed opacity-75 border-gray-200">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-gray-400" />
+                </div>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
+                  Soon
+                </span>
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-semibold text-lg text-gray-500">AI Supplier Network</h3>
+                <p className="text-sm text-gray-500">
+                  Jaringan supplier cerdas dengan rekomendasi bahan
+                  berkualitas dan harga terbaik untuk UMKM.
+                </p>
+                <div className="flex flex-wrap gap-1 pt-2">
+                  <span className="text-xs bg-gray-50 text-gray-400 px-2 py-1 rounded">🏪 Suppliers</span>
+                  <span className="text-xs bg-gray-50 text-gray-400 px-2 py-1 rounded">📦 Quality Check</span>
+                  <span className="text-xs bg-gray-50 text-gray-400 px-2 py-1 rounded">💰 Best Price</span>
+                </div>
+                <Button variant="outline" className="w-full mt-4" disabled>
+                  Coming Soon
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Additional Info */}

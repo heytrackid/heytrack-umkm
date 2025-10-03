@@ -19,7 +19,8 @@ import {
   Banknote,
   Brain,
   MessageSquare,
-  Lightbulb
+  Lightbulb,
+  Sparkles
 } from 'lucide-react'
 
 export interface NavigationItem {
@@ -71,7 +72,7 @@ export const useSidebarLogic = () => {
 
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
-    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', '/cash-flow', '/profit']
+    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', '/cash-flow', '/profit', '/ai/recipes', '/ai']
     routesToPrefetch.forEach((r) => {
       try { router.prefetch(r) } catch {}
     })
@@ -86,6 +87,14 @@ export const useSidebarLogic = () => {
           href: '/',
           icon: LayoutDashboard,
           description: "Ringkasan bisnis dan metrik utama"
+        },
+        {
+          name: "Recipe Generator",
+          href: '/ai/recipes',
+          icon: ChefHat,
+          isSimple: true,
+          badge: "AI",
+          description: "Generate resep autentik Indonesia dengan AI"
         }
       ]
     },

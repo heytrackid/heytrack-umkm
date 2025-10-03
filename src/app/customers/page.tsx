@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useSettings } from '@/contexts/settings-context'
 import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
 import { 
@@ -243,37 +244,37 @@ export default function CustomersPage() {
               <Users className="h-8 w-8 text-primary mx-auto mb-2" />
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {customers.length}
-              </div>
+              </AlertDescription></Alert>
               <p className="text-sm text-muted-foreground">Total Pelanggan</p>
             </CardContent>
-          </Card>
+          </Alert>
           <Card>
             <CardContent className="p-4 text-center">
               <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {customers.filter(c => c.status === 'active').length}
-              </div>
+              </AlertDescription></Alert>
               <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
             </CardContent>
-          </Card>
+          </Alert>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">{settings.currency.symbol}</div>
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length)}
-              </div>
+              </AlertDescription></Alert>
               <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
             </CardContent>
-          </Card>
+          </Alert>
           <Card>
             <CardContent className="p-4 text-center">
               <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                 {Math.round(customers.reduce((sum, c) => sum + c.totalOrders, 0) / customers.length)}
-              </div>
+              </AlertDescription></Alert>
               <p className="text-sm text-muted-foreground">Rata-rata Order</p>
             </CardContent>
-          </Card>
+          </Alert>
           </div>
         )}
 
@@ -291,12 +292,12 @@ export default function CustomersPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
-            </div>
+            </AlertDescription></Alert>
           </div>
 
           {/* Bulk Actions */}
           {selectedItems.length > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+            <Alert><AlertDescription className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-900">
                   {selectedItems.length} pelanggan dipilih
@@ -305,7 +306,7 @@ export default function CustomersPage() {
                   ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
                   {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
                 </span>
-              </div>
+              </AlertDescription></Alert>
               <div className="ml-auto flex items-center gap-2">
                 <Button
                   
@@ -332,8 +333,8 @@ export default function CustomersPage() {
                   <Trash2 className="h-4 w-4 mr-2" />
                   Hapus Semua
                 </Button>
-              </div>
-            </div>
+              </AlertDescription></Alert>
+            </AlertDescription></Alert>
           )}
           </div>
         )}
@@ -357,12 +358,12 @@ export default function CustomersPage() {
         )}
 
         {/* Info Card */}
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <CardContent className="p-4">
+        <Alert>
+          <AlertDescription>
             <div className="flex items-start gap-3">
               <div className="bg-blue-100 dark:bg-blue-800/50 p-2 rounded-lg">
                 <Users className="h-5 w-5 text-blue-600" />
-              </div>
+              </AlertDescription></Alert>
               <div className="flex-1">
                 <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
                   💡 Tips: Manfaatkan Data Pelanggan
@@ -372,11 +373,11 @@ export default function CustomersPage() {
                   <span>• Analisa pelanggan terbaik</span>
                   <span>• Personalisasi penawaran</span>
                   <span>• Follow up order berkala</span>
-                </div>
-              </div>
-            </div>
+                </AlertDescription></Alert>
+              </AlertDescription></Alert>
+            </AlertDescription></Alert>
           </CardContent>
-        </Card>
+        </Alert>
       </div>
     </AppLayout>
   )

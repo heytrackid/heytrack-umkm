@@ -37,7 +37,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
           <div>
             <Label htmlFor="businessType">Jenis Bisnis</Label>
             <select
-              className="w-full p-2 border border-input rounded-md bg-background"
+              className="w-full"
               value={settings.general.businessType}
               onChange={(e) => onSettingChange('general', 'businessType', e.target.value)}
             >

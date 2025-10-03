@@ -76,11 +76,11 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.dev https://va.vercel-scripts.com blob:",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.dev https://va.vercel-scripts.com https://challenges.cloudflare.com blob:",
               "style-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev",
               "img-src 'self' data: https: https://*.clerk.accounts.dev https://img.clerk.com",
               "font-src 'self' data: https://*.clerk.accounts.dev",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai /error-monitoring https://*.clerk.accounts.dev https://clerk.dev wss://*.clerk.accounts.dev https://va.vercel-scripts.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://*.clerk.accounts.dev https://clerk.dev wss://*.clerk.accounts.dev https://va.vercel-scripts.com https://clerk-telemetry.com",
               "worker-src 'self' blob: https://*.clerk.accounts.dev",
               "frame-src 'self' https://*.clerk.accounts.dev",
               "object-src 'none'",

@@ -16,7 +16,8 @@ import {
   Settings,
   BarChart3,
   Plus,
-  Search
+  Search,
+  Sparkles
 } from 'lucide-react'
 
 // Smart Link component with preloading
@@ -121,6 +122,12 @@ const navigationItems = [
     href: '/dashboard',
     icon: LayoutDashboard,
     preloadTargets: ['/orders', '/finance', '/inventory']
+  },
+  {
+    title: 'New Features',
+    href: '/ai',
+    icon: Sparkles,
+    preloadTargets: ['/ai/recipes', '/ai/chat', '/ai/insights']
   },
   {
     title: 'Orders',
