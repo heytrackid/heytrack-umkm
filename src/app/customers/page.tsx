@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
+import AuthGuard from '@/components/auth/AuthGuard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useSettings } from '@/contexts/settings-context'
@@ -230,6 +231,8 @@ export default function CustomersPage() {
   }
 
   return (
+    <AuthGuard>
+      <AppLayout>
     <AppLayout>
       <div className="space-y-6">
         {/* Breadcrumb */}
@@ -438,5 +441,6 @@ export default function CustomersPage() {
         />
       </div>
     </AppLayout>
+    </AuthGuard>
   )
 }
