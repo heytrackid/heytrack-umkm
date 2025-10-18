@@ -1,4 +1,5 @@
 'use client'
+
 import SidebarHeader from './SidebarHeader' // Import statis untuk fix HMR
 
 import dynamic from 'next/dynamic'
@@ -8,36 +9,21 @@ import { Menu, X } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Lazy imports for sidebar components
-// const SidebarHeader = dynamic(() => import('./SidebarHeader'), {
-  ssr: false,
-//   loading: () => (
-//     <div className="h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-//       <div className="flex items-center space-x-3">
-//         <Skeleton className="w-10 h-10 rounded-lg" />
-//         <div className="space-y-1">
-//           <Skeleton className="h-5 w-20" />
-//           <Skeleton className="h-3 w-24" />
-//         </div>
-//       </div>
-//     </div>
-//   )
-// })
-// 
 const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
   ssr: false,
-//   loading: () => (
-//     <div className="flex-1 px-3 lg:px-4 py-4 space-y-6 overflow-y-auto">
-//       {Array(5).fill(0).map((_, i) => (
-//         <div key={i} className="space-y-2">
-//           <Skeleton className="h-6 w-32 mx-3" />
-//           <div className="space-y-1">
-//             {Array(3).fill(0).map((_, j) => (
-//               <div key={j} className="px-3 py-3 space-y-2">
-//                 <div className="flex items-center gap-3">
-//                   <Skeleton className="h-5 w-5" />
-//                   <Skeleton className="h-4 flex-1" />
-//                   <Skeleton className="h-4 w-12" />
-//                 </div>
+  loading: () => (
+    <div className="flex-1 px-3 lg:px-4 py-4 space-y-6 overflow-y-auto">
+      {Array(5).fill(0).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-6 w-32 mx-3" />
+          <div className="space-y-1">
+            {Array(3).fill(0).map((_, j) => (
+              <div key={j} className="px-3 py-3 space-y-2">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-5 w-5" />
+                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
                 <Skeleton className="h-3 w-3/4 ml-8" />
               </div>
             ))}
@@ -50,19 +36,19 @@ const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
 
 const SidebarFooter = dynamic(() => import('./SidebarFooter'), {
   ssr: false,
-//   loading: () => (
-//     <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
-//       <Skeleton className="w-full h-8" />
-//       <div className="mt-2 text-center">
-//         <Skeleton className="h-3 w-20 mx-auto" />
-//       </div>
-//     </div>
-//   )
-// })
-// 
-// const MobileSidebar = dynamic(() => import('./MobileSidebar'), {
-//   ssr: false,
-//   loading: () => (
+  loading: () => (
+    <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
+      <Skeleton className="w-full h-8" />
+      <div className="mt-2 text-center">
+        <Skeleton className="h-3 w-20 mx-auto" />
+      </div>
+    </div>
+  )
+})
+
+const MobileSidebar = dynamic(() => import('./MobileSidebar'), {
+  ssr: false,
+  loading: () => (
     <div className="h-full flex flex-col bg-background">
       <div className="h-16 px-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center space-x-3">
