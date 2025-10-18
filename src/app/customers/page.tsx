@@ -271,11 +271,6 @@ export default function CustomersPage() {
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <CustomerCreateModal
-              onSuccess={handleCreateSuccess}
-            />
-
-            </Button>
           </div>
         </div>
 
@@ -376,13 +371,6 @@ export default function CustomersPage() {
                     >
                       Batal
                     </Button>
-                    <BulkEditModal
-                      selectedItems={selectedItems}
-                      customers={customers}
-                      onSuccess={() => {
-                        setSelectedItems([])
-                        fetchCustomers()
-                      }}
                       onClose={() => setSelectedItems([])}
                     />
                     </Button>
