@@ -9,7 +9,6 @@ import QueryProvider from '@/providers/QueryProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import { Analytics } from '@vercel/analytics/next';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
-import { ClerkProvider, SignedIn, SignedOut } from '@clerk/nextjs';
 import "./globals.css";
 
 const geistSans = Geist({
