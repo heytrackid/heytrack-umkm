@@ -52,6 +52,7 @@ export default function CustomersPage() {
   const { formatCurrency, settings } = useSettings()
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
+  const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
@@ -105,13 +106,18 @@ export default function CustomersPage() {
     }
   }, [debouncedSearchTerm])
 
+  const filteredCustomers = customers.filter((customer: any) =>
+    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.phone?.includes(searchTerm)
+  )
 
   // Bulk action handlers
   const handleSelectAll = () => {
-    if (selectedItems.length === customers.length) {
+    if (selectedItems.length === filteredCustomers.length) {
       setSelectedItems([])
     } else {
-      setSelectedItems(customers.map(customer => customer.id.toString()))
+      setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
     }
   }
 
@@ -126,7 +132,7 @@ export default function CustomersPage() {
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return
     
-    const selectedCustomers = customers.filter(customer => selectedItems.includes(customer.id.toString()))
+    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
     const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
     
     const confirmed = window.confirm(
@@ -160,28 +166,24 @@ export default function CustomersPage() {
     }
   }
 
+  const handleBulkEdit = () => {
+    if (selectedItems.length === 0) return
+    
+    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
+    const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
+    
+    // TODO: Open bulk edit modal
+    console.log('Bulk editing customers:', selectedItems)
+    
     warningToast('Fitur Dalam Pengembangan', 'Bulk edit belum tersedia')
   }
 
   // Individual action handlers
   const handleEditCustomer = (customer: any) => {
-    setEditingCustomer(customer)
-    setIsEditModalOpen(true)
+    console.log('Edit customer:', customer)
+    setCurrentView('edit')
+    infoToast('Mode Edit', 'Fitur edit pelanggan sedang dalam pengembangan')
   }
-
-  const handleEditModalClose = () => {
-    setEditingCustomer(null)
-    setIsEditModalOpen(false)
-  }
-
-  const handleEditSuccess = () => {
-    fetchCustomers()
-  }
-
-  const handleCreateSuccess = () => {
-    fetchCustomers()
-  }
-
 
   const handleDeleteCustomer = async (customer: any) => {
     const confirmed = window.confirm(
@@ -219,9 +221,12 @@ export default function CustomersPage() {
   const getBreadcrumbItems = () => {
     const items = [
       { label: 'Dashboard', href: '/' },
+      { label: 'Data Pelanggan', href: currentView === 'list' ? undefined : '/customers' }
     ]
     
+    if (currentView !== 'list') {
       items.push({ 
+        label: currentView === 'add' ? 'Tambah Pelanggan' : 'Edit Pelanggan',
         href: undefined
       })
     }
@@ -271,10 +276,9 @@ export default function CustomersPage() {
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <CustomerCreateModal
-              onSuccess={handleCreateSuccess}
-            />
-
+            <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Pelanggan
             </Button>
           </div>
         </div>
@@ -358,7 +362,7 @@ export default function CustomersPage() {
                       {selectedItems.length} pelanggan dipilih
                     </span>
                     <span className="text-xs text-gray-500">
-                      ({customers
+                      ({filteredCustomers
                         .filter((customer) => selectedItems.includes(customer.id.toString()))
                         .map((customer) => customer.name)
                         .slice(0, 2)
@@ -376,15 +380,9 @@ export default function CustomersPage() {
                     >
                       Batal
                     </Button>
-                    <BulkEditModal
-                      selectedItems={selectedItems}
-                      customers={customers}
-                      onSuccess={() => {
-                        setSelectedItems([])
-                        fetchCustomers()
-                      }}
-                      onClose={() => setSelectedItems([])}
-                    />
+                    <Button size="sm" onClick={handleBulkEdit}>
+                      <Edit2 className="h-4 w-4 mr-2" />
+                      Edit Semua
                     </Button>
                     <Button
                       size="sm"
@@ -407,7 +405,7 @@ export default function CustomersPage() {
           <CustomersTableSkeleton rows={5} />
         ) : (
           <CustomersTable
-            customers={customers}
+            customers={filteredCustomers}
             selectedItems={selectedItems}
             onSelectItem={handleSelectItem}
             onSelectAll={handleSelectAll}
@@ -441,13 +439,6 @@ export default function CustomersPage() {
             </div>
           </AlertDescription>
         </Alert>
-        {/* Edit Modal */}
-        <CustomerEditModal
-          customer={editingCustomer}
-          isOpen={isEditModalOpen}
-          onClose={handleEditModalClose}
-          onSuccess={handleEditSuccess}
-        />
       </div>
     </AppLayout>
   )

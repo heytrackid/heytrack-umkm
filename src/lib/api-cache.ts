@@ -209,6 +209,7 @@ export const CACHE_PATTERNS = {
   RECIPES: '*recipe*',
   ORDERS: '*order*',
   FINANCIAL: '*financial*',
+  CUSTOMERS: '*customers*', // Tambahkan ini
   ALL: '*'
 } as const
 
