@@ -67,11 +67,6 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // In production, you might want to:
-    // 1. Send to external error tracking service (Sentry, LogRocket, etc.)
-    // 2. Store in database
-    // 3. Send alert notifications for critical errors
-    
     if (process.env.NODE_ENV === 'production') {
       // Example: Send to external service
       // await sendToExternalService(errorRecord)
