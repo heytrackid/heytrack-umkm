@@ -161,7 +161,6 @@ export default function Dashboard({ user }: { user?: any }) {
         )}
 
         {/* Stats Cards (Suspense + dynamic) */}
-        {/* Temporarily disabled for debugging
         {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }, (_, i) => (
@@ -179,10 +178,6 @@ export default function Dashboard({ user }: { user?: any }) {
             <StatsCardsSection formatCurrency={formatCurrency} stats={placeholderStats} />
           </Suspense>
         )}
-        */}
-        <div className="text-center py-8">
-          <p>Dashboard content temporarily disabled for debugging</p>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Low Stock Alert (Suspense + dynamic) */}
