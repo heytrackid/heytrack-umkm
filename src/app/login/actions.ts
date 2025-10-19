@@ -21,33 +21,14 @@ export async function sendOTP(formData: FormData) {
 
   console.log('Sending OTP to:', email) // Debug log
 
-  // Try magic link template first (for existing users)
-  let result = await supabase.auth.signInWithOtp({
+  // Send OTP - Supabase will auto-select template based on user existence
+  const { data, error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      shouldCreateUser: false, // Use magic link template
+      shouldCreateUser: true, // Allow signups for OTP
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/login/verify`,
     },
   })
-
-  console.log('Magic link attempt:', { data: !!result.data, error: result.error?.message }) // Debug log
-
-  // If magic link fails (user doesn't exist), try confirm signup
-  if (result.error && result.error.message.includes('User not found')) {
-    console.log('User not found, trying confirm signup template') // Debug log
-
-    result = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true, // Use confirm signup template
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/login/verify`,
-      },
-    })
-
-    console.log('Confirm signup attempt:', { data: !!result.data, error: result.error?.message }) // Debug log
-  }
-
-  const { data, error } = result
 
   console.log('Supabase response:', { data, error }) // Debug log
 
