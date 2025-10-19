@@ -273,9 +273,9 @@ CREATE INDEX idx_order_items_recipe_id ON order_items(recipe_id);
 ## 📊 Monitoring & Analytics
 
 ### Error Tracking
-- [ ] Sentry or similar configured
+- [ ] Application error logging configured
 - [ ] Error alerts set up
-- [ ] Error logging in place
+- [ ] Error monitoring in place
 
 ### Performance Monitoring
 - [ ] Vercel Analytics enabled

@@ -186,12 +186,11 @@ Enable in Vercel dashboard:
 - Go to **Analytics** tab
 - Enable **Web Analytics** and **Speed Insights**
 
-### 2. Error Tracking (Optional)
-Add Sentry for error monitoring:
-```bash
-npm install @sentry/nextjs
-npx @sentry/wizard -i nextjs
-```
+### 2. Performance Monitoring
+Track application performance:
+- Monitor Vercel Analytics for user behavior
+- Check Speed Insights for performance metrics
+- Monitor API response times in Vercel logs
 
 ### 3. AI Usage Monitoring
 Track AI API usage:
