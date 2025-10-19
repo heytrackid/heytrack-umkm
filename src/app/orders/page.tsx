@@ -5,6 +5,7 @@ import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
 import {
   Breadcrumb,
@@ -111,7 +112,8 @@ export default function OrdersPage() {
     if (currentView !== 'list') {
       items.push({ 
         label: currentView === 'add' ? 'Tambah Pesanan' : 
-               currentView === 'edit' ? 'Edit Pesanan' : 'Detail Pesanan'
+               currentView === 'edit' ? 'Edit Pesanan' : 'Detail Pesanan',
+        href: undefined
       })
     }
     
