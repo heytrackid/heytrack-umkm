@@ -98,7 +98,7 @@ export default function Dashboard({ user }: { user?: any }) {
   })
   
   // Enable smart preloading for dashboard
-  usePagePreloading('dashboard')
+  // usePagePreloading('dashboard') // Temporarily disabled
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
