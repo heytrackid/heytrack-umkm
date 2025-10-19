@@ -81,9 +81,16 @@ const recentOrders: any[] = []
 const lowStockItems: any[] = []
 
 export default function Dashboard({ user }: { user?: any }) {
+  console.log('Dashboard: Component starting render', { user: !!user })
+
   const { isMobile } = useResponsive()
+  console.log('Dashboard: useResponsive loaded', { isMobile })
+
   const { formatCurrency } = useCurrency()
+  console.log('Dashboard: useCurrency loaded')
+
   const { settings } = useSettings()
+  console.log('Dashboard: useSettings loaded', { currency: settings.currency.code })
   const [currentTime, setCurrentTime] = useState(new Date())
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
@@ -135,7 +142,7 @@ export default function Dashboard({ user }: { user?: any }) {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {settings.businessName || 'HeyTrack'}
+                HeyTrack
               </h1>
               <p className="text-muted-foreground mt-1">
                 {currentTime.toLocaleDateString('id-ID', { 
@@ -154,6 +161,7 @@ export default function Dashboard({ user }: { user?: any }) {
         )}
 
         {/* Stats Cards (Suspense + dynamic) */}
+        {/* Temporarily disabled for debugging
         {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }, (_, i) => (
@@ -171,6 +179,10 @@ export default function Dashboard({ user }: { user?: any }) {
             <StatsCardsSection formatCurrency={formatCurrency} stats={placeholderStats} />
           </Suspense>
         )}
+        */}
+        <div className="text-center py-8">
+          <p>Dashboard content temporarily disabled for debugging</p>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Low Stock Alert (Suspense + dynamic) */}

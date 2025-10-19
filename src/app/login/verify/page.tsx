@@ -10,8 +10,14 @@ export default async function VerifyPage({
 }: {
   searchParams: Promise<{ message: string; email: string }>
 }) {
+  console.log('VerifyPage: Starting render') // Debug log
+
   const params = await searchParams
+  console.log('VerifyPage: Search params loaded:', { email: params.email, message: params.message }) // Debug log
+
   const email = params.email || ''
+
+  console.log('VerifyPage: Render complete, email:', email) // Debug log
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
