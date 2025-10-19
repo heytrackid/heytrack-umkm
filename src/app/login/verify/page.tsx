@@ -1,6 +1,8 @@
 import { verifyOTP } from '../actions'
+import Link from 'next/link'
 
 // Client component for form handling
+'use client'
 function VerifyForm({ email, message }: { email: string; message?: string }) {
   return (
     <div className="bg-white shadow-xl rounded-lg p-6">
@@ -43,15 +45,16 @@ function VerifyForm({ email, message }: { email: string; message?: string }) {
           >
             Verify Code
           </button>
+        </form>
 
+        <Link href="/login">
           <button
             type="button"
-            onClick={() => window.location.href = '/login'}
             className="w-full h-11 border-2 rounded-lg"
           >
             ← Back to Login
           </button>
-        </form>
+        </Link>
 
         {message && (
           <div className="border border-red-200 bg-red-50 rounded-lg p-4">
