@@ -1,9 +1,7 @@
-export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./sentry.server.config')
-  }
+// Instrumentation file - no external monitoring services
+// This file is required by Next.js but kept empty for zero-footprint monitoring
 
-  if (process.env.NEXT_RUNTIME === 'edge') {
-    await import('./sentry.edge.config')
-  }
+export async function register() {
+  // No-op - can be replaced with custom monitoring later
+  // This function is required by Next.js instrumentation
 }

@@ -31,7 +31,6 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
-import type { Customer } from '@/types/customers'
 import type { CustomersTable } from '@/types/customers'
 
 type Customer = CustomersTable['Row']
