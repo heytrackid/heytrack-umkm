@@ -135,15 +135,3 @@ function isCriticalError(error: typeof errorStore[0]): boolean {
   
   return criticalKeywords.some(keyword => errorText.includes(keyword))
 }
-
-// Example function to send to external service
-// async function sendToExternalService(error: typeof errorStore[0]) {
-//   // Sentry example:
-//   // Sentry.captureException(new Error(error.message), {
-//   //   extra: {
-//   //     componentStack: error.componentStack,
-//   //     url: error.url,
-//   //     errorId: error.errorId
-//   //   }
-//   // })
-// }
