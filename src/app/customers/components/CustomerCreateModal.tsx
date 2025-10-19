@@ -35,11 +35,18 @@ type CustomerFormData = z.infer<typeof customerSchema>
 interface CustomerCreateModalProps {
   onSuccess: () => void
   trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export default function CustomerCreateModal({ onSuccess, trigger }: CustomerCreateModalProps) {
+export default function CustomerCreateModal({
+  onSuccess,
+  trigger,
+  open,
+  onOpenChange
+}: CustomerCreateModalProps) {
   const { toast } = useToast()
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -92,14 +99,17 @@ export default function CustomerCreateModal({ onSuccess, trigger }: CustomerCrea
       })
 
       reset()
-      setIsOpen(false)
+      handleOpenChange(false)
       onSuccess()
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Create customer error:', error)
       toast({
         title: 'Gagal Menambahkan',
-        description: error.message || 'Terjadi kesalahan saat menambahkan pelanggan',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Terjadi kesalahan saat menambahkan pelanggan',
         variant: 'destructive'
       })
     } finally {
@@ -107,15 +117,24 @@ export default function CustomerCreateModal({ onSuccess, trigger }: CustomerCrea
     }
   }
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
-    if (!open) {
-      reset()
+  const isControlled = typeof open === 'boolean'
+  const dialogOpen = isControlled ? open : internalOpen
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(nextOpen)
     }
+    onOpenChange?.(nextOpen)
   }
 
+  React.useEffect(() => {
+    if (!dialogOpen) {
+      reset()
+    }
+  }, [dialogOpen, reset])
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button>
@@ -224,7 +243,7 @@ export default function CustomerCreateModal({ onSuccess, trigger }: CustomerCrea
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={isLoading}
             >
               Batal

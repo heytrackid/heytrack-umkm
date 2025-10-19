@@ -1,15 +1,25 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import Link from 'next/link'
+import { ReactNode, useState, useTransition } from 'react'
 import SimpleSidebar from './sidebar'
 import MobileHeader from './mobile-header'
-import { Search, User } from 'lucide-react'
+import { Search, User, Settings, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
+import { logout } from '@/app/auth/actions'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -25,9 +35,14 @@ export default function AppLayout({
   const { isMobile } = useMobileFirst()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isLoggingOut, startLogout] = useTransition()
   
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+
+  const handleLogout = () => {
+    startLogout(() => logout())
+  }
 
   return (
     <div className={cn(
@@ -71,11 +86,32 @@ export default function AppLayout({
             <div className="flex items-center space-x-4">
               <SmartNotifications />
               <ThemeToggle />
-              {/* User menu */}
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                User
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    Akun
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel>Pengguna</DropdownMenuLabel>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      Pengaturan
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={handleLogout}
+                    disabled={isLoggingOut}
+                    className="flex items-center gap-2 text-destructive"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {isLoggingOut ? 'Keluar...' : 'Keluar'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
         )}

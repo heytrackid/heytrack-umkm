@@ -1,8 +1,8 @@
-import { createServerSupabaseClient } from '@/utils/supabase'
+import { createServerSupabaseClient } from '@/utils/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const { error } = await supabase.auth.signOut()
 

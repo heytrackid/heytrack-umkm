@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase'
+import { createClient } from '@/utils/supabase-client'
 
 interface AuthGuardProps {
   children: React.ReactNode

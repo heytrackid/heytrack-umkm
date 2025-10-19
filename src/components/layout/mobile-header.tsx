@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useTransition } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,9 @@ import {
   X, 
   ArrowLeft,
   MoreVertical,
-  User
+  User,
+  Settings,
+  LogOut
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 // Clerk removed for development
@@ -39,9 +41,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuLabel
 } from"@/components/ui/dropdown-menu"
 import SimpleSidebar from './sidebar'
+import { logout } from '@/app/auth/actions'
 
 interface MobileHeaderProps {
   title?: string
@@ -77,12 +81,17 @@ export default function MobileHeader({
   const [searchQuery, setSearchQuery] = useState('')
   const { isMobile } = useMobileFirst()
   const router = useRouter()
+  const [isLoggingOut, startLogout] = useTransition()
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (onSearch) {
       onSearch(searchQuery)
     }
+  }
+
+  const handleLogout = () => {
+    startLogout(() => logout())
   }
 
   const handleSearchToggle = () => {
@@ -239,15 +248,34 @@ export default function MobileHeader({
           )}
 
           {/* Simple User Menu for Development */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="p-2"
-            onClick={() => router.push('/settings')}
-            aria-label="Open settings"
-          >
-            <User className="h-5 w-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="p-2"
+                aria-label="Menu akun"
+              >
+                <User className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>Pengguna</DropdownMenuLabel>
+              <DropdownMenuItem onSelect={() => router.push('/settings')} className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Pengaturan
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={handleLogout}
+                disabled={isLoggingOut}
+                className="flex items-center gap-2 text-destructive"
+              >
+                <LogOut className="h-4 w-4" />
+                {isLoggingOut ? 'Keluar...' : 'Keluar'}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

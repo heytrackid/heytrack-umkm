@@ -2,10 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { createServerSupabaseClient } from '@/utils/supabase'
+import { createServerSupabaseClient } from '@/utils/supabase-server'
 
 export async function sendOTP(formData: FormData) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const email = formData.get('email') as string
 
@@ -29,7 +29,7 @@ export async function sendOTP(formData: FormData) {
 }
 
 export async function verifyOTP(formData: FormData) {
-  const supabase = createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient()
 
   const email = formData.get('email') as string
   const token = formData.get('token') as string
