@@ -1,8 +1,9 @@
+'use client'
+
 import { verifyOTP } from '../actions'
 import Link from 'next/link'
 
 // Client component for form handling
-'use client'
 function VerifyForm({ email, message }: { email: string; message?: string }) {
   return (
     <div className="bg-white shadow-xl rounded-lg p-6">
