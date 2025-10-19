@@ -51,23 +51,15 @@ export default function RootLayout({
         >
           <QueryProvider>
             <SettingsProvider>
-              {/* Temporarily disable PreloadingProvider for debugging */}
-              {/*
-              <PreloadingProvider 
+              <PreloadingProvider
                 enableIdlePreloading={true}
                 enableNetworkAware={true}
                 debug={process.env.NODE_ENV === 'development'}
               >
-              */}
-                {/* Temporarily disable ErrorBoundary for debugging */}
-                {/*
                 <ErrorBoundary>
                   {children}
                 </ErrorBoundary>
-                */}
-                {children}
-                {/* </ErrorBoundary> */}
-              {/* </PreloadingProvider> */}
+              </PreloadingProvider>
               <Toaster
                 position="bottom-right"
                 toastOptions={{
