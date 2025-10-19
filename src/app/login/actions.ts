@@ -13,15 +13,37 @@ export async function sendOTP(formData: FormData) {
     redirect('/login?message=Email is required')
   }
 
-  const { error } = await supabase.auth.signInWithOtp({
+  // Validasi email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    redirect('/login?message=Please enter a valid email address')
+  }
+
+  console.log('Sending OTP to:', email) // Debug log
+
+  // Cek rate limiting dengan mencoba kirim OTP
+  const { data, error } = await supabase.auth.signInWithOtp({
     email,
     options: {
       shouldCreateUser: true,
     },
   })
 
+  console.log('Supabase response:', { data, error }) // Debug log
+
   if (error) {
-    redirect('/login?message=Could not send OTP')
+    console.error('OTP Send Error:', error) // Debug log
+
+    // Handle specific error types
+    if (error.message.includes('rate limit')) {
+      redirect('/login?message=Too many requests. Please wait a few minutes before trying again.')
+    } else if (error.message.includes('invalid email')) {
+      redirect('/login?message=Please enter a valid email address')
+    } else if (error.message.includes('SMTP')) {
+      redirect('/login?message=Email service temporarily unavailable. Please try again later.')
+    } else {
+      redirect('/login?message=Could not send OTP: ' + error.message)
+    }
   }
 
   revalidatePath('/', 'layout')
@@ -35,17 +57,27 @@ export async function verifyOTP(formData: FormData) {
   const token = formData.get('token') as string
 
   if (!email || !token) {
-    redirect('/login/verify?email=' + encodeURIComponent(email) + '&message=Email and OTP are required')
+    redirect('/login/verify?email=' + encodeURIComponent(email || '') + '&message=Email and OTP are required')
   }
 
-  const { error } = await supabase.auth.verifyOtp({
+  // Validasi token format (harus 6 digit)
+  if (!/^\d{6}$/.test(token)) {
+    redirect('/login/verify?email=' + encodeURIComponent(email) + '&message=OTP must be 6 digits')
+  }
+
+  console.log('Verifying OTP for:', email, 'Token length:', token.length) // Debug log
+
+  const { data, error } = await supabase.auth.verifyOtp({
     email,
     token,
     type: 'email',
   })
 
+  console.log('Verify OTP response:', { data: !!data, error }) // Debug log
+
   if (error) {
-    redirect('/login/verify?email=' + encodeURIComponent(email) + '&message=Invalid OTP')
+    console.error('OTP Verify Error:', error) // Debug log
+    redirect('/login/verify?email=' + encodeURIComponent(email) + '&message=Invalid OTP code')
   }
 
   revalidatePath('/', 'layout')
