@@ -59,9 +59,14 @@ export default function RootLayout({
                 debug={process.env.NODE_ENV === 'development'}
               >
               */}
+                {/* Temporarily disable ErrorBoundary for debugging */}
+                {/*
                 <ErrorBoundary>
                   {children}
                 </ErrorBoundary>
+                */}
+                {children}
+                {/* </ErrorBoundary> */}
               {/* </PreloadingProvider> */}
               <Toaster
                 position="bottom-right"
