@@ -1,6 +1,39 @@
 // Business Intelligence Engine
 import type { EnhancedAutomationConfig } from './enhanced-automation-engine-types'
 
+interface FinancialHealth {
+  score: number
+  status: 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR'
+  key_indicators: Array<{
+    metric: string
+    current_value: number
+    benchmark: number
+    trend: 'IMPROVING' | 'DECLINING' | 'STABLE'
+    impact: 'HIGH' | 'MEDIUM' | 'LOW'
+  }>
+}
+
+interface MarketPositioning {
+  competitive_advantage: string[]
+  market_opportunities: string[]
+  threat_analysis: string[]
+  strategic_recommendations: string[]
+}
+
+interface OperationalEfficiency {
+  efficiency_score: number
+  waste_reduction_potential: number
+  automation_opportunities: string[]
+  process_improvements: string[]
+}
+
+interface GrowthStrategy {
+  high_potential_products: string[]
+  market_expansion_opportunities: string[]
+  investment_priorities: string[]
+  risk_mitigation_strategies: string[]
+}
+
 export class BusinessIntelligenceEngine {
   constructor(private config: EnhancedAutomationConfig) {}
 
@@ -18,22 +51,22 @@ export class BusinessIntelligenceEngine {
         operational_efficiency: operationalEfficiency,
         growth_strategy: growthStrategy
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Business intelligence generation error:', error)
       throw error
     }
   }
 
-  private async analyzeFinancialHealth() {
+  private async analyzeFinancialHealth(): Promise<FinancialHealth> {
     // Would implement detailed financial health analysis
     return {
       score: 0,
-      status: 'GOOD' as const,
+      status: 'GOOD',
       key_indicators: []
     }
   }
 
-  private async analyzeMarketPositioning() {
+  private async analyzeMarketPositioning(): Promise<MarketPositioning> {
     // Would implement market analysis
     return {
       competitive_advantage: [],
@@ -43,7 +76,7 @@ export class BusinessIntelligenceEngine {
     }
   }
 
-  private async analyzeOperationalEfficiency() {
+  private async analyzeOperationalEfficiency(): Promise<OperationalEfficiency> {
     // Would implement operational analysis
     return {
       efficiency_score: 0,
@@ -53,7 +86,7 @@ export class BusinessIntelligenceEngine {
     }
   }
 
-  private async generateGrowthStrategy() {
+  private async generateGrowthStrategy(): Promise<GrowthStrategy> {
     // Would implement strategic analysis
     return {
       high_potential_products: [],

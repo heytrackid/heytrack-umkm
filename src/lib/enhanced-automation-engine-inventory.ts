@@ -2,6 +2,23 @@
 import type { EnhancedAutomationConfig, InventoryAnalysisResult } from './enhanced-automation-engine-types'
 import { supabase } from '@/lib/supabase'
 
+interface InventoryAnalysisItem {
+  ingredient_id: string
+  ingredient_name: string
+  current_stock: number
+  reorder_point: number
+  days_until_stockout: number
+  suggested_order_quantity: number
+  urgency_level: string
+  cost_impact: number
+}
+
+interface InventoryNeedsResult {
+  criticalItems: InventoryAnalysisItem[]
+  reorderSuggestions: InventoryAnalysisItem[]
+  totalItemsNeedingAttention: number
+}
+
 export class InventoryEngine {
   constructor(private config: EnhancedAutomationConfig) {}
 
@@ -54,15 +71,15 @@ export class InventoryEngine {
   }
 
   // Static method for inventory analysis (used by components)
-  static async analyzeInventoryNeeds() {
+  static async analyzeInventoryNeeds(): Promise<InventoryNeedsResult> {
     try {
-      const { data: analysisResult, error } = await (supabase as any).rpc('analyze_inventory_needs')
+      const { data: analysisResult, error } = await supabase.rpc('analyze_inventory_needs')
 
       if (error) throw error
 
       // Transform and categorize results
-      const criticalItems = analysisResult?.filter((item: any) => item.urgency_level === 'CRITICAL') || []
-      const reorderSuggestions = analysisResult?.filter((item: any) =>
+      const criticalItems = analysisResult?.filter((item: InventoryAnalysisItem) => item.urgency_level === 'CRITICAL') || []
+      const reorderSuggestions = analysisResult?.filter((item: InventoryAnalysisItem) =>
         ['HIGH', 'MEDIUM'].includes(item.urgency_level)
       ) || []
 
@@ -71,7 +88,7 @@ export class InventoryEngine {
         reorderSuggestions,
         totalItemsNeedingAttention: analysisResult?.length || 0
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error analyzing inventory needs:', error)
       return {
         criticalItems: [],

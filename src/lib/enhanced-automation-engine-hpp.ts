@@ -2,6 +2,21 @@
 import type { EnhancedAutomationConfig, HPPCalculationResult } from './enhanced-automation-engine-types'
 import { supabase } from '@/lib/supabase'
 
+interface RecipeIngredient {
+  id: string
+  recipe_id: string
+  ingredient_id: string
+  quantity: number
+  unit: string
+  ingredients: {
+    id: string
+    name: string
+    current_stock: number | null
+    min_stock: number
+    price_per_unit: number | null
+  }
+}
+
 export class HPPEngine {
   constructor(private config: EnhancedAutomationConfig) {}
 
@@ -70,7 +85,7 @@ export class HPPEngine {
         },
         margin_analysis: marginAnalysis
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Advanced HPP calculation error:', error)
       throw error
     }
@@ -108,25 +123,40 @@ export class HPPEngine {
   }
 
   private async analyzeStockAvailability(recipeId: string, maxBatches: number) {
-    // Get recipe ingredients and check stock status
+    // Get recipe ingredients with ingredient details
     const { data: recipeIngredients } = await supabase
       .from('recipe_ingredients')
-      .select('*')
+      .select(`
+        id,
+        recipe_id,
+        ingredient_id,
+        quantity,
+        unit,
+        ingredients (
+          id,
+          name,
+          current_stock,
+          min_stock,
+          price_per_unit
+        )
+      `)
       .eq('recipe_id', recipeId)
 
     const limitingIngredients: string[] = []
     const warnings: string[] = []
 
     recipeIngredients?.forEach((ri: any) => {
-      const ingredient = ri.ingredients as unknown as any
+      const ingredient = ri.ingredients
+      if (!ingredient) return
+
       const needed = ri.quantity * maxBatches
 
-      if (ingredient.current_stock ?? 0 < needed) {
+      if ((ingredient.current_stock ?? 0) < needed) {
         limitingIngredients.push(ingredient.name)
       }
 
       // Check if approaching minimum stock
-      if (ingredient.current_stock ?? 0 <= ingredient.min_stock) {
+      if ((ingredient.current_stock ?? 0) <= ingredient.min_stock) {
         warnings.push(`${ingredient.name} mendekati minimum stock`)
       }
     })

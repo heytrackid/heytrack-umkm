@@ -2,6 +2,37 @@
 import type { EnhancedAutomationConfig, ProductionOptimizationResult } from './enhanced-automation-engine-types'
 import { supabase } from '@/lib/supabase'
 
+interface ProductionScheduleItem {
+  recipe_id: string
+  recipe_name: string
+  scheduled_time: string
+  quantity: number
+  duration_hours: number
+  profit_score: number
+  resource_requirements: string[]
+  dependencies: string[]
+}
+
+interface EfficiencyMetrics {
+  capacity_utilization: number
+  profit_per_hour: number
+  setup_time_ratio: number
+  quality_score_prediction: number
+}
+
+interface BottleneckAnalysis {
+  limiting_factors: string[]
+  suggested_improvements: string[]
+  capacity_expansion_recs: string[]
+}
+
+interface ProfitabilityForecast {
+  total_revenue: number
+  total_cost: number
+  net_profit: number
+  margin_percentage: number
+}
+
 export class ProductionEngine {
   constructor(private config: EnhancedAutomationConfig) {}
 
@@ -35,18 +66,18 @@ export class ProductionEngine {
         bottleneck_analysis: bottleneckAnalysis,
         profitability_forecast: profitabilityForecast
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Production optimization error:', error)
       throw error
     }
   }
 
-  private generateOptimalSchedule(optimization: ProductionOptimizationResult[], maxHours: number) {
+  private generateOptimalSchedule(optimization: ProductionOptimizationResult[], maxHours: number): ProductionScheduleItem[] {
     // Would implement advanced scheduling algorithm
     return []
   }
 
-  private calculateProductionEfficiency(schedule: any[], maxHours: number) {
+  private calculateProductionEfficiency(schedule: ProductionScheduleItem[], maxHours: number): EfficiencyMetrics {
     // Would calculate various efficiency metrics
     return {
       capacity_utilization: 0,
@@ -56,7 +87,7 @@ export class ProductionEngine {
     }
   }
 
-  private async analyzeProductionBottlenecks(optimization: ProductionOptimizationResult[]) {
+  private async analyzeProductionBottlenecks(optimization: ProductionOptimizationResult[]): Promise<BottleneckAnalysis> {
     // Would identify and analyze production constraints
     return {
       limiting_factors: [],
@@ -65,7 +96,7 @@ export class ProductionEngine {
     }
   }
 
-  private calculateProfitabilityForecast(schedule: any[]) {
+  private calculateProfitabilityForecast(schedule: ProductionScheduleItem[]): ProfitabilityForecast {
     // Would calculate detailed profitability projections
     return {
       total_revenue: 0,

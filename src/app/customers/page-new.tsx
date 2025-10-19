@@ -31,6 +31,10 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
+import type { Customer } from '@/types/customers'
+import type { CustomersTable } from '@/types/customers'
+
+type Customer = CustomersTable['Row']
 import { 
   Plus, 
   Users, 
@@ -58,7 +62,7 @@ export default function CustomersPage() {
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  const [customers, setCustomers] = useState<any[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
 
   // Debounced search term (500ms delay)
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
@@ -87,7 +91,7 @@ export default function CustomersPage() {
       )
       
       setCustomers(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching customers:', error)
       errorToast('Gagal Memuat Data', 'Terjadi kesalahan saat mengambil data pelanggan')
     } finally {
@@ -106,7 +110,7 @@ export default function CustomersPage() {
     }
   }, [debouncedSearchTerm])
 
-  const filteredCustomers = customers.filter((customer: any) =>
+  const filteredCustomers = customers.filter((customer: Customer) =>
     customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone?.includes(searchTerm)
@@ -117,7 +121,7 @@ export default function CustomersPage() {
     if (selectedItems.length === filteredCustomers.length) {
       setSelectedItems([])
     } else {
-      setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
+        setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
     }
   }
 
@@ -157,7 +161,7 @@ export default function CustomersPage() {
         )
         setSelectedItems([])
         await fetchCustomers()
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error:', error)
         errorToast('Gagal Menghapus', 'Terjadi kesalahan saat menghapus pelanggan')
       } finally {
@@ -179,13 +183,13 @@ export default function CustomersPage() {
   }
 
   // Individual action handlers
-  const handleEditCustomer = (customer: any) => {
+  const handleEditCustomer = (customer: Customer) => {
     console.log('Edit customer:', customer)
     setCurrentView('edit')
     infoToast('Mode Edit', 'Fitur edit pelanggan sedang dalam pengembangan')
   }
 
-  const handleDeleteCustomer = async (customer: any) => {
+  const handleDeleteCustomer = async (customer: Customer) => {
     const confirmed = window.confirm(
       `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus pelanggan:\n"${customer.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
     )
@@ -202,7 +206,7 @@ export default function CustomersPage() {
         
         successToast('Berhasil Dihapus', `Pelanggan "${customer.name}" berhasil dihapus`)
         await fetchCustomers()
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error:', error)
         errorToast('Gagal Menghapus', 'Terjadi kesalahan saat menghapus pelanggan')
       } finally {
@@ -211,7 +215,7 @@ export default function CustomersPage() {
     }
   }
 
-  const handleViewCustomer = (customer: any) => {
+  const handleViewCustomer = (customer: Customer) => {
     console.log('View customer details:', customer)
     // TODO: Open customer detail modal or navigate to customer detail page
     infoToast('Detail Pelanggan', `Melihat detail pelanggan: ${customer.name}`)
@@ -305,7 +309,7 @@ export default function CustomersPage() {
               <CardContent className="p-4 text-center">
                 <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
                 <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                  {customers.filter((c) => c.status === 'active').length}
+                  {customers.filter((c) => c.is_active).length}
                 </div>
                 <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
               </CardContent>
@@ -317,7 +321,7 @@ export default function CustomersPage() {
                 </div>
                 <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                   {formatCurrency(
-                    customers.reduce((sum, c) => sum + c.totalSpent, 0) / Math.max(customers.length, 1)
+                    customers.reduce((sum, c) => sum + (c.total_spent || 0), 0) / Math.max(customers.length, 1)
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
@@ -328,7 +332,7 @@ export default function CustomersPage() {
                 <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
                 <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
                   {Math.round(
-                    customers.reduce((sum, c) => sum + c.totalOrders, 0) / Math.max(customers.length, 1)
+                    customers.reduce((sum, c) => sum + (c.total_orders || 0), 0) / Math.max(customers.length, 1)
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground">Rata-rata Order</p>

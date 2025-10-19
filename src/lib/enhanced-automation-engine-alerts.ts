@@ -2,6 +2,20 @@
 import type { EnhancedAutomationConfig } from './enhanced-automation-engine-types'
 import { supabase } from '@/lib/supabase'
 
+interface AlertItem {
+  id: string
+  alert_type: string
+  message: string
+  severity: string | null
+  metadata: any
+  is_active: boolean | null
+  created_at: string | null
+  updated_at: string | null
+  acknowledged_at: string | null
+  resolved_at: string | null
+  ingredient_id: string | null
+}
+
 export class AlertsEngine {
   constructor(private config: EnhancedAutomationConfig) {}
 
@@ -27,13 +41,13 @@ export class AlertsEngine {
         trend_alerts: trendAlerts,
         business_insights: businessInsights
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Contextual alerts generation error:', error)
       throw error
     }
   }
 
-  private async generatePriorityAlerts(alerts: any[]) {
+  private async generatePriorityAlerts(alerts: AlertItem[]) {
     // Would implement AI-like alert prioritization
     return []
   }

@@ -78,7 +78,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         }
         setSettings(newSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to parse saved settings:', error)
         setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))

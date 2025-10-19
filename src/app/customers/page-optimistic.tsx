@@ -30,7 +30,7 @@
         'Berhasil Dihapus',
         `${selectedItems.length} pelanggan berhasil dihapus`
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
       // Rollback optimistic update
       setCustomers(previousCustomers)
