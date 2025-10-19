@@ -3,7 +3,7 @@ import React from 'react';
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+// import ErrorBoundary from '@/components/ErrorBoundary'; // Removed - using error.js files instead
 import { Toaster } from 'react-hot-toast';
 import QueryProvider from '@/providers/QueryProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
@@ -56,9 +56,7 @@ export default function RootLayout({
                 enableNetworkAware={true}
                 debug={process.env.NODE_ENV === 'development'}
               >
-                <ErrorBoundary>
-                  {children}
-                </ErrorBoundary>
+                {children}
               </PreloadingProvider>
               <Toaster
                 position="bottom-right"
