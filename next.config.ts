@@ -1,6 +1,10 @@
 import {withSentryConfig} from '@sentry/nextjs';
 import type { NextConfig } from "next";
-import withBundleAnalyzer from '@next/bundle-analyzer';
+import { BundleAnalyzerPlugin } from '@next/bundle-analyzer';
+
+const withBundleAnalyzer = BundleAnalyzerPlugin({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
   // TypeScript and Linting

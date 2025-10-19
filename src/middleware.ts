@@ -2,60 +2,97 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  // Skip middleware for static assets and API routes
+  const { pathname } = request.nextUrl
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-  // creating a new response object with NextResponse.next() or NextResponse.redirect(),
-  // make sure to:
-  // 1. Pass the request in it, like so: NextResponse.next({ request })
-  // 2. Copy over the cookies, like so: response.cookies.setAll(supabaseResponse.cookies.getAll())
-
+  // Skip for static assets, API routes, and auth routes
   if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.includes('.') ||
+    pathname.startsWith('/auth/')
   ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    return NextResponse.next()
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-  // creating a new response object with NextResponse.next() or NextResponse.redirect(),
-  // make sure to copy over the cookies.
-  return supabaseResponse
+  try {
+    // Validate environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Missing Supabase environment variables')
+      // Allow request to continue without auth check
+      return NextResponse.next()
+    }
+
+    let supabaseResponse = NextResponse.next({
+      request,
+    })
+
+    const supabase = createServerClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+              supabaseResponse = NextResponse.next({
+                request,
+              })
+              cookiesToSet.forEach(({ name, value, options }) =>
+                supabaseResponse.cookies.set(name, value, options)
+              )
+            } catch (error) {
+              console.error('Cookie setting error:', error)
+              // Continue without setting cookies
+            }
+          },
+        },
+      }
+    )
+
+    // Get user with error handling
+    let user = null
+    try {
+      const { data, error } = await supabase.auth.getUser()
+      if (error) {
+        console.error('Auth error in middleware:', error.message)
+      } else {
+        user = data?.user
+      }
+    } catch (error) {
+      console.error('Failed to get user in middleware:', error)
+      // Continue without user check
+    }
+
+    // Check if user needs to be redirected to login
+    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/auth')
+    const isPublicRoute = pathname === '/' || pathname.startsWith('/_not-found')
+
+    if (!user && !isAuthRoute && !isPublicRoute) {
+      try {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+      } catch (error) {
+        console.error('Redirect error:', error)
+        // Continue to login page via client-side redirect
+      }
+    }
+
+    return supabaseResponse
+
+  } catch (error) {
+    console.error('Middleware error:', error)
+    // On middleware error, allow request to continue
+    return NextResponse.next()
+  }
 }
 
 export const config = {
