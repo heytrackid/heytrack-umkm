@@ -108,7 +108,7 @@ class AutoReorderService {
    */
   async checkReorderNeeds(): Promise<ReorderSummary> {
     try {
-      console.log('[AutoReorder] Starting checkReorderNeeds...')
+      automationLogger.info('Starting checkReorderNeeds')
       
       const supabaseAdmin = getSupabaseAdmin()
       
@@ -119,7 +119,7 @@ class AutoReorderService {
 
       if (ingredientsError) throw ingredientsError
       
-      console.log(`[AutoReorder] Found ${ingredients?.length || 0} active ingredients`)
+      automationLogger.info('Found active ingredients', { count: ingredients?.length || 0 })
 
       const { data: reorderRules, error: rulesError } = await supabaseAdmin
         .from('inventory_reorder_rules')
@@ -128,7 +128,7 @@ class AutoReorderService {
 
       if (rulesError) throw rulesError
       
-      console.log(`[AutoReorder] Found ${reorderRules?.length || 0} active reorder rules`)
+      automationLogger.info('Found active reorder rules', { count: reorderRules?.length || 0 })
 
       const { data: suppliers, error: suppliersError } = await supabaseAdmin
         .from('suppliers')
@@ -147,7 +147,13 @@ class AutoReorderService {
 
         // Debug logging for first few items
         if (alerts.length < 3) {
-          console.log(`Checking ${ingredient.name}: stock=${currentStock}, min=${minStock}, rule_point=${rule?.reorder_point}, needs=${this.needsReorder(currentStock, minStock, rule)}`)
+          automationLogger.debug('Checking ingredient reorder status', {
+            name: ingredient.name,
+            currentStock,
+            minStock,
+            rulePoint: rule?.reorder_point,
+            needsReorder: this.needsReorder(currentStock, minStock, rule)
+          })
         }
 
         // Check if reorder is needed
@@ -179,7 +185,10 @@ class AutoReorderService {
               await this.generateAutoPurchaseOrder(alert, rule, preferredSupplier)
               autoOrdersGenerated++
             } catch (error: any) {
-              console.error(`Failed to generate auto purchase order for ${ingredient.name}:`, error)
+              automationLogger.error('Failed to generate auto purchase order', {
+                ingredientName: ingredient.name,
+                error: error.message
+              })
             }
           }
         }
@@ -197,7 +206,7 @@ class AutoReorderService {
         alerts
       }
     } catch (error: any) {
-      console.error('Error checking reorder needs:', error)
+      automationLogger.error('Error checking reorder needs', { error: error.message })
       throw error
     }
   }
@@ -418,7 +427,7 @@ class AutoReorderService {
       .insert(alerts)
 
     if (error) {
-      console.error('Error saving reorder alerts:', error)
+      dbLogger.error('Error saving reorder alerts', { error: error.message })
     }
   }
 }

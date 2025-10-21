@@ -1,30 +1,26 @@
 'use client'
 
-import React, { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
-  Eye,
-  ChevronRight,
-  Search,
-  Filter,
-  SortAsc,
-  SortDesc
-} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from"@/components/ui/dropdown-menu"
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 import { useResponsive } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
+import {
+    Edit,
+    Eye,
+    MoreHorizontal,
+    Search,
+    SortAsc,
+    SortDesc,
+    Trash2
+} from 'lucide-react'
+import React, { useState } from 'react'
 import { Input } from './input'
 
 // Types for mobile table
@@ -62,7 +58,15 @@ interface MobileTableProps<T = any> {
   cardMode?: boolean // Show as cards instead of table on mobile
 }
 
-export function MobileTable<T extends Record<string, any>>({
+/**
+ * MobileTable Component - Optimized with React.memo
+ * 
+ * Performance optimizations:
+ * - Wrapped with React.memo to prevent unnecessary re-renders
+ * - Custom comparison function for data prop
+ * - useCallback for event handlers
+ */
+export const MobileTable = memo(function MobileTable<T extends Record<string, any>>({
   data,
   columns,
   actions = [],
@@ -82,17 +86,17 @@ export function MobileTable<T extends Record<string, any>>({
   const [sortKey, setSortKey] = useState<string>('')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query)
     onSearch?.(query)
-  }
+  }, [onSearch])
 
-  const handleSort = (key: string) => {
+  const handleSort = useCallback((key: string) => {
     const newDirection = sortKey === key && sortDirection === 'asc' ? 'desc' : 'asc'
     setSortKey(key)
     setSortDirection(newDirection)
     onSort?.(key, newDirection)
-  }
+  }, [sortKey, sortDirection, onSort])
 
   const getValue = (item: T, column: MobileTableColumn<T>) => {
     if (typeof column.accessor === 'function') {
@@ -324,7 +328,16 @@ export function MobileTable<T extends Record<string, any>>({
       )}
     </div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders
+  // Only re-render if data, loading, or columns change
+  return (
+    prevProps.data === nextProps.data &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.columns === nextProps.columns &&
+    prevProps.searchable === nextProps.searchable
+  )
+})
 
 // Predefined cell renderers for common data types
 export const TableRenderers = {

@@ -23,9 +23,11 @@ export interface ProductionSchedule {
 }
 
 // Placeholder exports to resolve module imports
+import { logger } from '@/lib/logger'
+
 export const ProductionModule = {
   scheduleBatch: (batchData: Partial<ProductionBatch>) => {
-    console.log('Batch scheduling not implemented yet')
+    logger.debug('Batch scheduling not implemented yet', { batchData })
     return null
   }
 }

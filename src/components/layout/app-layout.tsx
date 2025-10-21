@@ -1,15 +1,15 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
-import SimpleSidebar from './sidebar'
-import MobileHeader from './mobile-header'
-import { Search, User } from 'lucide-react'
+import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import SmartNotifications from '@/components/automation/smart-notifications'
 import { useMobileFirst } from '@/hooks/use-responsive'
 import { cn } from '@/lib/utils'
+import { Search, User } from 'lucide-react'
+import { ReactNode, useState } from 'react'
+import MobileHeader from './mobile-header'
+import SimpleSidebar from './sidebar'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -50,7 +50,7 @@ export default function AppLayout({
           onMenuToggle={toggleMobileMenu}
           notification={{
             count: 3,
-            onClick: () => console.log('Mobile notifications')
+            onClick: () => uiLogger.debug('Mobile notifications clicked')
           }}
         />
       )}

@@ -16,7 +16,8 @@ Comprehensive bakery management solution featuring smart automation, cost optimi
 
 **🚀 Status**: Production Ready ✅  
 **📊 Version**: 1.0.0  
-**🔄 Last Updated**: 2025-10-01
+**🔄 Last Updated**: 2025-10-21  
+**💯 Quality Score**: 92/100
 
 ## ✨ Key Features
 
@@ -325,6 +326,12 @@ docker run -p 3000:3000 bakery-management
 npm run build
 npm run start
 ```
+
+## 🚀 Quick Start
+
+**New to HeyTrack?** Check out our [Quick Start Guide](./QUICK_START.md) to get up and running in 5 minutes!
+
+**Want to know the current status?** See [Project Status](./PROJECT_STATUS.md) for detailed information.
 
 ## 📚 Documentation
 

@@ -1,22 +1,20 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { cn } from '@/lib/utils'
+import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import SmartNotifications from '@/components/automation/smart-notifications'
-import { 
-  Search, 
-  Bell, 
-  Menu, 
-  X, 
-  ArrowLeft,
-  MoreVertical,
-  User
+import { cn } from '@/lib/utils'
+import {
+    ArrowLeft,
+    Menu,
+    MoreVertical,
+    Search,
+    User,
+    X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 // Clerk removed for development
 // import { 
 //   SignInButton, 
@@ -25,22 +23,20 @@ import { useRouter } from 'next/navigation'
 //   SignedOut, 
 //   UserButton 
 // } from '@clerk/nextjs'
-import { useMobileFirst } from '@/hooks/use-responsive'
-import { 
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from"@/components/ui/sheet"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from"@/components/ui/dropdown-menu"
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger
+} from "@/components/ui/sheet"
+import { useMobileFirst } from '@/hooks/use-responsive'
 import SimpleSidebar from './sidebar'
 
 interface MobileHeaderProps {
@@ -261,7 +257,7 @@ export function DashboardHeader() {
       title="Dashboard"
       notification={{
         count: 5,
-        onClick: () => console.log('Notifications clicked')
+        onClick: () => uiLogger.debug('Notifications clicked')
       }}
     />
   )

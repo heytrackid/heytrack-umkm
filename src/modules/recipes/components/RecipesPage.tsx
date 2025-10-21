@@ -1,33 +1,31 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  ChefHat,
-  Calculator,
-  TrendingUp,
-  Search,
-  Plus,
-  Filter,
-  BarChart3,
-  DollarSign,
-  Clock,
-  Users
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+    BarChart3,
+    Calculator,
+    ChefHat,
+    Clock,
+    DollarSign,
+    Plus,
+    Search,
+    TrendingUp,
+    Users
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 // Lazy loaded components
-import { 
-  LazyAdvancedHPPCalculator,
-  LazySmartPricingAssistant,
-  RecipeDashboardWithProgressiveLoading,
-  SmartRecipeLoader,
-  preloadRecipeComponents
+import {
+    LazyAdvancedHPPCalculator,
+    RecipeDashboardWithProgressiveLoading,
+    SmartRecipeLoader,
+    preloadRecipeComponents
 } from './LazyComponents'
 
 interface Recipe {
@@ -112,7 +110,7 @@ export default function RecipesPage({
 
   const handlePriceUpdate = (price: number, margin?: number) => {
     // Handle price updates from HPP calculator or pricing assistant
-    console.log('Price updated:', price, 'Margin:', margin)
+    uiLogger.info('Price updated', { price, margin })
     // In real app, this would update the recipe price in database
   }
 

@@ -53,5 +53,9 @@
     "**/.next/**": true,
     "**/build/**": true,
     "**/out/**": true
+  },
+  "kiroAgent.configureMCP": "Enabled",
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   }
 }

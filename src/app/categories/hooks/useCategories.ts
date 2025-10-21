@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 // Types and constants embedded in hook file for now
 export interface Category {
@@ -252,13 +253,13 @@ export function useCategories(): UseCategoriesReturn {
   const handleSaveCategory = () => {
     const validation = validateCategoryForm(formData)
     if (!validation.isValid) {
-      alert(validation.errors.join('\n'))
+      toast.error(validation.errors.join(', '))
       return
     }
 
     // Check for duplicate names
     if (isCategoryNameTaken(categories, formData.name, editingCategory?.id)) {
-      alert('Nama kategori sudah digunakan. Silakan pilih nama lain.')
+      toast.error('Nama kategori sudah digunakan. Silakan pilih nama lain.')
       return
     }
 
@@ -266,14 +267,14 @@ export function useCategories(): UseCategoriesReturn {
       // Create new category
       const newCategory = createCategoryFromForm(formData)
       setCategories(prev => sortCategories([...prev, newCategory]))
-      alert('Kategori berhasil ditambahkan!')
+      toast.success('Kategori berhasil ditambahkan!')
     } else if (currentView === 'edit' && editingCategory) {
       // Update existing category
       const updatedCategory = updateCategoryFromForm(editingCategory, formData)
       setCategories(prev => sortCategories(
         prev.map(cat => cat.id === editingCategory.id ? updatedCategory : cat)
       ))
-      alert('Kategori berhasil diperbarui!')
+      toast.success('Kategori berhasil diperbarui!')
     }
 
     resetForm()
@@ -301,7 +302,7 @@ export function useCategories(): UseCategoriesReturn {
     if (confirm(`Apakah Anda yakin ingin menghapus kategori "${category.name}"?`)) {
       setCategories(prev => prev.filter(cat => cat.id !== categoryId))
       setSelectedItems(prev => prev.filter(id => id !== categoryId))
-      alert('Kategori berhasil dihapus!')
+      toast.success('Kategori berhasil dihapus!')
     }
   }
 
@@ -337,7 +338,7 @@ export function useCategories(): UseCategoriesReturn {
     if (confirmed) {
       setCategories(prev => prev.filter(cat => !selectedItems.includes(cat.id)))
       setSelectedItems([])
-      alert(`${selectedItems.length} kategori berhasil dihapus!`)
+      toast.success(`${selectedItems.length} kategori berhasil dihapus!`)
     }
   }
 
@@ -347,16 +348,12 @@ export function useCategories(): UseCategoriesReturn {
     const selectedCategories = filteredCategories.filter(category =>
       selectedItems.includes(category.id)
     )
-    const categoryNames = selectedCategories.map(category => category.name).join(', ')
-
-    // TODO: Implement bulk edit modal
-    alert(`Bulk edit untuk ${selectedItems.length} kategori belum diimplementasi\n\nKategori: ${categoryNames}`)
+    toast(`Bulk edit untuk ${selectedItems.length} kategori akan segera tersedia`, { icon: 'ℹ️' })
   }
 
   // Handle view category (placeholder)
   const handleViewCategory = (category: Category) => {
-    console.log('View category details:', category)
-    alert(`Melihat detail kategori: ${category.name}`)
+    toast(`Melihat detail kategori: ${category.name}`, { icon: '👁️' })
   }
 
   // Simulate loading delay

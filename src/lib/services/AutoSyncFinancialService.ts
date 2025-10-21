@@ -51,7 +51,7 @@ export class AutoSyncFinancialService {
         .eq('metadata->>auto_synced', 'true')
 
       if (error) {
-        console.error('Error fetching sync status:', error)
+        dbLogger.error('Error fetching sync status', { error: error.message })
         return {
           isEnabled: false,
           totalSynced: 0,
@@ -95,7 +95,7 @@ export class AutoSyncFinancialService {
         syncHealth
       }
     } catch (error: any) {
-      console.error('Error in getSyncStatus:', error)
+      automationLogger.error('Error in getSyncStatus', { error: error.message })
       return {
         isEnabled: false,
         totalSynced: 0,
@@ -120,7 +120,7 @@ export class AutoSyncFinancialService {
         .limit(options.limit)
 
       if (error) {
-        console.error('Error fetching synced transactions:', error)
+        dbLogger.error('Error fetching synced transactions', { error: error.message })
         return []
       }
 
@@ -134,7 +134,7 @@ export class AutoSyncFinancialService {
         reference: record.reference || 'N/A'
       }))
     } catch (error: any) {
-      console.error('Error in getRecentSyncedTransactions:', error)
+      automationLogger.error('Error in getRecentSyncedTransactions', { error: error.message })
       return []
     }
   }
@@ -155,7 +155,7 @@ export class AutoSyncFinancialService {
         .single()
 
       if (txError || !transaction) {
-        console.error('Stock transaction not found:', txError)
+        dbLogger.error('Stock transaction not found', { transactionId, error: txError?.message })
         return false
       }
 
@@ -168,13 +168,16 @@ export class AutoSyncFinancialService {
         .single()
 
       if (existingRecord) {
-        console.log('Transaction already synced:', transactionId)
+        automationLogger.info('Transaction already synced', { transactionId })
         return true
       }
 
       // Only sync PURCHASE and ADJUSTMENT transactions
       if (!['PURCHASE', 'ADJUSTMENT'].includes(transaction.type)) {
-        console.log('Transaction type not eligible for sync:', transaction.type)
+        automationLogger.debug('Transaction type not eligible for sync', { 
+          transactionId, 
+          type: transaction.type 
+        })
         return false
       }
 
@@ -185,7 +188,10 @@ export class AutoSyncFinancialService {
       )
 
       if (amount <= 0) {
-        console.log('Transaction amount is zero or negative, skipping sync')
+        automationLogger.debug('Transaction amount is zero or negative, skipping sync', { 
+          transactionId, 
+          amount 
+        })
         return false
       }
 
@@ -214,14 +220,20 @@ export class AutoSyncFinancialService {
         })
 
       if (insertError) {
-        console.error('Error creating financial record:', insertError)
+        dbLogger.error('Error creating financial record', { 
+          transactionId, 
+          error: insertError.message 
+        })
         return false
       }
 
-      console.log(`Manual sync successful for transaction ${transactionId}`)
+      automationLogger.info('Manual sync successful', { transactionId })
       return true
     } catch (error: any) {
-      console.error('Error in manualSyncStockTransaction:', error)
+      automationLogger.error('Error in manualSyncStockTransaction', { 
+        transactionId, 
+        error: error.message 
+      })
       return false
     }
   }
@@ -311,7 +323,7 @@ export class AutoSyncFinancialService {
         healthScore: Math.max(healthScore, 0)
       }
     } catch (error: any) {
-      console.error('Error getting sync recommendations:', error)
+      automationLogger.error('Error getting sync recommendations', { error: error.message })
       return {
         recommendations: ['Error menganalisis sync status'],
         missingSync: 0,
@@ -360,7 +372,7 @@ export class AutoSyncFinancialService {
         .order('date', { ascending: false })
 
       if (error) {
-        console.error('Error fetching cashflow data:', error)
+        dbLogger.error('Error fetching cashflow data', { error: error.message })
         return {
           totalExpenses: 0,
           totalIncome: 0,
@@ -399,7 +411,7 @@ export class AutoSyncFinancialService {
         recentTransactions
       }
     } catch (error: any) {
-      console.error('Error in getCashflowSummary:', error)
+      automationLogger.error('Error in getCashflowSummary', { error: error.message })
       return {
         totalExpenses: 0,
         totalIncome: 0,

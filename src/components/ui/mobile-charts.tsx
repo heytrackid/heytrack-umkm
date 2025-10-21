@@ -1,39 +1,37 @@
 'use client'
 
-import React, { useState, useRef, useCallback, useMemo } from 'react'
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  TooltipProps,
-  Legend
-} from 'recharts'
-import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/use-mobile'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
-import { Button } from './button'
-import { 
-  Maximize2, 
-  Minimize2, 
-  Download, 
-  Share2, 
-  Filter,
-  TrendingUp,
-  TrendingDown,
-  Minus
+import { cn } from '@/lib/utils'
+import {
+    Download,
+    Maximize2,
+    Minimize2,
+    Minus,
+    Share2,
+    TrendingDown,
+    TrendingUp
 } from 'lucide-react'
+import React, { memo, useMemo, useState } from 'react'
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from 'recharts'
 import { Badge } from './badge'
+import { Button } from './button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
 
 // Color schemes for mobile-friendly visualization
 const CHART_COLORS = {
@@ -277,7 +275,11 @@ interface MobileLineChartProps extends BaseMobileChartProps {
   curved?: boolean
 }
 
-export function MobileLineChart({
+/**
+ * MobileLineChart - Optimized with React.memo
+ * Prevents unnecessary re-renders when data hasn't changed
+ */
+export const MobileLineChart = memo(function MobileLineChart({
   data,
   xKey,
   lines,
@@ -331,9 +333,9 @@ export function MobileLineChart({
               key={line.key}
               type={curved ?"monotone" :"linear"}
               dataKey={line.key}
-              stroke={line.color || CHART_COLORS.primary[index % CHART_COLORS.primary.length]}
+              stroke={line.color || CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
               strokeWidth={line.strokeWidth || (isMobile ? 2 : 3)}
-              dot={{ fill: line.color || CHART_COLORS.primary[index], strokeWidth: 0, r: isMobile ? 3 : 4 }}
+              dot={{ fill: line.color || CHART_COLORS.primary[_index], strokeWidth: 0, r: isMobile ? 3 : 4 }}
               activeDot={{ r: isMobile ? 5 : 6, strokeWidth: 0 }}
               name={line.name}
             />
@@ -342,7 +344,9 @@ export function MobileLineChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}
+}, (prevProps: MobileLineChartProps, nextProps: MobileLineChartProps) => {
+  return prevProps.data === nextProps.data && prevProps.lines === nextProps.lines
+})
 
 // Mobile Area Chart
 interface MobileAreaChartProps extends BaseMobileChartProps {
@@ -356,7 +360,11 @@ interface MobileAreaChartProps extends BaseMobileChartProps {
   stacked?: boolean
 }
 
-export function MobileAreaChart({
+/**
+ * MobileAreaChart - Optimized with React.memo
+ * Prevents unnecessary re-renders when data hasn't changed
+ */
+export const MobileAreaChart = memo(function MobileAreaChart({
   data,
   xKey,
   areas,
@@ -391,12 +399,12 @@ export function MobileAreaChart({
               >
                 <stop 
                   offset="5%" 
-                  stopColor={area.color || CHART_COLORS.primary[index]} 
+                  stopColor={area.color || CHART_COLORS.primary[_index]} 
                   stopOpacity={0.8}
                 />
                 <stop 
                   offset="95%" 
-                  stopColor={area.color || CHART_COLORS.primary[index]} 
+                  stopColor={area.color || CHART_COLORS.primary[_index]} 
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -424,7 +432,7 @@ export function MobileAreaChart({
               type="monotone"
               dataKey={area.key}
               stackId={stacked ?"1" : undefined}
-              stroke={area.color || CHART_COLORS.primary[index]}
+              stroke={area.color || CHART_COLORS.primary[_index]}
               fill={`url(#gradient-${area.key})`}
               strokeWidth={isMobile ? 2 : 3}
               name={area.name}
@@ -434,7 +442,9 @@ export function MobileAreaChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}
+}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => {
+  return prevProps.data === nextProps.data && prevProps.areas === nextProps.areas
+})
 
 // Mobile Bar Chart
 interface MobileBarChartProps extends BaseMobileChartProps {
@@ -448,7 +458,11 @@ interface MobileBarChartProps extends BaseMobileChartProps {
   horizontal?: boolean
 }
 
-export function MobileBarChart({
+/**
+ * MobileBarChart - Optimized with React.memo
+ * Prevents unnecessary re-renders when data hasn't changed
+ */
+export const MobileBarChart = memo(function MobileBarChart({
   data,
   xKey,
   bars,
@@ -494,7 +508,7 @@ export function MobileBarChart({
             <Bar
               key={bar.key}
               dataKey={bar.key}
-              fill={bar.color || CHART_COLORS.primary[index % CHART_COLORS.primary.length]}
+              fill={bar.color || CHART_COLORS.primary[_index % CHART_COLORS.primary.length]}
               radius={isMobile ? 4 : 6}
               name={bar.name}
             />
@@ -503,7 +517,9 @@ export function MobileBarChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}
+}, (prevProps: MobileBarChartProps, nextProps: MobileBarChartProps) => {
+  return prevProps.data === nextProps.data && prevProps.bars === nextProps.bars
+})
 
 // Mobile Pie Chart
 interface MobilePieChartProps extends BaseMobileChartProps {
@@ -514,7 +530,11 @@ interface MobilePieChartProps extends BaseMobileChartProps {
   innerRadius?: number
 }
 
-export function MobilePieChart({
+/**
+ * MobilePieChart - Optimized with React.memo
+ * Prevents unnecessary re-renders when data hasn't changed
+ */
+export const MobilePieChart = memo(function MobilePieChart({
   data,
   valueKey,
   nameKey,
@@ -565,8 +585,8 @@ export function MobilePieChart({
           >
             {data.map((entry, _index) => (
               <Cell 
-                key={`cell-${index}`} 
-                fill={colors[index % colors.length]} 
+                key={`cell-${_index}`} 
+                fill={colors[_index % colors.length]} 
               />
             ))}
           </Pie>
@@ -578,7 +598,9 @@ export function MobilePieChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}
+}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => {
+  return prevProps.data === nextProps.data && prevProps.valueKey === nextProps.valueKey
+})
 
 // Mini chart component for dashboard cards
 interface MiniChartProps {
@@ -590,7 +612,11 @@ interface MiniChartProps {
   height?: number
 }
 
-export function MiniChart({
+/**
+ * MiniChart - Optimized with React.memo
+ * Prevents unnecessary re-renders for dashboard mini charts
+ */
+export const MiniChart = memo(function MiniChart({
   data,
   type,
   dataKey,
@@ -638,4 +664,6 @@ export function MiniChart({
       </ResponsiveContainer>
     </div>
   )
-}
+}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => {
+  return prevProps.data === nextProps.data && prevProps.type === nextProps.type
+})

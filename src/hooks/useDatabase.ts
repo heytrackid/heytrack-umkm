@@ -1,12 +1,19 @@
+/**
+ * @deprecated This file is deprecated. Use @/hooks/useSupabase instead.
+ * See MIGRATION_GUIDE.md for migration instructions.
+ */
+
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase, dbService } from '@/lib/supabase'
+import { dbService, supabase } from '@/lib/supabase'
 import { Database } from '@/types'
+import { useEffect, useState } from 'react'
 
 type Tables = Database['public']['Tables']
 
-// Generic hook for CRUD operations
+/**
+ * @deprecated Use useSupabaseCRUD from @/hooks/useSupabase instead
+ */
 export function useTable<T extends keyof Tables>(
   tableName: T,
   options: {

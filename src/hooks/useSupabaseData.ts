@@ -1,11 +1,17 @@
+/**
+ * @deprecated This file is deprecated. Use @/hooks/useSupabase instead.
+ * See MIGRATION_GUIDE.md for migration instructions.
+ */
+
 'use client'
 
-import { useEffect, useState, useCallback } from 'react';
 import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types';
-import { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import { useCallback, useEffect, useState } from 'react';
 
-// Generic hook for real-time data
+/**
+ * @deprecated Use useSupabaseQuery from @/hooks/useSupabase instead
+ */
 export function useRealtimeData<T>(
   tableName: keyof Database['public']['Tables'],
   initialData: T[] = [],
@@ -104,7 +110,7 @@ export function useIngredients() {
 }
 
 // Simple hook for orders
-export function useOrders() {
+export function useOrders(options?: { limit?: number }) {
   const [orders, setOrders] = useState<Database['public']['Tables']['orders']['Row'][]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -117,7 +123,7 @@ export function useOrders() {
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(options.limit)
+        .limit(options?.limit || 100)
 
       if (error) throw error
       setOrders(data || [])
@@ -127,7 +133,7 @@ export function useOrders() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [options?.limit])
 
   useEffect(() => {
     fetchOrders()

@@ -1,8 +1,8 @@
 'use client'
 
-import { lazy, Suspense, ComponentType } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ComponentType, lazy, Suspense } from 'react'
 
 // Table Loading Skeleton Component
 const TableLoadingSkeleton = ({ 
@@ -209,7 +209,10 @@ export const useTablePerformance = () => {
       
       const measure = performance.getEntriesByName(`table-${tableName}-duration`)[0]
       if (measure && measure.duration > 2000) {
-        console.warn(`⚠️ Slow table rendering: ${tableName} took ${measure.duration.toFixed(2)}ms`)
+        logger.warn('Slow table rendering', { 
+          tableName, 
+          duration: measure.duration.toFixed(2) 
+        })
       }
     }
   }

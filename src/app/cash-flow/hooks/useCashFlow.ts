@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useLoading } from '@/hooks/useLoading'
+import { useEffect, useMemo, useState } from 'react'
 
 // Types and constants embedded in hook file for now
 export interface Transaction {
@@ -261,13 +260,13 @@ export function useCashFlow(): UseCashFlowReturn {
   const handleAddTransaction = async () => {
     const validation = validateTransactionForm(formData)
     if (!validation.isValid) {
-      alert(validation.errors.join('\n'))
+      toast.error(validation.errors.join(', '))
       return
     }
 
     const amount = parseFloat(formData.amount)
     if (isNaN(amount) || amount <= 0) {
-      alert('Jumlah harus lebih dari 0')
+      toast.error('Jumlah harus lebih dari 0')
       return
     }
 
@@ -410,4 +409,5 @@ export function useCashFlow(): UseCashFlowReturn {
 }
 
 // Export constants and utility functions for use in components
-export { incomeCategories, expenseCategories, calculateDateRange, prepareChartData, validateTransactionForm }
+export { calculateDateRange, expenseCategories, incomeCategories, prepareChartData, validateTransactionForm }
+

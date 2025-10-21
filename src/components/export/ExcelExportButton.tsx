@@ -1,28 +1,28 @@
 'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+    AlertCircle,
+    BarChart3,
+    Building,
+    CheckCircle,
+    Download,
+    Factory,
+    FileSpreadsheet,
+    Loader2,
+    Package,
+    Receipt,
+    Sheet,
+    ShoppingCart,
+    Users,
+    Utensils
+} from 'lucide-react'
+import { useState } from 'react'
 // Dynamic import of export service to reduce bundle size
 const loadExportService = () => import('@/services/excel-export-lazy.service').then(m => m.LazyExcelExportService)
-import { 
-  Download, 
-  FileSpreadsheet, 
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  Sheet,
-  Users,
-  Package,
-  ShoppingCart,
-  Receipt,
-  Building,
-  BarChart3,
-  Factory,
-  Utensils
-} from 'lucide-react'
 
 interface ExcelExportButtonProps {
   className?: string
@@ -42,7 +42,9 @@ const exportSheets = [
   { name: 'Batch Produksi', icon: Factory, description: 'Log produksi dan batch tracking', color: 'bg-cyan-100 text-cyan-800' }
 ]
 
-export default function ExcelExportButton({ 
+import { memo } from 'react'
+
+const ExcelExportButton = memo(function ExcelExportButton({ 
   className = '', 
   variant = 'default',
   size = 'md'
@@ -236,4 +238,6 @@ export default function ExcelExportButton({
       </DialogContent>
     </Dialog>
   )
-}
+})
+
+export default ExcelExportButton

@@ -1,51 +1,44 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  ShoppingCart,
-  Plus,
-  Search,
-  Filter,
-  Calendar,
-  Users,
-  DollarSign,
-  Clock,
-  Package,
-  Eye,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  TrendingUp,
-  BarChart3,
-  MessageCircle
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+    BarChart3,
+    Calendar,
+    Clock,
+    DollarSign,
+    Edit,
+    Eye,
+    Filter,
+    MessageCircle,
+    Package,
+    Plus,
+    Search,
+    ShoppingCart,
+    TrendingUp,
+    XCircle
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 // Types and constants
-import { 
-  Order, 
-  OrderStatus, 
-  PaymentStatus, 
-  OrderFilters, 
-  OrderStats,
-  ORDER_STATUS_LABELS,
-  PAYMENT_STATUS_LABELS 
-} from '../types'
-import { 
-  ORDER_STATUSES, 
-  PAYMENT_STATUSES, 
-  ORDER_PRIORITIES,
-  ORDER_CONFIG 
-} from '../constants'
 import { useCurrency } from '@/hooks/useCurrency'
+import {
+    ORDER_STATUSES,
+    PAYMENT_STATUSES
+} from '../constants'
+import {
+    Order,
+    ORDER_STATUS_LABELS,
+    OrderFilters,
+    OrderStats,
+    OrderStatus,
+    PAYMENT_STATUS_LABELS,
+    PaymentStatus
+} from '../types'
 
 
 interface OrdersPageProps {
@@ -158,7 +151,7 @@ export default function OrdersPage({
 
   const handleCreateOrder = () => {
     // Will implement order form
-    console.log('Create order')
+    uiLogger.debug('Create order button clicked')
   }
 
   const handleEditOrder = (order: Order) => {
@@ -317,7 +310,7 @@ export default function OrdersPage({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => console.log('Export orders')}
+              onClick={() => uiLogger.debug('Export orders button clicked')}
               className="flex items-center gap-2"
             >
               <Package className="h-4 w-4" />

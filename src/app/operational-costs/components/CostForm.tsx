@@ -1,17 +1,17 @@
 'use client'
 
-import React from 'react'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
-import { CalendarIcon, Save, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { CalendarIcon, Save, X } from 'lucide-react'
+import React from 'react'
 
 interface CostFormProps {
   cost?: any
@@ -53,7 +53,7 @@ export default function CostForm({
 
   const handleSubmit = () => {
     if (!formData.category || !formData.amount) {
-      alert('Harap isi kategori dan jumlah')
+      toast.error('Harap isi kategori dan jumlah')
       return
     }
     onSave(formData)

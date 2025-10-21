@@ -1,25 +1,24 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useResponsive } from '@/hooks/use-mobile'
-import { 
-  Eye,
-  Edit,
-  Trash2,
-  Package,
-  Clock,
-  Phone,
-  MapPin,
-  DollarSign
-} from 'lucide-react'
-import { OrderStatus, PaymentStatus, Priority, Order } from './types'
-import { getStatusInfo, getPaymentInfo, getPriorityInfo } from './utils'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
-import { useCurrency } from '@/hooks/useCurrency'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { useResponsive } from '@/hooks/use-mobile'
+import { useCurrency } from '@/hooks/useCurrency'
+import {
+    Clock,
+    DollarSign,
+    Edit,
+    Eye,
+    Package,
+    Phone,
+    Trash2
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Order, OrderStatus } from './types'
+import { getPaymentInfo, getPriorityInfo, getStatusInfo } from './utils'
 
 interface OrdersListProps {
   orders: Order[]
@@ -30,7 +29,15 @@ interface OrdersListProps {
   loading?: boolean
 }
 
-export default function OrdersList({
+/**
+ * OrdersList Component - Optimized with React.memo
+ * 
+ * Performance optimizations:
+ * - Wrapped with React.memo to prevent unnecessary re-renders
+ * - useCallback for event handlers
+ * - useMemo for expensive calculations
+ */
+const OrdersList = memo(function OrdersList({
   orders,
   onViewOrder,
   onEditOrder, 
@@ -48,11 +55,14 @@ export default function OrdersList({
   const totalPages = Math.max(1, Math.ceil(totalOrders / rowsPerPage))
   const pageStart = totalOrders === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1
   const pageEnd = totalOrders === 0 ? 0 : Math.min(pageStart + rowsPerPage - 1, totalOrders)
-  const paginatedOrders = totalOrders === 0 ? [] : orders.slice(pageStart - 1, pageEnd)
+  const paginatedOrders = useMemo(
+    () => totalOrders === 0 ? [] : orders.slice(pageStart - 1, pageEnd),
+    [orders, pageStart, pageEnd, totalOrders]
+  )
 
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
+  const handleStatusChange = useCallback((orderId: string, newStatus: OrderStatus) => {
     onUpdateStatus(orderId, newStatus)
-  }
+  }, [onUpdateStatus])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -310,4 +320,12 @@ export default function OrdersList({
       </CardContent>
     </Card>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders
+  return (
+    prevProps.orders === nextProps.orders &&
+    prevProps.loading === nextProps.loading
+  )
+})
+
+export default OrdersList

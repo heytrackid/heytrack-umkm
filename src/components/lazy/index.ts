@@ -3,84 +3,28 @@
  * Centralized exports for all code-split components
  */
 
+
 // Chart Lazy Loading
 export {
-  LazyLineChart,
-  LazyBarChart,
-  LazyAreaChart,
-  LazyPieChart,
-  LazyComposedChart,
-  LineChartWithSuspense,
-  BarChartWithSuspense,
-  AreaChartWithSuspense,
-  PieChartWithSuspense,
-  ComposedChartWithSuspense,
-  ChartContainer,
-  preloadChartBundle,
+  AreaChartWithSuspense, BarChartWithSuspense, ChartContainer, ComposedChartWithSuspense, LazyAreaChart, LazyBarChart, LazyComposedChart, LazyLineChart, LazyPieChart, LineChartWithSuspense, PieChartWithSuspense, preloadChartBundle,
   useChartPerformance,
   type ChartType
 } from './chart-lazy-loader'
 
 // Table Lazy Loading
 export {
-  LazyDataTable,
-  LazyCRUDTable,
-  LazyOrdersTable,
-  LazyInventoryTable,
-  LazyFinanceTable,
-  LazyVirtualizedTable,
-  DataTableWithSuspense,
-  CRUDTableWithSuspense,
-  OrdersTableWithSuspense,
-  InventoryTableWithSuspense,
-  FinanceTableWithSuspense,
-  VirtualizedTableWithSuspense,
-  TableContainer,
-  preloadTableBundle,
-  useTablePerformance,
-  useTableIntersectionObserver,
-  useRowVirtualization,
-  type TableType
+  CRUDTableWithSuspense, DataTableWithSuspense, FinanceTableWithSuspense, InventoryTableWithSuspense, LazyCRUDTable, LazyDataTable, LazyFinanceTable, LazyInventoryTable, LazyOrdersTable, LazyVirtualizedTable, OrdersTableWithSuspense, preloadTableBundle, TableContainer, useRowVirtualization, useTableIntersectionObserver, useTablePerformance, VirtualizedTableWithSuspense, type TableType
 } from './table-lazy-loader'
 
 // Modal Lazy Loading
 export {
-  LazyIngredientForm,
-  LazyOrderForm,
-  LazyCustomerForm,
-  LazyRecipeForm,
-  LazyFinanceForm,
-  LazyOrderDetail,
-  LazyCustomerDetail,
-  LazyInventoryDetail,
   LazyBulkActionModal,
-  LazyConfirmationModal,
-  LazyExportModal,
-  LazyModal,
-  useLazyModal,
-  useConfirmationModal,
-  preloadModalComponent,
-  ModalLoadingStrategy
+  LazyConfirmationModal, LazyCustomerDetail, LazyCustomerForm, LazyExportModal, LazyFinanceForm, LazyIngredientForm, LazyInventoryDetail, LazyModal, LazyOrderDetail, LazyOrderForm, LazyRecipeForm, ModalLoadingStrategy, preloadModalComponent, useConfirmationModal, useLazyModal
 } from './modal-lazy-loader'
 
 // Vendor Bundle Lazy Loading
 export {
-  LazyRechartsBundle,
-  LazyRadixBundle,
-  LazyDateBundle,
-  RechartsWithLoading,
-  RadixWithLoading,
-  LineChartWithSuspense as VendorLineChart,
-  BarChartWithSuspense as VendorBarChart,
-  AreaChartWithSuspense as VendorAreaChart,
-  PieChartWithSuspense as VendorPieChart,
-  NavigationMenuWithSuspense,
-  ScrollAreaWithSuspense,
-  HoverCardWithSuspense,
-  loadVendorWhenNeeded,
-  useVendorLib,
-  VendorLoadingStrategy,
-  VendorBundleSizes
+  HoverCardWithSuspense, LazyDateBundle, LazyRadixBundle, LazyRechartsBundle, loadVendorWhenNeeded, NavigationMenuWithSuspense, RadixWithLoading, RechartsWithLoading, ScrollAreaWithSuspense, useVendorLib, AreaChartWithSuspense as VendorAreaChart, BarChartWithSuspense as VendorBarChart, VendorBundleSizes, LineChartWithSuspense as VendorLineChart, VendorLoadingStrategy, PieChartWithSuspense as VendorPieChart
 } from './vendor-bundles'
 
 // Route-based Lazy Loading Strategy
@@ -148,7 +92,7 @@ export const PreloadingStrategy = {
   // Preload on user interaction
   onHover: [
     'ingredient-form',
-    'order-form', 
+    'order-form',
     'customer-form'
   ],
 
@@ -177,20 +121,20 @@ export const ComponentBundleSizes = {
   // Chart Components
   'recharts-bundle': '~180kb',
   'chart-components': '~25kb',
-  
+
   // Table Components  
   'react-table-bundle': '~90kb',
   'table-components': '~30kb',
   'virtualization': '~15kb',
-  
+
   // Form Components
   'form-components': '~40kb',
   'validation': '~50kb',
-  
+
   // Modal Components
   'modal-components': '~20kb',
   'dialog-components': '~15kb',
-  
+
   // Vendor Libraries
   'radix-ui-bundle': '~120kb',
   'date-components': '~80kb',
@@ -201,26 +145,26 @@ export const ComponentBundleSizes = {
 export const LazyLoadingMetrics = {
   // Track which components are loaded
   loadedComponents: new Set<string>(),
-  
+
   // Track loading times
   loadingTimes: new Map<string, number>(),
-  
+
   // Track bundle sizes
   bundleSizes: new Map<string, number>(),
-  
+
   // Add component load tracking
   trackComponentLoad: (componentName: string, startTime: number) => {
     const endTime = performance.now()
     const loadTime = endTime - startTime
-    
+
     LazyLoadingMetrics.loadedComponents.add(componentName)
     LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
-    
+
     if (loadTime > 1000) {
-      console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)
+      logger.warn('Slow component load', { componentName, loadTime: loadTime.toFixed(2) })
     }
   },
-  
+
   // Get metrics summary
   getMetrics: () => ({
     totalComponents: LazyLoadingMetrics.loadedComponents.size,
@@ -238,7 +182,7 @@ export const globalLazyLoadingUtils = {
   preloadForRoute: async (routeName: keyof typeof RouteLazyLoadingConfig) => {
     const config = RouteLazyLoadingConfig[routeName]
     const preloadPromises: Promise<any>[] = []
-    
+
     // Preload essential components
     if (config.essential) {
       config.essential.forEach(component => {
@@ -256,26 +200,28 @@ export const globalLazyLoadingUtils = {
         }
       })
     }
-    
+
     // Preload modals that might be used
     if (config.modals) {
       config.modals.forEach(modal => {
         if (modal.includes('form') || modal.includes('detail')) {
-            preloadPromises.push(
-              preloadModalComponent('modal')?.catch(() => {}) as any
-            )
+          preloadPromises.push(
+            preloadModalComponent('modal')?.catch(() => { }) as any
+          )
         }
       })
     }
-    
+
     return Promise.all(preloadPromises)
   },
-  
+
   // Monitor bundle size impact
   monitorBundleImpact: () => {
     if (typeof performance !== 'undefined' && 'memory' in performance) {
       const memory = (performance as any).memory
-      console.log(`📊 Current memory usage: ${(memory.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB`)
+      logger.debug('Current memory usage', {
+        memoryMB: (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
+      })
     }
   }
 }

@@ -16,9 +16,11 @@ export interface Report {
 }
 
 // Placeholder exports to resolve module imports
+import { logger } from '@/lib/logger'
+
 export const ReportsModule = {
   generateReport: (config: ReportConfig) => {
-    console.log('Report generation not implemented yet')
+    logger.debug('Report generation not implemented yet', { config })
     return null
   }
 }

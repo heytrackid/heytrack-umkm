@@ -1,41 +1,42 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useSettings } from '@/contexts/settings-context'
-import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
-import { 
-  StatsCardSkeleton,
-  DashboardHeaderSkeleton
-} from '@/components/ui/skeletons/dashboard-skeletons'
-import { 
-  CustomersTableSkeleton,
-  SearchFormSkeleton
-} from '@/components/ui/skeletons/table-skeletons'
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import {
+  StatsCardSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
+import {
+  CustomersTableSkeleton,
+  SearchFormSkeleton
+} from '@/components/ui/skeletons/table-skeletons'
+import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/use-mobile'
-import { 
-  Plus, 
-  Users, 
-  Search,
+import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import {
   Edit2,
-  Trash2,
+  Plus,
   RefreshCw,
-  UserPlus
+  Search,
+  Trash2,
+  UserPlus,
+  Users
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { useDebounce } from '../../shared/hooks'
 
 // Dynamically import the heavy table component
 const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
@@ -43,12 +44,14 @@ const CustomersTable = dynamic(() => import('./components/CustomersTable'), {
   ssr: false
 })
 export default function CustomersPage() {
+  const router = useRouter()
   const { isMobile } = useResponsive()
   const { formatCurrency, settings } = useSettings()
   const [searchTerm, setSearchTerm] = useState('')
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const { loading, setLoading, isLoading } = useLoading({
+  const { setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
@@ -75,9 +78,9 @@ export default function CustomersPage() {
   }
 
   const filteredCustomers = customers.filter((customer: any) =>
-    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone?.includes(searchTerm)
+    customer.name?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    customer.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    customer.phone?.includes(debouncedSearchTerm)
   )
 
   // Bulk action handlers
@@ -113,12 +116,12 @@ export default function CustomersPage() {
           fetch(`/api/customers/${id}`, { method: 'DELETE' })
         )
         await Promise.all(deletePromises)
-        alert(`Berhasil menghapus ${selectedItems.length} pelanggan`)
+        toast.success(`Berhasil menghapus ${selectedItems.length} pelanggan`)
         setSelectedItems([])
         fetchCustomers()
       } catch (error: any) {
         console.error('Error:', error)
-        alert('Gagal menghapus pelanggan')
+        toast.error('Gagal menghapus pelanggan')
       }
     }
   }
@@ -127,12 +130,8 @@ export default function CustomersPage() {
     if (selectedItems.length === 0) return
     
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
-    const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
     
-    // TODO: Open bulk edit modal
-    console.log('Bulk editing customers:', selectedItems)
-    
-    alert("Pesan")
+    toast(`Bulk edit untuk ${selectedItems.length} pelanggan akan segera tersedia`, { icon: 'ℹ️' })
   }
 
   // Individual action handlers
@@ -150,19 +149,17 @@ export default function CustomersPage() {
       try {
         const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
         if (!response.ok) throw new Error('Failed')
-        alert("Pesan")
+        toast.success('Pelanggan berhasil dihapus')
         fetchCustomers()
       } catch (error: any) {
         console.error('Error:', error)
-        alert("Pesan")
+        toast.error('Gagal menghapus pelanggan')
       }
     }
   }
 
   const handleViewCustomer = (customer: any) => {
-    console.log('View customer details:', customer)
-    // TODO: Open customer detail modal or navigate to customer detail page
-    alert("Pesan")
+    router.push(`/customers/${customer.id}`)
   }
 
   // Breadcrumb component

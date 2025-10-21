@@ -1,43 +1,20 @@
-import { formatCurrency } from '@/shared/utils/currency'
-
 /**
  * Smart Automation Engine for UMKM F&B
- * Updated to use the new modular automation system
- * 
- * This file now imports and re-exports the new modular automation engine
- * while preserving backwards compatibility with existing imports.
+ * Re-exports from modular automation system for backward compatibility
  */
+
+import { automationLogger } from './logger'
 
 // Re-export everything from the new modular automation system
 export {
-  AutomationEngine,
-  PricingAutomation,
-  InventoryAutomation,
-  ProductionAutomation,
-  FinancialAutomation,
-  NotificationSystem,
-  defaultAutomationEngine
+  AutomationEngine, defaultAutomationEngine, FinancialAutomation, InventoryAutomation, NotificationSystem, PricingAutomation, ProductionAutomation, UMKM_CONFIG
 } from './automation/index'
 
-// Re-export types separately
+// Re-export types
 export type { AutomationConfig } from './automation/types'
 
-// Import the default automation engine for backwards compatibility
+// Import for backward compatibility
 import { defaultAutomationEngine } from './automation/index'
-import type { AutomationConfig } from './automation/types'
-
-// Default configuration for Indonesian UMKM F&B (preserved for compatibility)
-export const UMKM_CONFIG: AutomationConfig = {
-  defaultProfitMargin: 60, // 60% margin - typical for F&B
-  minimumProfitMargin: 30, // 30% minimum
-  maximumProfitMargin: 150, // 150% for premium products
-  autoReorderDays: 7, // Reorder 7 days before stock out
-  safetyStockMultiplier: 1.5, // 50% safety stock
-  productionLeadTime: 4, // 4 hours production buffer
-  batchOptimizationThreshold: 5, // Minimum 5 units per batch
-  lowProfitabilityThreshold: 20, // Alert if margin below 20%
-  cashFlowWarningDays: 7 // Cash flow warning 7 days ahead
-}
 
 // Export the default instance for backwards compatibility
 export const automationEngine = defaultAutomationEngine
@@ -48,7 +25,7 @@ export const automationEngine = defaultAutomationEngine
  */
 
 // Event types untuk automation triggers
-export type WorkflowEvent = 
+export type WorkflowEvent =
   | 'order.status_changed'
   | 'order.completed'
   | 'order.cancelled'
@@ -71,7 +48,7 @@ export class WorkflowAutomation {
   private eventQueue: WorkflowEventData[] = []
   private isProcessing = false
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): WorkflowAutomation {
     if (!WorkflowAutomation.instance) {
@@ -89,11 +66,11 @@ export class WorkflowAutomation {
       timestamp: new Date().toISOString()
     }
 
-    console.log('🤖 Workflow Automation: Event triggered', event.event, event.entityId)
-    
+    automationLogger.info('Workflow event triggered', { event: event.event, entityId: event.entityId })
+
     // Add to queue for processing
     this.eventQueue.push(event)
-    
+
     // Process queue if not already processing
     if (!this.isProcessing) {
       await this.processEventQueue()
@@ -122,7 +99,7 @@ export class WorkflowAutomation {
    * Process single workflow event
    */
   private async processEvent(event: WorkflowEventData) {
-    console.log(`🎯 Processing workflow event: ${event.event}`);
+    automationLogger.debug('Processing workflow event', { event: event.event })
 
     try {
       switch (event.event) {
@@ -145,10 +122,10 @@ export class WorkflowAutomation {
           await this.handleHPPRecalculationNeeded(event)
           break
         default:
-          console.log(`No handler for event: ${event.event}`)
+          automationLogger.warn('No handler for event', { event: event.event })
       }
     } catch (error: any) {
-      console.error(`❌ Error processing event ${event.event}:`, error)
+      automationLogger.error('Error processing event', { event: event.event, error })
     }
   }
 
@@ -158,7 +135,7 @@ export class WorkflowAutomation {
    */
   private async handleOrderCompleted(event: WorkflowEventData) {
     const orderId = event.entityId
-    console.log('📦 Processing order completion workflow for:', orderId)
+    automationLogger.info('Processing order completion workflow', { orderId })
 
     // Import supabase inside function to avoid potential issues
     const { supabase } = await import('@/lib/supabase')
@@ -185,11 +162,11 @@ export class WorkflowAutomation {
         .single()
 
       if (orderError || !order) {
-        console.error('Order not found:', orderError)
+        automationLogger.error('Order not found', { orderError })
         return
       }
 
-      console.log(`Processing completed order: ${order.order_no}`)
+      automationLogger.debug('Processing completed order', { orderNo: order.order_no })
 
       // 2. Update inventory stock
       await this.updateInventoryFromOrder(order, supabase)
@@ -203,10 +180,10 @@ export class WorkflowAutomation {
       }
 
       // 5. Send completion notification
-      console.log(`✅ Order completion workflow finished for ${order.order_no}`);
+      automationLogger.info('Order completion workflow finished', { orderNo: order.order_no })
 
     } catch (error: any) {
-      console.error('Error in order completion workflow:', error)
+      automationLogger.error('Error in order completion workflow', { error })
     }
   }
 
@@ -214,13 +191,13 @@ export class WorkflowAutomation {
    * Update inventory stock berdasarkan order items
    */
   private async updateInventoryFromOrder(order: any, supabase: any) {
-    console.log('📊 Updating inventory from order items...')
+    automationLogger.debug('Updating inventory from order items')
 
     for (const orderItem of order.order_items || []) {
       const recipe = orderItem.recipe
       if (!recipe || !recipe.recipe_ingredients) continue
 
-      console.log(`Processing recipe: ${recipe.name} (${orderItem.quantity} qty)`)
+      automationLogger.debug('Processing recipe', { recipeName: recipe.name, quantity: orderItem.quantity })
 
       for (const recipeIngredient of recipe.recipe_ingredients) {
         const ingredient = recipeIngredient.ingredient
@@ -230,14 +207,14 @@ export class WorkflowAutomation {
         // Update ingredient stock
         const { error: updateError } = await supabase
           .from('ingredients')
-          .update({ 
+          .update({
             current_stock: newStock,
             updated_at: new Date().toISOString()
           })
           .eq('id', ingredient.id)
 
         if (updateError) {
-          console.error('Error updating ingredient stock:', updateError)
+          automationLogger.error('Error updating ingredient stock', { updateError })
           continue
         }
 
@@ -257,7 +234,11 @@ export class WorkflowAutomation {
             notes: `Used for order ${order.order_no} - ${recipe.name} (${orderItem.quantity} units)`
           })
 
-        console.log(`✅ Updated ${ingredient.name}: ${ingredient.current_stock ?? 0} → ${newStock}`)
+        automationLogger.debug('Updated ingredient stock', {
+          name: ingredient.name,
+          oldStock: ingredient.current_stock ?? 0,
+          newStock
+        })
 
         // Check for low stock dan trigger alert
         if (newStock <= (ingredient.min_stock ?? 0) && newStock > 0) {
@@ -280,7 +261,7 @@ export class WorkflowAutomation {
    * Create financial record untuk completed order
    */
   private async createFinancialRecordFromOrder(order: any, supabase: any) {
-    console.log('💰 Creating financial record for completed order...')
+    automationLogger.debug('Creating financial record for completed order')
 
     try {
       // Create income record
@@ -298,12 +279,12 @@ export class WorkflowAutomation {
         })
 
       if (financialError) {
-        console.error('Error creating financial record:', financialError)
+        automationLogger.error('Error creating financial record', { financialError })
       } else {
-        console.log(`✅ Created financial record: +${formatCurrency(order.total_amount)}`)
+        automationLogger.info('Created financial record', { amount: order.total_amount })
       }
     } catch (error: any) {
-      console.error('Error in createFinancialRecordFromOrder:', error)
+      automationLogger.error('Error in createFinancialRecordFromOrder', { error })
     }
   }
 
@@ -313,7 +294,7 @@ export class WorkflowAutomation {
   private async updateCustomerStats(order: any, supabase: any) {
     if (!order.customer_id) return
 
-    console.log('👤 Updating customer statistics...')
+    automationLogger.debug('Updating customer statistics')
 
     try {
       const { data: customer } = await supabase
@@ -338,10 +319,14 @@ export class WorkflowAutomation {
           })
           .eq('id', order.customer_id)
 
-        console.log(`✅ Updated customer stats: orders=${newTotalOrders}, spent=Rp${newTotalSpent.toLocaleString()}`)
+        automationLogger.info('Updated customer stats', {
+          customerId: order.customer_id,
+          totalOrders: newTotalOrders,
+          totalSpent: newTotalSpent
+        })
       }
     } catch (error: any) {
-      console.error('Error updating customer stats:', error)
+      automationLogger.error('Error updating customer stats', { error })
     }
   }
 
@@ -354,14 +339,15 @@ export class WorkflowAutomation {
     const currentStock = event.data.currentStock
     const severity = event.data.severity
 
-    console.log(`📉 Handling low stock for ${ingredient.name}: ${currentStock} ${ingredient.unit}`)
+    automationLogger.warn('Low stock alert', {
+      ingredientName: ingredient.name,
+      currentStock,
+      unit: ingredient.unit,
+      severity
+    })
 
-    // Create notification in database (simplified)
-    // In real app, would integrate with notification system
-    console.log(`🔔 ALERT: ${ingredient.name} stock rendah (${currentStock} ${ingredient.unit})!`)
-    
     if (severity === 'critical') {
-      console.log('🚨 CRITICAL: Segera restock sebelum kehabisan total!')
+      automationLogger.error('Critical stock level', { ingredientName: ingredient.name })
     }
 
     // Auto-generate reorder suggestion
@@ -369,8 +355,12 @@ export class WorkflowAutomation {
       ingredient.min_stock ?? 0 * 2, // 2x minimum stock
       50 // Minimum reorder quantity
     )
-    
-    console.log(`💡 Suggested reorder: ${suggestedQuantity} ${ingredient.unit}`);
+
+    automationLogger.info('Suggested reorder', {
+      ingredientName: ingredient.name,
+      quantity: suggestedQuantity,
+      unit: ingredient.unit
+    })
   }
 
   /**
@@ -378,7 +368,7 @@ export class WorkflowAutomation {
    * Otomatis: restore inventory (if needed), update financial records
    */
   private async handleOrderCancelled(event: WorkflowEventData) {
-    console.log('❌ Processing order cancellation workflow...', event.entityId)
+    automationLogger.info('Processing order cancellation workflow', { entityId: event.entityId })
     // Implementation for order cancellation workflow
     // This would restore inventory if order was already in production
   }
@@ -389,16 +379,20 @@ export class WorkflowAutomation {
    */
   private async handleIngredientPriceChanged(event: WorkflowEventData) {
     const { ingredientId, oldPrice, newPrice, priceChange, affectedRecipes } = event.data
-    
-    console.log(`💰 Processing ingredient price change workflow: ${ingredientId}`);
-    console.log(`Price change: ${priceChange.toFixed(2)}% (${oldPrice} → ${newPrice})`)
+
+    automationLogger.info('Processing ingredient price change workflow', {
+      ingredientId,
+      oldPrice,
+      newPrice,
+      priceChange: priceChange.toFixed(2)
+    })
 
     // Generate smart notifications for significant price changes
     if (Math.abs(priceChange) > 10) {
       try {
         // Import smart notification system
         const { smartNotificationSystem } = await import('@/lib/smart-notifications')
-        
+
         smartNotificationSystem.addNotification({
           type: priceChange > 0 ? 'warning' : 'info',
           category: 'financial',
@@ -409,14 +403,17 @@ export class WorkflowAutomation {
           actionLabel: 'Review HPP'
         })
       } catch (error: any) {
-        console.log('Smart notification system not available:', error)
+        automationLogger.debug('Smart notification system not available', { error })
       }
     }
 
     // Trigger pricing review for high-impact changes
     if (Math.abs(priceChange) > 15 && affectedRecipes?.length > 0) {
-      console.log(`🎯 High-impact price change detected, triggering pricing review workflow`)
-      
+      automationLogger.warn('High-impact price change detected', {
+        priceChange,
+        affectedRecipesCount: affectedRecipes.length
+      })
+
       // Schedule pricing review task
       setTimeout(async () => {
         await this.triggerEvent({
@@ -439,18 +436,21 @@ export class WorkflowAutomation {
    */
   private async handleOperationalCostChanged(event: WorkflowEventData) {
     const { costId, costName, oldAmount, newAmount } = event.data
-    
-    console.log(`🏭 Processing operational cost change workflow: ${costName}`);
-    console.log(`Cost change: ${oldAmount} → ${newAmount}`)
+
+    automationLogger.info('Processing operational cost change workflow', {
+      costName,
+      oldAmount,
+      newAmount
+    })
 
     try {
       // Import smart notification system
       const { smartNotificationSystem } = await import('@/lib/smart-notifications')
-      
+
       // Operational cost changes affect ALL recipes, so generate comprehensive alert
       smartNotificationSystem.addNotification({
         type: 'info',
-        category: 'financial', 
+        category: 'financial',
         priority: 'medium',
         title: 'Biaya Operasional Diperbarui',
         message: `${costName} berubah dari ${formatCurrency(oldAmount)} ke ${formatCurrency(newAmount)}. Semua HPP otomatis diperbarui.`,
@@ -464,7 +464,7 @@ export class WorkflowAutomation {
         smartNotificationSystem.addNotification({
           type: 'warning',
           category: 'financial',
-          priority: 'high', 
+          priority: 'high',
           title: 'Review Pricing Strategy Disarankan',
           message: `Perubahan biaya operasional ${Math.abs(costChange).toFixed(1)}% mempengaruhi seluruh profitabilitas. Pertimbangkan review harga jual.`,
           actionUrl: '/hpp-simple?tab=pricing_review',
@@ -472,7 +472,7 @@ export class WorkflowAutomation {
         })
       }
     } catch (error: any) {
-      console.log('Smart notification system not available:', error)
+      automationLogger.debug('Smart notification system not available', { error: error.message })
     }
   }
 
@@ -482,13 +482,13 @@ export class WorkflowAutomation {
    */
   private async handleHPPRecalculationNeeded(event: WorkflowEventData) {
     const { reason, affectedRecipes } = event.data
-    
-    console.log(`🧮 Processing HPP recalculation workflow: ${reason}`);
+
+    automationLogger.info('Processing HPP recalculation workflow', { reason });
 
     try {
       // Import smart notification system
       const { smartNotificationSystem } = await import('@/lib/smart-notifications')
-      
+
       // Notify about batch recalculation start
       smartNotificationSystem.addNotification({
         type: 'info',
@@ -517,7 +517,7 @@ export class WorkflowAutomation {
         this.generateHPPBusinessInsights(affectedRecipes || [])
       }, 10000) // 10 second simulation
     } catch (error: any) {
-      console.log('Smart notification system not available:', error)
+      automationLogger.debug('Smart notification system not available', { error })
     }
   }
 
@@ -555,7 +555,7 @@ export class WorkflowAutomation {
         }, (index + 1) * 2000) // Stagger notifications
       })
     }).catch(error => {
-      console.log('Smart notification system not available:', error)
+      automationLogger.debug('Smart notification system not available', { error })
     })
   }
 }
@@ -565,8 +565,8 @@ export const workflowAutomation = WorkflowAutomation.getInstance()
 
 // Helper function untuk trigger automation dari komponen lain
 export const triggerWorkflow = async (
-  event: WorkflowEvent, 
-  entityId: string, 
+  event: WorkflowEvent,
+  entityId: string,
   data: any = {}
 ) => {
   return workflowAutomation.triggerEvent({

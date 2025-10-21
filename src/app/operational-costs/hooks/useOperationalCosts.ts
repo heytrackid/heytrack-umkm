@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
 import { useLoading } from '@/hooks/useLoading'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 // Types and constants embedded in hook file for now
 export interface OperationalCost {
@@ -113,7 +114,7 @@ function getCategoryInfo(categoryId: string) {
 }
 
 // Export constants and utility functions for use in components
-export { costCategories, frequencies, getTotalMonthlyCosts, getCategoryInfo, calculateMonthlyCost }
+export { calculateMonthlyCost, costCategories, frequencies, getCategoryInfo, getTotalMonthlyCosts }
 
 interface UseOperationalCostsReturn {
   // State
@@ -195,7 +196,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       setCosts(transformedCosts)
     } catch (error) {
       console.error('Error fetching costs:', error)
-      alert('Gagal memuat data biaya operasional')
+      toast.error('Gagal memuat data biaya operasional')
     } finally {
       stopLoading(LOADING_KEYS.LOAD_COSTS)
     }
@@ -212,7 +213,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
     // Validate form data
     const errors = validateOperationalCost(newCost)
     if (errors.length > 0) {
-      alert(errors.join('\n'))
+      toast.error(errors.join(', '))
       return
     }
 
@@ -228,7 +229,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
         if (!response.ok) throw new Error('Failed to create cost')
 
-        alert('Biaya operasional berhasil ditambahkan!')
+        toast.success('Biaya operasional berhasil ditambahkan!')
       } else if (currentView === 'edit' && editingCost) {
         // Update existing cost
         const response = await fetch('/api/operational-costs', {
@@ -239,7 +240,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
         if (!response.ok) throw new Error('Failed to update cost')
 
-        alert('Biaya operasional berhasil diperbarui!')
+        toast.success('Biaya operasional berhasil diperbarui!')
       }
 
       // Refresh the list and reset form
@@ -248,7 +249,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       setCurrentView('list')
     } catch (error) {
       console.error('Error saving cost:', error)
-      alert('Gagal menyimpan biaya operasional')
+      toast.error('Gagal menyimpan biaya operasional')
     } finally {
       setIsLoading(false)
     }
@@ -277,10 +278,10 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
       // Refresh the list
       await fetchCosts()
-      alert('Biaya operasional berhasil dihapus!')
+      toast.success('Biaya operasional berhasil dihapus!')
     } catch (error) {
       console.error('Error deleting cost:', error)
-      alert('Gagal menghapus biaya operasional')
+      toast.error('Gagal menghapus biaya operasional')
     } finally {
       setIsLoading(false)
     }
@@ -309,10 +310,10 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       // Refresh the list and clear selection
       await fetchCosts()
       setSelectedItems([])
-      alert(`${selectedItems.length} biaya operasional berhasil dihapus!`)
+      toast.success(`${selectedItems.length} biaya operasional berhasil dihapus!`)
     } catch (error) {
       console.error('Error deleting costs:', error)
-      alert('Gagal menghapus biaya operasional')
+      toast.error('Gagal menghapus biaya operasional')
     } finally {
       setIsLoading(false)
     }
@@ -323,7 +324,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
     const existingNames = new Set(costs.map(c => c.name?.toLowerCase()).filter(Boolean))
     const template = getQuickSetupTemplate().filter(t => t.name && !existingNames.has(t.name.toLowerCase()))
     if (template.length === 0) {
-      alert('Semua template sudah ditambahkan')
+      toast('Semua template sudah ditambahkan', { icon: 'ℹ️' })
       return
     }
 
@@ -344,10 +345,10 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
       // Refresh the list
       await fetchCosts()
-      alert('Template berhasil ditambahkan!')
+      toast.success('Template berhasil ditambahkan!')
     } catch (error) {
       console.error('Error adding template:', error)
-      alert('Gagal menambahkan template')
+      toast.error('Gagal menambahkan template')
     } finally {
       setIsLoading(false)
     }

@@ -1,8 +1,8 @@
 'use client'
 
-import { lazy, Suspense, ComponentType } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { lazy, Suspense } from 'react'
 
 // Chart Loading Skeleton Component
 const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, height?: string }) => (
@@ -205,7 +205,10 @@ export const useChartPerformance = () => {
       
       const measure = performance.getEntriesByName(`chart-${chartType}-duration`)[0]
       if (measure && measure.duration > 1000) {
-        console.warn(`⚠️ Slow chart rendering: ${chartType} took ${measure.duration.toFixed(2)}ms`)
+        logger.warn('Slow chart rendering', { 
+          chartType, 
+          duration: measure.duration.toFixed(2) 
+        })
       }
     }
   }

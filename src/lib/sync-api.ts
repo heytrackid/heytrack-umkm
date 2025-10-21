@@ -1,11 +1,10 @@
 import { supabase } from '@/lib/supabase'
-import type { 
-  SyncEvent, 
-  SyncEventInsert, 
-  SystemMetric, 
-  SystemMetricInsert, 
-  InventoryStockLog,
-  InventoryStockLogInsert 
+import type {
+    InventoryStockLog,
+    InventoryStockLogInsert,
+    SyncEvent,
+    SystemMetric,
+    SystemMetricInsert
 } from '@/types'
 
 // Sync Events API
@@ -16,7 +15,7 @@ export const syncEventApi = {
       .from('sync_events')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(options.limit)
+      .limit(limit)
     
     if (error) throw error
     return data as SyncEvent[]
@@ -29,7 +28,7 @@ export const syncEventApi = {
       .select('*')
       .eq('event_type', eventType)
       .order('created_at', { ascending: false })
-      .limit(options.limit)
+      .limit(limit)
     
     if (error) throw error
     return data as SyncEvent[]
@@ -43,7 +42,7 @@ export const syncEventApi = {
       .eq('entity_type', entityType)
       .eq('entity_id', entityId)
       .order('created_at', { ascending: false })
-      .limit(options.limit)
+      .limit(limit)
     
     if (error) throw error
     return data as SyncEvent[]
@@ -53,7 +52,7 @@ export const syncEventApi = {
   async createEvent(eventData: any) {
     const { data, error } = await supabase
       .from('sync_events')
-      .insert(data)
+      .insert(eventData)
       .select('*')
       .single()
     
@@ -112,7 +111,7 @@ export const systemMetricsApi = {
   async recordMetric(metric: SystemMetricInsert) {
     const { data, error } = await supabase
       .from('system_metrics')
-      .insert(data)
+      .insert(metric)
       .select('*')
       .single()
     
@@ -127,7 +126,7 @@ export const systemMetricsApi = {
       .select('*')
       .eq('metric_type', 'sync_health')
       .order('recorded_at', { ascending: false })
-      .limit(options.limit)
+      .limit(1)
       .single()
     
     if (error && error.code !== 'PGRST116') throw error
@@ -138,7 +137,7 @@ export const systemMetricsApi = {
 // Inventory Stock Logs API
 export const inventoryStockLogsApi = {
   // Get stock logs for ingredient
-  async getLogsForIngredient(ingredientId: string) {
+  async getLogsForIngredient(ingredientId: string, limit = 50) {
     const { data, error } = await supabase
       .from('inventory_stock_logs')
       .select(`
@@ -147,7 +146,7 @@ export const inventoryStockLogsApi = {
       `)
       .eq('ingredient_id', ingredientId)
       .order('created_at', { ascending: false })
-      .limit(options.limit)
+      .limit(limit)
     
     if (error) throw error
     return data
@@ -162,7 +161,7 @@ export const inventoryStockLogsApi = {
         ingredient:ingredients(name)
       `)
       .order('created_at', { ascending: false })
-      .limit(options.limit)
+      .limit(limit)
     
     if (error) throw error
     return data
@@ -172,7 +171,7 @@ export const inventoryStockLogsApi = {
   async logStockChange(log: InventoryStockLogInsert) {
     const { data, error } = await supabase
       .from('inventory_stock_logs')
-      .insert(data)
+      .insert(log)
       .select('*')
       .single()
     
@@ -200,7 +199,7 @@ export const syncDashboardApi = {
             )
           `)
           .order('created_at', { ascending: false })
-          .limit(options.limit)
+          .limit(5)
       ])
 
       return {

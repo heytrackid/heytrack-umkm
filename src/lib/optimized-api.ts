@@ -14,7 +14,7 @@ class APICache {
   private cache = new Map<string, CacheEntry>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
 
-  set(key, data) {
+  set(key: string, data: any, ttl: number = this.DEFAULT_TTL) {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -22,7 +22,7 @@ class APICache {
     })
   }
 
-  get(key): any | null {
+  get(key: string): any | null {
     const entry = this.cache.get(key)
     if (!entry) return null
 
@@ -65,7 +65,7 @@ class RequestDeduplicator {
       this.pendingRequests.delete(key)
     })
 
-    this.pendingRequests.set(key, data)
+    this.pendingRequests.set(key, promise)
     return promise
   }
 }
@@ -89,7 +89,7 @@ class OptimizedAPIClient {
     
     // Check cache first (unless explicitly skipped)
     if (!cacheOptions?.skipCache) {
-      const cached = this.cache.get(key)
+      const cached = this.cache.get(cacheKey)
       if (cached) {
         return cached
       }
@@ -113,7 +113,7 @@ class OptimizedAPIClient {
 
       // Cache the result
       if (!cacheOptions?.skipCache && options.method !== 'POST' && options.method !== 'PUT' && options.method !== 'DELETE') {
-        this.cache.set(key, data)
+        this.cache.set(cacheKey, data, cacheOptions?.ttl)
       }
 
       // Invalidate related cache patterns on mutations
@@ -146,7 +146,7 @@ class OptimizedAPIClient {
   }
 
   // Mutation methods with cache invalidation
-  async createIngredient(ingredient) {
+  async createIngredient(data: any) {
     return this.fetch('/api/ingredients', {
       method: 'POST',
       body: JSON.stringify(data)
@@ -156,7 +156,7 @@ class OptimizedAPIClient {
     })
   }
 
-  async updateIngredient(id, updates) {
+  async updateIngredient(id: string, data: any) {
     return this.fetch(`/api/ingredients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
@@ -215,7 +215,7 @@ class OptimizedAPIClient {
 export const optimizedAPI = new OptimizedAPIClient()
 
 // React hook for using optimized API with loading states
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 export function useOptimizedAPI<T>(
   apiCall: () => Promise<T>,

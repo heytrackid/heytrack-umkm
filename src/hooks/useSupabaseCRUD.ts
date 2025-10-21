@@ -1,7 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
 import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types';
-import { useSupabaseData as useRealtimeData } from './useSupabaseData';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type Tables = Database['public']['Tables'];
 type ExtendedTableNames = keyof Tables | 'production_batches' | 'quality_checks' | 'production_equipment' | 'production_staff' | 'ingredient_allocations' | 'order_payments' | 'OrderItem' | 'OrderPayment' | 'ProductionBatch' | 'QualityCheck' | 'ProductionEquipment' | 'ProductionStaff' | 'IngredientAllocation' | 'Order';
@@ -45,32 +44,38 @@ function useSupabaseDataInternal<T = any>(
   const [loading, setLoading] = useState(!options?.initial);
   const [error, setError] = useState<string | null>(null);
 
+  // Memoize options to prevent infinite loops
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
   const refetch = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const supabase = createSupabaseClient();
       const actualTable = getActualTableName(table as any);
       let query = supabase.from(actualTable).select('*');
 
       // Apply filters
-      if (options?.filter) {
-        Object.entries(options.filter).forEach(([key, value]) => {
+      if (optionsRef.current?.filter) {
+        Object.entries(optionsRef.current.filter).forEach(([key, value]) => {
           query = query.eq(key, value);
         });
       }
 
       // Apply ordering
-      if (options?.orderBy) {
-        query = query.order(options.orderBy.column, {
-          ascending: options.orderBy.ascending ?? true,
+      if (optionsRef.current?.orderBy) {
+        query = query.order(optionsRef.current.orderBy.column, {
+          ascending: optionsRef.current.orderBy.ascending ?? true,
         });
       }
 
       // Apply limit
-      if (options?.limit) {
-        query = query.limit(options.limit);
+      if (optionsRef.current?.limit) {
+        query = query.limit(optionsRef.current.limit);
       }
 
       const { data: result, error } = await query;
@@ -81,12 +86,12 @@ function useSupabaseDataInternal<T = any>(
     } finally {
       setLoading(false);
     }
-  }, [table, options]);
+  }, [table]);
 
   useEffect(() => {
     const supabase = createSupabaseClient();
     const actualTable = getActualTableName(table as any);
-    
+
     // Initial fetch – skip if we have initial and refetchOnMount === false
     if (!(options?.initial && options.initial.length > 0 && options?.refetchOnMount === false)) {
       refetch();
@@ -128,7 +133,7 @@ function useSupabaseDataInternal<T = any>(
     return () => {
       if (channel) supabase.removeChannel(channel);
     };
-  }, [table, refetch, options?.initial, options?.refetchOnMount, options?.realtime]);
+  }, [table, refetch]);
 
   return { data, loading, error, refetch };
 }
@@ -148,24 +153,24 @@ export function useSupabaseMutation<T = any>(
   const create = async (data: any) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
+
       const response = await fetch(`/api/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok || !result.success) {
         throw new Error(result.error || result.errors?.join(', ') || 'Failed to create record');
       }
-      
+
       onSuccess?.();
       return result.data;
     } catch (err) {
@@ -181,24 +186,24 @@ export function useSupabaseMutation<T = any>(
   const update = async (id: string, data: any) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
+
       const response = await fetch(`/api/${endpoint}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok || !result.success) {
         throw new Error(result.error || result.errors?.join(', ') || 'Failed to update record');
       }
-      
+
       onSuccess?.();
       return result.data;
     } catch (err) {
@@ -214,22 +219,22 @@ export function useSupabaseMutation<T = any>(
   const remove = async (id: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
+
       const response = await fetch(`/api/${endpoint}/${id}`, {
         method: 'DELETE',
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok || !result.success) {
         throw new Error(result.error || result.errors?.join(', ') || 'Failed to delete record');
       }
-      
+
       onSuccess?.();
       return true;
     } catch (err) {
@@ -263,22 +268,22 @@ export function useSupabaseRecord<T = any>(
 
   const refetch = useCallback(async () => {
     if (!id) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
+
       const response = await fetch(`/api/${endpoint}/${id}`);
       const result = await response.json();
-      
+
       if (!response.ok || !result.success) {
         throw new Error(result.error || result.errors?.join(', ') || 'Failed to fetch record');
       }
-      
+
       setData(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -309,13 +314,13 @@ export function useSupabaseCRUD<T = any, TInsert = any, TUpdate = any>(
   // Handle both string and object configurations
   const tableName = typeof table === 'string' ? table : table.table;
   const config = typeof table === 'object' ? table : undefined;
-  
+
   // Use data hook for fetching
   const dataHook = useSupabaseDataInternal(tableName as any, options);
-  
+
   // Use mutation hook for operations
   const mutationHook = useSupabaseMutation(tableName as any, dataHook.refetch);
-  
+
   return {
     ...dataHook,
     ...mutationHook,
@@ -407,22 +412,22 @@ export function useSupabaseBulkOperations<T = any>(
   const bulkCreate = async (items: any[]) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
-      const promises = items.map(item => 
+
+      const promises = items.map(item =>
         fetch(`/api/${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(item),
         })
       );
-      
+
       const responses = await Promise.all(promises);
-      
+
       // Check if all requests were successful
       const results = await Promise.all(
         responses.map(async (response) => {
@@ -433,7 +438,7 @@ export function useSupabaseBulkOperations<T = any>(
           return response.json();
         })
       );
-      
+
       onSuccess?.();
       return results;
     } catch (err) {
@@ -449,22 +454,22 @@ export function useSupabaseBulkOperations<T = any>(
   const bulkUpdate = async (updates: { id: string; data: any }[]) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
-      const promises = updates.map(({ id, data }) => 
+
+      const promises = updates.map(({ id, data }) =>
         fetch(`/api/${endpoint}/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         })
       );
-      
+
       const responses = await Promise.all(promises);
-      
+
       // Check if all requests were successful
       const results = await Promise.all(
         responses.map(async (response) => {
@@ -475,7 +480,7 @@ export function useSupabaseBulkOperations<T = any>(
           return response.json();
         })
       );
-      
+
       onSuccess?.();
       return results;
     } catch (err) {
@@ -491,25 +496,25 @@ export function useSupabaseBulkOperations<T = any>(
   const bulkDelete = async (ids: string[]) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Convert table name to API endpoint format
       const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
-      
-      const promises = ids.map(id => 
+
+      const promises = ids.map(id =>
         fetch(`/api/${endpoint}/${id}`, { method: 'DELETE' })
       );
-      
+
       const responses = await Promise.all(promises);
-      
+
       // Check if all requests were successful
       responses.forEach((response, index: number) => {
         if (!response.ok) {
           throw new Error(`Failed to delete record with id: ${ids[index]}`);
         }
       });
-      
+
       onSuccess?.();
       return true;
     } catch (err) {
@@ -551,7 +556,7 @@ export function useFormValidation<T>(
   const handleChange = (field: string, value: any) => {
     const key = field as keyof T;
     setValues(prev => ({ ...prev, [key]: value }));
-    
+
     // Validate if field has been touched
     if (touched[key]) {
       const error = validateField(key, value);
@@ -569,7 +574,7 @@ export function useFormValidation<T>(
   const validateAll = () => {
     const newErrors: Partial<Record<keyof T, string>> = {};
     const newTouched: Partial<Record<keyof T, boolean>> = {};
-    
+
     Object.keys(validationRules).forEach(field => {
       const key = field as keyof T;
       newTouched[key] = true;
@@ -578,10 +583,10 @@ export function useFormValidation<T>(
         newErrors[key] = error;
       }
     });
-    
+
     setTouched(newTouched);
     setErrors(newErrors);
-    
+
     return Object.keys(newErrors).length === 0;
   };
 

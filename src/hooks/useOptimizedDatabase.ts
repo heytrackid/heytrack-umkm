@@ -1,12 +1,19 @@
+/**
+ * @deprecated This file is deprecated. Use @/hooks/useSupabase with useMemo for optimization.
+ * See MIGRATION_GUIDE.md for migration instructions.
+ */
+
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { enhancedApiClient } from '@/lib/enhanced-api'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 // Cache for hook results to prevent unnecessary re-renders
 const hookCache = new Map<string, any>()
 
-// Optimized hook for ingredients with memoization
+/**
+ * @deprecated Use useIngredients from @/hooks/useSupabase with useMemo for computed values
+ */
 export function useOptimizedIngredients() {
   const [data, setData] = useState<any[] | null>(null)
   const [loading, setLoading] = useState(true)

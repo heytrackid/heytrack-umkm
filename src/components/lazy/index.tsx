@@ -1,7 +1,7 @@
 'use client'
 
-import { lazy, Suspense, ComponentType, ReactNode } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import { ComponentType, lazy, ReactNode, Suspense } from 'react'
 
 // Loading fallback component
 const LoadingFallback = ({ height ="h-32" }: { height?: string }) => (
@@ -157,9 +157,9 @@ export const preloadChartBundle = async () => {
       import('@/components').then(m => m.FinancialTrendsChart),
       import('@/components').then(m => m.InventoryTrendsChart),
     ])
-    console.log('✅ Chart bundle preloaded')
+    logger.debug('Chart bundle preloaded')
   } catch (error) {
-    console.warn('⚠️ Failed to preload chart bundle:', error)
+    logger.warn('Failed to preload chart bundle', { error })
   }
 }
 
@@ -167,9 +167,9 @@ export const preloadChartBundle = async () => {
 export const preloadTableBundle = async () => {
   try {
     await import('@/components').then(m => m.SimpleDataTable)
-    console.log('✅ Table bundle preloaded')
+    logger.debug('Table bundle preloaded')
   } catch (error) {
-    console.warn('⚠️ Failed to preload table bundle:', error)
+    logger.warn('Failed to preload table bundle', { error })
   }
 }
 
@@ -193,11 +193,11 @@ export const preloadModalComponent = async (modalType: string) => {
         // Add order form if exists
         break
       default:
-        console.warn('Unknown modal type:', modalType)
+        logger.warn('Unknown modal type', { modalType })
     }
-    console.log('✅ Modal component preloaded:', modalType)
+    logger.debug('Modal component preloaded', { modalType })
   } catch (error) {
-    console.warn('⚠️ Failed to preload modal:', modalType, error)
+    logger.warn('Failed to preload modal', { modalType, error })
   }
 }
 
@@ -255,7 +255,7 @@ export const globalLazyLoadingUtils = {
     })
 
     await Promise.all(preloadPromises)
-    console.log(`✅ Preloaded components for route: ${route}`)
+    logger.debug('Preloaded components for route', { route })
   },
 
   // Preload all heavy components
@@ -265,9 +265,9 @@ export const globalLazyLoadingUtils = {
         preloadChartBundle(),
         preloadTableBundle(),
       ])
-      console.log('✅ All heavy components preloaded')
+      logger.debug('All heavy components preloaded')
     } catch (error) {
-      console.warn('⚠️ Failed to preload all components:', error)
+      logger.warn('Failed to preload all components', { error })
     }
   },
 

@@ -1,46 +1,45 @@
 import type { Json } from './common'
 
 // Import enums
-import type { DatabaseEnums } from './enums'
-import type { UserRole, BusinessUnit, OrderStatus, PaymentMethod, ProductionStatus, RecordType, TransactionType } from './enums'
+import type { BusinessUnit, DatabaseEnums, OrderStatus, PaymentMethod, ProductionStatus, RecordType, TransactionType, UserRole } from './enums'
 
 // Import table types
+import type { UserProfilesTable } from './auth'
 import type { CustomersTable } from './customers'
-import type { SuppliersTable } from './suppliers'
+import type { DailySalesSummaryTable, FinancialRecordsTable } from './finance'
 import type {
-  IngredientsTable,
-  InventoryAlertsTable,
-  InventoryStatusView,
-  InventoryStockLogsTable,
-  StockTransactionsTable,
-  SupplierIngredientsTable,
-  UsageAnalyticsTable
+    IngredientsTable,
+    InventoryAlertsTable,
+    InventoryStatusView,
+    InventoryStockLogsTable,
+    StockTransactionsTable,
+    SupplierIngredientsTable,
+    UsageAnalyticsTable
 } from './inventory'
 import type { NotificationsTable } from './notifications'
 import type {
-  OrdersTable,
-  OrderItemsTable,
-  OrderSummaryView,
-  PaymentsTable
+    OrderItemsTable,
+    OrdersTable,
+    OrderSummaryView,
+    PaymentsTable
 } from './orders'
 import type {
-  ProductionsTable,
-  ProductionSchedulesTable,
-  RecipeAvailabilityView,
-  RecipeIngredientsTable,
-  RecipesTable
+    ProductionSchedulesTable,
+    ProductionsTable,
+    RecipeAvailabilityView,
+    RecipeIngredientsTable,
+    RecipesTable
 } from './recipes'
-import type { DailySalesSummaryTable, FinancialRecordsTable } from './finance'
-import type { SyncEventsTable, SystemMetricsTable, RecentSyncEventsView } from './sync'
-import type { UserProfilesTable } from './auth'
+import type { SuppliersTable } from './suppliers'
+import type { RecentSyncEventsView, SyncEventsTable, SystemMetricsTable } from './sync'
 
 // Import functions
 import type { DatabaseFunctions } from './functions'
 
 // Import additional types
-import type { UserProfile, SecurityContext, AuditFields } from './auth'
-import type { SyncEvent, SystemMetric } from './sync'
+import type { AuditFields, SecurityContext, UserProfile } from './auth'
 import type { InventoryStockLog } from './inventory'
+import type { SyncEvent, SystemMetric } from './sync'
 
 // Main Database type
 export type Database = {
@@ -54,6 +53,9 @@ export type Database = {
       ingredients: IngredientsTable
       inventory_alerts: InventoryAlertsTable
       inventory_stock_logs: InventoryStockLogsTable
+      inventory_reorder_rules: InventoryReorderRulesTable
+      ingredient_purchases: IngredientPurchasesTable
+      operational_costs: OperationalCostsTable
       notifications: NotificationsTable
       order_items: OrderItemsTable
       orders: OrdersTable
@@ -82,6 +84,7 @@ export type Database = {
           is_default: boolean | null
           created_at: string | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           id?: string
@@ -94,6 +97,7 @@ export type Database = {
           is_default?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           id?: string
@@ -106,6 +110,7 @@ export type Database = {
           is_default?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -150,8 +155,11 @@ export type Database = {
           subcategory: string | null
           tags: Json | null
           metadata: Json | null
+          reference_type: string | null
+          reference_id: string | null
           created_at: string | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
           id?: string
@@ -169,8 +177,11 @@ export type Database = {
           subcategory?: string | null
           tags?: Json | null
           metadata?: Json | null
+          reference_type?: string | null
+          reference_id?: string | null
           created_at?: string | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
           id?: string
@@ -188,8 +199,11 @@ export type Database = {
           subcategory?: string | null
           tags?: Json | null
           metadata?: Json | null
+          reference_type?: string | null
+          reference_id?: string | null
           created_at?: string | null
           updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -315,54 +329,20 @@ export type WhatsAppTemplatesTable = Database['public']['Tables']['whatsapp_temp
 
 // Re-export all types
 export type {
-  // Core types
-  DatabaseEnums,
-  DatabaseFunctions,
-  Json,
-  
-  // Enum types
-  UserRole,
-  BusinessUnit,
-  OrderStatus,
-  PaymentMethod,
-  ProductionStatus,
-  RecordType,
-  TransactionType,
-  
-  // Table types
-  CustomersTable,
-  SuppliersTable,
-  IngredientsTable,
-  InventoryAlertsTable,
-  InventoryStatusView,
-  InventoryStockLogsTable,
-  StockTransactionsTable,
-  SupplierIngredientsTable,
-  UsageAnalyticsTable,
-  OrdersTable,
-  OrderItemsTable,
-  OrderSummaryView,
-  PaymentsTable,
-  RecipesTable,
-  RecipeIngredientsTable,
-  ProductionSchedulesTable,
-  ProductionsTable,
-  RecipeAvailabilityView,
-  FinancialRecordsTable,
-  DailySalesSummaryTable,
-  NotificationsTable,
-  SyncEventsTable,
-  SystemMetricsTable,
-  RecentSyncEventsView,
-  UserProfilesTable,
-  
-  // Additional types
-  UserProfile,
-  SecurityContext,
-  AuditFields,
-  SyncEvent,
-  SystemMetric,
-  InventoryStockLog
+    AuditFields, BusinessUnit,
+    // Table types
+    CustomersTable, DailySalesSummaryTable,
+    // Core types
+    DatabaseEnums,
+    DatabaseFunctions, FinancialRecordsTable, IngredientsTable,
+    InventoryAlertsTable,
+    InventoryStatusView, InventoryStockLog, InventoryStockLogsTable, Json, NotificationsTable, OrderItemsTable, OrdersTable, OrderStatus, OrderSummaryView, PaymentMethod, PaymentsTable, ProductionSchedulesTable,
+    ProductionsTable, ProductionStatus, RecentSyncEventsView, RecipeAvailabilityView, RecipeIngredientsTable, RecipesTable, RecordType, SecurityContext, StockTransactionsTable,
+    SupplierIngredientsTable, SuppliersTable, SyncEvent, SyncEventsTable, SystemMetric, SystemMetricsTable, TransactionType, UsageAnalyticsTable,
+    // Additional types
+    UserProfile, UserProfilesTable,
+    // Enum types
+    UserRole
 }
 
 // Constants

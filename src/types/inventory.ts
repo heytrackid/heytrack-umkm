@@ -205,36 +205,48 @@ export type StockTransactionsTable = {
     created_by: string | null
     id: string
     ingredient_id: string
+    ingredient_name: string | null
+    unit: string | null
     notes: string | null
     quantity: number
     reference: string | null
-    total_price: number | null
+    reason: string | null
+    total_value: number | null
     type: TransactionType
     unit_price: number | null
+    user_id: string
   }
   Insert: {
     created_at?: string | null
     created_by?: string | null
     id?: string
     ingredient_id: string
+    ingredient_name?: string | null
+    unit?: string | null
     notes?: string | null
     quantity: number
     reference?: string | null
-    total_price?: number | null
+    reason?: string | null
+    total_value?: number | null
     type: TransactionType
     unit_price?: number | null
+    user_id: string
   }
   Update: {
     created_at?: string | null
     created_by?: string | null
     id?: string
     ingredient_id?: string
+    ingredient_name?: string | null
+    unit?: string | null
     notes?: string | null
     quantity?: number
     reference?: string | null
-    total_price?: number | null
+    reason?: string | null
+    total_value?: number | null
     type?: TransactionType
     unit_price?: number | null
+    user_id?: string
   }
   Relationships: [
     {

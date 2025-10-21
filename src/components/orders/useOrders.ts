@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Order, OrderFormData, OrderFilters, OrderStats, OrderStatus } from './types'
+import { useCallback, useEffect, useState } from 'react'
+import { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
 import { generateOrderNumber } from './utils'
 
 export function useOrders() {
@@ -184,7 +184,7 @@ export function useOrders() {
                 }))
               })
             })
-            console.log(`✅ Inventory auto-updated for ${inventoryAction}`)
+            dbLogger.info('Inventory auto-updated', { action: inventoryAction })
           }
         } catch (err) {
           console.error('⚠️ Failed to auto-update inventory for status change:', err)

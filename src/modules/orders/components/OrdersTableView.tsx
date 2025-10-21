@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import OrdersTable from '@/components/orders/orders-table'
-import { OrderForm } from './OrderForm'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useEffect, useState } from 'react'
 import { OrderDetailView } from './OrderDetailView'
+import { OrderForm } from './OrderForm'
 
 export function OrdersTableView() {
   const [orders, setOrders] = useState<any[]>([])
@@ -27,7 +27,7 @@ export function OrdersTableView() {
         setOrders(data)
       }
     } catch (err) {
-      console.error('Error fetching orders:', err)
+      uiLogger.error('Error fetching orders', { error: err instanceof Error ? err.message : 'Unknown error' })
     } finally {
       setLoading(false)
     }
@@ -53,7 +53,7 @@ export function OrdersTableView() {
         setOrders(prev => prev.filter(o => o.id !== order.id))
       }
     } catch (err) {
-      console.error('Error deleting order:', err)
+      uiLogger.error('Error deleting order', { error: err instanceof Error ? err.message : 'Unknown error' })
     }
   }
 
@@ -71,12 +71,12 @@ export function OrdersTableView() {
         ))
       }
     } catch (err) {
-      console.error('Error updating status:', err)
+      uiLogger.error('Error updating status', { error: err instanceof Error ? err.message : 'Unknown error' })
     }
   }
 
   const handleBulkAction = async (action: string, orderIds: string[]) => {
-    console.log('Bulk action:', action, 'for orders:', orderIds)
+    uiLogger.info('Bulk action triggered', { action, orderCount: orderIds.length })
 
     switch (action) {
       case 'confirm':
@@ -87,15 +87,15 @@ export function OrdersTableView() {
         break
       case 'export':
         // Export selected orders
-        console.log('Exporting orders:', orderIds)
+        uiLogger.debug('Exporting orders', { orderIds })
         break
       case 'print':
         // Print selected orders
-        console.log('Printing orders:', orderIds)
+        uiLogger.debug('Printing orders', { orderIds })
         break
       case 'archive':
         // Archive selected orders
-        console.log('Archiving orders:', orderIds)
+        uiLogger.debug('Archiving orders', { orderIds })
         break
       case 'cancel':
         // Cancel selected orders
@@ -113,7 +113,7 @@ export function OrdersTableView() {
         }
         break
       default:
-        console.log('Unknown bulk action:', action)
+        uiLogger.warn('Unknown bulk action', { action })
     }
   }
 
@@ -151,7 +151,7 @@ export function OrdersTableView() {
             order={editingOrder}
             onSubmit={async (data) => {
               // Handle form submission
-              console.log('Order submitted:', data)
+              uiLogger.info('Order submitted', { orderId: data.id })
               await fetchOrders()
               setShowOrderForm(false)
               setEditingOrder(null)

@@ -8,9 +8,10 @@
  * - Production automation
  */
 
-import { autoReorderService } from '@/services/inventory/AutoReorderService'
-import { smartNotificationSystem } from '@/lib/smart-notifications'
 import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
+import { smartNotificationSystem } from '@/lib/smart-notifications'
+import { autoReorderService } from '@/services/inventory/AutoReorderService'
+import { cronLogger } from './logger'
 
 /**
  * Check inventory reorder needs
@@ -18,16 +19,16 @@ import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
  */
 export async function checkInventoryReorder() {
   try {
-    console.log('🔄 [CRON] Running inventory reorder check...')
-    
+    cronLogger.info('Running inventory reorder check')
+
     const summary = await autoReorderService.checkReorderNeeds()
-    
-    console.log(`✅ [CRON] Reorder check complete:`, {
+
+    cronLogger.info('Reorder check complete', {
       total_alerts: summary.total_alerts,
       critical_items: summary.critical_items,
       auto_orders_generated: summary.auto_orders_generated
     })
-    
+
     // Add notifications for critical items
     if (summary.critical_items > 0) {
       smartNotificationSystem.addNotification({
@@ -40,10 +41,10 @@ export async function checkInventoryReorder() {
         actionLabel: 'Cek Stock'
       })
     }
-    
+
     return summary
   } catch (error: any) {
-    console.error('❌ [CRON] Error in inventory reorder check:', error)
+    cronLogger.error('Error in inventory reorder check', { error: error.message })
     throw error
   }
 }
@@ -55,22 +56,22 @@ export async function checkInventoryReorder() {
 export async function processSmartNotifications() {
   try {
     console.log('🔔 [CRON] Processing smart notifications...')
-    
+
     // Check inventory alerts
     const inventoryAlerts = await checkInventoryAlerts()
-    
+
     // Check order deadlines
     const orderAlerts = await checkOrderDeadlines()
-    
+
     // Check financial alerts
     const financialAlerts = await checkFinancialAlerts()
-    
+
     console.log(`✅ [CRON] Notifications processed:`, {
       inventory: inventoryAlerts,
       orders: orderAlerts,
       financial: financialAlerts
     })
-    
+
     return {
       inventory: inventoryAlerts,
       orders: orderAlerts,
@@ -87,18 +88,18 @@ export async function processSmartNotifications() {
  */
 async function checkInventoryAlerts() {
   try {
-    const { data: ingredients } = await import('@/lib/supabase').then(m => 
+    const { data: ingredients } = await import('@/lib/supabase').then(m =>
       m.supabase.from('ingredients').select('*')
     )
-    
+
     if (!ingredients) return 0
-    
+
     let alertCount = 0
-    
+
     ingredients.forEach((ingredient: any) => {
       const currentStock = ingredient.current_stock ?? 0
       const minStock = ingredient.min_stock ?? 0
-      
+
       if (currentStock <= 0) {
         smartNotificationSystem.addNotification({
           type: 'error',
@@ -123,7 +124,7 @@ async function checkInventoryAlerts() {
         alertCount++
       }
     })
-    
+
     return alertCount
   } catch (error: any) {
     console.error('Error checking inventory alerts:', error)
@@ -136,23 +137,23 @@ async function checkInventoryAlerts() {
  */
 async function checkOrderDeadlines() {
   try {
-    const { data: orders } = await import('@/lib/supabase').then(m => 
+    const { data: orders } = await import('@/lib/supabase').then(m =>
       m.supabase
         .from('orders')
         .select('*')
         .in('status', ['PENDING', 'CONFIRMED', 'IN_PROGRESS'])
         .not('delivery_date', 'is', null)
     )
-    
+
     if (!orders) return 0
-    
+
     let alertCount = 0
     const now = new Date()
-    
+
     orders.forEach((order: any) => {
       const deliveryDate = new Date(order.delivery_date)
       const hoursUntilDelivery = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-      
+
       // Alert if delivery is in less than 24 hours and order is not ready
       if (hoursUntilDelivery < 24 && hoursUntilDelivery > 0 && order.status !== 'READY') {
         smartNotificationSystem.addNotification({
@@ -166,7 +167,7 @@ async function checkOrderDeadlines() {
         })
         alertCount++
       }
-      
+
       // Alert if overdue
       if (hoursUntilDelivery < 0) {
         smartNotificationSystem.addNotification({
@@ -181,7 +182,7 @@ async function checkOrderDeadlines() {
         alertCount++
       }
     })
-    
+
     return alertCount
   } catch (error: any) {
     console.error('Error checking order deadlines:', error)
@@ -197,21 +198,21 @@ async function checkFinancialAlerts() {
     // Get expenses this month
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    
-    const { data: expenses } = await import('@/lib/supabase').then(m => 
+
+    const { data: expenses } = await import('@/lib/supabase').then(m =>
       m.supabase
         .from('expenses')
         .select('*')
         .gte('expense_date', startOfMonth.toISOString())
     )
-    
+
     if (!expenses) return 0
-    
+
     const totalExpenses = expenses.reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0)
-    
+
     // Alert if expenses are high (example: > 10 million)
     const expenseThreshold = 10000000
-    
+
     if (totalExpenses > expenseThreshold) {
       smartNotificationSystem.addNotification({
         type: 'warning',
@@ -224,7 +225,7 @@ async function checkFinancialAlerts() {
       })
       return 1
     }
-    
+
     return 0
   } catch (error: any) {
     console.error('Error checking financial alerts:', error)
@@ -239,10 +240,10 @@ async function checkFinancialAlerts() {
 export async function runAutomationEngine() {
   try {
     console.log('⚙️ [CRON] Running automation engine...')
-    
+
     // Process automated workflows
     await enhancedAutomationEngine.processWorkflows()
-    
+
     console.log('✅ [CRON] Automation engine completed')
   } catch (error: any) {
     console.error('❌ [CRON] Error running automation engine:', error)
@@ -257,20 +258,20 @@ export async function runAutomationEngine() {
 export async function cleanupOldNotifications() {
   try {
     console.log('🧹 [CRON] Cleaning up old notifications...')
-    
+
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    
-    const { error } = await import('@/lib/supabase').then(m => 
+
+    const { error } = await import('@/lib/supabase').then(m =>
       m.supabase
         .from('notifications')
         .delete()
         .lt('created_at', sevenDaysAgo.toISOString())
         .eq('is_read', true)
     )
-    
+
     if (error) throw error
-    
+
     console.log('✅ [CRON] Old notifications cleaned up')
   } catch (error: any) {
     console.error('❌ [CRON] Error cleaning notifications:', error)
@@ -285,7 +286,7 @@ export async function getAutomationStatus() {
   try {
     const notifications = smartNotificationSystem.getNotifications()
     const summary = smartNotificationSystem.getSummary()
-    
+
     return {
       notifications: {
         total: notifications.length,

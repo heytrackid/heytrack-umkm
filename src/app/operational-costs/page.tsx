@@ -1,11 +1,11 @@
 'use client'
 
-import React, { lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
-import { useSettings } from '@/contexts/settings-context'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import { useSettings } from '@/contexts/settings-context'
+import React, { lazy, Suspense } from 'react'
 
 // Lazy load extracted components for better performance and code splitting
 const CostFormView = lazy(() => import('./components/CostFormView'))
@@ -14,25 +14,25 @@ const BulkActions = lazy(() => import('./components/BulkActions'))
 const CostListTable = lazy(() => import('./components/CostListTable'))
 
 import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/use-mobile'
 import {
-  Plus,
-  Zap,
-  Receipt,
-  Search
+    Plus,
+    Receipt,
+    Search,
+    Zap
 } from 'lucide-react'
 
-import { useOperationalCosts, type OperationalCost, costCategories, frequencies, getTotalMonthlyCosts, getCategoryInfo, calculateMonthlyCost } from './hooks/useOperationalCosts'
+import { calculateMonthlyCost, costCategories, frequencies, getCategoryInfo, getTotalMonthlyCosts, useOperationalCosts } from './hooks/useOperationalCosts'
 
 export default function OperationalCostsPage() {
   const { isMobile } = useResponsive()
@@ -273,7 +273,7 @@ export default function OperationalCostsPage() {
                   selectedItems={selectedItems}
                   costs={filteredCosts}
                   onClearSelection={() => setSelectedItems([])}
-                  onBulkEdit={() => alert('Bulk edit belum diimplementasi')}
+                  onBulkEdit={() => toast('Fitur bulk edit akan segera tersedia', { icon: 'ℹ️' })}
                   onBulkDelete={handleBulkDelete}
                 />
               </Suspense>
@@ -288,7 +288,7 @@ export default function OperationalCostsPage() {
                 onSelectItem={handleSelectItem}
                 onEdit={handleEditCost}
                 onDelete={handleDeleteCost}
-                onView={(cost) => alert(`Melihat detail ${cost.name}`)}
+                onView={(cost) => toast(`Melihat detail: ${cost.name}`, { icon: '👁️' })}
                 onAdd={() => setCurrentView('add')}
                 formatCurrency={formatCurrency}
                 calculateMonthlyCost={calculateMonthlyCost}

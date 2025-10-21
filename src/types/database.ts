@@ -2,63 +2,26 @@
 // This file maintains the old import path while using the new split structure
 
 export type {
-  Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
-  Enums,
-  // Table types
-  CustomersTable,
-  SuppliersTable,
-  IngredientsTable,
-  InventoryAlertsTable,
-  InventoryStatusView,
-  InventoryStockLogsTable,
-  StockTransactionsTable,
-  SupplierIngredientsTable,
-  UsageAnalyticsTable,
-  OrdersTable,
-  OrderItemsTable,
-  OrderSummaryView,
-  PaymentsTable,
-  RecipesTable,
-  RecipeIngredientsTable,
-  ProductionSchedulesTable,
-  ProductionsTable,
-  RecipeAvailabilityView,
-  FinancialRecordsTable,
-  DailySalesSummaryTable,
-  NotificationsTable,
-  SyncEventsTable,
-  SystemMetricsTable,
-  RecentSyncEventsView,
-  UserProfilesTable,
-  ExpensesTable,
-  AppSettingsTable,
-  WhatsAppTemplatesTable,
-  // Enum types
-  UserRole,
-  BusinessUnit,
-  OrderStatus,
-  PaymentMethod,
-  ProductionStatus,
-  RecordType,
-  TransactionType,
-  // Additional types
-  UserProfile,
-  SecurityContext,
-  AuditFields,
-  SyncEvent,
-  SystemMetric,
-  InventoryStockLog,
-  // Constants
-  Constants
+    AppSettingsTable, AuditFields, BusinessUnit,
+    // Constants
+    Constants,
+    // Table types
+    CustomersTable, DailySalesSummaryTable, Database, Enums, ExpensesTable, FinancialRecordsTable, IngredientPurchasesTable, IngredientsTable,
+    InventoryAlertsTable, InventoryReorderRulesTable, InventoryStatusView, InventoryStockLog, InventoryStockLogsTable, NotificationsTable, OperationalCostsTable, OrderItemsTable, OrderStatus, OrderSummaryView, OrdersTable, PaymentMethod, PaymentsTable, ProductionSchedulesTable, ProductionStatus, ProductionsTable, RecentSyncEventsView, RecipeAvailabilityView, RecipeIngredientsTable, RecipesTable, RecordType, SecurityContext, StockTransactionsTable,
+    SupplierIngredientsTable, SuppliersTable, SyncEvent, SyncEventsTable, SystemMetric, SystemMetricsTable, Tables,
+    TablesInsert,
+    TablesUpdate, TransactionType, UsageAnalyticsTable,
+    // Additional types
+    UserProfile, UserProfilesTable,
+    // Enum types
+    UserRole, WhatsAppTemplatesTable
 } from './index'
 
 export type {
-  Json
+    Json
 } from './common'
 
 export {
-  DatabaseEnums
+    DatabaseEnums
 } from './enums'
+
