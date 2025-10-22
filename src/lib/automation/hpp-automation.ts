@@ -1,12 +1,11 @@
-import { formatCurrency } from '@/shared/utils/currency'
 
 /**
  * HPP (Harga Pokok Produksi) Automation System
  * Otomatis update HPP ketika ada perubahan harga bahan baku atau biaya operasional
  */
 
-import { workflowAutomation } from './automation-engine'
-import { smartNotificationSystem } from './smart-notifications'
+import { workflowAutomation } from '../automation-engine'
+import { smartNotificationSystem } from '../smart-notifications'
 
 export interface HPPComponent {
   id: string
@@ -179,20 +178,20 @@ export class HPPAutomationSystem {
 
     // Get recipe data from database/API
     const recipeData = await this.getRecipeData(recipeId)
-    
+
     if (!recipeData) {
       throw new Error(`Recipe not found: ${recipeId}`)
     }
 
     // Calculate ingredient costs (otomatis ambil harga terbaru)
     const ingredientCosts = await this.calculateIngredientCosts(recipeData.ingredients)
-    
+
     // Calculate labor costs (berdasarkan waktu prep/cook dan hourly rate)
     const laborCosts = this.calculateLaborCosts(recipeData.prepTime, recipeData.cookTime)
-    
+
     // Calculate overhead costs (otomatis alokasi dari operational costs)
     const overheadCosts = this.calculateOverheadCosts(recipeData.servings, recipeData.estimatedDuration)
-    
+
     // Calculate packaging costs
     const packagingCosts = await this.calculatePackagingCosts(recipeData.packaging || [])
 
@@ -311,7 +310,7 @@ export class HPPAutomationSystem {
       date: new Date().toISOString(),
       price: newPrice
     })
-    
+
     // Keep only last 30 entries
     this.ingredientPriceHistory.set(ingredientId, history.slice(-30))
   }
@@ -333,7 +332,8 @@ export class HPPAutomationSystem {
     throw new Error('Recipe data fetching not implemented yet')
   }
 
-  private async calculateIngredientCosts(ingredients: any[]) {    for (const ing of ingredients) {
+  private async calculateIngredientCosts(ingredients: any[]) {
+    for (const ing of ingredients) {
       // Get latest price from database/cache
       const pricePerUnit = await this.getLatestIngredientPrice(ing.ingredientId)
       const totalCost = (ing.quantity * pricePerUnit) / this.getUnitMultiplier(ing.unit)
@@ -370,7 +370,7 @@ export class HPPAutomationSystem {
   private calculateOverheadCosts(servings: number, durationMinutes: number) {
     // Auto-allocate overhead costs
     const electricity = this.allocateOverheadCost("electricity", servings, durationMinutes)
-    const gas = this.allocateOverheadCost("gas", servings, durationMinutes)  
+    const gas = this.allocateOverheadCost("gas", servings, durationMinutes)
     const rent = this.allocateOverheadCost("rent", servings, durationMinutes)
     const depreciation = this.allocateOverheadCost("depreciation", servings, durationMinutes)
     const other = this.allocateOverheadCost("other", servings, durationMinutes)
@@ -463,7 +463,8 @@ export class HPPAutomationSystem {
     throw new Error('Ingredient price fetching not implemented yet')
   }
 
-  private getUnitMultiplier(unit: string): number {    const multipliers: Record<string, number> = {
+  private getUnitMultiplier(unit: string): number {
+    const multipliers: Record<string, number> = {
       'g': 1000, // per kg
       'gram': 1000,
       'ml': 1000, // per liter
@@ -485,7 +486,7 @@ export class HPPAutomationSystem {
     const baseCost = this.getOperationalCostAmount(key, 0)
     const durationFactor = durationMinutes / 60 // convert to hours
     const servingFactor = servings / 10 // normalized per 10 servings
-    
+
     return baseCost * durationFactor * servingFactor
   }
 
@@ -551,7 +552,7 @@ export class HPPAutomationSystem {
       },
       {
         id: 'overhead_gas',
-        category: 'overhead', 
+        category: 'overhead',
         name: 'Gas',
         amount: 1500,
         period: 'per_batch',
@@ -598,17 +599,17 @@ export class HPPAutomationSystem {
    */
   public async monitorIngredientPrices(ingredients: Array<{ id: string; name: string; price_per_unit: number }>) {
     console.log('🔍 Monitoring ingredient prices...')
-    
+
     const significantChanges = []
-    
+
     for (const ingredient of ingredients) {
       const history = this.ingredientPriceHistory.get(key) || []
-      
+
       if (history.length > 0) {
         const lastPrice = history[history.length - 1].price
         const currentPrice = ingredient.price_per_unit
         const changePercent = ((currentPrice - lastPrice) / lastPrice) * 100
-        
+
         if (Math.abs(changePercent) > 10) {
           significantChanges.push({
             ingredientId: ingredient.id,
@@ -619,11 +620,11 @@ export class HPPAutomationSystem {
           })
         }
       }
-      
+
       // Update price history
       this.trackPriceHistory(ingredient.id, ingredient.price_per_unit)
     }
-    
+
     return {
       monitoredIngredients: ingredients.length,
       significantChanges,

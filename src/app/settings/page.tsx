@@ -1,26 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import { toast } from 'react-hot-toast'
-import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/useLoading'
-import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { createClient } from '@supabase/supabase-js'
+import dynamic from 'next/dynamic'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
 
 // Breadcrumb components
 import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 
@@ -28,7 +28,7 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Icons
-import { Settings, RotateCcw, Save } from 'lucide-react'
+import { RotateCcw, Save } from 'lucide-react'
 // Dynamic import to reduce bundle size
 const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
   ssr: false,
@@ -36,25 +36,40 @@ const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportB
 })
 
 // Extracted components
-import { SettingsQuickLinks } from './components/SettingsQuickLinks'
-import { BusinessInfoSettings } from './components/BusinessInfoSettings'
-import { RegionalSettings } from './components/RegionalSettings'
-import { ProfileSettings } from './components/ProfileSettings'
-import { SecuritySettings } from './components/SecuritySettings'
-import { NotificationSettings } from './components/NotificationSettings'
 import { BackupSettings } from './components/BackupSettings'
+import { BusinessInfoSettings } from './components/BusinessInfoSettings'
 import { BusinessSettings } from './components/BusinessSettings'
 import { DangerZone } from './components/DangerZone'
-import { UIThemeSettings } from './components/UIThemeSettings'
 import { DateTimeSettings } from './components/DateTimeSettings'
+import { NotificationSettings } from './components/NotificationSettings'
 import { NumberCurrencySettings } from './components/NumberCurrencySettings'
+import { ProfileSettings } from './components/ProfileSettings'
+import { RegionalSettings } from './components/RegionalSettings'
+import { SecuritySettings } from './components/SecuritySettings'
+import { SettingsQuickLinks } from './components/SettingsQuickLinks'
+import { UIThemeSettings } from './components/UIThemeSettings'
 import { UnsavedChangesPrompt } from './components/UnsavedChangesPrompt'
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+// Lazy Supabase client creation
+const getSupabaseClient = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url || !key) {
+    throw new Error('Supabase environment variables not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file.')
+  }
+
+  return createClient(url, key)
+}
+
+// Create supabase client lazily
+let supabaseClient: any = null
+const getSupabase = () => {
+  if (!supabaseClient) {
+    supabaseClient = getSupabaseClient()
+  }
+  return supabaseClient
+}
 
 const LOADING_KEYS = {
   LOAD_SETTINGS: 'loadSettings',
@@ -133,7 +148,7 @@ export default function SettingsPage() {
     try {
       startLoading(LOADING_KEYS.LOAD_SETTINGS)
       
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from('app_settings')
         .select('*')
         .eq('user_id', 'default')
@@ -180,7 +195,7 @@ export default function SettingsPage() {
         updated_at: new Date().toISOString()
       }
       
-      const { data, error } = await supabase
+      const { data, error } = await getSupabase()
         .from('app_settings')
         .upsert(settingsData, {
           onConflict: 'user_id'

@@ -4,6 +4,7 @@ import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import {
     ArrowLeft,
@@ -56,7 +57,7 @@ interface MobileHeaderProps {
   sidebarOpen?: boolean
 }
 
-export default function MobileHeader({
+const MobileHeader = React.memo(function MobileHeader({
   title,
   showBackButton,
   onBackClick,
@@ -248,7 +249,9 @@ export default function MobileHeader({
       </div>
     </header>
   )
-}
+})
+
+export default MobileHeader
 
 // Pre-built header variants for common use cases
 export function DashboardHeader() {

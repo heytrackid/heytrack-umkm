@@ -1,21 +1,21 @@
 'use client'
 
-import React from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
-import { 
-  RecipeSchema,
-  type RecipeFormData
+import {
+    RecipeSchema,
+    type RecipeFormData
 } from '@/lib/validations'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { memo } from 'react'
+import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
 
 interface RecipeFormProps {
@@ -24,7 +24,7 @@ interface RecipeFormProps {
   isLoading?: boolean
 }
 
-export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps) {
+export const RecipeForm = memo(function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps) {
   const { toast } = useToast()
   
   const form = useForm<RecipeFormData>({
@@ -264,4 +264,4 @@ export function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps
       </CardContent>
     </Card>
   )
-}
+})

@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Bell, X, AlertTriangle, CheckCircle, Info, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { automationEngine } from '@/lib/automation-engine'
+import { AlertTriangle, Bell, CheckCircle, Info, X, Zap } from 'lucide-react'
+import { memo, useEffect, useState } from 'react'
 
 interface SmartNotification {
   id: string
@@ -24,7 +24,7 @@ interface SmartNotificationsProps {
   className?: string
 }
 
-export default function SmartNotifications({ className }: SmartNotificationsProps) {
+const SmartNotifications = memo(function SmartNotifications({ className }: SmartNotificationsProps) {
   const [notifications, setNotifications] = useState<SmartNotification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -360,4 +360,6 @@ export default function SmartNotifications({ className }: SmartNotificationsProp
       )}
     </div>
   )
-}
+})
+
+export default SmartNotifications

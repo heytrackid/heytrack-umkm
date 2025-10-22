@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { useMobileFirst } from '@/hooks/use-responsive'
+import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
-import { ReactNode, useState } from 'react'
+import { memo, ReactNode, useState } from 'react'
 import MobileHeader from './mobile-header'
 import SimpleSidebar from './sidebar'
 
@@ -17,7 +18,7 @@ interface AppLayoutProps {
   showMobileHeader?: boolean
 }
 
-export default function AppLayout({ 
+const AppLayout = memo(function AppLayout({ 
   children, 
   pageTitle,
   showMobileHeader = true
@@ -95,4 +96,6 @@ export default function AppLayout({
       </div>
     </div>
   )
-}
+})
+
+export default AppLayout

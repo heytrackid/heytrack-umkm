@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 import { NavigationItem } from './useSidebarLogic'
 
 interface SidebarItemProps {
@@ -20,7 +20,7 @@ export default function SidebarItem({
   if (variant === 'mobile') {
     return (
       <Link
-        href={item.href}
+        href={item.href || '#'}
         onMouseEnter={onMouseEnter}
         className={cn(
           "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
@@ -66,7 +66,7 @@ export default function SidebarItem({
 
   return (
     <Link
-      href={item.href}
+      href={item.href || '#'}
       onMouseEnter={onMouseEnter}
       className={cn(
         "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",

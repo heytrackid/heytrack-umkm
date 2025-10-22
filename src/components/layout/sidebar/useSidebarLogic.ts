@@ -1,26 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
 import {
-  LayoutDashboard,
-  ChefHat,
-  Package,
-  ShoppingCart,
-  Users,
   Calculator,
-  Receipt,
-  BarChart3,
-  TrendingUp,
-  Settings,
-  Target,
+  ChefHat,
   DollarSign,
   Layers,
-  Banknote,
-  Brain,
-  MessageSquare,
-  Lightbulb
+  LayoutDashboard,
+  Package,
+  Receipt,
+  Settings,
+  ShoppingCart,
+  Target,
+  TrendingUp,
+  Users,
+  Bot
 } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export interface NavigationItem {
   name: string
@@ -44,7 +40,7 @@ export interface NavigationSection {
 export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
-  
+
   // Collapsible sections state - initialize from localStorage if available
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
     if (typeof window !== 'undefined') {
@@ -71,9 +67,9 @@ export const useSidebarLogic = () => {
 
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
-    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', '/cash-flow', '/profit']
+    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', '/cash-flow', '/profit', '/ai-chatbot']
     routesToPrefetch.forEach((r) => {
-      try { router.prefetch(r) } catch {}
+      try { router.prefetch(r) } catch { }
     })
   }, [router])
 
@@ -211,68 +207,30 @@ export const useSidebarLogic = () => {
         },
       ]
     },
+
     {
-      title: 'Asisten AI',
-      description: 'Asisten cerdas untuk optimasi bisnis',
-      isWorkflow: true,
-      isCollapsible: true,
+      title: "Asisten AI",
+      description: "Bantuan cerdas untuk pengelolaan bisnis",
       items: [
         {
-          name: 'Wawasan AI',
-          href: '/ai',
-          icon: Brain,
-          isSimple: true,
-          badge: 'PINTAR',
-          description: 'Dashboard AI untuk analisis bisnis'
-        },
-        {
-          name: 'Harga Pintar',
-          href: '/ai/pricing',
-          icon: TrendingUp,
-          isSimple: true,
-          badge: 'AI',
-          description: 'Analisis harga optimal berbasis AI'
-        },
-        {
-          name: 'Chat Asisten',
-          href: '/ai/chat',
-          icon: MessageSquare,
-          isSimple: true,
-          badge: 'BETA',
-          description: 'Chatbot bisnis dengan AI'
-        },
-        {
-          name: 'Tips Bisnis',
-          href: '/ai/insights',
-          icon: Lightbulb,
-          isSimple: true,
-          badge: 'BARU',
-          description: 'Tips bisnis personal dari AI'
+          name: "Chat AI",
+          href: '/ai-chatbot',
+          icon: Bot,
+          description: "Tanya apa saja tentang bisnis bakery Anda"
         }
       ]
     },
-    {
-      title: "Lainnya",
-      items: [
-        {
-          name: "Pengaturan",
-          href: '/settings',
-          icon: Settings,
-          description: "Pengaturan aplikasi dan preferensi"
-        },
-      ]
-    }
   ]
 
   const isItemActive = (item: NavigationItem): boolean => {
-    return pathname === item.href || 
+    return pathname === item.href ||
       (item.href.includes('#') && pathname === item.href.split('#')[0])
   }
 
   const prefetchRoute = (href: string) => {
-    try { 
-      router.prefetch(href) 
-    } catch {}
+    try {
+      router.prefetch(href)
+    } catch { }
   }
 
   const toggleSection = (sectionTitle: string) => {

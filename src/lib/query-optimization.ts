@@ -6,9 +6,16 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Supabase environment variables not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file.')
+}
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  supabaseUrl,
+  supabaseAnonKey
 );
 
 // Query builder with optimized patterns
@@ -68,13 +75,13 @@ export class QueryOptimizer {
         .order('name');
     },
 
-    // Uses idx_ingredients_cost_analysis for cost analysis
-    getCostAnalysis: () => {
+    // Uses idx_ingredients_value_analysis for value analysis
+    getValueAnalysis: () => {
       return supabase
         .from('ingredients')
         .select('*')
         .eq('is_active', true)
-        .gte(0)
+        .gt('total_value', 0)
         .order('total_value', { ascending: false });
     }
   };
@@ -148,7 +155,7 @@ export class QueryOptimizer {
         .from('orders')
         .select('*')
         .eq('status', 'DELIVERED')
-        .gte(0)
+        .gt('total_amount', 0)
         .gte('created_at', startDate)
         .lte('created_at', endDate)
         .order('created_at', { ascending: false });
@@ -194,7 +201,7 @@ export class QueryOptimizer {
         .from('recipes')
         .select('*')
         .eq('is_active', true)
-        .gte(0)
+        .gt('times_made', 0)
         .order('times_made', { ascending: false })
         .order('total_revenue', { ascending: false })
         .limit(limit);
@@ -206,7 +213,7 @@ export class QueryOptimizer {
         .from('recipes')
         .select('*')
         .eq('is_active', true)
-        .gte(0)
+        .gt('total_revenue', 0)
         .order('total_revenue', { ascending: false });
     },
 
@@ -269,7 +276,7 @@ export class QueryOptimizer {
         .from('customers')
         .select('*')
         .eq('is_active', true)
-        .gte(0)
+        .gt('total_spent', 0)
         .order('total_spent', { ascending: false });
     },
 
@@ -319,7 +326,7 @@ export class QueryOptimizer {
       return supabase
         .from('financial_records')
         .select('*')
-        .gte(0)
+        .gte('amount', minAmount)
         .order('amount', { ascending: false })
         .limit(50);
     }
@@ -409,7 +416,7 @@ export class QueryOptimizer {
           .from('orders')
           .select('*')
           .eq('status', 'DELIVERED')
-          .gte(0)
+          .gt('total_amount', 0)
           .gte('created_at', startDate)
           .lte('created_at', endDate)
       ]);
@@ -441,9 +448,9 @@ export class QueryPerformanceMonitor {
       const duration = performance.now() - startTime;
       
       // Store query time for analysis
-      const times = this.queryTimes.get(key) || [];
+      const times = this.queryTimes.get(queryName) || [];
       times.push(duration);
-      this.queryTimes.set(key, times.slice(-100)); // Keep last 100 measurements
+      this.queryTimes.set(queryName, times.slice(-100)); // Keep last 100 measurements
       
       console.log(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
       
@@ -456,7 +463,7 @@ export class QueryPerformanceMonitor {
   }
 
   static getQueryStats(queryName: string) {
-    const times = this.queryTimes.get(key);
+    const times = this.queryTimes.get(queryName);
     if (!times || times.length === 0) return null;
 
     const avg = times.reduce((sum, time) => sum + time, 0) / times.length;

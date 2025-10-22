@@ -257,7 +257,7 @@ export default function CustomersPage() {
             <CardContent className="p-4 text-center">
               <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">{settings.currency.symbol}</div>
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {formatCurrency(customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length)}
+                {formatCurrency(customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / customers.length : 0)}
               </div>
               <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
             </CardContent>
@@ -266,7 +266,7 @@ export default function CustomersPage() {
             <CardContent className="p-4 text-center">
               <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
               <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {Math.round(customers.reduce((sum, c) => sum + c.totalOrders, 0) / customers.length)}
+                {Math.round(customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0) / customers.length : 0)}
               </div>
               <p className="text-sm text-muted-foreground">Rata-rata Order</p>
             </CardContent>

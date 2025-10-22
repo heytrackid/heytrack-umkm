@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { ComponentType, lazy, ReactNode, Suspense } from 'react'
+import { logger } from '@/lib/logger'
 
 // Loading fallback component
 const LoadingFallback = ({ height ="h-32" }: { height?: string }) => (

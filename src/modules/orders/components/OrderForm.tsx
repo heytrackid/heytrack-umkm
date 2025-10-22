@@ -1,18 +1,18 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Trash2, Package, Users, Phone, MapPin, DollarSign, TrendingUp, AlertCircle } from 'lucide-react'
-import { OrderFormProps, Order, OrderItem } from '../types'
-import { ORDER_PRIORITIES, ORDER_CONFIG } from '../constants'
-import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
+import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
+import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
+import React, { memo, useEffect, useState } from 'react'
+import { ORDER_CONFIG, ORDER_PRIORITIES } from '../constants'
+import { OrderFormProps, OrderItem } from '../types'
+import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
 
-export function OrderForm({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) {
+export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) {
   const { formatCurrency } = useCurrency()
   const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
   const [availableCustomers, setAvailableCustomers] = useState<any[]>([])
@@ -627,4 +627,4 @@ export function OrderForm({ order, onSubmit, onCancel, loading = false, error }:
       </Tabs>
     </form>
   )
-}
+})

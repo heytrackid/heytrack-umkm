@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { lazy, Suspense } from 'react'
+import { logger } from '@/lib/logger'
 
 // Chart Loading Skeleton Component
 const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, height?: string }) => (

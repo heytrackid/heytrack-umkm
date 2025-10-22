@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ComponentType, lazy, Suspense } from 'react'
+import { logger } from '@/lib/logger'
 
 // Table Loading Skeleton Component
 const TableLoadingSkeleton = ({ 

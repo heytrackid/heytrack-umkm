@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { hppAutomation, triggerIngredientPriceUpdate, updateOperationalCosts } from '@/lib/automation/hpp-automation'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { hppAutomation, triggerIngredientPriceUpdate, updateOperationalCosts } from '@/lib/hpp-automation'
+import { NextRequest, NextResponse } from 'next/server'
 
 // POST /api/hpp/automation - Trigger HPP automation events
 export async function POST(request: NextRequest) {
@@ -16,19 +16,19 @@ export async function POST(request: NextRequest) {
       case 'ingredient_price_changed':
         result = await handleIngredientPriceChange(data)
         break
-      
+
       case 'operational_cost_changed':
         result = await handleOperationalCostChange(data)
         break
-      
+
       case 'recipe_hpp_calculate':
         result = await handleRecipeHPPCalculation(data)
         break
-      
+
       case 'batch_hpp_recalculate':
         result = await handleBatchHPPRecalculation(data)
         break
-      
+
       default:
         return NextResponse.json(
           { error: 'Invalid automation event' },
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
 
 async function handleIngredientPriceChange(data: any) {
   const { ingredientId, oldPrice, newPrice } = data
-  
+
   if (!ingredientId || oldPrice === undefined || newPrice === undefined) {
     throw new Error('Missing required fields: ingredientId, oldPrice, newPrice')
   }
@@ -108,7 +108,7 @@ async function handleIngredientPriceChange(data: any) {
 
   // Update ingredient price in database
   const supabase = createServerSupabaseAdmin()
-  
+
   const { error: updateError } = await (supabase as any)
     .from('ingredients')
     .update({
@@ -135,7 +135,7 @@ async function handleIngredientPriceChange(data: any) {
 
 async function handleOperationalCostChange(data: any) {
   const { costId, oldAmount, newAmount } = data
-  
+
   if (!costId || oldAmount === undefined || newAmount === undefined) {
     throw new Error('Missing required fields: costId, oldAmount, newAmount')
   }
@@ -159,7 +159,7 @@ async function handleOperationalCostChange(data: any) {
 
 async function handleRecipeHPPCalculation(data: any) {
   const { recipeId } = data
-  
+
   if (!recipeId) {
     throw new Error('Missing required field: recipeId')
   }
@@ -196,7 +196,7 @@ async function handleBatchHPPRecalculation(data: any) {
 
   // Get all recipe IDs from database
   const supabase = createServerSupabaseAdmin()
-  
+
   const { data: recipes, error } = await (supabase as any)
     .from('recipes')
     .select('*')
@@ -214,7 +214,7 @@ async function handleBatchHPPRecalculation(data: any) {
   for (const recipe of recipes || []) {
     try {
       const recipeHPP = await hppAutomation.calculateSmartHPP(recipe.id)
-      
+
       results.push({
         recipeId: recipe.id,
         recipeName: recipe.name,
@@ -222,7 +222,7 @@ async function handleBatchHPPRecalculation(data: any) {
         newHPP: recipeHPP.hppPerServing,
         lastCalculated: recipeHPP.lastCalculated
       })
-      
+
       successCount++
     } catch (error: any) {
       results.push({
@@ -231,7 +231,7 @@ async function handleBatchHPPRecalculation(data: any) {
         status: 'error',
         error: error.message
       })
-      
+
       errorCount++
     }
   }

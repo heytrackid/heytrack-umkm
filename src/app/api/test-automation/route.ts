@@ -1,18 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { WorkflowAutomation } from '@/lib/automation-engine'
-import { hppAutomation } from '@/lib/hpp-automation'
+import { hppAutomation } from '@/lib/automation/hpp-automation'
+import { NextRequest, NextResponse } from 'next/server'
 
 // GET /api/test-automation - Test all automation workflows
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const test = searchParams.get('param') || 'full_integration'
-  
+
   console.log(`🧪 Running automation test: ${test}`)
-  
+
   try {
     let result
-    
+
     switch (test) {
       case 'order_completion':
         result = await testOrderCompletionWorkflow()
@@ -41,20 +40,20 @@ export async function GET(request: NextRequest) {
           { status: 400 }
         )
     }
-    
+
     return NextResponse.json({
       test,
       success: true,
       result,
       timestamp: new Date().toISOString()
     })
-    
+
   } catch (error: any) {
     console.error(`❌ Test ${test} failed:`, error)
     return NextResponse.json(
-      { 
+      {
         test,
-        error: 'Test failed', 
+        error: 'Test failed',
         details: error.message,
         timestamp: new Date().toISOString()
       },
@@ -68,11 +67,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { test, data = {} } = body
-    
+
     console.log(`🧪 Running custom automation test: ${test}`)
-    
+
     let result
-    
+
     switch (test) {
       case 'hpp_integration':
         result = await testHPPIntegration(data)
@@ -92,7 +91,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
     }
-    
+
     return NextResponse.json({
       test,
       success: true,
@@ -100,7 +99,7 @@ export async function POST(request: NextRequest) {
       inputData: data,
       timestamp: new Date().toISOString()
     })
-    
+
   } catch (error: any) {
     console.error('❌ Custom test failed:', error)
     return NextResponse.json(
@@ -114,9 +113,9 @@ export async function POST(request: NextRequest) {
 
 async function testOrderCompletionWorkflow() {
   console.log('📦 Testing Order Completion Workflow...')
-  
+
   const automation = WorkflowAutomation.getInstance()
-  
+
   // Simulate order completion
   await automation.triggerEvent({
     event: 'order.completed',
@@ -131,13 +130,13 @@ async function testOrderCompletionWorkflow() {
       ]
     }
   })
-  
+
   return {
     workflow: 'order.completed',
     status: 'triggered',
     expectedActions: [
       'inventory_updated',
-      'financial_record_created', 
+      'financial_record_created',
       'customer_stats_updated',
       'completion_notification_sent'
     ],
@@ -147,9 +146,9 @@ async function testOrderCompletionWorkflow() {
 
 async function testInventoryAutomation() {
   console.log('📊 Testing Inventory Automation...')
-  
+
   const automation = WorkflowAutomation.getInstance()
-  
+
   // Test low stock trigger
   await automation.triggerEvent({
     event: 'inventory.low_stock',
@@ -166,7 +165,7 @@ async function testInventoryAutomation() {
       }
     }
   })
-  
+
   return {
     workflow: 'inventory.low_stock',
     status: 'triggered',
@@ -181,9 +180,9 @@ async function testInventoryAutomation() {
 
 async function testSmartNotifications() {
   console.log('🔔 Testing Smart Notifications System...')
-  
+
   const { smartNotificationSystem } = await import('@/lib/smart-notifications')
-  
+
   // Generate test notifications
   smartNotificationSystem.addNotification({
     type: 'warning',
@@ -194,7 +193,7 @@ async function testSmartNotifications() {
     actionUrl: '/bahan-simple',
     actionLabel: 'Lihat Inventory'
   })
-  
+
   smartNotificationSystem.addNotification({
     type: 'success',
     category: 'financial',
@@ -204,9 +203,9 @@ async function testSmartNotifications() {
     actionUrl: '/dashboard',
     actionLabel: 'Lihat Laporan'
   })
-  
+
   const notifications = smartNotificationSystem.getNotifications()
-  
+
   return {
     system: 'smart_notifications',
     status: 'active',
@@ -218,14 +217,14 @@ async function testSmartNotifications() {
 
 async function testProductionPlanning() {
   console.log('🏭 Testing Production Planning Automation...')
-  
+
   // Empty test data arrays
   const testOrders = []
   const testInventory = []
-  
+
   // Simulate production planning trigger
   const automation = WorkflowAutomation.getInstance()
-  
+
   await automation.triggerEvent({
     event: 'production.batch_completed',
     entityId: 'production-batch-001',
@@ -237,7 +236,7 @@ async function testProductionPlanning() {
       nextBatchScheduled: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString()
     }
   })
-  
+
   return {
     workflow: 'production.batch_completed',
     status: 'triggered',
@@ -257,19 +256,19 @@ async function testProductionPlanning() {
 
 async function testHPPAutomation() {
   console.log('🧮 Testing HPP Automation...')
-  
+
   // Test ingredient price change impact
   const priceChangeResult = await hppAutomation.monitorIngredientPrices([
     { id: 'flour-001', name: 'Tepung Terigu', price_per_unit: 12000 },
     { id: 'butter-001', name: 'Butter', price_per_unit: 85000 }
   ])
-  
+
   // Test operational cost update  
   hppAutomation.updateOperationalCosts(10.5, 15.0, 8.0)
-  
+
   // Test recipe HPP calculation
   const recipeHPP = await hppAutomation.calculateSmartHPP('test-recipe-croissant')
-  
+
   return {
     system: 'hpp_automation',
     status: 'active',
@@ -292,9 +291,9 @@ async function testHPPAutomation() {
 
 async function testWorkflowIntegration() {
   console.log('🔗 Testing Workflow Integration...')
-  
+
   const automation = WorkflowAutomation.getInstance()
-  
+
   // Test cascade workflow: ingredient price change → HPP recalculation → pricing review
   await automation.triggerEvent({
     event: 'ingredient.price_changed',
@@ -307,7 +306,7 @@ async function testWorkflowIntegration() {
       affectedRecipes: ['croissant', 'danish', 'baguette']
     }
   })
-  
+
   // Simulate delay and check if cascade events are triggered
   setTimeout(async () => {
     await automation.triggerEvent({
@@ -320,7 +319,7 @@ async function testWorkflowIntegration() {
       }
     })
   }, 2000)
-  
+
   return {
     integration: 'workflow_cascade',
     status: 'initiated',
@@ -336,27 +335,27 @@ async function testWorkflowIntegration() {
 
 async function testFullIntegration() {
   console.log('🚀 Testing Full System Integration...')
-  
+
   const results = []
-  
+
   // Test 1: Order completion workflow
   results.push(await testOrderCompletionWorkflow())
-  
+
   // Test 2: Inventory automation
   results.push(await testInventoryAutomation())
-  
+
   // Test 3: Smart notifications
   results.push(await testSmartNotifications())
-  
+
   // Test 4: Production planning
   results.push(await testProductionPlanning())
-  
+
   // Test 5: HPP automation
   results.push(await testHPPAutomation())
-  
+
   // Test 6: Workflow integration
   results.push(await testWorkflowIntegration())
-  
+
   return {
     integration: 'full_system',
     status: 'completed',
@@ -372,7 +371,7 @@ async function testFullIntegration() {
       integrationLevel: 'Full',
       businessProcesses: [
         'Order Management',
-        'Inventory Control', 
+        'Inventory Control',
         'Financial Tracking',
         'Production Planning',
         'Cost Management',
@@ -388,11 +387,11 @@ async function testFullIntegration() {
 
 async function testHPPIntegration(data: any) {
   console.log('🧮 Testing HPP Integration with custom data...')
-  
+
   const { ingredientId = 'test-flour', priceChange = 15 } = data
-  
+
   const automation = WorkflowAutomation.getInstance()
-  
+
   await automation.triggerEvent({
     event: 'ingredient.price_changed',
     entityId: ingredientId,
@@ -404,7 +403,7 @@ async function testHPPIntegration(data: any) {
       affectedRecipes: ['croissant', 'danish']
     }
   })
-  
+
   return {
     test: 'hpp_integration',
     ingredientId,
@@ -416,17 +415,17 @@ async function testHPPIntegration(data: any) {
 
 async function testWorkflowTrigger(data: any) {
   console.log('⚡ Testing Custom Workflow Trigger...')
-  
+
   const { event, entityId = 'test-entity', customData = {} } = data
-  
+
   const automation = WorkflowAutomation.getInstance()
-  
+
   await automation.triggerEvent({
     event,
     entityId,
     data: customData
   })
-  
+
   return {
     test: 'workflow_trigger',
     event,
@@ -438,11 +437,11 @@ async function testWorkflowTrigger(data: any) {
 
 async function testSmartAlertSystem(data: any) {
   console.log('🚨 Testing Smart Alert System...')
-  
+
   const { alertType = 'inventory', priority = 'medium', message = 'Test alert' } = data
-  
+
   const { smartNotificationSystem } = await import('@/lib/smart-notifications')
-  
+
   smartNotificationSystem.addNotification({
     type: 'warning',
     category: alertType,
@@ -452,7 +451,7 @@ async function testSmartAlertSystem(data: any) {
     actionUrl: '/dashboard',
     actionLabel: 'View Details'
   })
-  
+
   return {
     test: 'smart_alert_system',
     alertGenerated: true,
@@ -464,9 +463,9 @@ async function testSmartAlertSystem(data: any) {
 
 async function testProductionOptimization(data: any) {
   console.log('⚡ Testing Production Optimization...')
-  
+
   const { targetQuantity = 100, recipeId = 'croissant' } = data
-  
+
   return {
     test: 'production_optimization',
     targetQuantity,
