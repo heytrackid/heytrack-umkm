@@ -1,30 +1,15 @@
 import type { NextConfig } from "next";
-import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const nextConfig: NextConfig = {
-  // TypeScript and Linting
+  // TypeScript configuration
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  // Turbopack for faster development
-  turbopack: {
-    root: __dirname,
-    rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-    },
-  },
-  
+
   // Performance Optimizations
   poweredByHeader: false, // Remove X-Powered-By header for security
   compress: true, // Enable gzip compression
-  
+
   // Image Optimization
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -40,7 +25,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   // Security Headers
   async headers() {
     return [
@@ -64,10 +49,6 @@ const nextConfig: NextConfig = {
             value: '1; mode=block',
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
-          },
-          {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
@@ -75,15 +56,15 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://clerk.dev",
-              "style-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev",
-              "img-src 'self' data: https: https://*.clerk.accounts.dev https://img.clerk.com",
-              "font-src 'self' data: https://*.clerk.accounts.dev",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://*.clerk.accounts.dev https://clerk.dev wss://*.clerk.accounts.dev",
-              "frame-src 'self' https://*.clerk.accounts.dev",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai",
+              "frame-src 'none'",
               "object-src 'none'",
               "base-uri 'self'",
-              "form-action 'self' https://*.clerk.accounts.dev",
+              "form-action 'self'",
               "frame-ancestors 'none'",
               "upgrade-insecure-requests",
             ].join('; '),
@@ -102,66 +83,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  
-  // Bundle Optimization  
-  experimental: {
-    // optimizeCss: true, // Temporarily disabled due to critters dependency issue
-    optimizeServerReact: true,
-    scrollRestoration: true,
-    webVitalsAttribution: ['CLS', 'LCP'],
-  },
-  
+
   // External packages for server components
   serverExternalPackages: [
     '@supabase/supabase-js',
     '@supabase/realtime-js',
     '@supabase/ssr'
   ],
-  
-  // Output optimization for production
-  output: 'standalone',
-  
-  // Webpack optimizations
-  webpack: (config, { dev, isServer }) => {
-    // Production optimizations
-    if (!dev) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          ...config.optimization.splitChunks,
-          cacheGroups: {
-            ...config.optimization.splitChunks?.cacheGroups,
-            // Vendor chunk for common libraries
-            vendor: {
-              test: /[\\/]node_modules[\\/](react|react-dom|@radix-ui|lucide-react)[\\/]/,
-              name: 'vendor',
-              chunks: 'all',
-              priority: 10,
-            },
-            // Chart libraries separate chunk
-            charts: {
-              test: /[\\/]node_modules[\\/](recharts|d3)[\\/]/,
-              name: 'charts',
-              chunks: 'all',
-              priority: 8,
-            },
-            // UI components chunk
-            ui: {
-              test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
-              name: 'ui-components',
-              chunks: 'all',
-              priority: 6,
-            },
-          },
-        },
-      };
-    }
-
-    // Bundle size optimization (removed problematic aliases)
-    // Note: React aliases can cause module resolution issues in Next.js 15+
-
-    return config;
-  },
 
   // Redirects for security
   async redirects() {
@@ -181,9 +109,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Enable bundle analyzer when ANALYZE=true
-const configWithAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})(nextConfig);
-
-export default configWithAnalyzer;
+export default nextConfig;

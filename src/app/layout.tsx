@@ -41,61 +41,62 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full light`}
       >
-        <ThemeProvider
+        {/* ThemeProvider disabled - using simple light theme */}
+        {/* <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem
+          enableSystem={false}
           disableTransitionOnChange
-        >
+        > */}
           <QueryProvider>
-            <SettingsProvider>
-              <PreloadingProvider 
-                enableSmartPreloading={true}
-                enableIdlePreloading={true}
-                enableNetworkAware={true}
-                debug={process.env.NODE_ENV === 'development'}
-              >
-                <ErrorBoundary>
-                  {/* Header temporarily disabled during development */}
-                  {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
-                    <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
-                      🚧 Development Mode - Auth Disabled
-                    </div>
-                  </header> */}
-                    {children}
-                  </ErrorBoundary>
-                </PreloadingProvider>
-                <Toaster
-                  position="bottom-right"
-                  toastOptions={{
-                    duration: 4000,
-                    style: {
-                      background: 'hsl(var(--background))',
-                      color: 'hsl(var(--foreground))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '0.625rem',
-                      zIndex: 9999,
+          <SettingsProvider>
+            <PreloadingProvider 
+              enableSmartPreloading={true}
+              enableIdlePreloading={true}
+              enableNetworkAware={true}
+              debug={process.env.NODE_ENV === 'development'}
+            >
+              <ErrorBoundary>
+                {/* Header temporarily disabled during development */}
+                {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+                  <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
+                    🚧 Development Mode - Auth Disabled
+                  </div>
+                </header> */}
+                  {children}
+                </ErrorBoundary>
+              </PreloadingProvider>
+              <Toaster
+                position="bottom-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: 'hsl(var(--background))',
+                    color: 'hsl(var(--foreground))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '0.625rem',
+                    zIndex: 9999,
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: 'hsl(var(--primary))',
+                      secondary: 'hsl(var(--primary-foreground))',
                     },
-                    success: {
-                      iconTheme: {
-                        primary: 'hsl(var(--primary))',
-                        secondary: 'hsl(var(--primary-foreground))',
-                      },
+                  },
+                  error: {
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#ffffff',
                     },
-                    error: {
-                      iconTheme: {
-                        primary: '#ef4444',
-                        secondary: '#ffffff',
-                      },
-                    },
-                  }}
-                />
-                {/* Web Vitals Reporter disabled during build to avoid overhead; enable when analytics endpoint is ready */}
-            </SettingsProvider>
+                  },
+                }}
+              />
+              {/* Web Vitals Reporter disabled during build to avoid overhead; enable when analytics endpoint is ready */}
+          </SettingsProvider>
           </QueryProvider>
-        </ThemeProvider>
+        {/* </ThemeProvider> */}
         <Analytics />
       </body>
     </html>

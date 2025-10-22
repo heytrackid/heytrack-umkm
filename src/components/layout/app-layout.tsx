@@ -8,9 +8,19 @@ import { useMobileFirst } from '@/hooks/use-responsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
-import { memo, ReactNode, useState } from 'react'
+import { memo, ReactNode, useEffect, useState } from 'react'
 import MobileHeader from './mobile-header'
 import SimpleSidebar from './sidebar'
+// Supabase auth
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 
 interface AppLayoutProps {
   children: ReactNode
@@ -26,7 +36,37 @@ const AppLayout = memo(function AppLayout({
   const { isMobile } = useMobileFirst()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+  const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const supabase = createClientComponentClient()
+
+  // Check auth state on mount
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+      } catch (error) {
+        console.error('Error getting user:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getUser()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      }
+    )
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth])
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
@@ -72,11 +112,52 @@ const AppLayout = memo(function AppLayout({
             <div className="flex items-center space-x-4">
               <SmartNotifications />
               <ThemeToggle />
-              {/* User menu */}
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                User
-              </Button>
+              {/* User Authentication */}
+              {loading ? (
+                <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <User className="h-4 w-4 mr-2" />
+                      {user.email?.split('@')[0]}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-2 py-1.5 text-sm font-medium">
+                      {user.email}
+                    </div>
+                    <DropdownMenuItem onClick={() => router.push('/settings')}>
+                      Pengaturan
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await supabase.auth.signOut()
+                        router.push('/auth/login')
+                      }}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      Keluar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/auth/login')}
+                  >
+                    Masuk
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => router.push('/auth/register')}
+                  >
+                    Daftar
+                  </Button>
+                </div>
+              )}
             </div>
           </header>
         )}

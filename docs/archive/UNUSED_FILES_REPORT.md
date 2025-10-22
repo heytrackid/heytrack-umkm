@@ -74,10 +74,9 @@ sonner                          ← Toast notifications
 ```
 **Action**: ⚠️ FALSE POSITIVE - All needed for functionality
 
-**Core Dependencies** (10 packages):
+**Core Dependencies** (9 packages):
 ```
 @hookform/resolvers      ← Form validation
-@sentry/nextjs           ← Error tracking
 @supabase/supabase-js    ← Database
 @types/file-saver        ← Type definitions
 dotenv                   ← Environment variables
@@ -86,7 +85,6 @@ next-themes              ← Theme switching
 react-day-picker         ← Date picker
 react-hot-toast          ← Notifications
 server-only              ← Server-only code marker
-xlsx                     ← Excel generation
 ```
 **Action**: ⚠️ FALSE POSITIVE - All critical dependencies
 

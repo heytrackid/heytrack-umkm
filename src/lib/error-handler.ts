@@ -1,11 +1,9 @@
 /**
  * Centralized Error Handling Utility
- * 
+ *
  * This module provides consistent error handling across the application
- * with Sentry integration for production error tracking.
+ * with console logging for debugging and development.
  */
-
-import * as Sentry from '@sentry/nextjs'
 
 export type ErrorSeverity = 'fatal' | 'error' | 'warning' | 'info' | 'debug'
 
@@ -21,80 +19,66 @@ export interface ErrorContext {
 }
 
 /**
- * Capture and log error to Sentry
+ * Capture and log error to console
  */
 export function captureError(
   error: Error | string,
   context?: ErrorContext
-): string | undefined {
-  // Always log to console
-  console.error('Error captured:', error, context)
+): void {
+  const errorObj = error instanceof Error ? error : new Error(error)
+  const timestamp = new Date().toISOString()
 
-  // Only send to Sentry in production
-  if (process.env.NODE_ENV === 'production') {
-    return Sentry.captureException(error, {
-      level: context?.level || 'error',
-      user: context?.user,
-      tags: context?.tags,
-      extra: context?.extra,
-    })
-  }
-
-  return undefined
+  console.error(`[${timestamp}] Error captured:`, {
+    error: {
+      message: errorObj.message,
+      stack: errorObj.stack,
+      name: errorObj.name,
+    },
+    context,
+    level: context?.level || 'error',
+  })
 }
 
 /**
- * Capture message (non-error) to Sentry
+ * Capture message (non-error) to console
  */
 export function captureMessage(
   message: string,
   level: ErrorSeverity = 'info',
   context?: ErrorContext
-): string | undefined {
-  console.log(`[${level.toUpperCase()}]`, message, context)
+): void {
+  const timestamp = new Date().toISOString()
 
-  if (process.env.NODE_ENV === 'production') {
-    return Sentry.captureMessage(message, {
-      level,
-      user: context?.user,
-      tags: context?.tags,
-      extra: context?.extra,
-    })
-  }
-
-  return undefined
+  console.log(`[${timestamp}] [${level.toUpperCase()}]`, message, context)
 }
 
 /**
- * Set user context for error tracking
+ * Set user context for error tracking (no-op without Sentry)
  */
 export function setUser(user: {
   id?: string
   email?: string
   username?: string
 } | null): void {
-  if (process.env.NODE_ENV === 'production') {
-    Sentry.setUser(user)
-  }
+  // User context not available without Sentry
+  console.log('User context set:', user)
 }
 
 /**
- * Add breadcrumb for debugging
+ * Add breadcrumb for debugging (logs to console)
  */
 export function addBreadcrumb(
   message: string,
   category?: string,
   data?: Record<string, any>
 ): void {
-  if (process.env.NODE_ENV === 'production') {
-    Sentry.addBreadcrumb({
-      message,
-      category: category || 'app',
-      data,
-      level: 'info',
-      timestamp: Date.now() / 1000,
-    })
-  }
+  const timestamp = new Date().toISOString()
+
+  console.log(`[${timestamp}] Breadcrumb:`, {
+    message,
+    category: category || 'app',
+    data,
+  })
 }
 
 /**
@@ -124,7 +108,7 @@ export function handleApiError(
   const errorMessage =
     error instanceof Error ? error.message : 'An unexpected error occurred'
 
-  // Capture to Sentry
+  // Log to console
   captureError(error instanceof Error ? error : new Error(errorMessage), {
     ...context,
     tags: {
