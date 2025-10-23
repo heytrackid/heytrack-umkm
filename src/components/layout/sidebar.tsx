@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/ui/skeleton'
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
 
 // Main skeleton for entire sidebar
 const SidebarSkeleton = () => (
@@ -53,7 +53,7 @@ const SidebarSkeleton = () => (
 )
 
 // Dynamically import the main sidebar component
-const LazySidebar = dynamic(() => import('./sidebar/LazySidebar'), {
+const LazySidebar = dynamic(() => import('./sidebar/LazySidebar').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => <SidebarSkeleton />
 })
@@ -64,14 +64,16 @@ interface SidebarProps {
   isMobile?: boolean
 }
 
-export default function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
+function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
   return (
     <Suspense fallback={<SidebarSkeleton />}>
-      <LazySidebar 
-        isOpen={isOpen} 
-        onToggle={onToggle} 
-        isMobile={isMobile} 
+      <LazySidebar
+        isOpen={isOpen}
+        onToggle={onToggle}
+        isMobile={isMobile}
       />
     </Suspense>
   )
 }
+
+export default Sidebar

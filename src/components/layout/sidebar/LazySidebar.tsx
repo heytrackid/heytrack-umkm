@@ -1,13 +1,14 @@
 'use client'
+import * as React from 'react'
 
-import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Menu, X } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
 
 // Lazy imports for sidebar components
-const SidebarHeader = dynamic(() => import('./SidebarHeader'), {
+const SidebarHeader = dynamic(() => import('./SidebarHeader').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
     <div className="h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -22,7 +23,7 @@ const SidebarHeader = dynamic(() => import('./SidebarHeader'), {
   )
 })
 
-const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
+const SidebarNavigation = dynamic(() => import('./SidebarNavigation').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
     <div className="flex-1 px-3 lg:px-4 py-4 space-y-6 overflow-y-auto">
@@ -47,7 +48,7 @@ const SidebarNavigation = dynamic(() => import('./SidebarNavigation'), {
   )
 })
 
-const SidebarFooter = dynamic(() => import('./SidebarFooter'), {
+const SidebarFooter = dynamic(() => import('./SidebarFooter').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
     <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
@@ -59,7 +60,7 @@ const SidebarFooter = dynamic(() => import('./SidebarFooter'), {
   )
 })
 
-const MobileSidebar = dynamic(() => import('./MobileSidebar'), {
+const MobileSidebar = dynamic(() => import('./MobileSidebar').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
     <div className="h-full flex flex-col bg-background">
@@ -98,12 +99,12 @@ interface LazySidebarProps {
 }
 
 export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarProps) {
-  const { 
-    navigationSections, 
-    isItemActive, 
-    prefetchRoute, 
-    isSectionCollapsed, 
-    toggleSection 
+  const {
+    navigationSections,
+    isItemActive,
+    prefetchRoute,
+    isSectionCollapsed,
+    toggleSection
   } = useSidebarLogic()
 
   // If it's mobile mode (used within Sheet), render simplified version
@@ -119,7 +120,7 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onToggle}
         />
@@ -140,15 +141,15 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
       )}>
         {/* Header */}
         <Suspense fallback={<div className="h-16 border-b border-gray-200 dark:border-gray-800" />}>
-          <SidebarHeader 
-            isMobile={Boolean(isOpen && onToggle)} 
+          <SidebarHeader
+            isMobile={Boolean(isOpen && onToggle)}
             onClose={onToggle}
           />
         </Suspense>
 
         {/* Navigation */}
         <Suspense fallback={<div className="flex-1" />}>
-          <SidebarNavigation 
+          <SidebarNavigation
             sections={navigationSections}
             isItemActive={isItemActive}
             onItemMouseEnter={prefetchRoute}
@@ -156,7 +157,7 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
             onToggleSection={toggleSection}
           />
         </Suspense>
-        
+
         {/* Footer */}
         <Suspense fallback={<div className="flex-shrink-0 h-20 border-t border-gray-200 dark:border-gray-800" />}>
           <SidebarFooter />

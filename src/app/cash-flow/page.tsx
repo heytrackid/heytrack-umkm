@@ -1,11 +1,12 @@
 'use client'
 
-import React, { lazy, Suspense } from 'react'
+import * as React from 'react'
+import { lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { Download, AlertCircle, Loader2 } from 'lucide-react'
 import {
@@ -16,6 +17,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
+import { StatsSkeleton, CardSkeleton } from '@/components/ui'
 
 // Lazy load extracted components for better performance and code splitting
 const TransactionForm = lazy(() => import('./components/TransactionForm'))
@@ -61,11 +63,9 @@ export default function CashFlowPage() {
   if (loading && !cashFlowData) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Memuat data arus kas...</p>
-          </div>
+        <div className="space-y-6">
+          <StatsSkeleton count={4} />
+          <CardSkeleton rows={6} />
         </div>
       </AppLayout>
     )

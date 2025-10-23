@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { 
   useSmartPreloading, 

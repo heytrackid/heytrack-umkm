@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { Suspense, lazy, ComponentType } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'

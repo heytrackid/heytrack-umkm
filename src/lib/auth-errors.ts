@@ -216,3 +216,62 @@ export const AUTH_SUCCESS_MESSAGES = {
         description: 'Sampai jumpa lagi!',
     },
 }
+
+/**
+ * Error codes for different failure scenarios
+ */
+export enum ErrorCode {
+    // Auth errors
+    AUTH_ERROR = 'AUTH_ERROR',
+    NO_USER = 'NO_USER',
+    SESSION_EXPIRED = 'SESSION_EXPIRED',
+    INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+    EMAIL_NOT_CONFIRMED = 'EMAIL_NOT_CONFIRMED',
+    WEAK_PASSWORD = 'WEAK_PASSWORD',
+    EMAIL_ALREADY_EXISTS = 'EMAIL_ALREADY_EXISTS',
+
+    // API errors
+    UNAUTHORIZED = 'UNAUTHORIZED',
+    FORBIDDEN = 'FORBIDDEN',
+    NOT_FOUND = 'NOT_FOUND',
+    VALIDATION_ERROR = 'VALIDATION_ERROR',
+    DATABASE_ERROR = 'DATABASE_ERROR',
+    INTERNAL_ERROR = 'INTERNAL_ERROR',
+
+    // Network errors
+    NETWORK_ERROR = 'NETWORK_ERROR',
+    TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+}
+
+/**
+ * Indonesian error messages mapped to error codes
+ */
+export const ERROR_MESSAGES: Record<ErrorCode, string> = {
+    // Auth errors
+    [ErrorCode.AUTH_ERROR]: 'Gagal memverifikasi autentikasi',
+    [ErrorCode.NO_USER]: 'Anda harus login untuk mengakses fitur ini',
+    [ErrorCode.SESSION_EXPIRED]: 'Sesi Anda telah berakhir. Silakan login kembali.',
+    [ErrorCode.INVALID_CREDENTIALS]: 'Email atau password salah',
+    [ErrorCode.EMAIL_NOT_CONFIRMED]: 'Silakan konfirmasi email Anda terlebih dahulu',
+    [ErrorCode.WEAK_PASSWORD]: 'Password terlalu lemah. Gunakan minimal 8 karakter.',
+    [ErrorCode.EMAIL_ALREADY_EXISTS]: 'Email sudah terdaftar',
+
+    // API errors
+    [ErrorCode.UNAUTHORIZED]: 'Anda tidak memiliki akses. Silakan login kembali.',
+    [ErrorCode.FORBIDDEN]: 'Anda tidak memiliki izin untuk mengakses ini',
+    [ErrorCode.NOT_FOUND]: 'Data tidak ditemukan',
+    [ErrorCode.VALIDATION_ERROR]: 'Data yang Anda masukkan tidak valid',
+    [ErrorCode.DATABASE_ERROR]: 'Terjadi kesalahan pada database',
+    [ErrorCode.INTERNAL_ERROR]: 'Terjadi kesalahan. Silakan coba lagi.',
+
+    // Network errors
+    [ErrorCode.NETWORK_ERROR]: 'Koneksi internet bermasalah. Silakan coba lagi',
+    [ErrorCode.TIMEOUT_ERROR]: 'Permintaan timeout. Silakan coba lagi',
+}
+
+/**
+ * Get error message by error code
+ */
+export function getErrorMessage(code: ErrorCode): string {
+    return ERROR_MESSAGES[code] || ERROR_MESSAGES[ErrorCode.INTERNAL_ERROR]
+}

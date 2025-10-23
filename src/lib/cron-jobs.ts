@@ -6,6 +6,9 @@
  * - Smart notifications
  * - Financial sync
  * - Production automation
+ * - HPP snapshot creation
+ * - HPP alert detection
+ * - HPP data archival
  */
 
 import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
@@ -309,11 +312,283 @@ export async function getAutomationStatus() {
   }
 }
 
+/**
+ * @deprecated This function has been migrated to a Supabase Edge Function.
+ * 
+ * HPP snapshot creation is now handled by:
+ * - Edge Function: supabase/functions/hpp-daily-snapshots
+ * - Scheduler: pg-cron (runs daily at 00:00 UTC)
+ * 
+ * This function is kept for reference only and should not be used.
+ * It will be removed in a future version.
+ * 
+ * For more information, see:
+ * - .kiro/specs/hpp-edge-function-migration/design.md
+ * - .kiro/specs/hpp-edge-function-migration/PRODUCTION_READINESS_REPORT.md
+ */
+export async function createDailyHPPSnapshots() {
+  console.warn('⚠️ [DEPRECATED] createDailyHPPSnapshots() is deprecated')
+  console.warn('⚠️ [DEPRECATED] Use Supabase Edge Function: supabase/functions/hpp-daily-snapshots')
+  console.warn('⚠️ [DEPRECATED] This function will be removed in a future version')
+
+  throw new Error(
+    'createDailyHPPSnapshots() is deprecated. ' +
+    'HPP snapshots are now created by the Supabase Edge Function: hpp-daily-snapshots. ' +
+    'See .kiro/specs/hpp-edge-function-migration/ for details.'
+  )
+}
+
+/**
+ * @deprecated This function is deprecated and should not be used.
+ * 
+ * HPP alert detection should be migrated to a Supabase Edge Function
+ * similar to the hpp-daily-snapshots migration.
+ * 
+ * This function is kept for reference only.
+ * It will be removed in a future version.
+ */
+export async function detectHPPAlertsForAllUsers() {
+  console.warn('⚠️ [DEPRECATED] detectHPPAlertsForAllUsers() is deprecated')
+  console.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
+  console.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
+
+  throw new Error(
+    'detectHPPAlertsForAllUsers() is deprecated. ' +
+    'This function should be migrated to a Supabase Edge Function. ' +
+    'See .kiro/specs/hpp-edge-function-migration/ for migration example.'
+  )
+
+  /*
+  // Original implementation kept for reference
+  {
+  try {
+    cronLogger.info('Running HPP alert detection')
+
+    const supabase = createServerSupabaseAdmin()
+
+    // Get all active users with recipes
+    const { data: users, error: usersError } = await supabase
+      .from('recipes')
+      .select('user_id')
+      .eq('is_active', true)
+
+    if (usersError) {
+      cronLogger.error('Error fetching users for alert detection', { error: usersError.message })
+      throw usersError
+    }
+
+    if (!users || users.length === 0) {
+      cronLogger.info('No active users with recipes found')
+      return {
+        total_users: 0,
+        alerts_generated: 0,
+        snapshots_analyzed: 0,
+        errors: []
+      }
+    }
+
+    // Get unique user IDs
+    const uniqueUserIds = [...new Set(users.map(u => u.user_id))]
+
+    let totalAlertsGenerated = 0
+    let totalSnapshotsAnalyzed = 0
+    const errors: Array<{ user_id: string; error: string }> = []
+    const startTime = Date.now()
+
+    // Process each user
+    for (const userId of uniqueUserIds) {
+      try {
+        // Detect alerts for this user
+        const alertResult = await detectHPPAlerts(userId)
+
+        // Save alerts to database
+        if (alertResult.alerts.length > 0) {
+          await saveAlerts(alertResult.alerts)
+          totalAlertsGenerated += alertResult.alerts.length
+        }
+
+        totalSnapshotsAnalyzed += alertResult.snapshots_analyzed
+
+        cronLogger.info(`HPP alerts detected for user ${userId}`, {
+          alerts: alertResult.alerts.length,
+          snapshots_analyzed: alertResult.snapshots_analyzed
+        })
+
+      } catch (error: any) {
+        cronLogger.error(`Error detecting HPP alerts for user ${userId}`, { error: error.message })
+        errors.push({
+          user_id: userId,
+          error: error.message
+        })
+      }
+
+      // Add small delay between users
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    const executionTime = Date.now() - startTime
+    const successRate = ((uniqueUserIds.length - errors.length) / uniqueUserIds.length) * 100
+
+    const summary = {
+      total_users: uniqueUserIds.length,
+      alerts_generated: totalAlertsGenerated,
+      snapshots_analyzed: totalSnapshotsAnalyzed,
+      execution_time_ms: executionTime,
+      success_rate: successRate.toFixed(2) + '%',
+      errors: errors.length > 0 ? errors : undefined,
+      timestamp: new Date().toISOString()
+    }
+
+    cronLogger.info('HPP alert detection complete', summary)
+
+    return summary
+
+  } catch (error: any) {
+    cronLogger.error('Error in HPP alert detection', { error: error.message })
+    throw error
+  }
+}
+
+/**
+ * @deprecated This function is deprecated and should not be used.
+ * 
+ * HPP data archival should be migrated to a Supabase Edge Function
+ * similar to the hpp-daily-snapshots migration.
+ * 
+ * This function is kept for reference only.
+ * It will be removed in a future version.
+ */
+  export async function archiveOldHPPSnapshots() {
+    console.warn('⚠️ [DEPRECATED] archiveOldHPPSnapshots() is deprecated')
+    console.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
+    console.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
+
+    throw new Error(
+      'archiveOldHPPSnapshots() is deprecated. ' +
+      'This function should be migrated to a Supabase Edge Function. ' +
+      'See .kiro/specs/hpp-edge-function-migration/ for migration example.'
+    )
+
+/*
+// Original implementation kept for reference
+  try {
+    cronLogger.info('Running HPP data archival')
+
+    const supabase = createServerSupabaseAdmin()
+
+    // Calculate date 1 year ago
+    const oneYearAgo = new Date()
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+
+    // Get snapshots older than 1 year
+    const { data: oldSnapshots, error: fetchError } = await supabase
+      .from('hpp_snapshots')
+      .select('*')
+      .lt('snapshot_date', oneYearAgo.toISOString())
+
+    if (fetchError) {
+      cronLogger.error('Error fetching old snapshots', { error: fetchError.message })
+      throw fetchError
+    }
+
+    if (!oldSnapshots || oldSnapshots.length === 0) {
+      cronLogger.info('No snapshots to archive')
+      return {
+        snapshots_archived: 0,
+        oldest_date: null,
+        timestamp: new Date().toISOString()
+      }
+    }
+
+    cronLogger.info(`Found ${oldSnapshots.length} snapshots to archive`)
+
+    // Insert into archive table in batches
+    const batchSize = 100
+    let totalArchived = 0
+    const errors: Array<{ batch: number; error: string }> = []
+
+    for (let i = 0; i < oldSnapshots.length; i += batchSize) {
+      const batch = oldSnapshots.slice(i, i + batchSize)
+      const batchNumber = Math.floor(i / batchSize) + 1
+
+      try {
+        // Insert into archive table
+        const { error: insertError } = await supabase
+          .from('hpp_snapshots_archive')
+          .insert(batch)
+
+        if (insertError) {
+          throw insertError
+        }
+
+        // Delete from main table
+        const snapshotIds = batch.map(s => s.id)
+        const { error: deleteError } = await supabase
+          .from('hpp_snapshots')
+          .delete()
+          .in('id', snapshotIds)
+
+        if (deleteError) {
+          throw deleteError
+        }
+
+        totalArchived += batch.length
+
+        cronLogger.info(`Archived batch ${batchNumber}`, {
+          batch_size: batch.length,
+          total_archived: totalArchived
+        })
+
+      } catch (error: any) {
+        cronLogger.error(`Error archiving batch ${batchNumber}`, { error: error.message })
+        errors.push({
+          batch: batchNumber,
+          error: error.message
+        })
+      }
+
+      // Add delay between batches
+      await new Promise(resolve => setTimeout(resolve, 200))
+    }
+
+    // Verify data integrity
+    const { count: remainingOldSnapshots } = await supabase
+      .from('hpp_snapshots')
+      .select('*', { count: 'exact', head: true })
+      .lt('snapshot_date', oneYearAgo.toISOString())
+
+    const { count: archivedCount } = await supabase
+      .from('hpp_snapshots_archive')
+      .select('*', { count: 'exact', head: true })
+
+    const summary = {
+      snapshots_archived: totalArchived,
+      oldest_date: oldSnapshots[0]?.snapshot_date,
+      remaining_old_snapshots: remainingOldSnapshots || 0,
+      total_in_archive: archivedCount || 0,
+      errors: errors.length > 0 ? errors : undefined,
+      timestamp: new Date().toISOString()
+    }
+
+    cronLogger.info('HPP data archival complete', summary)
+
+    return summary
+
+  } catch (error: any) {
+    cronLogger.error('Error in HPP data archival', { error: error.message })
+    throw error
+  }
+}
+
 // Export all cron functions
 export const cronJobs = {
   checkInventoryReorder,
   processSmartNotifications,
   runAutomationEngine,
   cleanupOldNotifications,
-  getAutomationStatus
+  getAutomationStatus,
+  // HPP-related functions DEPRECATED: Should be migrated to Edge Functions
+  // createDailyHPPSnapshots - DEPRECATED
+  // detectHPPAlertsForAllUsers - DEPRECATED
+  // archiveOldHPPSnapshots - DEPRECATED
 }

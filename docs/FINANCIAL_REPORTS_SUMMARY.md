@@ -200,12 +200,12 @@ Click export buttons to download:
 
 **Cash Flow API:**
 ```bash
-curl "http://localhost:3000/api/reports/cash-flow?start_date=2024-01-01&end_date=2024-12-31&group_by=month"
+curl "http://localhost:3000/api/reports/cash-flow?start_date=2025-01-01&end_date=2025-12-31&group_by=month"
 ```
 
 **Profit API:**
 ```bash
-curl "http://localhost:3000/api/reports/profit?start_date=2024-01-01&end_date=2024-12-31"
+curl "http://localhost:3000/api/reports/profit?start_date=2025-01-01&end_date=2025-12-31"
 ```
 
 ---

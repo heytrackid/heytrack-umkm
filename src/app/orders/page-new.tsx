@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import * as React from 'react'
+import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import {
   Breadcrumb,
   BreadcrumbList,

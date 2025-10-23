@@ -3,9 +3,9 @@
  * Reusable custom hooks yang digunakan across domains
  */
 
-// Data Management Hooks
-export { useSupabaseCRUD } from './data/useSupabaseCRUD'
-export { useSupabaseData } from './data/useSupabaseData'
+// Data Management Hooks (consolidated in @/hooks/useSupabase)
+// Re-export from main hooks location
+export { useSupabaseCRUD } from '@/hooks/useSupabase'
 export { useLocalStorage } from './data/useLocalStorage'
 export { useDebounce } from './data/useDebounce'
 

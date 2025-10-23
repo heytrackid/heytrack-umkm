@@ -20,7 +20,8 @@ const tableMap: Record<string, keyof Tables> = {
   'ProductionEquipment': 'productions',
   'ProductionStaff': 'productions',
   'IngredientAllocation': 'productions',
-  'Order': 'orders'
+  'Order': 'orders',
+  'ingredients': 'bahan_baku' // Map ingredients to bahan_baku table
 };
 
 function getActualTableName(table: ExtendedTableNames): keyof Tables {
@@ -333,6 +334,14 @@ export const useIngredients = (options?: { initial?: any[]; refetchOnMount?: boo
   const initialData = Array.isArray(options?.initial) ? options.initial : []
   const data = useSupabaseData('ingredients', { ...options, initial: initialData });
   const mutations = useSupabaseMutation('ingredients', data.refetch);
+  return { ...data, ...mutations };
+};
+
+// Hook for bahan_baku (Indonesian field structure)
+export const useBahanBaku = (options?: { initial?: any[]; refetchOnMount?: boolean }) => {
+  const initialData = Array.isArray(options?.initial) ? options.initial : []
+  const data = useSupabaseData('bahan_baku', { ...options, initial: initialData });
+  const mutations = useSupabaseMutation('bahan_baku', data.refetch);
   return { ...data, ...mutations };
 };
 

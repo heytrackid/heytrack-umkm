@@ -475,3 +475,27 @@ export interface InventoryStockLog {
   metadata?: Json
   created_at: string
 }
+
+// Bahan Baku (Indonesian ingredients table) types
+export interface BahanBaku {
+  id: string
+  account_id: string
+  nama_bahan: string
+  satuan: string
+  harga_per_satuan: number
+  stok_tersedia: number
+  stok_minimum: number
+  wac_harga: number | null
+  jenis_kemasan: string | null
+  created_at: string
+}
+
+// Form data type for create/update operations
+export interface BahanBakuFormData {
+  nama_bahan: string
+  satuan: string
+  harga_per_satuan: number
+  stok_tersedia: number
+  stok_minimum: number
+  jenis_kemasan?: string
+}

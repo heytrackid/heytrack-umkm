@@ -1,17 +1,26 @@
 'use client'
+import * as React from 'react'
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { createSupabaseClient } from '@/lib/supabase';
-import { Database } from '@/types';
+import { createContext, useContext, ReactNode } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 type SupabaseContext = {
-  supabase: ReturnType<typeof createSupabaseClient>
+  supabase: SupabaseClient
 }
 
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
+/**
+ * Provider untuk Supabase client
+ * Harus dibungkus di root layout atau parent component
+ * @example
+ * <SupabaseProvider>
+ *   <App />
+ * </SupabaseProvider>
+ */
 export default function SupabaseProvider({ children }: { children: ReactNode }) {
-  const supabase = createSupabaseClient()
+  const supabase = createClient()
 
   return (
     <Context.Provider value={{ supabase }}>
@@ -20,8 +29,14 @@ export default function SupabaseProvider({ children }: { children: ReactNode }) 
   )
 }
 
+/**
+ * Hook untuk mengakses Supabase client
+ * @throws Error jika digunakan di luar SupabaseProvider
+ * @example
+ * const { supabase } = useSupabase()
+ */
 export const useSupabase = () => {
-  const context = useContext
+  const context = useContext(Context)
   if (context === undefined) {
     throw new Error('useSupabase must be used inside SupabaseProvider')
   }

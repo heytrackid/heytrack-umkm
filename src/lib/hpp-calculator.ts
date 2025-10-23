@@ -1,8 +1,11 @@
 import { Database } from '@/types'
+import type { CostBreakdown, IngredientCost, OperationalCost } from '@/types/hpp-tracking'
+import { createSupabaseClient } from './supabase'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type OperationalCostRow = Database['public']['Tables']['operational_costs']['Row']
 
 export interface RecipeWithIngredients extends Recipe {
   recipe_ingredients: Array<
@@ -55,7 +58,8 @@ export class HPPCalculator {
     })
 
     const totalCost = ingredientBreakdown.reduce((sum, item) => sum + item.totalCost, 0)
-    const costPerServing = totalCost / recipe.servings
+    const servings = recipe.servings || 1
+    const costPerServing = totalCost / servings
     const costPerUnit = totalCost // For single unit recipes
 
     // Calculate percentage for each ingredient
@@ -66,7 +70,7 @@ export class HPPCalculator {
     return {
       recipeId: recipe.id,
       recipeName: recipe.name,
-      servings: recipe.servings,
+      servings: servings,
       totalCost: totalCost,
       costPerServing: costPerServing,
       costPerUnit: costPerUnit,
@@ -158,7 +162,7 @@ export class HPPCalculator {
     recipe.recipe_ingredients.forEach((recipeIngredient) => {
       const ingredient = recipeIngredient.ingredients
       const requiredQuantity = recipeIngredient.quantity * productionQuantity
-      const availableStock = ingredient.current_stock
+      const availableStock = ingredient.current_stock || 0
 
       if (availableStock < requiredQuantity) {
         canProduce = false
@@ -191,7 +195,7 @@ export class HPPCalculator {
    * Calculate low stock ingredients that need restocking
    */
   static checkLowStockIngredients(ingredients: Ingredient[]): Ingredient[] {
-    return ingredients.filter(ingredient => ingredient.current_stock ?? 0 <= ingredient.min_stock)
+    return ingredients.filter(ingredient => (ingredient.current_stock ?? 0) <= (ingredient.min_stock || 0))
   }
 
   /**
@@ -208,14 +212,15 @@ export class HPPCalculator {
   } {
     const dailyUsage = averageUsagePerMonth / 30
     const leadTimeUsage = dailyUsage * leadTimeDays
-    const safetyStock = ingredient.min_stock
+    const safetyStock = ingredient.min_stock || 0
     const reorderPoint = leadTimeUsage + safetyStock
 
-    // Simple EOQ calculation (can be enhanced with carrying costs, order costs)
+    // Simple EOQ calculation (simplified version)
     const monthlyDemand = averageUsagePerMonth
-    const economicOrderQuantity = Math.sqrt(variance) // Assuming 20% carrying cost
+    const economicOrderQuantity = Math.sqrt(monthlyDemand * 2) // Simplified EOQ
 
-    const suggestedOrder = Math.max(economicOrderQuantity, reorderPoint - ingredient.current_stock)
+    const currentStock = ingredient.current_stock || 0
+    const suggestedOrder = Math.max(economicOrderQuantity, reorderPoint - currentStock)
 
     return {
       reorderPoint,
@@ -225,20 +230,194 @@ export class HPPCalculator {
   }
 }
 
+// New interface for HPP calculation result (for historical tracking)
+export interface HPPCalculationResult {
+  total_hpp: number
+  material_cost: number
+  operational_cost: number
+  breakdown: CostBreakdown
+}
+
+/**
+ * Calculate HPP for historical tracking with operational costs
+ * This function calculates the complete HPP including material and operational costs
+ */
+export async function calculateHPP(recipeId: string, userId: string): Promise<HPPCalculationResult> {
+  const supabase = createSupabaseClient()
+
+  // 1. Get recipe with ingredients
+  const { data: recipe, error: recipeError } = await supabase
+    .from('recipes')
+    .select(`
+      *,
+      recipe_ingredients (
+        *,
+        ingredients (*)
+      )
+    `)
+    .eq('id', recipeId)
+    .eq('user_id', userId)
+    .single()
+
+  if (recipeError || !recipe) {
+    throw new Error(`Failed to fetch recipe: ${recipeError?.message || 'Recipe not found'}`)
+  }
+
+  // 2. Calculate material cost from ingredients
+  const ingredientBreakdown: IngredientCost[] = []
+  let materialCost = 0
+
+  if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
+    for (const recipeIngredient of recipe.recipe_ingredients) {
+      const ingredient = recipeIngredient.ingredients
+      if (ingredient) {
+        const cost = recipeIngredient.quantity * ingredient.price_per_unit
+        materialCost += cost
+
+        ingredientBreakdown.push({
+          id: ingredient.id,
+          name: ingredient.name,
+          cost: cost,
+          percentage: 0 // Will calculate after total
+        })
+      }
+    }
+  }
+
+  // 3. Get operational costs for the user (last 30 days to calculate monthly average)
+  const thirtyDaysAgo = new Date()
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+  const { data: operationalCosts, error: opCostError } = await supabase
+    .from('operational_costs')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', thirtyDaysAgo.toISOString())
+
+  if (opCostError) {
+    console.warn('Failed to fetch operational costs:', opCostError.message)
+  }
+
+  // 4. Calculate monthly operational cost
+  const operationalBreakdown: OperationalCost[] = []
+  let monthlyOpCost = 0
+
+  if (operationalCosts && operationalCosts.length > 0) {
+    // Group by category and sum
+    const categoryTotals = new Map<string, number>()
+
+    for (const cost of operationalCosts) {
+      const category = cost.category || 'Other'
+      const amount = calculateMonthlyCost(cost)
+      categoryTotals.set(category, (categoryTotals.get(category) || 0) + amount)
+      monthlyOpCost += amount
+    }
+
+    // Convert to breakdown array
+    for (const [category, cost] of categoryTotals.entries()) {
+      operationalBreakdown.push({
+        category,
+        cost,
+        percentage: 0 // Will calculate after total
+      })
+    }
+  }
+
+  // 5. Estimate production volume per month
+  // Get production history for this recipe in the last 30 days
+  const { data: productions } = await supabase
+    .from('productions')
+    .select('quantity')
+    .eq('recipe_id', recipeId)
+    .eq('user_id', userId)
+    .gte('created_at', thirtyDaysAgo.toISOString())
+
+  let estimatedMonthlyProduction = 100 // Default fallback
+
+  if (productions && productions.length > 0) {
+    const totalProduced = productions.reduce((sum: number, p: any) => sum + (p.quantity || 0), 0)
+    estimatedMonthlyProduction = Math.max(totalProduced, 1) // Avoid division by zero
+  }
+
+  // 6. Calculate operational cost per unit
+  const operationalCostPerUnit = monthlyOpCost / estimatedMonthlyProduction
+
+  // Adjust operational breakdown to per-unit costs
+  const operationalBreakdownPerUnit = operationalBreakdown.map(item => ({
+    ...item,
+    cost: item.cost / estimatedMonthlyProduction
+  }))
+
+  // 7. Calculate total HPP
+  const totalHPP = materialCost + operationalCostPerUnit
+
+  // 8. Calculate percentages
+  if (totalHPP > 0) {
+    ingredientBreakdown.forEach(item => {
+      item.percentage = (item.cost / totalHPP) * 100
+    })
+
+    operationalBreakdownPerUnit.forEach(item => {
+      item.percentage = (item.cost / totalHPP) * 100
+    })
+  }
+
+  return {
+    total_hpp: totalHPP,
+    material_cost: materialCost,
+    operational_cost: operationalCostPerUnit,
+    breakdown: {
+      ingredients: ingredientBreakdown,
+      operational: operationalBreakdownPerUnit
+    }
+  }
+}
+
+/**
+ * Calculate monthly cost from operational cost entry
+ * Handles recurring costs with different frequencies
+ */
+function calculateMonthlyCost(cost: OperationalCostRow): number {
+  const amount = cost.amount || 0
+
+  if (!cost.recurring) {
+    // One-time cost, return as-is
+    return amount
+  }
+
+  // Handle recurring costs based on frequency
+  const frequency = cost.frequency?.toLowerCase() || 'monthly'
+
+  switch (frequency) {
+    case 'daily':
+      return amount * 30
+    case 'weekly':
+      return amount * 4
+    case 'monthly':
+      return amount
+    case 'quarterly':
+      return amount / 3
+    case 'yearly':
+      return amount / 12
+    default:
+      return amount
+  }
+}
+
 // Utility functions for formatting
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
-  }).format
+  }).format(amount)
 }
 
 export const formatNumber = (number: number, decimals: number = 2): string => {
   return new Intl.NumberFormat('id-ID', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
-  }).format
+  }).format(number)
 }
 
 export const formatPercentage = (percentage: number, decimals: number = 1): string => {

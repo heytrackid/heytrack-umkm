@@ -3,12 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // TypeScript configuration
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   // Performance Optimizations
   poweredByHeader: false, // Remove X-Powered-By header for security
   compress: true, // Enable gzip compression
+
+  // Turbopack configuration (Next.js 16+)
+  // Empty config to silence webpack warning - Turbopack handles HMR automatically
+  turbopack: {},
 
   // Image Optimization
   images: {

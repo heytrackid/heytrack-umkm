@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { useSupabaseCRUD } from '@/hooks/useSupabase'

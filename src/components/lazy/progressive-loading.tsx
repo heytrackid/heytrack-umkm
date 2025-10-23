@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { useState, useEffect, ReactNode, Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface Expense {
   id: string
@@ -26,11 +26,11 @@ export function useExpenses() {
     try {
       setLoading(true)
       const response = await fetch('/api/expenses')
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch expenses')
       }
-      
+
       const data = await response.json()
       setExpenses(data)
     } catch (err: any) {
@@ -50,11 +50,11 @@ export function useExpenses() {
         },
         body: JSON.stringify(expenseData),
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to add expense')
       }
-      
+
       const newExpense = await response.json()
       setExpenses(prev => [newExpense, ...prev])
       return newExpense
@@ -73,14 +73,14 @@ export function useExpenses() {
         },
         body: JSON.stringify(expenseData),
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to update expense')
       }
-      
+
       const updatedExpense = await response.json()
-      setExpenses(prev => 
-        prev.map(expense => 
+      setExpenses(prev =>
+        prev.map(expense =>
           expense.id === id ? updatedExpense : expense
         )
       )
@@ -96,11 +96,11 @@ export function useExpenses() {
       const response = await fetch(`/api/expenses/${id}`, {
         method: 'DELETE',
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete expense')
       }
-      
+
       setExpenses(prev => prev.filter(expense => expense.id !== id))
     } catch (err: any) {
       setError(err.message)

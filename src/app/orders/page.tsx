@@ -1,21 +1,21 @@
 'use client'
 
-import React, { useState, useEffect, Suspense, lazy } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
-import { 
+import {
   StatsCardSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
-import { 
+import { SearchFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
+import {
   OrdersTableSkeleton
 } from '@/components/ui/skeletons/table-skeletons'
-import { SearchFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
-import { 
-  ShoppingCart,
-  Plus
+import { useCurrency } from '@/hooks/useCurrency'
+import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import {
+  Plus,
+  ShoppingCart
 } from 'lucide-react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 
 // Lazy load heavy components
 const OrdersStatsSection = lazy(() => import('./components/OrdersStatsSection'))
@@ -33,21 +33,45 @@ export default function OrdersPage() {
   const { loading, setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_ORDERS]: true
   })
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const router = useRouter()
 
   // Fetch orders from API
   useEffect(() => {
-    fetchOrders()
-  }, [])
+    if (!isAuthLoading && isAuthenticated) {
+      fetchOrders()
+    }
+  }, [isAuthLoading, isAuthenticated])
 
   const fetchOrders = async () => {
     try {
       setLoading(LOADING_KEYS.FETCH_ORDERS, true)
       const response = await fetch('/api/orders')
-      if (!response.ok) throw new Error('Failed to fetch orders')
+
+      if (response.status === 401) {
+        toast({
+          title: 'Sesi berakhir',
+          description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+          variant: 'destructive',
+        })
+        router.push('/auth/login')
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders')
+      }
+
       const data = await response.json()
       setOrders(data)
     } catch (error: any) {
       console.error('Error fetching orders:', error)
+      toast({
+        title: 'Terjadi kesalahan',
+        description: 'Gagal memuat data pesanan. Silakan coba lagi.',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(LOADING_KEYS.FETCH_ORDERS, false)
     }
@@ -67,32 +91,59 @@ export default function OrdersPage() {
     partial: { label: 'Dibayar Sebagian', color: 'bg-gray-200 text-gray-900' },
     paid: { label: 'Lunas', color: 'bg-gray-300 text-gray-900' }
   }
-  
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
-      month: 'short', 
+      month: 'short',
       year: 'numeric'
     })
   }
-  
+
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.order_number?.toLowerCase().includes(searchTerm.toLowerCase())
+      order.order_number?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter
     const matchesDateFrom = !dateFrom || order.order_date >= dateFrom
     const matchesDateTo = !dateTo || order.order_date <= dateTo
-    
+
     return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo
   })
-  
 
-  
+
+
   // Stats calculations
   const totalOrders = orders.length
   const totalRevenue = orders.reduce((sum, order) => sum + order.total_amount, 0)
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
   const pendingRevenue = orders.filter(o => o.payment_status === 'unpaid').reduce((sum, o) => sum + o.total_amount, 0)
+
+  // Show loading state while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <ShoppingCart className="h-8 w-8" />
+                Pesanan
+              </h1>
+              <p className="text-muted-foreground">
+                Kelola pesanan pelanggan
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+          <OrdersTableSkeleton rows={5} />
+        </div>
+      </AppLayout>
+    )
+  }
 
   return (
     <AppLayout>
@@ -113,7 +164,7 @@ export default function OrdersPage() {
             Tambah Pesanan
           </Button>
         </div>
-        
+
         {/* Stats Cards (Suspense boundary) */}
         {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
           <div className="grid gap-4 md:grid-cols-4">
@@ -138,7 +189,7 @@ export default function OrdersPage() {
             />
           </Suspense>
         )}
-        
+
         {/* Quick Actions */}
         {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
           <div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />
@@ -147,7 +198,7 @@ export default function OrdersPage() {
             <OrdersQuickActions />
           </Suspense>
         )}
-        
+
         {/* Filters */}
         {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
           <SearchFormSkeleton />
@@ -166,7 +217,7 @@ export default function OrdersPage() {
             />
           </Suspense>
         )}
-        
+
         {/* Orders Table */}
         {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
           <OrdersTableSkeleton rows={5} />

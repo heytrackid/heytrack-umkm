@@ -1,7 +1,8 @@
 'use client'
 
+import * as React from 'react'
 import { useState, useEffect } from 'react'
-import { useHPPCalculations, useRecipes } from '@/hooks/useDatabase'
+import { useRecipes } from '@/hooks/useSupabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
 export const useHPPLogic = () => {

@@ -4,6 +4,7 @@
  */
 
 'use client'
+import * as React from 'react'
 
 import { enhancedApiClient } from '@/lib/enhanced-api'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -32,7 +33,7 @@ export function useOptimizedIngredients() {
       setLoading(true)
       setError(null)
       lastFetchTime.current = now
-      
+
       const result = await enhancedApiClient.getIngredients()
       setData(result)
       hookCache.set(cacheKey, result)
@@ -56,7 +57,7 @@ export function useOptimizedIngredients() {
       setLoading(false)
       return
     }
-    
+
     fetchIngredients()
   }, [fetchIngredients])
 
@@ -64,11 +65,11 @@ export function useOptimizedIngredients() {
   const computedData = useMemo(() => {
     if (!data) return { lowStockCount: 0, totalValue: 0, categories: [] }
 
-    const lowStockCount = data.filter(item => 
+    const lowStockCount = data.filter(item =>
       item.current_stock <= (item.min_stock || 0)
     ).length
 
-    const totalValue = data.reduce((sum, item) => 
+    const totalValue = data.reduce((sum, item) =>
       sum + ((item.current_stock || 0) * (item.price_per_unit || 0)), 0
     )
 
@@ -104,7 +105,7 @@ export function useOptimizedRecipes() {
       setLoading(true)
       setError(null)
       lastFetchTime.current = now
-      
+
       const result = await enhancedApiClient.getRecipes()
       setData(result)
       hookCache.set(cacheKey, result)
@@ -127,14 +128,14 @@ export function useOptimizedRecipes() {
       setLoading(false)
       return
     }
-    
+
     fetchRecipes()
   }, [fetchRecipes])
 
   const computedData = useMemo(() => {
     if (!data) return { recipesWithIngredients: 0, categories: [], totalRecipes: 0 }
 
-    const recipesWithIngredients = data.filter(recipe => 
+    const recipesWithIngredients = data.filter(recipe =>
       recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0
     ).length
 
@@ -171,7 +172,7 @@ export function useOptimizedOrders(limit: number = 50) {
       setLoading(true)
       setError(null)
       lastFetchTime.current = now
-      
+
       const result = await enhancedApiClient.getOrders({ limit })
       setData(result)
       hookCache.set(cacheKey, result)
@@ -194,19 +195,19 @@ export function useOptimizedOrders(limit: number = 50) {
       setLoading(false)
       return
     }
-    
+
     fetchOrders()
   }, [fetchOrders])
 
   const computedData = useMemo(() => {
-    if (!data) return { 
-      pendingOrders: 0, 
-      totalRevenue: 0, 
+    if (!data) return {
+      pendingOrders: 0,
+      totalRevenue: 0,
       urgentOrders: 0,
       recentOrders: []
     }
 
-    const pendingOrders = data.filter(order => 
+    const pendingOrders = data.filter(order =>
       order.status === 'PENDING' || order.status === 'CONFIRMED'
     ).length
 
@@ -254,7 +255,7 @@ export function useOptimizedCustomers() {
       setLoading(true)
       setError(null)
       lastFetchTime.current = now
-      
+
       const result = await enhancedApiClient.getCustomers()
       setData(result)
       hookCache.set(cacheKey, result)
@@ -277,25 +278,25 @@ export function useOptimizedCustomers() {
       setLoading(false)
       return
     }
-    
+
     fetchCustomers()
   }, [fetchCustomers])
 
   const computedData = useMemo(() => {
-    if (!data) return { 
-      activeCustomers: 0, 
-      totalCustomers: 0, 
+    if (!data) return {
+      activeCustomers: 0,
+      totalCustomers: 0,
       avgOrderValue: 0,
       topCustomers: []
     }
 
-    const activeCustomers = data.filter(customer => 
+    const activeCustomers = data.filter(customer =>
       customer.status === 'active'
     ).length
 
     const totalCustomers = data.length
 
-    const avgOrderValue = data.reduce((sum, customer) => 
+    const avgOrderValue = data.reduce((sum, customer) =>
       sum + (customer.total_spent || 0), 0
     ) / Math.max(totalCustomers, 1)
 
@@ -318,7 +319,7 @@ export function useOptimizedCustomers() {
 // Dashboard hook yang mengkombinasi multiple data sources
 export function useOptimizedDashboard() {
   const ingredients = useOptimizedIngredients()
-  const recipes = useOptimizedRecipes() 
+  const recipes = useOptimizedRecipes()
   const orders = useOptimizedOrders(20) // Limited for dashboard
   const customers = useOptimizedCustomers()
 

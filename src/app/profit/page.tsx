@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import * as React from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,7 +21,7 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import {
   TrendingUp,
@@ -37,6 +38,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { StatsSkeleton, CardSkeleton } from '@/components/ui'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 interface ProfitData {
@@ -175,11 +177,9 @@ export default function ProfitReportPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Memuat laporan laba...</p>
-          </div>
+        <div className="space-y-6">
+          <StatsSkeleton count={4} />
+          <CardSkeleton rows={5} />
         </div>
       </AppLayout>
     )

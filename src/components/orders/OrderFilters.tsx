@@ -1,11 +1,11 @@
 'use client'
+import * as React from 'react'
 
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { Search, Filter, X, Calendar } from 'lucide-react'
 import { OrderFilters as OrderFiltersType } from './types'
 

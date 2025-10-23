@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { lazy, Suspense, useState, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'

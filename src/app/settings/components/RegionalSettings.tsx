@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
 import { Settings, RotateCcw } from 'lucide-react'
+import * as React from 'react'
 import { useState } from 'react'
 
 interface RegionalSettingsProps {

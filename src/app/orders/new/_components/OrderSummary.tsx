@@ -1,10 +1,11 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calculator, Save } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
+import { Calculator, Save } from 'lucide-react'
+import * as React from 'react'
 import { OrderFormData, OrderItem } from '../hooks/useOrderLogic'
 
 interface OrderSummaryProps {
@@ -44,26 +45,26 @@ export default function OrderSummary({
             <span>Subtotal:</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
-          
+
           <div className="flex justify-between">
             <span>Diskon:</span>
             <span>- {formatCurrency(formData.discount_amount)}</span>
           </div>
-          
+
           <div className="flex justify-between">
             <span>Pajak ({formData.tax_rate}%):</span>
             <span>{formatCurrency(taxAmount)}</span>
           </div>
-          
+
           {formData.delivery_method === 'delivery' && (
             <div className="flex justify-between">
               <span>Biaya Kirim:</span>
               <span>{formatCurrency(formData.delivery_fee)}</span>
             </div>
           )}
-          
+
           <hr className="my-2" />
-          
+
           <div className="flex justify-between text-lg font-bold">
             <span>Total:</span>
             <span>{formatCurrency(totalAmount)}</span>
@@ -88,9 +89,9 @@ export default function OrderSummary({
         </div>
 
         <div className="space-y-2 pt-4">
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full"
             disabled={isSubmitting || orderItems.length === 0}
             onClick={onSubmit}
           >
@@ -103,10 +104,10 @@ export default function OrderSummary({
               </>
             )}
           </Button>
-          
-          <Button 
-            type="button" 
-            variant="outline" 
+
+          <Button
+            type="button"
+            variant="outline"
             className="w-full"
             onClick={onCancel}
           >

@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     const recipeId = searchParams.get('param')
     const includeOperationalCosts = searchParams.get('param') === 'true'
 
-    const status = {
+    const status: any = {
       hppAutomationEnabled: true,
       lastMonitoringCheck: new Date().toISOString(),
       cachedRecipes: 'Available'
@@ -217,7 +217,7 @@ async function handleBatchHPPRecalculation(data: any) {
 
       results.push({
         recipeId: recipe.id,
-        recipeName: recipe.name,
+        recipeName: recipe.nama,
         status: 'success',
         newHPP: recipeHPP.hppPerServing,
         lastCalculated: recipeHPP.lastCalculated
@@ -227,7 +227,7 @@ async function handleBatchHPPRecalculation(data: any) {
     } catch (error: any) {
       results.push({
         recipeId: recipe.id,
-        recipeName: recipe.name,
+        recipeName: recipe.nama,
         status: 'error',
         error: error.message
       })

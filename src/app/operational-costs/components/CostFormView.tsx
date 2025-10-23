@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -8,8 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
-import { useResponsive } from '@/hooks/use-mobile'
-import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
+import { useResponsive } from '@/hooks/useResponsive'
+import { FormSkeleton } from '@/components/ui'
 
 interface CostFormViewProps {
   currentView: 'add' | 'edit'

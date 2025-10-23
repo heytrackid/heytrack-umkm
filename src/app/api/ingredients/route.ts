@@ -1,46 +1,57 @@
-import { NextRequest } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { 
-  IngredientSchema,
+import {
+  calculateOffset,
+  createPaginationMeta,
+  createSuccessResponse,
+  handleDatabaseError,
+  withQueryValidation,
+  withValidation
+} from '@/lib/api-validation'
+import {
+  BahanBakuSchema,
   PaginationSchema
 } from '@/lib/validations'
-import {
-  withValidation,
-  withQueryValidation,
-  createSuccessResponse,
-  createErrorResponse,
-  handleDatabaseError,
-  extractPagination,
-  calculateOffset,
-  createPaginationMeta
-} from '@/lib/api-validation'
+import { createClient } from '@/utils/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-// GET /api/ingredients - Get all ingredients with pagination and filtering
+// GET /api/ingredients - Get all bahan baku with pagination and filtering
 export const GET = withQueryValidation(
   PaginationSchema.partial(), // Make all fields optional for GET requests
   async (req: NextRequest, query) => {
     try {
-      const { page = 1, limit = 10, sort, order = 'desc', search } = query
-      const offset = calculateOffset(page, limit)
-      
-      const supabase = createServerSupabaseAdmin()
-      
-      // Build query
-      let supabaseQuery = (supabase as any)
-        .from('ingredients')
-        .select('*')
-        .range(offset, offset + limit - 1)
+      // Create authenticated Supabase client
+      const supabase = await createClient()
 
-      // Apply search filter
-      if (search) {
-        supabaseQuery = supabaseQuery.or(`name.ilike.%${search}%,category.ilike.%${search}%,supplier.ilike.%${search}%`)
+      // Validate session
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        console.error('Auth error:', authError)
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        )
       }
 
-      // Apply sorting
+      const { page = 1, limit = 10, sort, order = 'desc', search } = query
+      const offset = calculateOffset(page, limit)
+
+      // Build query - using bahan_baku table
+      let supabaseQuery = supabase
+        .from('bahan_baku')
+        .select('*', { count: 'exact' })
+        .eq('user_id', user.id)
+        .range(offset, offset + limit - 1)
+
+      // Apply search filter - using nama_bahan instead of name
+      if (search) {
+        supabaseQuery = supabaseQuery.ilike('nama_bahan', `%${search}%`)
+      }
+
+      // Apply sorting - default to nama_bahan
       if (sort) {
         supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
       } else {
-        supabaseQuery = supabaseQuery.order('name', { ascending: true })
+        supabaseQuery = supabaseQuery.order('nama_bahan', { ascending: true })
       }
 
       const { data, error, count } = await supabaseQuery
@@ -63,15 +74,31 @@ export const GET = withQueryValidation(
   }
 )
 
-// POST /api/ingredients - Create new ingredient
+// POST /api/ingredients - Create new bahan baku
 export const POST = withValidation(
-  IngredientSchema,
+  BahanBakuSchema,
   async (req: NextRequest, validatedData) => {
     try {
-      const supabase = createServerSupabaseAdmin()
-      const { data: insertedData, error } = await (supabase as any)
-        .from('ingredients')
-        .insert(validatedData)
+      // Create authenticated Supabase client
+      const supabase = await createClient()
+
+      // Validate session
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        console.error('Auth error:', authError)
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        )
+      }
+
+      const { data: insertedData, error } = await supabase
+        .from('bahan_baku')
+        .insert({
+          ...validatedData,
+          user_id: user.id
+        })
         .select('*')
         .single()
 
@@ -79,7 +106,7 @@ export const POST = withValidation(
         return handleDatabaseError(error)
       }
 
-      return createSuccessResponse(insertedData, 201)
+      return createSuccessResponse(insertedData, '201')
 
     } catch (error: any) {
       return handleDatabaseError(error)

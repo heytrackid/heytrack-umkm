@@ -72,7 +72,7 @@ Fetch all operational costs from the database.
       "frequency": "monthly",
       "description": "string",
       "isFixed": false,
-      "expense_date": "2024-01-01",
+      "expense_date": "2025-01-01",
       "supplier": "string",
       "payment_method": "CASH",
       "status": "paid",
@@ -106,7 +106,7 @@ Create a new operational cost.
   "description": "Biaya listrik bulanan",
   "isFixed": false,
   "supplier": "PLN",
-  "expense_date": "2024-01-15",
+  "expense_date": "2025-01-15",
   "payment_method": "BANK_TRANSFER",
   "receipt_number": "INV-001"
 }

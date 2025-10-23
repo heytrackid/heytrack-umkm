@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { CalendarIcon, Save, X } from 'lucide-react'
-import React from 'react'
+import * as React from 'react'
 
 interface CostFormProps {
   cost?: any

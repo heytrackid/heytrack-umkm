@@ -1,6 +1,7 @@
 // Orders service hooks with multi-currency and optional VAT support
 'use client'
 
+import * as React from 'react'
 import { useMemo } from 'react'
 import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'
 import { useSupabaseData } from '@/hooks/useSupabaseData'

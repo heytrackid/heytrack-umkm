@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { Suspense, ComponentType, lazy, ReactElement, useState, useEffect } from 'react'
 import { ErrorBoundary } from './ErrorBoundary'

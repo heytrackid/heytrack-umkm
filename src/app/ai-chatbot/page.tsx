@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'

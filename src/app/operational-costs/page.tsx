@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import React, { lazy, Suspense } from 'react'
+import * as React from 'react'
+import { lazy, Suspense } from 'react'
 
 // Lazy load extracted components for better performance and code splitting
 const CostFormView = lazy(() => import('./components/CostFormView'))
@@ -24,7 +25,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import {
     Plus,
     Receipt,

@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import {
     Download,
@@ -11,7 +12,7 @@ import {
     TrendingDown,
     TrendingUp
 } from 'lucide-react'
-import React, { memo, useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import {
     Area,
     AreaChart,

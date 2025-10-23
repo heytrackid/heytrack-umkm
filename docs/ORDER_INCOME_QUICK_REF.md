@@ -32,7 +32,7 @@ Income is automatically created in the `expenses` table when:
 ```json
 {
   "id": "uuid",
-  "order_no": "ORD-2024-001",
+  "order_no": "ORD-2025-001",
   "status": "DELIVERED",
   "total_amount": 500000,
   "financial_record_id": "uuid-of-income",
@@ -48,7 +48,7 @@ Income is automatically created in the `expenses` table when:
   "status_change": {
     "from": "READY",
     "to": "DELIVERED",
-    "timestamp": "2024-01-15T10:30:00Z"
+    "timestamp": "2025-01-15T10:30:00Z"
   },
   "automation": {
     "triggered": true,
@@ -135,21 +135,21 @@ WHERE status = 'DELIVERED'
   "category": "Revenue",
   "subcategory": "Order Income",
   "amount": 500000,
-  "description": "Order #ORD-2024-001 - John Doe",
-  "expense_date": "2024-01-15",
+  "description": "Order #ORD-2025-001 - John Doe",
+  "expense_date": "2025-01-15",
   "payment_method": "CASH",
   "status": "paid",
   "tags": ["order_income", "revenue", "sales"],
   "metadata": {
-    "order_no": "ORD-2024-001",
+    "order_no": "ORD-2025-001",
     "customer_name": "John Doe",
     "customer_phone": "08123456789",
-    "order_date": "2024-01-10",
-    "delivery_date": "2024-01-15",
+    "order_date": "2025-01-10",
+    "delivery_date": "2025-01-15",
     "status_change": {
       "from": "READY",
       "to": "DELIVERED",
-      "timestamp": "2024-01-15T10:30:00Z"
+      "timestamp": "2025-01-15T10:30:00Z"
     }
   },
   "reference_type": "order",

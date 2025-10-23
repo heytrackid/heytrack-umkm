@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import {
     Edit,
@@ -20,7 +21,7 @@ import {
     SortDesc,
     Trash2
 } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Input } from './input'
 
 // Types for mobile table

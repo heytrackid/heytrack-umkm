@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { Component, ErrorInfo, ReactNode } from 'react'
 import { Card, CardContent } from '../ui/card'
 import { AlertTriangle, RefreshCw, Bug } from 'lucide-react'
 import { Button } from '@/components/ui/button'

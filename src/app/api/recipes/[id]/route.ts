@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server'
 
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
@@ -10,24 +10,23 @@ export async function GET(
   try {
     const supabase = createServerSupabaseAdmin()
     const { data: recipe, error } = await (supabase as any)
-      .from('recipes')
+      .from('resep')
       .select(`
         *,
-        recipe_ingredients (
+        resep_item (
           id,
-          quantity,
-          unit,
-          ingredient:ingredients (
+          qty_per_batch,
+          bahan:bahan_baku (
             id,
-            name,
-            unit,
-            price_per_unit
+            nama_bahan,
+            satuan,
+            harga_per_satuan
           )
         )
       `)
       .eq('id', id)
       .single()
-    
+
     if (error) {
       if (error.code === 'PGRST116') {
         return NextResponse.json(
@@ -62,15 +61,15 @@ export async function PUT(
     const supabase = createServerSupabaseAdmin()
     const body = await request.json()
     const { recipe_ingredients, ...recipeData } = body
-    
+
     // Update the recipe
     const { data: recipe, error: recipeError } = await (supabase as any)
-      .from('recipes')
+      .from('resep')
       .update(recipeData)
       .eq('id', id)
       .select('*')
       .single()
-    
+
     if (recipeError) {
       if (recipeError.code === 'PGRST116') {
         return NextResponse.json(
@@ -89,9 +88,9 @@ export async function PUT(
     if (recipe_ingredients !== undefined) {
       // Delete existing recipe ingredients
       const { error: deleteError } = await (supabase as any)
-        .from('recipe_ingredients')
+        .from('resep_item')
         .delete()
-        .eq('recipe_id', id)
+        .eq('resep_id', id)
 
       if (deleteError) {
         console.error('Error deleting existing ingredients:', deleteError)
@@ -104,15 +103,13 @@ export async function PUT(
       // Add new ingredients if any
       if (recipe_ingredients.length > 0) {
         const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
-          recipe_id: id,
-          ingredient_id: ingredient.ingredient_id,
-          quantity: ingredient.quantity,
-          unit: ingredient.unit,
-          cost: ingredient.cost || 0
+          resep_id: id,
+          bahan_id: ingredient.bahan_id || ingredient.ingredient_id,
+          qty_per_batch: ingredient.qty_per_batch || ingredient.quantity
         }))
 
         const { error: insertError } = await (supabase as any)
-          .from('recipe_ingredients')
+          .from('resep_item')
           .insert(recipeIngredientsToInsert)
 
         if (insertError) {
@@ -127,18 +124,17 @@ export async function PUT(
 
     // Fetch the complete updated recipe with ingredients
     const { data: completeRecipe, error: fetchError } = await (supabase as any)
-      .from('recipes')
+      .from('resep')
       .select(`
         *,
-        recipe_ingredients (
+        resep_item (
           id,
-          quantity,
-          unit,
-          ingredient:ingredients (
+          qty_per_batch,
+          bahan:bahan_baku (
             id,
-            name,
-            unit,
-            price_per_unit
+            nama_bahan,
+            satuan,
+            harga_per_satuan
           )
         )
       `)
@@ -160,7 +156,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/recipes/[id] - Delete recipe (cascade will delete recipe_ingredients)
+// DELETE /api/recipes/[id] - Delete recipe (cascade will delete resep_item)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -168,10 +164,10 @@ export async function DELETE(
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
-    
+
     // Check if recipe exists first
     const { data: existingRecipe, error: checkError } = await (supabase as any)
-      .from('recipes')
+      .from('resep')
       .select('*')
       .eq('id', id)
       .single()
@@ -183,12 +179,12 @@ export async function DELETE(
       )
     }
 
-    // Delete the recipe (cascade will handle recipe_ingredients)
+    // Delete the recipe (cascade will handle resep_item)
     const { error } = await (supabase as any)
-      .from('recipes')
+      .from('resep')
       .delete()
       .eq('id', id)
-    
+
     if (error) {
       console.error('Error deleting recipe:', error)
       return NextResponse.json(

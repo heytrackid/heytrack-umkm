@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import * as React from 'react'
 import { NavigationItem } from './useSidebarLogic'
 
 interface SidebarItemProps {
@@ -11,11 +12,11 @@ interface SidebarItemProps {
   variant?: 'default' | 'mobile'
 }
 
-export default function SidebarItem({ 
-  item, 
-  isActive, 
+function SidebarItem({
+  item,
+  isActive,
   onMouseEnter,
-  variant = 'default' 
+  variant = 'default'
 }: SidebarItemProps) {
   if (variant === 'mobile') {
     return (
@@ -25,19 +26,19 @@ export default function SidebarItem({
         className={cn(
           "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
           "hover:scale-[1.02]",
-          isActive 
-            ? "bg-primary/10 text-primary border border-primary/20" 
+          isActive
+            ? "bg-primary/10 text-primary border border-primary/20"
             : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >
         <div className="flex items-center justify-center mr-3 mt-0.5">
           <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <span className="font-medium truncate">{item.name}</span>
-            
+
             {/* Badges */}
             <div className="flex items-center gap-1 ml-2">
               {item.badge && (
@@ -47,7 +48,7 @@ export default function SidebarItem({
               )}
             </div>
           </div>
-          
+
           {/* Description */}
           {item.description && (
             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -55,7 +56,7 @@ export default function SidebarItem({
             </p>
           )}
         </div>
-        
+
         {/* Active indicator */}
         {isActive && (
           <div className="w-1 bg-primary rounded-full self-stretch ml-2" />
@@ -71,19 +72,19 @@ export default function SidebarItem({
       className={cn(
         "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
         "hover:scale-[1.02]",
-        isActive 
-          ? "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700" 
+        isActive
+          ? "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
           : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white"
       )}
     >
       <div className="flex items-center justify-center mr-3 mt-0.5">
         <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
       </div>
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <span className="font-medium truncate flex-1">{item.name}</span>
-          
+
           {/* Badges */}
           <div className="flex items-center gap-1 flex-shrink-0">
             {item.badge && (
@@ -98,7 +99,7 @@ export default function SidebarItem({
             )}
           </div>
         </div>
-        
+
         {/* Description */}
         {item.description && (
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed break-words">
@@ -106,7 +107,7 @@ export default function SidebarItem({
           </p>
         )}
       </div>
-      
+
       {/* Active indicator */}
       {isActive && (
         <div className="w-1 bg-gray-700 dark:bg-gray-300 rounded-full self-stretch ml-2" />
@@ -114,3 +115,6 @@ export default function SidebarItem({
     </Link>
   )
 }
+
+
+export default SidebarItem

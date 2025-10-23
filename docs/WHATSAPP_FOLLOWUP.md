@@ -295,5 +295,5 @@ For issues or feature requests, create an issue in the project repository or con
 
 ---
 
-*Last updated: December 2024*
+*Last updated: December 2025*
 *Version: 1.0.0*

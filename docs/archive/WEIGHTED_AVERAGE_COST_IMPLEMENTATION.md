@@ -130,9 +130,9 @@ Implementasi lengkap sistem Weighted Average Cost untuk UMKM HeyTrack, memungkin
   current_stock: 45,
   price_per_unit: 15000, // List price
   transactions: [
-    { type: 'PURCHASE', quantity: 25, unit_price: 14500, date: '2024-01-15' },
-    { type: 'PURCHASE', quantity: 30, unit_price: 15200, date: '2024-01-25' },
-    { type: 'PURCHASE', quantity: 20, unit_price: 15800, date: '2024-02-05' }
+    { type: 'PURCHASE', quantity: 25, unit_price: 14500, date: '2025-01-15' },
+    { type: 'PURCHASE', quantity: 30, unit_price: 15200, date: '2025-01-25' },
+    { type: 'PURCHASE', quantity: 20, unit_price: 15800, date: '2025-02-05' }
   ]
 }
 ```

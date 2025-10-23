@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import { createLazyComponent, ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
 import { Suspense } from 'react'
