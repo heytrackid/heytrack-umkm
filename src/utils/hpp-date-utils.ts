@@ -74,7 +74,7 @@ export function formatDate(
                 month: 'short'
             })
         case 'long':
-            // e.g., "25 Desember 2024"
+            // e.g., "25 Desember 2025"
             return d.toLocaleDateString('id-ID', {
                 day: 'numeric',
                 month: 'long',

@@ -93,9 +93,9 @@ List all ingredients.
       "weighted_average_cost": 12000,
       "total_value": 306000,
       "supplier_name": "Toko Bahan Kue",
-      "last_purchase_date": "2024-01-15",
-      "created_at": "2024-01-01T00:00:00Z",
-      "updated_at": "2024-01-15T10:30:00Z"
+      "last_purchase_date": "2025-01-15",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-15T10:30:00Z"
     }
   ],
   "count": 45
@@ -149,12 +149,12 @@ Get ingredient by ID.
       "quantity": 10,
       "price_per_unit": 12500,
       "total_cost": 125000,
-      "purchase_date": "2024-01-15"
+      "purchase_date": "2025-01-15"
     }
   ],
   "stock_movements": [
     {
-      "date": "2024-01-15",
+      "date": "2025-01-15",
       "quantity": 10,
       "type": "purchase",
       "reference": "PO-001"
@@ -195,7 +195,7 @@ Record ingredient purchase.
   "ingredient_id": "uuid",
   "quantity": 25,
   "price_per_unit": 12500,
-  "purchase_date": "2024-01-20",
+  "purchase_date": "2025-01-20",
   "supplier_name": "PT Bogasari",
   "notes": "Pembelian rutin"
 }
@@ -241,7 +241,7 @@ List all recipes.
       "selling_price": 25000,
       "margin_percentage": 40,
       "ingredients_count": 8,
-      "created_at": "2024-01-01T00:00:00Z"
+      "created_at": "2025-01-01T00:00:00Z"
     }
   ]
 }
@@ -337,12 +337,12 @@ List all orders.
   "data": [
     {
       "id": "uuid",
-      "order_no": "ORD-2024-001",
+      "order_no": "ORD-2025-001",
       "customer_id": "uuid",
       "customer_name": "John Doe",
       "customer_phone": "08123456789",
-      "order_date": "2024-01-20",
-      "delivery_date": "2024-01-22",
+      "order_date": "2025-01-20",
+      "delivery_date": "2025-01-22",
       "status": "DELIVERED",
       "payment_status": "PAID",
       "payment_method": "CASH",
@@ -358,8 +358,8 @@ List all orders.
           "subtotal": 125000
         }
       ],
-      "created_at": "2024-01-20T08:00:00Z",
-      "updated_at": "2024-01-22T10:30:00Z"
+      "created_at": "2025-01-20T08:00:00Z",
+      "updated_at": "2025-01-22T10:30:00Z"
     }
   ],
   "count": 150
@@ -375,8 +375,8 @@ Create new order.
   "customer_id": "uuid",
   "customer_name": "Jane Smith",
   "customer_phone": "08198765432",
-  "order_date": "2024-01-20",
-  "delivery_date": "2024-01-22",
+  "order_date": "2025-01-20",
+  "delivery_date": "2025-01-22",
   "payment_method": "TRANSFER",
   "notes": "Please pack carefully",
   "items": [
@@ -400,7 +400,7 @@ Create new order.
   "success": true,
   "order": {
     "id": "uuid",
-    "order_no": "ORD-2024-002",
+    "order_no": "ORD-2025-002",
     "total_amount": 145000,
     "status": "PENDING"
   }
@@ -430,7 +430,7 @@ Update order status (with auto-sync to income).
   "status_change": {
     "from": "READY",
     "to": "DELIVERED",
-    "timestamp": "2024-01-22T10:30:00Z"
+    "timestamp": "2025-01-22T10:30:00Z"
   },
   "automation": {
     "triggered": true,
@@ -475,7 +475,7 @@ List all customers.
       "address": "Jl. Raya No. 123",
       "total_orders": 15,
       "total_spent": 2500000,
-      "last_order_date": "2024-01-20",
+      "last_order_date": "2025-01-20",
       "created_at": "2023-12-01T00:00:00Z"
     }
   ]
@@ -518,28 +518,28 @@ List all expenses (including revenue/income).
       "category": "Revenue",
       "subcategory": "Order Income",
       "amount": 150000,
-      "description": "Order #ORD-2024-001 - John Doe",
-      "expense_date": "2024-01-22",
+      "description": "Order #ORD-2025-001 - John Doe",
+      "expense_date": "2025-01-22",
       "payment_method": "CASH",
       "status": "paid",
       "reference_type": "order",
       "reference_id": "uuid",
       "tags": ["order_income", "revenue", "sales"],
       "metadata": {
-        "order_no": "ORD-2024-001",
+        "order_no": "ORD-2025-001",
         "customer_name": "John Doe"
       },
-      "created_at": "2024-01-22T10:30:00Z"
+      "created_at": "2025-01-22T10:30:00Z"
     },
     {
       "id": "uuid",
       "category": "Bahan Baku",
       "amount": 500000,
       "description": "Pembelian tepung terigu 40kg",
-      "expense_date": "2024-01-20",
+      "expense_date": "2025-01-20",
       "payment_method": "TRANSFER",
       "status": "paid",
-      "created_at": "2024-01-20T14:00:00Z"
+      "created_at": "2025-01-20T14:00:00Z"
     }
   ]
 }
@@ -555,7 +555,7 @@ Create expense or manual income.
   "subcategory": "Listrik",
   "amount": 500000,
   "description": "Biaya listrik bulan Januari",
-  "expense_date": "2024-01-31",
+  "expense_date": "2025-01-31",
   "payment_method": "TRANSFER",
   "status": "paid"
 }
@@ -568,7 +568,7 @@ Create expense or manual income.
   "subcategory": "Pre-Order",
   "amount": 1000000,
   "description": "Pre-order untuk acara pernikahan",
-  "expense_date": "2024-01-25",
+  "expense_date": "2025-01-25",
   "payment_method": "TRANSFER",
   "status": "paid",
   "tags": ["pre_order", "wedding"]
@@ -603,8 +603,8 @@ Generate cash flow report.
 {
   "period": {
     "type": "month",
-    "start_date": "2024-01-01",
-    "end_date": "2024-01-31"
+    "start_date": "2025-01-01",
+    "end_date": "2025-01-31"
   },
   "summary": {
     "total_income": 25000000,
@@ -657,8 +657,8 @@ Generate cash flow report.
   },
   "transactions": [
     {
-      "date": "2024-01-22",
-      "description": "Order #ORD-2024-001",
+      "date": "2025-01-22",
+      "description": "Order #ORD-2025-001",
       "category": "Revenue",
       "type": "income",
       "amount": 150000,
@@ -681,8 +681,8 @@ Generate profit report with WAC-based COGS.
 {
   "period": {
     "type": "month",
-    "start_date": "2024-01-01",
-    "end_date": "2024-01-31"
+    "start_date": "2025-01-01",
+    "end_date": "2025-01-31"
   },
   "summary": {
     "revenue": 25000000,

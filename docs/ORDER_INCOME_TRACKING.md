@@ -77,21 +77,21 @@ When an order is marked as DELIVERED, the system creates an income record with t
   "category": "Revenue",
   "subcategory": "Order Income",
   "amount": 500000, // Order total_amount
-  "description": "Order #ORD-2024-001 - John Doe",
-  "expense_date": "2024-01-15", // delivery_date or order_date
+  "description": "Order #ORD-2025-001 - John Doe",
+  "expense_date": "2025-01-15", // delivery_date or order_date
   "payment_method": "CASH",
   "status": "paid", // Based on payment_status
   "tags": ["order_income", "revenue", "sales"],
   "metadata": {
-    "order_no": "ORD-2024-001",
+    "order_no": "ORD-2025-001",
     "customer_name": "John Doe",
     "customer_phone": "08123456789",
-    "order_date": "2024-01-10",
-    "delivery_date": "2024-01-15",
+    "order_date": "2025-01-10",
+    "delivery_date": "2025-01-15",
     "status_change": { // Only for status updates
       "from": "READY",
       "to": "DELIVERED",
-      "timestamp": "2024-01-15T10:30:00Z"
+      "timestamp": "2025-01-15T10:30:00Z"
     }
   },
   "reference_type": "order",
@@ -110,13 +110,13 @@ Creates a new order and automatically records income if status is DELIVERED.
 **Request Body:**
 ```json
 {
-  "order_no": "ORD-2024-001",
+  "order_no": "ORD-2025-001",
   "customer_id": "uuid",
   "customer_name": "John Doe",
   "customer_phone": "08123456789",
   "status": "DELIVERED", // Must be DELIVERED to trigger income recording
-  "order_date": "2024-01-10",
-  "delivery_date": "2024-01-15",
+  "order_date": "2025-01-10",
+  "delivery_date": "2025-01-15",
   "delivery_time": "14:00",
   "total_amount": 500000,
   "discount": 50000,
@@ -143,7 +143,7 @@ Creates a new order and automatically records income if status is DELIVERED.
 ```json
 {
   "id": "uuid",
-  "order_no": "ORD-2024-001",
+  "order_no": "ORD-2025-001",
   "status": "DELIVERED",
   "total_amount": 500000,
   "financial_record_id": "uuid-of-income-record",
@@ -181,7 +181,7 @@ Updates order status and creates income record when transitioning to DELIVERED.
   "success": true,
   "order": {
     "id": "uuid",
-    "order_no": "ORD-2024-001",
+    "order_no": "ORD-2025-001",
     "status": "DELIVERED",
     "financial_record_id": "uuid-of-income-record",
     // ... other fields
@@ -189,7 +189,7 @@ Updates order status and creates income record when transitioning to DELIVERED.
   "status_change": {
     "from": "READY",
     "to": "DELIVERED",
-    "timestamp": "2024-01-15T10:30:00Z"
+    "timestamp": "2025-01-15T10:30:00Z"
   },
   "automation": {
     "triggered": true,
@@ -286,7 +286,7 @@ curl -X POST http://localhost:3000/api/orders \
     "customer_name": "Test Customer",
     "status": "DELIVERED",
     "total_amount": 100000,
-    "order_date": "2024-01-15",
+    "order_date": "2025-01-15",
     "payment_status": "PAID"
   }'
 ```
@@ -323,7 +323,7 @@ curl -X POST http://localhost:3000/api/orders \
     "customer_name": "Test Customer 2",
     "status": "PENDING",
     "total_amount": 200000,
-    "order_date": "2024-01-15"
+    "order_date": "2025-01-15"
   }'
 
 # Then update status to DELIVERED
@@ -389,7 +389,7 @@ curl -X POST http://localhost:3000/api/orders \
     "customer_name": "Free Sample",
     "status": "DELIVERED",
     "total_amount": 0,
-    "order_date": "2024-01-15"
+    "order_date": "2025-01-15"
   }'
 ```
 

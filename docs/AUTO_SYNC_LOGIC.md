@@ -111,7 +111,7 @@ POST /api/ingredient-purchases
   ingredient_id: "uuid",
   quantity: 25,
   unit_price: 12500,
-  purchase_date: "2024-01-20",
+  purchase_date: "2025-01-20",
   supplier: "PT Bogasari"
 }
 
@@ -187,7 +187,7 @@ POST /api/expenses
   subcategory: "Listrik",
   amount: 500000,
   description: "Biaya listrik bulan Januari",
-  expense_date: "2024-01-31",
+  expense_date: "2025-01-31",
   payment_method: "TRANSFER",
   status: "paid"
 }
@@ -220,7 +220,7 @@ POST /api/expenses
   subcategory: "Pre-Order",
   amount: 1000000,
   description: "Pre-order untuk acara pernikahan",
-  expense_date: "2024-01-25",
+  expense_date: "2025-01-25",
   payment_method: "TRANSFER",
   status: "paid",
   tags: ["pre_order", "wedding"]
@@ -555,7 +555,7 @@ SELECT
   reference_type,
   description
 FROM expenses
-WHERE expense_date >= '2024-01-01'
+WHERE expense_date >= '2025-01-01'
 ORDER BY expense_date DESC;
 ```
 

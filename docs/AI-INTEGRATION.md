@@ -287,19 +287,19 @@ NODE_ENV=development DEBUG=ai:* pnpm dev
 
 ## Roadmap
 
-### Q2 2024
+### Q2 2025
 - [ ] Advanced customer segmentation
 - [ ] Automated pricing rules
 - [ ] Multi-location inventory sync
 - [ ] Voice-activated insights
 
-### Q3 2024  
+### Q3 2025  
 - [ ] Predictive maintenance for equipment
 - [ ] Supply chain optimization
 - [ ] Social media sentiment analysis
 - [ ] Competitive intelligence
 
-### Q4 2024
+### Q4 2025
 - [ ] IoT sensor integration
 - [ ] Machine learning model fine-tuning
 - [ ] Advanced reporting & dashboards
@@ -314,5 +314,5 @@ For technical support or feature requests:
 
 ---
 
-*Last updated: January 2024*
+*Last updated: January 2025*
 *Version: 1.0.0*

@@ -98,7 +98,7 @@ Three cron jobs have been implemented to automate HPP tracking:
 ```json
 {
   "snapshots_archived": 500,
-  "oldest_date": "2024-01-01T00:00:00.000Z",
+  "oldest_date": "2025-01-01T00:00:00.000Z",
   "remaining_old_snapshots": 0,
   "total_in_archive": 1500,
   "errors": [],

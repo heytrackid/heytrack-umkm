@@ -148,7 +148,7 @@ POST /api/orders
   "order_no": "TEST-001",
   "status": "DELIVERED",
   "total_amount": 100000,
-  "order_date": "2024-01-15"
+  "order_date": "2025-01-15"
 }
 ```
 **Expected:** Income record created, `financial_record_id` set

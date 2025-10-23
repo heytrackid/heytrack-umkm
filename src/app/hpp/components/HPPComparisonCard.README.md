@@ -142,8 +142,8 @@ GET /api/hpp/comparison?recipe_id={id}&period={period}
       "avg_hpp": 14000,
       "min_hpp": 13500,
       "max_hpp": 14500,
-      "start_date": "2024-12-01T00:00:00Z",
-      "end_date": "2024-12-31T00:00:00Z"
+      "start_date": "2025-12-01T00:00:00Z",
+      "end_date": "2025-12-31T00:00:00Z"
     },
     "change": {
       "absolute": 1000,

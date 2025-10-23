@@ -8,7 +8,7 @@ import PrefetchLink from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useResponsive } from '@/hooks/use-mobile'
-import { Calculator, RefreshCw, Target, TrendingUp } from 'lucide-react'
+import { AlertCircle, Calculator, RefreshCw, Target, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import * as React from 'react'
 import { Suspense } from 'react'
@@ -136,6 +136,29 @@ const HPPHistoricalTab = dynamic(() => import('./components/HPPHistoricalTab'), 
 // Hook import
 import { useHPPLogic } from './hooks/useHPPLogic'
 
+// Import tracking components
+const HPPAlertsList = dynamic(() => import('./components/HPPAlertsList'), {
+  ssr: false,
+  loading: () => (
+    <Card>
+      <CardContent className="pt-6">
+        <Skeleton className="h-96 w-full" />
+      </CardContent>
+    </Card>
+  )
+})
+
+const HPPRecommendationsPanel = dynamic(() => import('./components/HPPRecommendationsPanel'), {
+  ssr: false,
+  loading: () => (
+    <Card>
+      <CardContent className="pt-6">
+        <Skeleton className="h-96 w-full" />
+      </CardContent>
+    </Card>
+  )
+})
+
 export default function HPPAndPricingPage() {
   const { isMobile } = useResponsive()
   const {
@@ -262,18 +285,31 @@ export default function HPPAndPricingPage() {
 
             {/* Main Tabs */}
             <Tabs defaultValue="hpp-calculator" className="space-y-6">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-3'}`}>
-                <TabsTrigger value="hpp-calculator" className={isMobile ? 'w-full' : ''}>
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 h-auto' : 'grid-cols-5'}`}>
+                <TabsTrigger value="hpp-calculator" className={isMobile ? 'w-full text-xs' : ''}>
                   <Calculator className="h-4 w-4 mr-2" />
-                  Kalkulator HPP
+                  {!isMobile && 'Kalkulator HPP'}
+                  {isMobile && 'HPP'}
                 </TabsTrigger>
-                <TabsTrigger value="pricing-strategy" className={isMobile ? 'w-full' : ''}>
+                <TabsTrigger value="pricing-strategy" className={isMobile ? 'w-full text-xs' : ''}>
                   <Target className="h-4 w-4 mr-2" />
-                  Strategi Pricing
+                  {!isMobile && 'Strategi Pricing'}
+                  {isMobile && 'Pricing'}
                 </TabsTrigger>
-                <TabsTrigger value="hpp-historical" className={isMobile ? 'w-full' : ''}>
+                <TabsTrigger value="hpp-historical" className={isMobile ? 'w-full text-xs' : ''}>
                   <TrendingUp className="h-4 w-4 mr-2" />
-                  HPP Lanjutan
+                  {!isMobile && 'Tracking Lanjutan'}
+                  {isMobile && 'Tracking'}
+                </TabsTrigger>
+                <TabsTrigger value="hpp-alerts" className={isMobile ? 'w-full text-xs' : ''}>
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                  {!isMobile && 'Alerts'}
+                  {isMobile && 'Alert'}
+                </TabsTrigger>
+                <TabsTrigger value="hpp-recommendations" className={isMobile ? 'w-full text-xs' : ''}>
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  {!isMobile && 'Rekomendasi'}
+                  {isMobile && 'Tips'}
                 </TabsTrigger>
               </TabsList>
 
@@ -318,6 +354,24 @@ export default function HPPAndPricingPage() {
                   <HPPHistoricalTab
                     recipes={recipes}
                     formatCurrency={formatCurrency}
+                    isMobile={isMobile}
+                  />
+                </Suspense>
+              </TabsContent>
+
+              {/* HPP Alerts Tab */}
+              <TabsContent value="hpp-alerts">
+                <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded" />}>
+                  <HPPAlertsList
+                    isMobile={isMobile}
+                  />
+                </Suspense>
+              </TabsContent>
+
+              {/* HPP Recommendations Tab */}
+              <TabsContent value="hpp-recommendations">
+                <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded" />}>
+                  <HPPRecommendationsPanel
                     isMobile={isMobile}
                   />
                 </Suspense>

@@ -19,6 +19,8 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { Button } from '@/components/ui/button'
+import { Sparkles } from 'lucide-react'
 
 // Lazy loaded components and hooks
 import { useRecipeLogic } from './hooks/useRecipeLogic'
@@ -80,6 +82,17 @@ export default function ProductionPage() {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
+
+          {/* Header with AI Generator Button */}
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">Resep</h1>
+            <PrefetchLink href="/recipes/ai-generator">
+              <Button className="gap-2">
+                <Sparkles className="h-4 w-4" />
+                Generate Resep AI
+              </Button>
+            </PrefetchLink>
+          </div>
           
           {/* Recipe List View */}
           {currentView === 'list' && (
