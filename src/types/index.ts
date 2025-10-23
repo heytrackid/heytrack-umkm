@@ -42,7 +42,7 @@ import type { DatabaseFunctions } from './functions'
 
 // Import additional types
 import type { AuditFields, SecurityContext, UserProfile } from './auth'
-import type { InventoryStockLog } from './inventory'
+import type { BahanBaku, BahanBakuFormData, InventoryStockLog } from './inventory'
 import type { SyncEvent, SystemMetric } from './sync'
 
 // Import HPP tracking types
