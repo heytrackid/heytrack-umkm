@@ -51,6 +51,26 @@ export const IngredientSchema = z.object({
 
 export type IngredientFormData = z.infer<typeof IngredientSchema>
 
+// Bahan Baku validation schema (Indonesian field names matching database)
+export const BahanBakuSchema = z.object({
+  nama_bahan: indonesianName,
+  satuan: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
+    message: 'Satuan tidak valid'
+  }),
+  harga_per_satuan: z.number().positive('Harga harus lebih dari 0'),
+  stok_tersedia: nonNegativeNumber,
+  stok_minimum: nonNegativeNumber,
+  jenis_kemasan: optionalString
+}).refine(data => {
+  // Custom validation: stok_minimum should be less than or equal to stok_tersedia
+  return data.stok_minimum <= data.stok_tersedia
+}, {
+  message: 'Stok minimum tidak boleh lebih besar dari stok tersedia',
+  path: ['stok_minimum']
+})
+
+export type BahanBakuFormData = z.infer<typeof BahanBakuSchema>
+
 // Recipe validation schema
 export const RecipeSchema = z.object({
   name: indonesianName,
@@ -279,14 +299,14 @@ export function formatValidationErrors(errors: z.ZodIssue[]): string[] {
 // Convert Zod errors to field-level errors for form libraries
 export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, string> {
   const fieldErrors: Record<string, string> = {}
-  
+
   errors.forEach((error) => {
     const fieldName = error.path.join('.')
     if (!fieldErrors[fieldName]) {
       fieldErrors[fieldName] = error.message
     }
   })
-  
+
   return fieldErrors
 }
 
@@ -299,42 +319,42 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
  */
 export function validateInput(data: any, rules?: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = []
-  
+
   for (const [field, rule] of Object.entries(rules || {})) {
     const value = data[field]
-    
+
     if (rule?.required && (!value || value === '')) {
       errors.push(`validation.fieldRequired`)
       continue
     }
-    
+
     if (value) {
       if (rule?.type && typeof value !== rule?.type) {
         errors.push(`validation.invalidType`)
       }
-      
+
       if (rule?.minLength && value.length < rule?.minLength) {
         errors.push(`validation.minLength`)
       }
-      
+
       if (rule?.maxLength && value.length > rule?.maxLength) {
         errors.push(`validation.maxLength`)
       }
-      
+
       if (rule?.pattern && !rule?.pattern?.test(data[field])) {
         errors.push(`validation.invalidFormat`)
       }
-      
+
       if (rule?.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data[field])) {
         errors.push(`validation.invalidEmail`)
       }
-      
+
       if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
         errors.push(`validation.dangerousContent`)
       }
     }
   }
-  
+
   return {
     isValid: errors.length === 0,
     errors
@@ -346,7 +366,7 @@ export function validateInput(data: any, rules?: any): { isValid: boolean; error
  */
 export function sanitizeSQL(input: string): string {
   return input
-    .replace(/'/g,"''")
+    .replace(/'/g, "''")
     .replace(/;/g, '')
     .replace(/--/g, '')
     .replace(/\/\*/g, '')

@@ -21,8 +21,8 @@ import {
   SearchFormSkeleton
 } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/useResponsive'
 import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import { useResponsive } from '@/hooks/useResponsive'
 import {
   Edit2,
   Plus,
@@ -36,7 +36,6 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { toast } from 'react-hot-toast'
 import { useDebounce } from '../../shared/hooks'
 
 // Dynamically import the heavy table component
@@ -59,20 +58,52 @@ export default function CustomersPage() {
 
 
   const [customers, setCustomers] = useState<any[]>([])
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+
+  // Handle auth errors
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      })
+      router.push('/auth/login')
+    }
+  }, [isAuthLoading, isAuthenticated, router, toast])
 
   // Fetch customer data from API
   useEffect(() => {
-    fetchCustomers()
-  }, [])
+    if (!isAuthLoading && isAuthenticated) {
+      fetchCustomers()
+    }
+  }, [isAuthLoading, isAuthenticated])
 
   const fetchCustomers = async () => {
     try {
       const response = await fetch('/api/customers')
+
+      if (response.status === 401) {
+        toast({
+          title: 'Sesi berakhir',
+          description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+          variant: 'destructive',
+        })
+        router.push('/auth/login')
+        return
+      }
+
       if (!response.ok) throw new Error('Failed to fetch customers')
       const data = await response.json()
       setCustomers(data)
     } catch (error: any) {
       console.error('Error fetching customers:', error)
+      toast({
+        title: 'Terjadi kesalahan',
+        description: 'Gagal memuat data pelanggan. Silakan coba lagi.',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
     }
@@ -94,8 +125,8 @@ export default function CustomersPage() {
   }
 
   const handleSelectItem = (itemId: string) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId) 
+    setSelectedItems(prev =>
+      prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     )
@@ -103,14 +134,14 @@ export default function CustomersPage() {
 
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) return
-    
+
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
     const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
-    
+
     const confirmed = window.confirm(
       `⚠️ Yakin ingin menghapus ${selectedItems.length} pelanggan berikut?\n\n${customerNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
     )
-    
+
     if (confirmed) {
       try {
         const deletePromises = selectedItems.map(id =>
@@ -129,9 +160,9 @@ export default function CustomersPage() {
 
   const handleBulkEdit = () => {
     if (selectedItems.length === 0) return
-    
+
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
-    
+
     toast(`Bulk edit untuk ${selectedItems.length} pelanggan akan segera tersedia`, { icon: 'ℹ️' })
   }
 
@@ -145,7 +176,7 @@ export default function CustomersPage() {
     const confirmed = window.confirm(
       `⚠️ KONFIRMASI PENGHAPUSAN\n\nYakin ingin menghapus pelanggan:\n"${customer.name}"\n\n❗ PERHATIAN: Tindakan ini tidak bisa dibatalkan!`
     )
-    
+
     if (confirmed) {
       try {
         const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
@@ -169,15 +200,47 @@ export default function CustomersPage() {
       { label: 'Dashboard', href: '/' },
       { label: 'Data Pelanggan', href: currentView === 'list' ? undefined : '/customers' }
     ]
-    
+
     if (currentView !== 'list') {
-      items.push({ 
+      items.push({
         label: currentView === 'add' ? 'Tambah Pelanggan' : 'Edit Pelanggan',
         href: undefined
       })
     }
-    
+
     return items
+  }
+
+  // Show loading state while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <PrefetchLink href="/">Dashboard</PrefetchLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Pelanggan</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold">Data Pelanggan</h1>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+          <CustomersTableSkeleton rows={5} />
+        </div>
+      </AppLayout>
+    )
   }
 
   return (
@@ -192,8 +255,8 @@ export default function CustomersPage() {
                   {item.href ? (
                     <BreadcrumbLink asChild>
                       <PrefetchLink href={item.href}>
-                      {item.label}
-                    </PrefetchLink>
+                        {item.label}
+                      </PrefetchLink>
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>
@@ -216,7 +279,7 @@ export default function CustomersPage() {
             </p>
           </div>
           <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
-            <Button  className={isMobile ? 'w-full' : ''}>
+            <Button className={isMobile ? 'w-full' : ''}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -236,42 +299,42 @@ export default function CustomersPage() {
           </div>
         ) : (
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-4'}`}>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Users className="h-8 w-8 text-primary mx-auto mb-2" />
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {customers.length}
-              </div>
-              <p className="text-sm text-muted-foreground">Total Pelanggan</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {customers.filter(c => c.status === 'active').length}
-              </div>
-              <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">{settings.currency.symbol}</div>
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {formatCurrency(customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / customers.length : 0)}
-              </div>
-              <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
-              <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-                {Math.round(customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0) / customers.length : 0)}
-              </div>
-              <p className="text-sm text-muted-foreground">Rata-rata Order</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {customers.length}
+                </div>
+                <p className="text-sm text-muted-foreground">Total Pelanggan</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <UserPlus className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {customers.filter(c => c.status === 'active').length}
+                </div>
+                <p className="text-sm text-muted-foreground">Pelanggan Aktif</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="h-8 w-8 text-blue-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">{settings.currency.symbol}</div>
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {formatCurrency(customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) / customers.length : 0)}
+                </div>
+                <p className="text-sm text-muted-foreground">Rata-rata Belanja</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="h-8 w-8 text-orange-600 mx-auto mb-2 flex items-center justify-center font-bold text-lg">#</div>
+                <div className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
+                  {Math.round(customers.length > 0 ? customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0) / customers.length : 0)}
+                </div>
+                <p className="text-sm text-muted-foreground">Rata-rata Order</p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -280,59 +343,59 @@ export default function CustomersPage() {
           <SearchFormSkeleton />
         ) : (
           <div className="space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          {/* Bulk Actions */}
-          {selectedItems.length > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-900">
-                  {selectedItems.length} pelanggan dipilih
-                </span>
-                <span className="text-xs text-gray-500">
-                  ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
-                  {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
-                </span>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Button
-                  
-                  size="sm"
-                  onClick={() => setSelectedItems([])}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  Batal
-                </Button>
-                <Button
-                  
-                  size="sm"
-                  onClick={handleBulkEdit}
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Edit Semua
-                </Button>
-                <Button
-                  
-                  size="sm"
-                  onClick={handleBulkDelete}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Hapus Semua
-                </Button>
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </div>
-          )}
+
+            {/* Bulk Actions */}
+            {selectedItems.length > 0 && (
+              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-900">
+                    {selectedItems.length} pelanggan dipilih
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    ({filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString())).map(customer => customer.name).slice(0, 2).join(', ')}
+                    {selectedItems.length > 2 ? ` +${selectedItems.length - 2} lainnya` : ''})
+                  </span>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <Button
+
+                    size="sm"
+                    onClick={() => setSelectedItems([])}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+
+                    size="sm"
+                    onClick={handleBulkEdit}
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit Semua
+                  </Button>
+                  <Button
+
+                    size="sm"
+                    onClick={handleBulkDelete}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Hapus Semua
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

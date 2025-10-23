@@ -1,10 +1,24 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { TimePeriod } from '@/types/hpp-tracking'
+import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 // GET /api/hpp/snapshots - Get HPP snapshots with filters
 export async function GET(request: NextRequest) {
     try {
+        // Create authenticated Supabase client
+        const supabase = await createClient()
+
+        // Validate session
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            console.error('Auth error:', authError)
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
+
         const { searchParams } = new URL(request.url)
         const recipeId = searchParams.get('recipe_id')
         const period = (searchParams.get('period') || '30d') as TimePeriod
@@ -24,13 +38,12 @@ export async function GET(request: NextRequest) {
         // Calculate date range based on period
         const dateRange = calculateDateRange(period, startDate, endDate)
 
-        const supabase = createServerSupabaseAdmin()
-
-        // Get recipe name
+        // Get recipe name and verify ownership
         const { data: recipe, error: recipeError } = await supabase
             .from('recipes')
             .select('name')
             .eq('id', recipeId)
+            .eq('user_id', user.id)
             .single()
 
         if (recipeError || !recipe) {
@@ -45,6 +58,7 @@ export async function GET(request: NextRequest) {
             .from('hpp_snapshots')
             .select('*', { count: 'exact' })
             .eq('recipe_id', recipeId)
+            .eq('user_id', user.id)
             .gte('snapshot_date', dateRange.start)
             .lte('snapshot_date', dateRange.end)
             .order('snapshot_date', { ascending: false })
@@ -61,62 +75,53 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json({
-            success: true,
-            data: snapshots || [],
-            meta: {
-                count: count || 0,
-                limit,
-                offset,
-                period,
-                date_range: dateRange,
-                recipe_name: recipe.name
-            }
+            snapshots: snapshots || [],
+            recipe_name: recipe.nama,
+            total: count || 0,
+            period,
+            date_range: dateRange
         })
 
     } catch (error: any) {
-        console.error('Error in snapshots endpoint:', error)
+        console.error('Error in GET /api/hpp/snapshots:', error)
         return NextResponse.json(
-            { error: 'Internal server error', details: error.message },
+            { error: 'Internal server error' },
             { status: 500 }
         )
     }
 }
 
-// Helper function to calculate date range based on period
+// Helper function to calculate date range
 function calculateDateRange(
     period: TimePeriod,
     startDate?: string | null,
     endDate?: string | null
 ): { start: string; end: string } {
-    const end = endDate ? new Date(endDate) : new Date()
-    let start: Date
+    const end = endDate || new Date().toISOString().split('T')[0]
+    let start: string
 
-    // If custom date range provided, use it
     if (startDate) {
-        start = new Date(startDate)
+        start = startDate
     } else {
-        // Calculate based on period
-        start = new Date(end)
+        const date = new Date()
         switch (period) {
             case '7d':
-                start.setDate(start.getDate() - 7)
+                date.setDate(date.getDate() - 7)
                 break
             case '30d':
-                start.setDate(start.getDate() - 30)
+                date.setDate(date.getDate() - 30)
                 break
             case '90d':
-                start.setDate(start.getDate() - 90)
+                date.setDate(date.getDate() - 90)
                 break
             case '1y':
-                start.setFullYear(start.getFullYear() - 1)
+                date.setFullYear(date.getFullYear() - 1)
                 break
             default:
-                start.setDate(start.getDate() - 30)
+                date.setDate(date.getDate() - 30)
         }
+        start = date.toISOString().split('T')[0]
     }
 
-    return {
-        start: start.toISOString(),
-        end: end.toISOString()
-    }
+    return { start, end }
 }

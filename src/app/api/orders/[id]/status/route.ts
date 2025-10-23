@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { triggerWorkflow } from '@/lib/automation-engine'
+import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { NextRequest, NextResponse } from 'next/server'
 
 // PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
 export async function PATCH(
@@ -10,10 +10,10 @@ export async function PATCH(
   try {
     const resolvedParams = await params
     const orderId = resolvedParams.id
-    
+
     const body = await request.json()
     const { status, notes } = body
-    
+
     // Validate required fields
     if (!status) {
       return NextResponse.json(
@@ -21,69 +21,52 @@ export async function PATCH(
         { status: 400 }
       )
     }
-    
+
     // Valid order statuses
     const validStatuses = [
       'PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'
     ]
-    
+
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
         { error: 'Invalid status. Must be one of: ' + validStatuses.join(', ') },
         { status: 400 }
       )
     }
-    
+
     const supabase = createServerSupabaseAdmin()
-    
+
     // Get current order to check previous status
     const { data: currentOrder, error: fetchError } = await (supabase as any)
       .from('orders')
       .select('*')
       .eq('id', orderId)
       .single()
-    
+
     if (fetchError || !currentOrder) {
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
       )
     }
-    
+
     const previousStatus = currentOrder.status
     let incomeRecordId = null
-    
+
     // If transitioning to DELIVERED, create income record
     if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount > 0) {
       const { data: incomeRecord, error: incomeError } = await (supabase as any)
-        .from('expenses')
+        .from('financial_transactions')
         .insert({
-          category: 'Revenue',
-          subcategory: 'Order Income',
-          amount: currentOrder.total_amount,
-          description: `Order #${currentOrder.order_no}${currentOrder.customer_name ? ' - ' + currentOrder.customer_name : ''}`,
-          expense_date: currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0],
-          payment_method: currentOrder.payment_method || 'CASH',
-          status: currentOrder.payment_status === 'PAID' ? 'paid' : 'pending',
-          tags: ['order_income', 'revenue', 'sales'],
-          metadata: {
-            order_no: currentOrder.order_no,
-            customer_name: currentOrder.customer_name,
-            customer_phone: currentOrder.customer_phone,
-            order_date: currentOrder.order_date,
-            delivery_date: currentOrder.delivery_date,
-            status_change: {
-              from: previousStatus,
-              to: status,
-              timestamp: new Date().toISOString()
-            }
-          },
-          reference_type: 'order',
-          reference_id: orderId
+          jenis: 'pemasukan',
+          kategori: 'Revenue',
+          nominal: currentOrder.total_amount,
+          tanggal: currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0],
+          referensi: `Order #${currentOrder.order_no}${currentOrder.customer_name ? ' - ' + currentOrder.customer_name : ''}`
         })
         .select()
         .single()
-      
+
       if (incomeError) {
         console.error('Error creating income record:', incomeError)
         return NextResponse.json(
@@ -91,11 +74,11 @@ export async function PATCH(
           { status: 500 }
         )
       }
-      
+
       incomeRecordId = incomeRecord.id
       console.log(`💰 Income record created for order ${currentOrder.order_no}: ${currentOrder.total_amount}`)
     }
-    
+
     // Update order status with financial_record_id if income was created
     const { data: updatedOrder, error: updateError } = await (supabase as any)
       .from('orders')
@@ -108,13 +91,13 @@ export async function PATCH(
       .eq('id', orderId)
       .select('*')
       .single()
-    
+
     if (updateError) {
       console.error('Error updating order status:', updateError)
       // Rollback income record if order update fails
       if (incomeRecordId) {
         await (supabase as any)
-          .from('expenses')
+          .from('financial_transactions')
           .delete()
           .eq('id', incomeRecordId)
       }
@@ -123,9 +106,9 @@ export async function PATCH(
         { status: 500 }
       )
     }
-    
+
     console.log(`🔄 Order ${currentOrder.order_no}: ${previousStatus} → ${status}`)
-    
+
     // TRIGGER AUTOMATION WORKFLOWS based on status change
     try {
       // Order completed workflow
@@ -137,7 +120,7 @@ export async function PATCH(
           newStatus: status
         })
       }
-      
+
       // Order cancelled workflow
       if (status === 'CANCELLED' && previousStatus !== 'CANCELLED') {
         console.log('🚀 Triggering order cancellation automation...')
@@ -148,7 +131,7 @@ export async function PATCH(
           reason: notes || 'Order cancelled'
         })
       }
-      
+
       // General status change trigger
       await triggerWorkflow('order.status_changed', orderId, {
         order: updatedOrder,
@@ -156,12 +139,12 @@ export async function PATCH(
         newStatus: status,
         notes
       })
-      
+
     } catch (automationError) {
       console.error('⚠️ Automation trigger error (non-blocking):', automationError)
       // Don't fail the status update if automation fails
     }
-    
+
     // Return success response with automation and income tracking info
     return NextResponse.json({
       success: true,
@@ -182,7 +165,7 @@ export async function PATCH(
       },
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })
-    
+
   } catch (error: any) {
     console.error('Error in order status update:', error)
     return NextResponse.json(
@@ -200,23 +183,23 @@ export async function GET(
   try {
     const resolvedParams = await params
     const orderId = resolvedParams.id
-    
+
     const supabase = createServerSupabaseAdmin()
-    
+
     // Get order with basic info
     const { data: order, error: orderError } = await (supabase as any)
       .from('orders')
       .select('*')
       .eq('id', orderId)
       .single()
-    
+
     if (orderError || !order) {
       return NextResponse.json(
         { error: 'Order not found' },
         { status: 404 }
       )
     }
-    
+
     // Note: Status history would require a separate audit table in production
     // For now, return current status info
     const statusInfo = {
@@ -226,13 +209,13 @@ export async function GET(
       automation_enabled: isAutomationEnabled(order.status),
       updated_at: order.updated_at
     }
-    
+
     return NextResponse.json({
       order_id: order.id,
       order_no: order.order_no,
       status_info: statusInfo
     })
-    
+
   } catch (error: any) {
     console.error('Error getting order status:', error)
     return NextResponse.json(
@@ -245,15 +228,15 @@ export async function GET(
 // Helper functions
 function getTriggeredWorkflows(newStatus: string, previousStatus: string): string[] {
   const workflows = []
-  
+
   if (newStatus === 'DELIVERED' && previousStatus !== 'DELIVERED') {
     workflows.push('order.completed', 'inventory.update', 'financial.record', 'customer.stats')
   }
-  
+
   if (newStatus === 'CANCELLED' && previousStatus !== 'CANCELLED') {
     workflows.push('order.cancelled', 'inventory.restore')
   }
-  
+
   return workflows
 }
 
@@ -266,7 +249,7 @@ function getStatusDisplay(status: string): string {
     'DELIVERED': 'Selesai',
     'CANCELLED': 'Dibatalkan'
   }
-  
+
   return statusMap[status] || status
 }
 
@@ -279,7 +262,7 @@ function getValidTransitions(currentStatus: string): string[] {
     'DELIVERED': [], // Final status
     'CANCELLED': []  // Final status
   }
-  
+
   return transitions[currentStatus] || []
 }
 

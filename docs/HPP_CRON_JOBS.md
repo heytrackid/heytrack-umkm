@@ -14,9 +14,12 @@ Three cron jobs have been implemented to automate HPP tracking:
 
 ### 1. Daily HPP Snapshot Creation
 
-**Schedule:** `0 0 * * *` (Daily at midnight)  
-**Endpoint:** `/api/cron/hpp-snapshots`  
-**Function:** `createDailyHPPSnapshots()`
+**Schedule:** `0 0 * * *` (Daily at midnight UTC)  
+**Implementation:** Supabase Edge Function (migrated from Next.js API)  
+**Edge Function:** `supabase/functions/hpp-daily-snapshots`  
+**Scheduler:** pg-cron
+
+**Migration Note:** This job has been migrated from a Next.js API route to a Supabase Edge Function for better performance and lower costs. See `.kiro/specs/hpp-edge-function-migration/` for details.
 
 **Purpose:**
 - Creates HPP snapshots for all active recipes across all users
@@ -161,9 +164,19 @@ SUPABASE_SERVICE_ROLE_KEY=...
 You can manually trigger cron jobs for testing:
 
 ### Test Snapshot Creation
+
+**Note:** Snapshot creation has been migrated to a Supabase Edge Function.
+
 ```bash
-curl -X GET https://your-domain.com/api/cron/hpp-snapshots \
-  -H "Authorization: Bearer your-cron-secret"
+# New method using Edge Function
+curl -X POST https://your-project.supabase.co/functions/v1/hpp-daily-snapshots \
+  -H "Authorization: Bearer your-service-role-key" \
+  -H "Content-Type: application/json"
+
+# Or use the verification script
+NEXT_PUBLIC_SUPABASE_URL="your-url" \
+SUPABASE_SERVICE_ROLE_KEY="your-key" \
+npx tsx scripts/verify-hpp-edge-function.ts
 ```
 
 ### Test Alert Detection

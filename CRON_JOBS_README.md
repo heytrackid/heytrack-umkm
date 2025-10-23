@@ -40,12 +40,16 @@ You should see:
 
 ### Manual Testing
 
+**Note:** HPP snapshot creation has been migrated to a Supabase Edge Function.  
+See `.kiro/specs/hpp-edge-function-migration/` for details.
+
 Test each endpoint:
 
 ```bash
-# Test snapshots
-curl https://your-domain.vercel.app/api/cron/hpp-snapshots \
-  -H "Authorization: Bearer your-cron-secret"
+# Test snapshots (MIGRATED TO EDGE FUNCTION)
+# New method:
+curl -X POST https://your-project.supabase.co/functions/v1/hpp-daily-snapshots \
+  -H "Authorization: Bearer your-service-role-key"
 
 # Test alerts
 curl https://your-domain.vercel.app/api/cron/hpp-alerts \

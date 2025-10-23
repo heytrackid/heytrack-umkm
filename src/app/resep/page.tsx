@@ -8,28 +8,28 @@ import * as React from 'react'
  * Components are split into separate files and loaded dynamically as needed.
  */
 
-import { Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Button } from '@/components/ui/button'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { Sparkles } from 'lucide-react'
+import { Suspense } from 'react'
 
 // Lazy loaded components and hooks
-import { useRecipeLogic } from './hooks/useRecipeLogic'
-import { 
-  LazyRecipeList, 
-  LazyRecipeForm,
-  RecipePageWithProgressiveLoading 
-} from './components/LazyComponents'
 import { DataGridSkeleton } from '@/components/ui/skeletons/table-skeletons'
+import {
+  LazyRecipeForm,
+  LazyRecipeList,
+  RecipePageWithProgressiveLoading
+} from './components/LazyComponents'
+import { useRecipeLogic } from './hooks/useRecipeLogic'
 
 export default function ProductionPage() {
   const {
@@ -42,7 +42,7 @@ export default function ProductionPage() {
     selectedItems,
     searchTerm,
     newRecipe,
-    
+
     // Actions
     setCurrentView,
     setSearchTerm,
@@ -58,6 +58,47 @@ export default function ProductionPage() {
     getBreadcrumbItems
   } = useRecipeLogic()
 
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const router = useRouter()
+
+  // Handle auth errors
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      })
+      router.push('/auth/login')
+    }
+  }, [isAuthLoading, isAuthenticated, router, toast])
+
+  // Show loading state while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <PrefetchLink href="/">Dashboard</PrefetchLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Resep</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <h1 className="text-3xl font-bold">Resep</h1>
+          <DataGridSkeleton rows={8} />
+        </div>
+      </AppLayout>
+    )
+  }
+
   return (
     <AppLayout>
       <RecipePageWithProgressiveLoading currentView={currentView}>
@@ -69,10 +110,10 @@ export default function ProductionPage() {
                   <BreadcrumbItem>
                     {item.href ? (
                       <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
-                        {item.label}
-                      </PrefetchLink>
-                    </BreadcrumbLink>
+                        <PrefetchLink href={item.href}>
+                          {item.label}
+                        </PrefetchLink>
+                      </BreadcrumbLink>
                     ) : (
                       <BreadcrumbPage>{item.label}</BreadcrumbPage>
                     )}
@@ -93,7 +134,7 @@ export default function ProductionPage() {
               </Button>
             </PrefetchLink>
           </div>
-          
+
           {/* Recipe List View */}
           {currentView === 'list' && (
             <Suspense fallback={<DataGridSkeleton rows={8} />}>
@@ -114,7 +155,7 @@ export default function ProductionPage() {
               />
             </Suspense>
           )}
-          
+
           {/* Recipe Add/Edit Form */}
           {(currentView === 'add' || currentView === 'edit') && (
             <Suspense fallback={<DataGridSkeleton rows={6} />}>

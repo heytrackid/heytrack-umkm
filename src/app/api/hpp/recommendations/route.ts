@@ -111,11 +111,11 @@ async function generateRecommendations(
 
             recommendations.push({
                 recipe_id: recipeId,
-                recipe_name: recipe.name,
+                recipe_name: recipe.nama,
                 type: 'supplier_review',
                 priority: changePercentage > 20 ? 'high' : 'medium',
                 title: 'Review Supplier atau Bahan Alternatif',
-                description: `HPP ${recipe.name} naik konsisten ${changePercentage.toFixed(1)}% dalam 30 hari terakhir. Pertimbangkan untuk mencari supplier dengan harga lebih kompetitif atau bahan alternatif.`,
+                description: `HPP ${recipe.nama} naik konsisten ${changePercentage.toFixed(1)}% dalam 30 hari terakhir. Pertimbangkan untuk mencari supplier dengan harga lebih kompetitif atau bahan alternatif.`,
                 potential_savings: potentialSavings,
                 action_items: [
                     'Bandingkan harga dari minimal 3 supplier berbeda',
@@ -145,12 +145,12 @@ async function generateRecommendations(
         const potentialSavings = (latestSnapshot.operational_cost - targetOperationalCost) * 10 // Estimate based on 10 units
 
         const description = operationalCostIncrease > 20
-            ? `Biaya operasional ${recipe.name} naik ${operationalCostIncrease.toFixed(1)}% dalam 30 hari terakhir dan mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
-            : `Biaya operasional ${recipe.name} mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
+            ? `Biaya operasional ${recipe.nama} naik ${operationalCostIncrease.toFixed(1)}% dalam 30 hari terakhir dan mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
+            : `Biaya operasional ${recipe.nama} mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
 
         recommendations.push({
             recipe_id: recipeId,
-            recipe_name: recipe.name,
+            recipe_name: recipe.nama,
             type: 'operational_efficiency',
             priority: operationalCostIncrease > 20 ? 'high' : 'medium',
             title: 'Optimasi Efisiensi Operasional',
@@ -179,11 +179,11 @@ async function generateRecommendations(
 
         recommendations.push({
             recipe_id: recipeId,
-            recipe_name: recipe.name,
+            recipe_name: recipe.nama,
             type: 'price_adjustment',
             priority: currentMargin < 10 ? 'high' : 'medium',
             title: 'Penyesuaian Harga Jual untuk Meningkatkan Margin',
-            description: `Margin profit ${recipe.name} hanya ${currentMargin.toFixed(1)}%. Dengan meningkatkan harga atau mengurangi HPP, margin bisa ditingkatkan ke target 25%.`,
+            description: `Margin profit ${recipe.nama} hanya ${currentMargin.toFixed(1)}%. Dengan meningkatkan harga atau mengurangi HPP, margin bisa ditingkatkan ke target 25%.`,
             potential_savings: potentialAdditionalProfit,
             action_items: [
                 `Opsi 1: Naikkan harga jual dari ${formatCurrency(currentPrice)} ke ${formatCurrency(suggestedPrice)} (margin 25%)`,
@@ -208,7 +208,7 @@ async function generateRecommendations(
 
             recommendations.push({
                 recipe_id: recipeId,
-                recipe_name: recipe.name,
+                recipe_name: recipe.nama,
                 type: 'ingredient_alternative',
                 priority: ingredientPercentage > 40 ? 'medium' : 'low',
                 title: 'Evaluasi Bahan Utama dan Alternatif',

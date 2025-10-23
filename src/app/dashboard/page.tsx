@@ -10,9 +10,11 @@ import {
   StockAlertSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/useResponsive'
+import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import { useResponsive } from '@/hooks/useResponsive'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import {
   BarChart3,
@@ -22,7 +24,7 @@ import {
   Target
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import * as React from 'react'
+import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
 // Dynamic import to reduce bundle size
@@ -85,9 +87,24 @@ export default function Dashboard() {
     [LOADING_KEYS.RECENT_ORDERS]: true,
     [LOADING_KEYS.STOCK_ALERTS]: true
   })
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const router = useRouter()
 
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
+
+  // Handle session expiry
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      })
+      router.push('/auth/login')
+    }
+  }, [isAuthLoading, isAuthenticated, router, toast])
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
@@ -127,6 +144,26 @@ export default function Dashboard() {
     }
   }
 
+  // Show loading state while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <DashboardHeaderSkeleton />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RecentOrdersSkeleton />
+            <StockAlertSkeleton />
+          </div>
+        </div>
+      </AppLayout>
+    )
+  }
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -147,6 +184,11 @@ export default function Dashboard() {
                   day: 'numeric'
                 })}
               </p>
+              {user && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Selamat datang, {user.email}
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

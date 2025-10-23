@@ -1,30 +1,44 @@
+import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
   try {
+    // Create authenticated Supabase client
+    const supabase = await createClient()
+
+    // Validate session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.error('Auth error:', authError)
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const limit = searchParams.get('limit')
     const search = searchParams.get('search')
-    
-    const supabase = createServerSupabaseAdmin()
-    let query = (supabase as any)
+
+    let query = supabase
       .from('customers')
       .select('*')
+      .eq('user_id', user.id)
       .order('name')
-    
+
     // Add search filter if provided
     if (search) {
       query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`)
     }
-    
+
     if (limit) {
       query = query.limit(parseInt(limit))
     }
-    
+
     const { data, error } = await query
-    
+
     if (error) {
       console.error('Error fetching customers:', error)
       return NextResponse.json(
@@ -46,8 +60,22 @@ export async function GET(request: NextRequest) {
 // POST /api/customers - Create new customer
 export async function POST(request: NextRequest) {
   try {
+    // Create authenticated Supabase client
+    const supabase = await createClient()
+
+    // Validate session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.error('Auth error:', authError)
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
-    
+
     // Validate required fields
     if (!body.name) {
       return NextResponse.json(
@@ -64,10 +92,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createServerSupabaseAdmin()
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('customers')
       .insert({
+        user_id: user.id,
         name: body.name,
         email: body.email,
         phone: body.phone,
@@ -83,7 +111,7 @@ export async function POST(request: NextRequest) {
       })
       .select('*')
       .single()
-    
+
     if (error) {
       if (error.code === '23505') { // Unique constraint violation
         return NextResponse.json(

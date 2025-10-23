@@ -1,309 +1,327 @@
+import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseClient } from '@/lib/supabase'
 
-// GET - List all ingredient purchases
+/**
+ * GET /api/ingredient-purchases
+ * List all ingredient purchases with optional filters
+ */
 export async function GET(request: NextRequest) {
-  try {
-    const supabase = createSupabaseClient()
-    
-    // Get query params for filtering
-    const searchParams = request.nextUrl.searchParams
-    const ingredientId = searchParams.get('ingredient_id')
-    const startDate = searchParams.get('start_date')
-    const endDate = searchParams.get('end_date')
-    const supplier = searchParams.get('supplier')
-    
-    // Build query
-    let query = supabase
-      .from('ingredient_purchases')
-      .select(`
-        *,
-        ingredient:ingredients(
-          id,
-          name,
-          unit,
-          category
-        )
-      `)
-      .order('purchase_date', { ascending: false })
-    
-    // Apply filters
-    if (ingredientId) {
-      query = query.eq('ingredient_id', ingredientId)
-    }
-    
-    if (startDate) {
-      query = query.gte('purchase_date', startDate)
-    }
-    
-    if (endDate) {
-      query = query.lte('purchase_date', endDate)
-    }
-    
-    if (supplier) {
-      query = query.ilike('supplier', `%${supplier}%`)
-    }
-    
-    const { data: purchases, error } = await query
-    
-    if (error) {
-      console.error('Error fetching purchases:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch purchases', details: error.message },
-        { status: 500 }
-      )
-    }
-    
-    return NextResponse.json(purchases || [])
-  } catch (error: any) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
-  }
-}
+    try {
+        const supabase = await createClient()
 
-// POST - Create new ingredient purchase with expense tracking and WAC
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createSupabaseClient()
-    const body = await request.json()
-    
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized', details: 'User not authenticated' },
-        { status: 401 }
-      )
-    }
-    
-    // Validate required fields
-    const requiredFields = ['ingredient_id', 'quantity', 'unit_price', 'purchase_date']
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        )
-      }
-    }
-    
-    // Calculate total price if not provided
-    const totalPrice = body.total_price || (parseFloat(body.quantity) * parseFloat(body.unit_price))
-    const quantity = parseFloat(body.quantity)
-    const unitPrice = parseFloat(body.unit_price)
-    
-    // Get ingredient details
-    const { data: ingredient, error: ingredientError } = await supabase
-      .from('ingredients')
-      .select('id, name, unit, current_stock, category')
-      .eq('id', body.ingredient_id)
-      .single()
-    
-    if (ingredientError || !ingredient) {
-      return NextResponse.json(
-        { error: 'Ingredient not found', details: ingredientError?.message },
-        { status: 404 }
-      )
-    }
-    
-    // 1. Create expense record first
-    const { data: expense, error: expenseError } = await supabase
-      .from('expenses')
-      .insert({
-        user_id: user.id,
-        category: 'Inventory',
-        subcategory: ingredient.category || 'General',
-        amount: totalPrice,
-        description: `Purchase: ${ingredient.name} (${quantity} ${ingredient.unit})`,
-        expense_date: body.purchase_date,
-        supplier: body.supplier || null,
-        payment_method: 'CASH',
-        status: 'paid',
-        tags: ['ingredient_purchase', 'inventory'],
-        metadata: {
-          ingredient_id: body.ingredient_id,
-          ingredient_name: ingredient.name,
-          quantity: quantity,
-          unit: ingredient.unit,
-          unit_price: unitPrice
+        // Validate session
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            )
         }
-      })
-      .select()
-      .single()
-    
-    if (expenseError) {
-      console.error('Error creating expense:', expenseError)
-      return NextResponse.json(
-        { error: 'Failed to create expense record', details: expenseError.message },
-        { status: 500 }
-      )
-    }
-    
-    // 2. Insert purchase record with expense reference
-    const { data: purchase, error: purchaseError } = await supabase
-      .from('ingredient_purchases')
-      .insert({
-        user_id: user.id,
-        ingredient_id: body.ingredient_id,
-        quantity: quantity,
-        unit_price: unitPrice,
-        total_price: totalPrice,
-        cost_per_unit: unitPrice,
-        supplier: body.supplier || null,
-        purchase_date: body.purchase_date,
-        notes: body.notes || null,
-        expense_id: expense.id
-      })
-      .select(`
+
+        // Get query parameters
+        const searchParams = request.nextUrl.searchParams
+        const bahanId = searchParams.get('bahan_id')
+        const startDate = searchParams.get('start_date')
+        const endDate = searchParams.get('end_date')
+        const supplier = searchParams.get('supplier')
+
+        // Build query
+        let query = supabase
+            .from('bahan_baku_pembelian')
+            .select(`
         *,
-        ingredient:ingredients(
+        bahan:bahan_baku (
           id,
-          name,
-          unit,
-          category,
-          current_stock,
-          weighted_average_cost
-        ),
-        expense:expenses(
-          id,
-          amount,
-          expense_date
+          nama_bahan,
+          satuan,
+          stok_tersedia,
+          harga_per_satuan
         )
       `)
-      .single()
-    
-    if (purchaseError) {
-      console.error('Error creating purchase:', purchaseError)
-      // Rollback expense if purchase fails
-      await supabase.from('expenses').delete().eq('id', expense.id)
-      return NextResponse.json(
-        { error: 'Failed to create purchase', details: purchaseError.message },
-        { status: 500 }
-      )
+            .eq('user_id', user.id)
+            .order('tanggal_beli', { ascending: false })
+
+        // Apply filters
+        if (bahanId) {
+            query = query.eq('bahan_id', bahanId)
+        }
+
+        if (startDate) {
+            query = query.gte('tanggal_beli', startDate)
+        }
+
+        if (endDate) {
+            query = query.lte('tanggal_beli', endDate)
+        }
+
+        if (supplier) {
+            query = query.ilike('supplier', `%${supplier}%`)
+        }
+
+        const { data: purchases, error } = await query
+
+        if (error) {
+            console.error('Error fetching purchases:', error)
+            return NextResponse.json(
+                { error: 'Failed to fetch purchases' },
+                { status: 500 }
+            )
+        }
+
+        return NextResponse.json(purchases)
+    } catch (error: any) {
+        console.error('Error in GET /api/ingredient-purchases:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
     }
-    
-    // 3. Update expense with purchase reference
-    await supabase
-      .from('expenses')
-      .update({
-        reference_type: 'ingredient_purchase',
-        reference_id: purchase.id
-      })
-      .eq('id', expense.id)
-    
-    // 4. Update ingredient stock
-    const newStock = (ingredient.current_stock || 0) + quantity
-    
-    const { error: stockError } = await supabase
-      .from('ingredients')
-      .update({ 
-        current_stock: newStock,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', body.ingredient_id)
-    
-    if (stockError) {
-      console.error('Warning: Failed to update ingredient stock:', stockError)
-    }
-    
-    // Note: WAC is automatically calculated by database trigger
-    
-    return NextResponse.json(purchase, { status: 201 })
-  } catch (error: any) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
-  }
 }
 
-// DELETE - Delete a purchase and related expense
+/**
+ * POST /api/ingredient-purchases
+ * Create new ingredient purchase and update stock
+ */
+export async function POST(request: NextRequest) {
+    try {
+        const supabase = await createClient()
+
+        // Validate session
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
+
+        const body = await request.json()
+
+        // Validate required fields
+        if (!body.bahan_id || !body.qty_beli || !body.harga_satuan) {
+            return NextResponse.json(
+                { error: 'Missing required fields: bahan_id, qty_beli, harga_satuan' },
+                { status: 400 }
+            )
+        }
+
+        const qtyBeli = parseFloat(body.qty_beli)
+        const hargaSatuan = parseFloat(body.harga_satuan)
+        const totalHarga = qtyBeli * hargaSatuan
+
+        // Get ingredient info
+        const { data: bahan, error: bahanError } = await supabase
+            .from('bahan_baku')
+            .select('*')
+            .eq('id', body.bahan_id)
+            .eq('user_id', user.id)
+            .single()
+
+        if (bahanError || !bahan) {
+            return NextResponse.json(
+                { error: 'Ingredient not found' },
+                { status: 404 }
+            )
+        }
+
+        // 1. Create financial transaction (expense)
+        let financialTransactionId = null
+        const { data: transaction, error: transactionError } = await supabase
+            .from('financial_transactions')
+            .insert({
+                user_id: user.id,
+                jenis: 'pengeluaran',
+                kategori: 'Pembelian Bahan Baku',
+                nominal: totalHarga,
+                tanggal: body.tanggal_beli || new Date().toISOString().split('T')[0],
+                referensi: `Pembelian: ${bahan.nama_bahan} (${qtyBeli} ${bahan.satuan}) dari ${body.supplier || 'Supplier'}`
+            })
+            .select('id')
+            .single()
+
+        if (transactionError) {
+            console.error('Error creating financial transaction:', transactionError)
+            // Continue without financial transaction
+        } else {
+            financialTransactionId = transaction.id
+        }
+
+        // 2. Create purchase record
+        const { data: purchase, error: purchaseError } = await supabase
+            .from('bahan_baku_pembelian')
+            .insert({
+                user_id: user.id,
+                bahan_id: body.bahan_id,
+                supplier: body.supplier || null,
+                qty_beli: qtyBeli,
+                harga_satuan: hargaSatuan,
+                total_harga: totalHarga,
+                tanggal_beli: body.tanggal_beli || new Date().toISOString().split('T')[0],
+                catatan: body.catatan || null
+            })
+            .select(`
+        *,
+        bahan:bahan_baku (
+          id,
+          nama_bahan,
+          satuan,
+          stok_tersedia,
+          harga_per_satuan
+        )
+      `)
+            .single()
+
+        if (purchaseError) {
+            console.error('Error creating purchase:', purchaseError)
+
+            // Rollback financial transaction if purchase fails
+            if (financialTransactionId) {
+                await supabase
+                    .from('financial_transactions')
+                    .delete()
+                    .eq('id', financialTransactionId)
+            }
+
+            return NextResponse.json(
+                { error: 'Failed to create purchase' },
+                { status: 500 }
+            )
+        }
+
+        // 3. Update ingredient stock
+        const newStock = (bahan.stok_tersedia || 0) + qtyBeli
+
+        const { error: stockError } = await supabase
+            .from('bahan_baku')
+            .update({ stok_tersedia: newStock })
+            .eq('id', body.bahan_id)
+            .eq('user_id', user.id)
+
+        if (stockError) {
+            console.error('Error updating stock:', stockError)
+            // Note: Purchase is already created, just log the error
+        }
+
+        // 4. Create stock ledger entry
+        await supabase
+            .from('stock_ledger')
+            .insert({
+                user_id: user.id,
+                bahan_id: body.bahan_id,
+                qty: qtyBeli,
+                tipe: 'in',
+                ref: `Purchase #${purchase.id.substring(0, 8)}`
+            })
+
+        return NextResponse.json(purchase, { status: 201 })
+    } catch (error: any) {
+        console.error('Error in POST /api/ingredient-purchases:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
+    }
+}
+
+/**
+ * DELETE /api/ingredient-purchases?id={id}
+ * Delete purchase and revert stock
+ */
 export async function DELETE(request: NextRequest) {
-  try {
-    const supabase = createSupabaseClient()
-    const searchParams = request.nextUrl.searchParams
-    const id = searchParams.get('id')
-    
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Purchase ID is required' },
-        { status: 400 }
-      )
+    try {
+        const supabase = await createClient()
+
+        // Validate session
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
+
+        const searchParams = request.nextUrl.searchParams
+        const id = searchParams.get('id')
+
+        if (!id) {
+            return NextResponse.json(
+                { error: 'Purchase ID is required' },
+                { status: 400 }
+            )
+        }
+
+        // Get purchase details
+        const { data: purchase, error: fetchError } = await supabase
+            .from('bahan_baku_pembelian')
+            .select('*')
+            .eq('id', id)
+            .eq('user_id', user.id)
+            .single()
+
+        if (fetchError || !purchase) {
+            return NextResponse.json(
+                { error: 'Purchase not found' },
+                { status: 404 }
+            )
+        }
+
+        // 1. Revert stock
+        const { data: bahan } = await supabase
+            .from('bahan_baku')
+            .select('stok_tersedia')
+            .eq('id', purchase.bahan_id)
+            .eq('user_id', user.id)
+            .single()
+
+        if (bahan) {
+            const newStock = Math.max(0, (bahan.stok_tersedia || 0) - purchase.qty_beli)
+
+            await supabase
+                .from('bahan_baku')
+                .update({ stok_tersedia: newStock })
+                .eq('id', purchase.bahan_id)
+                .eq('user_id', user.id)
+        }
+
+        // 2. Create stock ledger entry for reversal
+        await supabase
+            .from('stock_ledger')
+            .insert({
+                user_id: user.id,
+                bahan_id: purchase.bahan_id,
+                qty: purchase.qty_beli,
+                tipe: 'out',
+                ref: `Reversal: Purchase #${purchase.id.substring(0, 8)}`
+            })
+
+        // 3. Delete purchase
+        const { error: deleteError } = await supabase
+            .from('bahan_baku_pembelian')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id)
+
+        if (deleteError) {
+            console.error('Error deleting purchase:', deleteError)
+            return NextResponse.json(
+                { error: 'Failed to delete purchase' },
+                { status: 500 }
+            )
+        }
+
+        // 4. Delete associated financial transaction (optional)
+        // Note: We don't have a direct reference, so we'll skip this for now
+        // In a production system, you might want to add a reference field
+
+        return NextResponse.json({ message: 'Purchase deleted successfully' })
+    } catch (error: any) {
+        console.error('Error in DELETE /api/ingredient-purchases:', error)
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        )
     }
-    
-    // Get purchase details before deleting (to revert stock and delete expense)
-    const { data: purchase, error: fetchError } = await supabase
-      .from('ingredient_purchases')
-      .select('ingredient_id, quantity, expense_id')
-      .eq('id', id)
-      .single()
-    
-    if (fetchError || !purchase) {
-      return NextResponse.json(
-        { error: 'Purchase not found' },
-        { status: 404 }
-      )
-    }
-    
-    // 1. Delete related expense first
-    if (purchase.expense_id) {
-      const { error: expenseDeleteError } = await supabase
-        .from('expenses')
-        .delete()
-        .eq('id', purchase.expense_id)
-      
-      if (expenseDeleteError) {
-        console.error('Warning: Failed to delete expense:', expenseDeleteError)
-      }
-    }
-    
-    // 2. Delete the purchase (this will trigger WAC recalculation)
-    const { error: deleteError } = await supabase
-      .from('ingredient_purchases')
-      .delete()
-      .eq('id', id)
-    
-    if (deleteError) {
-      return NextResponse.json(
-        { error: 'Failed to delete purchase', details: deleteError.message },
-        { status: 500 }
-      )
-    }
-    
-    // 3. Revert ingredient stock
-    const { data: ingredient } = await supabase
-      .from('ingredients')
-      .select('current_stock')
-      .eq('id', purchase.ingredient_id)
-      .single()
-    
-    if (ingredient) {
-      const newStock = Math.max(0, (ingredient.current_stock || 0) - purchase.quantity)
-      
-      await supabase
-        .from('ingredients')
-        .update({ 
-          current_stock: newStock,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', purchase.ingredient_id)
-    }
-    
-    // Note: WAC is automatically recalculated by database trigger
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Purchase and related expense deleted successfully' 
-    })
-  } catch (error: any) {
-    console.error('Unexpected error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
-  }
 }

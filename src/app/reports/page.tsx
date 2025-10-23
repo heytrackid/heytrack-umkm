@@ -1,28 +1,31 @@
 'use client'
-import * as React from 'react'
 
 import AppLayout from '@/components/layout/app-layout'
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/useSupabase'
 import {
-    BarChart3,
-    Calendar,
-    Download
+  BarChart3,
+  Calendar,
+  Download
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
   ssr: false
@@ -34,6 +37,21 @@ export default function ReportsPage() {
     start: new Date(new Date().setDate(1)).toISOString().split('T')[0], // First day of month
     end: new Date().toISOString().split('T')[0] // Today
   })
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const router = useRouter()
+
+  // Handle auth errors
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      })
+      router.push('/auth/login')
+    }
+  }, [isAuthLoading, isAuthenticated, router, toast])
 
   // Fetch data
   const { data: orders } = useSupabaseCRUD('orders')
@@ -57,7 +75,7 @@ export default function ReportsPage() {
   const inventoryStats = {
     totalItems: ingredients?.length || 0,
     lowStock: ingredients?.filter((i: any) => (i.current_stock || 0) <= (i.min_stock || 0)).length || 0,
-    totalValue: ingredients?.reduce((sum: number, i: any) => 
+    totalValue: ingredients?.reduce((sum: number, i: any) =>
       sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
     ) || 0,
     outOfStock: ingredients?.filter((i: any) => (i.current_stock || 0) === 0).length || 0
@@ -76,9 +94,43 @@ export default function ReportsPage() {
     profitMargin: 0
   }
   financialStats.netProfit = financialStats.totalIncome - financialStats.totalExpense
-  financialStats.profitMargin = financialStats.totalIncome > 0 
-    ? (financialStats.netProfit / financialStats.totalIncome) * 100 
+  financialStats.profitMargin = financialStats.totalIncome > 0
+    ? (financialStats.netProfit / financialStats.totalIncome) * 100
     : 0
+
+  // Show loading state while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <PrefetchLink href="/">Dashboard</PrefetchLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Laporan</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <BarChart3 className="h-8 w-8" />
+              Laporan
+            </h1>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </AppLayout>
+    )
+  }
 
   return (
     <AppLayout>

@@ -217,7 +217,7 @@ async function handleBatchHPPRecalculation(data: any) {
 
       results.push({
         recipeId: recipe.id,
-        recipeName: recipe.name,
+        recipeName: recipe.nama,
         status: 'success',
         newHPP: recipeHPP.hppPerServing,
         lastCalculated: recipeHPP.lastCalculated
@@ -227,7 +227,7 @@ async function handleBatchHPPRecalculation(data: any) {
     } catch (error: any) {
       results.push({
         recipeId: recipe.id,
-        recipeName: recipe.name,
+        recipeName: recipe.nama,
         status: 'error',
         error: error.message
       })

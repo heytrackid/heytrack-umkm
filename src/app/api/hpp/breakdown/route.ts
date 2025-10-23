@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
                 snapshot_date: snapshot.snapshot_date
             },
             meta: {
-                recipe_name: recipe.name,
+                recipe_name: recipe.nama,
                 total_ingredients: breakdown.ingredients.length,
                 has_previous_data: !!(previousSnapshots && previousSnapshots.length > 0)
             }

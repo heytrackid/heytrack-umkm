@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
         // Build query
         let query = supabase
             .from('hpp_alerts')
-            .select('*, recipes(name)', { count: 'exact' })
+            .select('*, resep(nama)', { count: 'exact' })
             .eq('is_dismissed', false)
             .order('created_at', { ascending: false })
 

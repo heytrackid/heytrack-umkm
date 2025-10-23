@@ -55,9 +55,12 @@ After deployment:
 Test each cron job endpoint:
 
 ```bash
-# Test snapshot creation
-curl https://your-domain.vercel.app/api/cron/hpp-snapshots \
-  -H "Authorization: Bearer your-cron-secret"
+# Test snapshot creation (DEPRECATED - Use Edge Function instead)
+# See .kiro/specs/hpp-edge-function-migration/ for new implementation
+
+# New method using Edge Function:
+curl -X POST https://your-project.supabase.co/functions/v1/hpp-daily-snapshots \
+  -H "Authorization: Bearer your-service-role-key"
 
 # Test alert detection
 curl https://your-domain.vercel.app/api/cron/hpp-alerts \

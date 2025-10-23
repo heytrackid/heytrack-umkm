@@ -1,38 +1,23 @@
-'use client'
-import * as React from 'react'
+import { createClient } from '@/utils/supabase/server'
+import { redirect } from 'next/navigation'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+/**
+ * Root page - redirects based on auth status
+ * Middleware will handle the redirect, but this provides server-side fallback
+ */
+export default async function HomePage() {
+  const supabase = createClient()
 
-export default function HomePage() {
-  const router = useRouter()
-  const supabase = createClientComponentClient()
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          router.push('/dashboard')
-        } else {
-          router.push('/auth/login')
-        }
-      } catch (error) {
-        console.error('Error checking auth:', error)
-        router.push('/auth/login')
-      }
+    if (user) {
+      redirect('/dashboard')
+    } else {
+      redirect('/auth/login')
     }
-
-    checkUser()
-  }, [router, supabase.auth])
-
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Memuat HeyTrack...</p>
-      </div>
-    </div>
-  )
+  } catch (error) {
+    console.error('Error checking auth:', error)
+    redirect('/auth/login')
+  }
 }

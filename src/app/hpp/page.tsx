@@ -1,16 +1,15 @@
 'use client'
 
 import AppLayout from '@/components/layout/app-layout'
+import { CardSkeleton, ListSkeleton, StatsSkeleton } from '@/components/ui'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CardSkeleton, StatsSkeleton, ListSkeleton } from '@/components/ui'
 import { useResponsive } from '@/hooks/useResponsive'
 import { AlertCircle, Calculator, RefreshCw, Target, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import * as React from 'react'
 import { Suspense } from 'react'
 
 // Dynamic imports for better performance
@@ -70,7 +69,23 @@ export default function HPPAndPricingPage() {
     getMarginStatus
   } = useHPPLogic()
 
-  if (loading) {
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const router = useRouter()
+
+  // Handle auth errors
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      })
+      router.push('/auth/login')
+    }
+  }, [isAuthLoading, isAuthenticated, router, toast])
+
+  if (isAuthLoading || loading) {
     return (
       <AppLayout>
         <div className="space-y-6">

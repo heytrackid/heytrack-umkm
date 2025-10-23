@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
             success: true,
             data: comparison,
             meta: {
-                recipe_name: recipe.name,
+                recipe_name: recipe.nama,
                 period,
                 has_previous_data: !!previousStats
             }

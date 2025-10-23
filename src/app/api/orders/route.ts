@@ -1,15 +1,28 @@
+import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // GET /api/orders - Get all orders
 export async function GET(request: NextRequest) {
   try {
+    // Create authenticated Supabase client
+    const supabase = await createClient()
+
+    // Validate session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.error('Auth error:', authError)
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const limit = searchParams.get('param')
     const status = searchParams.get('param')
-    
-    const supabase = createServerSupabaseAdmin()
-    let query = (supabase as any)
+
+    let query = supabase
       .from('orders')
       .select(`
         *,
@@ -23,18 +36,19 @@ export async function GET(request: NextRequest) {
           special_requests
         )
       `)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-    
+
     if (status) {
       query = query.eq('status', status)
     }
-    
+
     if (limit) {
       query = query.limit(50)
     }
-    
+
     const { data, error } = await query
-    
+
     if (error) {
       console.error('Error fetching orders:', error)
       return NextResponse.json(
@@ -62,8 +76,22 @@ export async function GET(request: NextRequest) {
 // POST /api/orders - Create new order with income tracking
 export async function POST(request: NextRequest) {
   try {
+    // Create authenticated Supabase client
+    const supabase = await createClient()
+
+    // Validate session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      console.error('Auth error:', authError)
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
-    
+
     // Validate required fields
     if (!body.order_no || !body.total_amount) {
       return NextResponse.json(
@@ -72,36 +100,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = createServerSupabaseAdmin()
     const orderStatus = body.status || 'PENDING'
     let incomeRecordId = null
-    
+
     // If order is DELIVERED, create income record first
     if (orderStatus === 'DELIVERED' && body.total_amount > 0) {
-      const { data: incomeRecord, error: incomeError } = await (supabase as any)
-        .from('expenses')
+      const { data: incomeRecord, error: incomeError } = await supabase
+        .from('financial_transactions')
         .insert({
-          category: 'Revenue',
-          subcategory: 'Order Income',
-          amount: body.total_amount,
-          description: `Order #${body.order_no}${body.customer_name ? ' - ' + body.customer_name : ''}`,
-          expense_date: body.delivery_date || body.order_date || new Date().toISOString().split('T')[0],
-          payment_method: body.payment_method || 'CASH',
-          status: body.payment_status === 'PAID' ? 'paid' : 'pending',
-          tags: ['order_income', 'revenue', 'sales'],
-          metadata: {
-            order_no: body.order_no,
-            customer_name: body.customer_name,
-            customer_phone: body.customer_phone,
-            order_date: body.order_date,
-            delivery_date: body.delivery_date
-          },
-          reference_type: 'order',
-          reference_id: null // Will be updated after order creation
+          user_id: user.id,
+          jenis: 'pemasukan',
+          kategori: 'Revenue',
+          nominal: body.total_amount,
+          tanggal: body.delivery_date || body.order_date || new Date().toISOString().split('T')[0],
+          referensi: `Order #${body.order_no}${body.customer_name ? ' - ' + body.customer_name : ''}`
         })
         .select()
         .single()
-      
+
       if (incomeError) {
         console.error('Error creating income record:', incomeError)
         return NextResponse.json(
@@ -109,14 +125,15 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
-      
+
       incomeRecordId = incomeRecord.id
     }
-    
+
     // Create order with financial_record_id if income was created
-    const { data: orderData, error: orderError } = await (supabase as any)
+    const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert({
+        user_id: user.id,
         order_no: body.order_no,
         customer_id: body.customer_id,
         customer_name: body.customer_name,
@@ -138,28 +155,30 @@ export async function POST(request: NextRequest) {
       })
       .select('*')
       .single()
-    
+
     if (orderError) {
       console.error('Error creating order:', orderError)
       // Rollback income record if order creation fails
       if (incomeRecordId) {
-        await (supabase as any)
-          .from('expenses')
+        await supabase
+          .from('financial_transactions')
           .delete()
           .eq('id', incomeRecordId)
+          .eq('user_id', user.id)
       }
       return NextResponse.json(
         { error: 'Failed to create order' },
         { status: 500 }
       )
     }
-    
-    // Update income record with order reference_id
+
+    // Update income record with order reference
     if (incomeRecordId) {
-      await (supabase as any)
-        .from('expenses')
-        .update({ reference_id: orderData.id })
+      await supabase
+        .from('financial_transactions')
+        .update({ referensi: `Order ${orderData.id} - ${body.customer_name || 'Customer'}` })
         .eq('id', incomeRecordId)
+        .eq('user_id', user.id)
     }
 
     // If order items provided, create them (handle both order_items and items field names)
@@ -174,19 +193,20 @@ export async function POST(request: NextRequest) {
         total_price: item.total_price || (item.quantity * item.unit_price),
         special_requests: item.special_requests
       }))
-      
-      const { error: itemsError } = await (supabase as any)
+
+      const { error: itemsError } = await supabase
         .from('order_items')
         .insert(orderItems)
-      
+
       if (itemsError) {
         console.error('Error creating order items:', itemsError)
         // Rollback order creation if items fail
-        await (supabase as any)
+        await supabase
           .from('orders')
           .delete()
           .eq('id', orderData.id)
-        
+          .eq('user_id', user.id)
+
         return NextResponse.json(
           { error: 'Failed to create order items' },
           { status: 500 }

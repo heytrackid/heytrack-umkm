@@ -1,48 +1,104 @@
 'use client';
 
-import * as React from 'react'
-import { useState, useEffect } from 'react';
-import AppLayout from '@/components/layout/app-layout';
 import { IngredientsCRUD } from '@/components/crud/ingredients-crud';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useIngredients } from '@/hooks/useSupabaseCRUD';
-import { useSettings } from '@/contexts/settings-context';
-import { useLoading, LOADING_KEYS } from '@/hooks/useLoading';
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons';
+import AppLayout from '@/components/layout/app-layout';
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
-import { 
-  Package, 
-  TrendingDown, 
-  AlertTriangle, 
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons';
+import { useSettings } from '@/contexts/settings-context';
+import { useBahanBaku } from '@/hooks/useSupabaseCRUD';
+import {
+  AlertTriangle,
   DollarSign,
+  Package,
   Plus,
-  ShoppingCart
+  ShoppingCart,
+  TrendingDown
 } from 'lucide-react';
 
 export default function IngredientsPage() {
-  // Share single useIngredients hook call - IngredientsCRUD will use this
-  const { data: ingredients, loading } = useIngredients({ refetchOnMount: false });
+  // Share single useBahanBaku hook call - IngredientsCRUD will use this
+  const { data: ingredients, loading, error } = useBahanBaku({ refetchOnMount: false });
   const { formatCurrency } = useSettings();
+  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+
+  // Handle auth errors
+  useEffect(() => {
+    if (error && error.message?.includes('401')) {
+      toast({
+        title: 'Sesi berakhir',
+        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        variant: 'destructive',
+      });
+      router.push('/auth/login');
+    } else if (error) {
+      toast({
+        title: 'Terjadi kesalahan',
+        description: 'Gagal memuat data bahan baku. Silakan coba lagi.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, router, toast]);
 
   // Calculate stats
   const totalIngredients = ingredients?.length || 0;
-  const lowStockCount = ingredients?.filter(i => 
-    i.current_stock <= (i.minimum_stock || 0)
+  const lowStockCount = ingredients?.filter(i =>
+    i.stok_tersedia <= (i.stok_minimum || 0)
   ).length || 0;
-  const totalValue = ingredients?.reduce((sum, i) => 
-    sum + (i.current_stock * i.price_per_unit), 0
+  const totalValue = ingredients?.reduce((sum, i) =>
+    sum + (i.stok_tersedia * i.harga_per_satuan), 0
   ) || 0;
-  const outOfStockCount = ingredients?.filter(i => i.current_stock <= 0).length || 0;
+  const outOfStockCount = ingredients?.filter(i => i.stok_tersedia <= 0).length || 0;
+
+  // Show loading state while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <PrefetchLink href="/">Dashboard</PrefetchLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Bahan Baku</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Package className="h-8 w-8" />
+                Bahan Baku
+              </h1>
+              <p className="text-muted-foreground">
+                Kelola stok dan harga bahan baku untuk produksi
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <StatsCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -52,8 +108,8 @@ export default function IngredientsPage() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                      <PrefetchLink href="/">Dashboard</PrefetchLink>
-                    </BreadcrumbLink>
+                <PrefetchLink href="/">Dashboard</PrefetchLink>
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

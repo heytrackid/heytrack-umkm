@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
+import { NextResponse } from 'next/server';
 
 export async function GET(
   request: Request,
@@ -8,12 +8,12 @@ export async function GET(
   const { id } = await params;
   try {
     const supabase = createSupabaseClient();
-    
+
     const { data: batch, error } = await (supabase as any)
-      .from('production_batches')
+      .from('production_log')
       .select(`
         *,
-        recipe:recipes(name)
+        recipe:resep(nama)
       `)
       .eq('id', id)
       .single();
@@ -36,12 +36,12 @@ export async function PUT(
     const body = await request.json() as any;
 
     const { data: batch, error } = await (supabase as any)
-      .from('production_batches')
+      .from('production_log')
       .update(body)
       .eq('id', id)
       .select(`
         *,
-        recipe:recipes(name)
+        recipe:resep(nama)
       `)
       .single();
 
@@ -62,13 +62,13 @@ export async function DELETE(
     const supabase = createSupabaseClient();
 
     const { error } = await (supabase as any)
-      .from('production_batches')
+      .from('production_log')
       .delete()
       .eq('id', id);
 
     if (error) throw error;
 
-    return NextResponse.json({ message: 'Production batch deleted successfully' });
+    return NextResponse.json({ message: 'Production log deleted successfully' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

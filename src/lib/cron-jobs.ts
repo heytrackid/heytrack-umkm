@@ -313,97 +313,29 @@ export async function getAutomationStatus() {
 }
 
 /**
- * Create daily HPP snapshots for all users
- * Runs every day at 00:00
+ * @deprecated This function has been migrated to a Supabase Edge Function.
+ * 
+ * HPP snapshot creation is now handled by:
+ * - Edge Function: supabase/functions/hpp-daily-snapshots
+ * - Scheduler: pg-cron (runs daily at 00:00 UTC)
+ * 
+ * This function is kept for reference only and should not be used.
+ * It will be removed in a future version.
+ * 
+ * For more information, see:
+ * - .kiro/specs/hpp-edge-function-migration/design.md
+ * - .kiro/specs/hpp-edge-function-migration/PRODUCTION_READINESS_REPORT.md
  */
 export async function createDailyHPPSnapshots() {
-  try {
-    cronLogger.info('Running daily HPP snapshot creation')
+  console.warn('⚠️ [DEPRECATED] createDailyHPPSnapshots() is deprecated')
+  console.warn('⚠️ [DEPRECATED] Use Supabase Edge Function: supabase/functions/hpp-daily-snapshots')
+  console.warn('⚠️ [DEPRECATED] This function will be removed in a future version')
 
-    const supabase = createServerSupabaseAdmin()
-
-    // Get all active users with recipes
-    const { data: users, error: usersError } = await supabase
-      .from('recipes')
-      .select('user_id')
-      .eq('is_active', true)
-
-    if (usersError) {
-      cronLogger.error('Error fetching users for HPP snapshots', { error: usersError.message })
-      throw usersError
-    }
-
-    if (!users || users.length === 0) {
-      cronLogger.info('No active users with recipes found')
-      return {
-        total_users: 0,
-        snapshots_created: 0,
-        alerts_generated: 0,
-        errors: []
-      }
-    }
-
-    // Get unique user IDs
-    const uniqueUserIds = [...new Set(users.map(u => u.user_id))]
-
-    let totalSnapshotsCreated = 0
-    let totalAlertsGenerated = 0
-    const errors: Array<{ user_id: string; error: string }> = []
-
-    // Process each user
-    for (const userId of uniqueUserIds) {
-      try {
-        // Call the snapshot API endpoint logic
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/hpp/snapshot`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ user_id: userId })
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Snapshot creation failed')
-        }
-
-        const result = await response.json()
-        totalSnapshotsCreated += result.data.snapshots_created || 0
-        totalAlertsGenerated += result.data.alerts_generated || 0
-
-        cronLogger.info(`HPP snapshots created for user ${userId}`, {
-          snapshots: result.data.snapshots_created,
-          alerts: result.data.alerts_generated
-        })
-
-      } catch (error: any) {
-        cronLogger.error(`Error creating HPP snapshots for user ${userId}`, { error: error.message })
-        errors.push({
-          user_id: userId,
-          error: error.message
-        })
-      }
-
-      // Add small delay between users to avoid overwhelming the system
-      await new Promise(resolve => setTimeout(resolve, 200))
-    }
-
-    const summary = {
-      total_users: uniqueUserIds.length,
-      snapshots_created: totalSnapshotsCreated,
-      alerts_generated: totalAlertsGenerated,
-      errors: errors.length > 0 ? errors : undefined,
-      timestamp: new Date().toISOString()
-    }
-
-    cronLogger.info('Daily HPP snapshot creation complete', summary)
-
-    return summary
-
-  } catch (error: any) {
-    cronLogger.error('Error in daily HPP snapshot creation', { error: error.message })
-    throw error
-  }
+  throw new Error(
+    'createDailyHPPSnapshots() is deprecated. ' +
+    'HPP snapshots are now created by the Supabase Edge Function: hpp-daily-snapshots. ' +
+    'See .kiro/specs/hpp-edge-function-migration/ for details.'
+  )
 }
 
 /**
@@ -620,7 +552,7 @@ export const cronJobs = {
   runAutomationEngine,
   cleanupOldNotifications,
   getAutomationStatus,
-  createDailyHPPSnapshots,
+  // createDailyHPPSnapshots - DEPRECATED: Migrated to Edge Function
   detectHPPAlertsForAllUsers,
   archiveOldHPPSnapshots
 }

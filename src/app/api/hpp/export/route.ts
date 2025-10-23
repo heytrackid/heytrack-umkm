@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 
         // Prepare export data
         const exportData = {
-            recipe_name: recipe.name,
+            recipe_name: recipe.nama,
             period,
             date_range: dateRange,
             snapshots: typedSnapshots.map(snapshot => ({
@@ -332,7 +332,7 @@ export async function GET(request: NextRequest) {
         const buffer = await workbook.xlsx.writeBuffer()
 
         // Create filename
-        const filename = `HPP_History_${recipe.name.replace(/[^a-z0-9]/gi, '_')}_${formatDate(new Date().toISOString())}.xlsx`
+        const filename = `HPP_History_${recipe.nama.replace(/[^a-z0-9]/gi, '_')}_${formatDate(new Date().toISOString())}.xlsx`
 
         // Return file as download
         return new NextResponse(buffer, {

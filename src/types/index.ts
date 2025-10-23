@@ -58,6 +58,12 @@ export type Database = {
       customers: CustomersTable
       suppliers: SuppliersTable
       ingredients: IngredientsTable
+      bahan_baku: {
+        Row: BahanBaku
+        Insert: Omit<BahanBaku, 'id' | 'created_at'>
+        Update: Partial<Omit<BahanBaku, 'id' | 'account_id' | 'created_at'>>
+        Relationships: []
+      }
       inventory_alerts: InventoryAlertsTable
       inventory_stock_logs: InventoryStockLogsTable
       inventory_reorder_rules: InventoryReorderRulesTable
