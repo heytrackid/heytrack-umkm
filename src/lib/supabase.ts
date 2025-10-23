@@ -1,4 +1,4 @@
-import { sanitizeSQL, validateInput } from '@/lib/validation';
+import { sanitizeSQL, validateInput } from '@/lib/validations';
 import { Database } from '@/types';
 import { createClient } from '@supabase/supabase-js';
 

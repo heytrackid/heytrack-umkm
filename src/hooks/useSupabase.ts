@@ -254,61 +254,7 @@ export function useSupabaseCRUD<T extends keyof Tables>(
 // SPECIFIC ENTITY HOOKS
 // ============================================================================
 
-export const useIngredients = (options?: { initial?: any[]; refetchOnMount?: boolean }) => {
-  return useSupabaseCRUD('ingredients', {
-    filter: { is_active: true },
-    orderBy: { column: 'name' },
-    ...options,
-  })
-}
-
-export const useRecipes = (options?: { withIngredients?: boolean }) => {
-  return useSupabaseCRUD('recipes', {
-    select: options?.withIngredients
-      ? `
-          *,
-          recipe_ingredients(
-            quantity,
-            unit,
-            ingredient:ingredients(id, name, unit, price_per_unit, current_stock)
-          )
-        `
-      : '*',
-    filter: { is_active: true },
-    orderBy: { column: 'name' },
-  })
-}
-
-export const useOrders = (options?: { limit?: number; status?: string }) => {
-  return useSupabaseCRUD('orders', {
-    filter: options?.status ? { status: options.status } : undefined,
-    orderBy: { column: 'created_at', ascending: false },
-    limit: options?.limit || 100,
-  })
-}
-
-export const useCustomers = () => {
-  return useSupabaseCRUD('customers', {
-    orderBy: { column: 'name' },
-  })
-}
-
-export const useFinancialRecords = (options?: {
-  type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
-  startDate?: string
-  endDate?: string
-}) => {
-  return useSupabaseCRUD('financial_records', {
-    filter: options?.type ? { type: options.type } : undefined,
-    orderBy: { column: 'date', ascending: false },
-  })
-}
-
-export const useProductions = () => {
-  return useSupabaseCRUD('productions', {
-    orderBy: { column: 'created_at', ascending: false },
-  })
-}
+// Convenience hooks now defined at the end of file using useSupabaseQuery
 
 // ============================================================================
 // COMPLEX QUERY HOOKS
@@ -524,4 +470,79 @@ export function useSupabaseBulkOperations<T extends keyof Tables>(
     loading,
     error,
   }
+}
+
+// ============================================================================
+// CONVENIENCE HOOKS FOR SPECIFIC TABLES
+// ============================================================================
+
+/**
+ * Hook for fetching ingredients
+ */
+export function useIngredients(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('ingredients', {
+    filter: { is_active: true },
+    orderBy: { column: 'name' },
+    realtime: options?.realtime,
+  })
+}
+
+/**
+ * Hook for fetching recipes
+ */
+export function useRecipes(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('recipes', {
+    filter: { is_active: true },
+    orderBy: { column: 'name' },
+    realtime: options?.realtime,
+  })
+}
+
+/**
+ * Hook for fetching orders
+ */
+export function useOrders(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('orders', {
+    orderBy: { column: 'created_at', ascending: false },
+    realtime: options?.realtime,
+  })
+}
+
+/**
+ * Hook for fetching customers
+ */
+export function useCustomers(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('customers', {
+    orderBy: { column: 'name' },
+    realtime: options?.realtime,
+  })
+}
+
+/**
+ * Hook for fetching financial records
+ */
+export function useFinancialRecords(options?: {
+  startDate?: string
+  endDate?: string
+  type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
+  realtime?: boolean
+}) {
+  const filter: Record<string, any> = {}
+  if (options?.type) filter.type = options.type
+
+  return useSupabaseQuery('financial_records', {
+    filter,
+    orderBy: { column: 'date', ascending: false },
+    realtime: options?.realtime,
+  })
+}
+
+/**
+ * Hook for fetching productions
+ */
+export function useProductions(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('productions', {
+    orderBy: { column: 'created_at', ascending: false },
+    realtime: options?.realtime,
+  })
 }

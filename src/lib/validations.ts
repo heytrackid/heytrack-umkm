@@ -289,3 +289,68 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
   
   return fieldErrors
 }
+
+// ============================================================================
+// UTILITY VALIDATION FUNCTIONS
+// ============================================================================
+
+/**
+ * Generic input validation helper
+ */
+export function validateInput(data: any, rules?: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+  
+  for (const [field, rule] of Object.entries(rules || {})) {
+    const value = data[field]
+    
+    if (rule?.required && (!value || value === '')) {
+      errors.push(`validation.fieldRequired`)
+      continue
+    }
+    
+    if (value) {
+      if (rule?.type && typeof value !== rule?.type) {
+        errors.push(`validation.invalidType`)
+      }
+      
+      if (rule?.minLength && value.length < rule?.minLength) {
+        errors.push(`validation.minLength`)
+      }
+      
+      if (rule?.maxLength && value.length > rule?.maxLength) {
+        errors.push(`validation.maxLength`)
+      }
+      
+      if (rule?.pattern && !rule?.pattern?.test(data[field])) {
+        errors.push(`validation.invalidFormat`)
+      }
+      
+      if (rule?.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data[field])) {
+        errors.push(`validation.invalidEmail`)
+      }
+      
+      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
+        errors.push(`validation.dangerousContent`)
+      }
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+/**
+ * SQL injection prevention sanitization
+ */
+export function sanitizeSQL(input: string): string {
+  return input
+    .replace(/'/g,"''")
+    .replace(/;/g, '')
+    .replace(/--/g, '')
+    .replace(/\/\*/g, '')
+    .replace(/\*\//g, '')
+    .replace(/xp_/gi, '')
+    .replace(/sp_/gi, '')
+}
