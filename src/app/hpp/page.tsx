@@ -5,8 +5,8 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CardSkeleton, StatsSkeleton, ListSkeleton } from '@/components/ui'
 import { useResponsive } from '@/hooks/useResponsive'
 import { AlertCircle, Calculator, RefreshCw, Target, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -16,121 +16,22 @@ import { Suspense } from 'react'
 // Dynamic imports for better performance
 const HPPSummaryStats = dynamic(() => import('./components/HPPSummaryStats'), {
   ssr: false,
-  loading: () => (
-    <div className="grid gap-4 md:grid-cols-4">
-      {Array(4).fill(0).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-4">
-            <div className="text-center space-y-2">
-              <Skeleton className="h-8 w-16 mx-auto" />
-              <Skeleton className="h-4 w-20 mx-auto" />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
+  loading: () => <StatsSkeleton count={4} />
 })
 
 const HPPCalculatorTab = dynamic(() => import('./components/HPPCalculatorTab'), {
   ssr: false,
-  loading: () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-full" />
-            <div className="grid gap-4 md:grid-cols-2">
-              {Array(4).fill(0).map((_, i) => (
-                <Card key={i} className="border-2">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2">
-                        <Skeleton className="h-5 w-32" />
-                        <Skeleton className="h-3 w-full" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
-                      <Skeleton className="h-6 w-16" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 pt-3 border-t">
-                      <div className="space-y-2">
-                        {Array(2).fill(0).map((_, j) => (
-                          <div key={j} className="flex justify-between">
-                            <Skeleton className="h-4 w-12" />
-                            <Skeleton className="h-4 w-16" />
-                          </div>
-                        ))}
-                      </div>
-                      <div className="space-y-2">
-                        {Array(2).fill(0).map((_, j) => (
-                          <div key={j} className="flex justify-between">
-                            <Skeleton className="h-4 w-12" />
-                            <Skeleton className="h-4 w-16" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  loading: () => <CardSkeleton rows={5} />
 })
 
 const PricingStrategyTab = dynamic(() => import('./components/PricingStrategyTab'), {
   ssr: false,
-  loading: () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-full" />
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <Skeleton className="h-5 w-32 mb-2" />
-                <div className="grid grid-cols-2 gap-4">
-                  {Array(4).fill(0).map((_, i) => (
-                    <div key={i} className="flex justify-between">
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  loading: () => <CardSkeleton rows={5} />
 })
 
 const HPPHistoricalTab = dynamic(() => import('./components/HPPHistoricalTab'), {
   ssr: false,
-  loading: () => (
-    <div className="space-y-6">
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-full" />
-            <div className="grid gap-4 md:grid-cols-2">
-              <Skeleton className="h-64 w-full" />
-              <Skeleton className="h-64 w-full" />
-            </div>
-            <Skeleton className="h-96 w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+  loading: () => <CardSkeleton rows={4} />
 })
 
 // Hook import
@@ -139,24 +40,12 @@ import { useHPPLogic } from './hooks/useHPPLogic'
 // Import tracking components
 const HPPAlertsList = dynamic(() => import('./components/HPPAlertsList'), {
   ssr: false,
-  loading: () => (
-    <Card>
-      <CardContent className="pt-6">
-        <Skeleton className="h-96 w-full" />
-      </CardContent>
-    </Card>
-  )
+  loading: () => <ListSkeleton items={5} />
 })
 
 const HPPRecommendationsPanel = dynamic(() => import('./components/HPPRecommendationsPanel'), {
   ssr: false,
-  loading: () => (
-    <Card>
-      <CardContent className="pt-6">
-        <Skeleton className="h-96 w-full" />
-      </CardContent>
-    </Card>
-  )
+  loading: () => <CardSkeleton rows={4} />
 })
 
 export default function HPPAndPricingPage() {
