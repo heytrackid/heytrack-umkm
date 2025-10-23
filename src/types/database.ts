@@ -2,7 +2,7 @@
 // This file maintains the old import path while using the new split structure
 
 export type {
-    AppSettingsTable, AuditFields, BusinessUnit,
+    AppSettingsTable, AuditFields, BahanBaku, BahanBakuFormData, BusinessUnit,
     // Constants
     Constants,
     // Table types

@@ -470,7 +470,7 @@ export type HPPAlertsTable = Database['public']['Tables']['hpp_alerts']
 
 // Re-export all types
 export type {
-  AuditFields, BusinessUnit,
+  AuditFields, BahanBaku, BahanBakuFormData, BusinessUnit,
   // Table types
   CustomersTable, DailySalesSummaryTable,
   // Core types
