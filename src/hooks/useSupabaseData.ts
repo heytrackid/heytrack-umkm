@@ -4,6 +4,7 @@
  */
 
 'use client'
+import * as React from 'react'
 
 import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types';
@@ -23,7 +24,7 @@ export function useRealtimeData<T>(
 
   const fetchData = useCallback(async () => {
     if (!fetchFunction) return
-    
+
     try {
       setLoading(true)
       setError(null)

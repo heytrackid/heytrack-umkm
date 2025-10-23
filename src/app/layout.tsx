@@ -1,29 +1,29 @@
-import type { Metadata } from"next";
-import React from 'react';
-import { Geist, Geist_Mono } from"next/font/google";
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SettingsProvider } from '@/contexts/settings-context';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { Toaster } from 'react-hot-toast';
-import QueryProvider from '@/providers/QueryProvider';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
+import QueryProvider from '@/providers/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import React from 'react';
+import { Toaster } from 'react-hot-toast';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
-import"./globals.css";
+import "./globals.css";
 
 const geistSans = Geist({
-  variable:"--font-geist-sans",
+  variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable:"--font-geist-mono",
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title:"HeyTrack UMKM - Smart Culinary Management System",
-  description:"Comprehensive culinary business management system with AI Assistant, COGS calculation, inventory management, orders tracking, and financial analytics for Indonesian SMEs",
+  title: "HeyTrack UMKM - Smart Culinary Management System",
+  description: "Comprehensive culinary business management system with AI Assistant, COGS calculation, inventory management, orders tracking, and financial analytics for Indonesian SMEs",
 };
 
 export default function RootLayout({
@@ -41,26 +41,25 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full light`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
       >
-        {/* ThemeProvider disabled - using simple light theme */}
-        {/* <ThemeProvider
+        <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
+          defaultTheme="system"
+          enableSystem={true}
           disableTransitionOnChange
-        > */}
+        >
           <QueryProvider>
-          <SettingsProvider>
-            <PreloadingProvider 
-              enableSmartPreloading={true}
-              enableIdlePreloading={true}
-              enableNetworkAware={true}
-              debug={process.env.NODE_ENV === 'development'}
-            >
-              <ErrorBoundary>
-                {/* Header temporarily disabled during development */}
-                {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
+            <SettingsProvider>
+              <PreloadingProvider
+                enableSmartPreloading={true}
+                enableIdlePreloading={true}
+                enableNetworkAware={true}
+                debug={process.env.NODE_ENV === 'development'}
+              >
+                <ErrorBoundary>
+                  {/* Header temporarily disabled during development */}
+                  {/* <header className="flex justify-end items-center p-4 gap-4 h-16 border-b">
                   <div className="px-4 py-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-sm font-medium text-orange-700 dark:text-orange-300">
                     🚧 Development Mode - Auth Disabled
                   </div>
@@ -94,9 +93,9 @@ export default function RootLayout({
                 }}
               />
               {/* Web Vitals Reporter disabled during build to avoid overhead; enable when analytics endpoint is ready */}
-          </SettingsProvider>
+            </SettingsProvider>
           </QueryProvider>
-        {/* </ThemeProvider> */}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

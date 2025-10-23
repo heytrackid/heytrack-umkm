@@ -4,6 +4,7 @@
  */
 
 'use client'
+import * as React from 'react'
 
 import { dbService, supabase } from '@/lib/supabase'
 import { Database } from '@/types'
@@ -41,8 +42,8 @@ export function useTable<T extends keyof Tables>(
 
       // Apply ordering
       if (options.orderBy) {
-        query = query.order(options.orderBy.column, { 
-          ascending: options.orderBy.ascending ?? true 
+        query = query.order(options.orderBy.column, {
+          ascending: options.orderBy.ascending ?? true
         })
       }
 
@@ -68,7 +69,7 @@ export function useTable<T extends keyof Tables>(
         .single()
 
       if (error) throw error
-      
+
       await fetchData() // Refetch to update local state
       return result
     } catch (err) {
@@ -86,7 +87,7 @@ export function useTable<T extends keyof Tables>(
         .single()
 
       if (error) throw error
-      
+
       await fetchData() // Refetch to update local state
       return result
     } catch (err) {
@@ -102,7 +103,7 @@ export function useTable<T extends keyof Tables>(
         .eq('id', id as any)
 
       if (error) throw error
-      
+
       await fetchData() // Refetch to update local state
       return true
     } catch (err) {
@@ -170,11 +171,11 @@ export const useCustomers = (options?: { realtime?: boolean }) =>
     ...options,
   })
 
-export const useFinancialRecords = (options?: { 
+export const useFinancialRecords = (options?: {
   startDate?: string
   endDate?: string
   type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
-  realtime?: boolean 
+  realtime?: boolean
 }) => {
   const filter: Record<string, any> = {}
   if (options?.type) filter.type = options.type
@@ -249,14 +250,14 @@ export const useOrdersWithItems = () => {
 // Hook for HPP calculations
 export const useHPPCalculations = () => {
   const { data: recipes, loading: recipesLoading } = useRecipesWithIngredients()
-  
+
   const calculateHPP = (recipe: any) => {
     if (!recipe.recipe_ingredients) return 0
-    
+
     return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
       const ingredient = recipeIngredient.ingredient
       if (!ingredient) return total
-      
+
       const cost = (ingredient.price_per_unit * recipeIngredient.quantity)
       return total + cost
     }, 0)
@@ -266,7 +267,7 @@ export const useHPPCalculations = () => {
     const hpp = calculateHPP(recipe)
     const sellingPrice = recipe.selling_price || 0
     const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
-    
+
     return {
       ...recipe,
       hpp,
@@ -285,7 +286,7 @@ export const useHPPCalculations = () => {
 // Hook for financial analytics
 export const useFinancialAnalytics = (startDate?: string, endDate?: string) => {
   const { data: records, loading } = useFinancialRecords({ startDate, endDate })
-  
+
   const analytics = {
     totalIncome: records.filter(r => r.type === 'INCOME').reduce((sum, r) => sum + r.amount, 0),
     totalExpense: records.filter(r => r.type === 'EXPENSE').reduce((sum, r) => sum + r.amount, 0),
@@ -294,10 +295,10 @@ export const useFinancialAnalytics = (startDate?: string, endDate?: string) => {
     profitMargin: 0,
     categoryBreakdown: {} as Record<string, number>,
   }
-  
+
   analytics.netProfit = analytics.totalIncome - analytics.totalExpense
   analytics.profitMargin = analytics.totalIncome > 0 ? (analytics.netProfit / analytics.totalIncome) * 100 : 0
-  
+
   // Category breakdown
   records.forEach(record => {
     if (!analytics.categoryBreakdown[record.category]) {
@@ -305,7 +306,7 @@ export const useFinancialAnalytics = (startDate?: string, endDate?: string) => {
     }
     analytics.categoryBreakdown[record.category] += record.amount
   })
-  
+
   return { analytics, loading, records }
 }
 
@@ -335,19 +336,19 @@ export function useHPPReview() {
         // Calculate suggested HPP (simulate market changes)
         const marketFluctuation = Math.random() * 0.3 - 0.15 // -15% to +15%
         const suggestedHPP = Math.max(currentHPP * (1 + marketFluctuation), currentHPP * 0.8)
-        
+
         const currentPrice = recipe.selling_price || (currentHPP * 1.5) // Default 50% margin
         const currentMargin = currentPrice > 0 ? ((currentPrice - currentHPP) / currentPrice) * 100 : 0
-        
+
         // Calculate suggested price based on target margin
         const targetMargin = 0.4 // 40% target margin
         const suggestedPrice = suggestedHPP / (1 - targetMargin)
         const suggestedMargin = ((suggestedPrice - suggestedHPP) / suggestedPrice) * 100
-        
+
         // Determine status
         let status = 'maintain'
         const reasons: string[] = []
-        
+
         if (suggestedHPP < currentHPP * 0.9) {
           status = 'optimize'
           reasons.push('Efisiensi bahan baku memungkinkan pengurangan HPP')
@@ -364,7 +365,7 @@ export function useHPPReview() {
           reasons.push('HPP sudah optimal')
           reasons.push('Margin sesuai target')
         }
-        
+
         return {
           id: recipe.id,
           productName: recipe.name,
@@ -378,7 +379,7 @@ export function useHPPReview() {
           reasons
         }
       })
-      
+
       setReviewData(reviewItems)
       setLoading(false)
     }

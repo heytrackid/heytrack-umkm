@@ -6,6 +6,9 @@
  * - Smart notifications
  * - Financial sync
  * - Production automation
+ * - HPP snapshot creation
+ * - HPP alert detection
+ * - HPP data archival
  */
 
 import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
@@ -309,11 +312,315 @@ export async function getAutomationStatus() {
   }
 }
 
+/**
+ * Create daily HPP snapshots for all users
+ * Runs every day at 00:00
+ */
+export async function createDailyHPPSnapshots() {
+  try {
+    cronLogger.info('Running daily HPP snapshot creation')
+
+    const supabase = createServerSupabaseAdmin()
+
+    // Get all active users with recipes
+    const { data: users, error: usersError } = await supabase
+      .from('recipes')
+      .select('user_id')
+      .eq('is_active', true)
+
+    if (usersError) {
+      cronLogger.error('Error fetching users for HPP snapshots', { error: usersError.message })
+      throw usersError
+    }
+
+    if (!users || users.length === 0) {
+      cronLogger.info('No active users with recipes found')
+      return {
+        total_users: 0,
+        snapshots_created: 0,
+        alerts_generated: 0,
+        errors: []
+      }
+    }
+
+    // Get unique user IDs
+    const uniqueUserIds = [...new Set(users.map(u => u.user_id))]
+
+    let totalSnapshotsCreated = 0
+    let totalAlertsGenerated = 0
+    const errors: Array<{ user_id: string; error: string }> = []
+
+    // Process each user
+    for (const userId of uniqueUserIds) {
+      try {
+        // Call the snapshot API endpoint logic
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/hpp/snapshot`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: userId })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Snapshot creation failed')
+        }
+
+        const result = await response.json()
+        totalSnapshotsCreated += result.data.snapshots_created || 0
+        totalAlertsGenerated += result.data.alerts_generated || 0
+
+        cronLogger.info(`HPP snapshots created for user ${userId}`, {
+          snapshots: result.data.snapshots_created,
+          alerts: result.data.alerts_generated
+        })
+
+      } catch (error: any) {
+        cronLogger.error(`Error creating HPP snapshots for user ${userId}`, { error: error.message })
+        errors.push({
+          user_id: userId,
+          error: error.message
+        })
+      }
+
+      // Add small delay between users to avoid overwhelming the system
+      await new Promise(resolve => setTimeout(resolve, 200))
+    }
+
+    const summary = {
+      total_users: uniqueUserIds.length,
+      snapshots_created: totalSnapshotsCreated,
+      alerts_generated: totalAlertsGenerated,
+      errors: errors.length > 0 ? errors : undefined,
+      timestamp: new Date().toISOString()
+    }
+
+    cronLogger.info('Daily HPP snapshot creation complete', summary)
+
+    return summary
+
+  } catch (error: any) {
+    cronLogger.error('Error in daily HPP snapshot creation', { error: error.message })
+    throw error
+  }
+}
+
+/**
+ * Detect HPP alerts for all users
+ * Runs every 6 hours
+ */
+export async function detectHPPAlertsForAllUsers() {
+  try {
+    cronLogger.info('Running HPP alert detection')
+
+    const supabase = createServerSupabaseAdmin()
+
+    // Get all active users with recipes
+    const { data: users, error: usersError } = await supabase
+      .from('recipes')
+      .select('user_id')
+      .eq('is_active', true)
+
+    if (usersError) {
+      cronLogger.error('Error fetching users for alert detection', { error: usersError.message })
+      throw usersError
+    }
+
+    if (!users || users.length === 0) {
+      cronLogger.info('No active users with recipes found')
+      return {
+        total_users: 0,
+        alerts_generated: 0,
+        snapshots_analyzed: 0,
+        errors: []
+      }
+    }
+
+    // Get unique user IDs
+    const uniqueUserIds = [...new Set(users.map(u => u.user_id))]
+
+    let totalAlertsGenerated = 0
+    let totalSnapshotsAnalyzed = 0
+    const errors: Array<{ user_id: string; error: string }> = []
+    const startTime = Date.now()
+
+    // Process each user
+    for (const userId of uniqueUserIds) {
+      try {
+        // Detect alerts for this user
+        const alertResult = await detectHPPAlerts(userId)
+
+        // Save alerts to database
+        if (alertResult.alerts.length > 0) {
+          await saveAlerts(alertResult.alerts)
+          totalAlertsGenerated += alertResult.alerts.length
+        }
+
+        totalSnapshotsAnalyzed += alertResult.snapshots_analyzed
+
+        cronLogger.info(`HPP alerts detected for user ${userId}`, {
+          alerts: alertResult.alerts.length,
+          snapshots_analyzed: alertResult.snapshots_analyzed
+        })
+
+      } catch (error: any) {
+        cronLogger.error(`Error detecting HPP alerts for user ${userId}`, { error: error.message })
+        errors.push({
+          user_id: userId,
+          error: error.message
+        })
+      }
+
+      // Add small delay between users
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    const executionTime = Date.now() - startTime
+    const successRate = ((uniqueUserIds.length - errors.length) / uniqueUserIds.length) * 100
+
+    const summary = {
+      total_users: uniqueUserIds.length,
+      alerts_generated: totalAlertsGenerated,
+      snapshots_analyzed: totalSnapshotsAnalyzed,
+      execution_time_ms: executionTime,
+      success_rate: successRate.toFixed(2) + '%',
+      errors: errors.length > 0 ? errors : undefined,
+      timestamp: new Date().toISOString()
+    }
+
+    cronLogger.info('HPP alert detection complete', summary)
+
+    return summary
+
+  } catch (error: any) {
+    cronLogger.error('Error in HPP alert detection', { error: error.message })
+    throw error
+  }
+}
+
+/**
+ * Archive HPP snapshots older than 1 year
+ * Runs monthly on the 1st at 02:00
+ */
+export async function archiveOldHPPSnapshots() {
+  try {
+    cronLogger.info('Running HPP data archival')
+
+    const supabase = createServerSupabaseAdmin()
+
+    // Calculate date 1 year ago
+    const oneYearAgo = new Date()
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+
+    // Get snapshots older than 1 year
+    const { data: oldSnapshots, error: fetchError } = await supabase
+      .from('hpp_snapshots')
+      .select('*')
+      .lt('snapshot_date', oneYearAgo.toISOString())
+
+    if (fetchError) {
+      cronLogger.error('Error fetching old snapshots', { error: fetchError.message })
+      throw fetchError
+    }
+
+    if (!oldSnapshots || oldSnapshots.length === 0) {
+      cronLogger.info('No snapshots to archive')
+      return {
+        snapshots_archived: 0,
+        oldest_date: null,
+        timestamp: new Date().toISOString()
+      }
+    }
+
+    cronLogger.info(`Found ${oldSnapshots.length} snapshots to archive`)
+
+    // Insert into archive table in batches
+    const batchSize = 100
+    let totalArchived = 0
+    const errors: Array<{ batch: number; error: string }> = []
+
+    for (let i = 0; i < oldSnapshots.length; i += batchSize) {
+      const batch = oldSnapshots.slice(i, i + batchSize)
+      const batchNumber = Math.floor(i / batchSize) + 1
+
+      try {
+        // Insert into archive table
+        const { error: insertError } = await supabase
+          .from('hpp_snapshots_archive')
+          .insert(batch)
+
+        if (insertError) {
+          throw insertError
+        }
+
+        // Delete from main table
+        const snapshotIds = batch.map(s => s.id)
+        const { error: deleteError } = await supabase
+          .from('hpp_snapshots')
+          .delete()
+          .in('id', snapshotIds)
+
+        if (deleteError) {
+          throw deleteError
+        }
+
+        totalArchived += batch.length
+
+        cronLogger.info(`Archived batch ${batchNumber}`, {
+          batch_size: batch.length,
+          total_archived: totalArchived
+        })
+
+      } catch (error: any) {
+        cronLogger.error(`Error archiving batch ${batchNumber}`, { error: error.message })
+        errors.push({
+          batch: batchNumber,
+          error: error.message
+        })
+      }
+
+      // Add delay between batches
+      await new Promise(resolve => setTimeout(resolve, 200))
+    }
+
+    // Verify data integrity
+    const { count: remainingOldSnapshots } = await supabase
+      .from('hpp_snapshots')
+      .select('*', { count: 'exact', head: true })
+      .lt('snapshot_date', oneYearAgo.toISOString())
+
+    const { count: archivedCount } = await supabase
+      .from('hpp_snapshots_archive')
+      .select('*', { count: 'exact', head: true })
+
+    const summary = {
+      snapshots_archived: totalArchived,
+      oldest_date: oldSnapshots[0]?.snapshot_date,
+      remaining_old_snapshots: remainingOldSnapshots || 0,
+      total_in_archive: archivedCount || 0,
+      errors: errors.length > 0 ? errors : undefined,
+      timestamp: new Date().toISOString()
+    }
+
+    cronLogger.info('HPP data archival complete', summary)
+
+    return summary
+
+  } catch (error: any) {
+    cronLogger.error('Error in HPP data archival', { error: error.message })
+    throw error
+  }
+}
+
 // Export all cron functions
 export const cronJobs = {
   checkInventoryReorder,
   processSmartNotifications,
   runAutomationEngine,
   cleanupOldNotifications,
-  getAutomationStatus
+  getAutomationStatus,
+  createDailyHPPSnapshots,
+  detectHPPAlertsForAllUsers,
+  archiveOldHPPSnapshots
 }

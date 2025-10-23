@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 // Breakpoints sesuai dengan Tailwind CSS
 export const BREAKPOINTS = {
@@ -82,10 +83,10 @@ export function useMobile() {
   const isMobile = useMediaQuery(`(max-width: ${BREAKPOINTS.md - 1}px)`)
   const isTablet = useMediaQuery(`(min-width: ${BREAKPOINTS.md}px) and (max-width: ${BREAKPOINTS.lg - 1}px)`)
   const isDesktop = useMediaQuery(`(min-width: ${BREAKPOINTS.lg}px)`)
-  
+
   return {
     isMobile,
-    isTablet, 
+    isTablet,
     isDesktop,
     // Convenience flags
     isMobileOrTablet: isMobile || isTablet,
@@ -153,7 +154,7 @@ export function useViewportHeight() {
       // Gunakan visualViewport jika tersedia (lebih akurat di mobile)
       const height = (window as any).visualViewport?.height ?? window.innerHeight
       setViewportHeight(height)
-      
+
       // Set CSS custom property untuk digunakan di CSS
       document.documentElement.style.setProperty('--viewport-height', `${height}px`)
     }
@@ -188,7 +189,7 @@ export function useScrollDirection() {
 
     const updateScrollDirection = () => {
       const scrollY = window.scrollY
-      
+
       setIsScrolling(true)
       clearTimeout(scrollTimeout)
       scrollTimeout = setTimeout(() => setIsScrolling(false), 150)
@@ -242,7 +243,7 @@ export function useResponsive() {
     getBreakpoint: () => {
       const width = screenSize.width
       if (width < BREAKPOINTS.sm) return 'xs'
-      if (width < BREAKPOINTS.md) return 'sm' 
+      if (width < BREAKPOINTS.md) return 'sm'
       if (width < BREAKPOINTS.lg) return 'md'
       if (width < BREAKPOINTS.xl) return 'lg'
       if (width < BREAKPOINTS['2xl']) return 'xl'

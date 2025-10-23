@@ -5,6 +5,7 @@
  */
 
 'use client'
+import * as React from 'react'
 
 import { createSupabaseClient } from '@/lib/supabase'
 import { Database } from '@/types'

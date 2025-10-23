@@ -1,14 +1,15 @@
 'use client'
 
-import { useSidebarLogic } from './useSidebarLogic'
+import * as React from 'react'
+import SidebarFooter from './SidebarFooter'
 import SidebarHeader from './SidebarHeader'
 import SidebarNavigation from './SidebarNavigation'
-import SidebarFooter from './SidebarFooter'
+import { useSidebarLogic } from './useSidebarLogic'
 
-export default function MobileSidebar() {
-  const { 
-    navigationSections, 
-    isItemActive, 
+function MobileSidebar() {
+  const {
+    navigationSections,
+    isItemActive,
     prefetchRoute,
     isSectionCollapsed,
     toggleSection
@@ -17,8 +18,8 @@ export default function MobileSidebar() {
   return (
     <div className="h-full flex flex-col bg-background">
       <SidebarHeader variant="mobile" />
-      
-      <SidebarNavigation 
+
+      <SidebarNavigation
         sections={navigationSections}
         isItemActive={isItemActive}
         onItemMouseEnter={prefetchRoute}
@@ -31,3 +32,6 @@ export default function MobileSidebar() {
     </div>
   )
 }
+
+
+export default MobileSidebar

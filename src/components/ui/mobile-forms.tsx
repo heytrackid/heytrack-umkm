@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/use-mobile'
 import { Input } from './input'

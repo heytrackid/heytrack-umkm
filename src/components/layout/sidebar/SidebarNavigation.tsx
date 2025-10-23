@@ -1,7 +1,8 @@
 'use client'
 
-import { NavigationSection } from './useSidebarLogic'
+import * as React from 'react'
 import SidebarSection from './SidebarSection'
+import { NavigationSection } from './useSidebarLogic'
 
 interface SidebarNavigationProps {
   sections: NavigationSection[]
@@ -12,9 +13,9 @@ interface SidebarNavigationProps {
   onToggleSection: (sectionTitle: string) => void
 }
 
-export default function SidebarNavigation({ 
-  sections, 
-  isItemActive, 
+function SidebarNavigation({
+  sections,
+  isItemActive,
   onItemMouseEnter,
   variant = 'default',
   isSectionCollapsed,
@@ -48,3 +49,6 @@ export default function SidebarNavigation({
     </nav>
   )
 }
+
+
+export default SidebarNavigation

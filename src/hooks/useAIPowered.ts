@@ -3,7 +3,7 @@
  * Provides intelligent insights powered by OpenRouter AI
  */
 
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 interface AIAnalysisState<T = any> {
   data: T | null
@@ -403,7 +403,7 @@ export function useAIPowered() {
     // Computed
     isAnyLoading: pricingState.loading || inventoryState.loading || customerState.loading || financialState.loading,
     hasAnyData: !!(pricingState.data || inventoryState.data || customerState.data || financialState.data),
-    
+
     // Helper functions
     getConfidenceLevel: (confidence: number) => {
       if (confidence >= 0.8) return 'high'

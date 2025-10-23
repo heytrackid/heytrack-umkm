@@ -1,6 +1,7 @@
 'use client';
+import * as React from 'react'
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useIngredients } from '@/hooks/useSupabaseCRUD';
 import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';

@@ -34,7 +34,8 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import * as React from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useDebounce } from '../../shared/hooks'
 

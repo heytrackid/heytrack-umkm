@@ -1,6 +1,8 @@
 'use client'
+import * as React from 'react'
 
 import {
+  Bot,
   Calculator,
   ChefHat,
   DollarSign,
@@ -8,12 +10,10 @@ import {
   LayoutDashboard,
   Package,
   Receipt,
-  Settings,
   ShoppingCart,
   Target,
   TrendingUp,
-  Users,
-  Bot
+  Users
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -40,6 +40,29 @@ export interface NavigationSection {
 export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
+
+  // HPP Alerts count state
+  const [hppAlertsCount, setHppAlertsCount] = useState(0)
+
+  // Fetch HPP alerts count
+  useEffect(() => {
+    const fetchAlertsCount = async () => {
+      try {
+        const response = await fetch('/api/hpp/alerts?limit=1')
+        if (response.ok) {
+          const data = await response.json()
+          setHppAlertsCount(data.meta?.unread_count || 0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch alerts count:', error)
+      }
+    }
+
+    fetchAlertsCount()
+    // Refetch every minute
+    const interval = setInterval(fetchAlertsCount, 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Collapsible sections state - initialize from localStorage if available
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
@@ -149,7 +172,7 @@ export const useSidebarLogic = () => {
           href: '/hpp-enhanced',
           icon: Target,
           isSimple: true,
-          badge: "LANJUTAN",
+          badge: hppAlertsCount > 0 ? `${hppAlertsCount} ALERT` : "LANJUTAN",
           stepNumber: 2,
           description: "HPP dengan analisa mendalam"
         },

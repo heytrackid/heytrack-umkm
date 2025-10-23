@@ -1,3 +1,4 @@
+import * as React from 'react'
 // Responsive design types and utilities for mobile-first development
 
 export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';

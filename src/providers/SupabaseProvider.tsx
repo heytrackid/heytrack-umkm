@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types';
 
@@ -21,7 +22,7 @@ export default function SupabaseProvider({ children }: { children: ReactNode }) 
 }
 
 export const useSupabase = () => {
-  const context = useContext
+  const context = useContext(Context)
   if (context === undefined) {
     throw new Error('useSupabase must be used inside SupabaseProvider')
   }

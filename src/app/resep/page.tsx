@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 /**
  * Recipe Management Page - Code Split Version
@@ -7,7 +8,7 @@
  * Components are split into separate files and loaded dynamically as needed.
  */
 
-import React, { Suspense } from 'react'
+import { Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import {
   Breadcrumb,

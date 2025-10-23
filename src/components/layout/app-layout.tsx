@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
@@ -12,15 +13,15 @@ import { memo, ReactNode, useEffect, useState } from 'react'
 import MobileHeader from './mobile-header'
 import SimpleSidebar from './sidebar'
 // Supabase auth
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
+import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -28,8 +29,8 @@ interface AppLayoutProps {
   showMobileHeader?: boolean
 }
 
-const AppLayout = memo(function AppLayout({ 
-  children, 
+const AppLayout = memo(function AppLayout({
+  children,
   pageTitle,
   showMobileHeader = true
 }: AppLayoutProps) {
@@ -72,20 +73,20 @@ const AppLayout = memo(function AppLayout({
 
   return (
     <div className={cn(
-     "flex bg-background w-full sidebar-layout overflow-hidden",
-      isMobile ?"flex-col mobile-min-vh" :"h-screen"
+      "flex bg-background w-full sidebar-layout overflow-hidden",
+      isMobile ? "flex-col mobile-min-vh" : "h-screen"
     )}>
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <SimpleSidebar 
-          isOpen={sidebarOpen} 
+        <SimpleSidebar
+          isOpen={sidebarOpen}
           onToggle={toggleSidebar}
         />
       )}
-      
+
       {/* Mobile Header */}
       {isMobile && showMobileHeader && (
-        <MobileHeader 
+        <MobileHeader
           title={pageTitle}
           sidebarOpen={mobileMenuOpen}
           onMenuToggle={toggleMobileMenu}
@@ -164,12 +165,12 @@ const AppLayout = memo(function AppLayout({
 
         {/* Main Content */}
         <main className={cn(
-         "flex-1 overflow-auto bg-background min-w-0",
-          isMobile ?"pt-0 p-4" :"p-6"
+          "flex-1 overflow-auto bg-background min-w-0",
+          isMobile ? "pt-0 p-4" : "p-6"
         )}>
           <div className={cn(
-           "w-full mx-auto min-w-0",
-            isMobile ?"max-w-none" :"max-w-7xl"
+            "w-full mx-auto min-w-0",
+            isMobile ? "max-w-none" : "max-w-7xl"
           )}>
             {children}
           </div>

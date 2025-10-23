@@ -1,5 +1,6 @@
 // Production service hooks for Indonesian bakery operations
 'use client'
+import * as React from 'react'
 
 import { useMemo } from 'react'
 import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'

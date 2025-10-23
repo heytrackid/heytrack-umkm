@@ -1,11 +1,12 @@
 'use client'
+import * as React from 'react'
 
+import { Skeleton } from '@/components/ui/skeleton'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import ExcelExportButton to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => <Skeleton className="w-full h-8" />
 })
@@ -14,7 +15,7 @@ interface SidebarFooterProps {
   variant?: 'default' | 'mobile'
 }
 
-export default function SidebarFooter({ variant = 'default' }: SidebarFooterProps) {
+function SidebarFooter({ variant = 'default' }: SidebarFooterProps) {
   // Mobile footer is simplified or hidden
   if (variant === 'mobile') {
     return (
@@ -31,9 +32,9 @@ export default function SidebarFooter({ variant = 'default' }: SidebarFooterProp
   return (
     <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
       <Suspense fallback={<Skeleton className="w-full h-8" />}>
-        <ExcelExportButton 
-          variant="outline" 
-          size="sm" 
+        <ExcelExportButton
+          variant="outline"
+          size="sm"
           className="w-full text-xs"
         />
       </Suspense>
@@ -45,3 +46,6 @@ export default function SidebarFooter({ variant = 'default' }: SidebarFooterProp
     </div>
   )
 }
+
+
+export default SidebarFooter

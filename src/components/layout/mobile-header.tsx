@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
@@ -7,32 +8,32 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import {
-    ArrowLeft,
-    Menu,
-    MoreVertical,
-    Search,
-    User,
-    X
+  ArrowLeft,
+  Menu,
+  MoreVertical,
+  Search,
+  User,
+  X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 // Supabase auth components
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
 } from "@/components/ui/sheet"
 import { useMobileFirst } from '@/hooks/use-responsive'
+import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import SimpleSidebar from './sidebar'
 
 interface MobileHeaderProps {
@@ -52,13 +53,13 @@ interface MobileHeaderProps {
   sidebarOpen?: boolean
 }
 
-const MobileHeader = React.memo(function MobileHeader({
+function MobileHeader({
   title,
   showBackButton,
   onBackClick,
   actions,
   showSearch = true,
-  searchPlaceholder ="Cari...",
+  searchPlaceholder = "Cari...",
   onSearch,
   notification,
   className,
@@ -134,12 +135,12 @@ const MobileHeader = React.memo(function MobileHeader({
   }
 
   return (
-    <header 
+    <header
       className={cn(
-       "sticky top-0 z-50",
-       "bg-background/95 backdrop-blur-sm border-b border-border",
-       "transition-transform duration-300 ease-in-out",
-       "supports-[backdrop-filter]:bg-background/60",
+        "sticky top-0 z-50",
+        "bg-background/95 backdrop-blur-sm border-b border-border",
+        "transition-transform duration-300 ease-in-out",
+        "supports-[backdrop-filter]:bg-background/60",
         className
       )}
     >
@@ -184,10 +185,10 @@ const MobileHeader = React.memo(function MobileHeader({
 
         {/* Center Section - Search */}
         {showSearch && (
-          <div 
+          <div
             className={cn(
-             "flex items-center transition-all duration-300",
-              isSearchExpanded ?"flex-1 mx-2" :""
+              "flex items-center transition-all duration-300",
+              isSearchExpanded ? "flex-1 mx-2" : ""
             )}
             data-search-container
           >
@@ -230,7 +231,7 @@ const MobileHeader = React.memo(function MobileHeader({
         <div className="flex items-center space-x-1">
           {/* Dark/Light Mode Toggle */}
           <ThemeToggle />
-          
+
           {/* Smart Notification - Shared component with desktop */}
           <SmartNotifications />
 
@@ -308,7 +309,7 @@ const MobileHeader = React.memo(function MobileHeader({
       </div>
     </header>
   )
-})
+}
 
 export default MobileHeader
 
@@ -325,11 +326,11 @@ export function DashboardHeader() {
   )
 }
 
-export function PageHeader({ 
-  title, 
+export function PageHeader({
+  title,
   showBackButton = true,
-  actions 
-}: { 
+  actions
+}: {
   title: string
   showBackButton?: boolean
   actions?: React.ReactNode[]

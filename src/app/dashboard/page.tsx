@@ -1,46 +1,35 @@
 'use client'
 
-import React, { useState, useEffect, Suspense } from 'react'
-import dynamic from 'next/dynamic'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DashboardHeaderSkeleton,
+  RecentOrdersSkeleton,
+  StatsCardSkeleton,
+  StockAlertSkeleton
+} from '@/components/ui/skeletons/dashboard-skeletons'
+import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/use-mobile'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useSettings } from '@/contexts/settings-context'
+import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import { usePagePreloading } from '@/providers/PreloadingProvider'
+import {
+  BarChart3,
+  ChefHat,
+  Package,
+  ShoppingCart,
+  Target
+} from 'lucide-react'
+import dynamic from 'next/dynamic'
+import * as React from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 // Dynamic import to reduce bundle size
 const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
   ssr: false,
   loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
 })
-import { useLoading, LOADING_KEYS } from '@/hooks/useLoading'
-import { usePagePreloading } from '@/providers/PreloadingProvider'
-import { SmartLink, SmartActionButton, SmartQuickActions } from '@/components/navigation/SmartNavigation'
-import { 
-  StatsCardSkeleton,
-  DashboardHeaderSkeleton,
-  RecentOrdersSkeleton,
-  StockAlertSkeleton,
-  QuickActionsSkeleton
-} from '@/components/ui/skeletons/dashboard-skeletons'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  ShoppingCart, 
-  Package, 
-  DollarSign,
-  ChefHat,
-  BarChart3,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  Target,
-  Zap
-} from 'lucide-react'
 
 const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection'), {
   loading: () => (
@@ -53,6 +42,10 @@ const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection')
 })
 const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
 const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
+const HPPAlertsWidget = dynamic(() => import('./components/HPPAlertsWidget'), {
+  ssr: false,
+  loading: () => <StockAlertSkeleton />
+})
 
 // Sample data removed - now using real data from API
 // const sampleStats = {
@@ -92,7 +85,7 @@ export default function Dashboard() {
     [LOADING_KEYS.RECENT_ORDERS]: true,
     [LOADING_KEYS.STOCK_ALERTS]: true
   })
-  
+
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
 
@@ -147,15 +140,15 @@ export default function Dashboard() {
                 {settings.businessName || 'HeyTrack'}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {currentTime.toLocaleDateString('id-ID', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
+                {currentTime.toLocaleDateString('id-ID', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
                 })}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <ExcelExportButton size="sm" variant="outline" />
             </div>
@@ -200,6 +193,11 @@ export default function Dashboard() {
             </Suspense>
           )}
         </div>
+
+        {/* HPP Alerts Widget */}
+        <Suspense fallback={<StockAlertSkeleton />}>
+          <HPPAlertsWidget />
+        </Suspense>
 
         {/* Quick Actions */}
         <Card>

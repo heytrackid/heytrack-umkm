@@ -10,6 +10,7 @@ import { useSettings } from '@/contexts/settings-context'
 import { useLoading } from '@/hooks/useLoading'
 import { createClient } from '@supabase/supabase-js'
 import dynamic from 'next/dynamic'
+import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 

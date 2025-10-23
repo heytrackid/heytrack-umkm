@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Loader2, RefreshCw, ChevronDown } from 'lucide-react'
 import { useResponsive } from '@/hooks/use-mobile'

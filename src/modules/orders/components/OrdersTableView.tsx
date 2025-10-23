@@ -1,4 +1,5 @@
 'use client'
+import * as React from 'react'
 
 import OrdersTable from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'

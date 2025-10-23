@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { errorToast, infoToast, successToast } from '@/hooks/use-toast';
 import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types';
-import { useToast, successToast, errorToast, warningToast, infoToast } from '@/hooks/use-toast'
+import { useCallback, useState } from 'react';
 
 type Tables = Database['public']['Tables']
 
@@ -39,10 +39,10 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     } else if (showErrorToast) {
       const operationLabels = {
         create: 'membuat',
-        update: 'mengupdate', 
+        update: 'mengupdate',
         delete: 'menghapus'
       }
-      
+
       errorToast(
         `Gagal ${operationLabels[operation]} data`,
         errorMessage
@@ -54,14 +54,14 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
   const handleSuccess = useCallback((operation: 'create' | 'update' | 'delete') => {
     setError(null)
-    
+
     if (showSuccessToast) {
       const defaultMessages = {
         create: 'Data berhasil ditambahkan',
         update: 'Data berhasil diperbarui',
         delete: 'Data berhasil dihapus'
       }
-      
+
       const message = successMessages[operation] || defaultMessages[operation]
       successToast(message)
     }
@@ -73,7 +73,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
     try {
       const supabase = createSupabaseClient()
-      
+
       // Validate data if needed
       if (!data || typeof data !== 'object') {
         throw new Error('Data tidak valid')
@@ -307,16 +307,16 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     create: createRecord,
     update: updateRecord,
     delete: deleteRecord,
-    
+
     // Bulk operations
     bulkCreate,
     bulkUpdate,
     bulkDelete,
-    
+
     // State
     loading,
     error,
-    
+
     // Utility
     clearError,
   }
@@ -352,7 +352,7 @@ export function useAsyncOperation() {
 
     try {
       const result = await operation()
-      
+
       if (showToasts && successMessage) {
         successToast(successMessage)
       }

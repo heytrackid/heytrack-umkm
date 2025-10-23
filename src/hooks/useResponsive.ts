@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Simple breakpoints
 const BREAKPOINTS = {
@@ -206,7 +206,7 @@ export function useAnimationPreferences(): AnimationPreferences {
     if (typeof window === 'undefined') return;
 
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     const updatePreferences = () => {
       setPreferences({
         prefersReducedMotion: mediaQuery.matches,
@@ -281,7 +281,7 @@ export function useSafeAreaInsets() {
 
     const updateInsets = () => {
       const style = getComputedStyle(document.documentElement);
-      
+
       setInsets({
         top: parseInt(style.getPropertyValue('--sat') || '0', 10),
         bottom: parseInt(style.getPropertyValue('--sab') || '0', 10),
@@ -344,11 +344,11 @@ export function useResponsiveValue<T>(
   }
 
   const responsiveValues = values as Partial<Record<Breakpoint, T>>;
-  
+
   // Check current breakpoint first, then fall back to smaller breakpoints
   const breakpointOrder: Breakpoint[] = ['2xl', 'xl', 'lg', 'md', 'sm', 'xs'];
   const currentIndex = breakpointOrder.indexOf(breakpoint);
-  
+
   for (let i = currentIndex; i < breakpointOrder.length; i++) {
     const bp = breakpointOrder[i];
     if (responsiveValues[bp] !== undefined) {

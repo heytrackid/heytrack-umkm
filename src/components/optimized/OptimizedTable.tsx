@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import React, { memo, useMemo, useCallback } from 'react'
+import { memo, useMemo, useCallback } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'

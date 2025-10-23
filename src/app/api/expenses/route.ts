@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
-        message: `A large expense of ${formatCurrency(parseFloat(body.amount))} has been recorded for ${body.category}`,
+        message: `A large expense of ${formatCurrency(parseFloat(body.amount), { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${body.category}`,
         entity_type: 'expense',
         entity_id: expense.id,
         priority: 'high'

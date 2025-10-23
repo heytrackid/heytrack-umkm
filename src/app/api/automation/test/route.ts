@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const includeMetrics = searchParams.get('includeMetrics') === 'true'
 
-    const status = {
+    const status: any = {
       workflowAutomation: {
         enabled: true,
         eventQueue: 'Active',
@@ -187,7 +187,7 @@ async function testSmartNotifications(data: any) {
   
   try {
     // Test different types of notifications
-    const testNotifications = [
+    const testNotifications: any[] = [
       {
         type: 'warning',
         category: 'inventory',
@@ -242,9 +242,9 @@ async function testProductionPlanning(data: any) {
   
   try {
     // Test data for production planning
-    const testOrders = []
-    const testIngredients = []
-    const testRecipes = []
+    const testOrders: any[] = []
+    const testIngredients: any[] = []
+    const testRecipes: any[] = []
 
     // Generate production schedule with empty test data
     const schedules = await generateProductionSchedule(testOrders, testIngredients, testRecipes)

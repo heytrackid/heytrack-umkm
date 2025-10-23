@@ -44,6 +44,9 @@ export async function middleware(request: NextRequest) {
     '/profit',
     '/settings',
     '/ai-chatbot',
+    '/categories',
+    '/operational-costs',
+    '/reports',
   ]
 
   // Check if the current path is protected

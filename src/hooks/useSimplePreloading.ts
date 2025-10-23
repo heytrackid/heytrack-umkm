@@ -1,7 +1,8 @@
 'use client'
+import * as React from 'react'
 
-import { useEffect, useCallback } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useEffect } from 'react'
 
 // Simplified route preloading patterns
 const ROUTE_PRELOADING_PATTERNS = {
@@ -66,7 +67,7 @@ export const useRoutePreloading = () => {
   useEffect(() => {
     const currentRoute = pathname as keyof typeof ROUTE_PRELOADING_PATTERNS
     const routesToPreload = ROUTE_PRELOADING_PATTERNS[currentRoute]
-    
+
     if (routesToPreload) {
       // Immediate preloading
       routesToPreload.forEach((route, index: number) => {
@@ -174,13 +175,13 @@ export const useIdleTimePreloading = () => {
       clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
         console.log('🕒 User idle - preloading heavy components')
-        
+
         Promise.all([
           preloadChartBundle(),
           preloadTableBundle(),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
-        }).catch(() => {})
+        }).catch(() => { })
       }, 5000) // 5 seconds of inactivity
     }
 
@@ -212,12 +213,12 @@ export const useNetworkAwarePreloading = () => {
 
       if (isFastConnection) {
         console.log('🚀 Fast connection detected - enabling aggressive preloading')
-        
+
         setTimeout(() => {
           Promise.all([
             preloadChartBundle(),
             preloadTableBundle(),
-          ]).catch(() => {})
+          ]).catch(() => { })
         }, 1000)
       } else if (isSlowConnection) {
         console.log('🐌 Slow connection detected - minimal preloading')
@@ -230,19 +231,19 @@ export const useNetworkAwarePreloading = () => {
 export const LazyLoadingMetrics = {
   loadedComponents: new Set<string>(),
   loadingTimes: new Map<string, number>(),
-  
+
   trackComponentLoad: (componentName: string, startTime: number) => {
     const endTime = performance.now()
     const loadTime = endTime - startTime
-    
+
     LazyLoadingMetrics.loadedComponents.add(componentName)
     LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
-    
+
     if (loadTime > 1000) {
       console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)
     }
   },
-  
+
   getMetrics: () => ({
     totalComponents: LazyLoadingMetrics.loadedComponents.size,
     averageLoadTime: Array.from(LazyLoadingMetrics.loadingTimes.values())

@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, Suspense, lazy } from 'react'
+import * as React from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/hooks/useCurrency'

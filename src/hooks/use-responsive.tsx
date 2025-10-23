@@ -1,6 +1,7 @@
 'use client'
+import * as React from 'react'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface ResponsiveState {
   isMobile: boolean
@@ -21,11 +22,11 @@ export function useResponsive(): ResponsiveState {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    
+
     const updateState = () => {
       const width = window.innerWidth
       const height = window.innerHeight
-      
+
       setState({
         isMobile: width < 768,
         isTablet: width >= 768 && width < 1024,
@@ -40,7 +41,7 @@ export function useResponsive(): ResponsiveState {
 
     // Add event listener
     window.addEventListener('resize', updateState)
-    
+
     // Cleanup
     return () => window.removeEventListener('resize', updateState)
   }, [])
@@ -51,7 +52,7 @@ export function useResponsive(): ResponsiveState {
 // Hook untuk breakpoint checks
 export function useBreakpoint() {
   const responsive = useResponsive()
-  
+
   return {
     ...responsive,
     isXs: responsive.width < 480,
@@ -65,10 +66,10 @@ export function useBreakpoint() {
 // Hook untuk mobile-first development
 export function useMobileFirst() {
   const { isMobile, isTablet, width } = useResponsive()
-  
-  const isTouch = typeof window !== 'undefined' && 
+
+  const isTouch = typeof window !== 'undefined' &&
     ('ontouchstart' in window || (navigator && navigator.maxTouchPoints > 0))
-  
+
   return {
     isMobile,
     isTablet,

@@ -1,16 +1,17 @@
 'use client'
 
-import { Suspense } from 'react'
-import dynamic from 'next/dynamic'
-import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent } from '@/components/ui/card'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Card, CardContent } from '@/components/ui/card'
+import PrefetchLink from '@/components/ui/prefetch-link'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useResponsive } from '@/hooks/use-mobile'
-import { RefreshCw, Calculator, Target } from 'lucide-react'
+import { Calculator, RefreshCw, Target, TrendingUp } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import * as React from 'react'
+import { Suspense } from 'react'
 
 // Dynamic imports for better performance
 const HPPSummaryStats = dynamic(() => import('./components/HPPSummaryStats'), {
@@ -104,6 +105,27 @@ const PricingStrategyTab = dynamic(() => import('./components/PricingStrategyTab
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+})
+
+const HPPHistoricalTab = dynamic(() => import('./components/HPPHistoricalTab'), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-full" />
+            <div className="grid gap-4 md:grid-cols-2">
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+            <Skeleton className="h-96 w-full" />
           </div>
         </CardContent>
       </Card>
@@ -240,7 +262,7 @@ export default function HPPAndPricingPage() {
 
             {/* Main Tabs */}
             <Tabs defaultValue="hpp-calculator" className="space-y-6">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-2'}`}>
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-3'}`}>
                 <TabsTrigger value="hpp-calculator" className={isMobile ? 'w-full' : ''}>
                   <Calculator className="h-4 w-4 mr-2" />
                   Kalkulator HPP
@@ -248,6 +270,10 @@ export default function HPPAndPricingPage() {
                 <TabsTrigger value="pricing-strategy" className={isMobile ? 'w-full' : ''}>
                   <Target className="h-4 w-4 mr-2" />
                   Strategi Pricing
+                </TabsTrigger>
+                <TabsTrigger value="hpp-historical" className={isMobile ? 'w-full' : ''}>
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  HPP Lanjutan
                 </TabsTrigger>
               </TabsList>
 
@@ -280,6 +306,17 @@ export default function HPPAndPricingPage() {
                     isUpdating={isUpdating}
                     marginCategories={marginCategories}
                     handleUpdateRecipePrice={handleUpdateRecipePrice}
+                    formatCurrency={formatCurrency}
+                    isMobile={isMobile}
+                  />
+                </Suspense>
+              </TabsContent>
+
+              {/* HPP Historical Tab */}
+              <TabsContent value="hpp-historical">
+                <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded" />}>
+                  <HPPHistoricalTab
+                    recipes={recipes}
                     formatCurrency={formatCurrency}
                     isMobile={isMobile}
                   />

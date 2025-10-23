@@ -1,14 +1,14 @@
 'use client'
+import * as React from 'react'
 
-import { useEffect, useCallback } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
-import { 
-  preloadChartBundle, 
-  preloadTableBundle, 
+import {
+  globalLazyLoadingUtils,
+  preloadChartBundle,
   preloadModalComponent,
-  RouteLazyLoadingConfig,
-  globalLazyLoadingUtils 
+  preloadTableBundle
 } from '@/components/lazy/index'
+import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useEffect } from 'react'
 
 // Route preloading patterns based on user behavior
 const ROUTE_PRELOADING_PATTERNS = {
@@ -18,7 +18,7 @@ const ROUTE_PRELOADING_PATTERNS = {
     onHover: ['/customers', '/ingredients'],
     components: ['orders-table', 'financial-summary']
   },
-  
+
   // Orders -> likely next routes  
   '/orders': {
     immediate: ['/orders/new', '/customers'],
@@ -26,7 +26,7 @@ const ROUTE_PRELOADING_PATTERNS = {
     components: ['order-form', 'customer-detail'],
     modals: ['order-form', 'customer-form']
   },
-  
+
   // Finance -> likely next routes
   '/finance': {
     immediate: ['/orders', '/dashboard'],
@@ -34,7 +34,7 @@ const ROUTE_PRELOADING_PATTERNS = {
     components: ['financial-charts', 'transaction-table'],
     modals: ['finance-form']
   },
-  
+
   // Inventory/Ingredients -> likely next routes
   '/inventory': {
     immediate: ['/ingredients', '/orders'],
@@ -42,14 +42,14 @@ const ROUTE_PRELOADING_PATTERNS = {
     components: ['inventory-table', 'ingredient-form'],
     modals: ['ingredient-form', 'inventory-detail']
   },
-  
+
   '/ingredients': {
     immediate: ['/inventory', '/recipes'],
     onHover: ['/orders', '/suppliers'],
     components: ['ingredients-table', 'recipe-calculator'],
     modals: ['ingredient-form', 'recipe-form']
   },
-  
+
   // Customers -> likely next routes
   '/customers': {
     immediate: ['/orders', '/orders/new'],
@@ -57,7 +57,7 @@ const ROUTE_PRELOADING_PATTERNS = {
     components: ['customer-table', 'order-history'],
     modals: ['customer-form', 'order-form']
   },
-  
+
   // Recipes -> likely next routes
   '/resep': {
     immediate: ['/ingredients', '/hpp'],
@@ -65,7 +65,7 @@ const ROUTE_PRELOADING_PATTERNS = {
     components: ['recipe-table', 'cost-calculator'],
     modals: ['recipe-form', 'ingredient-detail']
   },
-  
+
   // Settings -> likely next routes
   '/settings': {
     immediate: ['/dashboard'],
@@ -78,7 +78,7 @@ const ROUTE_PRELOADING_PATTERNS = {
 // Preloading priority levels
 enum PreloadPriority {
   IMMEDIATE = 'immediate',
-  HIGH = 'high', 
+  HIGH = 'high',
   MEDIUM = 'medium',
   LOW = 'low'
 }
@@ -92,7 +92,7 @@ export const useRoutePreloading = () => {
   const preloadForCurrentRoute = useCallback(async (priority: PreloadPriority = PreloadPriority.IMMEDIATE) => {
     const currentRoute = pathname
     const config = ROUTE_PRELOADING_PATTERNS[currentRoute as keyof typeof ROUTE_PRELOADING_PATTERNS]
-    
+
     if (!config) return
 
     const startTime = performance.now()
@@ -113,12 +113,12 @@ export const useRoutePreloading = () => {
               }
             })
           }
-          
+
           // Preload critical modals
           if (config.modals) {
             config.modals.forEach(modal => {
               preloadPromises.push(
-                preloadModalComponent(modal).catch(() => {})
+                preloadModalComponent(modal).catch(() => { })
               )
             })
           }
@@ -145,10 +145,10 @@ export const useRoutePreloading = () => {
       }
 
       await Promise.all(preloadPromises)
-      
+
       const endTime = performance.now()
       console.log(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
-      
+
     } catch (error: any) {
       console.warn(`⚠️ Failed to preload resources for ${currentRoute}:`, error)
     }
@@ -158,12 +158,12 @@ export const useRoutePreloading = () => {
   useEffect(() => {
     // Immediate preloading
     preloadForCurrentRoute(PreloadPriority.IMMEDIATE)
-    
+
     // High priority preloading after a short delay
     const highPriorityTimer = setTimeout(() => {
       preloadForCurrentRoute(PreloadPriority.HIGH)
     }, 100)
-    
+
     // Medium priority preloading after longer delay
     const mediumPriorityTimer = setTimeout(() => {
       preloadForCurrentRoute(PreloadPriority.MEDIUM)
@@ -214,21 +214,21 @@ export const useLinkPreloading = () => {
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
     if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponent(modalType).catch(() => {})
+      preloadModalComponent(modalType).catch(() => { })
     }
   }, [])
 
   const preloadTableOnHover = useCallback(() => {
-    preloadTableBundle().catch(() => {})
+    preloadTableBundle().catch(() => { })
   }, [])
 
   const preloadChartOnHover = useCallback(() => {
-    preloadChartBundle().catch(() => {})
+    preloadChartBundle().catch(() => { })
   }, [])
 
   return {
     preloadModalOnHover,
-    preloadTableOnHover, 
+    preloadTableOnHover,
     preloadChartOnHover
   }
 }
@@ -282,13 +282,13 @@ export const useIdleTimePreloading = () => {
       idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
         console.log('🕒 User idle - preloading heavy components')
-        
+
         Promise.all([
-          preloadChartBundle().catch(() => {}),
-          preloadTableBundle().catch(() => {}),
+          preloadChartBundle().catch(() => { }),
+          preloadTableBundle().catch(() => { }),
         ]).then(() => {
           console.log('✅ Idle preloading completed')
-        }).catch(() => {})
+        }).catch(() => { })
       }, 5000) // 5 seconds of inactivity
     }
 
@@ -321,13 +321,13 @@ export const useNetworkAwarePreloading = () => {
 
       if (isFastConnection) {
         console.log('🚀 Fast connection detected - enabling aggressive preloading')
-        
+
         // Preload more aggressively on fast connections
         setTimeout(() => {
           Promise.all([
             preloadChartBundle(),
             preloadTableBundle(),
-          ]).catch(() => {})
+          ]).catch(() => { })
         }, 1000)
       } else if (isSlowConnection) {
         console.log('🐌 Slow connection detected - minimal preloading')
