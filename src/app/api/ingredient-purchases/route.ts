@@ -70,6 +70,15 @@ export async function POST(request: NextRequest) {
     const supabase = createSupabaseClient()
     const body = await request.json()
     
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized', details: 'User not authenticated' },
+        { status: 401 }
+      )
+    }
+    
     // Validate required fields
     const requiredFields = ['ingredient_id', 'quantity', 'unit_price', 'purchase_date']
     for (const field of requiredFields) {
@@ -104,6 +113,7 @@ export async function POST(request: NextRequest) {
     const { data: expense, error: expenseError } = await supabase
       .from('expenses')
       .insert({
+        user_id: user.id,
         category: 'Inventory',
         subcategory: ingredient.category || 'General',
         amount: totalPrice,
@@ -136,6 +146,7 @@ export async function POST(request: NextRequest) {
     const { data: purchase, error: purchaseError } = await supabase
       .from('ingredient_purchases')
       .insert({
+        user_id: user.id,
         ingredient_id: body.ingredient_id,
         quantity: quantity,
         unit_price: unitPrice,
