@@ -1,7 +1,7 @@
 'use client'
 
+import * as React from 'react'
 import { Package, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 interface SidebarHeaderProps {
   isMobile?: boolean
@@ -9,10 +9,10 @@ interface SidebarHeaderProps {
   variant?: 'default' | 'mobile'
 }
 
-export default function SidebarHeader({ 
-  isMobile = false, 
+function SidebarHeader({
+  isMobile = false,
   onClose,
-  variant = 'default' 
+  variant = 'default'
 }: SidebarHeaderProps) {
   if (variant === 'mobile') {
     return (
@@ -49,7 +49,7 @@ export default function SidebarHeader({
           </p>
         </div>
       </div>
-      
+
       {/* Mobile close button */}
       {isMobile && onClose && (
         <button
@@ -62,3 +62,7 @@ export default function SidebarHeader({
     </div>
   )
 }
+
+SidebarHeader.displayName = 'SidebarHeader'
+
+export default SidebarHeader
