@@ -339,10 +339,28 @@ export async function createDailyHPPSnapshots() {
 }
 
 /**
- * Detect HPP alerts for all users
- * Runs every 6 hours
+ * @deprecated This function is deprecated and should not be used.
+ * 
+ * HPP alert detection should be migrated to a Supabase Edge Function
+ * similar to the hpp-daily-snapshots migration.
+ * 
+ * This function is kept for reference only.
+ * It will be removed in a future version.
  */
 export async function detectHPPAlertsForAllUsers() {
+  console.warn('⚠️ [DEPRECATED] detectHPPAlertsForAllUsers() is deprecated')
+  console.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
+  console.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
+
+  throw new Error(
+    'detectHPPAlertsForAllUsers() is deprecated. ' +
+    'This function should be migrated to a Supabase Edge Function. ' +
+    'See .kiro/specs/hpp-edge-function-migration/ for migration example.'
+  )
+
+  /*
+  // Original implementation kept for reference
+  {
   try {
     cronLogger.info('Running HPP alert detection')
 
@@ -432,10 +450,27 @@ export async function detectHPPAlertsForAllUsers() {
 }
 
 /**
- * Archive HPP snapshots older than 1 year
- * Runs monthly on the 1st at 02:00
+ * @deprecated This function is deprecated and should not be used.
+ * 
+ * HPP data archival should be migrated to a Supabase Edge Function
+ * similar to the hpp-daily-snapshots migration.
+ * 
+ * This function is kept for reference only.
+ * It will be removed in a future version.
  */
-export async function archiveOldHPPSnapshots() {
+  export async function archiveOldHPPSnapshots() {
+    console.warn('⚠️ [DEPRECATED] archiveOldHPPSnapshots() is deprecated')
+    console.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
+    console.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
+
+    throw new Error(
+      'archiveOldHPPSnapshots() is deprecated. ' +
+      'This function should be migrated to a Supabase Edge Function. ' +
+      'See .kiro/specs/hpp-edge-function-migration/ for migration example.'
+    )
+
+/*
+// Original implementation kept for reference
   try {
     cronLogger.info('Running HPP data archival')
 
@@ -552,7 +587,8 @@ export const cronJobs = {
   runAutomationEngine,
   cleanupOldNotifications,
   getAutomationStatus,
-  // createDailyHPPSnapshots - DEPRECATED: Migrated to Edge Function
-  detectHPPAlertsForAllUsers,
-  archiveOldHPPSnapshots
+  // HPP-related functions DEPRECATED: Should be migrated to Edge Functions
+  // createDailyHPPSnapshots - DEPRECATED
+  // detectHPPAlertsForAllUsers - DEPRECATED
+  // archiveOldHPPSnapshots - DEPRECATED
 }
