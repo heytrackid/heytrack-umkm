@@ -5,7 +5,7 @@ import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { useMobileFirst } from '@/hooks/use-responsive'
+import { useMobile } from '@/hooks/useResponsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
@@ -34,7 +34,7 @@ const AppLayout = memo(function AppLayout({
   pageTitle,
   showMobileHeader = true
 }: AppLayoutProps) {
-  const { isMobile } = useMobileFirst()
+  const { isMobile } = useMobile()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)

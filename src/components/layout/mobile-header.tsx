@@ -31,7 +31,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet"
-import { useMobileFirst } from '@/hooks/use-responsive'
+import { useMobile } from '@/hooks/useResponsive'
 import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import SimpleSidebar from './sidebar'
@@ -70,7 +70,7 @@ function MobileHeader({
   const [searchQuery, setSearchQuery] = useState('')
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
-  const { isMobile } = useMobileFirst()
+  const { isMobile } = useMobile()
   const router = useRouter()
   const supabase = createClientComponentClient()
 

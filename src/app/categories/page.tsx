@@ -4,7 +4,7 @@ import * as React from 'react'
 import { lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import {
   Breadcrumb,

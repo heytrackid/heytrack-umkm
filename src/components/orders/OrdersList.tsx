@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { useCurrency } from '@/hooks/useCurrency'
 import {
     Clock,

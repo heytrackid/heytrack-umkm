@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import {
     Download,

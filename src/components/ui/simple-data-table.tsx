@@ -2,7 +2,7 @@
 import * as React from 'react'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useMobileFirst } from '@/hooks/use-responsive'
+import { useMobile } from '@/hooks/useResponsive'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -82,7 +82,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
   pageSizeOptions,
   initialPageSize
 }: SimpleDataTableProps<T>) {
-  const { isMobile, shouldUseCompactUI } = useMobileFirst()
+  const { isMobile, shouldUseCompactUI } = useMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [sortBy, setSortBy] = useState<string>('')

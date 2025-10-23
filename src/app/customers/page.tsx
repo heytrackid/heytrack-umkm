@@ -21,7 +21,7 @@ import {
   SearchFormSkeleton
 } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
 import {
   Edit2,

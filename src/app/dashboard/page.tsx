@@ -10,7 +10,7 @@ import {
   StockAlertSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import { useResponsive } from '@/hooks/use-mobile'
+import { useResponsive } from '@/hooks/useResponsive'
 import { useCurrency } from '@/hooks/useCurrency'
 import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
