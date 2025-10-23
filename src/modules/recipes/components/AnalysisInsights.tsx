@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { Card } from '@/components/ui/card'
 import { Lightbulb } from 'lucide-react'
 import { formatCurrency } from '@/shared/utils/currency'
