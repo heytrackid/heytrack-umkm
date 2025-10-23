@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ListSkeleton } from '@/components/ui'
 import { useCurrency } from '@/hooks/useCurrency'
 import { HPPRecommendation } from '@/types/hpp-tracking'
 import { useQuery } from '@tanstack/react-query'
@@ -122,19 +122,8 @@ export function HPPRecommendationsPanel({ recipeId }: HPPRecommendationsPanelPro
                     </CardTitle>
                     <CardDescription>Saran untuk meningkatkan efisiensi dan profitabilitas</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                    {Array(3).fill(0).map((_, i) => (
-                        <div key={i} className="p-4 border rounded-lg space-y-3">
-                            <div className="flex items-start justify-between">
-                                <div className="space-y-2 flex-1">
-                                    <Skeleton className="h-5 w-3/4" />
-                                    <Skeleton className="h-4 w-full" />
-                                </div>
-                                <Skeleton className="h-6 w-24" />
-                            </div>
-                            <Skeleton className="h-4 w-32" />
-                        </div>
-                    ))}
+                <CardContent>
+                    <ListSkeleton items={3} />
                 </CardContent>
             </Card>
         )

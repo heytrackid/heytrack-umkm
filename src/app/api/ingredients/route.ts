@@ -79,7 +79,7 @@ export const POST = withValidation(
         return handleDatabaseError(error)
       }
 
-      return createSuccessResponse(insertedData, 201)
+      return createSuccessResponse(insertedData, '201')
 
     } catch (error: any) {
       return handleDatabaseError(error)

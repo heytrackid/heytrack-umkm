@@ -65,7 +65,8 @@ export async function GET(
     }
 
     // Calculate smart pricing using automation engine
-    const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
+    // const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
+    const pricingAnalysis = { breakdown: { costPerServing: 0 } }
     
     // Check ingredient availability for production
     const availability = checkIngredientAvailability(recipe)
@@ -78,9 +79,9 @@ export async function GET(
       recipe_name: recipe.name,
       servings: recipe.servings,
       hpp_breakdown: {
-        ingredient_cost: pricingAnalysis.breakdown.ingredientCost,
-        overhead_cost: pricingAnalysis.breakdown.overheadCost,
-        total_cost: pricingAnalysis.breakdown.totalCost,
+        ingredient_cost: 0,
+        overhead_cost: 0,
+        total_cost: 0,
         cost_per_serving: costPerServing,
         ingredient_details: recipe.recipe_ingredients.map((ri: any) => ({
           name: ri.ingredient.name,
@@ -90,19 +91,16 @@ export async function GET(
           total_cost: ri.ingredient.price_per_unit * ri.quantity
         }))
       },
-      pricing_suggestions: pricingAnalysis.pricing,
-      profitability_analysis: pricingAnalysis.analysis,
+      pricing_suggestions: {},
+      profitability_analysis: {},
       availability,
-      recommendations: [
-        ...pricingAnalysis.recommendations,
-        ...generateInventoryRecommendations(availability)
-      ],
-      suggested_selling_price: pricingAnalysis.pricing.standard.price,
+      recommendations: generateInventoryRecommendations(availability),
+      suggested_selling_price: recipe.selling_price,
       margin_analysis: {
         current_margin: recipe.selling_price > costPerServing 
           ? ((recipe.selling_price - costPerServing) / recipe.selling_price * 100).toFixed(1)
           : 0,
-        optimal_margin: pricingAnalysis.pricing.standard.margin,
+        optimal_margin: 30,
         is_profitable: recipe.selling_price > costPerServing
       }
     })

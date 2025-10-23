@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CardSkeleton } from '@/components/ui'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
@@ -210,18 +210,10 @@ export default function CostBreakdownChart({
         return (
             <Card className={className}>
                 <CardHeader>
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-64" />
+                    <CardTitle>Loading...</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
-                        <Skeleton className="h-[300px] w-full" />
-                        <div className="space-y-2">
-                            {[1, 2, 3, 4, 5].map(i => (
-                                <Skeleton key={i} className="h-12 w-full" />
-                            ))}
-                        </div>
-                    </div>
+                    <CardSkeleton rows={5} />
                 </CardContent>
             </Card>
         )

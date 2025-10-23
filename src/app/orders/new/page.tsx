@@ -25,34 +25,10 @@ import {
   Package,
   AlertCircle
 } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { FormSkeleton, CardSkeleton } from '@/components/ui'
 
 // Import hooks
 import { useOrderLogic } from './hooks/useOrderLogic'
-import { AuthFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
-
-// ============= LOADING SKELETONS =============
-const StepSkeleton = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-6 w-48" />
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {Array(4).fill(0).map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ))}
-    </div>
-  </div>
-)
-
-const SummarySkeleton = () => (
-  <div className="space-y-4">
-    <Skeleton className="h-8 w-full" />
-    <Skeleton className="h-32 w-full" />
-    <Skeleton className="h-10 w-full" />
-  </div>
-)
 
 // ============= DYNAMIC IMPORTS (CODE SPLITTING) =============
 const OrderCustomerStep = dynamic(
@@ -82,7 +58,7 @@ const OrderDeliveryStep = dynamic(
 const OrderPaymentStep = dynamic(
   () => import('./_components/OrderPaymentStep'),
   { 
-    loading: () => <StepSkeleton />,
+    loading: () => <FormSkeleton fields={4} />,
     ssr: false
   }
 )
@@ -90,7 +66,7 @@ const OrderPaymentStep = dynamic(
 const OrderSummary = dynamic(
   () => import('./_components/OrderSummary'),
   { 
-    loading: () => <SummarySkeleton />,
+    loading: () => <CardSkeleton rows={4} />,
     ssr: false
   }
 )
@@ -131,28 +107,7 @@ export default function NewOrderPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="space-y-6">
-          {/* Breadcrumb Skeleton */}
-          <div className="flex items-center space-x-2">
-            <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-4 animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-          </div>
-
-          {/* Header Skeleton */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-9 bg-gray-200 rounded w-20 animate-pulse"></div>
-              <div>
-                <div className="h-8 bg-gray-200 rounded w-64 animate-pulse mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Form Skeleton */}
-          <AuthFormSkeleton />
-        </div>
+        <FormSkeleton fields={6} hasSubmit />
       </AppLayout>
     )
   }

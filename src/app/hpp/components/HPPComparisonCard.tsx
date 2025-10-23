@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CardSkeleton } from '@/components/ui'
 import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
 import { HPPComparison } from '@/types/hpp-tracking'
@@ -29,20 +29,8 @@ export default function HPPComparisonCard({
                     <CardTitle>Perbandingan Periode</CardTitle>
                     <CardDescription>Membandingkan HPP periode saat ini dengan periode sebelumnya</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-8 w-32" />
-                        </div>
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-8 w-32" />
-                        </div>
-                    </div>
-                    <div className="pt-4 border-t">
-                        <Skeleton className="h-6 w-full" />
-                    </div>
+                <CardContent>
+                    <CardSkeleton rows={4} />
                 </CardContent>
             </Card>
         )

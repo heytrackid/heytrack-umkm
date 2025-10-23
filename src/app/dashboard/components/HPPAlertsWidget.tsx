@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ListSkeleton } from '@/components/ui'
 import { formatCurrentCurrency } from '@/lib/currency'
 import { HPPAlert } from '@/types/hpp-tracking'
 import { formatChangePercentage, getSeverityColors } from '@/utils/hpp-alert-helpers'
@@ -49,13 +49,8 @@ export default function HPPAlertsWidget() {
                         Alert HPP
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                    {Array(3).fill(0).map((_, i) => (
-                        <div key={i} className="p-3 border rounded-lg space-y-2">
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-3 w-full" />
-                        </div>
-                    ))}
+                <CardContent>
+                    <ListSkeleton items={3} />
                 </CardContent>
             </Card>
         )

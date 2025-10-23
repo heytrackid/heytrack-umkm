@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { CardSkeleton } from '@/components/ui'
 import { 
   Play, 
   RefreshCw, 
@@ -109,8 +110,8 @@ export default function AutomationPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="space-y-6 p-6">
+        <CardSkeleton rows={4} />
       </div>
     )
   }

@@ -41,12 +41,12 @@ export async function GET(request: NextRequest) {
     }
     
     // Separate income and expenses
-    const income = transactions?.filter(t => t.category === 'Revenue') || []
-    const expenses = transactions?.filter(t => t.category !== 'Revenue') || []
+    const income = transactions?.filter((t: any) => t.category === 'Revenue') || []
+    const expenses = transactions?.filter((t: any) => t.category !== 'Revenue') || []
     
     // Calculate totals
-    const totalIncome = income.reduce((sum, t) => sum + Number(t.amount), 0)
-    const totalExpenses = expenses.reduce((sum, t) => sum + Number(t.amount), 0)
+    const totalIncome = income.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+    const totalExpenses = expenses.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
     const netCashFlow = totalIncome - totalExpenses
     
     // Group by period
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Transform transactions for frontend
-    const transactionsList = transactions?.map(t => ({
+    const transactionsList = transactions?.map((t: any) => ({
       id: t.id,
       reference_id: t.reference_id || t.id,
       date: t.expense_date,

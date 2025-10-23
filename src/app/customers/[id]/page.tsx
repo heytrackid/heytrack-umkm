@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ProfileSkeleton, CardSkeleton } from '@/components/ui'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/useSupabase'
 import {
@@ -65,11 +65,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     return (
       <AppLayout>
         <div className="space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64 md:col-span-2" />
-          </div>
+          <ProfileSkeleton />
+          <CardSkeleton rows={4} />
         </div>
       </AppLayout>
     )

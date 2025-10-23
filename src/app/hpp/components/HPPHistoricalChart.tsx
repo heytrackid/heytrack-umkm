@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CardSkeleton } from '@/components/ui'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
@@ -288,23 +288,10 @@ export default function HPPHistoricalChart({
         return (
             <Card className={className}>
                 <CardHeader>
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-64" />
+                    <CardTitle>Loading...</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-4">
-                        <div className="flex gap-2">
-                            {PERIOD_OPTIONS.map((_, i) => (
-                                <Skeleton key={i} className="h-9 w-20" />
-                            ))}
-                        </div>
-                        <Skeleton className="h-[300px] w-full" />
-                        <div className="grid grid-cols-3 gap-4">
-                            {[1, 2, 3].map(i => (
-                                <Skeleton key={i} className="h-16 w-full" />
-                            ))}
-                        </div>
-                    </div>
+                    <CardSkeleton rows={6} />
                 </CardContent>
             </Card>
         )

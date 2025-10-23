@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ListSkeleton } from '@/components/ui'
 import { toast } from '@/hooks/use-toast'
 import { formatCurrentCurrency } from '@/lib/currency'
 import { HPPAlert } from '@/types/hpp-tracking'
@@ -168,23 +168,10 @@ export function HPPAlertsList({ recipeId, limit = 20 }: HPPAlertsListProps) {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                        <span>Alert HPP</span>
-                        <Skeleton className="h-6 w-12" />
-                    </CardTitle>
+                    <CardTitle>Alert HPP</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                    {Array(3).fill(0).map((_, i) => (
-                        <div key={i} className="p-4 border rounded-lg space-y-2">
-                            <div className="flex items-start justify-between">
-                                <div className="space-y-2 flex-1">
-                                    <Skeleton className="h-5 w-3/4" />
-                                    <Skeleton className="h-4 w-full" />
-                                </div>
-                                <Skeleton className="h-6 w-16" />
-                            </div>
-                        </div>
-                    ))}
+                <CardContent>
+                    <ListSkeleton items={3} />
                 </CardContent>
             </Card>
         )

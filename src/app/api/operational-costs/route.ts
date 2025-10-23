@@ -64,10 +64,10 @@ export async function GET(request: NextRequest) {
       costs,
       total: costs.length,
       summary: {
-        total_amount: costs.reduce((sum, c) => sum + c.amount, 0),
+        total_amount: costs.reduce((sum: number, c: any) => sum + c.amount, 0),
         total_monthly: costs
           .filter((c: any) => c.frequency === 'monthly')
-          .reduce((sum, c) => sum + c.amount, 0),
+          .reduce((sum: number, c: any) => sum + c.amount, 0),
         fixed_costs: costs.filter((c: any) => c.isFixed).length,
         variable_costs: costs.filter((c: any) => !c.isFixed).length
       }
