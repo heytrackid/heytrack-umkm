@@ -2,9 +2,23 @@
  * Barrel export for all lib utilities
  * Provides convenient single-import access to all library functions
  * 
- * Usage:
+ * ORGANIZATION:
+ * - Utilities: Basic helpers (cn, debounce, logger)
+ * - Validation & Errors: Input validation and error handling
+ * - Database & API: Database and API utilities
+ * - Currency & Calculations: Financial calculations
+ * - Business Logic: Domain-specific business logic
+ * - AI & Automation: AI and automation features
+ * - External Services: Third-party integrations
+ * - Performance: Optimization utilities
+ * - Production: Production-related utilities
+ * - Validation & Security: Request validation and auth
+ * 
+ * Usage Examples:
  *   import { cn, formatCurrency } from '@/lib'
  *   import { AppError, ValidationError } from '@/lib/errors'
+ *   import { createSupabaseClient } from '@/lib'
+ *   import { calculateHPP, detectAlerts } from '@/lib'
  */
 
 // ============================================================================
