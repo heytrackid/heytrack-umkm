@@ -13,6 +13,9 @@ export { useLoading } from './useLoading'
 export { useConfirm } from './useConfirm'
 export { useToast } from './use-toast'
 
+// Error Handling Hooks
+export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
+
 // Auth Hooks
 export { useAuth } from './useAuth'
 export { useSupabaseClient } from './useSupabaseClient'

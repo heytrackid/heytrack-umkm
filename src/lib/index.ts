@@ -86,6 +86,25 @@ export {
   setCachedData,
 } from './query-cache'
 
+export type { ApiResponse, ApiErrorResponse, ValidationResult } from './api/route-handler'
+export {
+  createRouteHandler,
+  validateRequiredFields,
+  validateMethod,
+  validateAuth,
+  successResponse,
+  errorResponse,
+  validationErrorResponse,
+  paginatedResponse,
+  withCORS,
+  withCache,
+  withRateLimit,
+  handleGET,
+  handlePOST,
+  handlePUT,
+  handleDELETE,
+} from './api/route-handler'
+
 // ============================================================================
 // CURRENCY & CALCULATIONS
 // ============================================================================
