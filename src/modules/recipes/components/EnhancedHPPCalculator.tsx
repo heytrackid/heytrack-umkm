@@ -1,26 +1,25 @@
 'use client'
-import * as React from 'react'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { Card, CardContent } from '@/components/ui/card'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 // Services
+import type { HPPCalculationResult, PricingMethod } from '../services/EnhancedHPPCalculationService'
 import { EnhancedHPPCalculationService } from '../services/EnhancedHPPCalculationService'
-import type { PricingMethod, HPPCalculationResult } from '../services/EnhancedHPPCalculationService'
 
 // Extracted components
-import { SettingsPanel } from './SettingsPanel'
-import { MainResultsCard } from './MainResultsCard'
 import { CostBreakdownCard } from './CostBreakdownCard'
+import { EducationalFooter } from './EducationalFooter'
+import { MainResultsCard } from './MainResultsCard'
 import { MethodComparisonCard } from './MethodComparisonCard'
 import { RecommendationsCard } from './RecommendationsCard'
-import { EducationalFooter } from './EducationalFooter'
+import { SettingsPanel } from './SettingsPanel'
 
-import { Lightbulb } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
+import { Lightbulb } from 'lucide-react'
 
 export default function EnhancedHPPCalculator() {
   const { formatCurrency } = useCurrency()
@@ -33,7 +32,7 @@ export default function EnhancedHPPCalculator() {
   // Calculate HPP
   const calculateHPP = async () => {
     setIsCalculating(true)
-    
+
     try {
       // Empty data for now - will be populated with real data later
       const emptyRecipe = {
@@ -41,7 +40,7 @@ export default function EnhancedHPPCalculator() {
         name: 'Pilih resep untuk kalkulasi',
         servings: 0
       }
-      
+
       const result = await EnhancedHPPCalculationService.calculateHPP(
         emptyRecipe,
         [],
@@ -54,10 +53,10 @@ export default function EnhancedHPPCalculator() {
           overheadAllocationMethod: 'per_batch'
         }
       )
-      
+
       setCalculationResult(result)
     } catch (error: any) {
-      console.error('Error calculating HPP:', error)
+      uiLogger.error({ err: error }, 'Error calculating HPP')
       setCalculationResult(null)
     } finally {
       setIsCalculating(false)

@@ -224,7 +224,7 @@ export class EnhancedAutomationEngine {
         },
         margin_analysis: marginAnalysis
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Advanced HPP calculation error:', error)
       throw error
     }
@@ -305,7 +305,7 @@ export class EnhancedAutomationEngine {
         usage_predictions: usagePredictions,
         cost_optimization: costOptimization
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Intelligent inventory analysis error:', error)
       throw error
     }
@@ -373,7 +373,7 @@ export class EnhancedAutomationEngine {
         bottleneck_analysis: bottleneckAnalysis,
         profitability_forecast: profitabilityForecast
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Production optimization error:', error)
       throw error
     }
@@ -434,7 +434,7 @@ export class EnhancedAutomationEngine {
         trend_alerts: trendAlerts,
         business_insights: businessInsights
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Contextual alerts generation error:', error)
       throw error
     }
@@ -488,7 +488,7 @@ export class EnhancedAutomationEngine {
         operational_efficiency: operationalEfficiency,
         growth_strategy: growthStrategy
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Business intelligence generation error:', error)
       throw error
     }
@@ -536,7 +536,7 @@ export class EnhancedAutomationEngine {
     const limitingIngredients: string[] = []
     const warnings: string[] = []
 
-    recipeIngredients?.forEach((ri: any) => {
+    recipeIngredients?.forEach((ri: unknown) => {
       const ingredient = ri.ingredients as unknown as Ingredient
       const needed = ri.quantity * maxBatches
       
@@ -583,13 +583,13 @@ export class EnhancedAutomationEngine {
   // Static method for inventory analysis (used by components)
   static async analyzeInventoryNeeds(ingredients: Ingredient[]) {
     try {
-      const { data: analysisResult, error } = await (supabase as any).rpc('analyze_inventory_needs')
+      const { data: analysisResult, error } = await supabase.rpc('analyze_inventory_needs')
 
       if (error) throw error
 
       // Transform and categorize results
-      const criticalItems = analysisResult?.filter((item: any) => item.urgency_level === 'CRITICAL') || []
-      const reorderSuggestions = analysisResult?.filter((item: any) => 
+      const criticalItems = analysisResult?.filter((item: unknown) => item.urgency_level === 'CRITICAL') || []
+      const reorderSuggestions = analysisResult?.filter((item: unknown) => 
         ['HIGH', 'MEDIUM'].includes(item.urgency_level)
       ) || []
 
@@ -598,7 +598,7 @@ export class EnhancedAutomationEngine {
         reorderSuggestions,
         totalItemsNeedingAttention: analysisResult?.length || 0
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error analyzing inventory needs:', error)
       return {
         criticalItems: [],
@@ -662,7 +662,7 @@ export class EnhancedAutomationEngine {
     return []
   }
 
-  private calculateProductionEfficiency(schedule: any[], maxHours: number) {
+  private calculateProductionEfficiency(schedule: unknown[], maxHours: number) {
     // Would calculate various efficiency metrics
     return {
       capacity_utilization: 0,
@@ -691,7 +691,7 @@ export class EnhancedAutomationEngine {
     }
   }
 
-  private async generatePriorityAlerts(alerts: any[]) {
+  private async generatePriorityAlerts(alerts: unknown[]) {
     // Would implement AI-like alert prioritization
     return []
   }

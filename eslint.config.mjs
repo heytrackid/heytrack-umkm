@@ -28,44 +28,66 @@ const eslintConfig = [
       },
     },
     rules: {
-      // TypeScript Rules - Stricter to prevent common errors
-      "@typescript-eslint/no-explicit-any": "warn", // Warn on any usage
-      "@typescript-eslint/no-unused-vars": ["warn", { 
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+      // TypeScript Rules - Strict typing to prevent 'any' usage
+      "@typescript-eslint/no-explicit-any": ["error", {
+        fixToUnknown: false,
+        ignoreRestArgs: false
       }],
-      "@typescript-eslint/no-inferrable-types": "warn",
-      "@typescript-eslint/explicit-function-return-type": "off", // Too strict for React
-      "@typescript-eslint/ban-ts-comment": "warn",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-argument": "error",
+      "@typescript-eslint/no-redundant-type-constituents": "error",
       
-      // Prevent undefined variables (catches 'key', 'value', 'data' errors)
+      // Handle unknown type safely
+      "@typescript-eslint/no-unused-vars": ["error", { 
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtVariablesIgnorePattern": "^_"
+      }],
+      "@typescript-eslint/no-inferrable-types": "error",
+      "@typescript-eslint/explicit-function-return-type": ["error", {
+        "allowExpressions": true,
+        "allowTypedFunctionExpressions": true,
+        "allowHigherOrderFunctions": true
+      }],
+      "@typescript-eslint/ban-ts-comment": ["error", {
+        "ts-expect-error": "allow-with-description",
+        "ts-ignore": false,
+        "ts-nocheck": false,
+        "ts-check": false
+      }],
+      
+      // Prevent undefined variables
       "no-undef": "error",
       "no-unused-vars": "off", // Use TS version instead
       
       // React Rules
-      "react/no-unescaped-entities": "warn",
-      "react-hooks/exhaustive-deps": "warn",
+      "react/no-unescaped-entities": "error",
+      "react-hooks/exhaustive-deps": "error",
       "react/jsx-key": "error",
       "react/jsx-no-duplicate-props": "error",
       "react/jsx-no-undef": "error",
       
       // General Code Quality
       "no-console": ["warn", { "allow": ["warn", "error"] }],
-      "no-debugger": "warn",
+      "no-debugger": "error",
       "no-duplicate-imports": "error",
-      "prefer-const": "warn",
+      "prefer-const": "error",
       "no-var": "error",
       
       // Async/Promise handling
       "no-async-promise-executor": "error",
-      "require-await": "warn",
+      "require-await": "error",
       
-      // Null safety
-      "@typescript-eslint/no-non-null-assertion": "warn",
-      // Note: optional-chain and nullish-coalescing require type information
-      // Disabled for performance - enable if needed:
-      // "@typescript-eslint/prefer-optional-chain": "warn",
-      // "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      // Null safety - strict checking
+      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/strict-boolean-expressions": ["error", {
+        "allowString": false,
+        "allowNumber": false,
+        "allowNullableObject": false
+      }],
     },
   },
 ];

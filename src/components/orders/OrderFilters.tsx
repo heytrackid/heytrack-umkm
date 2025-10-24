@@ -58,13 +58,13 @@ export default function OrderFilters({
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Informasi</SelectItem>
-                  <SelectItem value="PENDING">Informasi</SelectItem>
-                  <SelectItem value="CONFIRMED">Informasi</SelectItem>
-                  <SelectItem value="IN_PROGRESS">Informasi</SelectItem>
-                  <SelectItem value="READY">Informasi</SelectItem>
-                  <SelectItem value="DELIVERED">Informasi</SelectItem>
-                  <SelectItem value="CANCELLED">Informasi</SelectItem>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="CONFIRMED">Dikonfirmasi</SelectItem>
+                  <SelectItem value="IN_PROGRESS">Sedang Diproses</SelectItem>
+                  <SelectItem value="READY">Siap Diantar</SelectItem>
+                  <SelectItem value="DELIVERED">Dikirim</SelectItem>
+                  <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -76,10 +76,10 @@ export default function OrderFilters({
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Informasi</SelectItem>
-                  <SelectItem value="UNPAID">Informasi</SelectItem>
-                  <SelectItem value="PARTIAL">Informasi</SelectItem>
-                  <SelectItem value="PAID">Informasi</SelectItem>
+                  <SelectItem value="all">Semua Pembayaran</SelectItem>
+                  <SelectItem value="UNPAID">Belum Dibayar</SelectItem>
+                  <SelectItem value="PARTIAL">Dibayar Sebagian</SelectItem>
+                  <SelectItem value="PAID">Lunas</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -91,10 +91,10 @@ export default function OrderFilters({
                   <SelectValue placeholder="" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Informasi</SelectItem>
-                  <SelectItem value="high">Informasi</SelectItem>
-                  <SelectItem value="normal">Informasi</SelectItem>
-                  <SelectItem value="low">Informasi</SelectItem>
+                  <SelectItem value="all">Semua Prioritas</SelectItem>
+                  <SelectItem value="high">Tinggi</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="low">Rendah</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -127,35 +127,35 @@ export default function OrderFilters({
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'PENDING' ? 'all' : 'PENDING')}
             >
-              Informasi
+              Pending
             </Button>
             <Button
               variant={filters.status === 'IN_PROGRESS' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'IN_PROGRESS' ? 'all' : 'IN_PROGRESS')}
             >
-              Informasi
+              Diproses
             </Button>
             <Button
               variant={filters.status === 'READY' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('status', filters.status === 'READY' ? 'all' : 'READY')}
             >
-              Informasi
+              Siap Kirim
             </Button>
             <Button
               variant={filters.paymentStatus === 'UNPAID' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('paymentStatus', filters.paymentStatus === 'UNPAID' ? 'all' : 'UNPAID')}
             >
-              Informasi
+              Belum Bayar
             </Button>
             <Button
               variant={filters.priority === 'high' ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleFilterChange('priority', filters.priority === 'high' ? 'all' : 'high')}
             >
-              Informasi
+              Prioritas
             </Button>
           </div>
 
@@ -163,7 +163,7 @@ export default function OrderFilters({
           {hasActiveFilters && (
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-sm text-muted-foreground">
-                Informasi
+                Filter aktif diterapkan
               </span>
               <Button
                 variant="ghost"
@@ -172,7 +172,7 @@ export default function OrderFilters({
                 className="text-red-600 hover:text-red-700"
               >
                 <X className="h-4 w-4 mr-2" />
-                Informasi
+                Reset Filter
               </Button>
             </div>
           )}

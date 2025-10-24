@@ -25,7 +25,7 @@ const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: fals
 
 interface DataVisualizationProps {
   type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis';
-  data: any;
+  data: unknown;
   compact?: boolean;
 }
 
@@ -37,7 +37,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
     new Intl.NumberFormat.format;
 
   // Financial Performance Visualization
-  const FinancialChart = ({ data }: { data: any }) => {
+  const FinancialChart = ({ data }: { data: unknown }) => {
     const chartData = [
       {
         name: 'Revenue',
@@ -131,7 +131,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Inventory Status Visualization
-  const InventoryChart = ({ data }: { data: any }) => {
+  const InventoryChart = ({ data }: { data: unknown }) => {
     return (
       <Card className="w-full">
         <CardHeader className="pb-3">
@@ -152,7 +152,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                   </span>
                 </div>
                 <div className="mt-2 space-y-1">
-                  {data.criticalItems.slice(0, 3).map((item: any, index: number) => (
+                  {data.criticalItems.slice(0, 3).map((item: unknown, index: number) => (
                     <div key={index} className="text-sm text-red-700">
                       • {item.name}: {item.current_stock} {item.unit} remaining
                     </div>
@@ -197,8 +197,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Customer Analysis Visualization
-  const CustomerChart = ({ data }: { data: any }) => {
-    const pieData = data.topCustomers.slice(0, 5).map((customer: any, index: number) => ({
+  const CustomerChart = ({ data }: { data: unknown }) => {
+    const pieData = data.topCustomers.slice(0, 5).map((customer: unknown, index: number) => ({
       name: customer.name,
       value: customer.total_spent || 0,
       color: COLORS[index % COLORS.length]
@@ -258,7 +258,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
             {/* Top customers list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Top Customers:</h4>
-              {data.topCustomers.slice(0, 3).map((customer: any, index: number) => (
+              {data.topCustomers.slice(0, 3).map((customer: unknown, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{customer.name}</span>
                   <div className="text-right">
@@ -275,8 +275,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Product Analysis Visualization
-  const ProductChart = ({ data }: { data: any }) => {
-    const chartData = data.topRecipes.slice(0, 5).map((recipe: any) => ({
+  const ProductChart = ({ data }: { data: unknown }) => {
+    const chartData = data.topRecipes.slice(0, 5).map((recipe: unknown) => ({
       name: recipe.name.length > 10 ? recipe.name.substring(0, 10) + '...' : recipe.name,
       revenue: recipe.total_revenue || 0,
       count: recipe.times_made || 0
@@ -314,7 +314,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
             {/* Top products list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Best Selling Products:</h4>
-              {data.topRecipes.slice(0, 3).map((recipe: any, index: number) => (
+              {data.topRecipes.slice(0, 3).map((recipe: unknown, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{recipe.name}</span>
                   <div className="text-right">
@@ -344,7 +344,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Comprehensive Analysis Dashboard
-  const AnalysisChart = ({ data }: { data: any }) => {
+  const AnalysisChart = ({ data }: { data: unknown }) => {
     const { financial, inventory, recipes, customers } = data.analysis;
 
     return (

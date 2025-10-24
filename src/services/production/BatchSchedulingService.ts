@@ -4,7 +4,6 @@
  * Handles equipment capacity, labor, ingredients, and deadline constraints
  */
 
-import { supabase } from '@/lib/supabase'
 
 // Core Types
 export interface ProductionConstraints {
@@ -32,29 +31,29 @@ export interface ProductionBatch {
   recipe_name: string
   quantity: number
   priority: number
-  
+
   // Timing
   earliest_start: string // ISO datetime
   deadline: string // ISO datetime  
   estimated_duration: number // minutes
   actual_duration?: number // minutes
-  
+
   // Resource requirements
   oven_slots_required: number
   baker_hours_required: number
   decorator_hours_required?: number
-  
+
   // Dependencies
   prerequisite_batches: string[] // batch IDs that must complete first
   blocking_ingredients: string[] // ingredients that would be depleted
-  
+
   // Status tracking
   status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled' | 'blocked'
   scheduled_start?: string // ISO datetime
   scheduled_end?: string // ISO datetime
   actual_start?: string
   actual_end?: string
-  
+
   // Optimization scores
   profit_score: number
   urgency_score: number
@@ -100,12 +99,12 @@ export class BatchSchedulingService {
     decorating_stations: 1,
     packaging_capacity: 50, // items per hour
     bakers_available: 2,
-    decorators_available: 1, 
-    shift_start:"06:00",
-    shift_end:"18:00",
+    decorators_available: 1,
+    shift_start: "06:00",
+    shift_end: "18:00",
     break_times: [
-      { start:"10:00", end:"10:15" },
-      { start:"14:00", end:"14:30" }
+      { start: "10:00", end: "10:15" },
+      { start: "14:00", end: "14:30" }
     ],
     setup_time_minutes: 15,
     cleanup_time_minutes: 10
@@ -126,25 +125,25 @@ export class BatchSchedulingService {
     try {
       // Step 1: Validate and prepare batches
       const validatedBatches = await this.validateBatches(batches)
-      
+
       // Step 2: Calculate priority scores
       const prioritizedBatches = this.calculatePriorityScores(validatedBatches)
-      
+
       // Step 3: Apply constraint-based scheduling
       const scheduledBatches = await this.applyConstraintSolver(prioritizedBatches)
-      
+
       // Step 4: Generate timeline
       const timeline = this.generateTimeline(scheduledBatches)
-      
+
       // Step 5: Calculate resource utilization
       const resourceUtilization = this.calculateResourceUtilization(scheduledBatches, timeline)
-      
+
       // Step 6: Validate constraints satisfaction
       const constraintsSatisfied = this.validateConstraints(scheduledBatches, timeline)
-      
+
       // Step 7: Generate optimization metrics
       const optimizationMetrics = this.calculateOptimizationMetrics(scheduledBatches)
-      
+
       // Step 8: Generate warnings and suggestions
       const { warnings, suggestions } = this.generateInsights(scheduledBatches, resourceUtilization)
 
@@ -158,7 +157,7 @@ export class BatchSchedulingService {
         suggestions
       }
     } catch (error: any) {
-      console.error('Error in batch scheduling:', error)
+      logger.error({ err: error }, 'Error in batch scheduling')
       throw error
     }
   }
@@ -169,7 +168,7 @@ export class BatchSchedulingService {
   private async applyConstraintSolver(batches: ProductionBatch[]): Promise<ProductionBatch[]> {
     const scheduledBatches: ProductionBatch[] = []
     const resourceTimeline: Map<string, { start: string; end: string; batch_id: string }[]> = new Map()
-    
+
     // Initialize resource timelines
     for (let i = 1; i <= this.constraints.oven_capacity; i++) {
       resourceTimeline.set(`oven_${i}`, [])
@@ -185,15 +184,15 @@ export class BatchSchedulingService {
       try {
         // Find earliest available slot that satisfies constraints
         const scheduledSlot = this.findOptimalTimeSlot(batch, resourceTimeline)
-        
+
         if (scheduledSlot) {
           batch.scheduled_start = scheduledSlot.start
           batch.scheduled_end = scheduledSlot.end
           batch.status = 'scheduled'
-          
+
           // Reserve resources
           this.reserveResources(batch, scheduledSlot, resourceTimeline)
-          
+
           scheduledBatches.push(batch)
         } else {
           // Cannot schedule - mark as blocked
@@ -201,7 +200,7 @@ export class BatchSchedulingService {
           scheduledBatches.push(batch)
         }
       } catch (error: any) {
-        console.error(`Error scheduling batch ${batch.id}:`, error)
+        logger.error({ err: error, batchId: batch.id }, `Error scheduling batch ${batch.id}`)
         batch.status = 'blocked'
         scheduledBatches.push(batch)
       }
@@ -214,7 +213,7 @@ export class BatchSchedulingService {
    * Find optimal time slot for a batch considering all constraints
    */
   private findOptimalTimeSlot(
-    batch: ProductionBatch, 
+    batch: ProductionBatch,
     resourceTimeline: Map<string, { start: string; end: string; batch_id: string }[]>
   ): { start: string; end: string; resources: string[] } | null {
     const earliestStart = new Date(batch.earliest_start)
@@ -224,12 +223,12 @@ export class BatchSchedulingService {
     // Try to find a slot starting from earliest_start
     const shiftStart = this.parseTime(this.constraints.shift_start)
     const shiftEnd = this.parseTime(this.constraints.shift_end)
-    
+
     let currentTime = new Date(Math.max(earliestStart.getTime(), shiftStart.getTime()))
 
     while (currentTime < deadline) {
       const endTime = new Date(currentTime.getTime() + duration * 60 * 1000)
-      
+
       // Check if slot is within working hours
       if (this.isWithinWorkingHours(currentTime, endTime)) {
         // Check resource availability
@@ -267,9 +266,9 @@ export class BatchSchedulingService {
       const deadline = new Date(batch.deadline)
       const timeUntilDeadline = deadline.getTime() - now.getTime()
       const hoursUntilDeadline = timeUntilDeadline / (1000 * 60 * 60)
-      
+
       batch.urgency_score = Math.max(0, 100 - (hoursUntilDeadline / 24) * 10) // Decrease by 10 per day
-      
+
       // Efficiency score based on resource utilization
       const resourceEfficiency = this.calculateBatchEfficiency(batch)
       batch.efficiency_score = resourceEfficiency
@@ -290,7 +289,7 @@ export class BatchSchedulingService {
    */
   private generateTimeline(batches: ProductionBatch[]): TimelineSlot[] {
     const timeline: TimelineSlot[] = []
-    
+
     for (const batch of batches.filter(b => b.scheduled_start && b.scheduled_end)) {
       // Main production slot
       timeline.push({
@@ -341,7 +340,7 @@ export class BatchSchedulingService {
     const usedLaborHours = batches
       .filter(batch => batch.scheduled_start)
       .reduce((sum, batch) => sum + batch.baker_hours_required, 0)
-    
+
     const laborUtilization = (usedLaborHours / totalLaborHours) * 100
 
     // Identify bottlenecks
@@ -392,7 +391,7 @@ export class BatchSchedulingService {
   private isWithinWorkingHours(startTime: Date, endTime: Date): boolean {
     const shiftStart = this.parseTime(this.constraints.shift_start)
     const shiftEnd = this.parseTime(this.constraints.shift_end)
-    
+
     return startTime >= shiftStart && endTime <= shiftEnd
   }
 
@@ -411,7 +410,7 @@ export class BatchSchedulingService {
     resourceTimeline: Map<string, any[]>
   ): string[] {
     const available: string[] = []
-    
+
     for (const [resourceId, timeline] of resourceTimeline.entries()) {
       if (resourceId.startsWith(requiredResources[0])) {
         const isAvailable = !timeline.some(slot => {
@@ -419,16 +418,16 @@ export class BatchSchedulingService {
           const slotEnd = new Date(slot.end)
           const requestStart = new Date(startTime)
           const requestEnd = new Date(endTime)
-          
+
           return (requestStart < slotEnd && requestEnd > slotStart)
         })
-        
+
         if (isAvailable) {
           available.push(resourceId)
         }
       }
     }
-    
+
     return available
   }
 
@@ -453,16 +452,16 @@ export class BatchSchedulingService {
     // Check if all high-priority batches are scheduled
     const highPriorityBatches = batches.filter(b => b.priority >= 8)
     const scheduledHighPriority = highPriorityBatches.filter(b => b.scheduled_start)
-    
+
     return scheduledHighPriority.length / Math.max(highPriorityBatches.length, 1) >= 0.8 // 80% scheduling rate
   }
 
   private calculateOptimizationMetrics(batches: ProductionBatch[]) {
     const scheduledBatches = batches.filter(b => b.scheduled_start)
-    
+
     return {
       total_profit: scheduledBatches.reduce((sum, b) => sum + b.profit_score * b.quantity, 0),
-      on_time_delivery_rate: scheduledBatches.filter(b => 
+      on_time_delivery_rate: scheduledBatches.filter(b =>
         new Date(b.scheduled_end!) <= new Date(b.deadline)
       ).length / Math.max(scheduledBatches.length, 1) * 100,
       resource_efficiency: 85, // Would calculate based on actual resource usage

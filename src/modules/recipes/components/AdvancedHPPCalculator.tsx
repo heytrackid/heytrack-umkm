@@ -1,21 +1,20 @@
 'use client'
-import * as React from 'react'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Calculator, RefreshCw, AlertTriangle } from 'lucide-react'
 import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
+import { uiLogger } from '@/lib/logger'
+import { AlertTriangle, Calculator, RefreshCw } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 // Extracted components
+import { AnalysisInsights } from './AnalysisInsights'
 import { CostBreakdownCard } from './CostBreakdownCard'
 import { PricingAnalysisCard } from './PricingAnalysisCard'
 import { PricingSuggestionsComponent } from './PricingSuggestions'
 import { StockAvailability } from './StockAvailability'
-import { AnalysisInsights } from './AnalysisInsights'
 
 interface HPPResult {
   hpp_breakdown: {
@@ -57,10 +56,10 @@ interface AdvancedHPPCalculatorProps {
   onPriceUpdate?: (price: number) => void
 }
 
-export default function AdvancedHPPCalculator({ 
-  recipeId, 
-  recipeName, 
-  onPriceUpdate 
+export default function AdvancedHPPCalculator({
+  recipeId,
+  recipeName,
+  onPriceUpdate
 }: AdvancedHPPCalculatorProps) {
   const [hppResult, setHppResult] = useState<HPPResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -83,7 +82,7 @@ export default function AdvancedHPPCalculator({
       setCustomPrice(result.pricing_analysis.current_price.toString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to calculate HPP')
-      console.error('HPP calculation error:', err)
+      uiLogger.error({ err }, 'HPP calculation error')
     } finally {
       setLoading(false)
     }
@@ -91,11 +90,11 @@ export default function AdvancedHPPCalculator({
 
   const applyPricingSuggestion = (pricingTier: 'economy' | 'standard' | 'premium') => {
     if (!hppResult) return
-    
+
     const suggestion = hppResult.pricing_suggestions[pricingTier]
     setCustomPrice(suggestion.price.toString())
     setSelectedPricing(pricingTier)
-    
+
     if (onPriceUpdate) {
       onPriceUpdate(suggestion.price)
     }

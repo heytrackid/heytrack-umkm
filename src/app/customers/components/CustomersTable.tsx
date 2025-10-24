@@ -1,11 +1,13 @@
-'use client'
-
-import * as React from 'react'
-import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Table,
@@ -16,23 +18,18 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Users,
-  Mail,
-  Phone,
-  Eye,
-  Edit2,
-  Trash2,
-  MoreHorizontal,
-  Plus,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit2,
+  Eye,
+  Mail,
+  MoreHorizontal,
+  Phone,
+  Plus,
+  Trash2,
+  Users
 } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 interface CustomersTableProps {
   customers: any[]
@@ -63,22 +60,22 @@ export default function CustomersTable({
   formatCurrency,
   isMobile = false
 }: CustomersTableProps) {
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  
+
   // Calculate pagination
   const totalItems = customers.length
   const totalPages = Math.ceil(totalItems / pageSize)
-  
+
   // Get paginated data
   const paginatedCustomers = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     const endIndex = startIndex + pageSize
     return customers.slice(startIndex, endIndex)
   }, [customers, currentPage, pageSize])
-  
+
   // Reset to page 1 when customers change
   useMemo(() => {
     setCurrentPage(1)
@@ -198,7 +195,7 @@ export default function CustomersTable({
                             <Edit2 className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-red-600"
                             onClick={() => onDelete(customer)}
                           >
@@ -213,7 +210,7 @@ export default function CustomersTable({
               ))}
             </TableBody>
           </Table>
-          
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
@@ -222,12 +219,12 @@ export default function CustomersTable({
                   Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} customers
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Informasi</span>
-                  <Select value={pageSize.toString()} onValueChange={(value) => {
+                  <span className="text-sm text-muted-foreground">Show</span>
+                  <Select value={pageSize.toString()} onValueChange={(value: string) => {
                     setPageSize(Number(value))
                     setCurrentPage(1)
                   }}>
@@ -242,7 +239,7 @@ export default function CustomersTable({
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Page Navigation */}
                 <div className="flex items-center gap-2">
                   <Button
@@ -253,11 +250,11 @@ export default function CustomersTable({
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  
+
                   <span className="text-sm font-medium">
-                    Informasi
+                    {currentPage} of {totalPages}
                   </span>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"

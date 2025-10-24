@@ -6,16 +6,31 @@
 export interface NLPIntent {
   intent: string
   confidence: number
-  entities: Record<string, any>
+  entities: Record<string, unknown>
 }
 
 export interface NLPAnalysis {
   intents: NLPIntent[]
   primaryIntent: string
-  entities: Record<string, any>
+  entities: Record<string, unknown>
   sentiment: 'positive' | 'negative' | 'neutral'
   complexity: 'simple' | 'medium' | 'complex'
   context: string[]
+}
+
+export interface BusinessData {
+  message?: string
+  lowStockCount?: number
+  feasibleRecipes?: number
+  totalValue?: number
+  topProducts?: string[]
+  popularRecipes?: unknown[]
+  breakEven?: string | number
+  cashFlowStatus?: string
+  totalCustomers?: number
+  repeatRate?: string | number
+  avgOrderValue?: number
+  [key: string]: unknown
 }
 
 export interface PromptTemplate {
@@ -129,8 +144,8 @@ export class NLPProcessor {
     }
   }
 
-  static extractEntities(query: string, intent: string): Record<string, any> {
-    const entities: Record<string, any> = {}
+  static extractEntities(query: string, intent: string): Record<string, unknown> {
+    const entities: Record<string, unknown> = {}
 
     // Intent-specific entity extraction
     switch (intent) {
@@ -169,8 +184,8 @@ export class NLPProcessor {
     return entities
   }
 
-  static extractGeneralEntities(query: string): Record<string, any> {
-    const entities: Record<string, any> = {}
+  static extractGeneralEntities(query: string): Record<string, unknown> {
+    const entities: Record<string, unknown> = {}
 
     // Extract numbers
     const numbers = query.match(ENTITY_PATTERNS.numbers)
@@ -223,7 +238,7 @@ export class NLPProcessor {
 
 // Advanced Prompt Templates
 export class PromptTemplates {
-  static getBusinessStrategyPrompt(analysis: NLPAnalysis, data: any): PromptTemplate {
+  static getBusinessStrategyPrompt(analysis: NLPAnalysis, data: unknown): PromptTemplate {
     const basePrompt = `Anda adalah konsultan bisnis senior untuk UMKM bakery di Indonesia.
 
     Konteks bisnis saat ini:
@@ -263,7 +278,7 @@ export class PromptTemplates {
     }
   }
 
-  static getOperationalPrompt(analysis: NLPAnalysis, data: any): PromptTemplate {
+  static getOperationalPrompt(analysis: NLPAnalysis, data: unknown): PromptTemplate {
     const intentSpecificPrompt = this.getIntentSpecificPrompt(analysis.primaryIntent)
 
     return {
@@ -353,10 +368,10 @@ export class PromptTemplates {
 
 // AI Response Generator with NLP Integration
 export class AIResponseGenerator {
-  static async generateResponse(query: string, businessData: any): Promise<{
+  static async generateResponse(query: string, businessData: BusinessData): Promise<{
     message: string
     suggestions: string[]
-    data?: any
+    data?: BusinessData
     intent: string
   }> {
     try {
@@ -369,7 +384,7 @@ export class AIResponseGenerator {
       // Determine response strategy based on intent
       switch (analysis.primaryIntent) {
         case 'strategy':
-          return await this.generateStrategyResponse(analysis, businessData)
+          return await this.generateGeneralResponse(analysis, businessData)
         case 'inventory':
           return await this.generateInventoryResponse(analysis, businessData)
         case 'recipe':
@@ -391,7 +406,7 @@ export class AIResponseGenerator {
     }
   }
 
-  static async generateInventoryResponse(analysis: NLPAnalysis, data: any) {
+  static async generateInventoryResponse(analysis: NLPAnalysis, data: BusinessData) {
     // Enhanced inventory analysis with NLP insights
     const message = `📦 **Analisis Inventory Cerdas**
 
@@ -421,7 +436,7 @@ ${data.message || 'Data inventory berhasil dianalisis.'}
     }
   }
 
-  static async generateRecipeResponse(analysis: NLPAnalysis, data: any) {
+  static async generateRecipeResponse(analysis: NLPAnalysis, data: BusinessData) {
     const message = `👨‍🍳 **Rekomendasi Resep AI-Powered**
 
 ${data.message || 'Data resep berhasil dianalisis.'}
@@ -450,7 +465,7 @@ ${data.message || 'Data resep berhasil dianalisis.'}
     }
   }
 
-  static async generateFinancialResponse(analysis: NLPAnalysis, data: any) {
+  static async generateFinancialResponse(analysis: NLPAnalysis, data: BusinessData) {
     const message = `💰 **Analisis Keuangan AI**
 
 ${data.message || 'Data keuangan berhasil dianalisis.'}
@@ -479,7 +494,7 @@ ${data.message || 'Data keuangan berhasil dianalisis.'}
     }
   }
 
-  static async generateOrderResponse(analysis: NLPAnalysis, data: any) {
+  static async generateOrderResponse(analysis: NLPAnalysis, data: BusinessData) {
     const message = `📋 **Customer & Order Intelligence**
 
 ${data.message || 'Data pesanan berhasil dianalisis.'}
@@ -508,7 +523,7 @@ ${data.message || 'Data pesanan berhasil dianalisis.'}
     }
   }
 
-  static async generateGeneralResponse(analysis: NLPAnalysis, data: any) {
+  static async generateGeneralResponse(analysis: NLPAnalysis, data: BusinessData) {
     const message = `🤖 **HeyTrack AI Assistant**
 
 Saya siap membantu Anda mengelola bisnis UMKM kuliner dengan lebih cerdas!

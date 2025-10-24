@@ -1,6 +1,39 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+interface FinancialTransaction {
+  id: string
+  reference_id?: string
+  expense_date: string
+  description: string
+  category: string
+  subcategory?: string
+  amount: string | number
+  tanggal: string
+}
+
+interface PeriodCashFlow {
+  period: string
+  income: number
+  expenses: number
+  net_cash_flow: number
+  transaction_count: number
+}
+
+interface CategoryBreakdown {
+  category: string
+  total: number
+  count: number
+  percentage: number
+  subcategories: Subcategory[]
+}
+
+interface Subcategory {
+  name: string
+  total: number
+  count: number
+}
+
 /**
  * GET /api/reports/cash-flow
  * 
@@ -25,7 +58,7 @@ export async function GET(request: NextRequest) {
     const supabase = createServerSupabaseAdmin()
 
     // Get all transactions (income and expenses) within date range
-    const { data: transactions, error: transError } = await (supabase as any)
+    const { data: transactions, error: transError } = await supabase
       .from('financial_transactions')
       .select('*')
       .gte('tanggal', startDate)
@@ -41,12 +74,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Separate income and expenses
-    const income = transactions?.filter((t: any) => t.category === 'Revenue') || []
-    const expenses = transactions?.filter((t: any) => t.category !== 'Revenue') || []
+    const income = transactions?.filter((t: FinancialTransaction) => t.category === 'Revenue') || []
+    const expenses = transactions?.filter((t: FinancialTransaction) => t.category !== 'Revenue') || []
 
     // Calculate totals
-    const totalIncome = income.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
-    const totalExpenses = expenses.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+    const totalIncome = income.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
+    const totalExpenses = expenses.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
     const netCashFlow = totalIncome - totalExpenses
 
     // Group by period
@@ -65,7 +98,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform transactions for frontend
-    const transactionsList = transactions?.map((t: any) => ({
+    const transactionsList = transactions?.map((t: FinancialTransaction) => ({
       id: t.id,
       reference_id: t.reference_id || t.id,
       date: t.expense_date,
@@ -106,7 +139,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating cash flow report:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -116,8 +149,8 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper: Group transactions by period
-function groupByPeriod(transactions: any[], period: string) {
-  const grouped: Record<string, any> = {}
+function groupByPeriod(transactions: FinancialTransaction[], period: string) {
+  const grouped: Record<string, PeriodCashFlow> = {}
 
   transactions.forEach(transaction => {
     let key = ''
@@ -162,14 +195,14 @@ function groupByPeriod(transactions: any[], period: string) {
     grouped[key].transaction_count++
   })
 
-  return Object.values(grouped).sort((a: any, b: any) =>
+  return Object.values(grouped).sort((a: PeriodCashFlow, b: PeriodCashFlow) =>
     a.period.localeCompare(b.period)
   )
 }
 
 // Helper: Calculate category breakdown
-function calculateCategoryBreakdown(transactions: any[]) {
-  const breakdown: Record<string, any> = {}
+function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
+  const breakdown: Record<string, CategoryBreakdown> = {}
 
   transactions.forEach(transaction => {
     const category = transaction.category
@@ -202,7 +235,7 @@ function calculateCategoryBreakdown(transactions: any[]) {
 
   // Calculate percentages
   const totalAmount = Object.values(breakdown).reduce((sum: number, cat: any) => sum + cat.total, 0)
-  Object.values(breakdown).forEach((cat: any) => {
+  Object.values(breakdown).forEach((cat: unknown) => {
     cat.percentage = totalAmount > 0 ? (cat.total / totalAmount) * 100 : 0
     cat.subcategories = Object.values(cat.subcategories)
   })
@@ -267,8 +300,8 @@ async function calculateComparison(supabase: any, startDate: string, endDate: st
     return null
   }
 
-  const prevIncome = prevTransactions.filter((t: any) => t.category === 'Revenue')
-  const prevExpenses = prevTransactions.filter((t: any) => t.category !== 'Revenue')
+  const prevIncome = prevTransactions.filter((t: unknown) => t.category === 'Revenue')
+  const prevExpenses = prevTransactions.filter((t: unknown) => t.category !== 'Revenue')
 
   const prevTotalIncome = prevIncome.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
   const prevTotalExpenses = prevExpenses.reduce((sum: number, t: any) => sum + Number(t.amount), 0)

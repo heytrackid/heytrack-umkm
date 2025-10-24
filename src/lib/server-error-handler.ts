@@ -3,6 +3,7 @@
  * Provides consistent error response format and logging for API routes
  */
 
+import logger from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { ErrorCode, getErrorMessage } from './auth-errors'
 
@@ -80,7 +81,7 @@ export function handleAuthError(
     error: unknown,
     context?: string
 ): NextResponse<ApiErrorResponse> {
-    console.error(`Auth error${context ? ` in ${context}` : ''}:`, error)
+    logger.error({ err: error, context }, 'Auth error')
 
     // Check if it's a Supabase auth error
     if (error && typeof error === 'object' && 'message' in error) {
@@ -108,7 +109,7 @@ export function handleDatabaseError(
     error: unknown,
     context?: string
 ): NextResponse<ApiErrorResponse> {
-    console.error(`Database error${context ? ` in ${context}` : ''}:`, error)
+    logger.error({ err: error, context }, 'Database error')
 
     // Don't expose database details to client
     return createErrorResponse(ErrorCode.DATABASE_ERROR, 500)
@@ -178,9 +179,9 @@ function logError(
 
     // In production, you might want to send this to a logging service
     if (statusCode >= 500) {
-        console.error('Server Error:', logData)
+        logger.error(logData, 'Server Error')
     } else if (statusCode >= 400) {
-        console.warn('Client Error:', logData)
+        logger.warn(logData, 'Client Error')
     }
 }
 
@@ -226,7 +227,7 @@ export function withErrorHandling<T>(
     handler: () => Promise<NextResponse<T>>
 ): Promise<NextResponse<T | ApiErrorResponse>> {
     return handler().catch((error) => {
-        console.error('Unhandled API error:', error)
+        logger.error({ err: error }, 'Unhandled API error')
 
         // Handle specific error types
         if (error instanceof Error) {

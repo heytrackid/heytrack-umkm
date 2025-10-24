@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running TypeScript type check..."
+npm run type-check
+
+if [ $? -ne 0 ]; then
+  echo "❌ Type checking failed! Fix type errors before committing."
+  echo ""
+  echo "📚 Reference: TYPE_SAFETY_RULES.md"
+  exit 1
+fi
+
+echo "✅ Type checking passed!"

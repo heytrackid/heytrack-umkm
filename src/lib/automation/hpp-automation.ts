@@ -97,7 +97,7 @@ export class HPPAutomationSystem {
    * AUTO-UPDATE HPP ketika harga bahan baku berubah
    */
   async onIngredientPriceChange(ingredientId: string, oldPrice: number, newPrice: number) {
-    console.log(`💰 Ingredient price changed: ${ingredientId} (${oldPrice} → ${newPrice})`)
+    automationLogger.info({ ingredientId, oldPrice, newPrice }, 'Ingredient price changed')
 
     // Track price history
     this.trackPriceHistory(ingredientId, newPrice)
@@ -106,11 +106,11 @@ export class HPPAutomationSystem {
     const affectedRecipes = await this.findRecipesUsingIngredient(ingredientId)
 
     if (affectedRecipes.length === 0) {
-      console.log('No recipes affected by price change')
+      automationLogger.info('No recipes affected by price change')
       return
     }
 
-    console.log(`Found ${affectedRecipes.length} recipes affected by price change`)
+    automationLogger.info({ count: affectedRecipes.length }, 'Found recipes affected by price change')
 
     // Recalculate HPP untuk semua affected recipes
     const recalculationResults = []
@@ -140,11 +140,11 @@ export class HPPAutomationSystem {
    * AUTO-UPDATE HPP ketika biaya operasional berubah
    */
   async onOperationalCostChange(costId: string, oldAmount: number, newAmount: number) {
-    console.log(`🏭 Operational cost changed: ${costId} (${oldAmount} → ${newAmount})`)
+    automationLogger.info({ costId, oldAmount, newAmount }, 'Operational cost changed')
 
     const costItem = this.operationalCosts.get(key)
     if (!costItem) {
-      console.error('Operational cost item not found')
+      automationLogger.error({ costId }, 'Operational cost item not found')
       return
     }
 
@@ -154,7 +154,7 @@ export class HPPAutomationSystem {
 
     // Jika auto-allocate enabled, recalculate semua resep
     if (costItem.autoAllocate) {
-      console.log(`Auto-allocating ${costItem.name} cost change to all recipes`)
+      automationLogger.info({ costName: costItem.name }, 'Auto-allocating cost change to all recipes')
       await this.recalculateAllRecipes('operational_cost_change')
     }
 
@@ -174,7 +174,7 @@ export class HPPAutomationSystem {
    * SMART HPP CALCULATION dengan automation
    */
   async calculateSmartHPP(recipeId: string): Promise<RecipeHPP> {
-    console.log(`🧮 Calculating smart HPP for recipe: ${recipeId}`)
+    automationLogger.info({ recipeId }, 'Calculating smart HPP for recipe')
 
     // Get recipe data from database/API
     const recipeData = await this.getRecipeData(recipeId)
@@ -226,7 +226,11 @@ export class HPPAutomationSystem {
     // Cache the result
     this.recipeHPPCache.set(recipeId, recipeHPP)
 
-    console.log(`✅ HPP calculated: ${this.formatCurrency(recipeHPP.totalHPP)} (${this.formatCurrency(recipeHPP.hppPerServing)}/serving)`)
+    automationLogger.info({
+      recipeId,
+      totalHPP: recipeHPP.totalHPP,
+      hppPerServing: recipeHPP.hppPerServing
+    }, 'HPP calculated successfully')
 
     return recipeHPP
   }
@@ -235,7 +239,7 @@ export class HPPAutomationSystem {
    * REAL-TIME HPP MONITORING
    */
   async monitorHPPChanges() {
-    console.log('📊 Starting HPP monitoring...')
+    automationLogger.info('Starting HPP monitoring')
 
     // Check for ingredient price changes (real implementation would use websocket/polling)
     setInterval(async () => {
@@ -265,7 +269,11 @@ export class HPPAutomationSystem {
       impactLevel: this.getImpactLevel(newHPP.hppPerServing - (oldHPP?.hppPerServing || 0))
     }
 
-    console.log(`📊 HPP recalculated for ${newHPP.recipeName}: ${this.formatCurrency(result.oldHPP)} → ${this.formatCurrency(result.newHPP)}`)
+    automationLogger.info({
+      recipeName: newHPP.recipeName,
+      oldHPP: result.oldHPP,
+      newHPP: result.newHPP
+    }, 'HPP recalculated for recipe')
 
     return result
   }
@@ -274,7 +282,7 @@ export class HPPAutomationSystem {
    * BATCH RECALCULATION untuk semua resep
    */
   private async recalculateAllRecipes(reason: string) {
-    console.log(`🔄 Recalculating all recipes due to: ${reason}`)
+    automationLogger.info({ reason }, 'Recalculating all recipes')
 
     const allRecipeIds = await this.getAllRecipeIds()
     const results = []
@@ -284,7 +292,7 @@ export class HPPAutomationSystem {
         const result = await this.recalculateRecipeHPP(recipeId)
         results.push(result)
       } catch (error: any) {
-        console.error(`Error recalculating recipe ${recipeId}:`, error)
+        automationLogger.error({ err: error, recipeId }, 'Error recalculating recipe')
       }
     }
 
@@ -322,7 +330,7 @@ export class HPPAutomationSystem {
       const data = await response.json()
       return data.recipes || []
     } catch (error: any) {
-      console.error('Error fetching recipes for ingredient:', error)
+      automationLogger.error({ err: error, ingredientId }, 'Error fetching recipes for ingredient')
       return []
     }
   }
@@ -497,7 +505,7 @@ export class HPPAutomationSystem {
       const recipes = await response.json()
       return recipes.map((r: any) => r.id)
     } catch (error: any) {
-      console.error('Error fetching recipe IDs:', error)
+      automationLogger.error({ err: error }, 'Error fetching recipe IDs')
       return []
     }
   }
@@ -519,12 +527,12 @@ export class HPPAutomationSystem {
 
   private async checkIngredientPriceChanges() {
     // TODO: Check database for price updates
-    console.log('🔍 Checking for ingredient price changes...')
+    automationLogger.info('Checking for ingredient price changes')
   }
 
   private async processStaleHPPCalculations() {
     // Check for HPP calculations yang perlu refresh
-    console.log('🔄 Processing stale HPP calculations...')
+    automationLogger.info('Processing stale HPP calculations')
   }
 
   private loadDefaultOperationalCosts() {
@@ -598,7 +606,7 @@ export class HPPAutomationSystem {
    * Monitor ingredient prices untuk testing
    */
   public async monitorIngredientPrices(ingredients: Array<{ id: string; name: string; price_per_unit: number }>) {
-    console.log('🔍 Monitoring ingredient prices...')
+    automationLogger.info({ count: ingredients.length }, 'Monitoring ingredient prices')
 
     const significantChanges = []
 

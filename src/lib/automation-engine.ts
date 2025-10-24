@@ -39,7 +39,7 @@ export type WorkflowEvent =
 export interface WorkflowEventData {
   event: WorkflowEvent
   entityId: string
-  data: any
+  data: unknown
   timestamp: string
 }
 
@@ -124,7 +124,7 @@ export class WorkflowAutomation {
         default:
           automationLogger.warn('No handler for event', { event: event.event })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.error('Error processing event', { event: event.event, error })
     }
   }
@@ -142,7 +142,7 @@ export class WorkflowAutomation {
 
     try {
       // 1. Get order with items and recipes
-      const { data: order, error: orderError } = await (supabase as any)
+      const { data: order, error: orderError } = await supabase
         .from('orders')
         .select(`
           *,
@@ -182,7 +182,7 @@ export class WorkflowAutomation {
       // 5. Send completion notification
       automationLogger.info('Order completion workflow finished', { orderNo: order.order_no })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.error('Error in order completion workflow', { error })
     }
   }
@@ -283,7 +283,7 @@ export class WorkflowAutomation {
       } else {
         automationLogger.info('Created financial record', { amount: order.total_amount })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.error('Error in createFinancialRecordFromOrder', { error })
     }
   }
@@ -325,7 +325,7 @@ export class WorkflowAutomation {
           totalSpent: newTotalSpent
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.error('Error updating customer stats', { error })
     }
   }
@@ -402,7 +402,7 @@ export class WorkflowAutomation {
           actionUrl: '/hpp-simple?tab=price_impact',
           actionLabel: 'Review HPP'
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         automationLogger.debug('Smart notification system not available', { error })
       }
     }
@@ -471,7 +471,7 @@ export class WorkflowAutomation {
           actionLabel: 'Review Pricing'
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.debug('Smart notification system not available', { error: error.message })
     }
   }
@@ -516,7 +516,7 @@ export class WorkflowAutomation {
         // Generate business insights
         this.generateHPPBusinessInsights(affectedRecipes || [])
       }, 10000) // 10 second simulation
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.debug('Smart notification system not available', { error })
     }
   }
@@ -524,7 +524,7 @@ export class WorkflowAutomation {
   /**
    * Generate business insights dari HPP changes
    */
-  private generateHPPBusinessInsights(affectedRecipes: any[]) {
+  private generateHPPBusinessInsights(affectedRecipes: unknown[]) {
     // Import smart notification system
     import('@/lib/smart-notifications').then(({ smartNotificationSystem }) => {
       // TODO: Analyze actual HPP data

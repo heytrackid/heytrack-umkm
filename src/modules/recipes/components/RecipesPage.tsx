@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,25 +7,26 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { uiLogger } from '@/lib/logger'
 import {
-    BarChart3,
-    Calculator,
-    ChefHat,
-    Clock,
-    DollarSign,
-    Plus,
-    Search,
-    TrendingUp,
-    Users
+  BarChart3,
+  Calculator,
+  ChefHat,
+  Clock,
+  DollarSign,
+  Plus,
+  Search,
+  TrendingUp,
+  Users
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 // Lazy loaded components
 import {
-    LazyAdvancedHPPCalculator,
-    RecipeDashboardWithProgressiveLoading,
-    SmartRecipeLoader,
-    preloadRecipeComponents
+  LazyAdvancedHPPCalculator,
+  RecipeDashboardWithProgressiveLoading,
+  SmartRecipeLoader,
+  preloadRecipeComponents
 } from './LazyComponents'
 
 interface Recipe {
@@ -48,9 +48,9 @@ interface RecipesPageProps {
   enableAdvancedFeatures?: boolean
 }
 
-export default function RecipesPage({ 
-  userRole = 'manager', 
-  enableAdvancedFeatures = true 
+export default function RecipesPage({
+  userRole = 'manager',
+  enableAdvancedFeatures = true
 }: RecipesPageProps) {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
@@ -77,7 +77,7 @@ export default function RecipesPage({
         setSelectedRecipe(fetchedRecipes[0])
       }
     } catch (error: any) {
-      console.error('Error fetching recipes:', error)
+      uiLogger.error({ err: error }, 'Error fetching recipes')
     } finally {
       setLoading(false)
     }
@@ -85,7 +85,7 @@ export default function RecipesPage({
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
+      recipe.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = categoryFilter === 'all' || recipe.category === categoryFilter
     return matchesSearch && matchesCategory && recipe.is_active
   })
@@ -93,7 +93,7 @@ export default function RecipesPage({
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-      case 'medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300' 
+      case 'medium': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       case 'hard': return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -129,7 +129,7 @@ export default function RecipesPage({
             </p>
           </div>
         </div>
-        
+
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-1 space-y-4">
             <div className="h-96 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -251,11 +251,10 @@ export default function RecipesPage({
           {/* Recipe List */}
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {filteredRecipes.map((recipe) => (
-              <Card 
+              <Card
                 key={recipe.id}
-                className={`cursor-pointer transition-all hover: ${
-                  selectedRecipe?.id === recipe.id ? 'ring-2 ring-primary' : ''
-                }`}
+                className={`cursor-pointer transition-all hover: ${selectedRecipe?.id === recipe.id ? 'ring-2 ring-primary' : ''
+                  }`}
                 onClick={() => setSelectedRecipe(recipe)}
               >
                 <CardContent className="p-4">

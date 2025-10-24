@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/app/api/customers/**/*.ts",
+    "src/app/api/expenses/**/*.ts",
+    "src/app/api/ingredients/**/*.ts",
+    "src/lib/logger.ts",
+    "src/lib/supabase.ts",
+    "src/utils/supabase/client.ts",
+    "src/utils/supabase/server.ts",
+    "src/utils/supabase/middleware.ts"
+  ]
+}

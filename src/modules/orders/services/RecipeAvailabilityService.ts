@@ -92,7 +92,7 @@ export class RecipeAvailabilityService {
 
       return recipeOptions
     } catch (error: any) {
-      console.error('Error fetching available recipes:', error)
+      logger.error({ err: error }, 'Error fetching available recipes')
       throw new Error('Failed to fetch available recipes')
     }
   }

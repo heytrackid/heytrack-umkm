@@ -3,6 +3,7 @@
  * Provides intelligent caching with TTL, invalidation, and memory management
  */
 
+
 interface CacheEntry<T = any> {
   data: T
   timestamp: number
@@ -175,7 +176,7 @@ class APICache {
       // On error, try to return stale cache if available
       const stale = this.cache.get(key)
       if (stale) {
-        console.warn(`API fetch failed, returning stale cache for ${endpoint}`, error)
+        apiLogger.warn({ err: error, endpoint }, 'API fetch failed, returning stale cache')
         return stale.data as T
       }
       throw error

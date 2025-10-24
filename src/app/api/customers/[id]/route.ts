@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('customers')
       .select('*')
       .eq('id', id)
@@ -57,9 +57,9 @@ export async function PUT(
       )
     }
     
-    const { data, error } = await (supabase as any)
+    const { data, error } = await (supabase
       .from('customers')
-      .update({
+      .update as any)({
         ...body,
         updated_at: new Date().toISOString()
       })
@@ -107,7 +107,7 @@ export async function DELETE(
     const supabase = createServerSupabaseAdmin()
     
     // Check if customer has orders
-    const { data: orders } = await (supabase as any)
+    const { data: orders } = await supabase
       .from('orders')
       .select('*')
       .eq('customer_id', id)
@@ -120,7 +120,7 @@ export async function DELETE(
       )
     }
     
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('customers')
       .delete()
       .eq('id', id)

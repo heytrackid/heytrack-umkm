@@ -141,7 +141,7 @@ export class ProductionOrdersIntegrationService {
     orders: Order[],
     currentBatches: ProductionBatch[],
     ingredientInventory: IngredientAvailability[],
-    recipes: any[]
+    recipes: unknown[]
   ): Promise<SchedulingResult> {
     if (!this.integrationConfig.auto_schedule_enabled) {
       return {
@@ -532,7 +532,7 @@ export class ProductionOrdersIntegrationService {
     const totalIngredientNeeds: Record<string, number> = {}
 
     batchSizes.forEach(batchSize => {
-      recipe.recipe_ingredients?.forEach((recipeIngredient: any) => {
+      recipe.recipe_ingredients?.forEach((recipeIngredient: unknown) => {
         const needed = (recipeIngredient.quantity * batchSize) / recipe.servings
         totalIngredientNeeds[recipeIngredient.ingredient_id] = 
           (totalIngredientNeeds[recipeIngredient.ingredient_id] || 0) + needed
@@ -702,7 +702,7 @@ export class ProductionOrdersIntegrationService {
   private calculateMaterialCost(recipe: any, batchSize: number): number {
     if (!recipe.recipe_ingredients) return 0
 
-    return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
+    return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: unknown) => {
       const neededQuantity = (recipeIngredient.quantity * batchSize) / recipe.servings
       const ingredientCost = recipeIngredient.ingredient?.price_per_unit || 0
       return total + (neededQuantity * ingredientCost)
@@ -722,7 +722,7 @@ export class ProductionOrdersIntegrationService {
   ): IngredientAllocation[] {
     if (!recipe.recipe_ingredients) return []
 
-    return recipe.recipe_ingredients.map((recipeIngredient: any) => {
+    return recipe.recipe_ingredients.map((recipeIngredient: unknown) => {
       const neededQuantity = (recipeIngredient.quantity * batchSize) / recipe.servings
       const ingredient = recipeIngredient.ingredient
 

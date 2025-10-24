@@ -79,7 +79,7 @@ export class RecipeRecommendationService {
 
       return recommendations
     } catch (error: any) {
-      console.error('Error getting recipe recommendations:', error)
+      logger.error({ err: error }, 'Error getting recipe recommendations')
       return []
     }
   }

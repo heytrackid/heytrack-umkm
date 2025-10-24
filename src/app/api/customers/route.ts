@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { CustomerInsertSchema, PaginationQuerySchema } from '@/lib/validations'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
@@ -19,23 +20,43 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const limit = searchParams.get('limit')
-    const search = searchParams.get('search')
+
+    // Validate query parameters
+    const queryValidation = PaginationQuerySchema.safeParse({
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+      search: searchParams.get('search'),
+      sort_by: searchParams.get('sort_by'),
+      sort_order: searchParams.get('sort_order'),
+    })
+
+    if (!queryValidation.success) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', details: queryValidation.error.issues },
+        { status: 400 }
+      )
+    }
+
+    const { page, limit, search, sort_by, sort_order } = queryValidation.data
 
     let query = supabase
       .from('customers')
       .select('*')
       .eq('user_id', user.id)
-      .order('name')
 
     // Add search filter if provided
     if (search) {
       query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`)
     }
 
-    if (limit) {
-      query = query.limit(parseInt(limit))
-    }
+    // Add sorting
+    const sortField = sort_by || 'name'
+    const sortDirection = sort_order === 'asc'
+    query = query.order(sortField, { ascending: sortDirection })
+
+    // Add pagination
+    const offset = (page - 1) * limit
+    query = query.range(offset, offset + limit - 1)
 
     const { data, error } = await query
 
@@ -76,38 +97,34 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    // Validate required fields
-    if (!body.name) {
+    // Validate request body
+    const validation = CustomerInsertSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Customer name is required' },
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
         { status: 400 }
       )
     }
 
-    // Validate email format if provided
-    if (body.email && !body.email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      )
-    }
+    const validatedData = validation.data
 
     const { data, error } = await supabase
       .from('customers')
       .insert({
         user_id: user.id,
-        name: body.name,
-        email: body.email,
-        phone: body.phone,
-        address: body.address,
-        customer_type: body.customer_type || 'retail',
-        status: body.status || 'active',
-        loyalty_points: body.loyalty_points || 0,
-        total_orders: 0,
-        total_spent: 0,
-        average_order_value: 0,
-        registration_date: body.registration_date || new Date().toISOString().split('T')[0],
-        notes: body.notes
+        name: validatedData.name,
+        email: validatedData.email,
+        phone: validatedData.phone,
+        address: validatedData.address,
+        customer_type: validatedData.customer_type || 'retail',
+        discount_percentage: validatedData.discount_percentage,
+        notes: validatedData.notes,
+        is_active: validatedData.is_active,
+        loyalty_points: validatedData.loyalty_points,
+        favorite_items: validatedData.favorite_items,
       })
       .select('*')
       .single()

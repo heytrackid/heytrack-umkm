@@ -25,7 +25,7 @@ export async function GET(
     }
 
     const supabase = createServerSupabaseAdmin()
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('bahan_baku')
       .select('*')
       .eq('id', id)
@@ -64,7 +64,7 @@ export async function PUT(
         const supabase = createServerSupabaseAdmin()
 
         // Update bahan baku
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from('bahan_baku')
           .update(validatedData)
           .eq('id', id)
@@ -103,7 +103,7 @@ export async function DELETE(
     const supabase = createServerSupabaseAdmin()
 
     // Check if bahan baku exists
-    const { data: existing } = await (supabase as any)
+    const { data: existing } = await supabase
       .from('bahan_baku')
       .select('*')
       .eq('id', id)
@@ -114,7 +114,7 @@ export async function DELETE(
     }
 
     // Check if bahan baku is used in recipes (resep_item table with bahan_id foreign key)
-    const { data: resepItems } = await (supabase as any)
+    const { data: resepItems } = await supabase
       .from('resep_item')
       .select('*')
       .eq('bahan_id', id)
@@ -128,7 +128,7 @@ export async function DELETE(
     }
 
     // Delete bahan baku
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('bahan_baku')
       .delete()
       .eq('id', id)

@@ -29,7 +29,7 @@ interface HPPCalculationResult {
 
 export class HPPCalculationService {
   static async calculateAdvancedHPP(
-    recipeId: string, 
+    recipeId: string,
     options: HPPCalculationOptions
   ): Promise<HPPCalculationResult> {
     try {
@@ -90,7 +90,7 @@ export class HPPCalculationService {
 
       // Profitability analysis
       const profitability = this.analyzeProfitability(
-        totalCost, 
+        totalCost,
         suggestedPricing.standard.price,
         recipe.servings
       )
@@ -108,7 +108,7 @@ export class HPPCalculationService {
         profitability
       }
     } catch (error: any) {
-      console.error('HPP Calculation Service Error:', error)
+      logger.error({ err: error }, 'HPP Calculation Service Error')
       throw new Error(`Failed to calculate HPP: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -128,7 +128,7 @@ export class HPPCalculationService {
   private static getUnitConversionFactor(fromUnit: string, toUnit: string): number {
     // Simplified unit conversion - in production this would be more comprehensive
     if (fromUnit === toUnit) return 1
-    
+
     // Common conversions for Indonesian F&B
     const conversions: Record<string, Record<string, number>> = {
       'g': { 'kg': 0.001, 'gram': 1 },
@@ -144,7 +144,7 @@ export class HPPCalculationService {
   }
 
   private static generatePricingSuggestions(
-    totalCost: number, 
+    totalCost: number,
     targetMargin: number
   ) {
     const basePrice = totalCost / (1 - targetMargin)
@@ -184,17 +184,17 @@ export class HPPCalculationService {
     try {
       const { error } = await supabase
         .from('recipes')
-        .update({ 
-          price, 
+        .update({
+          price,
           margin,
-          updated_at: new Date().toISOString() 
+          updated_at: new Date().toISOString()
         })
         .eq('id', recipeId)
 
       if (error) throw error
       return true
     } catch (error: any) {
-      console.error('Update recipe price error:', error)
+      logger.error({ err: error }, 'Update recipe price error')
       throw error
     }
   }
@@ -215,7 +215,7 @@ export class HPPCalculationService {
         performance: this.calculateRecipePerformance(salesData, productionData)
       }
     } catch (error: any) {
-      console.error('Recipe analytics error:', error)
+      logger.error({ err: error }, 'Recipe analytics error')
       throw error
     }
   }

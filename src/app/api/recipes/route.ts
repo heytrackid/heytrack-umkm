@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { PaginationQuerySchema } from '@/lib/validations'
 
 // GET /api/recipes - Get all recipes with ingredient relationships
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -18,7 +19,29 @@ export async function GET() {
       )
     }
 
-    const { data: recipes, error } = await supabase
+    const { searchParams } = new URL(request.url)
+
+    // Validate query parameters
+    const queryValidation = PaginationQuerySchema.safeParse({
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+      search: searchParams.get('search'),
+      sort_by: searchParams.get('sort_by'),
+      sort_order: searchParams.get('sort_order'),
+    })
+
+    if (!queryValidation.success) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', details: queryValidation.error.issues },
+        { status: 400 }
+      )
+    }
+
+    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const category = searchParams.get('category')
+    const status = searchParams.get('status')
+
+    let query = supabase
       .from('resep')
       .select(`
         *,
@@ -34,7 +57,32 @@ export async function GET() {
         )
       `)
       .eq('user_id', user.id)
-      .order('nama')
+
+    // Add search filter
+    if (search) {
+      query = query.ilike('nama', `%${search}%`)
+    }
+
+    // Add category filter
+    if (category) {
+      query = query.ilike('kategori', `%${category}%`)
+    }
+
+    // Add status filter
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    // Add sorting
+    const sortField = sort_by || 'nama'
+    const sortDirection = sort_order === 'asc'
+    query = query.order(sortField, { ascending: sortDirection })
+
+    // Add pagination
+    const offset = (page - 1) * limit
+    query = query.range(offset, offset + limit - 1)
+
+    const { data: recipes, error } = await query
 
     if (error) {
       console.error('Error fetching recipes:', error)

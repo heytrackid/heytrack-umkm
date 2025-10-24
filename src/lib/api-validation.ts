@@ -1,6 +1,6 @@
+import { formatValidationErrors, validateFormData } from '@/lib/validations'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { validateFormData, formatValidationErrors } from '@/lib/validations'
 
 // API Response types
 export interface ApiResponse<T = any> {
@@ -57,10 +57,10 @@ export function withValidation<T>(
     try {
       // Parse request body
       const body = await req.json()
-      
+
       // Validate data
       const validation = validateFormData(schema, body)
-      
+
       if (!validation.success) {
         const errorMessages = formatValidationErrors(validation.errors!)
         return createErrorResponse(
@@ -72,14 +72,14 @@ export function withValidation<T>(
 
       // Call the handler with validated data
       return await handler(req, validation.data!)
-      
-    } catch (error: any) {
-      console.error('API Route Error:', error)
-      
+
+    } catch (error: unknown) {
+      apiLogger.error({ err: error }, 'API Route Error')
+
       if (error instanceof SyntaxError) {
         return createErrorResponse('Invalid JSON format', 400)
       }
-      
+
       return createErrorResponse(
         'Internal server error',
         500
@@ -96,8 +96,8 @@ export function withQueryValidation<T>(
   return async (req: NextRequest) => {
     try {
       const url = new URL(req.url)
-      const queryParams: Record<string, any> = {}
-      
+      const queryParams: Record<string, unknown> = {}
+
       // Convert URLSearchParams to object
       url.searchParams.forEach((value, key) => {
         // Try to parse numbers and booleans
@@ -111,10 +111,10 @@ export function withQueryValidation<T>(
           queryParams[key] = value
         }
       })
-      
+
       // Validate query parameters
       const validation = validateFormData(schema, queryParams)
-      
+
       if (!validation.success) {
         const errorMessages = formatValidationErrors(validation.errors!)
         return createErrorResponse(
@@ -126,9 +126,9 @@ export function withQueryValidation<T>(
 
       // Call the handler with validated query
       return await handler(req, validation.data!)
-      
-    } catch (error: any) {
-      console.error('API Route Error:', error)
+
+    } catch (error: unknown) {
+      apiLogger.error({ err: error }, 'API Route Error')
       return createErrorResponse(
         'Internal server error',
         500
@@ -178,13 +178,13 @@ export const BulkDeleteSchema = z.object({
 
 export const BulkUpdateSchema = z.object({
   ids: z.array(z.string().uuid('Invalid ID format')).min(1, 'At least one ID is required'),
-  updates: z.record(z.string(), z.any()) // Generic updates object
+  updates: z.record(z.string(), z.unknown()) // Generic updates object
 })
 
 // Error handling for database operations
-export function handleDatabaseError(error: any): NextResponse<ApiErrorResponse> {
-  console.error('Database Error:', error)
-  
+export function handleDatabaseError(error: unknown): NextResponse<ApiErrorResponse> {
+  apiLogger.error({ err: error }, 'Database Error')
+
   // Handle specific Supabase/Postgres errors
   if (error.code) {
     switch (error.code) {
@@ -200,9 +200,9 @@ export function handleDatabaseError(error: any): NextResponse<ApiErrorResponse> 
         return createErrorResponse('Database operation failed', 500)
     }
   }
-  
+
   // Handle Supabase client errors
-  if (error.message) {
+  if ((error instanceof Error ? error.message : String(error))) {
     if (error.message.includes('JWT')) {
       return createErrorResponse('Authentication required', 401)
     }
@@ -210,7 +210,7 @@ export function handleDatabaseError(error: any): NextResponse<ApiErrorResponse> 
       return createErrorResponse('Access denied', 403)
     }
   }
-  
+
   return createErrorResponse('Internal server error', 500)
 }
 
@@ -225,18 +225,18 @@ export function withRateLimit(
   return async (req: NextRequest) => {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
     const now = Date.now()
-    
+
     const requestData = requestCounts.get(key)
-    
+
     if (!requestData || now > requestData.resetTime) {
       requestCounts.set(key, { count: 1, resetTime: now + windowMs })
       return handler(req)
     }
-    
+
     if (requestData.count >= maxRequests) {
       return createErrorResponse('Too many requests', 429)
     }
-    
+
     requestData.count++
     return handler(req)
   }
@@ -272,12 +272,12 @@ export function withCors(
     }
 
     const response = await handler(req)
-    
+
     // Add CORS headers to response
     response.headers.set("Access-Control-Allow-Origin", "*")
     response.headers.set("Access-Control-Allow-Origin", "*")
     response.headers.set("Access-Control-Allow-Origin", "*")
-    
+
     return response
   }
 }
@@ -289,21 +289,21 @@ export function withAuth(
   return async (req: NextRequest) => {
     try {
       const authHeader = req.headers.get("authorization")
-      
+
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return createErrorResponse('Authentication required', 401)
       }
-      
+
       const token = authHeader.substring(7)
-      
+
       // Here you would verify the JWT token
       // For now, we'll just pass through
       // In a real implementation, you'd verify with Supabase:
       // const { data: user, error } = await supabase.auth.getUser(token)
-      
+
       return handler(req, 'user-id-placeholder')
-      
-    } catch (error: any) {
+
+    } catch (error: unknown) {
       return createErrorResponse('Invalid authentication token', 401)
     }
   }
@@ -311,8 +311,8 @@ export function withAuth(
 
 // Combined middleware composer
 export function withMiddleware(
-  handler: (req: NextRequest, ...args: any[]) => Promise<NextResponse>,
-  middlewares: Array<(handler: any) => any>
+  handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse>,
+  middlewares: Array<(handler: unknown) => any>
 ) {
   return middlewares.reduce((wrapped, middleware) => middleware(wrapped), handler)
 }
@@ -353,7 +353,7 @@ export function createPaginationMeta(
   hasPrev: boolean
 } {
   const pages = Math.ceil(totalCount / limit)
-  
+
   return {
     total: totalCount,
     page,

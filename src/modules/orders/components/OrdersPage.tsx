@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,38 +6,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { uiLogger } from '@/lib/logger'
 import {
-    BarChart3,
-    Calendar,
-    Clock,
-    DollarSign,
-    Edit,
-    Eye,
-    Filter,
-    MessageCircle,
-    Package,
-    Plus,
-    Search,
-    ShoppingCart,
-    TrendingUp,
-    XCircle
+  BarChart3,
+  Calendar,
+  Clock,
+  DollarSign,
+  Edit,
+  Eye,
+  Filter,
+  MessageCircle,
+  Package,
+  Plus,
+  Search,
+  ShoppingCart,
+  TrendingUp,
+  XCircle
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 // Types and constants
 import { useCurrency } from '@/hooks/useCurrency'
 import {
-    ORDER_STATUSES,
-    PAYMENT_STATUSES
+  ORDER_STATUSES,
+  PAYMENT_STATUSES
 } from '../constants'
 import {
-    Order,
-    ORDER_STATUS_LABELS,
-    OrderFilters,
-    OrderStats,
-    OrderStatus,
-    PAYMENT_STATUS_LABELS,
-    PaymentStatus
+  Order,
+  ORDER_STATUS_LABELS,
+  OrderFilters,
+  OrderStats,
+  OrderStatus,
+  PAYMENT_STATUS_LABELS,
+  PaymentStatus
 } from '../types'
 
 
@@ -47,19 +47,19 @@ interface OrdersPageProps {
   enableAdvancedFeatures?: boolean
 }
 
-export default function OrdersPage({ 
-  userRole = 'manager', 
-  enableAdvancedFeatures = true 
+export default function OrdersPage({
+  userRole = 'manager',
+  enableAdvancedFeatures = true
 }: OrdersPageProps) {
   const { formatCurrency } = useCurrency()
-  
+
   // State management
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [activeView, setActiveView] = useState<'dashboard' | 'list' | 'calendar' | 'analytics'>('dashboard')
-  
+
   // Filters
   const [filters, setFilters] = useState<OrderFilters>({
     status: [],
@@ -68,7 +68,7 @@ export default function OrdersPage({
     date_to: '',
     customer_search: ''
   })
-  
+
   // Stats
   const [stats, setStats] = useState<OrderStats>({
     total_orders: 0,
@@ -96,14 +96,14 @@ export default function OrdersPage({
     try {
       setLoading(true)
       setError(null)
-      
+
       // Fetch orders from API
       const response = await fetch('/api/orders')
       if (!response.ok) throw new Error('Failed to fetch orders')
       const fetchedOrders: Order[] = await response.json()
-      
+
       setOrders(fetchedOrders)
-      
+
       // Calculate stats
       const newStats: OrderStats = {
         total_orders: fetchedOrders.length,
@@ -122,7 +122,7 @@ export default function OrdersPage({
         revenue_growth: 0,
         order_growth: 0
       }
-      
+
       setStats(newStats)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gagal memuat data pesanan')
@@ -168,13 +168,13 @@ export default function OrdersPage({
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
       // Update status via API
-      setOrders(prev => prev.map(order => 
-        order.id === orderId 
+      setOrders(prev => prev.map(order =>
+        order.id === orderId
           ? { ...order, status: newStatus, updated_at: new Date().toISOString() }
           : order
       ))
     } catch (err) {
-      console.error('Failed to update status:', err)
+      uiLogger.error({ err }, 'Failed to update status')
     }
   }
 
@@ -192,7 +192,7 @@ export default function OrdersPage({
             </p>
           </div>
         </div>
-        
+
         <div className="grid gap-6 lg:grid-cols-4">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -245,14 +245,14 @@ export default function OrdersPage({
                 <p className="text-sm font-medium text-muted-foreground">Total Pesanan</p>
                 <p className="text-2xl font-bold">{stats.total_orders}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                 {stats.order_growth}% dari periode sebelumnya
+                  {stats.order_growth}% dari periode sebelumnya
                 </p>
               </div>
               <ShoppingCart className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -260,14 +260,14 @@ export default function OrdersPage({
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                 {stats.revenue_growth}% dari periode sebelumnya
+                  {stats.revenue_growth}% dari periode sebelumnya
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-gray-600 dark:text-gray-400" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -280,7 +280,7 @@ export default function OrdersPage({
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -409,7 +409,7 @@ export default function OrdersPage({
                   {Object.entries(ORDER_STATUSES).map(([status, config]) => {
                     const count = orders.filter(o => o.status === status).length
                     const percentage = orders.length > 0 ? (count / orders.length) * 100 : 0
-                    
+
                     return (
                       <div key={status} className="space-y-1">
                         <div className="flex justify-between text-sm">
@@ -447,12 +447,12 @@ export default function OrdersPage({
                     />
                   </div>
                 </div>
-                
-                <Select 
+
+                <Select
                   value={filters.status?.join(',') || 'all'}
                   onValueChange={(value) => {
-                    setFilters(prev => ({ 
-                      ...prev, 
+                    setFilters(prev => ({
+                      ...prev,
                       status: value === 'all' ? [] : [value as OrderStatus]
                     }))
                   }}
@@ -529,7 +529,7 @@ export default function OrdersPage({
                       </Button>
                     )}
                     {ORDER_STATUSES[order.status].nextStatuses.length > 0 && (
-                      <Select 
+                      <Select
                         value={order.status}
                         onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
                       >

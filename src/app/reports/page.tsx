@@ -59,37 +59,37 @@ export default function ReportsPage() {
   const { data: financialRecords } = useSupabaseCRUD('financial_records')
 
   // Calculate sales report
-  const salesData = orders?.filter((order: any) => {
+  const salesData = orders?.filter((order: unknown) => {
     const orderDate = new Date(order.created_at).toISOString().split('T')[0]
     return orderDate >= dateRange.start && orderDate <= dateRange.end
   }) || []
 
   const salesStats = {
     totalOrders: salesData.length,
-    totalRevenue: salesData.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0),
-    completedOrders: salesData.filter((o: any) => o.status === 'DELIVERED').length,
-    pendingOrders: salesData.filter((o: any) => o.status === 'PENDING' || o.status === 'CONFIRMED').length
+    totalRevenue: salesData.reduce((sum: number, order: unknown) => sum + (order.total_amount || 0), 0),
+    completedOrders: salesData.filter((o: unknown) => o.status === 'DELIVERED').length,
+    pendingOrders: salesData.filter((o: unknown) => o.status === 'PENDING' || o.status === 'CONFIRMED').length
   }
 
   // Calculate inventory report
   const inventoryStats = {
     totalItems: ingredients?.length || 0,
-    lowStock: ingredients?.filter((i: any) => (i.current_stock || 0) <= (i.min_stock || 0)).length || 0,
-    totalValue: ingredients?.reduce((sum: number, i: any) =>
+    lowStock: ingredients?.filter((i: unknown) => (i.current_stock || 0) <= (i.min_stock || 0)).length || 0,
+    totalValue: ingredients?.reduce((sum: number, i: unknown) =>
       sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
     ) || 0,
-    outOfStock: ingredients?.filter((i: any) => (i.current_stock || 0) === 0).length || 0
+    outOfStock: ingredients?.filter((i: unknown) => (i.current_stock || 0) === 0).length || 0
   }
 
   // Calculate financial report
-  const financialData = financialRecords?.filter((record: any) => {
+  const financialData = financialRecords?.filter((record: unknown) => {
     const recordDate = new Date(record.date).toISOString().split('T')[0]
     return recordDate >= dateRange.start && recordDate <= dateRange.end
   }) || []
 
   const financialStats = {
-    totalIncome: financialData.filter((r: any) => r.type === 'INCOME').reduce((sum: number, r: any) => sum + r.amount, 0),
-    totalExpense: financialData.filter((r: any) => r.type === 'EXPENSE').reduce((sum: number, r: any) => sum + r.amount, 0),
+    totalIncome: financialData.filter((r: unknown) => r.type === 'INCOME').reduce((sum: number, r: unknown) => sum + r.amount, 0),
+    totalExpense: financialData.filter((r: unknown) => r.type === 'EXPENSE').reduce((sum: number, r: unknown) => sum + r.amount, 0),
     netProfit: 0,
     profitMargin: 0
   }
@@ -177,7 +177,7 @@ export default function ReportsPage() {
                 <input
                   type="date"
                   value={dateRange.start}
-                  onChange={(e) => setDateRange((prev: any) => ({ ...prev, start: e.target.value }))}
+                  onChange={(e) => setDateRange((prev: unknown) => ({ ...prev, start: e.target.value }))}
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
@@ -186,7 +186,7 @@ export default function ReportsPage() {
                 <input
                   type="date"
                   value={dateRange.end}
-                  onChange={(e) => setDateRange((prev: any) => ({ ...prev, end: e.target.value }))}
+                  onChange={(e) => setDateRange((prev: unknown) => ({ ...prev, end: e.target.value }))}
                   className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
@@ -257,7 +257,7 @@ export default function ReportsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {salesData.slice(0, 10).map((order: any) => (
+                  {salesData.slice(0, 10).map((order: unknown) => (
                     <div key={order.id} className="flex justify-between items-center p-3 border rounded-lg">
                       <div>
                         <p className="font-medium">{order.order_no}</p>

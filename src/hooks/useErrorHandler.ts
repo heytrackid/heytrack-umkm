@@ -66,7 +66,7 @@ export function useErrorHandler() {
     setErrorState({
       error,
       isError: true,
-      message: error.message,
+      message: (error instanceof Error ? error.message : String(error)),
     })
     throw error
   }, [])

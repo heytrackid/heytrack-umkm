@@ -125,7 +125,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setPricingState(prev => ({
         ...prev,
@@ -165,7 +165,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setInventoryState(prev => ({
         ...prev,
@@ -205,7 +205,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setCustomerState(prev => ({
         ...prev,
@@ -256,7 +256,7 @@ export function useAIPowered() {
 
       return result
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       setFinancialState(prev => ({
         ...prev,
@@ -272,11 +272,11 @@ export function useAIPowered() {
    * Combines multiple AI analyses for comprehensive insights
    */
   const generateSmartInsights = useCallback(async (businessData: {
-    recipes?: any[]
-    ingredients?: any[]
-    orders?: any[]
-    customers?: any[]
-    financials?: any
+    recipes?: unknown[]
+    ingredients?: unknown[]
+    orders?: unknown[]
+    customers?: unknown[]
+    financials?: unknown
   }) => {
     const insights = []
 
@@ -286,7 +286,7 @@ export function useAIPowered() {
         const topRecipes = businessData.recipes.slice(0, 3)
         for (const recipe of topRecipes) {
           if (recipe.recipe_ingredients) {
-            const ingredients = recipe.recipe_ingredients.map((ri: any) => ({
+            const ingredients = recipe.recipe_ingredients.map((ri: unknown) => ({
               name: ri.ingredient?.name || 'Unknown',
               cost: (ri.ingredient?.price_per_unit || 0) * ri.quantity,
               quantity: ri.quantity
@@ -305,7 +305,7 @@ export function useAIPowered() {
                 analysis: pricingAnalysis,
                 priority: 'high'
               })
-            } catch (error: any) {
+            } catch (error: unknown) {
               console.warn(`Pricing analysis failed for ${recipe.name}:`, error)
             }
           }
@@ -316,7 +316,7 @@ export function useAIPowered() {
       if (businessData.ingredients && businessData.ingredients.length > 0) {
         try {
           const inventoryOptimization = await optimizeInventory({
-            ingredients: businessData.ingredients.map((ing: any) => ({
+            ingredients: businessData.ingredients.map((ing: unknown) => ({
               name: ing.name,
               currentStock: ing.current_stock,
               minStock: ing.min_stock,
@@ -331,14 +331,14 @@ export function useAIPowered() {
             analysis: inventoryOptimization,
             priority: 'medium'
           })
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.warn('Inventory optimization failed:', error)
         }
       }
 
       return insights
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Smart insights generation failed:', error)
       return []
     }

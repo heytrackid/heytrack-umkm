@@ -46,8 +46,8 @@ export async function checkInventoryReorder() {
     }
 
     return summary
-  } catch (error: any) {
-    cronLogger.error('Error in inventory reorder check', { error: error.message })
+  } catch (error) {
+    cronLogger.error('Error in inventory reorder check', { error: error instanceof Error ? error.message : String(error) })
     throw error
   }
 }
@@ -80,8 +80,8 @@ export async function processSmartNotifications() {
       orders: orderAlerts,
       financial: financialAlerts
     }
-  } catch (error: any) {
-    console.error('❌ [CRON] Error processing notifications:', error)
+  } catch (error) {
+    console.error('❌ [CRON] Error processing notifications:', error instanceof Error ? error.message : String(error))
     throw error
   }
 }
@@ -129,8 +129,8 @@ async function checkInventoryAlerts() {
     })
 
     return alertCount
-  } catch (error: any) {
-    console.error('Error checking inventory alerts:', error)
+  } catch (error) {
+    console.error('Error checking inventory alerts:', error instanceof Error ? error.message : String(error))
     return 0
   }
 }
@@ -187,8 +187,8 @@ async function checkOrderDeadlines() {
     })
 
     return alertCount
-  } catch (error: any) {
-    console.error('Error checking order deadlines:', error)
+  } catch (error) {
+    console.error('Error checking order deadlines:', error instanceof Error ? error.message : String(error))
     return 0
   }
 }
@@ -230,7 +230,7 @@ async function checkFinancialAlerts() {
     }
 
     return 0
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error checking financial alerts:', error)
     return 0
   }
@@ -248,7 +248,7 @@ export async function runAutomationEngine() {
     await enhancedAutomationEngine.processWorkflows()
 
     console.log('✅ [CRON] Automation engine completed')
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ [CRON] Error running automation engine:', error)
     throw error
   }
@@ -276,7 +276,7 @@ export async function cleanupOldNotifications() {
     if (error) throw error
 
     console.log('✅ [CRON] Old notifications cleaned up')
-  } catch (error: any) {
+  } catch (error) {
     console.error('❌ [CRON] Error cleaning notifications:', error)
     throw error
   }
@@ -303,7 +303,7 @@ export async function getAutomationStatus() {
       },
       status: 'active'
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error getting automation status:', error)
     return {
       status: 'error',
@@ -414,7 +414,7 @@ export async function detectHPPAlertsForAllUsers() {
           snapshots_analyzed: alertResult.snapshots_analyzed
         })
 
-      } catch (error: any) {
+      } catch (error) {
         cronLogger.error(`Error detecting HPP alerts for user ${userId}`, { error: error.message })
         errors.push({
           user_id: userId,
@@ -443,10 +443,11 @@ export async function detectHPPAlertsForAllUsers() {
 
     return summary
 
-  } catch (error: any) {
+  } catch (error) {
     cronLogger.error('Error in HPP alert detection', { error: error.message })
     throw error
   }
+  */ // End of commented out original implementation
 }
 
 /**
@@ -539,7 +540,7 @@ export async function detectHPPAlertsForAllUsers() {
           total_archived: totalArchived
         })
 
-      } catch (error: any) {
+      } catch (error) {
         cronLogger.error(`Error archiving batch ${batchNumber}`, { error: error.message })
         errors.push({
           batch: batchNumber,
@@ -574,10 +575,11 @@ export async function detectHPPAlertsForAllUsers() {
 
     return summary
 
-  } catch (error: any) {
+  } catch (error) {
     cronLogger.error('Error in HPP data archival', { error: error.message })
     throw error
   }
+  */ // End of commented out original implementation
 }
 
 // Export all cron functions

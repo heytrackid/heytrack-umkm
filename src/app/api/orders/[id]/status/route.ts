@@ -37,7 +37,7 @@ export async function PATCH(
     const supabase = createServerSupabaseAdmin()
 
     // Get current order to check previous status
-    const { data: currentOrder, error: fetchError } = await (supabase as any)
+    const { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
       .select('*')
       .eq('id', orderId)
@@ -55,7 +55,7 @@ export async function PATCH(
 
     // If transitioning to DELIVERED, create income record
     if (status === 'DELIVERED' && previousStatus !== 'DELIVERED' && currentOrder.total_amount > 0) {
-      const { data: incomeRecord, error: incomeError } = await (supabase as any)
+      const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_transactions')
         .insert({
           jenis: 'pemasukan',
@@ -80,7 +80,7 @@ export async function PATCH(
     }
 
     // Update order status with financial_record_id if income was created
-    const { data: updatedOrder, error: updateError } = await (supabase as any)
+    const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
         status: status,
@@ -96,7 +96,7 @@ export async function PATCH(
       console.error('Error updating order status:', updateError)
       // Rollback income record if order update fails
       if (incomeRecordId) {
-        await (supabase as any)
+        await supabase
           .from('financial_transactions')
           .delete()
           .eq('id', incomeRecordId)
@@ -187,7 +187,7 @@ export async function GET(
     const supabase = createServerSupabaseAdmin()
 
     // Get order with basic info
-    const { data: order, error: orderError } = await (supabase as any)
+    const { data: order, error: orderError } = await supabase
       .from('orders')
       .select('*')
       .eq('id', orderId)

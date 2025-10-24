@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { HPPCalculationService } from '../services/HPPCalculationService'
 
 interface HPPCalculationResult {
@@ -54,7 +54,7 @@ export function useHPPCalculation(options: UseHPPCalculationOptions) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'HPP calculation failed'
       setError(errorMessage)
-      console.error('HPP Calculation Error:', err)
+      logger.error({ err }, 'HPP Calculation Error')
     } finally {
       setLoading(false)
     }

@@ -63,7 +63,7 @@ export class ProductionTimeService {
         parallel_processing_time
       }
     } catch (error: any) {
-      console.error('Error calculating production time:', error)
+      logger.error({ err: error }, 'Error calculating production time')
       return {
         total_prep_time: 0,
         total_cook_time: 0,

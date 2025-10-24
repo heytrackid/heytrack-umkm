@@ -1,21 +1,31 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { CostBreakdown, HPPSnapshot, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
+import { HPPExportQuerySchema } from '@/lib/validations'
 
 // GET /api/hpp/export - Export HPP data to Excel
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url)
-        const recipeId = searchParams.get('recipe_id')
-        const period = (searchParams.get('period') || '30d') as TimePeriod
 
-        // Validate required parameters
-        if (!recipeId) {
+        // Validate query parameters
+        const queryValidation = HPPExportQuerySchema.safeParse({
+            recipe_id: searchParams.get('recipe_id'),
+            period: searchParams.get('period'),
+            format: searchParams.get('format'),
+        })
+
+        if (!queryValidation.success) {
             return NextResponse.json(
-                { error: 'Missing required parameter: recipe_id' },
+                {
+                    error: 'Invalid query parameters',
+                    details: queryValidation.error.issues
+                },
                 { status: 400 }
             )
         }
+
+        const { recipe_id, period, format } = queryValidation.data
 
         const supabase = createServerSupabaseAdmin()
 
@@ -23,7 +33,7 @@ export async function GET(request: NextRequest) {
         const { data: recipe, error: recipeError } = await supabase
             .from('recipes')
             .select('name')
-            .eq('id', recipeId)
+            .eq('id', recipe_id)
             .single()
 
         if (recipeError || !recipe) {
@@ -40,7 +50,7 @@ export async function GET(request: NextRequest) {
         const { data: snapshots, error: snapshotsError } = await supabase
             .from('hpp_snapshots')
             .select('*')
-            .eq('recipe_id', recipeId)
+            .eq('recipe_id', recipe_id)
             .gte('snapshot_date', dateRange.start)
             .lte('snapshot_date', dateRange.end)
             .order('snapshot_date', { ascending: true })

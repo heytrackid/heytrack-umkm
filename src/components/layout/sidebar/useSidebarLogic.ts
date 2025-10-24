@@ -13,7 +13,10 @@ import {
   ShoppingCart,
   Target,
   TrendingUp,
-  Users
+  Users,
+  FileText,
+  Settings,
+  Sparkles
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -78,6 +81,8 @@ export const useSidebarLogic = () => {
       'Operasional': false,
       'Monitoring': false,
       'Asisten AI': false,
+      'Analytics & Laporan': false,
+      'Pengaturan': false,
     }
   })
 
@@ -90,7 +95,11 @@ export const useSidebarLogic = () => {
 
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
-    const routesToPrefetch = ['/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', '/cash-flow', '/profit', '/ai-chatbot']
+    const routesToPrefetch = [
+      '/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', 
+      '/cash-flow', '/profit', '/ai-chatbot', '/reports', '/settings', 
+      '/recipes/ai-generator'
+    ]
     routesToPrefetch.forEach((r) => {
       try { router.prefetch(r) } catch { }
     })
@@ -240,6 +249,36 @@ export const useSidebarLogic = () => {
           href: '/ai-chatbot',
           icon: Bot,
           description: "Tanya apa saja tentang bisnis bakery Anda"
+        },
+        {
+          name: "Generator Resep",
+          href: '/recipes/ai-generator',
+          icon: Sparkles,
+          description: "Buat resep baru dengan bantuan AI"
+        }
+      ]
+    },
+    {
+      title: "Analytics & Laporan",
+      description: "Laporan terperinci dan analitik",
+      items: [
+        {
+          name: "Laporan Lengkap",
+          href: '/reports',
+          icon: FileText,
+          description: "Lihat semua laporan dan analytics"
+        }
+      ]
+    },
+    {
+      title: "Pengaturan",
+      description: "Konfigurasi aplikasi",
+      items: [
+        {
+          name: "Pengaturan Aplikasi",
+          href: '/settings',
+          icon: Settings,
+          description: "Kelola pengaturan bisnis dan akun"
         }
       ]
     },

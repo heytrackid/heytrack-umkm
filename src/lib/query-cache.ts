@@ -3,8 +3,8 @@
  * Provides optimized queries with built-in caching for better performance
  */
 
-import { supabase } from '@/lib/supabase'
-import { apiCache } from '@/lib/api-cache'
+import { apiCache } from '@/lib/api-cache';
+import { supabase } from '@/lib/supabase';
 
 export class QueryCache {
   private static instance: QueryCache
@@ -46,7 +46,7 @@ export class QueryCache {
     try {
       const query = supabase.from(table).select('*')
       const result = await queryBuilder(query)
-      
+
       this.cache.set(key, {
         data: result,
         timestamp: Date.now(),
@@ -57,7 +57,7 @@ export class QueryCache {
     } catch (error: any) {
       // If fresh query fails, return stale cache if available
       if (cached) {
-        console.warn(`Query failed for ${table}, returning stale cache`, error)
+        dbLogger.warn({ err: error, table }, 'Query failed, returning stale cache')
         return cached.data
       }
       throw error
@@ -89,7 +89,7 @@ export const optimizedQueries = {
     offset?: number
   } = {}) {
     const queryCache = QueryCache.getInstance()
-    
+
     return await queryCache.cachedQuery(
       'ingredients',
       async (query) => {
@@ -229,8 +229,8 @@ export const suggestedIndexes = [
 
 // Utility to warm up common caches
 export const warmUpCache = async () => {
-  console.log('🔥 Warming up query caches...')
-  
+  dbLogger.info('Warming up query caches')
+
   try {
     // Pre-load common queries
     await Promise.all([
@@ -238,9 +238,9 @@ export const warmUpCache = async () => {
       optimizedQueries.getDashboardStatsOptimized(),
       optimizedQueries.getInventoryAnalyticsOptimized(7), // Last 7 days
     ])
-    
-    console.log('✅ Cache warm-up completed')
+
+    dbLogger.info('Cache warm-up completed')
   } catch (error: any) {
-    console.warn('⚠️ Cache warm-up failed:', error)
+    dbLogger.warn({ err: error }, 'Cache warm-up failed')
   }
 }

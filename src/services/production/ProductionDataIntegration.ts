@@ -5,11 +5,12 @@
  */
 
 import { supabase } from '@/lib/supabase'
-import { 
-  ProductionBatch, 
+import {
   batchSchedulingService,
-  SchedulingResult 
+  ProductionBatch,
+  SchedulingResult
 } from './BatchSchedulingService'
+import { logger } from '@/lib/logger'
 
 // Core interfaces for integration
 export interface OrderData {
@@ -29,7 +30,7 @@ export interface OrderItem {
   recipe_name: string
   quantity: number
   unit_price: number
-  customizations?: Record<string, any>
+  customizations?: Record<string, unknown>
 }
 
 export interface InventoryLevel {
@@ -73,7 +74,7 @@ export interface ProductionDemand {
   forecastedDemand: {
     next_24h: number
     next_week: number
-    seasonal_trends: any[]
+    seasonal_trends: unknown[]
   }
 }
 
@@ -107,26 +108,26 @@ export class ProductionDataIntegration {
       if (ordersError) throw ordersError
 
       // Process orders into standardized format
-      const processedOrders: OrderData[] = (orders || []).map(order => ({
-        id: order.id,
-        customer_name: order.customer_name || 'Unknown',
-        items: (order.order_items || []).map((item: any) => ({
-          id: item.id,
-          recipe_id: item.recipe_id,
-          recipe_name: item.recipe?.name || 'Unknown Recipe',
-          quantity: item.quantity,
-          unit_price: item.unit_price || 0,
-          customizations: item.customizations
+      const processedOrders: OrderData[] = (orders || []).map((order: unknown) => ({
+        id: (order as { id: string }).id,
+        customer_name: (order as { customer_name?: string }).customer_name || 'Unknown',
+        items: ((order as { order_items?: unknown[] }).order_items || []).map((item: unknown) => ({
+          id: (item as { id: string }).id,
+          recipe_id: (item as { recipe_id: string }).recipe_id,
+          recipe_name: (item as { recipe?: { name?: string } }).recipe?.name || 'Unknown Recipe',
+          quantity: (item as { quantity: number }).quantity,
+          unit_price: (item as { unit_price?: number }).unit_price || 0,
+          customizations: (item as { customizations?: unknown }).customizations
         })),
-        delivery_date: order.delivery_date,
-        priority: order.priority || 5,
-        status: order.status,
-        special_instructions: order.special_instructions,
-        created_at: order.created_at
+        delivery_date: (order as { delivery_date: string }).delivery_date,
+        priority: (order as { priority?: number }).priority || 5,
+        status: (order as { status: string }).status as OrderData['status'],
+        special_instructions: (order as { special_instructions?: string }).special_instructions,
+        created_at: (order as { created_at: string }).created_at
       }))
 
       // Calculate total batches needed
-      const totalBatches = processedOrders.reduce((sum, order) => 
+      const totalBatches = processedOrders.reduce((sum, order) =>
         sum + order.items.length, 0
       )
 
@@ -151,7 +152,7 @@ export class ProductionDataIntegration {
         forecastedDemand
       }
     } catch (error: any) {
-      console.error('Error fetching production demand:', error)
+      logger.error({ err: error }, 'Error fetching production demand')
       throw error
     }
   }
@@ -172,7 +173,7 @@ export class ProductionDataIntegration {
         const deliveryDate = new Date(order.delivery_date)
         const productionBuffer = 2 * 60 * 60 * 1000 // 2 hours before delivery
         const deadline = new Date(deliveryDate.getTime() - productionBuffer)
-        
+
         // Calculate earliest start (considering ingredients availability)
         const earliestStart = await this.calculateEarliestStart(recipeData, item.quantity)
 
@@ -186,19 +187,19 @@ export class ProductionDataIntegration {
           recipe_name: item.recipe_name,
           quantity: item.quantity,
           priority: Math.max(1, Math.min(10, Math.ceil(urgencyScore / 10))),
-          
+
           earliest_start: earliestStart.toISOString(),
           deadline: deadline.toISOString(),
           estimated_duration: recipeData.estimated_production_time,
-          
+
           oven_slots_required: recipeData.equipment_requirements.oven_slots,
           baker_hours_required: Math.ceil(recipeData.estimated_production_time / 60),
-          decorator_hours_required: recipeData.equipment_requirements.decorating_time ? 
+          decorator_hours_required: recipeData.equipment_requirements.decorating_time ?
             Math.ceil(recipeData.equipment_requirements.decorating_time / 60) : 0,
-          
+
           prerequisite_batches: [],
           blocking_ingredients: await this.getBlockingIngredients(item.recipe_id, item.quantity),
-          
+
           status: 'scheduled',
           profit_score: profitScore,
           urgency_score: urgencyScore,
@@ -220,16 +221,16 @@ export class ProductionDataIntegration {
     try {
       // Get current demand
       const demand = await this.getCurrentProductionDemand(days_ahead)
-      
+
       // Convert orders to batches
       const batches = await this.convertOrdersToBatches(demand.orders)
-      
+
       // Get current production capacity
       const constraints = await batchSchedulingService.getProductionCapacity()
-      
+
       // Generate schedule
       const schedule = await batchSchedulingService.scheduleProductionBatches(batches, constraints)
-      
+
       // Add order context to warnings
       if (demand.urgentOrders.length > 0) {
         schedule.warnings.unshift(
@@ -247,7 +248,7 @@ export class ProductionDataIntegration {
 
       return schedule
     } catch (error: any) {
-      console.error('Error generating production schedule:', error)
+      logger.error({ err: error }, 'Error generating production schedule')
       throw error
     }
   }
@@ -264,7 +265,7 @@ export class ProductionDataIntegration {
       if (status === 'completed') {
         await supabase
           .from('order_items')
-          .update({ 
+          .update({
             status: 'completed',
             completed_at: new Date().toISOString()
           })
@@ -277,11 +278,11 @@ export class ProductionDataIntegration {
           .eq('order_id', orderId)
 
         const allCompleted = orderItems?.every(item => item.status === 'completed')
-        
+
         if (allCompleted) {
           await supabase
             .from('orders')
-            .update({ 
+            .update({
               status: 'completed',
               completed_at: new Date().toISOString()
             })
@@ -290,7 +291,7 @@ export class ProductionDataIntegration {
       } else if (status === 'in_progress') {
         await supabase
           .from('order_items')
-          .update({ 
+          .update({
             status: 'in_production',
             production_started_at: new Date().toISOString()
           })
@@ -302,7 +303,7 @@ export class ProductionDataIntegration {
           .eq('id', orderId)
       }
     } catch (error: any) {
-      console.error('Error updating production progress:', error)
+      logger.error({ err: error }, 'Error updating production progress')
       throw error
     }
   }
@@ -345,7 +346,7 @@ export class ProductionDataIntegration {
         profit_margin: recipe.profit_margin || 30
       }
     } catch (error: any) {
-      console.error('Error getting recipe requirements:', error)
+      logger.error({ err: error }, 'Error getting recipe requirements')
       return null
     }
   }
@@ -353,13 +354,13 @@ export class ProductionDataIntegration {
   private async calculateEarliestStart(recipeData: RecipeRequirement, quantity: number): Promise<Date> {
     // Check ingredient availability and lead times
     const now = new Date()
-    
+
     // For now, assume ingredients are available immediately
     // In a full implementation, this would check:
     // 1. Current inventory levels
     // 2. Supplier lead times
     // 3. Existing production commitments
-    
+
     return now
   }
 
@@ -367,7 +368,7 @@ export class ProductionDataIntegration {
     const now = Date.now()
     const delivery = new Date(deliveryDate).getTime()
     const hoursUntilDelivery = (delivery - now) / (1000 * 60 * 60)
-    
+
     // Higher score for more urgent orders
     if (hoursUntilDelivery < 6) return 100
     if (hoursUntilDelivery < 24) return 80
@@ -390,11 +391,11 @@ export class ProductionDataIntegration {
         .eq('recipe_id', recipeId)
 
       const blocking: string[] = []
-      
+
       for (const ingredient of recipeIngredients || []) {
         const inventoryItem = inventory?.find(inv => inv.id === ingredient.ingredient_id)
         const requiredQuantity = ingredient.quantity * quantity
-        
+
         if (!inventoryItem || inventoryItem.current_stock < requiredQuantity) {
           blocking.push(ingredient.ingredient_id)
         }
@@ -402,7 +403,7 @@ export class ProductionDataIntegration {
 
       return blocking
     } catch (error: any) {
-      console.error('Error checking blocking ingredients:', error)
+      logger.error({ err: error }, 'Error checking blocking ingredients')
       return []
     }
   }
@@ -444,7 +445,7 @@ export class ProductionDataIntegration {
 
       for (const [ingredientId, requirement] of ingredientRequirements) {
         const inventoryItem = inventory?.find(inv => inv.id === ingredientId)
-        
+
         if (!inventoryItem || inventoryItem.current_stock < requirement.required) {
           const shortage = requirement.required - (inventoryItem?.current_stock || 0)
           ingredient_shortfalls.push({
@@ -469,7 +470,7 @@ export class ProductionDataIntegration {
       }
 
     } catch (error: any) {
-      console.error('Error checking resource constraints:', error)
+      logger.error({ err: error }, 'Error checking resource constraints')
     }
 
     return { ingredient_shortfalls, capacity_warnings }

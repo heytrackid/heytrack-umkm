@@ -61,7 +61,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
         setAvailableRecipes(data.filter((recipe: any) => recipe.is_active))
       }
     } catch (err) {
-      console.error('Error fetching recipes:', err)
+      uiLogger.error({ err }, 'Error fetching recipes')
     }
   }
 
@@ -73,7 +73,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
         setAvailableCustomers(data)
       }
     } catch (err) {
-      console.error('Error fetching customers:', err)
+      uiLogger.error({ err }, 'Error fetching customers')
     }
   }
 

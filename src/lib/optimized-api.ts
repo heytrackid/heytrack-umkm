@@ -3,18 +3,29 @@
  * Reduces redundant API calls and improves performance
  */
 
+import type { CustomersTable } from '@/types/customers'
+import type { IngredientsTable } from '@/types/inventory'
+import type { OrdersTable } from '@/types/orders'
+import type { RecipesTable } from '@/types/recipes'
+
+// Type aliases for cleaner code
+type Ingredient = IngredientsTable['Row']
+type Recipe = RecipesTable['Row']
+type Order = OrdersTable['Row']
+type Customer = CustomersTable['Row']
+
 // Simple in-memory cache with TTL
-interface CacheEntry {
-  data: any
+interface CacheEntry<T> {
+  data: T
   timestamp: number
   ttl: number
 }
 
 class APICache {
-  private cache = new Map<string, CacheEntry>()
+  private cache = new Map<string, CacheEntry<unknown>>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
 
-  set(key: string, data: any, ttl: number = this.DEFAULT_TTL) {
+  set<T>(key: string, data: T, ttl: number = this.DEFAULT_TTL): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -22,7 +33,7 @@ class APICache {
     })
   }
 
-  get(key: string): any | null {
+  get<T>(key: string): T | null {
     const entry = this.cache.get(key)
     if (!entry) return null
 
@@ -31,19 +42,19 @@ class APICache {
       return null
     }
 
-    return entry.data
+    return entry.data as T
   }
 
-  delete(key: string) {
+  delete(key: string): void {
     this.cache.delete(key)
   }
 
-  clear() {
+  clear(): void {
     this.cache.clear()
   }
 
   // Invalidate cache entries by pattern
-  invalidatePattern(pattern: string) {
+  invalidatePattern(pattern: string): void {
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
         this.cache.delete(key)
@@ -54,11 +65,11 @@ class APICache {
 
 // Request deduplication - prevent duplicate requests
 class RequestDeduplicator {
-  private pendingRequests = new Map<string, Promise<any>>()
+  private pendingRequests = new Map<string, Promise<unknown>>()
 
   async deduplicate<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
     if (this.pendingRequests.has(key)) {
-      return this.pendingRequests.get(key)!
+      return this.pendingRequests.get(key) as Promise<T>
     }
 
     const promise = requestFn().finally(() => {
@@ -77,16 +88,16 @@ class OptimizedAPIClient {
 
   // Generic fetch with caching
   async fetch<T>(
-    url: string, 
+    url: string,
     options: RequestInit = {},
-    cacheOptions?: { 
+    cacheOptions?: {
       ttl?: number
       skipCache?: boolean
       invalidatePatterns?: string[]
     }
   ): Promise<T> {
     const cacheKey = `${url}-${JSON.stringify(options)}`
-    
+
     // Check cache first (unless explicitly skipped)
     if (!cacheOptions?.skipCache) {
       const cached = this.cache.get(cacheKey)
@@ -220,9 +231,9 @@ import { useCallback, useEffect, useState } from 'react'
 export function useOptimizedAPI<T>(
   apiCall: () => Promise<T>,
   deps: any[] = [],
-  options?: { 
+  options?: {
     autoFetch?: boolean
-    onError?: (error: Error) => void 
+    onError?: (error: Error) => void
   }
 ) {
   const [data, setData] = useState<T | null>(null)

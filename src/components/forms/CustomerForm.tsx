@@ -13,22 +13,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { 
-  CustomerSchema,
-  type CustomerFormData
+  CustomerFormSchema,
+  type CustomerForm
 } from '@/lib/validations'
 import { FormField } from './shared/FormField'
 
 interface CustomerFormProps {
-  initialData?: Partial<CustomerFormData>
-  onSubmit: (data: CustomerFormData) => Promise<void>
+  initialData?: Partial<CustomerForm>
+  onSubmit: (data: CustomerForm) => Promise<void>
   isLoading?: boolean
 }
 
 export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormProps) {
   const { toast } = useToast()
   
-  const form = useForm<CustomerFormData>({
-    resolver: zodResolver(CustomerSchema) as any,
+  const form = useForm<CustomerForm>({
+    resolver: zodResolver(CustomerFormSchema) as any,
     defaultValues: {
       name: initialData?.name || '',
       email: initialData?.email || '',
@@ -42,7 +42,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
     }
   })
 
-  const handleSubmit = async (data: CustomerFormData) => {
+  const handleSubmit = async (data: CustomerForm) => {
     try {
       await onSubmit(data)
       toast({

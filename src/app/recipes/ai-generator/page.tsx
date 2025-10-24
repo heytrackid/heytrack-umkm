@@ -164,7 +164,7 @@ export default function AIRecipeGeneratorPage() {
 
         } catch (error: any) {
             console.error('Error saving recipe:', error)
-            alert('Gagal menyimpan resep: ' + error.message)
+            alert('Gagal menyimpan resep: ' + (error instanceof Error ? error.message : String(error)))
         }
     }
 

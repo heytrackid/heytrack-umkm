@@ -1,55 +1,112 @@
 import { formatCurrency } from '@/shared/utils/currency'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseClient } from '@/lib/supabase'
+import { PaginationQuerySchema, DateRangeQuerySchema, ExpenseInsertSchema } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const limit = searchParams.get('limit') || '50'
-  const offset = searchParams.get('offset') || '0'
+
+  // Validate query parameters
+  const paginationValidation = PaginationQuerySchema.safeParse({
+    page: searchParams.get('page'),
+    limit: searchParams.get('limit'),
+    search: searchParams.get('search'),
+    sort_by: searchParams.get('sort_by'),
+    sort_order: searchParams.get('sort_order'),
+  })
+
+  if (!paginationValidation.success) {
+    return NextResponse.json(
+      { error: 'Invalid pagination parameters', details: paginationValidation.error.issues },
+      { status: 400 }
+    )
+  }
+
+  // Validate date range if provided
+  const dateRangeValidation = DateRangeQuerySchema.safeParse({
+    start_date: searchParams.get('startDate'),
+    end_date: searchParams.get('endDate'),
+  })
+
+  if (!dateRangeValidation.success) {
+    return NextResponse.json(
+      { error: 'Invalid date parameters', details: dateRangeValidation.error.issues },
+      { status: 400 }
+    )
+  }
+
+  const { page, limit, search, sort_by, sort_order } = paginationValidation.data
+  const { start_date, end_date } = dateRangeValidation.data
   const category = searchParams.get('category')
-  const startDate = searchParams.get('startDate')
-  const endDate = searchParams.get('endDate')
 
   try {
     const supabase = createSupabaseClient()
-    
-    let query = (supabase as any)
+
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit
+
+    let query = supabase
       .from('expenses')
       .select('*')
-      .order('expense_date', { ascending: false })
-      .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)
+      .range(offset, offset + limit - 1)
 
+    // Add search filter
+    if (search) {
+      query = query.or(`description.ilike.%${search}%,category.ilike.%${search}%`)
+    }
+
+    // Add category filter
     if (category) {
       query = query.eq('category', category)
     }
 
-    if (startDate) {
-      query = query.gte('expense_date', startDate)
+    // Add date range filter
+    if (start_date) {
+      query = query.gte('expense_date', start_date)
     }
 
-    if (endDate) {
-      query = query.lte('expense_date', endDate)
+    if (end_date) {
+      query = query.lte('expense_date', end_date)
     }
+
+    // Add sorting
+    const sortField = sort_by || 'expense_date'
+    const sortDirection = sort_order === 'asc'
+    query = query.order(sortField, { ascending: sortDirection })
 
     const { data: expenses, error } = await query
 
     if (error) throw error
 
     // Get total count for pagination
-    const { count } = await (supabase as any)
-      .from('expenses')
-      .select('*')
+    let countQuery = supabase.from('expenses').select('*', { count: 'exact', head: true })
+
+    // Apply same filters to count query
+    if (search) {
+      countQuery = countQuery.or(`description.ilike.%${search}%,category.ilike.%${search}%`)
+    }
+    if (category) {
+      countQuery = countQuery.eq('category', category)
+    }
+    if (start_date) {
+      countQuery = countQuery.gte('expense_date', start_date)
+    }
+    if (end_date) {
+      countQuery = countQuery.lte('expense_date', end_date)
+    }
+
+    const { count } = await countQuery
 
     // Get summary stats for dashboard
     const today = new Date().toISOString().split('T')[0]
     const thisMonth = new Date().toISOString().slice(0, 7)
     
-    const { data: todayExpenses } = await (supabase as any)
+    const { data: todayExpenses } = await supabase
       .from('expenses')
       .select('*')
       .eq('expense_date', today)
-    
-    const { data: monthExpenses } = await (supabase as any)
+
+    const { data: monthExpenses } = await supabase
       .from('expenses')
       .select('*')
       .gte('expense_date', `${thisMonth}-01`)
@@ -78,9 +135,10 @@ export async function GET(request: NextRequest) {
         categoryBreakdown
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching expenses:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to fetch expenses'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -89,10 +147,24 @@ export async function POST(request: Request) {
     const supabase = createSupabaseClient()
     const body = await request.json()
 
-    const { data: expense, error } = await (supabase as any)
+    // Validate request body
+    const validation = ExpenseInsertSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
+        { status: 400 }
+      )
+    }
+
+    const validatedData = validation.data
+
+    const { data: expense, error } = await (supabase
       .from('expenses')
-      .insert([{
-        ...body,
+      .insert as any)([{
+        ...validatedData,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }])
@@ -102,12 +174,12 @@ export async function POST(request: Request) {
     if (error) throw error
 
     // Create notification for large expenses
-    if (body.amount > 1000000) { // More than 1M IDR
-      await (supabase as any).from('notifications').insert([{
+    if (validatedData.amount > 1000000) { // More than 1M IDR
+      await (supabase.from('notifications').insert as any)([{
         type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
-        message: `A large expense of ${formatCurrency(parseFloat(body.amount), { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${body.category}`,
+        message: `A large expense of ${formatCurrency(validatedData.amount, { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${validatedData.category}`,
         entity_type: 'expense',
         entity_id: expense.id,
         priority: 'high'
@@ -115,8 +187,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(expense, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating expense:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to create expense'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

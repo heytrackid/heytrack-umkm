@@ -1,27 +1,24 @@
 'use client'
-import * as React from 'react'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { 
-  Calculator, 
-  TrendingUp, 
-  AlertTriangle, 
-  CheckCircle, 
+import { useCurrency } from '@/hooks/useCurrency'
+import { automationEngine } from '@/lib/automation-engine'
+import { RecipeWithIngredients } from '@/types'
+import {
+  AlertTriangle,
+  Calculator,
+  CheckCircle,
   Lightbulb,
-  DollarSign,
   Target,
   Zap
 } from 'lucide-react'
-import { automationEngine } from '@/lib/automation-engine'
-import { RecipeWithIngredients } from '@/types'
-import { useCurrency } from '@/hooks/useCurrency'
+import { useEffect, useState } from 'react'
 
 interface SmartPricingAssistantProps {
   recipe: RecipeWithIngredients
@@ -49,7 +46,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       setAnalysis(pricingAnalysis)
       setCustomPrice(pricingAnalysis.pricing.standard.price)
     } catch (error: any) {
-      console.error('Error analyzing pricing:', error)
+      uiLogger.error({ err: error }, 'Error analyzing pricing')
     } finally {
       setLoading(false)
     }
@@ -57,10 +54,10 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
 
   const handleApplyPrice = (tier: 'economy' | 'standard' | 'premium' | 'custom') => {
     if (!analysis) return
-    
+
     let price: number
     let margin: number
-    
+
     if (tier === 'custom') {
       price = customPrice
       margin = ((price - analysis.breakdown.totalCost) / price) * 100
@@ -68,7 +65,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       price = analysis.pricing[tier].price
       margin = analysis.pricing[tier].margin
     }
-    
+
     onPriceUpdate(price, margin)
   }
 
@@ -149,11 +146,10 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
         <TabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             {Object.entries(analysis.pricing).map(([tier, data]: [string, any]) => (
-              <Card 
+              <Card
                 key={tier}
-                className={`cursor-pointer transition-all hover: ${
-                  selectedTier === tier ? 'ring-2 ring-primary' : ''
-                }`}
+                className={`cursor-pointer transition-all hover: ${selectedTier === tier ? 'ring-2 ring-primary' : ''
+                  }`}
                 onClick={() => setSelectedTier(tier as any)}
               >
                 <CardHeader className="pb-3">
@@ -185,8 +181,8 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                       </span>
                     </div>
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     className="w-full mt-3"
                     onClick={(e) => {
                       e.stopPropagation()
@@ -236,7 +232,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                   Apply
                 </Button>
               </div>
-              
+
               {customPrice > 0 && (
                 <div className="mt-4">
                   {customPrice < analysis.breakdown.totalCost * 1.3 && (

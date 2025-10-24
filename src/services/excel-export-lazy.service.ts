@@ -1,3 +1,4 @@
+import logger from '@/lib/logger';
 
 export interface ExcelExportData {
   sheetName: string
@@ -69,7 +70,7 @@ export class LazyExcelExportService {
       const defaultFileName = `HeyTrack-Export-${new Date().toISOString().split('T')[0]}.xlsx`
       saveAs(blob, fileName || defaultFileName)
     } catch (error: any) {
-      console.error('Excel export failed:', error)
+      logger.error({ err: error }, 'Excel export failed')
       throw new Error('Failed to export Excel file')
     }
   }
@@ -181,7 +182,7 @@ export class LazyExcelExportService {
 
       return sheets
     } catch (error: any) {
-      console.error('Failed to fetch data for export:', error)
+      logger.error({ err: error }, 'Failed to fetch data for export')
       throw new Error('Failed to fetch data for export')
     }
   }

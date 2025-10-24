@@ -118,8 +118,8 @@ export const DataTableWithSuspense = ({
   rows?: number
   showHeader?: boolean
   showPagination?: boolean
-  Component: ComponentType<any>
-  [key: string]: any
+  Component: ComponentType<unknown>
+  [key: string]: unknown
 }) => (
   <Suspense fallback={
     <TableLoadingSkeleton 
@@ -134,7 +134,7 @@ export const DataTableWithSuspense = ({
 )
 
 // Specialized table loaders
-export const CRUDTableWithSuspense = (props: any) => (
+export const CRUDTableWithSuspense = (props: unknown) => (
   <DataTableWithSuspense 
     columns={6} 
     rows={10} 
@@ -143,7 +143,7 @@ export const CRUDTableWithSuspense = (props: any) => (
   />
 )
 
-export const OrdersTableWithSuspense = (props: any) => (
+export const OrdersTableWithSuspense = (props: unknown) => (
   <DataTableWithSuspense 
     columns={6} 
     rows={8} 
@@ -152,7 +152,7 @@ export const OrdersTableWithSuspense = (props: any) => (
   />
 )
 
-export const InventoryTableWithSuspense = (props: any) => (
+export const InventoryTableWithSuspense = (props: unknown) => (
   <DataTableWithSuspense 
     columns={7} 
     rows={12} 
@@ -161,7 +161,7 @@ export const InventoryTableWithSuspense = (props: any) => (
   />
 )
 
-export const FinanceTableWithSuspense = (props: any) => (
+export const FinanceTableWithSuspense = (props: unknown) => (
   <DataTableWithSuspense 
     columns={5} 
     rows={15} 
@@ -242,10 +242,10 @@ export const TableContainer = ({
   ...props 
 }: {
   type: TableType
-  data?: any[]
-  columns?: any[]
+  data?: unknown[]
+  columns?: unknown[]
   loading?: boolean
-  [key: string]: any
+  [key: string]: unknown
 }) => {
   if (loading) {
     return <TableLoadingSkeleton columns={columns?.length || 6} />

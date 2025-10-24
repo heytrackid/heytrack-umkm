@@ -1,34 +1,29 @@
 'use client'
-import * as React from 'react'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Bell,
-  AlertTriangle,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Package,
-  DollarSign,
-  TrendingDown,
-  TrendingUp,
-  Factory,
-  Users,
-  Calendar,
-  Target,
-  Zap,
-  X,
-  BellRing,
-  Volume2,
-  VolumeX
-} from 'lucide-react'
 import { automationEngine } from '@/lib/automation-engine'
+import { uiLogger } from '@/lib/logger'
 import { Ingredient } from '@/types'
+import {
+  AlertCircle,
+  AlertTriangle,
+  Bell,
+  BellRing,
+  Calendar,
+  CheckCircle,
+  DollarSign,
+  Factory,
+  Package,
+  Volume2,
+  VolumeX,
+  X,
+  Zap
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 interface SmartNotification {
   id: string
@@ -70,8 +65,8 @@ export default function SmartNotificationCenter({
     const generateNotificationsStable = () => {
       try {
         const smartNotifications = automationEngine.generateSmartNotifications(
-          ingredients, 
-          orders, 
+          ingredients,
+          orders,
           financialMetrics
         )
 
@@ -95,7 +90,7 @@ export default function SmartNotificationCenter({
           // Check for orders due today
           const today = new Date().toDateString()
           const todayOrders = orders.filter(o => new Date(o.delivery_date).toDateString() === today)
-          
+
           if (todayOrders.length > 0) {
             additional.push({
               id: `today-orders-${Date.now()}`,
@@ -145,23 +140,23 @@ export default function SmartNotificationCenter({
 
           return additional
         })()
-        
+
         setNotifications(prev => {
           // Only update if notifications have actually changed to prevent loops
           const newNotifs = [...formattedNotifications, ...additionalNotifs]
-          if (JSON.stringify(prev.map(n => ({ title: n.title, message: n.message }))) === 
-              JSON.stringify(newNotifs.map(n => ({ title: n.title, message: n.message })))) {
+          if (JSON.stringify(prev.map(n => ({ title: n.title, message: n.message }))) ===
+            JSON.stringify(newNotifs.map(n => ({ title: n.title, message: n.message })))) {
             return prev
           }
           return newNotifs
         })
-        
+
         // Play sound for critical notifications
         if (soundEnabled && formattedNotifications.some(n => n.type === 'critical')) {
           playNotificationSound('critical')
         }
       } catch (error: any) {
-        console.error('Error generating notifications:', error)
+        uiLogger.error({ err: error }, 'Error generating notifications')
       }
     }
 
@@ -170,7 +165,7 @@ export default function SmartNotificationCenter({
 
   useEffect(() => {
     if (!autoRefresh) return
-    
+
     const interval = setInterval(() => {
       // Use a fresh timestamp for interval-based updates
       setNotifications(prev => {
@@ -184,7 +179,7 @@ export default function SmartNotificationCenter({
 
   const playNotificationSound = (type: 'critical' | 'warning' | 'info') => {
     if (!soundEnabled) return
-    
+
     // In a real app, you'd have audio files for different notification types
     const audio = new Audio('/notification-sound.mp3')
     audio.play().catch(() => {
@@ -221,7 +216,7 @@ export default function SmartNotificationCenter({
   }
 
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
     )
     onMarkAsRead?.(notificationId)
@@ -239,14 +234,14 @@ export default function SmartNotificationCenter({
   const handleNotificationAction = (notification: SmartNotification) => {
     markAsRead(notification.id)
     onNotificationAction?.(notification)
-    
+
     // Navigate to action URL if provided
     if (notification.actionUrl) {
       window.location.href = notification.actionUrl
     }
   }
 
-  const filteredNotifications = notifications.filter(n => 
+  const filteredNotifications = notifications.filter(n =>
     selectedCategory === 'all' || n.category === selectedCategory
   )
 
@@ -272,7 +267,7 @@ export default function SmartNotificationCenter({
                 </Badge>
               )}
             </CardTitle>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -344,19 +339,18 @@ export default function SmartNotificationCenter({
                       const priorityOrder = { high: 3, medium: 2, low: 1 }
                       const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0
                       const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] || 0
-                      
+
                       if (aPriority !== bPriority) {
                         return bPriority - aPriority
                       }
-                      
+
                       return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
                     })
                     .map((notification) => (
-                      <Alert 
-                        key={notification.id} 
-                        className={`${getTypeColor(notification.type)} ${
-                          !notification.read ? 'border-l-4 border-l-blue-500' : ''
-                        }`}
+                      <Alert
+                        key={notification.id}
+                        className={`${getTypeColor(notification.type)} ${!notification.read ? 'border-l-4 border-l-blue-500' : ''
+                          }`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-1">
@@ -364,14 +358,14 @@ export default function SmartNotificationCenter({
                               {getNotificationIcon(notification.type)}
                               {getCategoryIcon(notification.category)}
                             </div>
-                            
+
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <h4 className="font-medium">{notification.title}</h4>
-                                <Badge 
+                                <Badge
                                   variant={
                                     notification.priority === 'high' ? 'destructive' :
-                                    notification.priority === 'medium' ? 'secondary' : 'outline'
+                                      notification.priority === 'medium' ? 'secondary' : 'outline'
                                   }
                                   className="text-xs"
                                 >
@@ -383,27 +377,27 @@ export default function SmartNotificationCenter({
                                   </Badge>
                                 )}
                               </div>
-                              
+
                               <AlertDescription className="text-sm mb-2">
                                 {notification.message}
                               </AlertDescription>
-                              
+
                               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                 <span>{notification.timestamp.toLocaleString()}</span>
                                 <span className="capitalize">{notification.category}</span>
                               </div>
-                              
+
                               {notification.action && (
                                 <div className="mt-3 flex gap-2">
-                                  <Button 
-                                    size="sm" 
+                                  <Button
+                                    size="sm"
                                     onClick={() => handleNotificationAction(notification)}
                                   >
                                     {notification.action.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                   </Button>
                                   {!notification.read && (
-                                    <Button 
-                                      variant="outline" 
+                                    <Button
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => markAsRead(notification.id)}
                                     >
@@ -414,7 +408,7 @@ export default function SmartNotificationCenter({
                               )}
                             </div>
                           </div>
-                          
+
                           <Button
                             variant="ghost"
                             size="sm"

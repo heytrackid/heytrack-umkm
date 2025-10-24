@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
-    const { data: recipe, error } = await (supabase as any)
+    const { data: recipe, error } = await supabase
       .from('resep')
       .select(`
         *,
@@ -42,7 +42,7 @@ export async function GET(
     }
 
     return NextResponse.json(recipe)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in GET /api/recipes/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -63,7 +63,7 @@ export async function PUT(
     const { recipe_ingredients, ...recipeData } = body
 
     // Update the recipe
-    const { data: recipe, error: recipeError } = await (supabase as any)
+    const { data: recipe, error: recipeError } = await supabase
       .from('resep')
       .update(recipeData)
       .eq('id', id)
@@ -87,7 +87,7 @@ export async function PUT(
     // If ingredients are provided, update them
     if (recipe_ingredients !== undefined) {
       // Delete existing recipe ingredients
-      const { error: deleteError } = await (supabase as any)
+      const { error: deleteError } = await supabase
         .from('resep_item')
         .delete()
         .eq('resep_id', id)
@@ -108,7 +108,7 @@ export async function PUT(
           qty_per_batch: ingredient.qty_per_batch || ingredient.quantity
         }))
 
-        const { error: insertError } = await (supabase as any)
+        const { error: insertError } = await supabase
           .from('resep_item')
           .insert(recipeIngredientsToInsert)
 
@@ -123,7 +123,7 @@ export async function PUT(
     }
 
     // Fetch the complete updated recipe with ingredients
-    const { data: completeRecipe, error: fetchError } = await (supabase as any)
+    const { data: completeRecipe, error: fetchError } = await supabase
       .from('resep')
       .select(`
         *,
@@ -147,7 +147,7 @@ export async function PUT(
     }
 
     return NextResponse.json(completeRecipe)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in PUT /api/recipes/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -166,7 +166,7 @@ export async function DELETE(
     const supabase = createServerSupabaseAdmin()
 
     // Check if recipe exists first
-    const { data: existingRecipe, error: checkError } = await (supabase as any)
+    const { data: existingRecipe, error: checkError } = await supabase
       .from('resep')
       .select('*')
       .eq('id', id)
@@ -180,7 +180,7 @@ export async function DELETE(
     }
 
     // Delete the recipe (cascade will handle resep_item)
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('resep')
       .delete()
       .eq('id', id)
@@ -194,7 +194,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in DELETE /api/recipes/[id]:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

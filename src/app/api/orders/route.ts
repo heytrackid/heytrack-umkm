@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { OrderInsertSchema, PaginationQuerySchema } from '@/lib/validations'
 
 // GET /api/orders - Get all orders
 export async function GET(request: NextRequest) {
@@ -19,8 +20,25 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const limit = searchParams.get('param')
-    const status = searchParams.get('param')
+
+    // Validate query parameters
+    const queryValidation = PaginationQuerySchema.safeParse({
+      page: searchParams.get('page'),
+      limit: searchParams.get('limit'),
+      search: searchParams.get('search'),
+      sort_by: searchParams.get('sort_by'),
+      sort_order: searchParams.get('sort_order'),
+    })
+
+    if (!queryValidation.success) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', details: queryValidation.error.issues },
+        { status: 400 }
+      )
+    }
+
+    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    const status = searchParams.get('status') // Status filter is separate from pagination
 
     let query = supabase
       .from('orders')
@@ -37,15 +55,25 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
 
+    // Add search filter
+    if (search) {
+      query = query.or(`order_no.ilike.%${search}%,customer_name.ilike.%${search}%`)
+    }
+
+    // Add status filter
     if (status) {
       query = query.eq('status', status)
     }
 
-    if (limit) {
-      query = query.limit(50)
-    }
+    // Add sorting
+    const sortField = sort_by || 'created_at'
+    const sortDirection = sort_order === 'asc'
+    query = query.order(sortField, { ascending: sortDirection })
+
+    // Add pagination
+    const offset = (page - 1) * limit
+    query = query.range(offset, offset + limit - 1)
 
     const { data, error } = await query
 
@@ -92,28 +120,33 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    // Validate required fields
-    if (!body.order_no || !body.total_amount) {
+    // Validate request body
+    const validation = OrderInsertSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Order number and total amount are required' },
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
         { status: 400 }
       )
     }
 
-    const orderStatus = body.status || 'PENDING'
+    const validatedData = validation.data
+    const orderStatus = validatedData.status || 'PENDING'
     let incomeRecordId = null
 
     // If order is DELIVERED, create income record first
-    if (orderStatus === 'DELIVERED' && body.total_amount > 0) {
+    if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {
       const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_transactions')
         .insert({
           user_id: user.id,
           jenis: 'pemasukan',
           kategori: 'Revenue',
-          nominal: body.total_amount,
-          tanggal: body.delivery_date || body.order_date || new Date().toISOString().split('T')[0],
-          referensi: `Order #${body.order_no}${body.customer_name ? ' - ' + body.customer_name : ''}`
+          nominal: validatedData.total_amount,
+          tanggal: validatedData.delivery_date || validatedData.order_date || new Date().toISOString().split('T')[0],
+          referensi: `Order #${validatedData.order_no}${validatedData.customer_name ? ' - ' + validatedData.customer_name : ''}`
         })
         .select()
         .single()
@@ -134,23 +167,23 @@ export async function POST(request: NextRequest) {
       .from('orders')
       .insert({
         user_id: user.id,
-        order_no: body.order_no,
-        customer_id: body.customer_id,
-        customer_name: body.customer_name,
-        customer_phone: body.customer_phone,
+        order_no: validatedData.order_no,
+        customer_id: validatedData.customer_id,
+        customer_name: validatedData.customer_name,
+        customer_phone: validatedData.customer_phone,
         status: orderStatus,
-        order_date: body.order_date || new Date().toISOString().split('T')[0],
-        delivery_date: body.delivery_date,
-        delivery_time: body.delivery_time,
-        total_amount: body.total_amount,
-        discount: body.discount || 0,
-        tax_amount: body.tax_amount || 0,
-        paid_amount: body.paid_amount || 0,
-        payment_status: body.payment_status || 'UNPAID',
-        payment_method: body.payment_method,
-        priority: body.priority || 'normal',
-        notes: body.notes,
-        special_instructions: body.special_instructions,
+        order_date: validatedData.order_date || new Date().toISOString().split('T')[0],
+        delivery_date: validatedData.delivery_date,
+        delivery_time: validatedData.delivery_time,
+        total_amount: validatedData.total_amount,
+        discount: validatedData.discount || 0,
+        tax_amount: validatedData.tax_amount || 0,
+        paid_amount: validatedData.paid_amount || 0,
+        payment_status: validatedData.payment_status || 'UNPAID',
+        payment_method: validatedData.payment_method,
+        priority: validatedData.priority || 'normal',
+        notes: validatedData.notes,
+        special_instructions: validatedData.special_instructions,
         financial_record_id: incomeRecordId
       })
       .select('*')
@@ -176,15 +209,14 @@ export async function POST(request: NextRequest) {
     if (incomeRecordId) {
       await supabase
         .from('financial_transactions')
-        .update({ referensi: `Order ${orderData.id} - ${body.customer_name || 'Customer'}` })
+        .update({ referensi: `Order ${orderData.id} - ${validatedData.customer_name || 'Customer'}` })
         .eq('id', incomeRecordId)
         .eq('user_id', user.id)
     }
 
-    // If order items provided, create them (handle both order_items and items field names)
-    const itemsData = body.items || body.order_items
-    if (itemsData && itemsData.length > 0) {
-      const orderItems = itemsData.map((item: any) => ({
+    // If order items provided, create them
+    if (validatedData.items && validatedData.items.length > 0) {
+      const orderItems = validatedData.items.map((item) => ({
         order_id: orderData.id,
         recipe_id: item.recipe_id,
         product_name: item.product_name,

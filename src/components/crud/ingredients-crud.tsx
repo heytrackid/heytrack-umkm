@@ -187,7 +187,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
         <CrudForm onSubmit={handleSubmitCreate}>
           <FormSection
             title="Informasi Dasar"
-            description="Isi informasi dasar bahan baku"
+            description="Masukkan informasi dasar bahan baku"
           >
             <FormGrid cols={2}>
               <FormField

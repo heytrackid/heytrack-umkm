@@ -45,6 +45,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Backup files
+*.backup
+
 # Runtime data
 pids
 *.pid

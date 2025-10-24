@@ -2,7 +2,9 @@
  * Centralized error handling for the application
  */
 
-export type ErrorCode = 
+import logger from '@/lib/logger'
+
+export type ErrorCode =
   | 'VALIDATION_ERROR'
   | 'NOT_FOUND'
   | 'UNAUTHORIZED'
@@ -18,7 +20,7 @@ export interface ErrorDetails {
   code: ErrorCode
   message: string
   statusCode: number
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp?: string
 }
 
@@ -31,14 +33,14 @@ export class AppError extends Error implements ErrorDetails {
   code: ErrorCode
   message: string
   statusCode: number
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: string
 
   constructor(
     code: ErrorCode,
     message: string,
     statusCode: number = 500,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'AppError'
@@ -64,7 +66,7 @@ export class AppError extends Error implements ErrorDetails {
  * Validation error for invalid input
  */
 export class ValidationError extends AppError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super('VALIDATION_ERROR', message, 400, details)
     this.name = 'ValidationError'
   }
@@ -105,7 +107,7 @@ export class ForbiddenError extends AppError {
  * Conflict error (resource already exists)
  */
 export class ConflictError extends AppError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super('CONFLICT', message, 409, details)
     this.name = 'ConflictError'
   }
@@ -115,7 +117,7 @@ export class ConflictError extends AppError {
  * Database error
  */
 export class DatabaseError extends AppError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super('DATABASE_ERROR', message, 500, details)
     this.name = 'DatabaseError'
   }
@@ -125,7 +127,7 @@ export class DatabaseError extends AppError {
  * Auth error
  */
 export class AuthError extends AppError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super('AUTH_ERROR', message, 401, details)
     this.name = 'AuthError'
   }
@@ -146,7 +148,7 @@ export class NetworkError extends AppError {
  * @param error - Error to handle
  * @returns Normalized AppError
  */
-export function handleError(error: any): AppError {
+export function handleError(error: unknown): AppError {
   // If already AppError, return as is
   if (error instanceof AppError) {
     return error
@@ -180,7 +182,7 @@ export function handleError(error: any): AppError {
  * @param error - Error to get message from
  * @returns User-friendly message
  */
-export function getErrorMessage(error: any): string {
+export function getErrorMessage(error: unknown): string {
   if (error instanceof AppError) {
     return error.message
   }
@@ -199,12 +201,12 @@ export function getErrorMessage(error: any): string {
  */
 export function logError(error: any, context?: string) {
   const normalizedError = handleError(error)
-  
+
   if (typeof window === 'undefined') {
     // Server-side logging
-    console.error(`[${context || 'ERROR'}]`, normalizedError.toJSON())
+    logger.error({ err: normalizedError, context }, 'Server error')
   } else {
     // Client-side logging (could send to monitoring service)
-    console.error(`[${context || 'ERROR'}]`, normalizedError.message)
+    logger.error({ context, message: normalizedError.message }, 'Client error')
   }
 }

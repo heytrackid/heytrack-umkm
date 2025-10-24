@@ -1,3 +1,4 @@
+import logger from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -63,7 +64,7 @@ export class InventoryUpdateService {
         }
       }
     } catch (error: any) {
-      console.error('Error updating inventory for order:', error)
+      logger.error({ err: error }, 'Error updating inventory for order')
       throw new Error('Failed to update inventory')
     }
   }

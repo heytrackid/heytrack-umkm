@@ -79,19 +79,19 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('Data tidak valid')
       }
 
-      const { data: result, error } = await (supabase as any)
+      const { data: result, error } = await supabase
         .from(table)
         .insert(data)
         .select('*')
         .single()
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
       handleSuccess('create')
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error as Error, 'create')
       throw error
     } finally {
@@ -114,7 +114,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('Data tidak valid')
       }
 
-      const { data: result, error } = await (supabase as any)
+      const { data: result, error } = await supabase
         .from(table)
         .update(data as any)
         .eq('id', id as any)
@@ -122,7 +122,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         .single()
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
       if (!result) {
@@ -131,7 +131,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       handleSuccess('update')
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error as Error, 'update')
       throw error
     } finally {
@@ -151,7 +151,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       // Check if record exists first
-      const { data: existingRecord, error: fetchError } = await (supabase as any)
+      const { data: existingRecord, error: fetchError } = await supabase
         .from(table)
         .select('*')
         .eq('id', id as any)
@@ -161,18 +161,18 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('Data tidak ditemukan')
       }
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from(table)
         .delete()
         .eq('id', id as any)
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
       handleSuccess('delete')
       return true
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error as Error, 'delete')
       throw error
     } finally {
@@ -191,13 +191,13 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('Data tidak valid atau kosong')
       }
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from(table)
         .insert(data)
         .select('*')
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
       if (showSuccessToast) {
@@ -208,7 +208,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       return data
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error as Error, 'create')
       throw error
     } finally {
@@ -231,7 +231,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const results = []
       for (const update of updates) {
-        const { data, error } = await (supabase as any)
+        const { data, error } = await supabase
           .from(table)
           .update(update.data as any)
           .eq('id', update.id as any)
@@ -253,7 +253,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       return results
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error as Error, 'update')
       throw error
     } finally {
@@ -272,13 +272,13 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('ID tidak valid atau kosong')
       }
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from(table)
         .delete()
         .in('id', ids as any)
 
       if (error) {
-        throw new Error(error.message)
+        throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
       if (showSuccessToast) {
@@ -289,7 +289,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       return true
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleError(error as Error, 'delete')
       throw error
     } finally {
@@ -358,7 +358,7 @@ export function useAsyncOperation() {
       }
 
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMsg = error instanceof Error ? error.message : 'Terjadi kesalahan tak terduga'
       setError(errorMsg)
 

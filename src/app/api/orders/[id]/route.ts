@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('orders')
       .select(`
         *,
@@ -65,7 +65,7 @@ export async function PUT(
     const { order_items, ...orderData } = body
     
     // Update main order data
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('orders')
       .update({
         ...orderData,
@@ -92,7 +92,7 @@ export async function PUT(
     // Update order items if provided
     if (order_items && Array.isArray(order_items)) {
       // Delete existing items first
-      await (supabase as any)
+      await supabase
         .from('order_items')
         .delete()
         .eq('order_id', id)
@@ -104,7 +104,7 @@ export async function PUT(
           order_id: id
         }))
         
-        const { error: itemsError } = await (supabase as any)
+        const { error: itemsError } = await supabase
           .from('order_items')
           .insert(data)
         
@@ -138,13 +138,13 @@ export async function DELETE(
     const supabase = createServerSupabaseAdmin()
     
     // Delete order items first (cascade should handle this, but being explicit)
-    await (supabase as any)
+    await supabase
       .from('order_items')
       .delete()
       .eq('order_id', id)
     
     // Delete main order
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('orders')
       .delete()
       .eq('id', id)

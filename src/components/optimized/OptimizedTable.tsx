@@ -20,13 +20,13 @@ export const OptimizedTableRow = memo(({
   onView,
   formatValue
 }: {
-  item: any
-  columns: Array<{ key: string, label: string, render?: (value: any, item: any) => React.ReactNode }>
+  item: unknown
+  columns: Array<{ key: string, label: string, render?: (value: unknown, item: unknown) => React.ReactNode }>
   isSelected: boolean
   onSelect: (id: string) => void
-  onEdit?: (item: any) => void
-  onDelete?: (item: any) => void
-  onView?: (item: any) => void
+  onEdit?: (item: unknown) => void
+  onDelete?: (item: unknown) => void
+  onView?: (item: unknown) => void
   formatValue?: (key: string, value: any, item: any) => React.ReactNode
 }) => {
   const handleSelect = useCallback(() => {
@@ -185,17 +185,17 @@ export const OptimizedTable = memo(({
   title,
   description
 }: {
-  data: any[]
-  columns: Array<{ key: string, label: string, render?: (value: any, item: any) => React.ReactNode }>
+  data: unknown[]
+  columns: Array<{ key: string, label: string, render?: (value: unknown, item: unknown) => React.ReactNode }>
   selectedItems: string[]
   onSelectAll: () => void
   onSelectItem: (id: string) => void
   onClearSelection: () => void
   onBulkEdit: () => void
   onBulkDelete: () => void
-  onEdit?: (item: any) => void
-  onDelete?: (item: any) => void
-  onView?: (item: any) => void
+  onEdit?: (item: unknown) => void
+  onDelete?: (item: unknown) => void
+  onView?: (item: unknown) => void
   formatValue?: (key: string, value: any, item: any) => React.ReactNode
   emptyStateComponent?: React.ReactNode
   title?: string

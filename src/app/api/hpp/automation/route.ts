@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in HPP automation:', error)
     return NextResponse.json(
       { error: 'HPP automation failed', details: error.message },
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     const recipeId = searchParams.get('param')
     const includeOperationalCosts = searchParams.get('param') === 'true'
 
-    const status: any = {
+    const status: unknown = {
       hppAutomationEnabled: true,
       lastMonitoringCheck: new Date().toISOString(),
       cachedRecipes: 'Available'
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting HPP automation status:', error)
     return NextResponse.json(
       { error: 'Failed to get automation status' },
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
 
 // Handler Functions
 
-async function handleIngredientPriceChange(data: any) {
+async function handleIngredientPriceChange(data: unknown) {
   const { ingredientId, oldPrice, newPrice } = data
 
   if (!ingredientId || oldPrice === undefined || newPrice === undefined) {
@@ -109,7 +109,7 @@ async function handleIngredientPriceChange(data: any) {
   // Update ingredient price in database
   const supabase = createServerSupabaseAdmin()
 
-  const { error: updateError } = await (supabase as any)
+  const { error: updateError } = await supabase
     .from('ingredients')
     .update({
       price_per_unit: newPrice,
@@ -133,7 +133,7 @@ async function handleIngredientPriceChange(data: any) {
   }
 }
 
-async function handleOperationalCostChange(data: any) {
+async function handleOperationalCostChange(data: unknown) {
   const { costId, oldAmount, newAmount } = data
 
   if (!costId || oldAmount === undefined || newAmount === undefined) {
@@ -157,7 +157,7 @@ async function handleOperationalCostChange(data: any) {
   }
 }
 
-async function handleRecipeHPPCalculation(data: any) {
+async function handleRecipeHPPCalculation(data: unknown) {
   const { recipeId } = data
 
   if (!recipeId) {
@@ -189,7 +189,7 @@ async function handleRecipeHPPCalculation(data: any) {
   }
 }
 
-async function handleBatchHPPRecalculation(data: any) {
+async function handleBatchHPPRecalculation(data: unknown) {
   const { reason = 'manual_request' } = data
 
   console.log(`🔄 Processing batch HPP recalculation: ${reason}`)
@@ -197,7 +197,7 @@ async function handleBatchHPPRecalculation(data: any) {
   // Get all recipe IDs from database
   const supabase = createServerSupabaseAdmin()
 
-  const { data: recipes, error } = await (supabase as any)
+  const { data: recipes, error } = await supabase
     .from('recipes')
     .select('*')
     .eq('is_active', true)
@@ -224,7 +224,7 @@ async function handleBatchHPPRecalculation(data: any) {
       })
 
       successCount++
-    } catch (error: any) {
+    } catch (error: unknown) {
       results.push({
         recipeId: recipe.id,
         recipeName: recipe.nama,

@@ -139,7 +139,7 @@ function isCriticalError(error: typeof errorStore[0]): boolean {
 // Example function to send to external service
 // async function sendToExternalService(error: typeof errorStore[0]) {
 //   // Sentry example:
-//   // Sentry.captureException(new Error(error.message), {
+//   // Sentry.captureException(new Error((error instanceof Error ? error.message : String(error))), {
 //   //   extra: {
 //   //     componentStack: error.componentStack,
 //   //     url: error.url,

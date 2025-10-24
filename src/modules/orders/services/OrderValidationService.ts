@@ -77,7 +77,7 @@ export class OrderValidationService {
         errors
       }
     } catch (error: any) {
-      console.error('Error validating order against inventory:', error)
+      logger.error({ err: error }, 'Error validating order against inventory')
       return {
         isValid: false,
         warnings,

@@ -2,14 +2,14 @@ import { formatCurrency } from '@/shared/utils/currency'
 
 import {
   AutomationConfig,
+  FinancialMetrics,
   Ingredient,
   OrderForNotification,
-  SmartNotification,
-  FinancialMetrics
+  SmartNotification
 } from './types'
 
 export class NotificationSystem {
-  constructor(private config: AutomationConfig) {}
+  constructor(private config: AutomationConfig) { }
 
   /**
    * 🔔 NOTIFICATION SYSTEM: Smart Alerts
@@ -27,10 +27,10 @@ export class NotificationSystem {
 
     // Add inventory notifications
     notifications.push(...this.generateInventoryNotifications(safeInventory))
-    
+
     // Add order notifications
     notifications.push(...this.generateOrderNotifications(safeOrders))
-    
+
     // Add financial notifications
     notifications.push(...this.generateFinancialNotifications(financialMetrics))
 
@@ -39,9 +39,9 @@ export class NotificationSystem {
       .sort((a, b) => {
         const priorityOrder = { high: 3, medium: 2, low: 1 }
         const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority]
-        
+
         if (priorityDiff !== 0) return priorityDiff
-        
+
         // If same priority, sort by timestamp (newer first)
         const aTime = a.timestamp?.getTime() || 0
         const bTime = b.timestamp?.getTime() || 0
@@ -116,7 +116,7 @@ export class NotificationSystem {
     // Overall inventory health
     const lowStockCount = inventory.filter(ing => ing.current_stock <= ing.min_stock).length
     const criticalStockCount = inventory.filter(ing => ing.current_stock <= ing.min_stock * 0.5).length
-    
+
     if (criticalStockCount > 3) {
       notifications.push({
         type: 'critical',
@@ -161,7 +161,7 @@ export class NotificationSystem {
     urgentOrders.forEach(order => {
       const deliveryDate = new Date(order.delivery_date)
       const hoursUntilDelivery = Math.round((deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60))
-      
+
       notifications.push({
         type: 'warning',
         category: 'production',
@@ -201,9 +201,9 @@ export class NotificationSystem {
     const todayOrders = orders.filter(order => {
       const deliveryDate = new Date(order.delivery_date)
       const today = new Date()
-      return deliveryDate.toDateString() === today.toDateString() && 
-             order.status !== 'DELIVERED' && 
-             order.status !== 'CANCELLED'
+      return deliveryDate.toDateString() === today.toDateString() &&
+        order.status !== 'DELIVERED' &&
+        order.status !== 'CANCELLED'
     })
 
     if (todayOrders.length > 5) {
@@ -286,7 +286,7 @@ export class NotificationSystem {
           action: 'optimize_inventory_value',
           priority: 'medium',
           timestamp: now,
-          data: { 
+          data: {
             inventoryTurnover,
             inventoryValue: financialMetrics.inventoryValue,
             revenue: financialMetrics.revenue
@@ -310,7 +310,7 @@ export class NotificationSystem {
     equipment.forEach(item => {
       const lastMaintenance = new Date(item.lastMaintenance)
       const daysSinceLastMaintenance = Math.floor((now.getTime() - lastMaintenance.getTime()) / (1000 * 60 * 60 * 24))
-      
+
       if (daysSinceLastMaintenance >= item.intervalDays) {
         notifications.push({
           type: 'warning',
@@ -422,7 +422,7 @@ export class NotificationSystem {
         const priorityOrder = { low: 1, medium: 2, high: 3 }
         const minPriorityLevel = priorityOrder[userPreferences.minPriority]
         const notificationPriorityLevel = priorityOrder[notification.priority]
-        
+
         if (notificationPriorityLevel < minPriorityLevel) return false
       }
 
@@ -436,7 +436,7 @@ export class NotificationSystem {
   dismissNotification(notificationId: string): boolean {
     // This would typically update a database or state management system
     // For now, we'll just return true to indicate success
-    console.log(`Notification ${notificationId} dismissed`)
+    automationLogger.info({ notificationId }, 'Notification dismissed')
     return true
   }
 

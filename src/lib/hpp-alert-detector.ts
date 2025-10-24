@@ -245,7 +245,7 @@ export async function saveAlerts(alerts: HPPAlertInsert[]): Promise<void> {
         .insert(alerts)
 
     if (error) {
-        console.error('Failed to save alerts:', error)
+        logger.error({ err: error }, 'Failed to save alerts')
         throw new Error(`Failed to save alerts: ${error.message}`)
     }
 }

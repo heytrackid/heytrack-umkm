@@ -12,7 +12,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { AppError, handleError, getErrorMessage, logError } from '@/lib/errors'
+import { apiLogger } from '@/lib/logger'
 
 // ============================================================================
 // TYPES
@@ -23,18 +23,25 @@ export interface ApiResponse<T = any> {
   data?: T
   error?: string
   message?: string
-  timestamp: string
-  path?: string
+  statusCode?: number
+  timestamp?: string
+  pagination?: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
 }
 
 export interface ApiErrorResponse {
-  success: false
+  success: boolean
   error: string
-  message?: string
+  message: string
   statusCode: number
   timestamp: string
-  path?: string
-  details?: Record<string, any>
+  details?: any
 }
 
 export interface ValidationResult {
@@ -51,12 +58,7 @@ export interface ValidationResult {
  * Handles errors, validation, and response formatting
  */
 export async function createRouteHandler<T>(
-  handler: () => Promise<{ data: T; message?: string }>,
-  options?: {
-    validateRequest?: (req: any) => ValidationResult
-    requireAuth?: boolean
-    allowedMethods?: string[]
-  }
+  handler: () => Promise<{ data: T; message?: string }>
 ): Promise<NextResponse<ApiResponse<T> | ApiErrorResponse>> {
   try {
     const result = await handler()
@@ -71,19 +73,20 @@ export async function createRouteHandler<T>(
       { status: 200 }
     )
   } catch (error) {
-    const appError = handleError(error)
-    logError(error, 'API Route Handler')
+    apiLogger.error({ error }, 'API Route Handler Error')
+
+    const message = error instanceof Error ? error.message : 'Internal server error'
+    const statusCode = 500
 
     return NextResponse.json(
       {
         success: false,
-        error: appError.code,
-        message: appError.message,
-        statusCode: appError.statusCode,
+        error: 'INTERNAL_ERROR',
+        message,
+        statusCode,
         timestamp: new Date().toISOString(),
-        details: appError.details,
       },
-      { status: appError.statusCode }
+      { status: statusCode }
     )
   }
 }
@@ -175,21 +178,21 @@ export function successResponse<T>(
  * Create error response
  */
 export function errorResponse(
-  error: AppError | Error | string,
+  error: Error | string,
   statusCode?: number
 ): NextResponse<ApiErrorResponse> {
-  const appError = error instanceof AppError ? error : handleError(error)
+  const message = error instanceof Error ? error.message : error
+  const code = statusCode || 500
 
   return NextResponse.json(
     {
       success: false,
-      error: appError.code || 'UNKNOWN_ERROR',
-      message: appError.message,
-      statusCode: statusCode || appError.statusCode,
+      error: 'ERROR',
+      message,
+      statusCode: code,
       timestamp: new Date().toISOString(),
-      details: appError.details,
     },
-    { status: statusCode || appError.statusCode }
+    { status: code }
   )
 }
 
@@ -294,7 +297,11 @@ export async function handleGET<T>(
 
     return successResponse(data)
   } catch (error) {
-    return errorResponse(error)
+    if (error instanceof Error) {
+      return errorResponse(error, 500)
+    } else {
+      return errorResponse('An unknown error occurred', 500)
+    }
   }
 }
 
@@ -320,7 +327,11 @@ export async function handlePOST<T>(
     const data = await handler(body)
     return successResponse(data, 'Created', 201)
   } catch (error) {
-    return errorResponse(error)
+    if (error instanceof Error) {
+      return errorResponse(error, 500)
+    } else {
+      return errorResponse('An unknown error occurred', 500)
+    }
   }
 }
 
@@ -353,7 +364,11 @@ export async function handlePUT<T>(
     const data = await handler(id, body)
     return successResponse(data, 'Updated')
   } catch (error) {
-    return errorResponse(error)
+    if (error instanceof Error) {
+      return errorResponse(error, 500)
+    } else {
+      return errorResponse('An unknown error occurred', 500)
+    }
   }
 }
 
@@ -375,6 +390,10 @@ export async function handleDELETE<T>(
     const data = await handler(id)
     return successResponse(data, 'Deleted')
   } catch (error) {
-    return errorResponse(error)
+    if (error instanceof Error) {
+      return errorResponse(error, 500)
+    } else {
+      return errorResponse('An unknown error occurred', 500)
+    }
   }
 }

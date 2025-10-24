@@ -164,10 +164,10 @@ export default function OrderForm({
         </Button>
         <div>
           <h2 className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'}`}>
-            {order ? Informasi : Informasi}
+            {order ? 'Edit Pesanan' : 'Buat Pesanan Baru'}
           </h2>
           <p className="text-muted-foreground">
-            {order ? Informasi : Informasi}
+            {order ? 'Perbarui informasi dan detail pesanan' : 'Isi informasi pelanggan dan detail pesanan'}
           </p>
         </div>
       </div>
@@ -176,7 +176,7 @@ export default function OrderForm({
       {errors.length > 0 && (
         <Card className="border-red-200 bg-red-50">
           <CardContent className="p-4">
-            <h4 className="font-medium text-red-800 mb-2">Informasi</h4>
+            <h4 className="font-medium text-red-800 mb-2">Kesalahan Validasi</h4>
             <ul className="list-disc list-inside text-sm text-red-700">
               {errors.map((error, index: number) => (
                 <li key={index}>{error}</li>
@@ -190,11 +190,11 @@ export default function OrderForm({
         {/* Customer Information */}
         <Card>
           <CardHeader>
-            <CardTitle>Informasi</CardTitle>
+          <CardTitle>Informasi Pelanggan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Informasi *</Label>
+              <Label>Nama Pelanggan *</Label>
               <Input
                 value={formData.customer_name}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
@@ -203,7 +203,7 @@ export default function OrderForm({
             </div>
             
             <div className="space-y-2">
-              <Label>Informasi *</Label>
+              <Label>Nomor Telepon *</Label>
               <Input
                 value={formData.customer_phone}
                 onChange={(e) => handleInputChange('customer_phone', e.target.value)}
@@ -212,7 +212,7 @@ export default function OrderForm({
             </div>
             
             <div className="space-y-2">
-              <Label>Informasi</Label>
+              <Label>Alamat Email</Label>
               <Input
                 type="email"
                 value={formData.customer_email}
@@ -222,7 +222,7 @@ export default function OrderForm({
             </div>
             
             <div className="space-y-2">
-              <Label>Informasi</Label>
+              <Label>Alamat Pengiriman</Label>
               <Textarea
                 value={formData.customer_address}
                 onChange={(e) => handleInputChange('customer_address', e.target.value)}
@@ -236,12 +236,12 @@ export default function OrderForm({
         {/* Order Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Informasi</CardTitle>
+            <CardTitle>Detail Pesanan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Informasi *</Label>
+                <Label>Tanggal Pengiriman *</Label>
                 <Input
                   type="date"
                   value={formData.delivery_date}
@@ -251,7 +251,7 @@ export default function OrderForm({
               </div>
               
               <div className="space-y-2">
-                <Label>Informasi</Label>
+                <Label>Waktu Pengiriman</Label>
                 <Input
                   type="time"
                   value={formData.delivery_time}
@@ -261,7 +261,7 @@ export default function OrderForm({
             </div>
             
             <div className="space-y-2">
-              <Label>Informasi</Label>
+              <Label>Tingkat Prioritas</Label>
               <Select 
                 value={formData.priority} 
                 onValueChange={(value: Priority) => handleInputChange('priority', value)}
@@ -270,15 +270,15 @@ export default function OrderForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="low">Informasi</SelectItem>
-                  <SelectItem value="normal">Informasi</SelectItem>
-                  <SelectItem value="high">Informasi</SelectItem>
+                  <SelectItem value="low">Rendah</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="high">Tinggi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label>Informasi</Label>
+              <Label>Catatan Pesanan</Label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => handleInputChange('notes', e.target.value)}
@@ -294,18 +294,18 @@ export default function OrderForm({
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Informasi</CardTitle>
+            <CardTitle>Item Pesanan</CardTitle>
             <Button onClick={addOrderItem} size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Informasi
+              Tambah Item
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {formData.order_items.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>Informasi</p>
-              <p className="text-sm">Informasi</p>
+              <p>Belum ada item ditambahkan</p>
+              <p className="text-sm">Klik "Tambah Item" untuk mulai membuat pesanan</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -313,7 +313,7 @@ export default function OrderForm({
                 <div key={index} className="border rounded-lg p-4">
                   <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-5'}`}>
                     <div className="col-span-2">
-                      <Label>Informasi</Label>
+                      <Label>Produk</Label>
                       <Select
                         value={item.recipe_id}
                         onValueChange={(value) => handleRecipeSelect(index, value)}
@@ -323,7 +323,7 @@ export default function OrderForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="placeholder" disabled>
-                            Informasi
+                            Pilih produk
                           </SelectItem>
                           {recipes.map((recipe) => (
                             <SelectItem key={recipe.id} value={recipe.id}>
@@ -335,7 +335,7 @@ export default function OrderForm({
                     </div>
                     
                     <div>
-                      <Label>Informasi</Label>
+                      <Label>Jumlah</Label>
                       <Input
                         type="number"
                         value={item.quantity}
@@ -345,7 +345,7 @@ export default function OrderForm({
                     </div>
                     
                     <div>
-                      <Label>Informasi</Label>
+                      <Label>Harga</Label>
                       <Input
                         type="number"
                         value={item.price}
@@ -367,7 +367,7 @@ export default function OrderForm({
                   </div>
                   
                   <div className="mt-3">
-                    <Label>Informasi</Label>
+                    <Label>Catatan (Opsional)</Label>
                     <Input
                       value={item.notes || ''}
                       onChange={(e) => updateOrderItem(index, 'notes', e.target.value)}
@@ -379,7 +379,7 @@ export default function OrderForm({
               
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-bold">
-                  <span>Informasi:</span>
+                  <span>Total Harga:</span>
                   <span>{formatCurrency(totalAmount)}</span>
                 </div>
               </div>
@@ -396,10 +396,10 @@ export default function OrderForm({
           className="flex-1"
         >
           <Save className="h-4 w-4 mr-2" />
-          {loading ? Informasi : (order ? Informasi : Informasi)}
+          {loading ? 'Menyimpan...' : (order ? 'Perbarui Pesanan' : 'Buat Pesanan')}
         </Button>
         <Button variant="outline" onClick={onCancel} disabled={loading}>
-          Informasi
+          Batal
         </Button>
       </div>
     </div>

@@ -12,7 +12,7 @@ export async function GET(
     const supabase = createServerSupabaseAdmin()
     
     // Fetch recipe with ingredients
-    const { data: recipe, error } = await (supabase as any)
+    const { data: recipe, error } = await supabase
       .from('recipes')
       .select(`
         *,
@@ -83,7 +83,7 @@ export async function GET(
         overhead_cost: 0,
         total_cost: 0,
         cost_per_serving: costPerServing,
-        ingredient_details: recipe.recipe_ingredients.map((ri: any) => ({
+        ingredient_details: recipe.recipe_ingredients.map((ri: unknown) => ({
           name: ri.ingredient.name,
           quantity: ri.quantity,
           unit: ri.unit,
@@ -104,7 +104,7 @@ export async function GET(
         is_profitable: recipe.selling_price > costPerServing
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error calculating HPP:', error)
     return NextResponse.json(
       { error: 'Failed to calculate HPP' },
@@ -114,12 +114,12 @@ export async function GET(
 }
 
 // Helper function to check ingredient availability
-function checkIngredientAvailability(recipe: any) {
-  const stockWarnings: any[] = []
-  const missingIngredients: any[] = []
+function checkIngredientAvailability(recipe: unknown) {
+  const stockWarnings: unknown[] = []
+  const missingIngredients: unknown[] = []
   let canProduce = true
   
-  recipe.recipe_ingredients.forEach((ri: any) => {
+  recipe.recipe_ingredients.forEach((ri: unknown) => {
     const needed = ri.quantity
     const available = ri.ingredient.stock || 0
     const stockDays = available > 0 ? Math.floor(available / needed) : 0
@@ -148,7 +148,7 @@ function checkIngredientAvailability(recipe: any) {
     missing_ingredients: missingIngredients,
     stock_warnings: stockWarnings,
     production_capacity: canProduce ? Math.min(
-      ...recipe.recipe_ingredients.map((ri: any) => 
+      ...recipe.recipe_ingredients.map((ri: unknown) => 
         Math.floor((ri.ingredient.stock || 0) / ri.quantity)
       )
     ) : 0
@@ -156,12 +156,12 @@ function checkIngredientAvailability(recipe: any) {
 }
 
 // Helper function to generate inventory recommendations
-function generateInventoryRecommendations(availability: any): string[] {
+function generateInventoryRecommendations(availability: unknown): string[] {
   const recommendations = []
   
   if (!availability.can_produce) {
     recommendations.push('🛑 Tidak bisa produksi - stock bahan tidak mencukupi')
-    availability.missing_ingredients.forEach((missing: any) => {
+    availability.missing_ingredients.forEach((missing: unknown) => {
       recommendations.push(`📦 Butuh tambahan ${missing.shortage.toFixed(2)} ${missing.unit} ${missing.name}`)
     })
   }

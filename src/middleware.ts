@@ -1,6 +1,7 @@
 import { updateSession } from '@/utils/supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { z } from 'zod'
 
 // Define protected routes as a Set for O(1) lookup performance
 const PROTECTED_ROUTES = new Set([
@@ -22,8 +23,57 @@ const PROTECTED_ROUTES = new Set([
 // Auth pages that should redirect when user is authenticated
 const AUTH_PAGES = new Set(['/auth/login', '/auth/register'])
 
+// Request validation schemas
+const RequestHeadersSchema = z.object({
+  'user-agent': z.string().optional(),
+  'accept': z.string().optional(),
+  'accept-language': z.string().optional(),
+  'content-type': z.string().optional(),
+  'x-forwarded-for': z.string().optional(),
+})
+
+const UrlValidationSchema = z.object({
+  pathname: z.string().min(1).max(2048), // Reasonable URL length limit
+  search: z.string().max(2048).optional(), // Query string length limit
+})
+
 export async function middleware(request: NextRequest) {
   try {
+    // Validate request headers (optional, for security monitoring)
+    const headersValidation = RequestHeadersSchema.safeParse({
+      'user-agent': request.headers.get('user-agent'),
+      'accept': request.headers.get('accept'),
+      'accept-language': request.headers.get('accept-language'),
+      'content-type': request.headers.get('content-type'),
+      'x-forwarded-for': request.headers.get('x-forwarded-for'),
+    })
+
+    // Validate URL structure
+    const urlValidation = UrlValidationSchema.safeParse({
+      pathname: request.nextUrl.pathname,
+      search: request.nextUrl.search,
+    })
+
+    // Log suspicious requests but don't block them
+    if (!headersValidation.success) {
+      console.warn('⚠️ Suspicious request headers detected:', {
+        url: request.url,
+        headers: Object.fromEntries(request.headers.entries()),
+        issues: headersValidation.error.issues,
+      })
+    }
+
+    if (!urlValidation.success) {
+      console.warn('⚠️ Malformed URL detected:', {
+        url: request.url,
+        issues: urlValidation.error.issues,
+      })
+      return NextResponse.json(
+        { error: 'Invalid request URL' },
+        { status: 400 }
+      )
+    }
+
     // Update session using the new helper
     let response = await updateSession(request)
 

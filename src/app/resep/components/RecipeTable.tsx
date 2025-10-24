@@ -100,14 +100,14 @@ export default function RecipeTable({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <CardTitle className="text-xl flex items-center gap-2">
             <ChefHat className="h-5 w-5" />
-            Informasi
+            Daftar Resep
             <Badge variant="secondary" className="ml-2">
               {filteredRecipes.length}
             </Badge>
           </CardTitle>
           <Button onClick={onAddNew}>
             <Plus className="h-4 w-4 mr-2" />
-            Informasi
+            Tambah Resep
           </Button>
         </div>
       </CardHeader>
@@ -140,11 +140,11 @@ export default function RecipeTable({
                       />
                     </TableHead>
                   )}
-                  <TableHead>Informasi</TableHead>
-                  <TableHead>Informasi</TableHead>
-                  <TableHead>Informasi</TableHead>
-                  <TableHead>Informasi</TableHead>
-                  <TableHead className="text-right">Informasi</TableHead>
+                  <TableHead>Nama Resep</TableHead>
+                  <TableHead>HPP</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Bahan</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,17 +185,17 @@ export default function RecipeTable({
                       </TableCell>
                       <TableCell>
                         <Badge variant={ingredientCount > 0 ? 'default' : 'destructive'}>
-                          Informasi
+                          {ingredientCount > 0 ? 'Aktif' : 'Tidak Aktif'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {ingredientCount > 0 ? (
                           <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
-                            Informasi
+                            {ingredientCount} bahan
                           </Badge>
                         ) : (
                           <Badge variant="destructive">
-                            Informasi
+                            Tidak ada bahan
                           </Badge>
                         )}
                       </TableCell>
@@ -217,21 +217,21 @@ export default function RecipeTable({
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => onEdit(cost)}>
                                 <Edit2 className="h-4 w-4 mr-2" />
-                                Informasi
+                                Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => window.location.href = '/hpp'}
                                 disabled={ingredientCount === 0}
                               >
                                 <Calculator className="h-4 w-4 mr-2" />
-                                Informasi
+                                Hitung HPP
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 className="text-red-600"
                                 onClick={() => onDelete(recipe)}
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Informasi
+                                Hapus
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -259,7 +259,7 @@ export default function RecipeTable({
                 <div className="flex items-center gap-6">
                   {/* Page Size Selector */}
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Informasi</span>
+                    <span className="text-sm text-muted-foreground">Tampilkan</span>
                     <Select value={pageSize.toString()} onValueChange={(value) => {
                       setPageSize(Number(value))
                       setCurrentPage(1)
@@ -288,7 +288,7 @@ export default function RecipeTable({
                     </Button>
                     
                     <span className="text-sm font-medium">
-                      Informasi
+                      {currentPage} dari {totalPages}
                     </span>
                     
                     <Button
@@ -308,18 +308,18 @@ export default function RecipeTable({
           <div className="py-12 text-center">
             <ChefHat className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-              {searchTerm ? Informasi : Informasi}
+              {searchTerm ? 'Tidak ada resep ditemukan' : 'Belum ada resep'}
             </h3>
             <p className="text-muted-foreground mb-4">
               {searchTerm 
-                ? Informasi
-                : Informasi
+                ? 'Coba ubah kata kunci pencarian Anda'
+                : 'Mulai buat resep pertama Anda'
               }
             </p>
             {!searchTerm && (
               <Button onClick={onAddNew}>
                 <Plus className="h-4 w-4 mr-2" />
-                Informasi
+                Buat Resep Pertama
               </Button>
             )}
           </div>

@@ -71,7 +71,7 @@ export class ProductionPlanningSystem {
   /**
    * Generate production schedule untuk orders yang pending
    */
-  async generateProductionSchedule(orders: any[], ingredients: any[], recipes: any[]): Promise<ProductionSchedule[]> {
+  async generateProductionSchedule(orders: unknown[], ingredients: unknown[], recipes: unknown[]): Promise<ProductionSchedule[]> {
     console.log('🏭 Generating production schedule...')
 
     // Filter orders yang perlu diproduksi
@@ -105,9 +105,9 @@ export class ProductionPlanningSystem {
    */
   private async generateDailySchedule(
     dateStr: string, 
-    orders: any[], 
-    ingredients: any[], 
-    recipes: any[]
+    orders: unknown[], 
+    ingredients: unknown[], 
+    recipes: unknown[]
   ): Promise<ProductionSchedule> {
     const date = new Date(dateStr)
     const tasks: ProductionTask[] = []
@@ -153,7 +153,7 @@ export class ProductionPlanningSystem {
   /**
    * Create production task dari order item
    */
-  private createProductionTask(order: any, orderItem: any, recipe: any, ingredients: any[]): ProductionTask {
+  private createProductionTask(order: any, orderItem: any, recipe: any, ingredients: unknown[]): ProductionTask {
     const batchSize = recipe.servings || 1
     const batchCount = Math.ceil(orderItem.quantity / batchSize)
     
@@ -163,7 +163,7 @@ export class ProductionPlanningSystem {
     const estimatedDuration = (prepTime + cookTime) * batchCount
 
     // Calculate ingredient requirements
-    const ingredientRequirements = (recipe.recipe_ingredients || []).map((ri: any) => {
+    const ingredientRequirements = (recipe.recipe_ingredients || []).map((ri: unknown) => {
       const ingredient = ingredients.find(ing => ing.id === ri.ingredient_id)
       const requiredQuantity = ri.quantity * orderItem.quantity
       const availableQuantity = ingredient?.current_stock || 0
@@ -256,7 +256,7 @@ export class ProductionPlanningSystem {
   /**
    * Find schedule conflicts
    */
-  private findScheduleConflicts(tasks: ProductionTask[], ingredients: any[]): ProductionSchedule['conflicts'] {
+  private findScheduleConflicts(tasks: ProductionTask[], ingredients: unknown[]): ProductionSchedule['conflicts'] {
     const conflicts: ProductionSchedule['conflicts'] = []
 
     // Check ingredient shortages
@@ -324,8 +324,8 @@ export class ProductionPlanningSystem {
   /**
    * Group orders by delivery date
    */
-  private groupOrdersByDeliveryDate(orders: any[]): Map<string, any[]> {
-    const grouped = new Map<string, any[]>()
+  private groupOrdersByDeliveryDate(orders: unknown[]): Map<string, unknown[]> {
+    const grouped = new Map<string, unknown[]>()
 
     orders.forEach(order => {
       if (!order.delivery_date) return
@@ -472,7 +472,7 @@ export class ProductionPlanningSystem {
 export const productionPlanning = ProductionPlanningSystem.getInstance()
 
 // Helper functions untuk integrasi dengan komponen lain
-export const generateProductionSchedule = async (orders: any[], ingredients: any[], recipes: any[]) => {
+export const generateProductionSchedule = async (orders: unknown[], ingredients: unknown[], recipes: unknown[]) => {
   return productionPlanning.generateProductionSchedule(orders, ingredients, recipes)
 }
 

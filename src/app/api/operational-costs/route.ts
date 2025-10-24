@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import type { ExpensesTable } from '@/types'
 
 /**
  * GET /api/operational-costs
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform to match frontend interface
-    const costs = data?.map((expense: any) => ({
+    const costs = data?.map((expense: ExpensesTable['Row']) => ({
       id: expense.id,
       name: expense.description,
       category: expense.category,
@@ -73,20 +74,38 @@ export async function GET(request: NextRequest) {
       updated_at: expense.updated_at
     })) || []
 
+    interface CostSummary {
+      id: string
+      name: string
+      category: string
+      subcategory: string
+      amount: number
+      frequency: string
+      description: string
+      isFixed: boolean
+      expense_date: string
+      supplier: string | null
+      payment_method: string | null
+      status: string
+      receipt_number: string | null
+      created_at: string | null
+      updated_at: string | null
+    }
+
     return NextResponse.json({
       costs,
       total: costs.length,
       summary: {
-        total_amount: costs.reduce((sum: number, c: any) => sum + c.amount, 0),
+        total_amount: costs.reduce((sum: number, c: CostSummary) => sum + c.amount, 0),
         total_monthly: costs
-          .filter((c: any) => c.frequency === 'monthly')
-          .reduce((sum: number, c: any) => sum + c.amount, 0),
-        fixed_costs: costs.filter((c: any) => c.isFixed).length,
-        variable_costs: costs.filter((c: any) => !c.isFixed).length
+          .filter((c: CostSummary) => c.frequency === 'monthly')
+          .reduce((sum: number, c: CostSummary) => sum + c.amount, 0),
+        fixed_costs: costs.filter((c: CostSummary) => c.isFixed).length,
+        variable_costs: costs.filter((c: CostSummary) => !c.isFixed).length
       }
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in GET /api/operational-costs:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -164,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in POST /api/operational-costs:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -205,7 +224,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Build update object
-    const updateData: any = {}
+    const updateData: ExpensesTable['Update'] = {}
     if (body.category !== undefined) updateData.category = body.category
     if (body.subcategory !== undefined) updateData.subcategory = body.subcategory
     if (body.amount !== undefined) updateData.amount = body.amount
@@ -245,7 +264,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(data)
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in PUT /api/operational-costs:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -312,7 +331,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in DELETE /api/operational-costs:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -1,5 +1,6 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
+import type { HPPAlertsTable } from '@/types'
 
 // POST /api/hpp/alerts/:id/dismiss - Dismiss alert
 export async function POST(
@@ -19,13 +20,15 @@ export async function POST(
         const supabase = createServerSupabaseAdmin()
 
         // Update alert to mark as dismissed
+        const updateData: HPPAlertsTable['Update'] = {
+            is_dismissed: true,
+            dismissed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        }
+        
         const { data: alert, error } = await supabase
             .from('hpp_alerts')
-            .update({
-                is_dismissed: true,
-                dismissed_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            })
+            .update(updateData)
             .eq('id', alertId)
             .select()
             .single()

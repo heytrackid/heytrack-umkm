@@ -3,6 +3,8 @@
  * Handles all HTTP requests with interceptors, error handling, retry logic, etc.
  */
 
+import { apiLogger } from '@/lib/logger'
+
 interface RequestConfig extends RequestInit {
   baseURL?: string
   retry?: number
@@ -10,7 +12,7 @@ interface RequestConfig extends RequestInit {
   skipErrorLog?: boolean
 }
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -19,22 +21,20 @@ interface ApiResponse<T = any> {
 
 interface ApiError extends Error {
   status: number
-  data?: any
+  data?: unknown
   response?: Response
 }
 
 // Request/Response logging utilities
 const logger = {
-  log: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[API] ${message}`, data)
-    }
+  log: (message: string, data?: unknown) => {
+    apiLogger.debug({ data }, message)
   },
-  error: (message: string, error?: any) => {
-    console.error(`[API ERROR] ${message}`, error)
+  error: (message: string, error?: unknown) => {
+    apiLogger.error({ err: error }, message)
   },
-  warn: (message: string, data?: any) => {
-    console.warn(`[API WARN] ${message}`, data)
+  warn: (message: string, data?: unknown) => {
+    apiLogger.warn({ data }, message)
   },
 }
 
@@ -132,9 +132,10 @@ class APIClient {
   /**
    * Create ApiError from response
    */
-  private async createApiError(response: Response, data?: any): Promise<ApiError> {
+  private async createApiError(response: Response, data?: unknown): Promise<ApiError> {
+    const dataObj = data as { error?: string; message?: string } | undefined
     const error = new Error(
-      data?.error || data?.message || `API Error: ${response.status}`
+      dataObj?.error || dataObj?.message || `API Error: ${response.status}`
     ) as ApiError
     error.status = response.status
     error.response = response
@@ -145,7 +146,7 @@ class APIClient {
   /**
    * Make HTTP request with full error handling and interceptors
    */
-  async request<T = any>(
+  async request<T = unknown>(
     endpoint: string,
     config: RequestConfig = {}
   ): Promise<ApiResponse<T>> {
@@ -205,7 +206,7 @@ class APIClient {
 
         return {
           success: false,
-          error: error.message,
+          error: (error instanceof Error ? error.message : String(error)),
           status: response.status,
         }
       }
@@ -247,14 +248,14 @@ class APIClient {
   /**
    * GET request
    */
-  get<T = any>(endpoint: string, config?: RequestConfig) {
+  get<T = unknown>(endpoint: string, config?: RequestConfig) {
     return this.request<T>(endpoint, { ...config, method: 'GET' })
   }
 
   /**
    * POST request
    */
-  post<T = any>(endpoint: string, body?: any, config?: RequestConfig) {
+  post<T = unknown>(endpoint: string, body?: unknown, config?: RequestConfig) {
     return this.request<T>(endpoint, {
       ...config,
       method: 'POST',
@@ -265,7 +266,7 @@ class APIClient {
   /**
    * PUT request
    */
-  put<T = any>(endpoint: string, body?: any, config?: RequestConfig) {
+  put<T = unknown>(endpoint: string, body?: unknown, config?: RequestConfig) {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PUT',
@@ -276,7 +277,7 @@ class APIClient {
   /**
    * PATCH request
    */
-  patch<T = any>(endpoint: string, body?: any, config?: RequestConfig) {
+  patch<T = unknown>(endpoint: string, body?: unknown, config?: RequestConfig) {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PATCH',
@@ -287,7 +288,7 @@ class APIClient {
   /**
    * DELETE request
    */
-  delete<T = any>(endpoint: string, config?: RequestConfig) {
+  delete<T = unknown>(endpoint: string, config?: RequestConfig) {
     return this.request<T>(endpoint, { ...config, method: 'DELETE' })
   }
 }
@@ -297,4 +298,5 @@ const apiClient = new APIClient()
 
 // Export for direct use
 export { apiClient, APIClient }
-export type { ApiResponse, ApiError, RequestConfig }
+export type { ApiError, ApiResponse, RequestConfig }
+

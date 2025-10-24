@@ -19,10 +19,10 @@ type Tables = Database['public']['Tables']
 
 interface UseSupabaseQueryOptions<T extends keyof Tables> {
   select?: string
-  filter?: Record<string, any>
+  filter?: Record<string, unknown>
   orderBy?: { column: string; ascending?: boolean }
   limit?: number
-  initial?: any[]
+  initial?: unknown[]
   refetchOnMount?: boolean
   realtime?: boolean
 }
@@ -31,7 +31,7 @@ export function useSupabaseQuery<T extends keyof Tables>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
-  const [data, setData] = useState<any[]>(options.initial ?? [])
+  const [data, setData] = useState<unknown[]>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
 
@@ -95,18 +95,18 @@ export function useSupabaseQuery<T extends keyof Tables>(
           },
           (payload) => {
             if (payload.eventType === 'INSERT') {
-              setData((prev) => [payload.new as any, ...prev])
+              setData((prev) => [payload.new as unknown, ...prev])
             } else if (payload.eventType === 'UPDATE') {
               setData((prev) =>
                 prev.map((item) =>
-                  (item as any).id === (payload.new as any).id
-                    ? (payload.new as any)
+                  (item as unknown).id === (payload.new as unknown).id
+                    ? (payload.new as unknown)
                     : item
                 )
               )
             } else if (payload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item) => (item as any).id !== (payload.old as any).id)
+                prev.filter((item) => (item as unknown).id !== (payload.old as unknown).id)
               )
             }
           }
@@ -143,7 +143,7 @@ export function useSupabaseMutation<T extends keyof Tables>(
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const create = async (data: any) => {
+  const create = async (data: unknown) => {
     setLoading(true)
     setError(null)
 
@@ -261,7 +261,7 @@ export function useSupabaseCRUD<T extends keyof Tables>(
 // ============================================================================
 
 export const useRecipesWithIngredients = () => {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<unknown[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -300,7 +300,7 @@ export const useRecipesWithIngredients = () => {
 }
 
 export const useOrdersWithItems = () => {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<unknown[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -345,10 +345,10 @@ export const useOrdersWithItems = () => {
 export const useHPPCalculations = () => {
   const { data: recipes, loading: recipesLoading } = useRecipesWithIngredients()
 
-  const calculateHPP = useCallback((recipe: any) => {
+  const calculateHPP = useCallback((recipe: unknown) => {
     if (!recipe.recipe_ingredients) return 0
 
-    return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
+    return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: unknown) => {
       const ingredient = recipeIngredient.ingredient
       if (!ingredient) return total
 
@@ -417,7 +417,7 @@ export function useSupabaseBulkOperations<T extends keyof Tables>(
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const bulkCreate = async (items: any[]) => {
+  const bulkCreate = async (items: unknown[]) => {
     setLoading(true)
     setError(null)
 
@@ -527,7 +527,7 @@ export function useFinancialRecords(options?: {
   type?: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
   realtime?: boolean
 }) {
-  const filter: Record<string, any> = {}
+  const filter: Record<string, unknown> = {}
   if (options?.type) filter.type = options.type
 
   return useSupabaseQuery('financial_records', {

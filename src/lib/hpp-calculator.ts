@@ -1,6 +1,7 @@
 import { Database } from '@/types'
 import type { CostBreakdown, IngredientCost, OperationalCost } from '@/types/hpp-tracking'
 import { createSupabaseClient } from './supabase'
+import { validateHPPCalculation } from './business-validation'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -40,30 +41,52 @@ export class HPPCalculator {
    * Calculate HPP (Harga Pokok Produksi) for a recipe
    */
   static calculateRecipeHPP(recipe: RecipeWithIngredients): HPPCalculation {
-    const ingredientBreakdown = recipe.recipe_ingredients.map((recipeIngredient) => {
+    // Basic validation
+    if (!recipe.id || !recipe.name) {
+      throw new Error('Recipe must have valid id and name')
+    }
+
+    if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
+      throw new Error('Recipe must have at least one ingredient')
+    }
+
+    // Validate ingredients data
+    const validatedIngredients = recipe.recipe_ingredients.map((recipeIngredient) => {
+      if (!recipeIngredient.ingredients) {
+        throw new Error(`Recipe ingredient missing ingredient data`)
+      }
+
       const ingredient = recipeIngredient.ingredients
-      const quantity = recipeIngredient.quantity
-      const pricePerUnit = ingredient.price_per_unit
-      const totalCost = quantity * pricePerUnit
+      if (!ingredient.id || !ingredient.name) {
+        throw new Error(`Ingredient ${ingredient.id || 'unknown'} missing required data`)
+      }
+
+      if (!ingredient.price_per_unit || ingredient.price_per_unit <= 0) {
+        throw new Error(`Ingredient ${ingredient.name} has invalid price`)
+      }
+
+      if (!recipeIngredient.quantity || recipeIngredient.quantity <= 0) {
+        throw new Error(`Recipe ingredient ${ingredient.name} has invalid quantity`)
+      }
 
       return {
         ingredientId: ingredient.id,
         ingredientName: ingredient.name,
-        quantity: quantity,
+        quantity: recipeIngredient.quantity,
         unit: recipeIngredient.unit,
-        pricePerUnit: pricePerUnit,
-        totalCost: totalCost,
+        pricePerUnit: ingredient.price_per_unit,
+        totalCost: recipeIngredient.quantity * ingredient.price_per_unit,
         percentage: 0 // Will be calculated after total cost
       }
     })
 
-    const totalCost = ingredientBreakdown.reduce((sum, item) => sum + item.totalCost, 0)
+    const totalCost = validatedIngredients.reduce((sum: number, item) => sum + item.totalCost, 0)
     const servings = recipe.servings || 1
     const costPerServing = totalCost / servings
     const costPerUnit = totalCost // For single unit recipes
 
     // Calculate percentage for each ingredient
-    ingredientBreakdown.forEach((item) => {
+    validatedIngredients.forEach((item) => {
       item.percentage = totalCost > 0 ? (item.totalCost / totalCost) * 100 : 0
     })
 
@@ -74,7 +97,7 @@ export class HPPCalculator {
       totalCost: totalCost,
       costPerServing: costPerServing,
       costPerUnit: costPerUnit,
-      ingredientBreakdown: ingredientBreakdown
+      ingredientBreakdown: validatedIngredients
     }
   }
 
@@ -295,7 +318,7 @@ export async function calculateHPP(recipeId: string, userId: string): Promise<HP
     .gte('date', thirtyDaysAgo.toISOString())
 
   if (opCostError) {
-    console.warn('Failed to fetch operational costs:', opCostError.message)
+    logger.warn({ err: opCostError }, 'Failed to fetch operational costs')
   }
 
   // 4. Calculate monthly operational cost

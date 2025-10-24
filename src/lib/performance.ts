@@ -76,7 +76,7 @@ export class PerformanceMonitor {
 }
 
 // Simple debounce function
-function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T {
+function debounce<T extends (...args: unknown[]) => any>(func: T, delay: number): T {
   let timeoutId: ReturnType<typeof setTimeout>
   return ((...args: Parameters<T>) => {
     clearTimeout
@@ -85,7 +85,7 @@ function debounce<T extends (...args: any[]) => any>(func: T, delay: number): T 
 }
 
 // Simple throttle function
-function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T {
+function throttle<T extends (...args: unknown[]) => any>(func: T, limit: number): T {
   let inThrottle: boolean
   return ((...args: Parameters<T>) => {
     if (!inThrottle) {
@@ -97,7 +97,7 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): T 
 }
 
 // Optimized hooks
-export const useDebounce = <T extends (...args: any[]) => any>(
+export const useDebounce = <T extends (...args: unknown[]) => any>(
   callback: T,
   delay: number
 ): T => {
@@ -107,7 +107,7 @@ export const useDebounce = <T extends (...args: any[]) => any>(
   ) as T
 }
 
-export const useThrottle = <T extends (...args: any[]) => any>(
+export const useThrottle = <T extends (...args: unknown[]) => any>(
   callback: T,
   limit: number
 ): T => {
@@ -118,7 +118,7 @@ export const useThrottle = <T extends (...args: any[]) => any>(
 }
 
 // Memoized callback with performance monitoring
-export const usePerformantCallback = <T extends (...args: any[]) => any>(
+export const usePerformantCallback = <T extends (...args: unknown[]) => any>(
   callback: T,
   deps: React.DependencyList,
   label?: string
@@ -163,13 +163,13 @@ export const useIntersectionObserver = (
 // Virtual scrolling helper
 export class VirtualScroller {
   private container: HTMLElement
-  private items: any[]
+  private items: unknown[]
   private itemHeight: number
   private containerHeight: number
   
   constructor(
     container: HTMLElement,
-    items: any[],
+    items: unknown[],
     itemHeight: number,
     containerHeight: number
   ) {
@@ -222,7 +222,7 @@ export const analyzeBundleSize = (): void => {
         const size = parseInt
         totalSize += size
         console.log(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('Failed to analyze script:', (script as HTMLScriptElement).src)
       }
     }
@@ -237,10 +237,10 @@ export const analyzeBundleSize = (): void => {
 
 // Memory usage monitoring
 export const monitorMemoryUsage = (): void => {
-  if (typeof window === 'undefined' || !(performance as any).memory) return
+  if (typeof window === 'undefined' || !(performance as unknown).memory) return
   
   setInterval(() => {
-    const memory = (performance as any).memory
+    const memory = (performance as unknown).memory
     const used = (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     const limit = (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)
     
@@ -266,14 +266,14 @@ export const registerServiceWorker = async (): Promise<void> => {
     registration.addEventListener('updatefound', () => {
       console.log('🔄 New Service Worker version available')
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Service Worker registration failed:', error)
   }
 }
 
 // Cache utilities
 export class CacheManager {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   
   set(key, data): void {
     this.cache.set(key, {

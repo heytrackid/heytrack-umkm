@@ -1,10 +1,10 @@
 import { supabase } from '@/lib/supabase'
 import type {
-    InventoryStockLog,
-    InventoryStockLogInsert,
-    SyncEvent,
-    SystemMetric,
-    SystemMetricInsert
+  InventoryStockLog,
+  InventoryStockLogInsert,
+  SyncEvent,
+  SystemMetric,
+  SystemMetricInsert
 } from '@/types'
 
 // Sync Events API
@@ -16,7 +16,7 @@ export const syncEventApi = {
       .select('*')
       .order('created_at', { ascending: false })
       .limit(limit)
-    
+
     if (error) throw error
     return data as SyncEvent[]
   },
@@ -29,7 +29,7 @@ export const syncEventApi = {
       .eq('event_type', eventType)
       .order('created_at', { ascending: false })
       .limit(limit)
-    
+
     if (error) throw error
     return data as SyncEvent[]
   },
@@ -43,7 +43,7 @@ export const syncEventApi = {
       .eq('entity_id', entityId)
       .order('created_at', { ascending: false })
       .limit(limit)
-    
+
     if (error) throw error
     return data as SyncEvent[]
   },
@@ -55,7 +55,7 @@ export const syncEventApi = {
       .insert(eventData)
       .select('*')
       .single()
-    
+
     if (error) throw error
     return data as SyncEvent
   },
@@ -71,7 +71,7 @@ export const syncEventApi = {
       .eq('id', id)
       .select('*')
       .single()
-    
+
     if (error) throw error
     return data as SyncEvent
   },
@@ -82,7 +82,7 @@ export const syncEventApi = {
       .from('sync_events')
       .select('*')
       .eq('sync_status', 'pending')
-    
+
     if (error) throw error
     return count || 0
   }
@@ -102,7 +102,7 @@ export const systemMetricsApi = {
     }
 
     const { data, error } = await query.limit(options.limit)
-    
+
     if (error) throw error
     return data as SystemMetric[]
   },
@@ -114,7 +114,7 @@ export const systemMetricsApi = {
       .insert(metric)
       .select('*')
       .single()
-    
+
     if (error) throw error
     return data as SystemMetric
   },
@@ -128,7 +128,7 @@ export const systemMetricsApi = {
       .order('recorded_at', { ascending: false })
       .limit(1)
       .single()
-    
+
     if (error && error.code !== 'PGRST116') throw error
     return data as SystemMetric | null
   }
@@ -147,7 +147,7 @@ export const inventoryStockLogsApi = {
       .eq('ingredient_id', ingredientId)
       .order('created_at', { ascending: false })
       .limit(limit)
-    
+
     if (error) throw error
     return data
   },
@@ -162,7 +162,7 @@ export const inventoryStockLogsApi = {
       `)
       .order('created_at', { ascending: false })
       .limit(limit)
-    
+
     if (error) throw error
     return data
   },
@@ -174,7 +174,7 @@ export const inventoryStockLogsApi = {
       .insert(log)
       .select('*')
       .single()
-    
+
     if (error) throw error
     return data as InventoryStockLog
   }
@@ -210,7 +210,7 @@ export const syncDashboardApi = {
         timestamp: new Date().toISOString()
       }
     } catch (error: any) {
-      console.error('Error fetching dashboard data:', error)
+      apiLogger.error({ err: error }, 'Error fetching dashboard data')
       throw error
     }
   },
@@ -303,7 +303,7 @@ export const testSyncSystem = async () => {
       message: 'Sync system test completed successfully'
     }
   } catch (error: any) {
-    console.error('Sync system test failed:', error)
+    apiLogger.error({ err: error }, 'Sync system test failed')
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

@@ -3,14 +3,15 @@
  * Dynamically loads AI service modules only when needed
  */
 
+
 export class AIService {
   private apiKey: string
   private baseUrl = 'https://openrouter.ai/api/v1/chat/completions'
-  
+
   constructor() {
     this.apiKey = process.env.OPENROUTER_API_KEY || ''
     if (!this.apiKey) {
-      console.warn('OPENROUTER_API_KEY not found. AI features will be disabled.')
+      logger.warn('OPENROUTER_API_KEY not found. AI features will be disabled.')
     }
   }
 

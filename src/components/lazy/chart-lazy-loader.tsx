@@ -94,56 +94,56 @@ export const ComposedChartWithSuspense = ({ children, title, height = 'h-64', ..
 )
 
 // Chart Component Elements with Suspense
-export const CartesianGridWithSuspense = (props: any) => (
+export const CartesianGridWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyCartesianGrid {...props} />
   </Suspense>
 )
 
-export const TooltipWithSuspense = (props: any) => (
+export const TooltipWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyTooltip {...props} />
   </Suspense>
 )
 
-export const LegendWithSuspense = (props: any) => (
+export const LegendWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyLegend {...props} />
   </Suspense>
 )
 
-export const XAxisWithSuspense = (props: any) => (
+export const XAxisWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyXAxis {...props} />
   </Suspense>
 )
 
-export const YAxisWithSuspense = (props: any) => (
+export const YAxisWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyYAxis {...props} />
   </Suspense>
 )
 
 // Chart Data Elements with Suspense
-export const LineWithSuspense = (props: any) => (
+export const LineWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyLine {...props} />
   </Suspense>
 )
 
-export const BarWithSuspense = (props: any) => (
+export const BarWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyBar {...props} />
   </Suspense>
 )
 
-export const AreaWithSuspense = (props: any) => (
+export const AreaWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyArea {...props} />
   </Suspense>
 )
 
-export const CellWithSuspense = (props: any) => (
+export const CellWithSuspense = (props: unknown) => (
   <Suspense fallback={null}>
     <LazyCell {...props} />
   </Suspense>
@@ -169,7 +169,7 @@ export const ChartContainer = ({
   title?: string
   height?: string
   children: React.ReactNode
-  [key: string]: any
+  [key: string]: unknown
 }) => {
   const ChartComponents = {
     line: LineChartWithSuspense,
