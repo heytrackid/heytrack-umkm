@@ -122,7 +122,7 @@ export function formatMultiProductData(
             )
 
             const recipeName = recipeNames[recipeId] || recipeId
-            dataPoint[recipeName] = snapshot ? snapshot.hpp_value : null as any
+            dataPoint[recipeName] = snapshot ? snapshot.hpp_value : null
         })
 
         return dataPoint
@@ -249,9 +249,9 @@ export function fillMissingDataPoints(
                     case 'null':
                     default:
                         gapValue = {
-                            hpp: null as any,
-                            material_cost: null as any,
-                            operational_cost: null as any
+                            hpp: null,
+                            material_cost: null,
+                            operational_cost: null
                         }
                 }
 

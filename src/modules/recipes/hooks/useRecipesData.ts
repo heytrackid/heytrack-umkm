@@ -23,7 +23,7 @@ interface UseRecipesDataOptions {
 }
 
 export function useRecipesData(options: UseRecipesDataOptions = {}) {
-  const filters: Record<string, any> = {}
+  const filters: Record<string, unknown> = {}
   
   if (options.category && options.category !== 'all') {
     filters.category = options.category

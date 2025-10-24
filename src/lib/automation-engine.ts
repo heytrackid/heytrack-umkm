@@ -4,6 +4,7 @@
  */
 
 import { automationLogger } from './logger'
+import { getErrorMessage } from './type-guards'
 
 // Re-export everything from the new modular automation system
 export {
@@ -193,19 +194,40 @@ export class WorkflowAutomation {
   private async updateInventoryFromOrder(order: any, supabase: any) {
     automationLogger.debug('Updating inventory from order items')
 
-    for (const orderItem of order.order_items || []) {
-      const recipe = orderItem.recipe
+    if (!order || typeof order !== 'object') {
+      automationLogger.error('Invalid order object')
+      return
+    }
+
+    if (!supabase || typeof supabase !== 'object') {
+      automationLogger.error('Invalid supabase client')
+      return
+    }
+
+    const orderObj = order as Record<string, unknown>
+    const supabaseClient = supabase as any // Supabase client typing is complex
+
+    for (const orderItem of (orderObj.order_items as any[]) || []) {
+      const orderItemObj = orderItem as Record<string, unknown>
+      const recipe = orderItemObj.recipe as Record<string, unknown>
+
       if (!recipe || !recipe.recipe_ingredients) continue
 
-      automationLogger.debug('Processing recipe', { recipeName: recipe.name, quantity: orderItem.quantity })
+      automationLogger.debug('Processing recipe', {
+        recipeName: recipe.name,
+        quantity: orderItemObj.quantity
+      })
 
-      for (const recipeIngredient of recipe.recipe_ingredients) {
-        const ingredient = recipeIngredient.ingredient
-        const usedQuantity = recipeIngredient.quantity * orderItem.quantity
-        const newStock = Math.max(0, (ingredient.current_stock ?? 0) - usedQuantity)
+      for (const recipeIngredient of (recipe.recipe_ingredients as any[]) || []) {
+        const recipeIngObj = recipeIngredient as Record<string, unknown>
+        const ingredient = recipeIngObj.ingredient as Record<string, unknown>
+
+        const usedQuantity = Number(recipeIngObj.quantity) * Number(orderItemObj.quantity)
+        const currentStock = Number(ingredient.current_stock || 0)
+        const newStock = Math.max(0, currentStock - usedQuantity)
 
         // Update ingredient stock
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseClient
           .from('ingredients')
           .update({
             current_stock: newStock,
@@ -219,7 +241,7 @@ export class WorkflowAutomation {
         }
 
         // Create stock transaction record
-        await supabase
+        await supabaseClient
           .from('stock_transactions')
           .insert({
             ingredient_id: ingredient.id,
@@ -228,28 +250,29 @@ export class WorkflowAutomation {
             quantity: -usedQuantity, // Negative for usage
             unit: ingredient.unit,
             unit_price: ingredient.price_per_unit,
-            total_value: usedQuantity * ingredient.price_per_unit,
-            reference: `ORDER-${order.order_no}`,
+            total_value: usedQuantity * Number(ingredient.price_per_unit),
+            reference: `ORDER-${orderObj.order_no}`,
             reason: 'Order completion',
-            notes: `Used for order ${order.order_no} - ${recipe.name} (${orderItem.quantity} units)`
+            notes: `Used for order ${orderObj.order_no} - ${recipe.name} (${orderItemObj.quantity} units)`
           })
 
         automationLogger.debug('Updated ingredient stock', {
           name: ingredient.name,
-          oldStock: ingredient.current_stock ?? 0,
+          oldStock: currentStock,
           newStock
         })
 
         // Check for low stock dan trigger alert
-        if (newStock <= (ingredient.min_stock ?? 0) && newStock > 0) {
+        const minStock = Number(ingredient.min_stock || 0)
+        if (newStock <= minStock && newStock > 0) {
           this.triggerEvent({
             event: 'inventory.low_stock',
-            entityId: ingredient.id,
+            entityId: String(ingredient.id),
             data: {
               ingredient,
               currentStock: newStock,
-              minStock: ingredient.min_stock ?? 0,
-              severity: newStock <= ((ingredient.min_stock ?? 0) * 0.5) ? 'critical' : 'warning'
+              minStock,
+              severity: newStock <= (minStock * 0.5) ? 'critical' : 'warning'
             }
           })
         }
@@ -263,28 +286,41 @@ export class WorkflowAutomation {
   private async createFinancialRecordFromOrder(order: any, supabase: any) {
     automationLogger.debug('Creating financial record for completed order')
 
+    if (!order || typeof order !== 'object') {
+      automationLogger.error('Invalid order object')
+      return
+    }
+
+    if (!supabase || typeof supabase !== 'object') {
+      automationLogger.error('Invalid supabase client')
+      return
+    }
+
+    const orderObj = order as Record<string, unknown>
+    const supabaseClient = supabase as any // Supabase client typing is complex
+
     try {
       // Create income record
-      const { error: financialError } = await supabase
+      const { error: financialError } = await supabaseClient
         .from('financial_records')
         .insert({
           type: 'INCOME',
           category: 'Penjualan',
-          amount: order.total_amount,
-          description: `Penjualan - Order ${order.order_no}`,
-          reference: `ORDER-${order.order_no}`,
-          payment_method: order.payment_method || 'CASH',
+          amount: orderObj.total_amount,
+          description: `Penjualan - Order ${orderObj.order_no}`,
+          reference: `ORDER-${orderObj.order_no}`,
+          payment_method: orderObj.payment_method || 'CASH',
           date: new Date().toISOString().split('T')[0], // Today's date
-          order_id: order.id
+          order_id: orderObj.id
         })
 
       if (financialError) {
         automationLogger.error('Error creating financial record', { financialError })
       } else {
-        automationLogger.info('Created financial record', { amount: order.total_amount })
+        automationLogger.info('Created financial record', { amount: orderObj.total_amount })
       }
     } catch (error: unknown) {
-      automationLogger.error('Error in createFinancialRecordFromOrder', { error })
+      automationLogger.error('Error in createFinancialRecordFromOrder', { error: getErrorMessage(error) })
     }
   }
 
@@ -292,23 +328,36 @@ export class WorkflowAutomation {
    * Update customer statistics
    */
   private async updateCustomerStats(order: any, supabase: any) {
-    if (!order.customer_id) return
+    if (!order || typeof order !== 'object') {
+      automationLogger.error('Invalid order object')
+      return
+    }
+
+    const orderObj = order as Record<string, unknown>
+    if (!orderObj.customer_id) return
+
+    if (!supabase || typeof supabase !== 'object') {
+      automationLogger.error('Invalid supabase client')
+      return
+    }
+
+    const supabaseClient = supabase as any // Supabase client typing is complex
 
     automationLogger.debug('Updating customer statistics')
 
     try {
-      const { data: customer } = await supabase
+      const { data: customer } = await supabaseClient
         .from('customers')
         .select('*')
-        .eq('id', order.customer_id)
+        .eq('id', orderObj.customer_id)
         .single()
 
       if (customer) {
-        const newTotalOrders = (customer.total_orders || 0) + 1
-        const newTotalSpent = (customer.total_spent || 0) + order.total_amount
+        const newTotalOrders = (Number(customer.total_orders) || 0) + 1
+        const newTotalSpent = (Number(customer.total_spent) || 0) + Number(orderObj.total_amount)
         const newAverageOrderValue = newTotalSpent / newTotalOrders
 
-        await supabase
+        await supabaseClient
           .from('customers')
           .update({
             total_orders: newTotalOrders,
@@ -317,16 +366,16 @@ export class WorkflowAutomation {
             last_order_date: new Date().toISOString().split('T')[0],
             updated_at: new Date().toISOString()
           })
-          .eq('id', order.customer_id)
+          .eq('id', orderObj.customer_id)
 
         automationLogger.info('Updated customer stats', {
-          customerId: order.customer_id,
+          customerId: orderObj.customer_id,
           totalOrders: newTotalOrders,
           totalSpent: newTotalSpent
         })
       }
     } catch (error: unknown) {
-      automationLogger.error('Error updating customer stats', { error })
+      automationLogger.error('Error updating customer stats', { error: getErrorMessage(error) })
     }
   }
 
@@ -335,9 +384,18 @@ export class WorkflowAutomation {
    * Otomatis: send alert, suggest reorder
    */
   private async handleLowStock(event: WorkflowEventData) {
-    const ingredient = event.data.ingredient
-    const currentStock = event.data.currentStock
-    const severity = event.data.severity
+    if (!event.data || typeof event.data !== 'object') {
+      automationLogger.error('Invalid event data for low stock', { event })
+      return
+    }
+
+    const data = event.data as {
+      ingredient: { name: string; unit: string; min_stock?: number }
+      currentStock: number
+      severity: string
+    }
+
+    const { ingredient, currentStock, severity } = data
 
     automationLogger.warn('Low stock alert', {
       ingredientName: ingredient.name,
@@ -352,7 +410,7 @@ export class WorkflowAutomation {
 
     // Auto-generate reorder suggestion
     const suggestedQuantity = Math.max(
-      ingredient.min_stock ?? 0 * 2, // 2x minimum stock
+      (ingredient.min_stock ?? 0) * 2, // 2x minimum stock
       50 // Minimum reorder quantity
     )
 
@@ -378,7 +436,20 @@ export class WorkflowAutomation {
    * Otomatis: trigger HPP recalculation, update pricing suggestions
    */
   private async handleIngredientPriceChanged(event: WorkflowEventData) {
-    const { ingredientId, oldPrice, newPrice, priceChange, affectedRecipes } = event.data
+    if (!event.data || typeof event.data !== 'object') {
+      automationLogger.error('Invalid event data for ingredient price change', { event })
+      return
+    }
+
+    const data = event.data as {
+      ingredientId: string
+      oldPrice: number
+      newPrice: number
+      priceChange: number
+      affectedRecipes?: string[]
+    }
+
+    const { ingredientId, oldPrice, newPrice, priceChange, affectedRecipes } = data
 
     automationLogger.info('Processing ingredient price change workflow', {
       ingredientId,
@@ -435,7 +506,19 @@ export class WorkflowAutomation {
    * Otomatis: recalculate all HPP, update pricing across all recipes
    */
   private async handleOperationalCostChanged(event: WorkflowEventData) {
-    const { costId, costName, oldAmount, newAmount } = event.data
+    if (!event.data || typeof event.data !== 'object') {
+      automationLogger.error('Invalid event data for operational cost change', { event })
+      return
+    }
+
+    const data = event.data as {
+      costId: string
+      costName: string
+      oldAmount: number
+      newAmount: number
+    }
+
+    const { costId, costName, oldAmount, newAmount } = data
 
     automationLogger.info('Processing operational cost change workflow', {
       costName,
@@ -481,9 +564,19 @@ export class WorkflowAutomation {
    * Otomatis: batch recalculate HPP, generate business insights
    */
   private async handleHPPRecalculationNeeded(event: WorkflowEventData) {
-    const { reason, affectedRecipes } = event.data
+    if (!event.data || typeof event.data !== 'object') {
+      automationLogger.error('Invalid event data for HPP recalculation', { event })
+      return
+    }
 
-    automationLogger.info('Processing HPP recalculation workflow', { reason });
+    const data = event.data as {
+      reason: string
+      affectedRecipes?: unknown[]
+    }
+
+    const { reason, affectedRecipes } = data
+
+    automationLogger.info('Processing HPP recalculation workflow', { reason })
 
     try {
       // Import smart notification system
@@ -517,7 +610,7 @@ export class WorkflowAutomation {
         this.generateHPPBusinessInsights(affectedRecipes || [])
       }, 10000) // 10 second simulation
     } catch (error: unknown) {
-      automationLogger.debug('Smart notification system not available', { error })
+      automationLogger.debug('Smart notification system not available', { error: getErrorMessage(error) })
     }
   }
 
@@ -567,7 +660,7 @@ export const workflowAutomation = WorkflowAutomation.getInstance()
 export const triggerWorkflow = async (
   event: WorkflowEvent,
   entityId: string,
-  data: any = {}
+  data: Record<string, unknown> = {}
 ) => {
   return workflowAutomation.triggerEvent({
     event,

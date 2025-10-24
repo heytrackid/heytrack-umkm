@@ -14,6 +14,7 @@ import { Order, OrderFormData, Priority } from './types'
 import { generateOrderNumber, calculateOrderTotal, validateOrderData } from './utils'
 import { useCurrency } from '@/hooks/useCurrency'
 
+import { apiLogger } from '@/lib/logger'
 interface OrderFormProps {
   order?: Order // For editing existing order
   onSave: (orderData: OrderFormData) => void
@@ -84,8 +85,8 @@ export default function OrderForm({
         const data = await response.json()
         setRecipes(data)
       }
-    } catch (error: any) {
-      console.error('Error fetching recipes:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error fetching recipes:')
     }
   }
 

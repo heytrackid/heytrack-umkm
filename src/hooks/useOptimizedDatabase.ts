@@ -10,13 +10,13 @@ import { enhancedApiClient } from '@/lib/enhanced-api'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 // Cache for hook results to prevent unnecessary re-renders
-const hookCache = new Map<string, any>()
+const hookCache = new Map<string, unknown>()
 
 /**
  * @deprecated Use useIngredients from @/hooks/useSupabase with useMemo for computed values
  */
 export function useOptimizedIngredients() {
-  const [data, setData] = useState<any[] | null>(null)
+  const [data, setData] = useState<unknown[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const lastFetchTime = useRef<number>(0)
@@ -89,7 +89,7 @@ export function useOptimizedIngredients() {
 
 // Optimized recipes hook
 export function useOptimizedRecipes() {
-  const [data, setData] = useState<any[] | null>(null)
+  const [data, setData] = useState<unknown[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const lastFetchTime = useRef<number>(0)
@@ -156,7 +156,7 @@ export function useOptimizedRecipes() {
 
 // Optimized orders hook with pagination
 export function useOptimizedOrders(limit: number = 50) {
-  const [data, setData] = useState<any[] | null>(null)
+  const [data, setData] = useState<unknown[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const lastFetchTime = useRef<number>(0)
@@ -239,7 +239,7 @@ export function useOptimizedOrders(limit: number = 50) {
 
 // Optimized customers hook
 export function useOptimizedCustomers() {
-  const [data, setData] = useState<any[] | null>(null)
+  const [data, setData] = useState<unknown[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const lastFetchTime = useRef<number>(0)

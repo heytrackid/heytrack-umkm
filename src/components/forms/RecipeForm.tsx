@@ -29,7 +29,7 @@ export const RecipeForm = memo(function RecipeForm({ initialData, onSubmit, isLo
   const { toast } = useToast()
   
   const form = useForm<RecipeFormData>({
-    resolver: zodResolver(RecipeSchema) as any,
+    resolver: zodResolver(RecipeSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
@@ -66,7 +66,7 @@ export const RecipeForm = memo(function RecipeForm({ initialData, onSubmit, isLo
       if (!initialData) {
         form.reset()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan resep',

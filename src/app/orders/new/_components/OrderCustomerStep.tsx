@@ -8,7 +8,7 @@ import { OrderFormData } from '../hooks/useOrderLogic'
 
 interface OrderCustomerStepProps {
   formData: OrderFormData
-  customers: any[]
+  customers: unknown[]
   onInputChange: (field: keyof OrderFormData, value: any) => void
   onSelectCustomer: (customer: any) => void
 }

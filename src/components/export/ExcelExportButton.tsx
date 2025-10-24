@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { apiLogger } from '@/lib/logger'
 import {
     AlertCircle,
     BarChart3,
@@ -69,8 +70,8 @@ const ExcelExportButton = memo(function ExcelExportButton({
         setIsDialogOpen(false)
         setExportStatus('idle')
       }, 2000)
-    } catch (error: any) {
-      console.error('Export failed:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Export failed:')
       setExportStatus('error')
     } finally {
       setIsExporting(false)

@@ -2,6 +2,7 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { HPPTrendData, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/trends - Get HPP trend data for multiple recipes
 export async function GET(request: NextRequest) {
     try {
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
             .in('id', recipeIds)
 
         if (recipesError) {
-            console.error('Error fetching recipes:', recipesError)
+            apiLogger.error({ error: recipesError }, 'Error fetching recipes:')
             return NextResponse.json(
                 { error: 'Failed to fetch recipes', details: recipesError.message },
                 { status: 500 }
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
             .order('snapshot_date', { ascending: true })
 
         if (snapshotsError) {
-            console.error('Error fetching snapshots:', snapshotsError)
+            apiLogger.error({ error: snapshotsError }, 'Error fetching snapshots:')
             return NextResponse.json(
                 { error: 'Failed to fetch snapshots', details: snapshotsError.message },
                 { status: 500 }
@@ -103,8 +104,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in trends endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in trends endpoint:')
         return NextResponse.json(
             { error: 'Internal server error', details: error.message },
             { status: 500 }

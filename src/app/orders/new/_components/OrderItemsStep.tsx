@@ -9,7 +9,7 @@ import { OrderItem } from '../hooks/useOrderLogic'
 
 interface OrderItemsStepProps {
   orderItems: OrderItem[]
-  availableRecipes: any[]
+  availableRecipes: unknown[]
   subtotal: number
   onAddItem: () => void
   onUpdateItem: (index: number, field: keyof OrderItem, value: any) => void

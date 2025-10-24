@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 /**
  * Centralized Error Handling Utility
  *
@@ -14,7 +15,7 @@ export interface ErrorContext {
     username?: string
   }
   tags?: Record<string, string>
-  extra?: Record<string, any>
+  extra?: Record<string, unknown>
   level?: ErrorSeverity
 }
 
@@ -28,15 +29,14 @@ export function captureError(
   const errorObj = error instanceof Error ? error : new Error(error)
   const timestamp = new Date().toISOString()
 
-  console.error(`[${timestamp}] Error captured:`, {
-    error: {
-      message: errorObj.message,
-      stack: errorObj.stack,
-      name: errorObj.name,
-    },
-    context,
-    level: context?.level || 'error',
-  })
+  apiLogger.error({ message: `[${timestamp}] Error captured:`, error: {
+    message: errorObj.message,
+    stack: errorObj.stack,
+    name: errorObj.name,
+  },
+  context,
+  level: context?.level || 'error',
+}, 'Console error replaced with logger')
 }
 
 /**
@@ -49,7 +49,7 @@ export function captureMessage(
 ): void {
   const timestamp = new Date().toISOString()
 
-  console.log(`[${timestamp}] [${level.toUpperCase()}]`, message, context)
+  // apiLogger.info(`[${timestamp}] [${level.toUpperCase()}]`, message, context)
 }
 
 /**
@@ -61,7 +61,7 @@ export function setUser(user: {
   username?: string
 } | null): void {
   // User context not available without Sentry
-  console.log('User context set:', user)
+  // apiLogger.info({ params: user }, 'User context set:')
 }
 
 /**
@@ -70,28 +70,28 @@ export function setUser(user: {
 export function addBreadcrumb(
   message: string,
   category?: string,
-  data?: Record<string, any>
+  data?: Record<string, unknown>
 ): void {
   const timestamp = new Date().toISOString()
 
-  console.log(`[${timestamp}] Breadcrumb:`, {
-    message,
-    category: category || 'app',
-    data,
-  })
+  // apiLogger.info(`[${timestamp}] Breadcrumb:`, {
+  //   message,
+  //   category: category || 'app',
+  //   data,
+  // })
 }
 
 /**
  * Wrap async function with error handling
  */
-export function withErrorHandler<T extends (...args: any[]) => Promise<any>>(
+export function withErrorHandler<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   context?: ErrorContext
 ): T {
   return (async (...args: Parameters<T>) => {
     try {
       return await fn(...args)
-    } catch (error: any) {
+    } catch (error: unknown) {
       captureError(error as Error, context)
       throw error
     }
@@ -102,7 +102,7 @@ export function withErrorHandler<T extends (...args: any[]) => Promise<any>>(
  * API Error Handler - Use in API routes
  */
 export function handleApiError(
-  error: unknown,
+  error: any,
   context?: ErrorContext
 ): { error: string; statusCode: number } {
   const errorMessage =
@@ -165,7 +165,7 @@ export async function trackPerformance<T>(
     }
 
     return result
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = Date.now() - startTime
     captureError(error as Error, {
       extra: {

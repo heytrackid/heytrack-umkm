@@ -148,7 +148,7 @@ export class NetworkError extends AppError {
  * @param error - Error to handle
  * @returns Normalized AppError
  */
-export function handleError(error: unknown): AppError {
+export function handleError(error: any): AppError {
   // If already AppError, return as is
   if (error instanceof AppError) {
     return error
@@ -182,7 +182,7 @@ export function handleError(error: unknown): AppError {
  * @param error - Error to get message from
  * @returns User-friendly message
  */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(error: any): string {
   if (error instanceof AppError) {
     return error.message
   }

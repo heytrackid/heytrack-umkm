@@ -92,7 +92,7 @@ export const SmartRecipeLoader = ({
   userRole: 'admin' | 'manager' | 'staff'
   recipeId: string
   recipeName: string
-  [key: string]: any
+  [key: string]: unknown
 }) => {
   // Load different components based on user permissions
   const showAdvancedFeatures = userRole === 'admin' || userRole === 'manager'

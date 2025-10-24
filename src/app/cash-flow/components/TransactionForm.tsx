@@ -18,16 +18,17 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
-import { incomeCategories, expenseCategories, type TransactionFormData } from '../constants'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FinancialRecordSchema, type ExpenseForm } from '@/lib/validations/form-validations'
+import { incomeCategories, expenseCategories } from '../constants'
 
 interface TransactionFormProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   transactionType: 'income' | 'expense'
   onTransactionTypeChange: (type: 'income' | 'expense') => void
-  formData: TransactionFormData
-  onFormDataChange: (data: TransactionFormData) => void
-  onSubmit: () => void
+  onSubmit: (data: ExpenseForm) => void
   loading: boolean
 }
 
@@ -36,27 +37,30 @@ export default function TransactionForm({
   onOpenChange,
   transactionType,
   onTransactionTypeChange,
-  formData,
-  onFormDataChange,
   onSubmit,
   loading
 }: TransactionFormProps) {
-  const categories = transactionType === 'income' ? incomeCategories : expenseCategories
+  const form = useForm<ExpenseForm>({
+    resolver: zodResolver(FinancialRecordSchema),
+    defaultValues: {
+      amount: 0,
+      category: '',
+      description: '',
+      expense_date: new Date().toISOString().split('T')[0],
+      payment_method: 'CASH',
+      is_recurring: false
+    }
+  })
 
-  const handleInputChange = (field: keyof TransactionFormData, value: string) => {
-    onFormDataChange({
-      ...formData,
-      [field]: value
-    })
-  }
+  const categories = transactionType === 'income' ? incomeCategories : expenseCategories
 
   const handleTransactionTypeChange = (value: 'income' | 'expense') => {
     onTransactionTypeChange(value)
-    // Reset category when type changes
-    onFormDataChange({
-      ...formData,
-      category: ''
-    })
+    form.setValue('category', '')
+  }
+
+  const handleSubmit = (data: ExpenseForm) => {
+    onSubmit(data)
   }
 
   return (
@@ -65,7 +69,7 @@ export default function TransactionForm({
         <DialogHeader>
           <DialogTitle>Tambah Transaksi Baru</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label>Tipe Transaksi</Label>
             <Select
@@ -95,8 +99,8 @@ export default function TransactionForm({
           <div className="space-y-2">
             <Label>Kategori</Label>
             <Select
-              value={formData.category}
-              onValueChange={(value) => handleInputChange('category', value)}
+              value={form.watch('category')}
+              onValueChange={(value) => form.setValue('category', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Pilih kategori" />
@@ -107,41 +111,50 @@ export default function TransactionForm({
                 ))}
               </SelectContent>
             </Select>
+            {form.formState.errors.category && (
+              <p className="text-sm text-red-600">{form.formState.errors.category.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label>Deskripsi</Label>
             <Textarea
+              {...form.register('description')}
               placeholder="Contoh: Pembelian tepung terigu 10kg"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
             />
+            {form.formState.errors.description && (
+              <p className="text-sm text-red-600">{form.formState.errors.description.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label>Jumlah (Rp)</Label>
             <Input
               type="number"
+              {...form.register('amount', { valueAsNumber: true })}
               placeholder="0"
-              value={formData.amount}
-              onChange={(e) => handleInputChange('amount', e.target.value)}
             />
+            {form.formState.errors.amount && (
+              <p className="text-sm text-red-600">{form.formState.errors.amount.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label>Tanggal</Label>
             <Input
               type="date"
-              value={formData.date}
-              onChange={(e) => handleInputChange('date', e.target.value)}
+              {...form.register('expense_date')}
             />
+            {form.formState.errors.expense_date && (
+              <p className="text-sm text-red-600">{form.formState.errors.expense_date.message}</p>
+            )}
           </div>
-        </div>
+        </form>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Batal
           </Button>
-          <Button onClick={onSubmit} disabled={loading}>
+          <Button onClick={form.handleSubmit(handleSubmit)} disabled={loading}>
             {loading ? 'Menyimpan...' : 'Simpan Transaksi'}
           </Button>
         </DialogFooter>

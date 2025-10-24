@@ -3,9 +3,20 @@
  * Otomatis generate production schedules berdasarkan pending orders dan stock levels
  */
 
-import { smartNotificationSystem } from './smart-notifications'
 import { workflowAutomation } from './automation-engine'
+import { smartNotificationSystem } from './smart-notifications'
 
+import { apiLogger } from '@/lib/logger'
+import type { IngredientsTable } from '@/types/inventory'
+import type { OrderItemsTable, OrdersTable } from '@/types/orders'
+import type { RecipeIngredientsTable, RecipesTable } from '@/types/recipes'
+
+// Type aliases for cleaner code
+type Order = OrdersTable['Row'] & { order_items?: OrderItem[] }
+type OrderItem = OrderItemsTable['Row']
+type Ingredient = IngredientsTable['Row']
+type Recipe = RecipesTable['Row'] & { recipe_ingredients?: RecipeIngredient[] }
+type RecipeIngredient = RecipeIngredientsTable['Row']
 export interface ProductionTask {
   id: string
   orderId: string
@@ -59,7 +70,7 @@ export class ProductionPlanningSystem {
   private workingHoursEnd = 20   // 8 PM
   private maxDailyWorkload = 12  // 12 hours max capacity per day
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): ProductionPlanningSystem {
     if (!ProductionPlanningSystem.instance) {
@@ -71,16 +82,16 @@ export class ProductionPlanningSystem {
   /**
    * Generate production schedule untuk orders yang pending
    */
-  async generateProductionSchedule(orders: unknown[], ingredients: unknown[], recipes: unknown[]): Promise<ProductionSchedule[]> {
-    console.log('🏭 Generating production schedule...')
+  async generateProductionSchedule(orders: Order[], ingredients: Ingredient[], recipes: Recipe[]): Promise<ProductionSchedule[]> {
+    apiLogger.info('🏭 Generating production schedule...')
 
     // Filter orders yang perlu diproduksi
-    const productionOrders = orders.filter(order => 
+    const productionOrders = orders.filter(order =>
       ['CONFIRMED', 'IN_PROGRESS'].includes(order.status) &&
       order.delivery_date
     )
 
-    console.log(`Found ${productionOrders.length} orders for production planning`)
+    apiLogger.info(`Found ${productionOrders.length} orders for production planning`)
 
     // Group orders by delivery date
     const ordersByDate = this.groupOrdersByDeliveryDate(productionOrders)
@@ -104,10 +115,10 @@ export class ProductionPlanningSystem {
    * Generate schedule untuk satu hari
    */
   private async generateDailySchedule(
-    dateStr: string, 
-    orders: unknown[], 
-    ingredients: unknown[], 
-    recipes: unknown[]
+    dateStr: string,
+    orders: Order[],
+    ingredients: Ingredient[],
+    recipes: Recipe[]
   ): Promise<ProductionSchedule> {
     const date = new Date(dateStr)
     const tasks: ProductionTask[] = []
@@ -153,21 +164,21 @@ export class ProductionPlanningSystem {
   /**
    * Create production task dari order item
    */
-  private createProductionTask(order: any, orderItem: any, recipe: any, ingredients: unknown[]): ProductionTask {
+  private createProductionTask(order: Order, orderItem: OrderItem, recipe: Recipe, ingredients: Ingredient[]): ProductionTask {
     const batchSize = recipe.servings || 1
     const batchCount = Math.ceil(orderItem.quantity / batchSize)
-    
+
     // Calculate estimated duration
     const prepTime = (recipe.prep_time || 30) / 60 // Convert to hours
     const cookTime = (recipe.cook_time || 45) / 60 // Convert to hours
     const estimatedDuration = (prepTime + cookTime) * batchCount
 
     // Calculate ingredient requirements
-    const ingredientRequirements = (recipe.recipe_ingredients || []).map((ri: unknown) => {
+    const ingredientRequirements = (recipe.recipe_ingredients || []).map((ri: RecipeIngredient) => {
       const ingredient = ingredients.find(ing => ing.id === ri.ingredient_id)
       const requiredQuantity = ri.quantity * orderItem.quantity
       const availableQuantity = ingredient?.current_stock || 0
-      
+
       return {
         ingredientId: ri.ingredient_id,
         ingredientName: ingredient?.name || 'Unknown',
@@ -256,16 +267,16 @@ export class ProductionPlanningSystem {
   /**
    * Find schedule conflicts
    */
-  private findScheduleConflicts(tasks: ProductionTask[], ingredients: unknown[]): ProductionSchedule['conflicts'] {
+  private findScheduleConflicts(tasks: ProductionTask[], ingredients: Ingredient[]): ProductionSchedule['conflicts'] {
     const conflicts: ProductionSchedule['conflicts'] = []
 
     // Check ingredient shortages
     const ingredientUsage = new Map<string, number>()
-    
+
     for (const task of tasks) {
       for (const req of task.ingredientRequirements) {
-        const currentUsage = ingredientUsage.get(key) || 0
-        ingredientUsage.set(req.ingredientId, currentUsage + req.quantity)
+        const currentUsage = ingredientUsage.get(req.ingredientId) || 0
+        ingredientUsage.set(req.ingredientId, currentUsage + req.requiredQuantity)
       }
     }
 
@@ -284,7 +295,7 @@ export class ProductionPlanningSystem {
 
     // Check time overlaps (if multiple production lines)
     // Simplified - in real app would check equipment availability
-    
+
     return conflicts
   }
 
@@ -296,9 +307,9 @@ export class ProductionPlanningSystem {
 
     // Find tasks dengan recipe yang sama yang bisa di-batch
     const recipeGroups = new Map<string, ProductionTask[]>()
-    
+
     tasks.forEach(task => {
-      const existing = recipeGroups.get(key) || []
+      const existing = recipeGroups.get(task.recipeId) || []
       recipeGroups.set(task.recipeId, [...existing, task])
     })
 
@@ -324,14 +335,14 @@ export class ProductionPlanningSystem {
   /**
    * Group orders by delivery date
    */
-  private groupOrdersByDeliveryDate(orders: unknown[]): Map<string, unknown[]> {
-    const grouped = new Map<string, unknown[]>()
+  private groupOrdersByDeliveryDate(orders: Order[]): Map<string, Order[]> {
+    const grouped = new Map<string, Order[]>()
 
     orders.forEach(order => {
       if (!order.delivery_date) return
 
       const deliveryDate = new Date(order.delivery_date).toISOString().split('T')[0]
-      const existing = grouped.get(key) || []
+      const existing = grouped.get(deliveryDate) || []
       grouped.set(deliveryDate, [...existing, order])
     })
 
@@ -374,7 +385,7 @@ export class ProductionPlanningSystem {
       // Optimization opportunities
       if (schedule.optimizations.length > 0) {
         const totalTimeSaved = schedule.optimizations.reduce((sum, opt) => sum + opt.timeSaved, 0)
-        
+
         smartNotificationSystem.addNotification({
           type: 'info',
           category: 'production',
@@ -392,7 +403,7 @@ export class ProductionPlanningSystem {
    * Get schedule for specific date
    */
   getScheduleForDate(date: string): ProductionSchedule | undefined {
-    return this.schedules.get(key)
+    return this.schedules.get(date)
   }
 
   /**
@@ -414,7 +425,7 @@ export class ProductionPlanningSystem {
         const previousStatus = task.status
         task.status = status
 
-        console.log(`🔄 Production task ${task.recipeName}: ${previousStatus} → ${status}`)
+        apiLogger.info(`🔄 Production task ${task.recipeName}: ${previousStatus} → ${status}`)
 
         // Trigger workflow automation for completed tasks
         if (status === 'completed' && previousStatus !== 'completed') {
@@ -451,11 +462,11 @@ export class ProductionPlanningSystem {
    * Auto-reschedule berdasarkan perubahan kondisi
    */
   async autoReschedule(triggeredBy: 'inventory_update' | 'order_change' | 'delay') {
-    console.log(`🔄 Auto-rescheduling production due to: ${triggeredBy}`)
-    
+    apiLogger.info(`🔄 Auto-rescheduling production due to: ${triggeredBy}`)
+
     // Mark schedules as needing update
     // In real implementation, would re-run scheduling algorithm
-    
+
     smartNotificationSystem.addNotification({
       type: 'info',
       category: 'production',
@@ -472,7 +483,7 @@ export class ProductionPlanningSystem {
 export const productionPlanning = ProductionPlanningSystem.getInstance()
 
 // Helper functions untuk integrasi dengan komponen lain
-export const generateProductionSchedule = async (orders: unknown[], ingredients: unknown[], recipes: unknown[]) => {
+export const generateProductionSchedule = async (orders: Order[], ingredients: Ingredient[], recipes: Recipe[]) => {
   return productionPlanning.generateProductionSchedule(orders, ingredients, recipes)
 }
 

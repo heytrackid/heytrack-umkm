@@ -2,6 +2,7 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { CostBreakdown, HPPRecommendation } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/recommendations - Get HPP optimization recommendations
 export async function GET(request: NextRequest) {
     try {
@@ -34,8 +35,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in recommendations endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in recommendations endpoint:')
         return NextResponse.json(
             { error: 'Failed to generate recommendations', details: error.message },
             { status: 500 }
@@ -51,7 +52,7 @@ async function getAllRecipeIds(supabase: any): Promise<string[]> {
         .limit(20) // Limit to prevent performance issues
 
     if (error) {
-        console.error('Error fetching recipes:', error)
+        apiLogger.error({ error: error }, 'Error fetching recipes:')
         return []
     }
 

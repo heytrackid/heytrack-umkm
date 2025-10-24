@@ -203,7 +203,7 @@ Jangan sampai terlewat ya! Order sekarang:
   }
 
   // Generate message from template
-  generateMessage(templateId: string, data: Record<string, any>): string {
+  generateMessage(templateId: string, data: Record<string, unknown>): string {
     const template = WhatsAppService.getDefaultTemplates().find(t => t.id === templateId);
     if (!template) {
       throw new Error(`Template ${templateId} not found`);
@@ -319,7 +319,7 @@ Jangan sampai terlewat ya! Order sekarang:
   }
 
   // Custom template generator
-  generateCustomMessage(templateId: string, data: Record<string, any>, phoneNumber: string): {
+  generateCustomMessage(templateId: string, data: Record<string, unknown>, phoneNumber: string): {
     message: string;
     whatsappURL: string;
     businessURL: string;

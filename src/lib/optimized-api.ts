@@ -140,20 +140,20 @@ class OptimizedAPIClient {
 
   // Optimized endpoints
   async getIngredients() {
-    return this.fetch<any[]>('/api/ingredients', {}, { ttl: 2 * 60 * 1000 }) // 2 minutes cache
+    return this.fetch<unknown[]>('/api/ingredients', {}, { ttl: 2 * 60 * 1000 }) // 2 minutes cache
   }
 
   async getRecipes() {
-    return this.fetch<any[]>('/api/recipes', {}, { ttl: 5 * 60 * 1000 }) // 5 minutes cache
+    return this.fetch<unknown[]>('/api/recipes', {}, { ttl: 5 * 60 * 1000 }) // 5 minutes cache
   }
 
   async getOrders(limit?: number) {
     const url = limit ? `/api/orders?limit=${limit}` : '/api/orders'
-    return this.fetch<any[]>(url, {}, { ttl: 1 * 60 * 1000 }) // 1 minute cache for orders
+    return this.fetch<unknown[]>(url, {}, { ttl: 1 * 60 * 1000 }) // 1 minute cache for orders
   }
 
   async getCustomers() {
-    return this.fetch<any[]>('/api/customers', {}, { ttl: 3 * 60 * 1000 }) // 3 minutes cache
+    return this.fetch<unknown[]>('/api/customers', {}, { ttl: 3 * 60 * 1000 }) // 3 minutes cache
   }
 
   // Mutation methods with cache invalidation
@@ -230,7 +230,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 export function useOptimizedAPI<T>(
   apiCall: () => Promise<T>,
-  deps: any[] = [],
+  deps: unknown[] = [],
   options?: {
     autoFetch?: boolean
     onError?: (error: Error) => void

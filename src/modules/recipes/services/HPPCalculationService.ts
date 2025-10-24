@@ -107,7 +107,7 @@ export class HPPCalculationService {
         suggestedPricing,
         profitability
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'HPP Calculation Service Error')
       throw new Error(`Failed to calculate HPP: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
@@ -193,7 +193,7 @@ export class HPPCalculationService {
 
       if (error) throw error
       return true
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Update recipe price error')
       throw error
     }
@@ -214,7 +214,7 @@ export class HPPCalculationService {
         costTrends: costHistory,
         performance: this.calculateRecipePerformance(salesData, productionData)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Recipe analytics error')
       throw error
     }
@@ -259,7 +259,7 @@ export class HPPCalculationService {
     return []
   }
 
-  private static calculateRecipePerformance(salesData: any[], productionData: any[]) {
+  private static calculateRecipePerformance(salesData: unknown[], productionData: unknown[]) {
     const totalRevenue = salesData.reduce((sum, item) => sum + (item.quantity * item.price), 0)
     const totalQuantitySold = salesData.reduce((sum, item) => sum + item.quantity, 0)
     const totalProduced = productionData.reduce((sum, batch) => sum + batch.batch_size, 0)

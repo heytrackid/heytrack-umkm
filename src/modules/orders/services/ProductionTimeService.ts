@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -22,7 +23,7 @@ export class ProductionTimeService {
       const recipeIds = items.map(item => item.recipe_id)
       const { data: recipes, error } = await supabase
         .from('recipes')
-        .select('*')
+        .select('id, prep_time, cook_time')
         .in('id', recipeIds)
 
       if (error) throw error
@@ -32,10 +33,10 @@ export class ProductionTimeService {
       let max_single_recipe_time = 0
 
       items.forEach(item => {
-        const recipe = recipes?.find(r => r.id === item.recipe_id)
+        const recipe = recipes?.find((r: any) => r.id === item.recipe_id) as any
         if (recipe) {
-          const prep_time = (recipe.prep_time || 0) * item.quantity
-          const cook_time = (recipe.cook_time || 0) * item.quantity
+          const prep_time = ((recipe.prep_time as number | null) ?? 0) * item.quantity
+          const cook_time = ((recipe.cook_time as number | null) ?? 0) * item.quantity
 
           total_prep_time += prep_time
           total_cook_time += cook_time
@@ -62,7 +63,7 @@ export class ProductionTimeService {
         estimated_completion,
         parallel_processing_time
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error calculating production time')
       return {
         total_prep_time: 0,

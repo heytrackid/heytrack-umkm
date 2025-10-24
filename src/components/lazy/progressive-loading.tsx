@@ -100,8 +100,8 @@ export const ProgressiveDataTable = ({
   pageSize = 10,
   virtualizeThreshold = 100
 }: {
-  data: any[]
-  columns: any[]
+  data: unknown[]
+  columns: unknown[]
   pageSize?: number
   virtualizeThreshold?: number
 }) => {
@@ -220,7 +220,7 @@ export const StatsCardSkeleton = () => (
 )
 
 // Virtual table loader for heavy datasets
-const VirtualizedTableLoader = ({ data, columns }: any) => {
+const VirtualizedTableLoader = ({ ...props }: { [key: string]: unknown }) => {
   // Simulate heavy data processing
   return (
     <div className="p-4 border rounded-lg bg-muted/50">
@@ -233,7 +233,7 @@ const VirtualizedTableLoader = ({ data, columns }: any) => {
 }
 
 // Simple table view for smaller datasets
-const SimpleTableView = ({ data, columns }: any) => (
+const SimpleTableView = ({ ...props }: { [key: string]: unknown }) => (
   <div className="overflow-x-auto">
     <table className="w-full border-collapse">
       <thead>
@@ -295,7 +295,7 @@ export const ProgressiveImage = ({
 // Hook untuk progressive data loading
 export function useProgressiveData<T>(
   fetchFunction: () => Promise<T>,
-  deps: any[] = []
+  deps: unknown[] = []
 ) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)

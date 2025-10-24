@@ -1,6 +1,7 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/alerts - List HPP alerts with filters
 export async function GET(request: NextRequest) {
     try {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
         const { data: alerts, error, count } = await query
 
         if (error) {
-            console.error('Error fetching alerts:', error)
+            apiLogger.error({ error: error }, 'Error fetching alerts:')
             return NextResponse.json(
                 { error: 'Failed to fetch alerts', details: error.message },
                 { status: 500 }
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
             .eq('is_dismissed', false)
 
         if (unreadError) {
-            console.error('Error fetching unread count:', unreadError)
+            apiLogger.error({ error: unreadError }, 'Error fetching unread count:')
         }
 
         return NextResponse.json({
@@ -63,8 +64,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in alerts endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in alerts endpoint:')
         return NextResponse.json(
             { error: 'Internal server error', details: error.message },
             { status: 500 }

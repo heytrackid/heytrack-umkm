@@ -28,7 +28,7 @@ export const CustomerInsertSchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
   is_active: z.boolean().default(true).optional().nullable(),
   loyalty_points: NonNegativeNumberSchema.default(0).optional().nullable(),
-  favorite_items: z.any().optional().nullable(),
+  favorite_items: z.array(z.string()).optional().nullable(), // Array of item IDs
 })
 
 export const CustomerUpdateSchema = CustomerInsertSchema.partial()
@@ -96,7 +96,14 @@ export const IngredientInsertSchema = z.object({
   description: z.string().max(500).optional().nullable(),
   storage_location: z.string().max(100).optional().nullable(),
   expiry_date: DateStringSchema.optional().nullable(),
-  nutritional_info: z.any().optional().nullable(),
+  nutritional_info: z.object({
+    calories: z.number().optional(),
+    protein: z.number().optional(),
+    carbs: z.number().optional(),
+    fat: z.number().optional(),
+    fiber: z.number().optional(),
+    sugar: z.number().optional(),
+  }).optional().nullable(),
 })
 
 export const IngredientUpdateSchema = IngredientInsertSchema.partial()
@@ -122,7 +129,14 @@ export const RecipeInsertSchema = z.object({
   profit_margin: NonNegativeNumberSchema.optional().nullable(),
   is_active: z.boolean().default(true),
   image_url: z.string().url().optional().nullable(),
-  nutritional_info: z.any().optional().nullable(),
+  nutritional_info: z.object({
+    calories: z.number().optional(),
+    protein: z.number().optional(),
+    carbs: z.number().optional(),
+    fat: z.number().optional(),
+    fiber: z.number().optional(),
+    sugar: z.number().optional(),
+  }).optional().nullable(),
 }).refine((data) => {
   if (data.cost_price && data.selling_price) {
     return data.selling_price >= data.cost_price
@@ -174,8 +188,8 @@ export const ExpenseInsertSchema = z.object({
   recurring_frequency: z.string().max(50).optional().nullable(),
   status: z.string().max(50).optional().nullable(),
   subcategory: z.string().max(100).optional().nullable(),
-  tags: z.any().optional().nullable(),
-  metadata: z.any().optional().nullable(),
+  tags: z.array(z.string()).optional().nullable(), // Array of tag strings
+  metadata: z.record(z.unknown()).optional().nullable(), // Generic metadata object
   reference_type: z.string().max(50).optional().nullable(),
   reference_id: UUIDSchema.optional().nullable(),
 })

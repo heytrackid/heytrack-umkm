@@ -16,7 +16,8 @@ export interface HPPSnapshot {
 
 export interface CostBreakdown {
     ingredients: IngredientCost[]
-    operational: OperationalCost[]
+    operational?: OperationalCost[]
+    operational_costs?: OperationalCost[] // Alternative field name used in some contexts
 }
 
 export interface IngredientCost {

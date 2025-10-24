@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { CustomerInsertSchema, PaginationQuerySchema } from '@/lib/validations'
+import { CustomerInsertSchema } from '@/lib/validations/database-validations'
+import { getErrorMessage } from '@/lib/type-guards'
+
+import { apiLogger } from '@/lib/logger'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
@@ -12,7 +15,7 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Unauthorized access to GET /api/customers')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -21,23 +24,12 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
 
-    // Validate query parameters
-    const queryValidation = PaginationQuerySchema.safeParse({
-      page: searchParams.get('page'),
-      limit: searchParams.get('limit'),
-      search: searchParams.get('search'),
-      sort_by: searchParams.get('sort_by'),
-      sort_order: searchParams.get('sort_order'),
-    })
-
-    if (!queryValidation.success) {
-      return NextResponse.json(
-        { error: 'Invalid query parameters', details: queryValidation.error.issues },
-        { status: 400 }
-      )
-    }
-
-    const { page, limit, search, sort_by, sort_order } = queryValidation.data
+    // Parse query parameters with defaults
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    const search = searchParams.get('search')
+    const sort_by = searchParams.get('sort_by')
+    const sort_order = searchParams.get('sort_order')
 
     let query = supabase
       .from('customers')
@@ -61,7 +53,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching customers:', error)
+      apiLogger.error({ error }, 'Error fetching customers from database')
       return NextResponse.json(
         { error: 'Failed to fetch customers' },
         { status: 500 }
@@ -69,10 +61,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data)
-  } catch (error: any) {
-    console.error('Error in GET /api/customers:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Unexpected error in GET /api/customers')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -88,7 +80,7 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Unauthorized access to POST /api/customers')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -136,7 +128,7 @@ export async function POST(request: NextRequest) {
           { status: 409 }
         )
       }
-      console.error('Error creating customer:', error)
+      apiLogger.error({ error }, 'Error creating customer in database')
       return NextResponse.json(
         { error: 'Failed to create customer' },
         { status: 500 }
@@ -144,10 +136,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(data, { status: 201 })
-  } catch (error: any) {
-    console.error('Error in POST /api/customers:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Unexpected error in POST /api/customers')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

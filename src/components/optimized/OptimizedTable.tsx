@@ -9,8 +9,26 @@ import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
 
+// Define types
+interface ColumnDefinition<T> {
+  key: keyof T | string
+  label: string
+  render?: (value: any, item: T) => React.ReactNode
+}
+
+interface OptimizedTableRowProps<T extends { id: string | number }> {
+  item: T
+  columns: ColumnDefinition<T>[]
+  isSelected: boolean
+  onSelect: (id: string) => void
+  onEdit?: (item: T) => void
+  onDelete?: (item: T) => void
+  onView?: (item: T) => void
+  formatValue?: (key: string, value: any, item: T) => React.ReactNode
+}
+
 // Memoized row component to prevent unnecessary re-renders
-export const OptimizedTableRow = memo(({
+export const OptimizedTableRow = memo(<T extends { id: string | number }>({
   item,
   columns,
   isSelected,
@@ -19,18 +37,9 @@ export const OptimizedTableRow = memo(({
   onDelete,
   onView,
   formatValue
-}: {
-  item: unknown
-  columns: Array<{ key: string, label: string, render?: (value: unknown, item: unknown) => React.ReactNode }>
-  isSelected: boolean
-  onSelect: (id: string) => void
-  onEdit?: (item: unknown) => void
-  onDelete?: (item: unknown) => void
-  onView?: (item: unknown) => void
-  formatValue?: (key: string, value: any, item: any) => React.ReactNode
-}) => {
+}: OptimizedTableRowProps<T>) => {
   const handleSelect = useCallback(() => {
-    onSelect(item.id)
+    onSelect(item.id.toString())
   }, [onSelect, item.id])
 
   const handleEdit = useCallback(() => {
@@ -54,12 +63,12 @@ export const OptimizedTableRow = memo(({
         />
       </TableCell>
       {columns.map((column) => (
-        <TableCell key={column.key}>
+        <TableCell key={column.key as string}>
           {column.render 
-            ? column.render(item[column.key], item)
+            ? column.render(item[column.key as keyof T], item)
             : formatValue 
-              ? formatValue(column.key, item[column.key], item)
-              : item[column.key]
+              ? formatValue(column.key as string, item[column.key as keyof T], item)
+              : item[column.key as keyof T]
           }
         </TableCell>
       ))}
@@ -106,43 +115,45 @@ export const OptimizedTableRow = memo(({
 
 OptimizedTableRow.displayName = 'OptimizedTableRow'
 
-// Memoized bulk actions bar
-export const BulkActionsBar = memo(({
-  selectedCount,
-  selectedItems,
-  onClearSelection,
-  onBulkEdit,
-  onBulkDelete,
-  getPreviewNames
-}: {
+// Bulk Actions Bar Component
+interface BulkActionsBarProps<T> {
   selectedCount: number
   selectedItems: string[]
   onClearSelection: () => void
   onBulkEdit: () => void
   onBulkDelete: () => void
   getPreviewNames: (items: string[]) => string
-}) => {
+}
+
+const BulkActionsBar = memo(<T extends { id: string | number, name?: string, title?: string }>({
+  selectedCount,
+  selectedItems,
+  onClearSelection,
+  onBulkEdit,
+  onBulkDelete,
+  getPreviewNames
+}: BulkActionsBarProps<T>) => {
   if (selectedCount === 0) return null
 
   return (
-    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-gray-900">
+    <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="flex items-center gap-4">
+        <span className="text-sm font-medium text-blue-800">
           {selectedCount} item dipilih
         </span>
-        <span className="text-xs text-gray-500">
-          ({getPreviewNames(selectedItems)})
-        </span>
-      </div>
-      <div className="ml-auto flex items-center gap-2">
+        <Badge variant="secondary" className="text-xs">
+          {getPreviewNames(selectedItems)}
+        </Badge>
         <Button
           variant="ghost"
           size="sm"
           onClick={onClearSelection}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-blue-600 hover:text-blue-800"
         >
           Batal
         </Button>
+      </div>
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -168,7 +179,25 @@ export const BulkActionsBar = memo(({
 BulkActionsBar.displayName = 'BulkActionsBar'
 
 // Main optimized table component
-export const OptimizedTable = memo(({
+interface OptimizedTableProps<T extends { id: string | number }> {
+  data: T[]
+  columns: ColumnDefinition<T>[]
+  selectedItems: string[]
+  onSelectAll: () => void
+  onSelectItem: (id: string) => void
+  onClearSelection: () => void
+  onBulkEdit: () => void
+  onBulkDelete: () => void
+  onEdit?: (item: T) => void
+  onDelete?: (item: T) => void
+  onView?: (item: T) => void
+  formatValue?: (key: string, value: any, item: T) => React.ReactNode
+  emptyStateComponent?: React.ReactNode
+  title?: string
+  description?: string
+}
+
+export const OptimizedTable = memo(<T extends { id: string | number }>({
   data,
   columns,
   selectedItems,
@@ -184,23 +213,7 @@ export const OptimizedTable = memo(({
   emptyStateComponent,
   title,
   description
-}: {
-  data: unknown[]
-  columns: Array<{ key: string, label: string, render?: (value: unknown, item: unknown) => React.ReactNode }>
-  selectedItems: string[]
-  onSelectAll: () => void
-  onSelectItem: (id: string) => void
-  onClearSelection: () => void
-  onBulkEdit: () => void
-  onBulkDelete: () => void
-  onEdit?: (item: unknown) => void
-  onDelete?: (item: unknown) => void
-  onView?: (item: unknown) => void
-  formatValue?: (key: string, value: any, item: any) => React.ReactNode
-  emptyStateComponent?: React.ReactNode
-  title?: string
-  description?: string
-}) => {
+}: OptimizedTableProps<T>) => {
   const isAllSelected = useMemo(() => 
     selectedItems.length === data.length && data.length > 0,
     [selectedItems.length, data.length]
@@ -218,7 +231,7 @@ export const OptimizedTable = memo(({
 
   return (
     <div className="space-y-4">
-      <BulkActionsBar
+      <BulkActionsBar<T>
         selectedCount={selectedItems.length}
         selectedItems={selectedItems}
         onClearSelection={onClearSelection}
@@ -238,14 +251,14 @@ export const OptimizedTable = memo(({
                 />
               </TableHead>
               {columns.map((column) => (
-                <TableHead key={column.key}>{column.label}</TableHead>
+                <TableHead key={column.key as string}>{column.label}</TableHead>
               ))}
               <TableHead className="w-32">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((item) => (
-              <OptimizedTableRow
+              <OptimizedTableRow<T>
                 key={item.id}
                 item={item}
                 columns={columns}

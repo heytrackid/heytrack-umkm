@@ -1,0 +1,144 @@
+// Reports Layout - Main structure and navigation
+// Contains breadcrumbs, header, and date range picker
+
+import AppLayout from '@/components/layout/app-layout'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
+} from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  BarChart3,
+  Calendar,
+  Download
+} from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { useState } from 'react'
+
+// Lazy load heavy components
+const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
+  ssr: false
+})
+
+const SalesReport = dynamic(() => import('./SalesReport'), {
+  loading: () => <StatsCardSkeleton />
+})
+
+const InventoryReport = dynamic(() => import('./InventoryReport'), {
+  loading: () => <StatsCardSkeleton />
+})
+
+const FinancialReport = dynamic(() => import('./FinancialReport'), {
+  loading: () => <StatsCardSkeleton />
+})
+
+interface ReportsLayoutProps {
+  children?: React.ReactNode
+}
+
+export function ReportsLayout({ children }: ReportsLayoutProps) {
+  const [dateRange, setDateRange] = useState({
+    start: new Date(new Date().setDate(1)).toISOString().split('T')[0], // First day of month
+    end: new Date().toISOString().split('T')[0] // Today
+  })
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <PrefetchLink href="/">
+                  Dashboard
+                </PrefetchLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbPage>Laporan</BreadcrumbPage>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <BarChart3 className="h-8 w-8" />
+              Laporan
+            </h1>
+            <p className="text-muted-foreground">Analisis bisnis dan laporan keuangan</p>
+          </div>
+          <div className="flex gap-2">
+            <ExcelExportButton variant="outline" />
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
+        </div>
+
+        {/* Date Range Picker */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
+                <input
+                  type="date"
+                  value={dateRange.start}
+                  onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
+                <input
+                  type="date"
+                  value={dateRange.end}
+                  onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <Button>
+                <Calendar className="h-4 w-4 mr-2" />
+                Terapkan
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Reports Tabs */}
+        <Tabs defaultValue="sales" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="sales">Penjualan</TabsTrigger>
+            <TabsTrigger value="inventory">Inventory</TabsTrigger>
+            <TabsTrigger value="financial">Keuangan</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="sales">
+            <SalesReport dateRange={dateRange} />
+          </TabsContent>
+
+          <TabsContent value="inventory">
+            <InventoryReport dateRange={dateRange} />
+          </TabsContent>
+
+          <TabsContent value="financial">
+            <FinancialReport dateRange={dateRange} />
+          </TabsContent>
+        </Tabs>
+
+        {children}
+      </div>
+    </AppLayout>
+  )
+}

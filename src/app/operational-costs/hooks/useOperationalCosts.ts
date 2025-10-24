@@ -2,6 +2,7 @@ import { useLoading } from '@/hooks/useLoading'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
+import { apiLogger } from '@/lib/logger'
 // Types and constants embedded in hook file for now
 export interface OperationalCost {
   id: string
@@ -195,7 +196,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       }))
       setCosts(transformedCosts)
     } catch (error) {
-      console.error('Error fetching costs:', error)
+      apiLogger.error({ error: error }, 'Error fetching costs:')
       toast.error('Gagal memuat data biaya operasional')
     } finally {
       stopLoading(LOADING_KEYS.LOAD_COSTS)
@@ -248,7 +249,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       resetForm()
       setCurrentView('list')
     } catch (error) {
-      console.error('Error saving cost:', error)
+      apiLogger.error({ error: error }, 'Error saving cost:')
       toast.error('Gagal menyimpan biaya operasional')
     } finally {
       setIsLoading(false)
@@ -280,7 +281,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       await fetchCosts()
       toast.success('Biaya operasional berhasil dihapus!')
     } catch (error) {
-      console.error('Error deleting cost:', error)
+      apiLogger.error({ error: error }, 'Error deleting cost:')
       toast.error('Gagal menghapus biaya operasional')
     } finally {
       setIsLoading(false)
@@ -312,7 +313,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       setSelectedItems([])
       toast.success(`${selectedItems.length} biaya operasional berhasil dihapus!`)
     } catch (error) {
-      console.error('Error deleting costs:', error)
+      apiLogger.error({ error: error }, 'Error deleting costs:')
       toast.error('Gagal menghapus biaya operasional')
     } finally {
       setIsLoading(false)
@@ -347,7 +348,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       await fetchCosts()
       toast.success('Template berhasil ditambahkan!')
     } catch (error) {
-      console.error('Error adding template:', error)
+      apiLogger.error({ error: error }, 'Error adding template:')
       toast.error('Gagal menambahkan template')
     } finally {
       setIsLoading(false)

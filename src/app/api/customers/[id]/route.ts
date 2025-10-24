@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
+import { CustomersTable } from '@/types'
+import { getErrorMessage } from '@/lib/type-guards'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/customers/[id] - Get single customer
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -22,7 +26,7 @@ export async function GET(
           { status: 404 }
         )
       }
-      console.error('Error fetching customer:', error)
+      apiLogger.error({ error: error }, 'Error fetching customer:')
       return NextResponse.json(
         { error: 'Failed to fetch customer' },
         { status: 500 }
@@ -30,10 +34,10 @@ export async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error: any) {
-    console.error('Error in GET /api/customers/[id]:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in GET /api/customers/[id]:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -48,24 +52,41 @@ export async function PUT(
   try {
     const supabase = createServerSupabaseAdmin()
     const body = await request.json()
-    
-    // Validate email format if provided
-    if (body.email && !body.email.includes('@')) {
+
+    // Validate request body with Zod
+    const validation = CustomerUpdateSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid email format' },
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
         { status: 400 }
       )
+    }
+
+    const validatedData = validation.data
+
+    const updateData: CustomersTable['Update'] = {
+      name: validatedData.name,
+      email: validatedData.email,
+      phone: validatedData.phone,
+      address: validatedData.address,
+      customer_type: validatedData.customer_type,
+      discount_percentage: validatedData.discount_percentage,
+      notes: validatedData.notes,
+      is_active: validatedData.is_active,
+      loyalty_points: validatedData.loyalty_points,
+      favorite_items: validatedData.favorite_items,
+      updated_at: new Date().toISOString()
     }
     
     const { data, error } = await (supabase
       .from('customers')
-      .update as any)({
-        ...body,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', id)
       .select('*')
-      .single()
+      .single())
     
     if (error) {
       if (error.code === 'PGRST116') {
@@ -80,7 +101,7 @@ export async function PUT(
           { status: 409 }
         )
       }
-      console.error('Error updating customer:', error)
+      apiLogger.error({ error: error }, 'Error updating customer:')
       return NextResponse.json(
         { error: 'Failed to update customer' },
         { status: 500 }
@@ -88,10 +109,10 @@ export async function PUT(
     }
 
     return NextResponse.json(data)
-  } catch (error: any) {
-    console.error('Error in PUT /api/customers/[id]:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in PUT /api/customers/[id]:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -99,7 +120,7 @@ export async function PUT(
 
 // DELETE /api/customers/[id] - Delete customer
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -126,7 +147,7 @@ export async function DELETE(
       .eq('id', id)
     
     if (error) {
-      console.error('Error deleting customer:', error)
+      apiLogger.error({ error: error }, 'Error deleting customer:')
       return NextResponse.json(
         { error: 'Failed to delete customer' },
         { status: 500 }
@@ -134,10 +155,10 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: 'Customer deleted successfully' })
-  } catch (error: any) {
-    console.error('Error in DELETE /api/customers/[id]:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in DELETE /api/customers/[id]:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

@@ -3,6 +3,7 @@ import { createSnapshot } from '@/lib/hpp-snapshot-manager'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // POST /api/hpp/snapshot - Create HPP snapshots (internal endpoint for cron jobs)
 export async function POST(request: NextRequest) {
     try {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
                 .eq('is_active', true)
 
             if (recipesError) {
-                console.error('Error fetching recipes:', recipesError)
+                apiLogger.error({ error: recipesError }, 'Error fetching recipes:')
                 return NextResponse.json(
                     { error: 'Failed to fetch recipes', details: recipesError.message },
                     { status: 500 }
@@ -78,8 +79,8 @@ export async function POST(request: NextRequest) {
                     await createSnapshot(id, user_id, sellingPrice)
                     totalSnapshotsCreated++
 
-                } catch (error: any) {
-                    console.error(`Error creating snapshot for recipe ${id}:`, error)
+                } catch (error: unknown) {
+                    apiLogger.error({ error: `Error creating snapshot for recipe ${id}:`, error }, 'Console error replaced with logger')
                     errors.push({
                         recipe_id: id,
                         error: error.message
@@ -103,8 +104,8 @@ export async function POST(request: NextRequest) {
                 await saveAlerts(alertResult.alerts)
                 alertsGenerated = alertResult.alerts.length
             }
-        } catch (error: any) {
-            console.error('Error detecting alerts:', error)
+        } catch (error: unknown) {
+            apiLogger.error({ error: error }, 'Error detecting alerts:')
             // Don't fail the entire request if alert detection fails
         }
 
@@ -122,8 +123,8 @@ export async function POST(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in snapshot endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in snapshot endpoint:')
         return NextResponse.json(
             { error: 'Snapshot creation failed', details: error.message },
             { status: 500 }
@@ -181,8 +182,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error getting snapshot status:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error getting snapshot status:')
         return NextResponse.json(
             { error: 'Failed to get snapshot status', details: error.message },
             { status: 500 }

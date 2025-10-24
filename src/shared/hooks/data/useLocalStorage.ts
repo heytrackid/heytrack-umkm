@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // Get initial value from localStorage or use provided initial value
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -10,8 +11,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : initialValue
-    } catch (error: any) {
-      console.warn(`Error reading localStorage key"${key}":`, error)
+    } catch (error: unknown) {
+      apiLogger.warn(`Error reading localStorage key"${key}":`, error)
       return initialValue
     }
   })
@@ -27,8 +28,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (error: any) {
-      console.warn(`Error setting localStorage key"${key}":`, error)
+    } catch (error: unknown) {
+      apiLogger.warn(`Error setting localStorage key"${key}":`, error)
     }
   }
 
@@ -39,8 +40,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (error: any) {
-      console.warn(`Error removing localStorage key"${key}":`, error)
+    } catch (error: unknown) {
+      apiLogger.warn(`Error removing localStorage key"${key}":`, error)
     }
   }
 
@@ -52,8 +53,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (e.key === key && e.newValue !== null) {
         try {
           setStoredValue(JSON.parse(e.newValue))
-        } catch (error: any) {
-          console.warn(`Error parsing localStorage value for key"${key}":`, error)
+        } catch (error: unknown) {
+          apiLogger.warn(`Error parsing localStorage value for key"${key}":`, error)
         }
       }
     }

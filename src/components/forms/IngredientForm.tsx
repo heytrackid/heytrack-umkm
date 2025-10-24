@@ -28,7 +28,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
   const { toast } = useToast()
   
   const form = useForm<IngredientFormData>({
-    resolver: zodResolver(IngredientSchema) as any,
+    resolver: zodResolver(IngredientSchema),
     mode: 'onChange',
     defaultValues: {
       name: initialData?.name || '',
@@ -55,7 +55,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
       if (!initialData) {
         form.reset()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan data bahan',

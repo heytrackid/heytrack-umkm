@@ -41,7 +41,7 @@ function useSupabaseDataInternal<T = unknown>(
     realtime?: boolean; // default true
   }
 ) {
-  const [data, setData] = useState<unknown[]>(options?.initial ?? []);
+  const [data, setData] = useState<any[]>(options?.initial ?? []);
   const [loading, setLoading] = useState(!options?.initial);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,7 +57,7 @@ function useSupabaseDataInternal<T = unknown>(
 
     try {
       const supabase = createSupabaseClient();
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       let query = supabase.from(actualTable).select('*');
 
       // Apply filters
@@ -91,7 +91,7 @@ function useSupabaseDataInternal<T = unknown>(
 
   useEffect(() => {
     const supabase = createSupabaseClient();
-    const actualTable = getActualTableName(table as unknown);
+    const actualTable = getActualTableName(table as any);
 
     // Initial fetch – skip if we have initial and refetchOnMount === false
     if (!(options?.initial && options.initial.length > 0 && options?.refetchOnMount === false)) {
@@ -112,18 +112,18 @@ function useSupabaseDataInternal<T = unknown>(
           },
           (payload) => {
             if (payload.eventType === 'INSERT') {
-              setData((prev) => [payload.new as unknown, ...prev]);
+              setData((prev) => [payload.new as any, ...prev]);
             } else if (payload.eventType === 'UPDATE') {
               setData((prev) =>
                 prev.map((item) =>
-                  (item as unknown).id === (payload.new as unknown).id
-                    ? (payload.new as unknown)
+                  (item as any).id === (payload.new as any).id
+                    ? (payload.new as any)
                     : item
                 )
               );
             } else if (payload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item) => (item as unknown).id !== (payload.old as unknown).id)
+                prev.filter((item) => (item as any).id !== (payload.old as any).id)
               );
             }
           }
@@ -151,13 +151,13 @@ export function useSupabaseMutation<T = unknown>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const create = async (data: unknown) => {
+  const create = async (data: any) => {
     setLoading(true);
     setError(null);
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const response = await fetch(`/api/${endpoint}`, {
@@ -184,13 +184,13 @@ export function useSupabaseMutation<T = unknown>(
     }
   };
 
-  const update = async (id: string, data: unknown) => {
+  const update = async (id: string, data: any) => {
     setLoading(true);
     setError(null);
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const response = await fetch(`/api/${endpoint}/${id}`, {
@@ -223,7 +223,7 @@ export function useSupabaseMutation<T = unknown>(
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const response = await fetch(`/api/${endpoint}/${id}`, {
@@ -275,7 +275,7 @@ export function useSupabaseRecord<T = unknown>(
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const response = await fetch(`/api/${endpoint}/${id}`);
@@ -317,10 +317,10 @@ export function useSupabaseCRUD<T = unknown, TInsert = unknown, TUpdate = unknow
   const config = typeof table === 'object' ? table : undefined;
 
   // Use data hook for fetching
-  const dataHook = useSupabaseDataInternal(tableName as unknown, options);
+  const dataHook = useSupabaseDataInternal(tableName as any, options);
 
   // Use mutation hook for operations
-  const mutationHook = useSupabaseMutation(tableName as unknown, dataHook.refetch);
+  const mutationHook = useSupabaseMutation(tableName as any, dataHook.refetch);
 
   return {
     ...dataHook,
@@ -424,7 +424,7 @@ export function useSupabaseBulkOperations<T = unknown>(
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const promises = items.map(item =>
@@ -466,7 +466,7 @@ export function useSupabaseBulkOperations<T = unknown>(
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const promises = updates.map(({ id, data }) =>
@@ -508,7 +508,7 @@ export function useSupabaseBulkOperations<T = unknown>(
 
     try {
       // Convert table name to API endpoint format
-      const actualTable = getActualTableName(table as unknown);
+      const actualTable = getActualTableName(table as any);
       const endpoint = actualTable.replace(/_/g, '-');
 
       const promises = ids.map(id =>
@@ -548,13 +548,13 @@ export function useSupabaseBulkOperations<T = unknown>(
 // Form validation hook
 export function useFormValidation<T>(
   initialValues: T,
-  validationRules: Record<keyof T, (value: unknown) => string | null>
+  validationRules: Record<keyof T, (value: any) => string | null>
 ) {
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
 
-  const validateField = (field: keyof T, value: unknown) => {
+  const validateField = (field: keyof T, value: any) => {
     const rule = validationRules[field];
     if (rule) {
       return rule(value);
@@ -562,7 +562,7 @@ export function useFormValidation<T>(
     return null;
   };
 
-  const handleChange = (field: string, value: unknown) => {
+  const handleChange = (field: string, value: any) => {
     const key = field as keyof T;
     setValues(prev => ({ ...prev, [key]: value }));
 

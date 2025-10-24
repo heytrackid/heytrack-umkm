@@ -1,7 +1,8 @@
 import type { Database } from '@/types'
-import type { AffectedComponents, ComponentChange } from '@/types/hpp-tracking'
+import type { AffectedComponents, ComponentChange, CostBreakdown, IngredientCost, OperationalCost } from '@/types/hpp-tracking'
 import { formatCurrency } from './hpp-calculator'
 import { createSupabaseClient } from './supabase'
+import { logger } from '@/lib/logger'
 
 type HPPSnapshotRow = Database['public']['Tables']['hpp_snapshots']['Row']
 type HPPAlertInsert = Database['public']['Tables']['hpp_alerts']['Insert']
@@ -51,7 +52,8 @@ export async function detectHPPAlerts(userId: string, recipeId?: string): Promis
             continue // Need at least 2 snapshots to compare
         }
 
-        const [current, previous] = snapshots
+        const current = snapshots[0] as HPPSnapshotRow
+        const previous = snapshots[1] as HPPSnapshotRow
         const changePercentage = ((current.hpp_value - previous.hpp_value) / previous.hpp_value) * 100
 
         // Alert Rule 1: HPP increase > 10%
@@ -65,7 +67,7 @@ export async function detectHPPAlerts(userId: string, recipeId?: string): Promis
                 old_value: previous.hpp_value,
                 new_value: current.hpp_value,
                 change_percentage: changePercentage,
-                affected_components: analyzeAffectedComponents(current, previous) as any,
+                affected_components: analyzeAffectedComponents(current, previous) as unknown as Database['public']['Tables']['hpp_alerts']['Row']['affected_components'],
                 is_read: false,
                 is_dismissed: false,
                 user_id: userId
@@ -103,7 +105,7 @@ export async function detectHPPAlerts(userId: string, recipeId?: string): Promis
                 old_value: previous.material_cost,
                 new_value: current.material_cost,
                 change_percentage: materialCostChange,
-                affected_components: { ingredients: ingredientSpikes } as any,
+                affected_components: { ingredients: ingredientSpikes } as unknown as Database['public']['Tables']['hpp_alerts']['Row']['affected_components'],
                 is_read: false,
                 is_dismissed: false,
                 user_id: userId
@@ -129,15 +131,15 @@ function analyzeAffectedComponents(
     // Analyze ingredient changes
     const ingredientChanges: ComponentChange[] = []
 
-    const currentBreakdown = current.cost_breakdown as any
-    const previousBreakdown = previous.cost_breakdown as any
+    const currentBreakdown = current.cost_breakdown as CostBreakdown
+    const previousBreakdown = previous.cost_breakdown as CostBreakdown
 
     if (currentBreakdown?.ingredients && previousBreakdown?.ingredients) {
         const currentIngredients = currentBreakdown.ingredients
         const previousIngredients = previousBreakdown.ingredients
 
         for (const currentIng of currentIngredients) {
-            const previousIng = previousIngredients.find((p: any) => p.id === currentIng.id)
+            const previousIng = previousIngredients.find((p: IngredientCost) => p.id === currentIng.id)
 
             if (previousIng && previousIng.cost > 0) {
                 const change = ((currentIng.cost - previousIng.cost) / previousIng.cost) * 100
@@ -167,7 +169,7 @@ function analyzeAffectedComponents(
         const previousOps = previousBreakdown.operational
 
         for (const currentOp of currentOps) {
-            const previousOp = previousOps.find((p: any) => p.category === currentOp.category)
+            const previousOp = previousOps.find((p: OperationalCost) => p.category === currentOp.category)
 
             if (previousOp && previousOp.cost > 0) {
                 const change = ((currentOp.cost - previousOp.cost) / previousOp.cost) * 100
@@ -201,8 +203,8 @@ function detectIngredientSpikes(
 ): ComponentChange[] {
     const spikes: ComponentChange[] = []
 
-    const currentBreakdown = current.cost_breakdown as any
-    const previousBreakdown = previous.cost_breakdown as any
+    const currentBreakdown = current.cost_breakdown as CostBreakdown
+    const previousBreakdown = previous.cost_breakdown as CostBreakdown
 
     if (!currentBreakdown?.ingredients || !previousBreakdown?.ingredients) {
         return spikes
@@ -212,7 +214,7 @@ function detectIngredientSpikes(
     const previousIngredients = previousBreakdown.ingredients
 
     for (const currentIng of currentIngredients) {
-        const previousIng = previousIngredients.find((p: any) => p.id === currentIng.id)
+        const previousIng = previousIngredients.find((p: IngredientCost) => p.id === currentIng.id)
 
         if (previousIng && previousIng.cost > 0) {
             const change = ((currentIng.cost - previousIng.cost) / previousIng.cost) * 100

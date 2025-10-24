@@ -236,7 +236,7 @@ export function useOrderTotals(
 export function useOrderSummary(filters?: OrderFilters): {
   summary: OrderSummary | null
   loading: boolean
-  error: any
+  error: unknown
 } {
   const { orders, loading, error } = useOrders(filters)
 
@@ -325,7 +325,7 @@ export function useOrderStatus(orderId: string) {
         status: newStatus,
         internal_notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Failed to update order status: ${error}`)
     }
   }

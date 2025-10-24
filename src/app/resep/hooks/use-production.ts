@@ -297,7 +297,7 @@ export function useBatchScheduling(config: ProductionModuleConfig = DEFAULT_PROD
 export function useProductionCapacity(date: string): {
   capacity: ProductionCapacity | null
   loading: boolean
-  error: any
+  error: unknown
 } {
   const { batches, loading, error } = useProductionBatches({
     scheduled_date_from: date,
@@ -369,7 +369,7 @@ export function useBatchStatus(batchId: string) {
       }
 
       await updateBatch(batchId, updateData)
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Failed to update batch status: ${error}`)
     }
   }
@@ -399,7 +399,7 @@ export function useBatchStatus(batchId: string) {
 export function useProductionAnalytics(filters?: ProductionFilters): {
   analytics: ProductionAnalytics | null
   loading: boolean
-  error: any
+  error: unknown
 } {
   const { batches, loading, error } = useProductionBatches(filters)
 
@@ -516,12 +516,12 @@ export function useProductionNotifications() {
   const markAsRead = async (notificationId: string) => {
     try {
       await update(notificationId, { read: true })
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Failed to mark notification as read: ${error}`)
     }
   }
 
-  const unreadCount = (notifications as unknown[])?.filter((n: unknown) => {
+  const unreadCount = (notifications as any[])?.filter((n: any) => {
     const notif = n as { read?: boolean }
     return !notif.read
   }).length || 0
@@ -556,7 +556,7 @@ export function useTemperatureMonitoring(batchId: string) {
         ...reading,
         batch_id: batchId
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new Error(`Failed to add temperature reading: ${error}`)
     }
   }

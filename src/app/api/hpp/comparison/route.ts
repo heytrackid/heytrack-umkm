@@ -2,6 +2,7 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { HPPComparison, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/comparison - Compare HPP between current and previous period
 export async function GET(request: NextRequest) {
     try {
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
             .lte('snapshot_date', currentPeriod.end)
 
         if (currentError) {
-            console.error('Error fetching current period snapshots:', currentError)
+            apiLogger.error({ error: currentError }, 'Error fetching current period snapshots:')
             return NextResponse.json(
                 { error: 'Failed to fetch current period data', details: currentError.message },
                 { status: 500 }
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
             .lte('snapshot_date', previousPeriod.end)
 
         if (previousError) {
-            console.error('Error fetching previous period snapshots:', previousError)
+            apiLogger.error({ error: previousError }, 'Error fetching previous period snapshots:')
             return NextResponse.json(
                 { error: 'Failed to fetch previous period data', details: previousError.message },
                 { status: 500 }
@@ -128,8 +129,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in comparison endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in comparison endpoint:')
         return NextResponse.json(
             { error: 'Internal server error', details: error.message },
             { status: 500 }

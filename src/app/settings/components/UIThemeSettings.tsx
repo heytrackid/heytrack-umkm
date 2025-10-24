@@ -5,8 +5,19 @@ import { Label } from '@/components/ui/label'
 import { Palette } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 
+interface UIThemeSettings {
+  theme?: string
+  numberFormat?: string
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  ui?: UIThemeSettings
+  [key: string]: unknown
+}
+
 interface UIThemeSettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

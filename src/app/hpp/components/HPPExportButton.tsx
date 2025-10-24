@@ -7,6 +7,7 @@ import { Download, Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { useState } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 interface HPPExportButtonProps {
     recipeId: string
     recipeName: string
@@ -74,8 +75,8 @@ export default function HPPExportButton({
                 description: `Data HPP ${recipeName} berhasil diekspor ke Excel`,
                 variant: 'default'
             })
-        } catch (error: any) {
-            console.error('Export error:', error)
+        } catch (error: unknown) {
+            apiLogger.error({ error: error }, 'Export error:')
 
             // Show error toast
             toast({

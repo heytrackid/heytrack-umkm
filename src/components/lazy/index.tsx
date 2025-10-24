@@ -16,7 +16,7 @@ const LoadingFallback = ({ height ="h-32" }: { height?: string }) => (
 )
 
 // Generic lazy wrapper
-export const withLazyLoading = <T extends ComponentType<any>>(
+export const withLazyLoading = <T extends ComponentType<unknown>>(
   importFunc: () => Promise<{ default: T }>,
   fallbackHeight?: string
 ) => {

@@ -54,7 +54,7 @@ export interface Order {
   
   // Relations
   items: OrderItem[]
-  customer?: any // Will be properly typed when customers module is done
+  customer?: CustomersTable['Row'] // Customer data type
   payments?: OrderPayment[] // Payment history
 }
 

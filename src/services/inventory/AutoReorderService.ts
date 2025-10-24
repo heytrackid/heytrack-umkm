@@ -4,7 +4,12 @@
  * and generates purchase orders when ingredients reach minimum thresholds
  */
 
+import { logger } from '@/lib/logger'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+
+// Create logger instances for different contexts
+const automationLogger = logger.child({ context: 'automation' })
+const dbLogger = logger.child({ context: 'database' })
 
 // Use admin client for server-side automation
 const getSupabaseAdmin = () => {
@@ -13,6 +18,9 @@ const getSupabaseAdmin = () => {
   }
   return createServerSupabaseAdmin()
 }
+
+// Create a supabase instance for non-admin operations
+const supabase = getSupabaseAdmin()
 
 export interface ReorderRule {
   id: string
@@ -109,16 +117,16 @@ class AutoReorderService {
   async checkReorderNeeds(): Promise<ReorderSummary> {
     try {
       automationLogger.info('Starting checkReorderNeeds')
-      
+
       const supabaseAdmin = getSupabaseAdmin()
-      
+
       const { data: ingredients, error: ingredientsError } = await supabaseAdmin
         .from('ingredients')
         .select('*')
         .eq('is_active', true)
 
       if (ingredientsError) throw ingredientsError
-      
+
       automationLogger.info('Found active ingredients', { count: ingredients?.length || 0 })
 
       const { data: reorderRules, error: rulesError } = await supabaseAdmin
@@ -127,7 +135,7 @@ class AutoReorderService {
         .eq('is_active', true)
 
       if (rulesError) throw rulesError
-      
+
       automationLogger.info('Found active reorder rules', { count: reorderRules?.length || 0 })
 
       const { data: suppliers, error: suppliersError } = await supabaseAdmin
@@ -184,10 +192,11 @@ class AutoReorderService {
             try {
               await this.generateAutoPurchaseOrder(alert, rule, preferredSupplier)
               autoOrdersGenerated++
-            } catch (error: any) {
+            } catch (error: unknown) {
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error'
               automationLogger.error('Failed to generate auto purchase order', {
                 ingredientName: ingredient.name,
-                error: error.message
+                error: errorMessage
               })
             }
           }
@@ -205,8 +214,9 @@ class AutoReorderService {
         manual_review_required: alerts.filter(a => !a.auto_reorder_enabled).length,
         alerts
       }
-    } catch (error: any) {
-      automationLogger.error('Error checking reorder needs', { error: error.message })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      automationLogger.error('Error checking reorder needs', { error: errorMessage })
       throw error
     }
   }
@@ -215,8 +225,8 @@ class AutoReorderService {
    * Generate purchase order automatically
    */
   async generateAutoPurchaseOrder(
-    alert: ReorderAlert, 
-    rule: ReorderRule, 
+    alert: ReorderAlert,
+    rule: ReorderRule,
     supplier?: SupplierInfo
   ): Promise<PurchaseOrder> {
     if (!supplier) {
@@ -224,7 +234,7 @@ class AutoReorderService {
     }
 
     const poNumber = await this.generatePONumber()
-    
+
     const purchaseOrder: Omit<PurchaseOrder, 'id'> = {
       po_number: poNumber,
       supplier_id: supplier.id,
@@ -275,7 +285,7 @@ class AutoReorderService {
         last_reorder_date: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .eq('id', rule?.id)
+      .eq('id', rule.id)
 
     return {
       ...createdPO,
@@ -344,41 +354,41 @@ class AutoReorderService {
   /**
    * Private helper methods
    */
-  private needsReorder(currentStock: number, minStock: number, rule?: any): boolean {
-    const threshold = rule?.reorder_point || rule?.min_stock_threshold || minStock
+  private needsReorder(currentStock: number, minStock: number, rule?: ReorderRule): boolean {
+    const threshold = rule?.min_stock_threshold || minStock
     return currentStock <= threshold
   }
 
   private calculateUrgency(currentStock: number, minStock: number): ReorderAlert['urgency'] {
     if (currentStock <= 0) return 'critical'
-    
+
     const ratio = currentStock / minStock
     if (ratio <= this.URGENCY_THRESHOLDS.high) return 'high'
     if (ratio <= this.URGENCY_THRESHOLDS.medium) return 'medium'
     return 'low'
   }
 
-  private calculateReorderQuantity(ingredient: any, rule?: any): number {
+  private calculateReorderQuantity(ingredient: { min_stock?: number | null }, rule?: ReorderRule): number {
     if (rule?.reorder_quantity) {
-      return rule?.reorder_quantity
+      return rule.reorder_quantity
     }
 
     // Default logic: reorder to 150% of minimum stock
     return Math.ceil(((ingredient.min_stock ?? 0) || 0) * 1.5)
   }
 
-  private estimateReorderCost(quantity: number, ingredient: any): number {
+  private estimateReorderCost(quantity: number, ingredient: { price_per_unit?: number | null }): number {
     const unitPrice = ingredient.price_per_unit || 0
     return quantity * unitPrice
   }
 
   private shouldAutoReorder(alert: ReorderAlert, rule: ReorderRule): boolean {
     // Check if enough time has passed since last reorder
-    if (rule?.last_reorder_date && rule?.reorder_frequency_days) {
+    if (rule.last_reorder_date && rule.reorder_frequency_days) {
       const daysSinceLastReorder = Math.floor(
-        (Date.now() - new Date(rule?.last_reorder_date).getTime()) / (1000 * 60 * 60 * 24)
+        (Date.now() - new Date(rule.last_reorder_date).getTime()) / (1000 * 60 * 60 * 24)
       )
-      if (daysSinceLastReorder < rule?.reorder_frequency_days) {
+      if (daysSinceLastReorder < rule.reorder_frequency_days) {
         return false
       }
     }
@@ -390,7 +400,7 @@ class AutoReorderService {
   private async generatePONumber(): Promise<string> {
     const today = new Date()
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-    
+
     // Get count of POs created today
     const { data, error } = await supabase
       .from('purchase_orders')
@@ -427,7 +437,8 @@ class AutoReorderService {
       .insert(alerts)
 
     if (error) {
-      dbLogger.error('Error saving reorder alerts', { error: error.message })
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      dbLogger.error('Error saving reorder alerts', { error: errorMessage })
     }
   }
 }

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { apiLogger } from '@/lib/logger'
 import { 
   Calculator, 
   TrendingUp, 
@@ -44,7 +45,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
     try {
       // Validate recipe data before processing
       if (!recipe?.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
-        console.warn('No ingredients found in recipe')
+        apiLogger.warn('No ingredients found in recipe')
         return
       }
       
@@ -55,10 +56,10 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
         setAnalysis(pricingAnalysis)
         setCustomPrice(pricingAnalysis.pricing.standard.price)
       } else {
-        console.error('Invalid pricing analysis result')
+        apiLogger.error({ error: 'Invalid pricing analysis result' }, 'Console error replaced with logger')
       }
-    } catch (error: any) {
-      console.error('Error analyzing pricing:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error analyzing pricing:')
       // Set fallback analysis to prevent UI breaks
       setAnalysis(null)
     } finally {
@@ -159,13 +160,13 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
         {/* Pricing Options Tab */}
         <TabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            {Object.entries(analysis.pricing).map(([tier, data]: [string, any]) => (
+            {Object.entries(analysis.pricing).map(([tier, data]: [string, unknown]) => (
               <Card 
                 key={tier}
                 className={`cursor-pointer transition-all hover: ${
                   selectedTier === tier ? 'ring-2 ring-primary' : ''
                 }`}
-                onClick={() => setSelectedTier(tier as any)}
+                onClick={() => setSelectedTier(tier)}
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
@@ -201,7 +202,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
                     className="w-full mt-3"
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleApplyPrice(tier as any)
+                      handleApplyPrice(tier)
                     }}
                   >
                     Gunakan Harga Ini

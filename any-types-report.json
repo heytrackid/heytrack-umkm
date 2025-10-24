@@ -1,0 +1,151 @@
+{
+  "summary": {
+    "totalInstances": 23,
+    "totalFiles": 16,
+    "breakdown": {
+      "general": 8,
+      "annotation": 13,
+      "assertion": 2
+    }
+  },
+  "details": [
+    {
+      "file": "src/app/api/recipes/[id]/route.ts",
+      "line": 104,
+      "content": "// Add new ingredients if any",
+      "type": "general"
+    },
+    {
+      "file": "src/app/hpp/components/HPPComparisonCard.example.tsx",
+      "line": 5,
+      "content": "* into the HPP Historical Tab or any other page.",
+      "type": "general"
+    },
+    {
+      "file": "src/app/orders/types/orders.types.ts",
+      "line": 57,
+      "content": "customer?: any // Will be properly typed when customers module is done",
+      "type": "annotation"
+    },
+    {
+      "file": "src/app/resep/types/production.types.ts",
+      "line": 59,
+      "content": "recipe?: any // Will be properly typed when recipes module is integrated",
+      "type": "annotation"
+    },
+    {
+      "file": "src/app/resep/types/production.types.ts",
+      "line": 60,
+      "content": "quality_inspector?: any // Staff member",
+      "type": "annotation"
+    },
+    {
+      "file": "src/components/ui/crud-form.tsx",
+      "line": 8,
+      "content": "value: any;",
+      "type": "annotation"
+    },
+    {
+      "file": "src/components/ui/skeletons/performance-optimizations.ts",
+      "line": 39,
+      "content": "// Clear existing timer if any",
+      "type": "general"
+    },
+    {
+      "file": "src/hooks/useErrorHandler.ts",
+      "line": 89,
+      "content": "* @returns {AppError|null} error - Current error if any",
+      "type": "general"
+    },
+    {
+      "file": "src/hooks/useErrorHandler.ts",
+      "line": 146,
+      "content": "* @returns {boolean} hasErrors - Whether there are any errors",
+      "type": "general"
+    },
+    {
+      "file": "src/hooks/useSupabaseCRUD.ts",
+      "line": 31,
+      "content": "// Base CRUD hook for any table",
+      "type": "general"
+    },
+    {
+      "file": "src/lib/safe-cast.ts",
+      "line": 4,
+      "content": "* Use these instead of 'as any' type assertions.",
+      "type": "assertion"
+    },
+    {
+      "file": "src/lib/schemas.ts",
+      "line": 31,
+      "content": "favorite_items: z.any().optional().nullable(),",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/schemas.ts",
+      "line": 99,
+      "content": "nutritional_info: z.any().optional().nullable(),",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/schemas.ts",
+      "line": 125,
+      "content": "nutritional_info: z.any().optional().nullable(),",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/schemas.ts",
+      "line": 177,
+      "content": "tags: z.any().optional().nullable(),",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/schemas.ts",
+      "line": 178,
+      "content": "metadata: z.any().optional().nullable(),",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/search-filter.ts",
+      "line": 115,
+      "content": "* Check if any filter is active",
+      "type": "general"
+    },
+    {
+      "file": "src/lib/search-filter.ts",
+      "line": 177,
+      "content": "conditions: Record<keyof T, any>",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/settings-validation.ts",
+      "line": 119,
+      "content": "export function validateSettingsCategory(category: string, data: unknown): { success: boolean; data?: any; errors?: string[] } {",
+      "type": "annotation"
+    },
+    {
+      "file": "src/lib/type-guards.ts",
+      "line": 5,
+      "content": "* instead of using 'as any' or type assertions.",
+      "type": "assertion"
+    },
+    {
+      "file": "src/modules/recipes/services/EnhancedHPPCalculationService.ts",
+      "line": 467,
+      "content": "pricingInsights: any // PricingInsights",
+      "type": "annotation"
+    },
+    {
+      "file": "src/types/errors.ts",
+      "line": 166,
+      "content": "* Error handler utility - converts any error to ApiError format",
+      "type": "general"
+    },
+    {
+      "file": "src/utils/supabase/middleware.ts",
+      "line": 30,
+      "content": "// IMPORTANT: Avoid writing any logic between createServerClient and",
+      "type": "annotation"
+    }
+  ]
+}

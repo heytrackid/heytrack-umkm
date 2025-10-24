@@ -5,7 +5,8 @@
 
 import { useCallback, useState } from 'react'
 
-interface AIAnalysisState<T = any> {
+import { apiLogger } from '@/lib/logger'
+interface AIAnalysisState<T = unknown > {
   data: T | null
   loading: boolean
   error: string | null
@@ -286,7 +287,7 @@ export function useAIPowered() {
         const topRecipes = businessData.recipes.slice(0, 3)
         for (const recipe of topRecipes) {
           if (recipe.recipe_ingredients) {
-            const ingredients = recipe.recipe_ingredients.map((ri: unknown) => ({
+            const ingredients = recipe.recipe_ingredients.map((ri: any) => ({
               name: ri.ingredient?.name || 'Unknown',
               cost: (ri.ingredient?.price_per_unit || 0) * ri.quantity,
               quantity: ri.quantity
@@ -306,7 +307,7 @@ export function useAIPowered() {
                 priority: 'high'
               })
             } catch (error: unknown) {
-              console.warn(`Pricing analysis failed for ${recipe.name}:`, error)
+              apiLogger.warn(`Pricing analysis failed for ${recipe.name}:`, error)
             }
           }
         }
@@ -316,7 +317,7 @@ export function useAIPowered() {
       if (businessData.ingredients && businessData.ingredients.length > 0) {
         try {
           const inventoryOptimization = await optimizeInventory({
-            ingredients: businessData.ingredients.map((ing: unknown) => ({
+            ingredients: businessData.ingredients.map((ing: any) => ({
               name: ing.name,
               currentStock: ing.current_stock,
               minStock: ing.min_stock,
@@ -332,14 +333,14 @@ export function useAIPowered() {
             priority: 'medium'
           })
         } catch (error: unknown) {
-          console.warn('Inventory optimization failed:', error)
+          apiLogger.warn('Inventory optimization failed:', error)
         }
       }
 
       return insights
 
     } catch (error: unknown) {
-      console.error('Smart insights generation failed:', error)
+      apiLogger.error({ error: error }, 'Smart insights generation failed:')
       return []
     }
   }, [analyzePricing, optimizeInventory])

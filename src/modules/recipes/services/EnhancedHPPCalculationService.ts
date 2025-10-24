@@ -3,7 +3,7 @@ interface Ingredient {
   id: string
   name: string
   price_per_unit: number
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface StockTransaction {
@@ -14,7 +14,7 @@ interface StockTransaction {
   unit_price?: number
   total_cost?: number
   transaction_date: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface Recipe {
@@ -409,7 +409,7 @@ export class EnhancedHPPCalculationService {
   private static generatePricingInsights(
     ingredient: Ingredient,
     transactions: StockTransaction[]
-  ): any {
+  ): unknown {
     const purchases = transactions
       .filter(t => t.type === 'purchase' && t.unit_price)
       .sort((a, b) => new Date(a.transaction_date).getTime() - new Date(b.transaction_date).getTime())
@@ -464,7 +464,7 @@ interface IngredientCost {
   unit: string
   unitPrice: number
   totalCost: number
-  pricingInsights: any // PricingInsights
+  pricingInsights: PricingInsights // Pricing insights data
   priceComparison: {
     listPrice: number
     weightedAverage: number
@@ -472,6 +472,30 @@ interface IngredientCost {
     movingAverage: number
     usedPrice: number
     pricingMethod: PricingMethod
+  }
+}
+
+
+interface PricingInsights {
+  marketRate: number
+  competitorPrices: number[]
+  suggestedPrice: number
+  priceConfidenceScore: number
+  seasonalAdjustments: Record<string, number>
+  historicalTrends: {
+    last30Days: number[]
+    last90Days: number[]
+    yearOverYear: number
+  }
+  costBasedRecommendations: {
+    breakEvenPrice: number
+    targetMarginPrice: number
+    premiumPrice: number
+  }
+  demandFactors: {
+    popularityScore: number
+    seasonalityImpact: number
+    competitionLevel: 'low' | 'medium' | 'high'
   }
 }
 

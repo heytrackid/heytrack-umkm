@@ -10,6 +10,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
+import type { Database } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -233,7 +234,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               </div>
             ) : orders && orders.length > 0 ? (
               <div className="space-y-3">
-                {orders.map((order: any) => (
+                {orders.map((order: Database['public']['Tables']['orders']['Row']) => (
                   <div
                     key={order.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"

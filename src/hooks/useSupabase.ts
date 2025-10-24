@@ -31,7 +31,7 @@ export function useSupabaseQuery<T extends keyof Tables>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
-  const [data, setData] = useState<unknown[]>(options.initial ?? [])
+  const [data, setData] = useState<any[]>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
 
@@ -95,18 +95,18 @@ export function useSupabaseQuery<T extends keyof Tables>(
           },
           (payload) => {
             if (payload.eventType === 'INSERT') {
-              setData((prev) => [payload.new as unknown, ...prev])
+              setData((prev) => [payload.new as any, ...prev])
             } else if (payload.eventType === 'UPDATE') {
               setData((prev) =>
                 prev.map((item) =>
-                  (item as unknown).id === (payload.new as unknown).id
-                    ? (payload.new as unknown)
+                  (item as any).id === (payload.new as any).id
+                    ? (payload.new as any)
                     : item
                 )
               )
             } else if (payload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item) => (item as unknown).id !== (payload.old as unknown).id)
+                prev.filter((item) => (item as any).id !== (payload.old as any).id)
               )
             }
           }
@@ -143,7 +143,7 @@ export function useSupabaseMutation<T extends keyof Tables>(
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const create = async (data: unknown) => {
+  const create = async (data: any) => {
     setLoading(true)
     setError(null)
 
@@ -261,7 +261,7 @@ export function useSupabaseCRUD<T extends keyof Tables>(
 // ============================================================================
 
 export const useRecipesWithIngredients = () => {
-  const [data, setData] = useState<unknown[]>([])
+  const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -300,7 +300,7 @@ export const useRecipesWithIngredients = () => {
 }
 
 export const useOrdersWithItems = () => {
-  const [data, setData] = useState<unknown[]>([])
+  const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -345,10 +345,10 @@ export const useOrdersWithItems = () => {
 export const useHPPCalculations = () => {
   const { data: recipes, loading: recipesLoading } = useRecipesWithIngredients()
 
-  const calculateHPP = useCallback((recipe: unknown) => {
+  const calculateHPP = useCallback((recipe: any) => {
     if (!recipe.recipe_ingredients) return 0
 
-    return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: unknown) => {
+    return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
       const ingredient = recipeIngredient.ingredient
       if (!ingredient) return total
 

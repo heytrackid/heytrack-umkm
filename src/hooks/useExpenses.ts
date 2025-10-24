@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 export interface Expense {
   id: string
   date: string
@@ -35,7 +36,7 @@ export function useExpenses() {
       setExpenses(data)
     } catch (err: any) {
       setError(err.message)
-      console.error('Error fetching expenses:', err)
+      apiLogger.error({ error: err }, 'Error fetching expenses:')
     } finally {
       setLoading(false)
     }

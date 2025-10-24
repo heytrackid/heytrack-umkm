@@ -5,7 +5,7 @@ interface FormFieldProps {
   label: string;
   name: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'date' | 'datetime-local' | 'tel' | 'url';
-  value: any;
+  value: unknown;
   onChange: (name: string, value: any) => void;
   onBlur?: (name: string) => void;
   error?: string;
@@ -71,7 +71,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    let newValue: any = e.target.value;
+    let newValue: unknown = e.target.value;
     
     if (type === 'number') {
       newValue = e.target.value === '' ? '' : parseFloat || 0;

@@ -7,6 +7,7 @@
 
 import { HPPRecommendationsPanel } from './HPPRecommendationsPanel'
 
+import { apiLogger } from '@/lib/logger'
 // ============================================================================
 // Example 1: Basic Usage - Show all recommendations
 // ============================================================================
@@ -173,12 +174,12 @@ export function Example7_TabbedInterface() {
 // ============================================================================
 export function Example8_WithActionButtons() {
     const handleExport = () => {
-        console.log('Exporting recommendations...')
+        apiLogger.info('Exporting recommendations...')
         // Implementation would go here
     }
 
     const handleRefresh = () => {
-        console.log('Refreshing recommendations...')
+        apiLogger.info('Refreshing recommendations...')
         // Implementation would go here
     }
 

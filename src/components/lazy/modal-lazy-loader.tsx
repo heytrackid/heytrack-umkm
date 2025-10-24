@@ -186,7 +186,7 @@ export const useLazyModal = () => {
     isOpen: boolean
     component: LazyModalProps['component'] | null
     title: string
-    props: any
+    props: unknown
     size: LazyModalProps['size']
   }>({
     isOpen: false,
@@ -199,7 +199,7 @@ export const useLazyModal = () => {
   const openModal = useCallback((
     component: LazyModalProps['component'],
     title: string,
-    props: any = {},
+    props: { [key: string]: unknown } = {},
     size: LazyModalProps['size'] = 'md'
   ) => {
     setModalState({

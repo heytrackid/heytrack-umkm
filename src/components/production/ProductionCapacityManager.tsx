@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
+import { apiLogger } from '@/lib/logger'
 import { 
   Oven,
   Users,
@@ -99,8 +100,8 @@ export default function ProductionCapacityManager({
       setConstraints(currentConstraints)
       setOriginalConstraints(currentConstraints)
       calculateEfficiencyMetrics(currentConstraints)
-    } catch (error: any) {
-      console.error('Error loading constraints:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error loading constraints:')
       toast.error('Failed to load production capacity settings')
     } finally {
       setLoading(false)
@@ -173,8 +174,8 @@ export default function ProductionCapacityManager({
       calculateEfficiencyMetrics(constraints)
       onCapacityUpdate?.(constraints)
       toast.success('Production capacity updated successfully')
-    } catch (error: any) {
-      console.error('Error saving constraints:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error saving constraints:')
       toast.error('Failed to save production capacity settings')
     } finally {
       setLoading(false)

@@ -5,8 +5,24 @@ import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Bell } from 'lucide-react'
 
+interface NotificationSettings {
+  emailNotifications?: boolean
+  pushNotifications?: boolean
+  lowStockAlert?: boolean
+  orderUpdates?: boolean
+  dailyReports?: boolean
+  weeklyReports?: boolean
+  monthlyReports?: boolean
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  notifications?: NotificationSettings
+  [key: string]: unknown
+}
+
 interface NotificationSettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

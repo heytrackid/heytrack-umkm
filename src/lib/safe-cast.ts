@@ -7,10 +7,11 @@
 
 import { getErrorMessage, isObject, isString, isNumber, isArray } from './type-guards'
 
+import { apiLogger } from '@/lib/logger'
 // Safe cast with validator
 export function safeCast<T>(
-  value: unknown,
-  validator: (v: unknown) => v is T,
+  value: any,
+  validator: (v: any) => v is T,
   fallback?: T
 ): T {
   if (validator(value)) {
@@ -23,7 +24,7 @@ export function safeCast<T>(
 }
 
 // Cast to string
-export function castToString(value: unknown, fallback = ''): string {
+export function castToString(value: any, fallback = ''): string {
   if (isString(value)) {
     return value
   }
@@ -44,7 +45,7 @@ export function castToString(value: unknown, fallback = ''): string {
 }
 
 // Cast to number
-export function castToNumber(value: unknown, fallback = 0): number {
+export function castToNumber(value: any, fallback = 0): number {
   if (isNumber(value)) {
     return value
   }
@@ -59,7 +60,7 @@ export function castToNumber(value: unknown, fallback = 0): number {
 }
 
 // Cast to boolean
-export function castToBoolean(value: unknown, fallback = false): boolean {
+export function castToBoolean(value: any, fallback = false): boolean {
   if (typeof value === 'boolean') {
     return value
   }
@@ -77,7 +78,7 @@ export function castToBoolean(value: unknown, fallback = false): boolean {
 
 // Cast to array
 export function castToArray<T = unknown>(
-  value: unknown,
+  value: any,
   fallback: T[] = []
 ): T[] {
   if (isArray(value)) {
@@ -91,7 +92,7 @@ export function castToArray<T = unknown>(
 
 // Cast to object
 export function castToObject(
-  value: unknown,
+  value: any,
   fallback: Record<string, unknown> = {}
 ): Record<string, unknown> {
   if (isObject(value)) {
@@ -102,7 +103,7 @@ export function castToObject(
 
 // Cast with deep property access (replaces (obj as any).prop.nested)
 export function getNestedProperty<T = unknown>(
-  obj: unknown,
+  obj: any,
   path: string,
   fallback?: T
 ): T | undefined {
@@ -111,7 +112,7 @@ export function getNestedProperty<T = unknown>(
   }
 
   const keys = path.split('.')
-  let current: any = obj
+  let current: unknown = obj
 
   for (const key of keys) {
     if (current === null || current === undefined) {
@@ -125,23 +126,22 @@ export function getNestedProperty<T = unknown>(
 
 // Safe property access
 export function getProperty<T = unknown>(
-  obj: unknown,
+  obj: any,
   key: string,
   fallback?: T
 ): T | undefined {
   if (!isObject(obj)) {
     return fallback
   }
-  const value = (obj as Record<string, any>)[key]
+  const value = (obj as Record<string, unknown>)[key]
   return value ?? fallback
 }
 
 // Set nested property safely
 export function setNestedProperty(
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
   path: string,
-  value: unknown
-): void {
+  value: any): void {
   const keys = path.split('.')
   const lastKey = keys.pop()
 
@@ -162,7 +162,7 @@ export function setNestedProperty(
 
 // Type-safe array operations
 export function safeMap<T, R>(
-  arr: unknown,
+  arr: any,
   mapper: (item: T, index: number) => R,
   fallback: R[] = []
 ): R[] {
@@ -177,7 +177,7 @@ export function safeMap<T, R>(
 }
 
 export function safeFilter<T>(
-  arr: unknown,
+  arr: any,
   predicate: (item: T, index: number) => boolean,
   fallback: T[] = []
 ): T[] {
@@ -192,7 +192,7 @@ export function safeFilter<T>(
 }
 
 export function safeReduce<T, R>(
-  arr: unknown,
+  arr: any,
   reducer: (acc: R, item: T, index: number) => R,
   initial: R,
   fallback: R = initial
@@ -215,16 +215,16 @@ export function safeParseJSON<T = unknown>(
   try {
     return JSON.parse(json) as T
   } catch (error) {
-    console.error('Failed to parse JSON:', getErrorMessage(error))
+    apiLogger.error({ error: getErrorMessage(error) }, 'Failed to parse JSON:')
     return fallback
   }
 }
 
-export function safeStringifyJSON(value: unknown, fallback = '{}'): string {
+export function safeStringifyJSON(value: any, fallback = '{}'): string {
   try {
     return JSON.stringify(value)
   } catch (error) {
-    console.error('Failed to stringify JSON:', getErrorMessage(error))
+    apiLogger.error({ error: getErrorMessage(error) }, 'Failed to stringify JSON:')
     return fallback
   }
 }
@@ -242,7 +242,7 @@ export function createSuccessResponse<T>(data: T): ApiResponse<T> {
   }
 }
 
-export function createErrorResponse<T>(error: unknown): ApiResponse<T> {
+export function createErrorResponse<T>(error: any): ApiResponse<T> {
   const err = error instanceof Error ? error : new Error(String(error))
   return {
     data: null,
@@ -257,8 +257,8 @@ export interface SupabaseResult<T> {
 }
 
 export function castSupabaseResult<T>(
-  result: unknown,
-  validator?: (v: unknown) => v is T
+  result: any,
+  validator?: (v: any) => v is T
 ): SupabaseResult<T> {
   if (!isObject(result)) {
     return {
@@ -298,7 +298,7 @@ export function castSupabaseResult<T>(
 // Function return type casting
 export function castFunctionReturn<T>(
   fn: () => unknown,
-  validator: (v: unknown) => v is T,
+  validator: (v: any) => v is T,
   fallback?: T
 ): T {
   try {
@@ -321,7 +321,7 @@ export function castFunctionReturn<T>(
 // Async version
 export async function castAsyncFunctionReturn<T>(
   fn: () => Promise<unknown>,
-  validator: (v: unknown) => v is T,
+  validator: (v: any) => v is T,
   fallback?: T
 ): Promise<T> {
   try {
@@ -342,7 +342,7 @@ export async function castAsyncFunctionReturn<T>(
 }
 
 // Utility for checking if value is boolean (needed by castToBoolean)
-function isBoolean(value: unknown): boolean {
+function isBoolean(value: any): boolean {
   return typeof value === 'boolean'
 }
 

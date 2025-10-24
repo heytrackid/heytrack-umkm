@@ -209,7 +209,7 @@ export const syncDashboardApi = {
         recentOrders: recentOrders.data || [],
         timestamp: new Date().toISOString()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       apiLogger.error({ err: error }, 'Error fetching dashboard data')
       throw error
     }
@@ -302,7 +302,7 @@ export const testSyncSystem = async () => {
       testEvent,
       message: 'Sync system test completed successfully'
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     apiLogger.error({ err: error }, 'Sync system test failed')
     return {
       success: false,

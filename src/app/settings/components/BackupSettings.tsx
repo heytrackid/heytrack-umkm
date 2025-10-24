@@ -7,8 +7,20 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Database, Download, Upload } from 'lucide-react'
 
+interface SystemSettings {
+  autoBackup?: boolean
+  backupFrequency?: string
+  dataRetention?: number
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  system?: SystemSettings
+  [key: string]: unknown
+}
+
 interface BackupSettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

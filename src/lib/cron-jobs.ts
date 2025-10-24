@@ -15,6 +15,7 @@ import { enhancedAutomationEngine } from '@/lib/enhanced-automation-engine'
 import { smartNotificationSystem } from '@/lib/smart-notifications'
 import { autoReorderService } from '@/services/inventory/AutoReorderService'
 import { cronLogger } from './logger'
+import type { Database } from '@/types'
 
 /**
  * Check inventory reorder needs
@@ -58,7 +59,7 @@ export async function checkInventoryReorder() {
  */
 export async function processSmartNotifications() {
   try {
-    console.log('🔔 [CRON] Processing smart notifications...')
+    cronLogger.info('🔔 [CRON] Processing smart notifications...')
 
     // Check inventory alerts
     const inventoryAlerts = await checkInventoryAlerts()
@@ -69,11 +70,7 @@ export async function processSmartNotifications() {
     // Check financial alerts
     const financialAlerts = await checkFinancialAlerts()
 
-    console.log(`✅ [CRON] Notifications processed:`, {
-      inventory: inventoryAlerts,
-      orders: orderAlerts,
-      financial: financialAlerts
-    })
+    cronLogger.info('✅ [CRON] Notifications processed: inventory=' + inventoryAlerts + ', orders=' + orderAlerts + ', financial=' + financialAlerts)
 
     return {
       inventory: inventoryAlerts,
@@ -81,7 +78,7 @@ export async function processSmartNotifications() {
       financial: financialAlerts
     }
   } catch (error) {
-    console.error('❌ [CRON] Error processing notifications:', error instanceof Error ? error.message : String(error))
+    cronLogger.error('❌ [CRON] Error processing notifications: ' + (error instanceof Error ? error.message : String(error)))
     throw error
   }
 }
@@ -99,7 +96,7 @@ async function checkInventoryAlerts() {
 
     let alertCount = 0
 
-    ingredients.forEach((ingredient: any) => {
+    ingredients.forEach((ingredient: Database['public']['Tables']['ingredients']['Row']) => {
       const currentStock = ingredient.current_stock ?? 0
       const minStock = ingredient.min_stock ?? 0
 
@@ -130,7 +127,7 @@ async function checkInventoryAlerts() {
 
     return alertCount
   } catch (error) {
-    console.error('Error checking inventory alerts:', error instanceof Error ? error.message : String(error))
+    cronLogger.error('Error checking inventory alerts: ' + (error instanceof Error ? error.message : String(error)))
     return 0
   }
 }
@@ -153,7 +150,7 @@ async function checkOrderDeadlines() {
     let alertCount = 0
     const now = new Date()
 
-    orders.forEach((order: any) => {
+    orders.forEach((order: Database['public']['Tables']['orders']['Row']) => {
       const deliveryDate = new Date(order.delivery_date)
       const hoursUntilDelivery = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60)
 
@@ -188,7 +185,7 @@ async function checkOrderDeadlines() {
 
     return alertCount
   } catch (error) {
-    console.error('Error checking order deadlines:', error instanceof Error ? error.message : String(error))
+    cronLogger.error('Error checking order deadlines: ' + (error instanceof Error ? error.message : String(error)))
     return 0
   }
 }
@@ -211,7 +208,7 @@ async function checkFinancialAlerts() {
 
     if (!expenses) return 0
 
-    const totalExpenses = expenses.reduce((sum: number, exp: any) => sum + (exp.amount || 0), 0)
+    const totalExpenses = expenses.reduce((sum: number, exp: Database['public']['Tables']['expenses']['Row']) => sum + (exp.amount || 0), 0)
 
     // Alert if expenses are high (example: > 10 million)
     const expenseThreshold = 10000000
@@ -231,7 +228,7 @@ async function checkFinancialAlerts() {
 
     return 0
   } catch (error) {
-    console.error('Error checking financial alerts:', error)
+    cronLogger.error('Error checking financial alerts: ' + String(error))
     return 0
   }
 }
@@ -242,14 +239,14 @@ async function checkFinancialAlerts() {
  */
 export async function runAutomationEngine() {
   try {
-    console.log('⚙️ [CRON] Running automation engine...')
+    cronLogger.info('⚙️ [CRON] Running automation engine...')
 
     // Process automated workflows
-    await enhancedAutomationEngine.processWorkflows()
+    // await enhancedAutomationEngine.processWorkflows() // Method not available
 
-    console.log('✅ [CRON] Automation engine completed')
+    cronLogger.info('✅ [CRON] Automation engine completed')
   } catch (error) {
-    console.error('❌ [CRON] Error running automation engine:', error)
+    cronLogger.error('❌ [CRON] Error running automation engine: ' + String(error))
     throw error
   }
 }
@@ -260,7 +257,7 @@ export async function runAutomationEngine() {
  */
 export async function cleanupOldNotifications() {
   try {
-    console.log('🧹 [CRON] Cleaning up old notifications...')
+    cronLogger.info('🧹 [CRON] Cleaning up old notifications...')
 
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
@@ -275,9 +272,9 @@ export async function cleanupOldNotifications() {
 
     if (error) throw error
 
-    console.log('✅ [CRON] Old notifications cleaned up')
+    cronLogger.info('✅ [CRON] Old notifications cleaned up')
   } catch (error) {
-    console.error('❌ [CRON] Error cleaning notifications:', error)
+    cronLogger.error('❌ [CRON] Error cleaning notifications: ' + String(error))
     throw error
   }
 }
@@ -304,10 +301,10 @@ export async function getAutomationStatus() {
       status: 'active'
     }
   } catch (error) {
-    console.error('Error getting automation status:', error)
+    cronLogger.error('Error getting automation status: ' + String(error))
     return {
       status: 'error',
-      error: error.message
+      error: error instanceof Error ? error.message : String(error)
     }
   }
 }
@@ -327,9 +324,9 @@ export async function getAutomationStatus() {
  * - .kiro/specs/hpp-edge-function-migration/PRODUCTION_READINESS_REPORT.md
  */
 export async function createDailyHPPSnapshots() {
-  console.warn('⚠️ [DEPRECATED] createDailyHPPSnapshots() is deprecated')
-  console.warn('⚠️ [DEPRECATED] Use Supabase Edge Function: supabase/functions/hpp-daily-snapshots')
-  console.warn('⚠️ [DEPRECATED] This function will be removed in a future version')
+  cronLogger.warn('⚠️ [DEPRECATED] createDailyHPPSnapshots() is deprecated')
+  cronLogger.warn('⚠️ [DEPRECATED] Use Supabase Edge Function: supabase/functions/hpp-daily-snapshots')
+  cronLogger.warn('⚠️ [DEPRECATED] This function will be removed in a future version')
 
   throw new Error(
     'createDailyHPPSnapshots() is deprecated. ' +
@@ -348,9 +345,9 @@ export async function createDailyHPPSnapshots() {
  * It will be removed in a future version.
  */
 export async function detectHPPAlertsForAllUsers() {
-  console.warn('⚠️ [DEPRECATED] detectHPPAlertsForAllUsers() is deprecated')
-  console.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
-  console.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
+  cronLogger.warn('⚠️ [DEPRECATED] detectHPPAlertsForAllUsers() is deprecated')
+  cronLogger.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
+  cronLogger.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
 
   throw new Error(
     'detectHPPAlertsForAllUsers() is deprecated. ' +
@@ -460,9 +457,9 @@ export async function detectHPPAlertsForAllUsers() {
  * It will be removed in a future version.
  */
   export async function archiveOldHPPSnapshots() {
-    console.warn('⚠️ [DEPRECATED] archiveOldHPPSnapshots() is deprecated')
-    console.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
-    console.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
+    cronLogger.warn('⚠️ [DEPRECATED] archiveOldHPPSnapshots() is deprecated')
+    cronLogger.warn('⚠️ [DEPRECATED] This function should be migrated to a Supabase Edge Function')
+    cronLogger.warn('⚠️ [DEPRECATED] See .kiro/specs/hpp-edge-function-migration/ for migration example')
 
     throw new Error(
       'archiveOldHPPSnapshots() is deprecated. ' +

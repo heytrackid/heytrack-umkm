@@ -8,8 +8,21 @@ import { Settings, RotateCcw } from 'lucide-react'
 import * as React from 'react'
 import { useState } from 'react'
 
+interface RegionalSettings {
+  timezone?: string
+  language?: string
+  currency?: string
+  region?: string
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  regional?: RegionalSettings
+  [key: string]: unknown
+}
+
 interface RegionalSettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

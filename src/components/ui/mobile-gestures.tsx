@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { Loader2, RefreshCw, ChevronDown } from 'lucide-react'
 import { useResponsive } from '@/hooks/useResponsive'
 
+import { apiLogger } from '@/lib/logger'
 // Pull to Refresh Component
 interface PullToRefreshProps {
   children: React.ReactNode
@@ -60,8 +61,8 @@ export function PullToRefresh({
       setIsRefreshing(true)
       try {
         await onRefresh()
-      } catch (error: any) {
-        console.error('Refresh failed:', error)
+      } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Refresh failed:')
       } finally {
         setIsRefreshing(false)
       }
@@ -430,7 +431,7 @@ export function SwipeActions({
 }
 
 // Utility function for throttling
-function throttle<T extends (...args: any[]) => any>(
+function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {

@@ -1,20 +1,19 @@
 'use client'
 
-import * as React from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
+import { apiLogger } from '@/lib/logger'
 // Import enhanced AI service
-import { getInventoryInsights, getRecipeSuggestions, getFinancialAnalysis, getOrderInsights, getBusinessInsights } from '@/lib/ai-chatbot-service'
-import { NLPProcessor, AIResponseGenerator } from '@/lib/nlp-processor'
+import { getInventoryInsights, getRecipeSuggestions, getFinancialAnalysis, getOrderInsights } from '@/lib/ai-chatbot-service'
+import { AIResponseGenerator } from '@/lib/nlp-processor'
 
 interface Message {
   id: string
@@ -137,7 +136,7 @@ export default function AIChatbotPage() {
         data: response.data
       }
     } catch (error) {
-      console.error('Error processing AI query:', error)
+      apiLogger.error({ error: error }, 'Error processing AI query:')
 
       // Fallback to basic responses if NLP fails
       const lowerQuery = query.toLowerCase()
@@ -169,6 +168,20 @@ export default function AIChatbotPage() {
         ]
       }
     }
+  }
+
+  const renderMessageData = (data: any) => {
+    if (!data) return null
+    return (
+      <div className="mt-3 p-3 bg-background/50 rounded border">
+        <pre className="text-xs overflow-x-auto">
+          {typeof data === 'string'
+            ? data
+            : JSON.stringify(data, null, 2) || 'No data'
+          }
+        </pre>
+      </div>
+    )
   }
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -220,13 +233,7 @@ export default function AIChatbotPage() {
                 <p className="text-sm leading-relaxed">{message.content}</p>
 
                 {/* Display data if available */}
-                {message.data && (
-                  <div className="mt-3 p-3 bg-background/50 rounded border">
-                    <pre className="text-xs overflow-x-auto">
-                      {JSON.stringify(message.data, null, 2)}
-                    </pre>
-                  </div>
-                )}
+                {renderMessageData(message.data)}
 
                 {/* Suggestions */}
                 {message.suggestions && message.suggestions.length > 0 && (

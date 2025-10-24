@@ -9,10 +9,10 @@ import { Card, CardContent } from '@/components/ui/card'
  * Provides consistent loading states for route components
  */
 
-interface RouteLoaderProps {
-  loader: () => Promise<{ default: ComponentType<any> }>
+interface RouteLoaderProps<T = Record<string, unknown>> {
+  loader: () => Promise<{ default: ComponentType<T> }>
   fallback?: React.ReactNode
-  props?: any
+  props?: T
 }
 
 const DefaultFallback = () => {
@@ -34,8 +34,8 @@ const DefaultFallback = () => {
 /**
  * Lazy load route component with fallback
  */
-export function RouteLoader({ loader, fallback, props }: RouteLoaderProps) {
-  const Component = lazy(loader)
+export function RouteLoader<T = Record<string, unknown>>({ loader, fallback, props }: RouteLoaderProps<T>) {
+  const Component = lazy(loader) as any as ComponentType<T>
   
   return (
     <Suspense fallback={fallback || <DefaultFallback />}>
@@ -47,13 +47,13 @@ export function RouteLoader({ loader, fallback, props }: RouteLoaderProps) {
 /**
  * Create lazy route component
  */
-export function createLazyRoute<T extends ComponentType<any>>(
-  loader: () => Promise<{ default: T }>,
+export function createLazyRoute<T extends Record<string, unknown>>(
+  loader: () => Promise<{ default: ComponentType<T> }>,
   fallback?: React.ReactNode
 ) {
   const LazyComponent = lazy(loader)
   
-  return function LazyRoute(props: any) {
+  return function LazyRoute(props: T) {
     return (
       <Suspense fallback={fallback || <DefaultFallback />}>
         <LazyComponent {...props} />

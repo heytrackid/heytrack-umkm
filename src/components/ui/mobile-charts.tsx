@@ -34,6 +34,28 @@ import { Badge } from './badge'
 import { Button } from './button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card'
 
+// Chart data interfaces
+interface ChartDataPoint {
+  [key: string]: string | number | boolean | null | undefined
+}
+
+interface TooltipEntry {
+  color: string
+  name: string
+  value: number | string
+  payload?: ChartDataPoint
+}
+
+interface PieLabelProps {
+  cx: number
+  cy: number
+  midAngle: number
+  innerRadius: number
+  outerRadius: number
+  percent: number
+  index: number
+}
+
 // Color schemes for mobile-friendly visualization
 const CHART_COLORS = {
   primary: ['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a'],
@@ -47,10 +69,10 @@ const CHART_COLORS = {
 // Mobile-optimized tooltip component
 interface MobileTooltipProps {
   active?: boolean
-  payload?: any[]
-  label?: any
-  formatter?: (value: any, name: string, props: any) => [React.ReactNode, string]
-  labelFormatter?: (value: any) => React.ReactNode
+  payload?: TooltipEntry[]
+  label?: string | number
+  formatter?: (value: number | string, name: string, props: TooltipEntry) => [React.ReactNode, string]
+  labelFormatter?: (value: string | number) => React.ReactNode
 }
 
 function MobileTooltip({ 
@@ -74,7 +96,7 @@ function MobileTooltip({
           </div>
         )}
         <div className="space-y-1">
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry: TooltipEntry, index: number) => (
             <div key={index} className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <div 
@@ -104,7 +126,7 @@ function MobileTooltip({
 interface BaseMobileChartProps {
   title?: string
   description?: string
-  data: any[]
+  data: ChartDataPoint[]
   className?: string
   height?: number
   showFullscreen?: boolean
@@ -546,7 +568,7 @@ export const MobilePieChart = memo(function MobilePieChart({
 }: MobilePieChartProps) {
   const { isMobile } = useResponsive()
 
-  const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: any) => {
+  const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: PieLabelProps) => {
     if (!showLabels || percent < 0.05) return null // Don't show labels for slices < 5%
     
     const RADIAN = Math.PI / 180
@@ -605,7 +627,7 @@ export const MobilePieChart = memo(function MobilePieChart({
 
 // Mini chart component for dashboard cards
 interface MiniChartProps {
-  data: any[]
+  data: ChartDataPoint[]
   type: 'line' | 'area' | 'bar'
   dataKey: string
   color?: string

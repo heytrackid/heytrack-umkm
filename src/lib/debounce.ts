@@ -5,7 +5,7 @@
  * since the last time it was invoked.
  */
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number = 300
 ): (...args: Parameters<T>) => void {
@@ -50,7 +50,7 @@ export function useDebounce<T>(value: T, delay: number = 300): T {
  */
 import { useCallback, useRef } from 'react'
 
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number = 300
 ): (...args: Parameters<T>) => void {

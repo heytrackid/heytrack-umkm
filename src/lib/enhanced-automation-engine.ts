@@ -15,6 +15,7 @@
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types'
 
+import { apiLogger } from '@/lib/logger'
 // Type definitions
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -225,7 +226,7 @@ export class EnhancedAutomationEngine {
         margin_analysis: marginAnalysis
       }
     } catch (error: unknown) {
-      console.error('Advanced HPP calculation error:', error)
+      apiLogger.error({ error: error }, 'Advanced HPP calculation error:')
       throw error
     }
   }
@@ -306,7 +307,7 @@ export class EnhancedAutomationEngine {
         cost_optimization: costOptimization
       }
     } catch (error: unknown) {
-      console.error('Intelligent inventory analysis error:', error)
+      apiLogger.error({ error: error }, 'Intelligent inventory analysis error:')
       throw error
     }
   }
@@ -374,7 +375,7 @@ export class EnhancedAutomationEngine {
         profitability_forecast: profitabilityForecast
       }
     } catch (error: unknown) {
-      console.error('Production optimization error:', error)
+      apiLogger.error({ error: error }, 'Production optimization error:')
       throw error
     }
   }
@@ -435,7 +436,7 @@ export class EnhancedAutomationEngine {
         business_insights: businessInsights
       }
     } catch (error: unknown) {
-      console.error('Contextual alerts generation error:', error)
+      apiLogger.error({ error: error }, 'Contextual alerts generation error:')
       throw error
     }
   }
@@ -489,7 +490,7 @@ export class EnhancedAutomationEngine {
         growth_strategy: growthStrategy
       }
     } catch (error: unknown) {
-      console.error('Business intelligence generation error:', error)
+      apiLogger.error({ error: error }, 'Business intelligence generation error:')
       throw error
     }
   }
@@ -536,8 +537,8 @@ export class EnhancedAutomationEngine {
     const limitingIngredients: string[] = []
     const warnings: string[] = []
 
-    recipeIngredients?.forEach((ri: unknown) => {
-      const ingredient = ri.ingredients as unknown as Ingredient
+    recipeIngredients?.forEach((ri: any) => {
+      const ingredient = ri.ingredients as any as Ingredient
       const needed = ri.quantity * maxBatches
       
       if (ingredient.current_stock ?? 0 < needed) {
@@ -588,8 +589,8 @@ export class EnhancedAutomationEngine {
       if (error) throw error
 
       // Transform and categorize results
-      const criticalItems = analysisResult?.filter((item: unknown) => item.urgency_level === 'CRITICAL') || []
-      const reorderSuggestions = analysisResult?.filter((item: unknown) => 
+      const criticalItems = analysisResult?.filter((item: any) => item.urgency_level === 'CRITICAL') || []
+      const reorderSuggestions = analysisResult?.filter((item: any) => 
         ['HIGH', 'MEDIUM'].includes(item.urgency_level)
       ) || []
 
@@ -599,7 +600,7 @@ export class EnhancedAutomationEngine {
         totalItemsNeedingAttention: analysisResult?.length || 0
       }
     } catch (error: unknown) {
-      console.error('Error analyzing inventory needs:', error)
+      apiLogger.error({ error: error }, 'Error analyzing inventory needs:')
       return {
         criticalItems: [],
         reorderSuggestions: [],

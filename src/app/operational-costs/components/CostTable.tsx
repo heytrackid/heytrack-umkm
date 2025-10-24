@@ -31,7 +31,7 @@ import {
 import { format } from 'date-fns'
 
 interface CostTableProps {
-  costs: any[]
+  costs: unknown[]
   onEdit: (cost: any) => void
   onDelete: (cost: any) => void
   formatCurrency: (amount: number) => string

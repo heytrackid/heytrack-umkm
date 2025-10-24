@@ -1,12 +1,20 @@
+import { dbLogger } from '@/lib/logger';
 import { sanitizeSQL, validateInput } from '@/lib/validations';
 import { Database } from '@/types';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// Cache entry type
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  ttl: number;
+}
 
 // Simple in-memory cache for server-side operations
 class SimpleCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, CacheEntry<unknown>>()
 
-  set(key: string, data: any, ttlMs: number = 300000): void {
+  set<T>(key: string, data: T, ttlMs: number = 300000): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -14,7 +22,7 @@ class SimpleCache {
     })
   }
 
-  get<T = any>(key: string): T | null {
+  get<T>(key: string): T | null {
     const item = this.cache.get(key)
 
     if (!item) return null
@@ -24,7 +32,7 @@ class SimpleCache {
       return null
     }
 
-    return item.data
+    return item.data as T
   }
 
   clear(): void {
@@ -48,37 +56,18 @@ const shouldValidate = (typeof window !== 'undefined' || process.env.NODE_ENV ==
 if (shouldValidate) {
   // Validate environment variables format
   if (!supabaseUrl.startsWith('https://') || !supabaseUrl.includes('.supabase.co')) {
-    console.warn('Invalid Supabase URL format. Should be: https://your-project.supabase.co')
+    dbLogger.warn('Invalid Supabase URL format. Should be: https://your-project.supabase.co')
   }
 
   if (supabaseAnonKey.length < 100) {
-    console.warn('Invalid Supabase anonymous key format. Key appears too short.')
+    dbLogger.warn('Invalid Supabase anonymous key format. Key appears too short.')
   }
-}
-
-// Create a mock client that throws helpful errors when env vars are missing
-const createMockSupabaseClient = () => {
-  const mockClient = {
-    from: () => {
-      throw new Error('Supabase client not initialized. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env file.')
-    },
-    auth: {
-      signIn: () => Promise.reject(new Error('Supabase client not initialized. Please configure environment variables.')),
-      signOut: () => Promise.reject(new Error('Supabase client not initialized. Please configure environment variables.')),
-    },
-    channel: () => ({
-      on: () => mockClient,
-      subscribe: () => Promise.resolve(),
-    }),
-    removeChannel: () => {},
-  }
-  return mockClient as any
 }
 
 // Create a lazy-loaded supabase client
-let _supabaseClient: any = null
+let _supabaseClient: SupabaseClient<Database> | null = null
 
-function getSupabaseClient(): any {
+function getSupabaseClient(): SupabaseClient<Database> {
   if (!_supabaseClient) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -115,12 +104,12 @@ function getSupabaseClient(): any {
 }
 
 // For client-side usage with typing - lazy loaded
-export const supabase = new Proxy({}, {
-  get(target, prop) {
+export const supabase = new Proxy({} as SupabaseClient<Database>, {
+  get(_target, prop) {
     const client = getSupabaseClient()
-    return client[prop]
+    return client[prop as keyof SupabaseClient<Database>]
   }
-}) as any
+}) as SupabaseClient<Database>
 
 // Export createClient function for API routes and server-side usage
 export const createSupabaseClient = () => {
@@ -164,23 +153,34 @@ export const createServerSupabaseAdmin = () => {
   )
 }
 
+// Type for realtime payload
+export interface RealtimePayload<T = Record<string, unknown>> {
+  schema: string;
+  table: string;
+  commit_timestamp: string;
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE';
+  new: T;
+  old: T;
+  errors: string[] | null;
+}
+
 // Real-time subscription helper
-export const subscribeToTable = (
+export const subscribeToTable = <T extends Record<string, unknown> = Record<string, unknown>>(
   table: keyof Database['public']['Tables'],
-  callback: (payload: any) => void,
+  callback: (payload: RealtimePayload<T>) => void,
   filter?: string
 ) => {
   const channel = supabase
-    .channel(`realtime_${table}`)
+    .channel(`realtime_${String(table)}`)
     .on(
-      'postgres_changes',
+      'postgres_changes' as const,
       {
         event: '*',
         schema: 'public',
-        table,
+        table: String(table),
         filter,
       },
-      callback
+      (payload: any) => callback(payload as RealtimePayload<T>)
     )
     .subscribe()
 
@@ -189,33 +189,16 @@ export const subscribeToTable = (
   }
 }
 
-// Enhanced validation rules
-const validationRules = {
-  ingredient: {
-    name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
-    price_per_unit: { required: true, type: 'number', min: 0 },
-    unit: { required: true, type: 'string', minLength: 1, maxLength: 20 },
-    current_stock: { required: true, type: 'number', min: 0 },
-    minimum_stock: { required: true, type: 'number', min: 0 },
-  },
-  order: {
-    customer_name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
-    total_amount: { required: true, type: 'number', min: 0 },
-    order_date: { required: true, type: 'string', pattern: /^\d{4}-\d{2}-\d{2}$/ },
-  },
-  recipe: {
-    name: { required: true, type: 'string', minLength: 2, maxLength: 100 },
-    description: { type: 'string', maxLength: 500 },
-    category: { required: true, type: 'string', minLength: 2, maxLength: 50 },
-  }
-}
+// Type definitions for database operations
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
 
 // Secure database service helpers with input validation and caching
 export const dbService = {
   // Ingredients with caching and validation
-  async getIngredients() {
+  async getIngredients(): Promise<Ingredient[]> {
     const cacheKey = 'ingredients_active'
-    const cached = cacheManager.get(cacheKey)
+    const cached = cacheManager.get<Ingredient[]>(cacheKey)
     if (cached) return cached
 
     const { data, error } = await supabase
@@ -225,7 +208,7 @@ export const dbService = {
       .order('name')
 
     if (error) {
-      console.error('Database error in getIngredients:', error)
+      dbLogger.error({ err: error }, 'Database error in getIngredients')
       throw new Error('Failed to fetch ingredients')
     }
 
@@ -234,7 +217,7 @@ export const dbService = {
     return data
   },
 
-  async addIngredient(ingredientData: any) {
+  async addIngredient(ingredientData: Partial<Ingredient>): Promise<Ingredient> {
     // Validate input
     const validation = validateInput(ingredientData)
     if (!validation.isValid) {
@@ -248,15 +231,24 @@ export const dbService = {
       unit: typeof ingredientData.unit === 'string' ? sanitizeSQL(ingredientData.unit) : ingredientData.unit,
     }
 
-    const { data, error } = await supabase
+    // Type assertion needed due to Supabase client type inference limitations
+    // The sanitizedIngredient matches IngredientInsert structure but TS can't infer it
+    const result = await supabase
       .from('ingredients')
-      .insert(ingredientData)
+      // @ts-ignore - Supabase client returns 'never' for ingredients table, using type assertion
+      .insert(sanitizedIngredient)
       .select('*')
       .single()
 
+    const { data, error } = result as { data: Ingredient | null; error: unknown }
+
     if (error) {
-      console.error('Database error in addIngredient:', error)
+      dbLogger.error({ err: error }, 'Database error in addIngredient')
       throw new Error('Failed to add ingredient')
+    }
+
+    if (!data) {
+      throw new Error('No data returned from insert')
     }
 
     // Clear cache
@@ -264,7 +256,7 @@ export const dbService = {
     return data
   },
 
-  async updateIngredient(id: string, updates: any) {
+  async updateIngredient(id: string, updates: Partial<Ingredient>): Promise<Ingredient> {
     // Validate UUID
     if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
       throw new Error('Invalid ingredient ID format')
@@ -285,21 +277,30 @@ export const dbService = {
       sanitizedUpdates.unit = sanitizeSQL(sanitizedUpdates.unit)
     }
 
-    const { data, error } = await supabase
+    // Type assertion needed due to Supabase client type inference limitations
+    // The sanitizedUpdates matches IngredientUpdate structure but TS can't infer it
+    const result = await supabase
       .from('ingredients')
+      // @ts-ignore - Supabase client returns 'never' for ingredients table, using type assertion
       .update(sanitizedUpdates)
       .eq('id', id)
       .select('*')
       .single()
 
+    const { data, error } = result as { data: Ingredient | null; error: unknown }
+
     if (error) {
-      console.error('Database error in updateIngredient:', error)
+      dbLogger.error({ err: error }, 'Database error in updateIngredient')
       throw new Error('Failed to update ingredient')
+    }
+
+    if (!data) {
+      throw new Error('No data returned from update')
     }
 
     // Clear cache
     cacheManager.clear()
-    return data as Database['public']['Tables']['ingredients']['Row']
+    return data
   },
 
   // Recipes with ingredients
@@ -354,7 +355,7 @@ export const dbService = {
   },
 
   // Financial records
-  async getFinancialRecords(startDate?: string, endDate?: string) {
+  async getFinancialRecords(startDate?: string, endDate?: string): Promise<FinancialRecord[]> {
     let query = supabase
       .from('financial_records')
       .select('*')
@@ -374,4 +375,3 @@ export const dbService = {
     return data
   },
 }
-

@@ -17,11 +17,30 @@ import {
   ChefHat
 } from 'lucide-react'
 
+interface RecipeIngredient {
+  ingredient_id: string
+  quantity: number
+  unit: string
+}
+
+interface Recipe {
+  name: string
+  category: string
+  description: string
+  ingredients: RecipeIngredient[]
+}
+
+interface Ingredient {
+  id: string
+  name: string
+  unit: string
+}
+
 interface RecipeFormProps {
-  recipe: any
-  ingredients: any[]
+  recipe: Recipe
+  ingredients: Ingredient[]
   isEditing: boolean
-  onRecipeChange: (recipe: any) => void
+  onRecipeChange: (recipe: Recipe) => void
   onSave: () => void
   onCancel: () => void
 }
@@ -198,7 +217,7 @@ export function RecipeForm({
           </div>
 
           <div className="space-y-3">
-            {recipe.ingredients.map((ingredient: any, index: number) => (
+            {recipe.ingredients.map((ingredient: RecipeIngredient, index: number) => (
               <div key={index} className="flex gap-2 items-end">
                 <div className="flex-1">
                   <Label className="text-xs text-gray-600">
@@ -212,7 +231,7 @@ export function RecipeForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ingredients?.map((ing) => (
+                      {ingredients?.map((ing: Ingredient) => (
                         <SelectItem key={ing.id} value={ing.id}>
                           {ing.name}
                         </SelectItem>

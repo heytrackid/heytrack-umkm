@@ -1,14 +1,16 @@
 import { hppAutomation, triggerIngredientPriceUpdate, updateOperationalCosts } from '@/lib/automation/hpp-automation'
+import { getErrorMessage, isRecord } from '@/lib/type-guards'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // POST /api/hpp/automation - Trigger HPP automation events
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { event, data } = body
 
-    console.log(`🧮 HPP Automation triggered: ${event}`)
+    apiLogger.info(`🧮 HPP Automation triggered: ${event}`)
 
     let result = null
 
@@ -45,9 +47,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    console.error('Error in HPP automation:', error)
+    apiLogger.error({ error: error }, 'Error in HPP automation:')
     return NextResponse.json(
-      { error: 'HPP automation failed', details: error.message },
+      { error: 'HPP automation failed', details: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -60,7 +62,7 @@ export async function GET(request: NextRequest) {
     const recipeId = searchParams.get('param')
     const includeOperationalCosts = searchParams.get('param') === 'true'
 
-    const status: unknown = {
+    const status: Record<string, unknown> = {
       hppAutomationEnabled: true,
       lastMonitoringCheck: new Date().toISOString(),
       cachedRecipes: 'Available'
@@ -84,7 +86,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    console.error('Error getting HPP automation status:', error)
+    apiLogger.error({ error: error }, 'Error getting HPP automation status:')
     return NextResponse.json(
       { error: 'Failed to get automation status' },
       { status: 500 }
@@ -94,14 +96,21 @@ export async function GET(request: NextRequest) {
 
 // Handler Functions
 
-async function handleIngredientPriceChange(data: unknown) {
-  const { ingredientId, oldPrice, newPrice } = data
-
-  if (!ingredientId || oldPrice === undefined || newPrice === undefined) {
-    throw new Error('Missing required fields: ingredientId, oldPrice, newPrice')
+async function handleIngredientPriceChange(data: any) {
+  if (!isRecord(data)) {
+    throw new Error('Invalid data format: expected object')
   }
 
-  console.log(`💰 Processing ingredient price change: ${ingredientId} (${oldPrice} → ${newPrice})`)
+  const { ingredientId, oldPrice, newPrice } = data
+
+  if (!ingredientId || typeof ingredientId !== 'string') {
+    throw new Error('Missing or invalid required field: ingredientId')
+  }
+  if (typeof oldPrice !== 'number' || typeof newPrice !== 'number') {
+    throw new Error('Missing or invalid required fields: oldPrice, newPrice')
+  }
+
+  apiLogger.info({ ingredientId, oldPrice, newPrice }, '💰 Processing ingredient price change')
 
   // Trigger HPP automation
   await triggerIngredientPriceUpdate(ingredientId, oldPrice, newPrice)
@@ -118,7 +127,7 @@ async function handleIngredientPriceChange(data: unknown) {
     .eq('id', ingredientId)
 
   if (updateError) {
-    console.error('Error updating ingredient price in database:', updateError)
+    apiLogger.error({ error: updateError }, 'Error updating ingredient price in database:')
   }
 
   return {
@@ -133,14 +142,21 @@ async function handleIngredientPriceChange(data: unknown) {
   }
 }
 
-async function handleOperationalCostChange(data: unknown) {
-  const { costId, oldAmount, newAmount } = data
-
-  if (!costId || oldAmount === undefined || newAmount === undefined) {
-    throw new Error('Missing required fields: costId, oldAmount, newAmount')
+async function handleOperationalCostChange(data: any) {
+  if (!isRecord(data)) {
+    throw new Error('Invalid data format: expected object')
   }
 
-  console.log(`🏭 Processing operational cost change: ${costId} (${oldAmount} → ${newAmount})`)
+  const { costId, oldAmount, newAmount } = data
+
+  if (!costId || typeof costId !== 'string') {
+    throw new Error('Missing or invalid required field: costId')
+  }
+  if (typeof oldAmount !== 'number' || typeof newAmount !== 'number') {
+    throw new Error('Missing or invalid required fields: oldAmount, newAmount')
+  }
+
+  apiLogger.info({ costId, oldAmount, newAmount }, '🏭 Processing operational cost change')
 
   // Trigger HPP automation
   updateOperationalCosts(costId, newAmount)
@@ -157,14 +173,18 @@ async function handleOperationalCostChange(data: unknown) {
   }
 }
 
-async function handleRecipeHPPCalculation(data: unknown) {
-  const { recipeId } = data
-
-  if (!recipeId) {
-    throw new Error('Missing required field: recipeId')
+async function handleRecipeHPPCalculation(data: any) {
+  if (!isRecord(data)) {
+    throw new Error('Invalid data format: expected object')
   }
 
-  console.log(`🧮 Calculating HPP for recipe: ${recipeId}`)
+  const { recipeId } = data
+
+  if (!recipeId || typeof recipeId !== 'string') {
+    throw new Error('Missing or invalid required field: recipeId')
+  }
+
+  apiLogger.info({ recipeId }, '🧮 Calculating HPP for recipe')
 
   // Calculate smart HPP
   const recipeHPP = await hppAutomation.calculateSmartHPP(recipeId)
@@ -189,10 +209,18 @@ async function handleRecipeHPPCalculation(data: unknown) {
   }
 }
 
-async function handleBatchHPPRecalculation(data: unknown) {
+async function handleBatchHPPRecalculation(data: any) {
+  if (!isRecord(data)) {
+    throw new Error('Invalid data format: expected object')
+  }
+
   const { reason = 'manual_request' } = data
 
-  console.log(`🔄 Processing batch HPP recalculation: ${reason}`)
+  if (typeof reason !== 'string') {
+    throw new Error('Invalid reason field: must be string')
+  }
+
+  apiLogger.info({ reason }, '🔄 Processing batch HPP recalculation')
 
   // Get all recipe IDs from database
   const supabase = createServerSupabaseAdmin()
@@ -203,7 +231,7 @@ async function handleBatchHPPRecalculation(data: unknown) {
     .eq('is_active', true)
 
   if (error) {
-    throw new Error(`Failed to fetch recipes: ${error.message}`)
+    throw new Error(`Failed to fetch recipes: ${getErrorMessage(error)}`)
   }
 
   const results = []
@@ -229,7 +257,7 @@ async function handleBatchHPPRecalculation(data: unknown) {
         recipeId: recipe.id,
         recipeName: recipe.nama,
         status: 'error',
-        error: error.message
+        error: getErrorMessage(error)
       })
 
       errorCount++

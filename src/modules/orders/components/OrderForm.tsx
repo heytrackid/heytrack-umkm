@@ -19,7 +19,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
   const [availableCustomers, setAvailableCustomers] = useState<any[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
   const [showNewCustomer, setShowNewCustomer] = useState(false)
-  const [hppCalculations, setHppCalculations] = useState<Record<string, any>>({})
+  const [hppCalculations, setHppCalculations] = useState<Record<string, unknown>>({})
 
   const [formData, setFormData] = useState({
     customer_name: order?.customer_name || '',

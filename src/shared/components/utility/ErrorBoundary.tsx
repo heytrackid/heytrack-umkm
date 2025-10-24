@@ -6,6 +6,7 @@ import { Card, CardContent } from '../ui/card'
 import { AlertTriangle, RefreshCw, Bug } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+import { apiLogger } from '@/lib/logger'
 interface Props {
   children: ReactNode
   fallback?: ReactNode
@@ -42,7 +43,7 @@ export class ErrorBoundary extends Component<Props, State> {
     })
 
     // Log error to console
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    apiLogger.error({ error: error, errorInfo }, 'ErrorBoundary caught an error:')
     
     // Call optional error handler
     this.props.onError?.(error, errorInfo)
@@ -85,7 +86,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 {process.env.NODE_ENV === 'development' && (
                   <Button 
                     variant="ghost" 
-                    onClick={() => console.log(this.state.error, this.state.errorInfo)}
+                    onClick={() => apiLogger.info(this.state.error, this.state.errorInfo)}
                     className="gap-2"
                   >
                     <Bug className="h-4 w-4" />

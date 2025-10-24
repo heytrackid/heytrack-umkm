@@ -5,6 +5,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 interface AuthState {
   user: User | null
   session: Session | null
@@ -36,7 +37,7 @@ export function useAuth() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
         if (sessionError) {
-          console.error('Session error:', sessionError)
+          apiLogger.error({ error: sessionError }, 'Session error:')
           setAuthState({
             user: null,
             session: null,
@@ -49,7 +50,7 @@ export function useAuth() {
         const { data: { user }, error: userError } = await supabase.auth.getUser()
 
         if (userError) {
-          console.error('User error:', userError)
+          apiLogger.error({ error: userError }, 'User error:')
         }
 
         setAuthState({
@@ -59,7 +60,7 @@ export function useAuth() {
           isAuthenticated: !!user,
         })
       } catch (error) {
-        console.error('Auth initialization error:', error)
+        apiLogger.error({ error: error }, 'Auth initialization error:')
         setAuthState({
           user: null,
           session: null,
@@ -74,7 +75,7 @@ export function useAuth() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: string, session: Session | null) => {
-        console.log('Auth state changed:', event)
+        apiLogger.info('Auth state changed:', event)
 
         setAuthState({
           user: session?.user || null,
@@ -115,7 +116,7 @@ export function useAuth() {
       })
       router.push('/auth/login')
     } catch (error) {
-      console.error('Sign out error:', error)
+      apiLogger.error({ error: error }, 'Sign out error:')
     }
   }
 

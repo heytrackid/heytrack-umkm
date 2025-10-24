@@ -21,7 +21,7 @@ export async function GET(
     if (error) throw error;
 
     return NextResponse.json(expense);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -33,7 +33,7 @@ export async function PUT(
   const { id } = await params;
   try {
     const supabase = createSupabaseClient();
-    const body = await request.json() as any;
+    const body = await request.json();
 
     const { data: expense, error } = await supabase
       .from('expenses')
@@ -48,7 +48,7 @@ export async function PUT(
     if (error) throw error;
 
     return NextResponse.json(expense);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -69,7 +69,7 @@ export async function DELETE(
     if (error) throw error;
 
     return NextResponse.json({ message: 'Expense deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

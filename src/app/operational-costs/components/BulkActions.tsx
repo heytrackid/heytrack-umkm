@@ -6,7 +6,7 @@ import { Edit2, Trash2 } from 'lucide-react'
 
 interface BulkActionsProps {
   selectedItems: string[]
-  costs: any[]
+  costs: unknown[]
   onClearSelection: () => void
   onBulkEdit: () => void
   onBulkDelete: () => void

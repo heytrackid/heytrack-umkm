@@ -23,6 +23,62 @@ const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: fals
 const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false })
 const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
 
+// Type definitions for data structures
+interface ChartEntry {
+  name: string
+  value: number
+  color: string
+}
+
+interface Customer {
+  name: string
+  total_spent?: number
+  total_orders?: number
+}
+
+interface Recipe {
+  name: string
+  total_revenue?: number
+  times_made?: number
+}
+
+interface InventoryItem {
+  name: string
+  current_stock: number
+  unit: string
+}
+
+interface FinancialData {
+  revenue: number
+  costs: number
+  profitMargin: number
+}
+
+interface InventoryData {
+  criticalItems: InventoryItem[]
+  alerts: unknown[]
+  recommendations: string[]
+}
+
+interface CustomerData {
+  topCustomers: Customer[]
+  summary: string
+}
+
+interface ProductData {
+  topRecipes: Recipe[]
+  recommendations: string[]
+}
+
+interface AnalysisData {
+  analysis: {
+    financial: FinancialData
+    inventory: InventoryData
+    recipes: ProductData
+    customers: CustomerData
+  }
+}
+
 interface DataVisualizationProps {
   type: 'financial' | 'inventory' | 'customers' | 'products' | 'analysis';
   data: unknown;
@@ -37,8 +93,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
     new Intl.NumberFormat.format;
 
   // Financial Performance Visualization
-  const FinancialChart = ({ data }: { data: unknown }) => {
-    const chartData = [
+  const FinancialChart = ({ data }: { data: FinancialData }) => {
+    const chartData: ChartEntry[] = [
       {
         name: 'Revenue',
         value: data.revenue,
@@ -104,7 +160,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                     <YAxis tickFormatter={(value) => `${value / 1000000}M`} />
                     <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
                     <Bar dataKey="value" fill="#8884d8">
-                      {chartData.map((entry, _index) => (
+                      {chartData.map((entry: ChartEntry, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Bar>
@@ -131,7 +187,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Inventory Status Visualization
-  const InventoryChart = ({ data }: { data: unknown }) => {
+  const InventoryChart = ({ data }: { data: InventoryData }) => {
     return (
       <Card className="w-full">
         <CardHeader className="pb-3">
@@ -152,7 +208,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                   </span>
                 </div>
                 <div className="mt-2 space-y-1">
-                  {data.criticalItems.slice(0, 3).map((item: unknown, index: number) => (
+                  {data.criticalItems.slice(0, 3).map((item: InventoryItem, index: number) => (
                     <div key={index} className="text-sm text-red-700">
                       • {item.name}: {item.current_stock} {item.unit} remaining
                     </div>
@@ -197,8 +253,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Customer Analysis Visualization
-  const CustomerChart = ({ data }: { data: unknown }) => {
-    const pieData = data.topCustomers.slice(0, 5).map((customer: unknown, index: number) => ({
+  const CustomerChart = ({ data }: { data: CustomerData }) => {
+    const pieData = data.topCustomers.slice(0, 5).map((customer: Customer, index: number) => ({
       name: customer.name,
       value: customer.total_spent || 0,
       color: COLORS[index % COLORS.length]
@@ -258,7 +314,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
             {/* Top customers list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Top Customers:</h4>
-              {data.topCustomers.slice(0, 3).map((customer: unknown, index: number) => (
+              {data.topCustomers.slice(0, 3).map((customer: Customer, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{customer.name}</span>
                   <div className="text-right">
@@ -275,8 +331,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Product Analysis Visualization
-  const ProductChart = ({ data }: { data: unknown }) => {
-    const chartData = data.topRecipes.slice(0, 5).map((recipe: unknown) => ({
+  const ProductChart = ({ data }: { data: ProductData }) => {
+    const chartData = data.topRecipes.slice(0, 5).map((recipe: Recipe) => ({
       name: recipe.name.length > 10 ? recipe.name.substring(0, 10) + '...' : recipe.name,
       revenue: recipe.total_revenue || 0,
       count: recipe.times_made || 0
@@ -314,7 +370,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
             {/* Top products list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Best Selling Products:</h4>
-              {data.topRecipes.slice(0, 3).map((recipe: unknown, index: number) => (
+              {data.topRecipes.slice(0, 3).map((recipe: Recipe, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{recipe.name}</span>
                   <div className="text-right">
@@ -344,7 +400,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Comprehensive Analysis Dashboard
-  const AnalysisChart = ({ data }: { data: unknown }) => {
+  const AnalysisChart = ({ data }: { data: AnalysisData }) => {
     const { financial, inventory, recipes, customers } = data.analysis;
 
     return (

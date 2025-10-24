@@ -1,5 +1,5 @@
 'use client'
-import * as React from 'react'
+import React from 'react'
 
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,7 @@ import {
 import { useSettings } from '@/contexts/settings-context'
 
 interface RecipeTableProps {
-  recipes: any[]
+  recipes: unknown[]
   searchTerm: string
   onSearchChange: (term: string) => void
   onAddNew: () => void
@@ -120,7 +120,7 @@ export default function RecipeTable({
             <Input
               placeholder=""
               value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchChange(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -215,7 +215,7 @@ export default function RecipeTable({
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => onEdit(cost)}>
+                              <DropdownMenuItem onClick={() => onEdit(recipe)}>
                                 <Edit2 className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
@@ -248,11 +248,7 @@ export default function RecipeTable({
               <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
-                    {t('recipes.pagination.showing', {
-                      from: ((currentPage - 1) * pageSize) + 1,
-                      to: Math.min(currentPage * pageSize, totalItems),
-                      total: totalItems
-                    })}
+                    Menampilkan {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalItems)} dari {totalItems} resep
                   </span>
                 </div>
                 
@@ -260,7 +256,7 @@ export default function RecipeTable({
                   {/* Page Size Selector */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Tampilkan</span>
-                    <Select value={pageSize.toString()} onValueChange={(value) => {
+                    <Select value={pageSize.toString()} onValueChange={(value: string) => {
                       setPageSize(Number(value))
                       setCurrentPage(1)
                     }}>

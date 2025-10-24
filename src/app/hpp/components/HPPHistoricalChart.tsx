@@ -154,7 +154,7 @@ export default function HPPHistoricalChart({
     const chartData = useMemo(() => {
         if (multiSelect) {
             // For multi-product, we need to merge data by date
-            const dateMap = new Map<string, any>()
+            const dateMap = new Map<string, unknown>()
 
             Object.entries(multiProductData).forEach(([recipeId, snapshots]) => {
                 const recipe = recipes.find(r => r.id === recipeId)
@@ -237,7 +237,7 @@ export default function HPPHistoricalChart({
     }, [snapshots, multiSelect, multiProductData])
 
     // Custom tooltip - optimized for touch devices
-    const CustomTooltip = ({ active, payload, label }: any) => {
+    const CustomTooltip = ({ ...props }: { [key: string]: unknown }) => {
         if (active && payload && payload.length) {
             return (
                 <div className={cn(

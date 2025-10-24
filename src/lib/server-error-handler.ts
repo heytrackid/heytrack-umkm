@@ -78,7 +78,7 @@ export function createSuccessResponse<T>(
  * Handle authentication errors
  */
 export function handleAuthError(
-    error: unknown,
+    error: any,
     context?: string
 ): NextResponse<ApiErrorResponse> {
     logger.error({ err: error, context }, 'Auth error')
@@ -106,7 +106,7 @@ export function handleAuthError(
  * Handle database errors
  */
 export function handleDatabaseError(
-    error: unknown,
+    error: any,
     context?: string
 ): NextResponse<ApiErrorResponse> {
     logger.error({ err: error, context }, 'Database error')

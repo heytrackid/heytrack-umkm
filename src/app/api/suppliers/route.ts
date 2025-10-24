@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
+import { getErrorMessage } from '@/lib/type-guards';
 import { PaginationQuerySchema, SupplierInsertSchema } from '@/lib/validations';
 
 export async function GET(request: NextRequest) {
@@ -64,8 +65,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(count / limit)
       }
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     return NextResponse.json(supplier, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

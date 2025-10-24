@@ -138,6 +138,11 @@ export default function CostBreakdownChart({
 
     // Custom active shape for pie chart
     const renderActiveShape = (props: any) => {
+        // Type guard for Recharts Pie sector props
+        if (!props || typeof props !== 'object') {
+            return null
+        }
+
         const {
             cx,
             cy,
@@ -148,7 +153,17 @@ export default function CostBreakdownChart({
             fill,
             payload,
             percent
-        } = props
+        } = props as {
+            cx: number
+            cy: number
+            innerRadius: number
+            outerRadius: number
+            startAngle: number
+            endAngle: number
+            fill: string
+            payload: { name: string; value: number }
+            percent: number
+        }
 
         return (
             <g>
@@ -175,22 +190,22 @@ export default function CostBreakdownChart({
     }
 
     // Custom tooltip
-    const CustomTooltip = ({ active, payload }: any) => {
+    const CustomTooltip = ({ active, payload, ...props }: { active?: boolean; payload?: unknown[]; [key: string]: unknown }) => {
         if (active && payload && payload.length) {
-            const data = payload[0].payload
+            const data = payload[0] as { payload: { name: string; value: number; percentage: number } }
             return (
                 <div className="bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-3 min-w-[180px]">
                     <div className="font-medium text-foreground mb-2 border-b pb-2">
-                        {data.name}
+                        {data.payload.name}
                     </div>
                     <div className="space-y-1">
                         <div className="flex justify-between gap-3">
                             <span className="text-sm text-muted-foreground">Nilai:</span>
-                            <span className="text-sm font-medium">{formatCurrency(data.value)}</span>
+                            <span className="text-sm font-medium">{formatCurrency(data.payload.value)}</span>
                         </div>
                         <div className="flex justify-between gap-3">
                             <span className="text-sm text-muted-foreground">Persentase:</span>
-                            <span className="text-sm font-medium">{data.percentage.toFixed(1)}%</span>
+                            <span className="text-sm font-medium">{data.payload.percentage.toFixed(1)}%</span>
                         </div>
                     </div>
                 </div>
@@ -200,7 +215,7 @@ export default function CostBreakdownChart({
     }
 
     // Handle pie click
-    const onPieClick = (data: any, index: number) => {
+    const onPieClick = (_data: any, index: number) => {
         setActiveIndex(index)
         setSelectedSegment(index === 0 ? 'material' : 'operational')
     }
@@ -304,7 +319,7 @@ export default function CostBreakdownChart({
                                 fill="#8884d8"
                                 dataKey="value"
                                 onClick={onPieClick}
-                                onMouseEnter={(_, index) => setActiveIndex(index)}
+                                onMouseEnter={(_: any, index: number) => setActiveIndex(index)}
                                 onMouseLeave={() => setActiveIndex(undefined)}
                             >
                                 {pieData.map((entry, index) => (

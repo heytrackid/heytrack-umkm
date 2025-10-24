@@ -7,7 +7,7 @@ export type TableRow<T extends TableName> = Tables[T]['Row']
 export type TableInsert<T extends TableName> = Tables[T]['Insert']
 export type TableUpdate<T extends TableName> = Tables[T]['Update']
 
-export function assertTableRow<T extends TableName>(data: unknown): TableRow<T> {
+export function assertTableRow<T extends TableName>(data: any): TableRow<T> {
   return data as TableRow<T>
 }
 

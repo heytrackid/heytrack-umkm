@@ -28,7 +28,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
   const { toast } = useToast()
   
   const form = useForm<CustomerForm>({
-    resolver: zodResolver(CustomerFormSchema) as any,
+    resolver: zodResolver(CustomerFormSchema),
     defaultValues: {
       name: initialData?.name || '',
       email: initialData?.email || '',
@@ -52,7 +52,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
       if (!initialData) {
         form.reset()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan data customer',

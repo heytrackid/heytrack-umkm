@@ -1,7 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import type { ExpensesTable } from '@/types'
+import { OperationalCostInsertSchema, OperationalCostUpdateSchema } from '@/lib/validations/database-validations'
+import { getErrorMessage } from '@/lib/type-guards'
 
+import { apiLogger } from '@/lib/logger'
 /**
  * GET /api/operational-costs
  * 
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching operational costs:', error)
+      apiLogger.error({ error: error }, 'Error fetching operational costs:')
       return NextResponse.json(
         { error: 'Failed to fetch operational costs' },
         { status: 500 }
@@ -106,9 +109,9 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    console.error('Error in GET /api/operational-costs:', error)
+    apiLogger.error({ error: error }, 'Error in GET /api/operational-costs:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -128,7 +131,7 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -137,44 +140,42 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    // Validate required fields
-    if (!body.category || !body.amount || !body.expense_date) {
+    // Validate request body with Zod
+    const validation = OperationalCostInsertSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Category, amount, and expense_date are required' },
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
         { status: 400 }
       )
     }
 
-    // Prevent creating Revenue records through this endpoint
-    if (body.category === 'Revenue') {
-      return NextResponse.json(
-        { error: 'Cannot create Revenue records through this endpoint' },
-        { status: 400 }
-      )
-    }
+    const validatedData = validation.data
 
     const { data, error } = await supabase
       .from('expenses')
       .insert({
         user_id: user.id,
-        category: body.category,
-        subcategory: body.subcategory,
-        amount: body.amount,
-        description: body.description || body.name,
-        expense_date: body.expense_date,
-        supplier: body.supplier,
-        payment_method: body.payment_method || 'CASH',
-        status: body.status || 'paid',
-        receipt_number: body.receipt_number,
-        is_recurring: body.isFixed || false,
-        recurring_frequency: body.frequency || 'monthly',
-        tags: body.tags || []
+        category: validatedData.category,
+        subcategory: validatedData.subcategory,
+        amount: validatedData.amount,
+        description: validatedData.description,
+        expense_date: validatedData.cost_date,
+        supplier: null,
+        payment_method: 'CASH',
+        status: 'paid',
+        receipt_number: null,
+        is_recurring: validatedData.is_recurring,
+        recurring_frequency: validatedData.frequency,
+        tags: []
       })
       .select('*')
       .single()
 
     if (error) {
-      console.error('Error creating operational cost:', error)
+      apiLogger.error({ error: error }, 'Error creating operational cost:')
       return NextResponse.json(
         { error: 'Failed to create operational cost' },
         { status: 500 }
@@ -184,9 +185,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: 201 })
 
   } catch (error: unknown) {
-    console.error('Error in POST /api/operational-costs:', error)
+    apiLogger.error({ error: error }, 'Error in POST /api/operational-costs:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -206,7 +207,7 @@ export async function PUT(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -214,6 +215,20 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
+
+    // Validate request body with Zod (excluding id which is in URL)
+    const updateValidation = OperationalCostUpdateSchema.safeParse(body)
+    if (!updateValidation.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request data',
+          details: updateValidation.error.issues
+        },
+        { status: 400 }
+      )
+    }
+
+    const validatedData = updateValidation.data
 
     // Validate required fields
     if (!body.id) {
@@ -223,21 +238,15 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Build update object
+    // Build update object from validated data
     const updateData: ExpensesTable['Update'] = {}
-    if (body.category !== undefined) updateData.category = body.category
-    if (body.subcategory !== undefined) updateData.subcategory = body.subcategory
-    if (body.amount !== undefined) updateData.amount = body.amount
-    if (body.description !== undefined) updateData.description = body.description
-    if (body.name !== undefined) updateData.description = body.name
-    if (body.expense_date !== undefined) updateData.expense_date = body.expense_date
-    if (body.supplier !== undefined) updateData.supplier = body.supplier
-    if (body.payment_method !== undefined) updateData.payment_method = body.payment_method
-    if (body.status !== undefined) updateData.status = body.status
-    if (body.receipt_number !== undefined) updateData.receipt_number = body.receipt_number
-    if (body.isFixed !== undefined) updateData.is_recurring = body.isFixed
-    if (body.frequency !== undefined) updateData.recurring_frequency = body.frequency
-    if (body.tags !== undefined) updateData.tags = body.tags
+    if (validatedData.category !== undefined) updateData.category = validatedData.category
+    if (validatedData.subcategory !== undefined) updateData.subcategory = validatedData.subcategory
+    if (validatedData.amount !== undefined) updateData.amount = validatedData.amount
+    if (validatedData.description !== undefined) updateData.description = validatedData.description
+    if (validatedData.cost_date !== undefined) updateData.expense_date = validatedData.cost_date
+    if (validatedData.is_recurring !== undefined) updateData.is_recurring = validatedData.is_recurring
+    if (validatedData.frequency !== undefined) updateData.recurring_frequency = validatedData.frequency
 
     const { data, error } = await supabase
       .from('expenses')
@@ -248,7 +257,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating operational cost:', error)
+      apiLogger.error({ error: error }, 'Error updating operational cost:')
       return NextResponse.json(
         { error: 'Failed to update operational cost' },
         { status: 500 }
@@ -265,9 +274,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(data)
 
   } catch (error: unknown) {
-    console.error('Error in PUT /api/operational-costs:', error)
+    apiLogger.error({ error: error }, 'Error in PUT /api/operational-costs:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -287,7 +296,7 @@ export async function DELETE(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -315,7 +324,7 @@ export async function DELETE(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error deleting operational cost:', error)
+      apiLogger.error({ error: error }, 'Error deleting operational cost:')
       return NextResponse.json(
         { error: 'Failed to delete operational cost' },
         { status: 500 }
@@ -332,9 +341,9 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
 
   } catch (error: unknown) {
-    console.error('Error in DELETE /api/operational-costs:', error)
+    apiLogger.error({ error: error }, 'Error in DELETE /api/operational-costs:')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

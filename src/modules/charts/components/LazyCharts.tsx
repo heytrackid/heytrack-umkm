@@ -90,9 +90,9 @@ export const SmartChartLoader = ({
   ...props 
 }: {
   chartType: 'line' | 'bar' | 'area' | 'pie'
-  data: any[]
+  data: unknown[]
   height?: number
-  [key: string]: any
+  [key: string]: unknown
 }) => {
   // Use lightweight version for small datasets, heavy version for large
   const useAdvancedChart = data.length > 20
@@ -173,14 +173,14 @@ export const ChartPerformanceUtils = {
   // Debounce chart updates to prevent excessive re-renders
   debounceChartUpdate: (callback: Function, delay = 300) => {
     let timeoutId: NodeJS.Timeout
-    return (...args: any[]) => {
+    return (...args: unknown[]) => {
       clearTimeout
       timeoutId = setTimeout(() => callback(...args), delay)
     }
   },
 
   // Optimize data for rendering
-  optimizeChartData: (data: any[], maxPoints = 50) => {
+  optimizeChartData: (data: unknown[], maxPoints = 50) => {
     if (data.length <= maxPoints) return data
     
     // Sample data points to reduce rendering load
@@ -189,7 +189,7 @@ export const ChartPerformanceUtils = {
   },
 
   // Virtual scrolling for large datasets
-  getVisibleDataRange: (data: any[], scrollPosition: number, viewportSize: number) => {
+  getVisibleDataRange: (data: unknown[], scrollPosition: number, viewportSize: number) => {
     const startIndex = Math.floor(scrollPosition / viewportSize) * viewportSize
     const endIndex = Math.min(startIndex + viewportSize, data.length)
     return data.slice(startIndex, endIndex)

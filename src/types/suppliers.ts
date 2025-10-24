@@ -1,3 +1,5 @@
+import type { Json } from './common'
+
 // Supplier-related types
 export type SuppliersTable = {
   Row: {
@@ -10,7 +12,7 @@ export type SuppliersTable = {
     is_active: boolean | null
     last_order_date: string | null
     lead_time_days: number | null
-    metadata: any | null
+    metadata: Json | null
     minimum_order: number | null
     name: string
     notes: string | null
@@ -31,7 +33,7 @@ export type SuppliersTable = {
     is_active?: boolean | null
     last_order_date?: string | null
     lead_time_days?: number | null
-    metadata?: any | null
+    metadata?: Json | null
     minimum_order?: number | null
     name: string
     notes?: string | null
@@ -52,7 +54,7 @@ export type SuppliersTable = {
     is_active?: boolean | null
     last_order_date?: string | null
     lead_time_days?: number | null
-    metadata?: any | null
+    metadata?: Json | null
     minimum_order?: number | null
     name?: string
     notes?: string | null

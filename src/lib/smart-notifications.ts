@@ -1,5 +1,6 @@
 import { formatCurrency } from '@/shared/utils/currency'
 
+import { apiLogger } from '@/lib/logger'
 /**
  * Smart Notification System
  * Context-aware business intelligence alerts dan notifications
@@ -28,7 +29,7 @@ export interface NotificationRule {
   conditions: {
     metric: string
     operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'contains'
-    value: any
+    value: unknown
     timeWindow?: number // minutes
   }[]
   notification: {
@@ -96,7 +97,7 @@ export class SmartNotificationSystem {
     // Keep only last 100 notifications
     this.notifications = this.notifications.slice(0, 100)
 
-    console.log('🔔 New notification:', newNotification.title)
+    apiLogger.info('🔔 New notification:', newNotification.title)
 
     this.notifySubscribers()
     return newNotification
@@ -169,12 +170,12 @@ export class SmartNotificationSystem {
    * Process business metrics and generate smart notifications
    */
   async processBusinessMetrics(metrics: {
-    inventory?: any[]
-    orders?: any[]
-    financial?: any
-    production?: any[]
+    inventory?: unknown[]
+    orders?: unknown[]
+    financial?: unknown
+    production?: unknown[]
   }) {
-    console.log('🧠 Processing business metrics for smart notifications...')
+    apiLogger.info('🧠 Processing business metrics for smart notifications...')
 
     // Process inventory metrics
     if (metrics.inventory) {
@@ -198,7 +199,7 @@ export class SmartNotificationSystem {
   /**
    * Process inventory metrics
    */
-  private async processInventoryMetrics(inventory: any[]) {
+  private async processInventoryMetrics(inventory: unknown[]) {
     // Critical stock alerts
     const criticalItems = inventory.filter(item => 
       item.current_stock <= (item.min_stock * 0.3)
@@ -303,7 +304,7 @@ export class SmartNotificationSystem {
   /**
    * Process order metrics
    */
-  private async processOrderMetrics(orders: any[]) {
+  private async processOrderMetrics(orders: unknown[]) {
     // Urgent orders (delivery in < 24 hours)
     const urgentOrders = orders.filter(order => {
       if (!order.delivery_date || order.status === 'DELIVERED') return false
@@ -365,7 +366,7 @@ export class SmartNotificationSystem {
 
     const removedCount = initialCount - this.notifications.length
     if (removedCount > 0) {
-      console.log(`🧹 Cleaned up ${removedCount} expired notifications`)
+      apiLogger.info(`🧹 Cleaned up ${removedCount} expired notifications`)
       this.notifySubscribers()
     }
   }
@@ -432,7 +433,7 @@ export class SmartNotificationSystem {
     const rule = this.rules.find(r => r.id === ruleId)
     if (rule) {
       rule.enabled = enabled
-      console.log(`🔔 Rule ${rule.name} ${enabled ? 'enabled' : 'disabled'}`)
+      apiLogger.info(`🔔 Rule ${rule.name} ${enabled ? 'enabled' : 'disabled'}`)
     }
   }
 }

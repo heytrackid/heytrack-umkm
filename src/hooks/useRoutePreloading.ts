@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 
+import { apiLogger } from '@/lib/logger'
 import {
   globalLazyLoadingUtils,
   preloadChartBundle,
@@ -96,7 +97,7 @@ export const useRoutePreloading = () => {
     if (!config) return
 
     const startTime = performance.now()
-    const preloadPromises: Promise<any>[] = []
+    const preloadPromises: Promise<unknown>[] = []
 
     try {
       // Preload based on priority
@@ -147,10 +148,10 @@ export const useRoutePreloading = () => {
       await Promise.all(preloadPromises)
 
       const endTime = performance.now()
-      console.log(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
+      apiLogger.info(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
 
-    } catch (error: any) {
-      console.warn(`⚠️ Failed to preload resources for ${currentRoute}:`, error)
+    } catch (error: unknown) {
+      apiLogger.warn(`⚠️ Failed to preload resources for ${currentRoute}:`, error)
     }
   }, [pathname, router])
 
@@ -281,13 +282,13 @@ export const useIdleTimePreloading = () => {
       clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
-        console.log('🕒 User idle - preloading heavy components')
+        apiLogger.info('🕒 User idle - preloading heavy components')
 
         Promise.all([
           preloadChartBundle().catch(() => { }),
           preloadTableBundle().catch(() => { }),
         ]).then(() => {
-          console.log('✅ Idle preloading completed')
+          apiLogger.info('✅ Idle preloading completed')
         }).catch(() => { })
       }, 5000) // 5 seconds of inactivity
     }
@@ -320,7 +321,7 @@ export const useNetworkAwarePreloading = () => {
       const isFastConnection = connection.effectiveType === '4g' || connection.downlink > 1.5
 
       if (isFastConnection) {
-        console.log('🚀 Fast connection detected - enabling aggressive preloading')
+        apiLogger.info('🚀 Fast connection detected - enabling aggressive preloading')
 
         // Preload more aggressively on fast connections
         setTimeout(() => {
@@ -330,7 +331,7 @@ export const useNetworkAwarePreloading = () => {
           ]).catch(() => { })
         }, 1000)
       } else if (isSlowConnection) {
-        console.log('🐌 Slow connection detected - minimal preloading')
+        apiLogger.info('🐌 Slow connection detected - minimal preloading')
         // Minimal preloading on slow connections
       }
     }

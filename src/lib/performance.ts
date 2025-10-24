@@ -1,9 +1,10 @@
 import React, { ComponentType, lazy, memo, ReactNode, Suspense, useMemo, useCallback } from 'react'
+import { apiLogger } from '@/lib/logger'
 // Temporarily disabled to fix build issues
 // import { debounce, throttle } from 'lodash-es'
 
 // Lazy loading utilities
-export function createLazyComponent<T extends ComponentType<any>>(
+export function createLazyComponent<T extends ComponentType<unknown>>(
   importFn: () => Promise<{ default: T }>,
   fallback?: ReactNode
 ) {
@@ -49,7 +50,7 @@ export class PerformanceMonitor {
       
       // Log slow operations (>100ms)
       if (duration > 100) {
-        console.warn(`⚠️ Slow operation detected: ${label} took ${duration.toFixed(2)}ms`)
+        apiLogger.warn(`⚠️ Slow operation detected: ${label} took ${duration.toFixed(2)}ms`)
       }
     }
   }
@@ -76,7 +77,7 @@ export class PerformanceMonitor {
 }
 
 // Simple debounce function
-function debounce<T extends (...args: unknown[]) => any>(func: T, delay: number): T {
+function debounce<T extends (...args: unknown[]) => unknown>(func: T, delay: number): T {
   let timeoutId: ReturnType<typeof setTimeout>
   return ((...args: Parameters<T>) => {
     clearTimeout
@@ -85,7 +86,7 @@ function debounce<T extends (...args: unknown[]) => any>(func: T, delay: number)
 }
 
 // Simple throttle function
-function throttle<T extends (...args: unknown[]) => any>(func: T, limit: number): T {
+function throttle<T extends (...args: unknown[]) => unknown>(func: T, limit: number): T {
   let inThrottle: boolean
   return ((...args: Parameters<T>) => {
     if (!inThrottle) {
@@ -97,7 +98,7 @@ function throttle<T extends (...args: unknown[]) => any>(func: T, limit: number)
 }
 
 // Optimized hooks
-export const useDebounce = <T extends (...args: unknown[]) => any>(
+export const useDebounce = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): T => {
@@ -107,7 +108,7 @@ export const useDebounce = <T extends (...args: unknown[]) => any>(
   ) as T
 }
 
-export const useThrottle = <T extends (...args: unknown[]) => any>(
+export const useThrottle = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   limit: number
 ): T => {
@@ -118,7 +119,7 @@ export const useThrottle = <T extends (...args: unknown[]) => any>(
 }
 
 // Memoized callback with performance monitoring
-export const usePerformantCallback = <T extends (...args: unknown[]) => any>(
+export const usePerformantCallback = <T extends (...args: unknown[]) => unknown>(
   callback: T,
   deps: React.DependencyList,
   label?: string
@@ -221,13 +222,13 @@ export const analyzeBundleSize = (): void => {
         const response = await fetch((script as HTMLScriptElement).src)
         const size = parseInt
         totalSize += size
-        console.log(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
+        apiLogger.info(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
       } catch (error: unknown) {
-        console.warn('Failed to analyze script:', (script as HTMLScriptElement).src)
+        apiLogger.warn('Failed to analyze script:', (script as HTMLScriptElement).src)
       }
     }
     
-    console.log(`📊 Total JavaScript bundle size: ${(totalSize / 1024).toFixed(2)}KB`)
+    apiLogger.info(`📊 Total JavaScript bundle size: ${(totalSize / 1024).toFixed(2)}KB`)
   }
   
   if (process.env.NODE_ENV === 'development') {
@@ -237,18 +238,18 @@ export const analyzeBundleSize = (): void => {
 
 // Memory usage monitoring
 export const monitorMemoryUsage = (): void => {
-  if (typeof window === 'undefined' || !(performance as unknown).memory) return
+  if (typeof window === 'undefined' || !(performance as any).memory) return
   
   setInterval(() => {
-    const memory = (performance as unknown).memory
+    const memory = (performance as any).memory
     const used = (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     const limit = (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)
     
-    console.log(`🧠 Memory usage: ${used}MB / ${limit}MB`)
+    apiLogger.info(`🧠 Memory usage: ${used}MB / ${limit}MB`)
     
     // Warn if memory usage is high
     if (memory.usedJSHeapSize / memory.jsHeapSizeLimit > 0.8) {
-      console.warn('⚠️ High memory usage detected!')
+      apiLogger.warn('⚠️ High memory usage detected!')
     }
   }, 30000) // Check every 30 seconds
 }
@@ -261,13 +262,13 @@ export const registerServiceWorker = async (): Promise<void> => {
   
   try {
     const registration = await navigator.serviceWorker.register('/sw.js')
-    console.log('✅ Service Worker registered:', registration)
+    apiLogger.info({ registration }, '✅ Service Worker registered')
     
     registration.addEventListener('updatefound', () => {
-      console.log('🔄 New Service Worker version available')
+      apiLogger.info('🔄 New Service Worker version available')
     })
   } catch (error: unknown) {
-    console.error('❌ Service Worker registration failed:', error)
+    apiLogger.error({ error: error }, '❌ Service Worker registration failed:')
   }
 }
 
@@ -283,7 +284,7 @@ export class CacheManager {
     })
   }
   
-  get<T = any>(key: string): T | null {
+  get<T = unknown >(key: string): T | null {
     const item = this.cache.get(key)
     
     if (!item) return null
@@ -330,12 +331,12 @@ export const measureWebVitals = (): void => {
   
   // Import web-vitals dynamically to avoid SSR issues
   import('@/components').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS((metric) => console.log('📊 CLS:', metric))
-    getFID((metric) => console.log('📊 FID:', metric))
-    getFCP((metric) => console.log('📊 FCP:', metric))
-    getLCP((metric) => console.log('📊 LCP:', metric))
-    getTTFB((metric) => console.log('📊 TTFB:', metric))
+    getCLS((metric) => apiLogger.info('📊 CLS:', metric))
+    getFID((metric) => apiLogger.info({ metric }, '📊 FID'))
+    getFCP((metric) => apiLogger.info({ metric }, '📊 FCP'))
+    getLCP((metric) => apiLogger.info({ metric }, '📊 LCP'))
+    getTTFB((metric) => apiLogger.info({ metric }, '📊 TTFB'))
   }).catch(() => {
-    console.warn('web-vitals not available')
+    apiLogger.warn('web-vitals not available')
   })
 }

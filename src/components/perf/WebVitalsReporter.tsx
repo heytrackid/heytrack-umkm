@@ -3,11 +3,12 @@
 import React, { useEffect } from 'react'
 import { onCLS, onINP, onLCP, onTTFB } from 'web-vitals'
 
+import { apiLogger } from '@/lib/logger'
 function sendToAnalytics(metric: any) {
   try {
     // For now, log to console. Later, POST to /api/errors or analytics endpoint
     if (process.env.NODE_ENV !== 'production') {
-      console.debug('[WebVitals]', metric.name, Math.round(metric.value))
+      apiLogger.debug('[WebVitals]', metric.name, Math.round(metric.value))
     }
     // Example POST (disabled):
     // fetch('/api/web-vitals', { method: 'POST', body: JSON.stringify(metric) })

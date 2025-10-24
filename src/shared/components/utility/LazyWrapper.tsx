@@ -8,6 +8,7 @@ import { Card, CardContent } from '../ui/card'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+import { apiLogger } from '@/lib/logger'
 interface LazyWrapperProps {
   children: ReactElement
   fallback?: ReactElement
@@ -29,7 +30,7 @@ interface LazyComponentOptions {
  */
 export function LazyWrapper({ 
   children, 
-  fallback, 
+  fallback,
   errorFallback,
   name = 'Component',
   minLoadingTime = 300 
@@ -110,11 +111,11 @@ export function createLazyComponent<T extends ComponentType<any>>(
 ): T {
   const LazyComponent = lazy(importFn)
   
-  const WrappedComponent = (props: Parameters<T>[0]) => (
+  const WrappedComponent = (props: React.ComponentPropsWithoutRef<T>) => (
     <LazyWrapper {...options}>
       <LazyComponent {...props} />
     </LazyWrapper>
-  ) as T
+  ) as any as T
   
   // Preserve component name for debugging
   WrappedComponent.displayName = `Lazy(${options.name || 'Component'})`
@@ -125,16 +126,16 @@ export function createLazyComponent<T extends ComponentType<any>>(
 /**
  * Preload a lazy component for better UX
  */
-export function preloadComponent(importFn: () => Promise<{ default: any }>) {
+export function preloadComponent<T>(importFn: () => Promise<{ default: T }>) {
   // Start loading the component but don't wait for it
-  importFn().catch(console.error)
+  importFn().catch(apiLogger.error)
 }
 
 /**
  * Hook for progressive component loading
  */
-export function useProgressiveLoading(
-  components: (() => Promise<{ default: any }>)[],
+export function useProgressiveLoading<T>(
+  components: (() => Promise<{ default: T }>)[],
   delay = 100
 ) {
   const [loadedCount, setLoadedCount] = useState(0)
@@ -144,7 +145,7 @@ export function useProgressiveLoading(
       setTimeout(() => {
         importFn().then(() => {
           setLoadedCount(prev => prev + 1)
-        }).catch(console.error)
+        }).catch(apiLogger.error)
       }, delay * index)
     })
   }, [components, delay])
@@ -245,4 +246,3 @@ export const ComponentSkeletons = {
     </div>
   )
 }
-

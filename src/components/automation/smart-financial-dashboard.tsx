@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { apiLogger } from '@/lib/logger'
 import { 
   DollarSign,
   TrendingUp,
@@ -70,8 +71,8 @@ export function SmartFinancialDashboard({
         data.inventory
       )
       setAnalysis(financialAnalysis)
-    } catch (error: any) {
-      console.error('Error analyzing financial health:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error analyzing financial health:')
     } finally {
       setLoading(false)
     }

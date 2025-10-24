@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
+import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
   request: Request,
@@ -18,8 +19,8 @@ export async function GET(
     if (error) throw error;
 
     return NextResponse.json(supplier);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -30,11 +31,11 @@ export async function PUT(
   const { id } = await params;
   try {
     const supabase = createSupabaseClient();
-    const body = await request.json() as any;
+    const body = await request.json();
 
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .update(body)
+      .update(body as Record<string, unknown>)
       .eq('id', id)
       .select('*')
       .single();
@@ -42,8 +43,8 @@ export async function PUT(
     if (error) throw error;
 
     return NextResponse.json(supplier);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -63,7 +64,7 @@ export async function DELETE(
     if (error) throw error;
 
     return NextResponse.json({ message: 'Supplier deleted successfully' });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import type { HPPComparison, TimePeriod } from '@/types/hpp-tracking'
 import { calculateHPP, HPPCalculationResult } from './hpp-calculator'
 import { createSupabaseClient } from './supabase'
 
+import { apiLogger } from '@/lib/logger'
 type HPPSnapshotInsert = Database['public']['Tables']['hpp_snapshots']['Insert']
 type HPPSnapshotRow = Database['public']['Tables']['hpp_snapshots']['Row']
 
@@ -55,7 +56,7 @@ export async function createSnapshot(
         .single()
 
     if (error) {
-        console.error('Failed to create snapshot:', error)
+        apiLogger.error({ error: error }, 'Failed to create snapshot:')
         throw new Error(`Failed to create snapshot: ${error.message}`)
     }
 
@@ -107,7 +108,7 @@ export async function getRecentSnapshots(
     const { data, error } = await query
 
     if (error) {
-        console.error('Failed to fetch snapshots:', error)
+        apiLogger.error({ error: error }, 'Failed to fetch snapshots:')
         throw new Error(`Failed to fetch snapshots: ${error.message}`)
     }
 
@@ -272,7 +273,7 @@ export async function deleteOldSnapshots(
         .select()
 
     if (error) {
-        console.error('Failed to delete old snapshots:', error)
+        apiLogger.error({ error: error }, 'Failed to delete old snapshots:')
         throw new Error(`Failed to delete old snapshots: ${error.message}`)
     }
 
@@ -295,7 +296,7 @@ export async function getSnapshotCount(
         .eq('user_id', userId)
 
     if (error) {
-        console.error('Failed to get snapshot count:', error)
+        apiLogger.error({ error: error }, 'Failed to get snapshot count:')
         return 0
     }
 

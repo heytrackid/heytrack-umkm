@@ -1,4 +1,4 @@
-import { ORDER_STATUS_CONFIG, ORDER_PRIORITIES } from '../constants'
+import { ORDER_PRIORITIES, ORDER_STATUS_CONFIG } from '../constants'
 
 /**
  * Get status information for an order
@@ -24,10 +24,14 @@ export function generateOrderNumber(): string {
   return `ORD-${dateStr}-${timeStr}`
 }
 
+interface OrderItemWithPrice {
+  total_price: number
+}
+
 /**
  * Calculate order totals
  */
-export function calculateOrderTotals(orderItems: any[], discount: number = 0, taxRate: number = 0, deliveryFee: number = 0) {
+export function calculateOrderTotals(orderItems: OrderItemWithPrice[], discount: number = 0, taxRate: number = 0, deliveryFee: number = 0) {
   const subtotal = orderItems.reduce((sum, item) => sum + item.total_price, 0)
   const taxAmount = subtotal * (taxRate / 100)
   const totalAmount = subtotal - discount + taxAmount + deliveryFee

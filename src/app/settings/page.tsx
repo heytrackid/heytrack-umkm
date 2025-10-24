@@ -14,6 +14,7 @@ import * as React from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
+import { apiLogger } from '@/lib/logger'
 // Breadcrumb components
 import {
     Breadcrumb,
@@ -64,7 +65,7 @@ const getSupabaseClient = () => {
 }
 
 // Create supabase client lazily
-let supabaseClient: any = null
+let supabaseClient: unknown = null
 const getSupabase = () => {
   if (!supabaseClient) {
     supabaseClient = getSupabaseClient()
@@ -156,18 +157,18 @@ export default function SettingsPage() {
         .single()
       
       if (error) {
-        console.error('Error loading settings:', error)
+        apiLogger.error({ error: error }, 'Error loading settings:')
         toast.error('Gagal memuat pengaturan')
         return
       }
       
       if (data?.settings_data) {
         setSettings(data.settings_data)
-        console.log('✅ Settings loaded successfully:', data.settings_data)
+        apiLogger.info('✅ Settings loaded successfully:', data.settings_data)
       }
       
-    } catch (error: any) {
-      console.error('Error loading settings:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error loading settings:')
       toast.error('Gagal memuat pengaturan')
     } finally {
       stopLoading(LOADING_KEYS.LOAD_SETTINGS)
@@ -207,12 +208,12 @@ export default function SettingsPage() {
         throw error
       }
       
-      console.log('✅ Settings saved successfully:', data)
+      apiLogger.info({ data }, '✅ Settings saved successfully')
       setIsUnsavedChanges(false)
       toast.success('Pengaturan berhasil disimpan')
       
-    } catch (error: any) {
-      console.error('❌ Error saving settings:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, '❌ Error saving settings:')
       toast.error('Gagal menyimpan pengaturan')
     } finally {
       setIsSaving(false)

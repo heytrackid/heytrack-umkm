@@ -1,0 +1,186 @@
+// Base validation utilities and core schemas
+// Core validation functions and basic schemas used across the application
+
+import { z } from 'zod'
+import { apiLogger } from '@/lib/logger'
+
+// Base validation utilities
+export const requiredString = z.string().min(1, 'validation.fieldRequired')
+export const optionalString = z.string().optional()
+export const positiveNumber = z.number().positive('validation.positiveNumber')
+export const nonNegativeNumber = z.number().min(0, 'validation.nonNegative')
+export const email = z.string().email('validation.invalidEmail')
+export const phone = z.string().min(10, 'validation.phoneMinLength')
+export const uuid = z.string().uuid('validation.invalidId')
+
+// Indonesian specific validations
+export const rupiah = z.number().min(0, 'validation.nonNegativeAmount').transform(val => Math.round(val))
+export const percentage = z.number().min(0, 'validation.nonNegativePercentage').max(100, 'validation.maxPercentage')
+export const indonesianName = z.string().min(2, 'validation.nameMinLength').max(100, 'validation.nameMaxLength')
+
+// Enhanced base schemas
+export const UUIDSchema = z.string().uuid()
+export const EmailSchema = z.string().email()
+export const PhoneSchema = z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number')
+export const DateStringSchema = z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid date string')
+export const PositiveNumberSchema = z.number().positive()
+export const NonNegativeNumberSchema = z.number().nonnegative()
+
+// Enums
+export const OrderStatusEnum = z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'DELIVERED', 'CANCELLED'])
+export const PaymentMethodEnum = z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET', 'OTHER'])
+export const UserRoleEnum = z.enum(['OWNER', 'MANAGER', 'STAFF', 'VIEWER'])
+export const ProductionStatusEnum = z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+export const BusinessUnitEnum = z.enum(['RESTAURANT', 'CAFE', 'BAKERY', 'CATERING', 'OTHER'])
+export const RecordTypeEnum = z.enum(['INCOME', 'EXPENSE'])
+export const TransactionTypeEnum = z.enum(['SALES', 'PURCHASE', 'SALARY', 'RENT', 'UTILITIES', 'OTHER'])
+
+// Environment validation
+export const EnvSchema = z.object({
+  // Supabase Configuration
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'Supabase anon key is required'),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'Supabase service role key is required'),
+
+  // AI Services (at least one required)
+  OPENAI_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+
+  // Application Settings
+  NEXT_PUBLIC_APP_URL: z.string().url('Invalid app URL'),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
+
+  // Optional: Cron Job Authentication
+  CRON_SECRET: z.string().optional(),
+}).refine((env) => {
+  // At least one AI service must be configured
+  return env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY
+}, {
+  message: 'At least one AI service (OpenAI or Anthropic) must be configured',
+  path: ['OPENAI_API_KEY']
+})
+
+// Type for validated environment
+export type EnvConfig = z.infer<typeof EnvSchema>
+
+// Function to validate environment variables
+export function validateEnvironment(): EnvConfig {
+  const env = {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    NODE_ENV: process.env.NODE_ENV || 'development',
+    CRON_SECRET: process.env.CRON_SECRET,
+  }
+
+  const validation = EnvSchema.safeParse(env)
+
+  if (!validation.success) {
+    apiLogger.error({ error: '❌ Environment validation failed:' }, 'Console error replaced with logger')
+    validation.error.issues.forEach((issue) => {
+      apiLogger.error({ error: `  - ${issue.path.join('.')}: ${issue.message}` })
+    })
+    throw new Error('Invalid environment configuration')
+  }
+
+  return validation.data
+}
+
+// Validation utility functions
+export function validateFormData<T>(schema: z.ZodSchema<T>, data: any): {
+  success: boolean
+  data?: T
+  errors?: z.ZodIssue[]
+} {
+  try {
+    const result = schema.parse(data)
+    return { success: true, data: result }
+  } catch (error: unknown) {
+    if (error instanceof z.ZodError) {
+      return { success: false, errors: error.issues }
+    }
+    throw error
+  }
+}
+
+// Format validation errors for display
+export function formatValidationErrors(errors: z.ZodIssue[]): string[] {
+  return errors.map((error) => {
+    const path = error.path.join('.')
+    return path ? `${path}: ${error.message}` : error.message
+  })
+}
+
+// Convert Zod errors to field-level errors for form libraries
+export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, string> {
+  const fieldErrors: Record<string, string> = {}
+
+  errors.forEach((error) => {
+    const fieldName = error.path.join('.')
+    if (!fieldErrors[fieldName]) {
+      fieldErrors[fieldName] = error.message
+    }
+  })
+
+  return fieldErrors
+}
+
+// Legacy validation function (still used in supabase.ts)
+export function validateInput(data: any, rules?: Record<string, unknown>): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+
+  for (const [field, rule] of Object.entries(rules || {})) {
+    const value = data[field]
+
+    if (rule?.required && (!value || value === '')) {
+      errors.push(`validation.fieldRequired`)
+      continue
+    }
+
+    if (value) {
+      if (rule?.type && typeof value !== rule?.type) {
+        errors.push(`validation.invalidType`)
+      }
+
+      if (rule?.minLength && value.length < rule?.minLength) {
+        errors.push(`validation.minLength`)
+      }
+
+      if (rule?.maxLength && value.length > rule?.maxLength) {
+        errors.push(`validation.maxLength`)
+      }
+
+      if (rule?.pattern && !rule?.pattern?.test(value)) {
+        errors.push(`validation.invalidFormat`)
+      }
+
+      if (rule?.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        errors.push(`validation.invalidEmail`)
+      }
+
+      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
+        errors.push(`validation.dangerousContent`)
+      }
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+// SQL injection prevention sanitization
+export function sanitizeSQL(input: string): string {
+  return input
+    .replace(/'/g, "''")
+    .replace(/;/g, '')
+    .replace(/--/g, '')
+    .replace(/\/\*/g, '')
+    .replace(/\*\//g, '')
+    .replace(/xp_/gi, '')
+    .replace(/sp_/gi, '')
+}

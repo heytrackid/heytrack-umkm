@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 /**
  * External AI Service Integration for HeyTrack
  * Supports OpenRouter API for advanced AI responses
@@ -22,7 +23,7 @@ class ExternalAIService {
 
   static async generateResponse(prompt: string, context?: string): Promise<string> {
     if (!this.API_KEY) {
-      console.warn('OpenRouter API key not configured, using fallback response')
+      apiLogger.warn('OpenRouter API key not configured, using fallback response')
       return this.generateFallbackResponse(prompt)
     }
 
@@ -77,7 +78,7 @@ class ExternalAIService {
       return data.choices[0]?.message?.content || this.generateFallbackResponse(prompt)
 
     } catch (error) {
-      console.error('Error calling OpenRouter API:', error)
+      apiLogger.error({ error: error }, 'Error calling OpenRouter API:')
       return this.generateFallbackResponse(prompt)
     }
   }

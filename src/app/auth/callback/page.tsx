@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Loader2 } from 'lucide-react'
 
+import { apiLogger } from '@/lib/logger'
 export default function AuthCallbackPage() {
   const router = useRouter()
   const supabase = createClientComponentClient()
@@ -16,7 +17,7 @@ export default function AuthCallbackPage() {
         const { data, error } = await supabase.auth.getSession()
 
         if (error) {
-          console.error('Auth callback error:', error)
+          apiLogger.error({ error: error }, 'Auth callback error:')
           router.push('/auth/login?error=auth_callback_error')
           return
         }
@@ -27,7 +28,7 @@ export default function AuthCallbackPage() {
           router.push('/auth/login')
         }
       } catch (error) {
-        console.error('Unexpected error in auth callback:', error)
+        apiLogger.error({ error: error }, 'Unexpected error in auth callback:')
         router.push('/auth/login?error=unexpected_error')
       }
     }

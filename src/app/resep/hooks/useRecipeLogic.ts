@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useState, useCallback } from 'react'
 import { useIngredients } from '@/hooks/useSupabase'
 
+import { apiLogger } from '@/lib/logger'
 export interface Recipe {
   id?: string
   name: string
@@ -45,13 +46,13 @@ export function useRecipeLogic() {
   const handleSaveRecipe = useCallback(async () => {
     try {
       // API call to save recipe would go here
-      console.log('Saving recipe:', newRecipe)
+      apiLogger.info('Saving recipe:', newRecipe)
       
       resetForm()
       setCurrentView('list')
       await refetch()
-    } catch (error: any) {
-      console.error('Error saving recipe:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error saving recipe:')
     }
   }, [newRecipe, resetForm, refetch])
 
@@ -72,17 +73,17 @@ export function useRecipeLogic() {
 
   const handleViewRecipe = useCallback((recipe: any) => {
     // Implement recipe view logic
-    console.log('Viewing recipe:', recipe)
+    apiLogger.info({ params: recipe }, 'Viewing recipe:')
   }, [])
 
   const handleDeleteRecipe = useCallback(async (recipe: any) => {
     if (window.confirm('Are you sure you want to delete this recipe?')) {
       try {
         // API call to delete recipe would go here
-        console.log('Deleting recipe:', recipe.id)
+        apiLogger.info({ params: recipe.id }, 'Deleting recipe:')
         await refetch()
-      } catch (error: any) {
-        console.error('Error deleting recipe:', error)
+      } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error deleting recipe:')
       }
     }
   }, [refetch])

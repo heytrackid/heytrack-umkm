@@ -48,7 +48,7 @@ export const ChartSkeleton = () => (
 
 // Generic lazy wrapper with customizable loading
 interface LazyWrapperProps {
-  component: ComponentType<any>
+  component: ComponentType<unknown>
   loadingComponent?: ComponentType
   props?: any
 }
@@ -64,7 +64,7 @@ export const LazyWrapper = ({
 )
 
 // Helper function to create lazy components
-export const createLazyComponent = <T extends ComponentType<any>>(
+export const createLazyComponent = <T extends ComponentType<unknown>>(
   importFunc: () => Promise<{ default: T }>,
   loadingComponent?: ComponentType
 ) => {

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ComponentProps, MouseEvent } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 interface PrefetchLinkProps extends ComponentProps<typeof Link> {
   prefetchOnHover?: boolean
   prefetchOnMount?: boolean
@@ -43,7 +44,7 @@ export function PrefetchLink({
         router.prefetch(href)
       } catch (error) {
         // Silently fail - prefetch is enhancement, not critical
-        console.debug(`Prefetch failed for: ${href}`)
+        apiLogger.debug(`Prefetch failed for: ${href}`)
       }
     }
   }

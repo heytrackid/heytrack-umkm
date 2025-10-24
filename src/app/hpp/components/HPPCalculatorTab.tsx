@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import HPPRecipeCard from './HPPRecipeCard'
 
 interface HPPCalculatorTabProps {
-  recipes: any[]
+  recipes: unknown[]
   formatCurrency: (amount: number) => string
   getMarginBadgeVariant: (margin: number) => 'default' | 'secondary' | 'destructive'
   getMarginStatus: (margin: number) => string

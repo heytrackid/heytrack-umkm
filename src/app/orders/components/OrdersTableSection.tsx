@@ -1,5 +1,3 @@
-"use client"
-
 import React, { memo, useMemo, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -13,21 +11,36 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled'
+type PaymentStatus = 'unpaid' | 'partial' | 'paid'
+
+interface Order {
+  id: string
+  order_number: string
+  customer_name: string
+  customer_phone: string
+  order_date: string
+  due_date: string
+  status: OrderStatus
+  payment_status: PaymentStatus
+  total_amount: number
+}
+
 function OrdersTableSection({
   orders,
   formatCurrency,
   formatDate,
 }: {
-  orders: any[]
+  orders: Order[]
   formatCurrency: (n: number) => string
   formatDate: (d: string) => string
 }) {
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  
-  const ORDER_STATUS_CONFIG = useMemo(() => ({
+
+  const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = useMemo(() => ({
     pending: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
     confirmed: { label: "Confirmed", color: 'bg-gray-200 text-gray-900' },
     in_production: { label: "In Production", color: 'bg-gray-300 text-gray-900' },
@@ -35,7 +48,7 @@ function OrdersTableSection({
     cancelled: { label: "Cancelled", color: 'bg-gray-500 text-white' }
   }), [])
 
-  const PAYMENT_STATUS_CONFIG = useMemo(() => ({
+  const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, { label: string; color: string }> = useMemo(() => ({
     unpaid: { label: "Unpaid", color: 'bg-gray-100 text-gray-800' },
     partial: { label: "Partial", color: 'bg-gray-200 text-gray-900' },
     paid: { label: "Paid", color: 'bg-gray-300 text-gray-900' }
@@ -51,25 +64,11 @@ function OrdersTableSection({
     const endIndex = startIndex + pageSize
     return orders.slice(startIndex, endIndex)
   }, [orders, currentPage, pageSize])
-  
+
   // Reset to page 1 when orders change
   useMemo(() => {
     setCurrentPage(1)
   }, [orders.length])
-  
-  // Pagination handlers
-  const handlePreviousPage = () => {
-    setCurrentPage(prev => Math.max(1, prev - 1))
-  }
-  
-  const handleNextPage = () => {
-    setCurrentPage(prev => Math.min(totalPages, prev + 1))
-  }
-  
-  const handlePageSizeChange = (value: string) => {
-    setPageSize(Number(value))
-    setCurrentPage(1)
-  }
 
   return (
     <div className="rounded-md border">
@@ -87,7 +86,7 @@ function OrdersTableSection({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedOrders.map((order) => (
+          {paginatedOrders.map((order: Order) => (
             <TableRow key={order.id}>
               <TableCell className="font-medium">{order.order_number}</TableCell>
               <TableCell>
@@ -138,7 +137,7 @@ function OrdersTableSection({
           ))}
         </TableBody>
       </Table>
-      
+
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
@@ -147,12 +146,12 @@ function OrdersTableSection({
               Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalItems)} of {totalItems} orders
             </span>
           </div>
-          
+
           <div className="flex items-center gap-6">
             {/* Page Size Selector */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Per page</span>
-              <Select value={pageSize.toString()} onValueChange={(value) => setPageSize(Number(value))}>
+              <Select value={pageSize.toString()} onValueChange={(value: string) => setPageSize(Number(value))}>
                 <SelectTrigger className="w-20 h-8">
                   <SelectValue />
                 </SelectTrigger>
@@ -164,7 +163,7 @@ function OrdersTableSection({
                 </SelectContent>
               </Select>
             </div>
-            
+
             {/* Page Navigation */}
             <div className="flex items-center gap-2">
               <Button
@@ -175,11 +174,11 @@ function OrdersTableSection({
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              
+
               <span className="text-sm font-medium">
                 Page {currentPage} of {totalPages}
               </span>
-              
+
               <Button
                 variant="outline"
                 size="sm"

@@ -16,6 +16,7 @@ import { WhatsAppService, WhatsAppTemplate, OrderData, whatsappService } from '@
 import { toast } from 'react-hot-toast';
 import { useSettings } from '@/contexts/settings-context';
 
+import { apiLogger } from '@/lib/logger'
 interface WhatsAppFollowUpProps {
   order: {
     id: string;
@@ -118,8 +119,8 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       }
 
       setGeneratedMessage(result.message);
-    } catch (error: any) {
-      console.error('Error generating message:', error);
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };
@@ -142,7 +143,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error('Gagal menyalin text');
     }
   };

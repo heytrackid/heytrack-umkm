@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 
+import { apiLogger } from '@/lib/logger'
 import {
   Bot,
   Calculator,
@@ -24,7 +25,7 @@ import { useEffect, useState } from 'react'
 export interface NavigationItem {
   name: string
   href: string
-  icon: any
+  icon: unknown
   isSimple?: boolean
   badge?: string
   stepNumber?: number
@@ -57,7 +58,7 @@ export const useSidebarLogic = () => {
           setHppAlertsCount(data.meta?.unread_count || 0)
         }
       } catch (error) {
-        console.error('Failed to fetch alerts count:', error)
+        apiLogger.error({ error: error }, 'Failed to fetch alerts count:')
       }
     }
 

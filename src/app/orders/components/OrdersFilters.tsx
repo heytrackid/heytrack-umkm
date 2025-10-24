@@ -16,7 +16,7 @@ interface OrdersFiltersProps {
   dateTo: string
   setDateTo: (value: string) => void
   statusConfig: Record<string, { label: string; color: string }>
-  t: any
+  t: unknown
 }
 
 export default function OrdersFilters({

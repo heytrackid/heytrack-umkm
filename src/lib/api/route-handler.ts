@@ -18,7 +18,7 @@ import { apiLogger } from '@/lib/logger'
 // TYPES
 // ============================================================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown > {
   success: boolean
   data?: T
   error?: string
@@ -41,7 +41,7 @@ export interface ApiErrorResponse {
   message: string
   statusCode: number
   timestamp: string
-  details?: any
+  details?: unknown
 }
 
 export interface ValidationResult {

@@ -16,7 +16,7 @@ import {
 /**
  * Validates HPP calculation inputs
  */
-export function validateHPPCalculation(data: unknown): HPPCalculationInput {
+export function validateHPPCalculation(data: any): HPPCalculationInput {
   const result = HPPCalculationInputSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -28,7 +28,7 @@ export function validateHPPCalculation(data: unknown): HPPCalculationInput {
 /**
  * Validates currency formatting options
  */
-export function validateCurrencyFormat(data: unknown): CurrencyFormat {
+export function validateCurrencyFormat(data: any): CurrencyFormat {
   const result = CurrencyFormatSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -40,7 +40,7 @@ export function validateCurrencyFormat(data: unknown): CurrencyFormat {
 /**
  * Validates inventory calculation parameters
  */
-export function validateInventoryCalculation(data: unknown): InventoryCalculation {
+export function validateInventoryCalculation(data: any): InventoryCalculation {
   const result = InventoryCalculationSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -52,7 +52,7 @@ export function validateInventoryCalculation(data: unknown): InventoryCalculatio
 /**
  * Validates sales calculation inputs
  */
-export function validateSalesCalculation(data: unknown): SalesCalculation {
+export function validateSalesCalculation(data: any): SalesCalculation {
   const result = SalesCalculationSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -64,7 +64,7 @@ export function validateSalesCalculation(data: unknown): SalesCalculation {
 /**
  * Validates report generation parameters
  */
-export function validateReportGeneration(data: unknown): ReportGeneration {
+export function validateReportGeneration(data: any): ReportGeneration {
   const result = ReportGenerationSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -76,7 +76,7 @@ export function validateReportGeneration(data: unknown): ReportGeneration {
 /**
  * Validates cron job configuration
  */
-export function validateCronJobConfig(data: unknown): CronJobConfig {
+export function validateCronJobConfig(data: any): CronJobConfig {
   const result = CronJobConfigSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -88,7 +88,7 @@ export function validateCronJobConfig(data: unknown): CronJobConfig {
 /**
  * Calculates HPP with validation
  */
-export function calculateHPPWithValidation(input: unknown) {
+export function calculateHPPWithValidation(input: any) {
   const validatedInput = validateHPPCalculation(input)
 
   // Calculate ingredient costs
@@ -148,7 +148,7 @@ export function formatCurrencyWithValidation(amount: number, options: unknown = 
 /**
  * Validates inventory levels and reorder needs
  */
-export function validateInventoryLevels(data: unknown) {
+export function validateInventoryLevels(data: any) {
   const validatedData = validateInventoryCalculation(data)
 
   const needsReorder = validatedData.currentStock <= validatedData.reorderPoint

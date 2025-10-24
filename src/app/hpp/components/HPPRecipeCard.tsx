@@ -12,7 +12,7 @@ interface HPPRecipeCardProps {
     selling_price?: number
     margin: number
     profit: number
-    recipe_ingredients?: any[]
+    recipe_ingredients?: unknown[]
   }
   formatCurrency: (amount: number) => string
   getMarginBadgeVariant: (margin: number) => 'default' | 'secondary' | 'destructive'

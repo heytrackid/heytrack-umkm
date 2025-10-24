@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cronJobs } from '@/lib/cron-jobs'
 
+import { apiLogger } from '@/lib/logger'
 /**
  * API Endpoint to manually trigger automation tasks
  * 
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { task = 'all' } = body
 
-    const results: any = {
+    const results: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
       task,
       status: 'success'
@@ -20,29 +21,29 @@ export async function POST(request: Request) {
 
     switch (task) {
       case 'reorder':
-        console.log('📋 Running auto reorder check...')
+        apiLogger.info('📋 Running auto reorder check...')
         results.reorder = await cronJobs.checkInventoryReorder()
         break
 
       case 'notifications':
-        console.log('🔔 Processing smart notifications...')
+        apiLogger.info('🔔 Processing smart notifications...')
         results.notifications = await cronJobs.processSmartNotifications()
         break
 
       case 'engine':
-        console.log('⚙️ Running automation engine...')
+        apiLogger.info('⚙️ Running automation engine...')
         await cronJobs.runAutomationEngine()
         results.engine = { status: 'completed' }
         break
 
       case 'cleanup':
-        console.log('🧹 Cleaning up old notifications...')
+        apiLogger.info('🧹 Cleaning up old notifications...')
         await cronJobs.cleanupOldNotifications()
         results.cleanup = { status: 'completed' }
         break
 
       case 'all':
-        console.log('🚀 Running all automation tasks...')
+        apiLogger.info('🚀 Running all automation tasks...')
         results.reorder = await cronJobs.checkInventoryReorder()
         results.notifications = await cronJobs.processSmartNotifications()
         await cronJobs.runAutomationEngine()
@@ -56,13 +57,14 @@ export async function POST(request: Request) {
         )
     }
 
-    console.log('✅ Automation task completed:', task)
+    apiLogger.info({ params: task }, '✅ Automation task completed:')
 
     return NextResponse.json(results)
-  } catch (error: any) {
-    console.error('❌ Error running automation:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, '❌ Error running automation:')
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to run automation', message: error.message },
+      { error: 'Failed to run automation', message: errorMessage },
       { status: 500 }
     )
   }
@@ -88,10 +90,11 @@ export async function GET() {
         'all - Run all tasks'
       ]
     })
-  } catch (error: any) {
-    console.error('❌ Error getting automation status:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, '❌ Error getting automation status:')
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to get automation status', message: error.message },
+      { error: 'Failed to get automation status', message: errorMessage },
       { status: 500 }
     )
   }

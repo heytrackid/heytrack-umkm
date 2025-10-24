@@ -6,6 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 
+import { apiLogger } from '@/lib/logger'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -452,12 +453,12 @@ export class QueryPerformanceMonitor {
       times.push(duration);
       this.queryTimes.set(queryName, times.slice(-100)); // Keep last 100 measurements
       
-      console.log(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
+      apiLogger.info(`Query"${queryName}" took ${duration.toFixed(2)}ms`);
       
       return { result, duration };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = performance.now() - startTime;
-      console.error(`Query"${queryName}" failed after ${duration.toFixed(2)}ms:`, error);
+      apiLogger.error({ error: `Query"${queryName}" failed after ${duration.toFixed(2)}ms:`, error });
       throw error;
     }
   }

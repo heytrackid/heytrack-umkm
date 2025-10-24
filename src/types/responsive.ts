@@ -52,7 +52,7 @@ export interface ResponsiveColumn {
   priority: ColumnPriority;
   hideOnMobile?: boolean;
   minWidth?: string;
-  render?: (value: unknown, item: unknown) => React.ReactNode;
+  render?: (value: any, item: any) => React.ReactNode;
 }
 
 // Form field responsive configuration
@@ -69,7 +69,7 @@ export interface ResponsiveFormField {
     minLength?: number;
     maxLength?: number;
     pattern?: string;
-    custom?: (value: unknown) => string | undefined;
+    custom?: (value: any) => string | undefined;
   };
 }
 

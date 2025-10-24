@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { apiLogger } from '@/lib/logger'
 import { 
   Activity, 
   Clock, 
@@ -17,6 +18,31 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { cacheMetrics } from '@/lib/api-cache'
+
+// Performance Observer API interfaces
+interface PerformanceEntry {
+  name: string
+  entryType: string
+  startTime: number
+  duration: number
+  processingStart?: number
+}
+
+interface LargestContentfulPaintEntry extends PerformanceEntry {
+  entryType: 'largest-contentful-paint'
+  size: number
+  element?: Element
+}
+
+interface FirstInputEntry extends PerformanceEntry {
+  entryType: 'first-input'
+  processingStart: number
+  target?: Element
+}
+
+interface PaintEntry extends PerformanceEntry {
+  entryType: 'paint'
+}
 
 interface PerformanceMetrics {
   // Web Vitals
@@ -69,44 +95,44 @@ const PerformanceMonitor = memo(() => {
         if ('PerformanceObserver' in window) {
           const lcpObserver = new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries()
-            const lcp = entries[entries.length - 1] as any
+            const lcp = entries[entries.length - 1] as LargestContentfulPaintEntry
             setMetrics(prev => ({ ...prev, lcp: lcp?.startTime || 0 }))
           })
-          
+
           try {
             lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
-          } catch (error: any) {
-            console.warn('LCP observation not supported')
+          } catch (error: unknown) {
+            apiLogger.warn('LCP observation not supported')
           }
 
           // FID - First Input Delay
           const fidObserver = new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries()
-            entries.forEach((entry: any) => {
+            entries.forEach((entry: FirstInputEntry) => {
               setMetrics(prev => ({ ...prev, fid: entry.processingStart - entry.startTime }))
             })
           })
-          
+
           try {
             fidObserver.observe({ entryTypes: ['first-input'] })
-          } catch (error: any) {
-            console.warn('FID observation not supported')
+          } catch (error: unknown) {
+            apiLogger.warn('FID observation not supported')
           }
 
           // FCP - First Contentful Paint
           const fcpObserver = new PerformanceObserver((entryList) => {
             const entries = entryList.getEntries()
-            entries.forEach((entry: any) => {
+            entries.forEach((entry: PaintEntry) => {
               if (entry.name === 'first-contentful-paint') {
                 setMetrics(prev => ({ ...prev, fcp: entry.startTime }))
               }
             })
           })
-          
+
           try {
             fcpObserver.observe({ entryTypes: ['paint'] })
-          } catch (error: any) {
-            console.warn('FCP observation not supported')
+          } catch (error: unknown) {
+            apiLogger.warn('FCP observation not supported')
           }
         }
       }
@@ -141,8 +167,8 @@ const PerformanceMonitor = memo(() => {
         cacheHitRate: hitRate,
         memoryUsage: totalCacheSize
       }))
-    } catch (error: any) {
-      console.warn('Failed to update cache metrics:', error)
+    } catch (error: unknown) {
+      apiLogger.warn('Failed to update cache metrics:', error)
     }
   }
 
@@ -226,8 +252,8 @@ const PerformanceMonitor = memo(() => {
       try {
         cacheMetrics.getStats()
         window.location.reload()
-      } catch (error: any) {
-        console.warn('Failed to clear caches:', error)
+      } catch (error: unknown) {
+        apiLogger.warn('Failed to clear caches:', error)
       }
     }
   }

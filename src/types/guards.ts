@@ -22,7 +22,7 @@ import type {
 /**
  * Check if a value is a non-null object
  */
-function isObject(value: unknown): value is Record<string, unknown> {
+function isObject(value: any): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
@@ -30,7 +30,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
  * Check if a value has a specific property
  */
 function hasProperty<K extends string>(
-    value: unknown,
+    value: any,
     key: K
 ): value is Record<K, unknown> {
     return isObject(value) && key in value;
@@ -39,7 +39,7 @@ function hasProperty<K extends string>(
 /**
  * Type guard for OrderStatus
  */
-export function isOrderStatus(value: unknown): value is OrderStatus {
+export function isOrderStatus(value: any): value is OrderStatus {
     return (
         typeof value === 'string' &&
         ['pending', 'processing', 'completed', 'cancelled'].includes(value)
@@ -49,7 +49,7 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
 /**
  * Type guard for PaymentStatus
  */
-export function isPaymentStatus(value: unknown): value is PaymentStatus {
+export function isPaymentStatus(value: any): value is PaymentStatus {
     return (
         typeof value === 'string' &&
         ['unpaid', 'partial', 'paid'].includes(value)
@@ -59,7 +59,7 @@ export function isPaymentStatus(value: unknown): value is PaymentStatus {
 /**
  * Type guard for Ingredient
  */
-export function isIngredient(value: unknown): value is Ingredient {
+export function isIngredient(value: any): value is Ingredient {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -75,7 +75,7 @@ export function isIngredient(value: unknown): value is Ingredient {
 /**
  * Type assertion for Ingredient
  */
-export function assertIngredient(value: unknown): asserts value is Ingredient {
+export function assertIngredient(value: any): asserts value is Ingredient {
     if (!isIngredient(value)) {
         throw new TypeError('Invalid ingredient data');
     }
@@ -84,7 +84,7 @@ export function assertIngredient(value: unknown): asserts value is Ingredient {
 /**
  * Type guard for Recipe
  */
-export function isRecipe(value: unknown): value is Recipe {
+export function isRecipe(value: any): value is Recipe {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -97,7 +97,7 @@ export function isRecipe(value: unknown): value is Recipe {
 /**
  * Type assertion for Recipe
  */
-export function assertRecipe(value: unknown): asserts value is Recipe {
+export function assertRecipe(value: any): asserts value is Recipe {
     if (!isRecipe(value)) {
         throw new TypeError('Invalid recipe data');
     }
@@ -106,7 +106,7 @@ export function assertRecipe(value: unknown): asserts value is Recipe {
 /**
  * Type guard for Order
  */
-export function isOrder(value: unknown): value is Order {
+export function isOrder(value: any): value is Order {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -121,7 +121,7 @@ export function isOrder(value: unknown): value is Order {
 /**
  * Type assertion for Order
  */
-export function assertOrder(value: unknown): asserts value is Order {
+export function assertOrder(value: any): asserts value is Order {
     if (!isOrder(value)) {
         throw new TypeError('Invalid order data');
     }
@@ -130,7 +130,7 @@ export function assertOrder(value: unknown): asserts value is Order {
 /**
  * Type guard for Customer
  */
-export function isCustomer(value: unknown): value is Customer {
+export function isCustomer(value: any): value is Customer {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -142,7 +142,7 @@ export function isCustomer(value: unknown): value is Customer {
 /**
  * Type assertion for Customer
  */
-export function assertCustomer(value: unknown): asserts value is Customer {
+export function assertCustomer(value: any): asserts value is Customer {
     if (!isCustomer(value)) {
         throw new TypeError('Invalid customer data');
     }
@@ -151,7 +151,7 @@ export function assertCustomer(value: unknown): asserts value is Customer {
 /**
  * Type guard for Supplier
  */
-export function isSupplier(value: unknown): value is Supplier {
+export function isSupplier(value: any): value is Supplier {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -163,7 +163,7 @@ export function isSupplier(value: unknown): value is Supplier {
 /**
  * Type assertion for Supplier
  */
-export function assertSupplier(value: unknown): asserts value is Supplier {
+export function assertSupplier(value: any): asserts value is Supplier {
     if (!isSupplier(value)) {
         throw new TypeError('Invalid supplier data');
     }
@@ -172,7 +172,7 @@ export function assertSupplier(value: unknown): asserts value is Supplier {
 /**
  * Type guard for OrderItem
  */
-export function isOrderItem(value: unknown): value is OrderItem {
+export function isOrderItem(value: any): value is OrderItem {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -187,7 +187,7 @@ export function isOrderItem(value: unknown): value is OrderItem {
 /**
  * Type guard for RecipeIngredient
  */
-export function isRecipeIngredient(value: unknown): value is RecipeIngredient {
+export function isRecipeIngredient(value: any): value is RecipeIngredient {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -201,7 +201,7 @@ export function isRecipeIngredient(value: unknown): value is RecipeIngredient {
 /**
  * Type guard for IngredientPurchase
  */
-export function isIngredientPurchase(value: unknown): value is IngredientPurchase {
+export function isIngredientPurchase(value: any): value is IngredientPurchase {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -217,7 +217,7 @@ export function isIngredientPurchase(value: unknown): value is IngredientPurchas
 /**
  * Type guard for HppSnapshot
  */
-export function isHppSnapshot(value: unknown): value is HppSnapshot {
+export function isHppSnapshot(value: any): value is HppSnapshot {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -232,7 +232,7 @@ export function isHppSnapshot(value: unknown): value is HppSnapshot {
 /**
  * Type guard for UserProfile
  */
-export function isUserProfile(value: unknown): value is UserProfile {
+export function isUserProfile(value: any): value is UserProfile {
     return (
         isObject(value) &&
         typeof value.id === 'string' &&
@@ -243,7 +243,7 @@ export function isUserProfile(value: unknown): value is UserProfile {
 /**
  * Type guard for ApiError
  */
-export function isApiError(value: unknown): value is ApiError {
+export function isApiError(value: any): value is ApiError {
     return (
         isObject(value) &&
         typeof value.code === 'string' &&
@@ -255,8 +255,8 @@ export function isApiError(value: unknown): value is ApiError {
  * Type guard for ApiResponse
  */
 export function isApiResponse<T>(
-    value: unknown,
-    dataGuard?: (data: unknown) => data is T
+    value: any,
+    dataGuard?: (data: any) => data is T
 ): value is ApiResponse<T> {
     if (!isObject(value) || typeof value.success !== 'boolean') {
         return false;
@@ -277,8 +277,8 @@ export function isApiResponse<T>(
  * Type guard for arrays
  */
 export function isArrayOf<T>(
-    value: unknown,
-    itemGuard: (item: unknown) => item is T
+    value: any,
+    itemGuard: (item: any) => item is T
 ): value is T[] {
     return Array.isArray(value) && value.every(itemGuard);
 }
@@ -287,8 +287,8 @@ export function isArrayOf<T>(
  * Type assertion for arrays
  */
 export function assertArrayOf<T>(
-    value: unknown,
-    itemGuard: (item: unknown) => item is T,
+    value: any,
+    itemGuard: (item: any) => item is T,
     errorMessage = 'Invalid array data'
 ): asserts value is T[] {
     if (!isArrayOf(value, itemGuard)) {
@@ -318,27 +318,27 @@ export function assertNonNull<T>(
 /**
  * Type guard for string values
  */
-export function isString(value: unknown): value is string {
+export function isString(value: any): value is string {
     return typeof value === 'string';
 }
 
 /**
  * Type guard for number values
  */
-export function isNumber(value: unknown): value is number {
+export function isNumber(value: any): value is number {
     return typeof value === 'number' && !isNaN(value);
 }
 
 /**
  * Type guard for boolean values
  */
-export function isBoolean(value: unknown): value is boolean {
+export function isBoolean(value: any): value is boolean {
     return typeof value === 'boolean';
 }
 
 /**
  * Type guard for Record<string, unknown>
  */
-export function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: any): value is Record<string, unknown> {
     return isObject(value);
 }

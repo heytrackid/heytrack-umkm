@@ -2,6 +2,7 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { CostBreakdown } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/breakdown - Get detailed cost breakdown for a recipe
 export async function GET(request: NextRequest) {
     try {
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
         const { data: snapshots, error: snapshotError } = await snapshotQuery
 
         if (snapshotError) {
-            console.error('Error fetching snapshot:', snapshotError)
+            apiLogger.error({ error: snapshotError }, 'Error fetching snapshot:')
             return NextResponse.json(
                 { error: 'Failed to fetch snapshot', details: snapshotError.message },
                 { status: 500 }
@@ -136,8 +137,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in breakdown endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in breakdown endpoint:')
         return NextResponse.json(
             { error: 'Internal server error', details: error.message },
             { status: 500 }

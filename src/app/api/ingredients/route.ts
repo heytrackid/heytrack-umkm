@@ -13,6 +13,7 @@ import {
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/ingredients - Get all bahan baku with pagination and filtering
 export const GET = withQueryValidation(
   PaginationSchema.partial(), // Make all fields optional for GET requests
@@ -25,7 +26,7 @@ export const GET = withQueryValidation(
       const { data: { user }, error: authError } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        console.error('Auth error:', authError)
+        apiLogger.error({ error: authError }, 'Auth error:')
         return NextResponse.json(
           { error: 'Unauthorized' },
           { status: 401 }
@@ -68,7 +69,7 @@ export const GET = withQueryValidation(
         pagination
       })
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       return handleDatabaseError(error)
     }
   }
@@ -86,7 +87,7 @@ export const POST = withValidation(
       const { data: { user }, error: authError } = await supabase.auth.getUser()
 
       if (authError || !user) {
-        console.error('Auth error:', authError)
+        apiLogger.error({ error: authError }, 'Auth error:')
         return NextResponse.json(
           { error: 'Unauthorized' },
           { status: 401 }
@@ -108,7 +109,7 @@ export const POST = withValidation(
 
       return createSuccessResponse(insertedData, '201')
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       return handleDatabaseError(error)
     }
   }

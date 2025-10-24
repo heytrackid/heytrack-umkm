@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { apiLogger } from '@/lib/logger'
 import { 
   Select,
   SelectContent,
@@ -128,7 +129,7 @@ export default function ProfitReportPage() {
       const data = await response.json()
       setProfitData(data)
     } catch (err: any) {
-      console.error('Error fetching profit data:', err)
+      apiLogger.error({ error: err }, 'Error fetching profit data:')
       setError(err.message || 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
@@ -154,7 +155,7 @@ export default function ProfitReportPage() {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (err) {
-      console.error('Error exporting report:', err)
+      apiLogger.error({ error: err }, 'Error exporting report:')
       alert('Gagal mengekspor laporan')
     }
   }

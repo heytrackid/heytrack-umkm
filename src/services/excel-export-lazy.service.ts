@@ -1,9 +1,91 @@
 import logger from '@/lib/logger';
 
-export interface ExcelExportData {
+export interface ExcelExportData<T = Record<string, unknown>> {
   sheetName: string
-  data: Record<string, any>[]
+  data: T[]
   columns?: { key: string; header: string; width?: number }[]
+}
+
+// API response types
+interface RecipeResponse {
+  id: string
+  name: string
+  description?: string | null
+  servings?: number | null
+  selling_price?: number | null
+  cost_price?: number | null
+  category?: string | null
+  created_at?: string
+}
+
+interface IngredientResponse {
+  id: string
+  name: string
+  unit?: string | null
+  cost_per_unit?: number | null
+  min_stock?: number | null
+  current_stock?: number | null
+  created_at?: string
+}
+
+interface OrderResponse {
+  id: string
+  order_no?: string | null
+  customer_name?: string | null
+  order_date?: string | null
+  status?: string | null
+  total_amount?: number | null
+  created_at?: string
+}
+
+interface CustomerResponse {
+  id: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+  created_at?: string
+}
+
+// Excel export row types
+interface RecipeExportRow {
+  id: string
+  nama: string
+  deskripsi: string
+  porsi: number
+  harga_jual: number
+  hpp: number
+  kategori: string
+  dibuat: string
+}
+
+interface IngredientExportRow {
+  id: string
+  nama: string
+  satuan: string
+  harga_per_unit: number
+  stok_minimum: number
+  stok_saat_ini: number
+  dibuat: string
+}
+
+interface OrderExportRow {
+  id: string
+  nomor_order: string
+  nama_pelanggan: string
+  tanggal_order: string
+  status: string
+  total_jumlah: number
+  dibuat: string
+}
+
+interface CustomerExportRow {
+  id: string
+  nama: string
+  telepon: string
+  email: string
+  alamat: string
+  dibuat: string
 }
 
 export class LazyExcelExportService {
@@ -19,7 +101,7 @@ export class LazyExcelExportService {
   /**
    * Export multiple sheets to Excel with dynamic imports
    */
-  static async exportToExcel(sheets: ExcelExportData[], fileName?: string) {
+  static async exportToExcel(sheets: ExcelExportData<Record<string, unknown>>[], fileName?: string) {
     try {
       // Load dependencies dynamically
       const { ExcelJS, saveAs } = await this.loadDependencies()
@@ -45,11 +127,13 @@ export class LazyExcelExportService {
           // Auto-generate columns from first data row
           if (sheet.data.length > 0) {
             const firstRow = sheet.data[0]
-            worksheet.columns = Object.keys(firstRow).map(key => ({
-              header: key,
-              key: key,
-              width: 20
-            }))
+            if (firstRow) {
+              worksheet.columns = Object.keys(firstRow).map(key => ({
+                header: key,
+                key: key,
+                width: 20
+              }))
+            }
 
             // Add all data
             sheet.data.forEach(row => {
@@ -69,7 +153,7 @@ export class LazyExcelExportService {
 
       const defaultFileName = `HeyTrack-Export-${new Date().toISOString().split('T')[0]}.xlsx`
       saveAs(blob, fileName || defaultFileName)
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Excel export failed')
       throw new Error('Failed to export Excel file')
     }
@@ -78,7 +162,7 @@ export class LazyExcelExportService {
   /**
    * Fetch all application data for export
    */
-  static async fetchAllData(): Promise<ExcelExportData[]> {
+  static async fetchAllData(): Promise<ExcelExportData<Record<string, unknown>>[]> {
     try {
       // Fetch data from all endpoints
       const [
@@ -93,10 +177,10 @@ export class LazyExcelExportService {
         fetch('/api/customers').then(r => r.ok ? r.json() : { customers: [] })
       ])
 
-      const sheets: ExcelExportData[] = [
+      const sheets: ExcelExportData<Record<string, unknown>>[] = [
         {
           sheetName: 'Resep',
-          data: Array.isArray(recipes?.recipes) ? recipes.recipes.map((recipe: any) => ({
+          data: Array.isArray(recipes?.recipes) ? recipes.recipes.map((recipe: RecipeResponse): RecipeExportRow => ({
             id: recipe.id,
             nama: recipe.name,
             deskripsi: recipe.description || '',
@@ -119,7 +203,7 @@ export class LazyExcelExportService {
         },
         {
           sheetName: 'Bahan Baku',
-          data: Array.isArray(ingredients?.ingredients) ? ingredients.ingredients.map((ingredient: any) => ({
+          data: Array.isArray(ingredients?.ingredients) ? ingredients.ingredients.map((ingredient: IngredientResponse): IngredientExportRow => ({
             id: ingredient.id,
             nama: ingredient.name,
             satuan: ingredient.unit || '',
@@ -140,7 +224,7 @@ export class LazyExcelExportService {
         },
         {
           sheetName: 'Pesanan',
-          data: Array.isArray(orders?.orders) ? orders.orders.map((order: any) => ({
+          data: Array.isArray(orders?.orders) ? orders.orders.map((order: OrderResponse): OrderExportRow => ({
             id: order.id,
             nomor_order: order.order_no || '',
             nama_pelanggan: order.customer_name || '',
@@ -161,7 +245,7 @@ export class LazyExcelExportService {
         },
         {
           sheetName: 'Pelanggan',
-          data: Array.isArray(customers?.customers) ? customers.customers.map((customer: any) => ({
+          data: Array.isArray(customers?.customers) ? customers.customers.map((customer: CustomerResponse): CustomerExportRow => ({
             id: customer.id,
             nama: customer.name,
             telepon: customer.phone || '',
@@ -181,7 +265,7 @@ export class LazyExcelExportService {
       ]
 
       return sheets
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Failed to fetch data for export')
       throw new Error('Failed to fetch data for export')
     }

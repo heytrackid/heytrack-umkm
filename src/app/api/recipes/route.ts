@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/recipes - Get all recipes with ingredient relationships
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -85,7 +86,7 @@ export async function GET(request: NextRequest) {
     const { data: recipes, error } = await query
 
     if (error) {
-      console.error('Error fetching recipes:', error)
+      apiLogger.error({ error: error }, 'Error fetching recipes:')
       return NextResponse.json(
         { error: 'Failed to fetch recipes' },
         { status: 500 }
@@ -93,8 +94,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(recipes)
-  } catch (error: any) {
-    console.error('Error in GET /api/recipes:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in GET /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (recipeError) {
-      console.error('Error creating recipe:', recipeError)
+      apiLogger.error({ error: recipeError }, 'Error creating recipe:')
       return NextResponse.json(
         { error: 'Failed to create recipe' },
         { status: 500 }
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
         .insert(recipeIngredientsToInsert)
 
       if (ingredientsError) {
-        console.error('Error adding recipe ingredients:', ingredientsError)
+        apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
         // If ingredients fail, we should delete the recipe to maintain consistency
         await supabase
           .from('resep')
@@ -197,13 +198,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (fetchError) {
-      console.error('Error fetching complete recipe:', fetchError)
+      apiLogger.error({ error: fetchError }, 'Error fetching complete recipe:')
       return NextResponse.json(recipe, { status: 201 })
     }
 
     return NextResponse.json(completeRecipe, { status: 201 })
-  } catch (error: any) {
-    console.error('Error in POST /api/recipes:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in POST /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

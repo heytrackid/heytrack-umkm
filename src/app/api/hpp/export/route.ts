@@ -3,6 +3,7 @@ import { CostBreakdown, HPPSnapshot, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 import { HPPExportQuerySchema } from '@/lib/validations'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/export - Export HPP data to Excel
 export async function GET(request: NextRequest) {
     try {
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
             .order('snapshot_date', { ascending: true })
 
         if (snapshotsError) {
-            console.error('Error fetching snapshots:', snapshotsError)
+            apiLogger.error({ error: snapshotsError }, 'Error fetching snapshots:')
             return NextResponse.json(
                 { error: 'Failed to fetch snapshots', details: snapshotsError.message },
                 { status: 500 }
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Type cast snapshots to HPPSnapshot[]
-        const typedSnapshots = snapshots as unknown as HPPSnapshot[]
+        const typedSnapshots = snapshots as any as HPPSnapshot[]
 
         // Calculate summary statistics
         const hppValues = typedSnapshots.map(s => s.hpp_value)
@@ -352,8 +353,8 @@ export async function GET(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error in export endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in export endpoint:')
         return NextResponse.json(
             { error: 'Export failed', details: error.message },
             { status: 500 }

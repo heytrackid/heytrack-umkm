@@ -17,7 +17,7 @@ interface UseApiState<T> {
 /**
  * useApi - Hook for making API requests with loading/error states
  */
-export function useApi<T = any>(
+export function useApi<T = unknown >(
   endpoint: string,
   options: UseApiOptions<T> = {}
 ) {
@@ -128,7 +128,7 @@ export function useApi<T = any>(
 /**
  * useMutationApi - Hook for POST/PUT/DELETE/PATCH requests
  */
-export function useMutationApi<T = any, R = any>(
+export function useMutationApi<T = unknown , R = unknown >(
   endpoint: string,
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'POST',
   options: UseApiOptions<R> = {}

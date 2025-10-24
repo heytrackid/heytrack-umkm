@@ -40,7 +40,7 @@ export async function GET(
 
     return createSuccessResponse(data)
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleDatabaseError(error)
   }
 }
@@ -80,7 +80,7 @@ export async function PUT(
 
         return createSuccessResponse(data, 'Bahan baku berhasil diupdate')
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         return handleDatabaseError(error)
       }
     }
@@ -139,7 +139,7 @@ export async function DELETE(
 
     return createSuccessResponse(null, 'Bahan baku berhasil dihapus')
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return handleDatabaseError(error)
   }
 }

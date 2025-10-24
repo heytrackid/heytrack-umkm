@@ -4,7 +4,7 @@
  */
 
 
-interface CacheEntry<T = any> {
+interface CacheEntry<T = unknown > {
   data: T
   timestamp: number
   ttl: number
@@ -32,7 +32,7 @@ class APICache {
   /**
    * Generate a cache key from request parameters
    */
-  private generateKey(endpoint: string, params?: Record<string, any>): string {
+  private generateKey(endpoint: string, params?: Record<string, unknown>): string {
     const baseKey = `${this.version}:${endpoint}`
     if (!params) return baseKey
 
@@ -68,7 +68,7 @@ class APICache {
   /**
    * Get data from cache
    */
-  get<T>(endpoint: string, params?: Record<string, any>): T | null {
+  get<T>(endpoint: string, params?: Record<string, unknown>): T | null {
     const key = this.generateKey(endpoint, params)
     const entry = this.cache.get(key)
 
@@ -87,7 +87,7 @@ class APICache {
   /**
    * Set data in cache
    */
-  set<T>(endpoint: string, data: T, params?: Record<string, any>, ttl?: number): void {
+  set<T>(endpoint: string, data: T, params?: Record<string, unknown>, ttl?: number): void {
     const key = this.generateKey(endpoint, params)
     const entry: CacheEntry<T> = {
       data,
@@ -144,7 +144,7 @@ class APICache {
   /**
    * Preload data into cache
    */
-  preload<T>(endpoint: string, data: T, params?: Record<string, any>, ttl?: number): void {
+  preload<T>(endpoint: string, data: T, params?: Record<string, unknown>, ttl?: number): void {
     this.set(endpoint, data, params, ttl)
   }
 
@@ -154,7 +154,7 @@ class APICache {
   async cachedFetch<T>(
     endpoint: string,
     fetchFn: () => Promise<T>,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     options?: { ttl?: number; forceRefresh?: boolean }
   ): Promise<T> {
     const key = this.generateKey(endpoint, params)
@@ -172,7 +172,7 @@ class APICache {
       const data = await fetchFn()
       this.set(endpoint, data, params, options?.ttl)
       return data
-    } catch (error: any) {
+    } catch (error: unknown) {
       // On error, try to return stale cache if available
       const stale = this.cache.get(key)
       if (stale) {

@@ -2,6 +2,7 @@
 
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
+import { apiLogger } from '@/lib/logger'
 import {
   StatsCardSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
@@ -65,8 +66,8 @@ export default function OrdersPage() {
 
       const data = await response.json()
       setOrders(data)
-    } catch (error: any) {
-      console.error('Error fetching orders:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error fetching orders:')
       toast({
         title: 'Terjadi kesalahan',
         description: 'Gagal memuat data pesanan. Silakan coba lagi.',

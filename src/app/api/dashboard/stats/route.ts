@@ -3,6 +3,7 @@ import { createSupabaseClient } from '@/lib/supabase'
 import { DateRangeQuerySchema } from '@/lib/validations'
 import { Database } from '@/types'
 
+import { apiLogger } from '@/lib/logger'
 type Order = Database['public']['Tables']['orders']['Row']
 type Customer = Database['public']['Tables']['customers']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -26,11 +27,10 @@ export async function GET(request: Request) {
       )
     }
 
-    const { start_date, end_date } = dateRangeValidation.data
+    const { start_date: _start_date, end_date: _end_date } = dateRangeValidation.data
 
     const supabase = createSupabaseClient()
-    const today = new Date().toISOString().split('T')[0]
-    const thisMonth = new Date().toISOString().slice(0, 7)
+    const today = new Date().toISOString().split('T')[0] as string
     
     // Get orders statistics
     const { data: orders } = await supabase
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     
     const totalCustomers = customers?.length || 0
     const vipCustomers = customers?.filter((customer: Customer) =>
-      String((customer as unknown as { customer_type?: string }).customer_type || '') === 'vip').length || 0
+      String((customer as any as { customer_type?: string }).customer_type || '') === 'vip').length || 0
 
     const lowStockItems = ingredients?.filter((ingredient: Ingredient) => {
       const currentStock = Number(ingredient.current_stock || 0)
@@ -92,7 +92,7 @@ export async function GET(request: Request) {
     // Calculate yesterday for comparison
     const yesterdayDate = new Date()
     yesterdayDate.setDate(yesterdayDate.getDate() - 1)
-    const yesterdayStr = yesterdayDate.toISOString().split('T')[0]
+    const yesterdayStr = yesterdayDate.toISOString().split('T')[0] as string
 
     const { data: yesterdayOrders } = await supabase
       .from('orders')
@@ -156,8 +156,8 @@ export async function GET(request: Request) {
         total: totalRecipes,
         popular: recipes
           ?.sort((a: Recipe, b: Recipe) => {
-            const aUsage = Number((a as unknown as { times_made?: number }).times_made || 0)
-            const bUsage = Number((b as unknown as { times_made?: number }).times_made || 0)
+            const aUsage = Number((a as any as { times_made?: number }).times_made || 0)
+            const bUsage = Number((b as any as { times_made?: number }).times_made || 0)
             return bUsage - aUsage
           })
           ?.slice(0, 3) || []
@@ -174,7 +174,7 @@ export async function GET(request: Request) {
     })
     
   } catch (error: unknown) {
-    console.error('Error fetching dashboard stats:', error)
+    apiLogger.error({ error: error }, 'Error fetching dashboard stats:')
     return NextResponse.json({ error: (error as Error).message }, { status: 500 })
   }
 }
@@ -183,7 +183,7 @@ export async function GET(request: Request) {
 export async function POST() {
   try {
     const supabase = createSupabaseClient()
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0] as string
     
     // Get today's data
     const { data: todayOrders } = await supabase
@@ -201,13 +201,13 @@ export async function POST() {
       .eq('expense_date', today)
     
     const todayOrderIds = todayOrders?.map((order: Order) => order.id) || []
-    const todayItems = todayOrderItems?.filter((item: unknown) =>
+    const todayItems = todayOrderItems?.filter((item: any) =>
       todayOrderIds.includes(String((item as { order_id: string }).order_id))) || []
 
     const totalRevenue = todayOrders?.reduce((sum: number, order: Order) =>
       sum + parseFloat(String(order.total_amount || 0)), 0) || 0
 
-    const totalItemsSold = todayItems.reduce((sum: number, item: unknown) =>
+    const totalItemsSold = todayItems.reduce((sum: number, item: any) =>
       sum + parseInt(String((item as { quantity: number | string }).quantity || 0), 10), 0) || 0
 
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
@@ -218,9 +218,9 @@ export async function POST() {
     const profitEstimate = totalRevenue - totalExpenses
 
     // Upsert daily summary
-    const { error } = await (supabase
+    const { error } = await supabase
       .from('daily_sales_summary')
-      .upsert as any)([{
+      .upsert([{
         sales_date: today,
         total_orders: todayOrders?.length || 0,
         total_revenue: totalRevenue,
@@ -238,7 +238,7 @@ export async function POST() {
     return NextResponse.json({ success: true, message: 'Daily summary updated' })
     
   } catch (error: unknown) {
-    console.error('Error updating daily summary:', error)
+    apiLogger.error({ error: error }, 'Error updating daily summary:')
     return NextResponse.json({ error: (error as Error).message }, { status: 500 })
   }
 }

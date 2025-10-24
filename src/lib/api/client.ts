@@ -21,19 +21,19 @@ interface ApiResponse<T = unknown> {
 
 interface ApiError extends Error {
   status: number
-  data?: unknown
+  data?: any
   response?: Response
 }
 
 // Request/Response logging utilities
 const logger = {
-  log: (message: string, data?: unknown) => {
+  log: (message: string, data?: any) => {
     apiLogger.debug({ data }, message)
   },
-  error: (message: string, error?: unknown) => {
+  error: (message: string, error?: any) => {
     apiLogger.error({ err: error }, message)
   },
-  warn: (message: string, data?: unknown) => {
+  warn: (message: string, data?: any) => {
     apiLogger.warn({ data }, message)
   },
 }
@@ -132,7 +132,7 @@ class APIClient {
   /**
    * Create ApiError from response
    */
-  private async createApiError(response: Response, data?: unknown): Promise<ApiError> {
+  private async createApiError(response: Response, data?: any): Promise<ApiError> {
     const dataObj = data as { error?: string; message?: string } | undefined
     const error = new Error(
       dataObj?.error || dataObj?.message || `API Error: ${response.status}`
@@ -255,7 +255,7 @@ class APIClient {
   /**
    * POST request
    */
-  post<T = unknown>(endpoint: string, body?: unknown, config?: RequestConfig) {
+  post<T = unknown>(endpoint: string, body?: any, config?: RequestConfig) {
     return this.request<T>(endpoint, {
       ...config,
       method: 'POST',
@@ -266,7 +266,7 @@ class APIClient {
   /**
    * PUT request
    */
-  put<T = unknown>(endpoint: string, body?: unknown, config?: RequestConfig) {
+  put<T = unknown>(endpoint: string, body?: any, config?: RequestConfig) {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PUT',
@@ -277,7 +277,7 @@ class APIClient {
   /**
    * PATCH request
    */
-  patch<T = unknown>(endpoint: string, body?: unknown, config?: RequestConfig) {
+  patch<T = unknown>(endpoint: string, body?: any, config?: RequestConfig) {
     return this.request<T>(endpoint, {
       ...config,
       method: 'PATCH',

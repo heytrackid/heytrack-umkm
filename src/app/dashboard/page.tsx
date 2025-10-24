@@ -73,9 +73,9 @@ const placeholderStats = {
   ingredientsLow: 0
 }
 
-const recentOrders: any[] = []
+const recentOrders: unknown[] = []
 
-const lowStockItems: any[] = []
+const lowStockItems: unknown[] = []
 
 export default function Dashboard() {
   const { isMobile } = useResponsive()

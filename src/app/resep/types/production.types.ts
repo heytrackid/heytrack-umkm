@@ -56,8 +56,8 @@ export interface ProductionBatch {
   updated_at: string
   
   // Relations
-  recipe?: any // Will be properly typed when recipes module is integrated
-  quality_inspector?: any // Staff member
+  recipe?: RecipesTable['Row'] // Recipe data type
+  quality_inspector?: UserProfilesTable['Row'] // Staff member
   production_logs?: ProductionLog[]
 }
 
@@ -134,7 +134,7 @@ export interface ProductionLog {
   stage?: QualityCheckPoint
   user_id?: string
   user_name?: string
-  data?: Record<string, any> // Additional structured data
+  data?: Record<string, unknown> // Additional structured data
   created_at: string
 }
 
@@ -158,7 +158,7 @@ export interface ProductionEquipment {
   utilization_percentage?: number
   
   // Specifications
-  specifications: Record<string, any>
+  specifications: Record<string, unknown>
   operating_temperature_range?: { min: number, max: number }
   power_consumption?: number // watts
   
@@ -422,7 +422,7 @@ export interface ProductionExportOptions {
 export interface ProductionRealtimeUpdate {
   batch_id: string
   update_type: 'status' | 'progress' | 'quality' | 'equipment' | 'alert'
-  data: any
+  data: unknown
   timestamp: string
 }
 

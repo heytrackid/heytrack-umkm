@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import { HPPCalculationService } from '@/modules/recipes'
 import type { RecipeOption } from './OrderRecipeService'
@@ -9,7 +10,14 @@ export class RecipeAvailabilityService {
   /**
    * Check if ingredients are available for production
    */
-  static checkIngredientAvailability(recipeIngredients: any[]): boolean {
+  static checkIngredientAvailability(recipeIngredients: Array<{
+    quantity: number
+    ingredient: {
+      is_active: boolean
+      current_stock: number | null
+      reorder_point: number | null
+    } | null
+  }>): boolean {
     return recipeIngredients.every(ri => {
       if (!ri.ingredient || !ri.ingredient.is_active) return false
 
@@ -91,7 +99,7 @@ export class RecipeAvailabilityService {
       )
 
       return recipeOptions
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error fetching available recipes')
       throw new Error('Failed to fetch available recipes')
     }

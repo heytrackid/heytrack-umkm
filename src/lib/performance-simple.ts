@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 // Simple performance utilities without external dependencies
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor
@@ -24,20 +25,20 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.set(key, data)
+        this.metrics.set(label, [])
       }
       
-      this.metrics.get(key)!.push(duration)
+      this.metrics.get(label)!.push(duration)
       
       // Log slow operations (>100ms)
       if (duration > 100) {
-        console.warn(`⚠️ Slow operation detected: ${label} took ${duration.toFixed(2)}ms`)
+        apiLogger.warn(`⚠️ Slow operation detected: ${label} took ${duration.toFixed(2)}ms`)
       }
     }
   }
   
   getMetrics(label: string): { avg: number; min: number; max: number; count: number } | null {
-    const measurements = this.metrics.get(key)
+    const measurements = this.metrics.get(label)
     if (!measurements || measurements.length === 0) return null
     
     return {
@@ -59,9 +60,9 @@ export class PerformanceMonitor {
 
 // Cache utilities
 export class CacheManager {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   
-  set(key, data): void {
+  set(key: string, data: any, ttlMs: number = 300000): void { // Default 5 minutes
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -69,7 +70,7 @@ export class CacheManager {
     })
   }
   
-  get<T = any>(key: string): T | null {
+  get<T = unknown>(key: string): T | null {
     const item = this.cache.get(key)
     
     if (!item) return null
@@ -111,19 +112,26 @@ if (typeof window !== 'undefined') {
 }
 
 // Memory usage monitoring
+// Define memory info interface for better typing
+interface MemoryInfo {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
 export const monitorMemoryUsage = (): void => {
   if (typeof window === 'undefined' || !(performance as any).memory) return
   
   setInterval(() => {
-    const memory = (performance as any).memory
+    const memory = (performance as any).memory as MemoryInfo
     const used = (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
     const limit = (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2)
     
-    console.log(`🧠 Memory usage: ${used}MB / ${limit}MB`)
+    apiLogger.info(`🧠 Memory usage: ${used}MB / ${limit}MB`)
     
     // Warn if memory usage is high
     if (memory.usedJSHeapSize / memory.jsHeapSizeLimit > 0.8) {
-      console.warn('⚠️ High memory usage detected!')
+      apiLogger.warn('⚠️ High memory usage detected!')
     }
   }, 30000) // Check every 30 seconds
 }
@@ -135,13 +143,13 @@ export const measureWebVitals = (): void => {
   // Simple performance measurement
   const observer = new PerformanceObserver((list) => {
     list.getEntries().forEach((entry) => {
-      console.log(`📊 ${entry.name}:`, entry.duration || entry.value)
+      apiLogger.info(`📊 ${entry.name}:`, entry.duration || entry.value)
     })
   })
   
   try {
     observer.observe({ entryTypes: ['navigation', 'paint', 'largest-contentful-paint'] })
   } catch (e) {
-    console.log('Performance Observer not supported')
+    apiLogger.info('Performance Observer not supported')
   }
 }

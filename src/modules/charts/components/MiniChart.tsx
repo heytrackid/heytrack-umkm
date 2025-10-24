@@ -5,7 +5,7 @@ import { lazy, Suspense } from 'react'
 import dynamic from 'next/dynamic'
 
 interface MiniChartProps {
-  data: any[]
+  data: unknown[]
   type?: 'line' | 'bar'
   dataKey: string
   color?: string

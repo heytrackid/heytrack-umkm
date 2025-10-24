@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseClient } from '@/lib/supabase'
 import { PaginationQuerySchema, DateRangeQuerySchema, ExpenseInsertSchema } from '@/lib/validations'
 
+import { apiLogger } from '@/lib/logger'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -112,12 +113,15 @@ export async function GET(request: NextRequest) {
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
-    const todayTotal = todayExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || '0'), 0) || 0
-    const monthTotal = monthExpenses?.reduce((sum: number, exp: any) => sum + parseFloat(exp.amount || '0'), 0) || 0
-    
+    const todayTotal = todayExpenses?.reduce((sum: number, exp: { amount?: string | number }) =>
+      sum + parseFloat(String(exp.amount || '0')), 0) || 0
+    const monthTotal = monthExpenses?.reduce((sum: number, exp: { amount?: string | number }) =>
+      sum + parseFloat(String(exp.amount || '0')), 0) || 0
+
     // Category breakdown
-    const categoryBreakdown = monthExpenses?.reduce((acc: any, exp: any) => {
-      acc[exp.category] = (acc[exp.category] || 0) + parseFloat(exp.amount || '0')
+    const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: { category?: string; amount?: string | number }) => {
+      const category = exp.category || 'Uncategorized'
+      acc[category] = (acc[category] || 0) + parseFloat(String(exp.amount || '0'))
       return acc
     }, {}) || {}
 
@@ -125,8 +129,8 @@ export async function GET(request: NextRequest) {
       data: expenses, 
       count,
       pagination: {
-        limit: parseInt(limit),
-        offset: parseInt(offset),
+        limit: parseInt(String(limit)),
+        offset: parseInt(String(offset)),
         total: count
       },
       summary: {
@@ -136,7 +140,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error: unknown) {
-    console.error('Error fetching expenses:', error)
+    apiLogger.error({ error: error }, 'Error fetching expenses:')
     const message = error instanceof Error ? error.message : 'Failed to fetch expenses'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -161,13 +165,13 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    const { data: expense, error } = await (supabase
+    const { data: expense, error } = await supabase
       .from('expenses')
-      .insert as any)([{
+      .insert([{
         ...validatedData,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }])
+      }] as any)
       .select('*')
       .single()
 
@@ -175,7 +179,7 @@ export async function POST(request: Request) {
 
     // Create notification for large expenses
     if (validatedData.amount > 1000000) { // More than 1M IDR
-      await (supabase.from('notifications').insert as any)([{
+      await supabase.from('notifications').insert([{
         type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
@@ -183,12 +187,12 @@ export async function POST(request: Request) {
         entity_type: 'expense',
         entity_id: expense.id,
         priority: 'high'
-      }])
+      }] as any)
     }
 
     return NextResponse.json(expense, { status: 201 })
   } catch (error: unknown) {
-    console.error('Error creating expense:', error)
+    apiLogger.error({ error: error }, 'Error creating expense:')
     const message = error instanceof Error ? error.message : 'Failed to create expense'
     return NextResponse.json({ error: message }, { status: 500 })
   }

@@ -64,7 +64,7 @@ interface SimpleDataTableProps<T> {
   initialPageSize?: number
 }
 
-export function SimpleDataTable<T extends Record<string, any>>({
+export function SimpleDataTable<T extends Record<string, unknown>>({
   title,
   description,
   data,
@@ -146,7 +146,7 @@ export function SimpleDataTable<T extends Record<string, any>>({
     ? sortedData.slice(pageStart - 1, pageEnd)
     : sortedData
 
-  function getValue(item: T, key: keyof T | string): any {
+  function getValue(item: T, key: keyof T | string): unknown {
     if (typeof key === 'string' && key.includes('.')) {
       return key.split('.').reduce((obj, k) => obj?.[k], item)
     }

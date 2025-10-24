@@ -1,6 +1,7 @@
 import { TimePeriod } from '@/types/hpp-tracking'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { apiLogger } from '@/lib/logger'
 
 // GET /api/hpp/snapshots - Get HPP snapshots with filters
 export async function GET(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
-            console.error('Auth error:', authError)
+            apiLogger.error({ error: authError }, 'Unauthorized access to GET /api/hpp/snapshots')
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
         const { data: snapshots, error, count } = await query
 
         if (error) {
-            console.error('Error fetching snapshots:', error)
+            apiLogger.error({ error }, 'Error fetching HPP snapshots from database')
             return NextResponse.json(
                 { error: 'Failed to fetch snapshots', details: error.message },
                 { status: 500 }
@@ -82,8 +83,8 @@ export async function GET(request: NextRequest) {
             date_range: dateRange
         })
 
-    } catch (error: any) {
-        console.error('Error in GET /api/hpp/snapshots:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error }, 'Unexpected error in GET /api/hpp/snapshots')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

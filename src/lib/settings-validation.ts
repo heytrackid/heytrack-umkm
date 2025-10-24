@@ -20,7 +20,7 @@ import {
 /**
  * Validates user profile settings
  */
-export function validateUserProfileSettings(data: unknown): UserProfileSettings {
+export function validateUserProfileSettings(data: any): UserProfileSettings {
   const result = UserProfileSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -32,7 +32,7 @@ export function validateUserProfileSettings(data: unknown): UserProfileSettings 
 /**
  * Validates business information settings
  */
-export function validateBusinessInfoSettings(data: unknown): BusinessInfoSettings {
+export function validateBusinessInfoSettings(data: any): BusinessInfoSettings {
   const result = BusinessInfoSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -44,7 +44,7 @@ export function validateBusinessInfoSettings(data: unknown): BusinessInfoSetting
 /**
  * Validates notification settings
  */
-export function validateNotificationSettings(data: unknown): NotificationSettings {
+export function validateNotificationSettings(data: any): NotificationSettings {
   const result = NotificationSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -56,7 +56,7 @@ export function validateNotificationSettings(data: unknown): NotificationSetting
 /**
  * Validates regional settings
  */
-export function validateRegionalSettings(data: unknown): RegionalSettings {
+export function validateRegionalSettings(data: any): RegionalSettings {
   const result = RegionalSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -68,7 +68,7 @@ export function validateRegionalSettings(data: unknown): RegionalSettings {
 /**
  * Validates security settings
  */
-export function validateSecuritySettings(data: unknown): SecuritySettings {
+export function validateSecuritySettings(data: any): SecuritySettings {
   const result = SecuritySettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -80,7 +80,7 @@ export function validateSecuritySettings(data: unknown): SecuritySettings {
 /**
  * Validates backup settings
  */
-export function validateBackupSettings(data: unknown): BackupSettings {
+export function validateBackupSettings(data: any): BackupSettings {
   const result = BackupSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -92,7 +92,7 @@ export function validateBackupSettings(data: unknown): BackupSettings {
 /**
  * Validates theme settings
  */
-export function validateThemeSettings(data: unknown): ThemeSettings {
+export function validateThemeSettings(data: any): ThemeSettings {
   const result = ThemeSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -104,7 +104,7 @@ export function validateThemeSettings(data: unknown): ThemeSettings {
 /**
  * Validates complete app settings
  */
-export function validateAppSettings(data: unknown): AppSettings {
+export function validateAppSettings(data: any): AppSettings {
   const result = AppSettingsSchema.safeParse(data)
   if (!result.success) {
     const errors = result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
@@ -116,9 +116,9 @@ export function validateAppSettings(data: unknown): AppSettings {
 /**
  * Validates individual settings category and returns validation result
  */
-export function validateSettingsCategory(category: string, data: unknown): { success: boolean; data?: any; errors?: string[] } {
+export function validateSettingsCategory(category: string, data: any): { success: boolean; data?: Record<string, unknown>; errors?: string[] } {
   try {
-    let validatedData: any
+    let validatedData: unknown
 
     switch (category) {
       case 'user':

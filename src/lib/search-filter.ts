@@ -151,7 +151,7 @@ export function useSearch(defaultValue = '', debounceMs = 300) {
 /**
  * Simple text search across array
  */
-export function filterBySearch<T extends Record<string, any>>(
+export function filterBySearch<T extends Record<string, unknown>>(
   items: T[],
   searchTerm: string,
   searchableFields: (keyof T)[]
@@ -172,9 +172,9 @@ export function filterBySearch<T extends Record<string, any>>(
 /**
  * Filter array by multiple conditions
  */
-export function filterByConditions<T extends Record<string, any>>(
+export function filterByConditions<T extends Record<string, unknown>>(
   items: T[],
-  conditions: Record<keyof T, any>
+  conditions: Partial<Record<keyof T, unknown>>
 ): T[] {
   return items.filter((item) =>
     Object.entries(conditions).every(([key, value]) => {
@@ -187,7 +187,7 @@ export function filterByConditions<T extends Record<string, any>>(
 /**
  * Range filter for numbers/dates
  */
-export function filterByRange<T extends Record<string, any>>(
+export function filterByRange<T extends Record<string, unknown>>(
   items: T[],
   field: keyof T,
   min?: number | Date,

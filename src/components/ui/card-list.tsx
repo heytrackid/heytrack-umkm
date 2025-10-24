@@ -10,7 +10,7 @@ import { Card, CardContent } from './card'
 
 interface CardListItem {
   id: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface CardListProps<T extends CardListItem> {

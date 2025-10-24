@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { User, Upload } from 'lucide-react'
 
 interface ProfileSettingsProps {
-  settings: any
+  settings: unknown
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

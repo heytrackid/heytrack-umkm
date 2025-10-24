@@ -3,6 +3,7 @@ import { createSupabaseClient } from '@/lib/supabase';
 import { Database } from '@/types';
 import { useCallback, useState } from 'react';
 
+import { apiLogger } from '@/lib/logger'
 type Tables = Database['public']['Tables']
 
 interface EnhancedCRUDOptions {
@@ -49,7 +50,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       )
     }
 
-    console.error(`CRUD ${operation} error:`, error)
+    apiLogger.error({ error: `CRUD ${operation} error:`, error }, 'Console error replaced with logger')
   }, [customErrorHandler, showErrorToast])
 
   const handleSuccess = useCallback((operation: 'create' | 'update' | 'delete') => {
@@ -116,8 +117,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const { data: result, error } = await supabase
         .from(table)
-        .update(data as any)
-        .eq('id', id as any)
+        .update(data)
+        .eq('id', id)
         .select('*')
         .single()
 
@@ -154,7 +155,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const { data: existingRecord, error: fetchError } = await supabase
         .from(table)
         .select('*')
-        .eq('id', id as any)
+        .eq('id', id)
         .single()
 
       if (fetchError || !existingRecord) {
@@ -164,7 +165,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const { error } = await supabase
         .from(table)
         .delete()
-        .eq('id', id as any)
+        .eq('id', id)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -233,8 +234,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       for (const update of updates) {
         const { data, error } = await supabase
           .from(table)
-          .update(update.data as any)
-          .eq('id', update.id as any)
+          .update(update.data)
+          .eq('id', update.id)
           .select('*')
           .single()
 
@@ -275,7 +276,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const { error } = await supabase
         .from(table)
         .delete()
-        .in('id', ids as any)
+        .in('id', ids)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -369,7 +370,7 @@ export function useAsyncOperation() {
         )
       }
 
-      console.error('Async operation error:', error)
+      apiLogger.error({ error: error }, 'Async operation error:')
       return null
     } finally {
       setLoading(false)

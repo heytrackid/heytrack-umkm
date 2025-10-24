@@ -1,17 +1,16 @@
 'use client'
-import * as React from 'react'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Phone, MapPin, Users, Package, Truck, DollarSign } from 'lucide-react'
-import { Order } from '../types'
-import { getStatusInfo, getPriorityInfo } from '../utils/helpers'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
+import { MapPin, Phone, Users } from 'lucide-react'
+import { Order } from '../types'
+import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
 interface OrderDetailViewProps {
-  order: any // Using any for now to match the legacy structure
+  order: Order
 }
 
 export function OrderDetailView({ order }: OrderDetailViewProps) {
@@ -120,10 +119,10 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
               </div>
             </div>
           )) || (
-            <div className="text-center py-4 text-muted-foreground">
-              Tidak ada item pesanan
-            </div>
-          )}
+              <div className="text-center py-4 text-muted-foreground">
+                Tidak ada item pesanan
+              </div>
+            )}
         </div>
         <div className="pt-4 border-t">
           <div className="flex justify-between items-center font-medium">
@@ -183,7 +182,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
             <CardContent>
               <p className="text-lg font-bold">
                 {(order.paid_amount || 0) >= (order.total_amount || 0) ? 'LUNAS' :
-                 (order.paid_amount || 0) > 0 ? 'SEBAGIAN' : 'BELUM BAYAR'}
+                  (order.paid_amount || 0) > 0 ? 'SEBAGIAN' : 'BELUM BAYAR'}
               </p>
             </CardContent>
           </Card>

@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MessageCircle, Package } from 'lucide-react'
 
+import { apiLogger } from '@/lib/logger'
 interface OrdersQuickActionsProps {
-  t: any
+  t: unknown
 }
 
 export default function OrdersQuickActions({ t }: OrdersQuickActionsProps) {
@@ -26,7 +27,7 @@ export default function OrdersQuickActions({ t }: OrdersQuickActionsProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => console.log('Export orders')}
+            onClick={() => apiLogger.info('Export orders')}
             className="flex items-center gap-2"
           >
             <Package className="h-4 w-4" />

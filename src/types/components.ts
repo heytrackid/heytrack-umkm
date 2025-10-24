@@ -37,7 +37,7 @@ export interface ColumnDef<T> {
     header: string;
     accessorKey?: keyof T;
     accessorFn?: (row: T) => unknown;
-    cell?: (value: unknown, row: T) => ReactNode;
+    cell?: (value: any, row: T) => ReactNode;
     sortable?: boolean;
     width?: string | number;
 }

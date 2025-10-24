@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 
+import { apiLogger } from '@/lib/logger'
 interface Props {
   children: ReactNode
   fallback?: ReactNode
@@ -36,7 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo)
+    apiLogger.error({ error: error, errorInfo }, 'Error caught by boundary:')
     
     this.setState({
       error,
@@ -46,10 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log to error tracking service (e.g., Sentry)
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
       // Log error to your tracking service
-      console.error('Production error:', {
-        error: error.toString(),
-        componentStack: errorInfo.componentStack
-      })
+      apiLogger.error({ error: error.toString(), componentStack: errorInfo.componentStack }, 'Production error:')
     }
   }
 

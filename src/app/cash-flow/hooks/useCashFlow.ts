@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 // Types and constants embedded in hook file for now
 export interface Transaction {
   id: string
@@ -249,7 +250,7 @@ export function useCashFlow(): UseCashFlowReturn {
       const data = await response.json()
       setCashFlowData(data)
     } catch (err: any) {
-      console.error('Error fetching cash flow data:', err)
+      apiLogger.error({ error: err }, 'Error fetching cash flow data:')
       setError(err.message || 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
@@ -317,7 +318,7 @@ export function useCashFlow(): UseCashFlowReturn {
       await fetchCashFlowData()
 
     } catch (err: any) {
-      console.error('Error adding transaction:', err)
+      apiLogger.error({ error: err }, 'Error adding transaction:')
       alert('Gagal menambah transaksi: ' + err.message)
     } finally {
       setLoading(false)
@@ -341,7 +342,7 @@ export function useCashFlow(): UseCashFlowReturn {
 
       await fetchCashFlowData()
     } catch (err: any) {
-      console.error('Error deleting transaction:', err)
+      apiLogger.error({ error: err }, 'Error deleting transaction:')
       alert('Gagal menghapus transaksi: ' + err.message)
     } finally {
       setLoading(false)
@@ -356,7 +357,7 @@ export function useCashFlow(): UseCashFlowReturn {
       const filename = `arus-kas-${new Date().toISOString().split('T')[0]}.${format}`
       exportToCSV(cashFlowData, filename)
     } catch (err) {
-      console.error('Error exporting report:', err)
+      apiLogger.error({ error: err }, 'Error exporting report:')
       alert('Gagal mengekspor laporan')
     }
   }

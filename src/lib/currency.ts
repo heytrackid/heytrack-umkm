@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 /**
  * Currency utilities - Single source of truth
  * Works with settings context for dynamic currency support
@@ -163,8 +164,8 @@ export function getCurrentCurrency(): Currency {
       const parsed = JSON.parse(savedSettings)
       return parsed.currency || currencies[0]
     }
-  } catch (error: any) {
-    console.error('Error loading currency settings:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error loading currency settings:')
   }
   return currencies[0] // Default to IDR
 }
@@ -213,7 +214,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
     }).format(amount)
     
     return `${currency.symbol} ${formatted}`
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Fallback to basic formatting
     return formatCurrency(amount, currency)
   }

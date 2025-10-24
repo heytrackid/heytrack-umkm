@@ -8,10 +8,12 @@
     "dev": "NEXT_WEBPACK=1 next dev",
     "dev:webpack": "NEXT_WEBPACK=1 next dev",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
+    "build:monitor": "node scripts/bundle-monitor.ts",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "packageManager": "pnpm@9.15.2",
   "pnpm": {
@@ -84,13 +86,16 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }

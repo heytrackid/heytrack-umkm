@@ -130,42 +130,42 @@ export class RateLimitError extends TypedError {
 /**
  * Type guard for TypedError
  */
-export function isTypedError(error: unknown): error is TypedError {
+export function isTypedError(error: any): error is TypedError {
     return error instanceof TypedError;
 }
 
 /**
  * Type guard for ValidationError
  */
-export function isValidationError(error: unknown): error is ValidationError {
+export function isValidationError(error: any): error is ValidationError {
     return error instanceof ValidationError;
 }
 
 /**
  * Type guard for NotFoundError
  */
-export function isNotFoundError(error: unknown): error is NotFoundError {
+export function isNotFoundError(error: any): error is NotFoundError {
     return error instanceof NotFoundError;
 }
 
 /**
  * Type guard for AuthenticationError
  */
-export function isAuthenticationError(error: unknown): error is AuthenticationError {
+export function isAuthenticationError(error: any): error is AuthenticationError {
     return error instanceof AuthenticationError;
 }
 
 /**
  * Type guard for AuthorizationError
  */
-export function isAuthorizationError(error: unknown): error is AuthorizationError {
+export function isAuthorizationError(error: any): error is AuthorizationError {
     return error instanceof AuthorizationError;
 }
 
 /**
  * Error handler utility - converts any error to ApiError format
  */
-export function handleError(error: unknown) {
+export function handleError(error: any) {
     if (isTypedError(error)) {
         return {
             code: error.code,
@@ -193,7 +193,7 @@ export function handleError(error: unknown) {
 /**
  * Safe error message extractor
  */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(error: any): string {
     if (error instanceof Error) {
         return error.message;
     }
@@ -208,7 +208,7 @@ export function getErrorMessage(error: unknown): string {
 /**
  * Safe error code extractor
  */
-export function getErrorCode(error: unknown): string {
+export function getErrorCode(error: any): string {
     if (isTypedError(error)) {
         return error.code;
     }

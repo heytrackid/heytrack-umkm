@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react'
 import { AppError, handleError, logError, getErrorMessage } from '@/lib/errors'
 
+import { apiLogger } from '@/lib/logger'
 interface ErrorState {
   error: AppError | null
   isError: boolean
@@ -41,7 +42,7 @@ export function useErrorHandler() {
     message: '',
   })
 
-  const handle = useCallback((error: unknown, context?: string) => {
+  const handle = useCallback((error: any, context?: string) => {
     const appError = handleError(error)
     logError(error, context)
 
@@ -210,7 +211,7 @@ export function useFormErrors() {
  * const handleFetch = async () => {
  *   const result = await retry(
  *     async () => await fetchUnreliableAPI(),
- *     (attempt, error) => console.log(`Retry ${attempt}: ${error.message}`)
+ *     (attempt, error) => apiLogger.info(`Retry ${attempt}: ${error.message}`)
  *   )
  * }
  * 

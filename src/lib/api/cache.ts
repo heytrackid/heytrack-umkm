@@ -10,8 +10,8 @@ interface CacheEntry<T> {
 }
 
 class RequestCache {
-  private cache = new Map<string, CacheEntry<any>>()
-  private pendingRequests = new Map<string, Promise<any>>()
+  private cache = new Map<string, CacheEntry<unknown>>()
+  private pendingRequests = new Map<string, Promise<unknown>>()
 
   /**
    * Get cached data if not expired
@@ -207,7 +207,7 @@ export function useCachedData<T>(
 /**
  * Mutation with automatic cache invalidation
  */
-export async function mutateWithCache<T, R = any>(
+export async function mutateWithCache<T, R = unknown >(
   url: string,
   fetcher: () => Promise<R>,
   options: {

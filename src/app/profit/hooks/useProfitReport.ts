@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useLoading } from '@/hooks/useLoading'
+import { apiLogger } from '@/lib/logger'
 import type {
   ProfitData,
   ProfitPeriodType,
@@ -81,7 +82,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
       setProfitData(data)
     } catch (err: any) {
-      console.error('Error fetching profit data:', err)
+      apiLogger.error({ error: err }, 'Error fetching profit data:')
       setError(err.message || 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
@@ -96,7 +97,7 @@ export function useProfitReport(): UseProfitReportReturn {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
     } catch (err) {
-      console.error('Error exporting report:', err)
+      apiLogger.error({ error: err }, 'Error exporting report:')
       alert('Gagal mengekspor laporan')
     }
   }

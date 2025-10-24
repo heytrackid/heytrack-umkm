@@ -6,27 +6,27 @@
  */
 
 // Primitive type guards
-export function isString(value: unknown): value is string {
+export function isString(value: any): value is string {
   return typeof value === 'string'
 }
 
-export function isNumber(value: unknown): value is number {
+export function isNumber(value: any): value is number {
   return typeof value === 'number' && !isNaN(value)
 }
 
-export function isBoolean(value: unknown): value is boolean {
+export function isBoolean(value: any): value is boolean {
   return typeof value === 'boolean'
 }
 
-export function isNull(value: unknown): value is null {
+export function isNull(value: any): value is null {
   return value === null
 }
 
-export function isUndefined(value: unknown): value is undefined {
+export function isUndefined(value: any): value is undefined {
   return value === undefined
 }
 
-export function isNullish(value: unknown): value is null | undefined {
+export function isNullish(value: any): value is null | undefined {
   return value === null || value === undefined
 }
 
@@ -35,17 +35,17 @@ export function isDefined<T>(value: T | null | undefined): value is T {
 }
 
 // Object type guards
-export function isObject(value: unknown): value is Record<string, unknown> {
+export function isObject(value: any): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-export function isArray(value: unknown): value is unknown[] {
+export function isArray(value: any): value is unknown[] {
   return Array.isArray(value)
 }
 
 export function isArrayOf<T>(
-  value: unknown,
-  check: (v: unknown) => v is T
+  value: any,
+  check: (v: any) => v is T
 ): value is T[] {
   return Array.isArray(value) && value.every(check)
 }
@@ -66,11 +66,11 @@ export function hasProperties<T extends object, K extends PropertyKey>(
 }
 
 // Error handling
-export function isError(value: unknown): value is Error {
+export function isError(value: any): value is Error {
   return value instanceof Error
 }
 
-export function isErrorWithMessage(value: unknown): value is { message: string } {
+export function isErrorWithMessage(value: any): value is { message: string } {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -79,20 +79,39 @@ export function isErrorWithMessage(value: unknown): value is { message: string }
   )
 }
 
-export function getErrorMessage(error: unknown): string {
+// Specific error types for API routes
+export type ApiError =
+  | Error
+  | { message: string }
+  | { error: string }
+  | { code: string; message: string }
+  | string
+  | null
+  | undefined
+
+export function getErrorMessage(error: any): string {
   if (isErrorWithMessage(error)) {
+    return error.message
+  }
+  if (isError(error)) {
     return error.message
   }
   if (isString(error)) {
     return error
+  }
+  if (error && typeof error === 'object' && 'error' in error && typeof error.error === 'string') {
+    return error.error
+  }
+  if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+    return `${error.code}: ${error.message}`
   }
   return 'Unknown error occurred'
 }
 
 // Generic type assertion helper
 export function assertType<T>(
-  value: unknown,
-  check: (v: unknown) => v is T,
+  value: any,
+  check: (v: any) => v is T,
   message?: string
 ): T {
   if (!check(value)) {
@@ -102,13 +121,13 @@ export function assertType<T>(
 }
 
 // Record/Object with unknown values
-export function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: any): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 export function isRecordOf<T>(
-  value: unknown,
-  check: (v: unknown) => v is T
+  value: any,
+  check: (v: any) => v is T
 ): value is Record<string, T> {
   if (!isRecord(value)) {
     return false
@@ -118,8 +137,8 @@ export function isRecordOf<T>(
 
 // API Response helpers
 export function isSuccessResponse<T>(
-  value: unknown,
-  check?: (v: unknown) => v is T
+  value: any,
+  check?: (v: any) => v is T
 ): value is { data: T; error: null } {
   if (!isObject(value)) return false
   if (!('data' in value) || !('error' in value)) return false
@@ -129,8 +148,7 @@ export function isSuccessResponse<T>(
 }
 
 export function isErrorResponse(
-  value: unknown
-): value is { data: null; error: Error | string } {
+  value: any): value is { data: null; error: Error | string } {
   if (!isObject(value)) return false
   if (!('data' in value) || !('error' in value)) return false
   if (value.data !== null) return false
@@ -139,18 +157,18 @@ export function isErrorResponse(
 
 // Union type helper
 export function isOneOf<T>(
-  value: unknown,
-  checks: Array<(v: unknown) => v is T>
+  value: any,
+  checks: Array<(v: any) => v is T>
 ): value is T {
   return checks.some(check => check(value))
 }
 
 // Date helpers
-export function isDate(value: unknown): value is Date {
+export function isDate(value: any): value is Date {
   return value instanceof Date && !isNaN(value.getTime())
 }
 
-export function isISODateString(value: unknown): value is string {
+export function isISODateString(value: any): value is string {
   if (!isString(value)) return false
   try {
     const date = new Date(value)
@@ -161,13 +179,13 @@ export function isISODateString(value: unknown): value is string {
 }
 
 // Database type guards
-export function isValidUUID(value: unknown): value is string {
+export function isValidUUID(value: any): value is string {
   if (!isString(value)) return false
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(value)
 }
 
-export function isValidEmail(value: unknown): value is string {
+export function isValidEmail(value: any): value is string {
   if (!isString(value)) return false
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(value)
@@ -180,7 +198,7 @@ export interface SupabaseError {
   details?: string
 }
 
-export function isSupabaseError(value: unknown): value is SupabaseError {
+export function isSupabaseError(value: any): value is SupabaseError {
   return (
     isObject(value) &&
     isString(value.message) &&
@@ -201,7 +219,7 @@ export function isJSON(value: string): boolean {
 
 export function parseJSON<T>(
   value: string,
-  check?: (v: unknown) => v is T
+  check?: (v: any) => v is T
 ): T | null {
   try {
     const parsed = JSON.parse(value)
@@ -216,14 +234,14 @@ export function parseJSON<T>(
 
 // Enum helpers
 export function isEnumValue<T extends Record<string, string | number>>(
-  value: unknown,
+  value: any,
   enumObj: T
 ): value is T[keyof T] {
   return Object.values(enumObj).includes(value as any)
 }
 
 // Narrowing helpers for Promises
-export function isPromise<T = unknown>(value: unknown): value is Promise<T> {
+export function isPromise<T = unknown>(value: any): value is Promise<T> {
   return (
     isObject(value) &&
     typeof value.then === 'function' &&

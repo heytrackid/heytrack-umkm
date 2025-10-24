@@ -1,18 +1,23 @@
 'use client';
 import * as React from 'react'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useState } from 'react';
 import { useSuppliers } from '@/hooks/useSupabaseCRUD';
 import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { Modal } from '@/components/ui/modal';
 import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
-import { useFormValidation } from '@/hooks/useSupabaseCRUD';
+import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
 import { Database } from '@/types';
+
+import { apiLogger } from '@/lib/logger'
 
 // Using generic types since suppliers might not be in the database schema yet
 type Supplier = {
   id: string;
   name: string;
+  contact_person?: string | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
@@ -22,60 +27,37 @@ type Supplier = {
 type SupplierInsert = Omit<Supplier, 'id' | 'created_at' | 'updated_at'>;
 type SupplierUpdate = Partial<SupplierInsert>;
 
-interface SupplierFormData {
-  name: string;
-  contact_person?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  notes?: string;
-}
-
-const validationRules = {
-  name: (value: string) => !value ? 'Name is required' : null,
-  contact_person: () => null,
-  phone: (value: string) => {
-    if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
-      return 'Invalid phone number format';
-    }
-    return null;
-  },
-  email: (value: string) => {
-    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      return 'Invalid email format';
-    }
-    return null;
-  },
-  address: () => null,
-  notes: () => null,
-};
-
 export function SuppliersCRUD() {
   const { data: suppliersData, loading, error, create, update, remove } = useSuppliers();
-  const suppliers = suppliersData as Supplier[];
+  const suppliers = suppliersData || [];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
 
-  const initialFormData: SupplierFormData = {
-    name: '',
-    contact_person: '',
-    phone: '',
-    email: '',
-    address: '',
-    notes: '',
-  };
+  const createForm = useForm<SupplierForm>({
+    resolver: zodResolver(SupplierFormSchema),
+    defaultValues: {
+      name: '',
+      contact_person: '',
+      phone: '',
+      email: '',
+      address: '',
+      notes: '',
+    }
+  });
 
-  const {
-    values: formData,
-    errors,
-    touched,
-    handleChange,
-    handleBlur,
-    validateAll,
-    resetForm,
-  } = useFormValidation(initialFormData, validationRules);
+  const editForm = useForm<SupplierForm>({
+    resolver: zodResolver(SupplierFormSchema),
+    defaultValues: {
+      name: '',
+      contact_person: '',
+      phone: '',
+      email: '',
+      address: '',
+      notes: '',
+    }
+  });
 
   const columns = [
     {
@@ -104,70 +86,71 @@ export function SuppliersCRUD() {
   ];
 
   const handleCreate = () => {
-    resetForm();
-    setIsCreateModalOpen(true);
-  };
+    createForm.reset()
+    setIsCreateModalOpen(true)
+  }
 
   const handleEdit = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    // Populate form with supplier data
-    Object.keys(initialFormData).forEach(key => {
-      handleChange(key as keyof SupplierFormData, (supplier as any)[key] || '');
-    });
-    setIsEditModalOpen(true);
-  };
+    setSelectedSupplier(supplier)
+    editForm.reset({
+      name: supplier.name,
+      contact_person: supplier.contact_person || '',
+      phone: supplier.phone || '',
+      email: supplier.email || '',
+      address: supplier.address || '',
+      notes: '' // Notes field not in supplier type
+    })
+    setIsEditModalOpen(true)
+  }
 
   const handleDelete = (supplier: Supplier) => {
-    setSelectedSupplier(supplier);
-    setIsDeleteDialogOpen(true);
-  };
+    setSelectedSupplier(supplier)
+    setIsDeleteDialogOpen(true)
+  }
 
-  const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefault;
-    if (!validateAll()) return;
+  const handleSubmitCreate = async (data: SupplierForm) => {
+    try {
+      await create(data)
+      setIsCreateModalOpen(false)
+      createForm.reset()
+    } catch (error: unknown) {
+      apiLogger.error({ error }, 'Failed to create supplier:')
+    }
+  }
+
+  const handleSubmitEdit = async (data: SupplierForm) => {
+    if (!selectedSupplier) return
 
     try {
-      await create(formData as SupplierInsert);
-      setIsCreateModalOpen(false);
-      resetForm();
-    } catch (error: any) {
-      console.error('Failed to create supplier:', error);
+      await update(selectedSupplier.id, data)
+      setIsEditModalOpen(false)
+      setSelectedSupplier(null)
+      editForm.reset()
+    } catch (error: unknown) {
+      apiLogger.error({ error }, 'Failed to update supplier:')
     }
-  };
-
-  const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefault;
-    if (!validateAll() || !selectedSupplier) return;
-
-    try {
-      await update(selectedSupplier.id, formData as SupplierUpdate);
-      setIsEditModalOpen(false);
-      setSelectedSupplier(null);
-      resetForm();
-    } catch (error: any) {
-      console.error('Failed to update supplier:', error);
-    }
-  };
+  }
 
   const handleConfirmDelete = async () => {
-    if (!selectedSupplier) return;
+    if (!selectedSupplier) return
 
     try {
-      await remove(selectedSupplier.id);
-      setIsDeleteDialogOpen(false);
-      setSelectedSupplier(null);
-    } catch (error: any) {
-      console.error('Failed to delete supplier:', error);
+      await remove(selectedSupplier.id)
+      setIsDeleteDialogOpen(false)
+      setSelectedSupplier(null)
+    } catch (error: unknown) {
+      apiLogger.error({ error }, 'Failed to delete supplier:')
     }
-  };
+  }
 
   const closeModals = () => {
-    setIsCreateModalOpen(false);
-    setIsEditModalOpen(false);
-    setIsDeleteDialogOpen(false);
-    setSelectedSupplier(null);
-    resetForm();
-  };
+    setIsCreateModalOpen(false)
+    setIsEditModalOpen(false)
+    setIsDeleteDialogOpen(false)
+    setSelectedSupplier(null)
+    createForm.reset()
+    editForm.reset()
+  }
 
   if (error) {
     return (
@@ -192,35 +175,28 @@ export function SuppliersCRUD() {
         searchable={true}
       />
 
-      {/* Create Modal */}
       <Modal
         isOpen={isCreateModalOpen}
         onClose={closeModals}
         title="Add New Supplier"
         size="md"
       >
-        <CrudForm onSubmit={handleSubmitCreate}>
+        <CrudForm onSubmit={createForm.handleSubmit(handleSubmitCreate)}>
           <FormField
             label="Name"
             name="name"
             type="text"
-            value={formData.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.name ? errors.name : undefined}
+            {...createForm.register('name')}
+            error={createForm.formState.errors.name?.message}
             required
-
           />
 
           <FormField
             label="Contact Person"
             name="contact_person"
             type="text"
-            value={formData.contact_person}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.contact_person ? errors.contact_person : undefined}
-
+            {...createForm.register('contact_person')}
+            error={createForm.formState.errors.contact_person?.message}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -228,22 +204,16 @@ export function SuppliersCRUD() {
               label="Phone"
               name="phone"
               type="text"
-              value={formData.phone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.phone ? errors.phone : undefined}
-
+              {...createForm.register('phone')}
+              error={createForm.formState.errors.phone?.message}
             />
 
             <FormField
               label="Email"
               name="email"
               type="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.email ? errors.email : undefined}
-
+              {...createForm.register('email')}
+              error={createForm.formState.errors.email?.message}
             />
           </div>
 
@@ -251,11 +221,8 @@ export function SuppliersCRUD() {
             label="Address"
             name="address"
             type="textarea"
-            value={formData.address}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.address ? errors.address : undefined}
-
+            {...createForm.register('address')}
+            error={createForm.formState.errors.address?.message}
             rows={3}
           />
 
@@ -263,11 +230,8 @@ export function SuppliersCRUD() {
             label="Notes"
             name="notes"
             type="textarea"
-            value={formData.notes}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.notes ? errors.notes : undefined}
-
+            {...createForm.register('notes')}
+            error={createForm.formState.errors.notes?.message}
             rows={2}
           />
 
@@ -286,28 +250,22 @@ export function SuppliersCRUD() {
         title="Edit Supplier"
         size="md"
       >
-        <CrudForm onSubmit={handleSubmitEdit}>
+        <CrudForm onSubmit={editForm.handleSubmit(handleSubmitEdit)}>
           <FormField
             label="Name"
             name="name"
             type="text"
-            value={formData.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.name ? errors.name : undefined}
+            {...editForm.register('name')}
+            error={editForm.formState.errors.name?.message}
             required
-
           />
 
           <FormField
             label="Contact Person"
             name="contact_person"
             type="text"
-            value={formData.contact_person}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.contact_person ? errors.contact_person : undefined}
-
+            {...editForm.register('contact_person')}
+            error={editForm.formState.errors.contact_person?.message}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -315,22 +273,16 @@ export function SuppliersCRUD() {
               label="Phone"
               name="phone"
               type="text"
-              value={formData.phone}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.phone ? errors.phone : undefined}
-
+              {...editForm.register('phone')}
+              error={editForm.formState.errors.phone?.message}
             />
 
             <FormField
               label="Email"
               name="email"
               type="email"
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.email ? errors.email : undefined}
-
+              {...editForm.register('email')}
+              error={editForm.formState.errors.email?.message}
             />
           </div>
 
@@ -338,11 +290,8 @@ export function SuppliersCRUD() {
             label="Address"
             name="address"
             type="textarea"
-            value={formData.address}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.address ? errors.address : undefined}
-
+            {...editForm.register('address')}
+            error={editForm.formState.errors.address?.message}
             rows={3}
           />
 
@@ -350,11 +299,8 @@ export function SuppliersCRUD() {
             label="Notes"
             name="notes"
             type="textarea"
-            value={formData.notes}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.notes ? errors.notes : undefined}
-
+            {...editForm.register('notes')}
+            error={editForm.formState.errors.notes?.message}
             rows={2}
           />
 

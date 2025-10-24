@@ -21,7 +21,7 @@ import {
     SortDesc,
     Trash2
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { Input } from './input'
 
 // Types for mobile table
@@ -99,83 +99,165 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
     onSort?.(key, newDirection)
   }, [sortKey, sortDirection, onSort])
 
-  const getValue = (item: T, column: MobileTableColumn<T>) => {
+  // Filter data based on search query
+  const filteredData = React.useMemo(() => {
+    if (!searchQuery) return data
+    
+    return data.filter(item =>
+      columns.some(col => {
+        const value = typeof col.accessor === 'function' 
+          ? col.accessor(item)
+          : item[col.accessor]
+        
+        return String(value).toLowerCase().includes(searchQuery.toLowerCase())
+      })
+    )
+  }, [data, columns, searchQuery])
+
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Render empty state
+  if (filteredData.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="text-muted-foreground">
+            {emptyMessage || 'Tidak ada data'}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Render search bar
+  const renderSearchBar = () => {
+    if (!searchable) return null
+    
+    return (
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder={searchPlaceholder || 'Cari...'}
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // Render sort indicator
+  const renderSortIndicator = (column: MobileTableColumn<T>) => {
+    if (!sortable || !column.sortable) return null
+    
+    if (sortKey === column.key) {
+      return sortDirection === 'asc' ? 
+        <SortAsc className="ml-1 h-4 w-4 inline" /> : 
+        <SortDesc className="ml-1 h-4 w-4 inline" />
+    }
+    
+    return null
+  }
+
+  // Get cell value
+  const getCellValue = (item: T, column: MobileTableColumn<T>) => {
+    if (column.render) {
+      const value = typeof column.accessor === 'function' 
+        ? column.accessor(item)
+        : item[column.accessor]
+      return column.render(value, item)
+    }
+    
     if (typeof column.accessor === 'function') {
       return column.accessor(item)
     }
+    
     return item[column.accessor]
   }
 
-  const renderValue = (item: T, column: MobileTableColumn<T>) => {
-    const value = getValue(item, column)
-    if (column.render) {
-      return column.render(value, item)
-    }
-    return value
-  }
-
-  // Mobile Card View
-  const MobileCardView = () => (
-    <div className="space-y-3">
-      {data.map((item, index: number) => (
+  // Render card view for mobile
+  const renderCardView = () => (
+    <div className="space-y-4">
+      {filteredData.map((item, index) => (
         <Card 
-          key={index}
+          key={index} 
           className={cn(
-           "transition-colors",
-            onRowClick &&"cursor-pointer hover:bg-accent"
+            "transition-all hover:shadow-md cursor-pointer",
+            onRowClick && "hover:bg-gray-50"
           )}
           onClick={() => onRowClick?.(item)}
         >
           <CardContent className="p-4">
-            <div className="space-y-2">
-              {/* Primary column (first column) */}
-              {columns[0] && (
-                <div className="flex items-center justify-between">
-                  <div className="font-medium text-base">
-                    {renderValue(item, columns[0])}
+            <div className="space-y-3">
+              {columns.map((column) => (
+                <div key={column.key} className="flex justify-between items-start">
+                  <span className="text-sm font-medium text-muted-foreground w-1/3">
+                    {column.label}:
+                  </span>
+                  <div className={cn(
+                    "text-sm flex-1 text-right truncate",
+                    column.className
+                  )} style={{ maxWidth: column.width }}>
+                    {getCellValue(item, column)}
                   </div>
-                  {actions.length > 0 && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {actions.map((action, actionIndex) => {
-                          if (action.show && !action.show(item)) return null
-                          return (
-                            <DropdownMenuItem
-                              key={actionIndex}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                action.onClick(item)
-                              }}
-                              className={action.variant === 'destructive' ? 'text-gray-600 dark:text-gray-400' : ''}
-                            >
-                              {action.icon && <span className="mr-2">{action.icon}</span>}
-                              {action.label}
-                            </DropdownMenuItem>
-                          )
-                        })}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-              )}
-              
-              {/* Secondary columns */}
-              {columns.slice(1).map((column, colIndex) => (
-                <div key={colIndex} className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">{column.label}:</span>
-                  <span className="font-medium">{renderValue(item, column)}</span>
                 </div>
               ))}
+              
+              {actions && actions.length > 0 && (
+                <div className="flex gap-2 pt-3 border-t">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <MoreHorizontal className="h-4 w-4 mr-2" />
+                        Aksi
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {actions
+                        .filter(action => !action.show || action.show(item))
+                        .map((action, actionIndex) => (
+                          <DropdownMenuItem
+                            key={actionIndex}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              action.onClick(item)
+                            }}
+                            className={cn(
+                              action.variant === 'destructive' && "text-destructive"
+                            )}
+                          >
+                            {action.icon && (
+                              <span className="mr-2 h-4 w-4">
+                                {action.icon}
+                              </span>
+                            )}
+                            {action.label}
+                          </DropdownMenuItem>
+                        ))
+                      }
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -183,103 +265,89 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
     </div>
   )
 
-  // Desktop Table View
-  const DesktopTableView = () => (
-    <div className="rounded-md border">
+  // Render table view for desktop
+  const renderTableView = () => (
+    <div className="border rounded-lg overflow-hidden">
       <table className="w-full">
-        <thead>
-          <tr className="border-b">
-            {columns.map((column, index: number) => (
-              <th
-                key={index}
+        <thead className="bg-gray-50">
+          <tr>
+            {columns.map((column) => (
+              <th 
+                key={column.key}
                 className={cn(
-                 "h-12 px-4 text-left align-middle font-medium text-muted-foreground",
-                  column.className,
-                  column.sortable && sortable &&"cursor-pointer hover:text-foreground"
+                  "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+                  sortable && column.sortable && "cursor-pointer hover:bg-gray-100",
+                  column.className
                 )}
+                onClick={() => sortable && column.sortable && handleSort(column.key)}
                 style={{ width: column.width }}
-                onClick={() => {
-                  if (column.sortable && sortable) {
-                    handleSort(column.key)
-                  }
-                }}
               >
-                <div className="flex items-center space-x-2">
-                  <span>{column.label}</span>
-                  {column.sortable && sortable && (
-                    <div className="flex flex-col">
-                      {sortKey === column.key ? (
-                        sortDirection === 'asc' ? (
-                          <SortAsc className="h-4 w-4" />
-                        ) : (
-                          <SortDesc className="h-4 w-4" />
-                        )
-                      ) : (
-                        <div className="h-4 w-4" />
-                      )}
-                    </div>
-                  )}
+                <div className="flex items-center">
+                  {column.label}
+                  {renderSortIndicator(column)}
                 </div>
               </th>
             ))}
-            {actions.length > 0 && (
-              <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground w-20">
-                Informasi
+            {actions && actions.length > 0 && (
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Aksi
               </th>
             )}
           </tr>
         </thead>
-        <tbody>
-          {data.map((item, index: number) => (
-            <tr
-              key={index}
+        <tbody className="divide-y divide-gray-200">
+          {filteredData.map((item, rowIndex) => (
+            <tr 
+              key={rowIndex}
               className={cn(
-               "border-b transition-colors hover:bg-muted/50",
-                onRowClick &&"cursor-pointer"
+                "hover:bg-gray-50",
+                onRowClick && "cursor-pointer"
               )}
               onClick={() => onRowClick?.(item)}
             >
-              {columns.map((column, colIndex) => (
-                <td
-                  key={colIndex}
+              {columns.map((column) => (
+                <td 
+                  key={column.key}
                   className={cn(
-                   "p-4 align-middle",
+                    "px-4 py-3 text-sm",
                     column.className
                   )}
+                  style={{ width: column.width }}
                 >
-                  {renderValue(item, column)}
+                  {getCellValue(item, column)}
                 </td>
               ))}
-              {actions.length > 0 && (
-                <td className="p-4 align-middle text-right">
+              {actions && actions.length > 0 && (
+                <td className="px-4 py-3 text-right text-sm">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <Button variant="ghost" size="sm">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {actions.map((action, actionIndex) => {
-                        if (action.show && !action.show(item)) return null
-                        return (
+                      {actions
+                        .filter(action => !action.show || action.show(item))
+                        .map((action, actionIndex) => (
                           <DropdownMenuItem
                             key={actionIndex}
                             onClick={(e) => {
                               e.stopPropagation()
                               action.onClick(item)
                             }}
-                            className={action.variant === 'destructive' ? 'text-gray-600 dark:text-gray-400' : ''}
+                            className={cn(
+                              action.variant === 'destructive' && "text-destructive"
+                            )}
                           >
-                            {action.icon && <span className="mr-2">{action.icon}</span>}
+                            {action.icon && (
+                              <span className="mr-2 h-4 w-4">
+                                {action.icon}
+                              </span>
+                            )}
                             {action.label}
                           </DropdownMenuItem>
-                        )
-                      })}
+                        ))
+                      }
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
@@ -291,121 +359,25 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
     </div>
   )
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Informasi</div>
-      </div>
-    )
-  }
-
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Search and Filter Bar */}
-      {searchable && (
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder || "Cari..."}
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          {/* Additional filter buttons can be added here */}
-        </div>
-      )}
-
-      {/* Table Content */}
-      {data.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
-          {emptyMessage || Informasi}
-        </div>
-      ) : (
-        <>
-          {isMobile && cardMode ? <MobileCardView /> : <DesktopTableView />}
-        </>
-      )}
+    <div className={cn(className)}>
+      {renderSearchBar()}
+      {isMobile && cardMode ? renderCardView() : renderTableView()}
     </div>
   )
 }, (prevProps, nextProps) => {
-  // Custom comparison to prevent unnecessary re-renders
-  // Only re-render if data, loading, or columns change
+  // Custom comparison function for React.memo
   return (
     prevProps.data === nextProps.data &&
-    prevProps.loading === nextProps.loading &&
     prevProps.columns === nextProps.columns &&
-    prevProps.searchable === nextProps.searchable
+    prevProps.actions === nextProps.actions &&
+    prevProps.loading === nextProps.loading &&
+    prevProps.emptyMessage === nextProps.emptyMessage &&
+    prevProps.searchable === nextProps.searchable &&
+    prevProps.searchPlaceholder === nextProps.searchPlaceholder &&
+    prevProps.sortable === nextProps.sortable &&
+    prevProps.cardMode === nextProps.cardMode
   )
 })
 
-// Predefined cell renderers for common data types
-export const TableRenderers = {
-  currency: (value: number) => (
-    <span className="font-medium">
-      Rp {value?.toLocaleString('id-ID') || '0'}
-    </span>
-  ),
-  
-  status: (value: string, colorMap?: Record<string, string>) => (
-    <Badge 
-      variant="secondary"
-      className={colorMap?.[value] || ''}
-    >
-      {value}
-    </Badge>
-  ),
-  
-  date: (value: string | Date) => {
-    const date = value instanceof Date ? value : new Date(value)
-    return (
-      <span className="text-sm">
-        {date.toLocaleDateString('id-ID')}
-      </span>
-    )
-  },
-  
-  boolean: (value: boolean) => (
-    <Badge variant={value ?"default" :"secondary"}>
-      {value ? Informasi : Informasi}
-    </Badge>
-  ),
-  
-  stock: (current: number, min: number) => (
-    <div className="space-y-1">
-      <div className="font-medium">{current}</div>
-      {current <= min && (
-        <Badge variant="destructive" className="text-xs">
-          Informasi
-        </Badge>
-      )}
-    </div>
-  )
-}
-
-// Common action sets
-export const createCommonActions = {
-  crud: <T,>(
-    onEdit: (item: T) => void,
-    onDelete: (item: T) => void,
-    onView?: (item: T) => void
-  ): MobileTableAction<T>[] => [
-    ...(onView ? [{
-      label: Informasi,
-      icon: <Eye className="h-4 w-4" />,
-      onClick: onView
-    }] : []),
-    {
-      label: Informasi,
-      icon: <Edit className="h-4 w-4" />,
-      onClick: onEdit
-    },
-    {
-      label: Informasi,
-      icon: <Trash2 className="h-4 w-4" />,
-      onClick: onDelete,
-      variant: 'destructive' as const
-    }
-  ]
-}
+MobileTable.displayName = 'MobileTable'

@@ -1,6 +1,37 @@
 import { createSupabaseClient } from '@/lib/supabase'
+import { apiLogger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 
+// Type definitions for better type safety
+interface Ingredient {
+  id: string
+  name: string
+  price_per_unit: number
+  unit: string
+}
+
+interface RecipeIngredient {
+  name: string
+  quantity: number
+  unit: string
+  notes?: string
+}
+
+interface Recipe {
+  name: string
+  category: string
+  servings: number
+  prep_time_minutes: number
+  bake_time_minutes: number
+  total_time_minutes: number
+  difficulty: string
+  description: string
+  ingredients: RecipeIngredient[]
+  instructions: unknown[]
+  tips?: string[]
+  storage?: string
+  shelf_life?: string
+}
 export const runtime = 'edge'
 export const maxDuration = 60
 
@@ -37,7 +68,7 @@ export async function POST(request: NextRequest) {
             .eq('user_id', userId)
 
         if (ingredientsError) {
-            console.error('Error fetching ingredients:', ingredientsError)
+            apiLogger.error({ error: ingredientsError }, 'Error fetching ingredients:')
         }
 
         // Build the AI prompt
@@ -58,7 +89,7 @@ export async function POST(request: NextRequest) {
         const recipe = parseRecipeResponse(aiResponse)
 
         // Calculate HPP for the generated recipe
-        const hppCalculation = await calculateRecipeHPP(recipe, ingredients || [])
+        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, ingredients as Ingredient[])
 
         return NextResponse.json({
             success: true,
@@ -68,10 +99,11 @@ export async function POST(request: NextRequest) {
             }
         })
 
-    } catch (error: any) {
-        console.error('Error generating recipe:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error generating recipe:')
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate recipe'
         return NextResponse.json(
-            { error: error.message || 'Failed to generate recipe' },
+            { error: errorMessage },
             { status: 500 }
         )
     }
@@ -87,7 +119,7 @@ function buildRecipePrompt(params: {
     servings: number
     targetPrice?: number
     dietaryRestrictions?: string[]
-    availableIngredients: any[]
+    availableIngredients: Ingredient[]
     userProvidedIngredients?: string[]
 }) {
     const {
@@ -324,7 +356,7 @@ function parseRecipeResponse(response: string) {
         }
 
         // Validate each ingredient
-        recipe.ingredients.forEach((ing: any, index: number) => {
+        recipe.ingredients.forEach((ing: RecipeIngredient, index: number) => {
             if (!ing.name || !ing.quantity || !ing.unit) {
                 throw new Error(`Invalid ingredient at index ${index}: missing required fields`)
             }
@@ -339,9 +371,10 @@ function parseRecipeResponse(response: string) {
         }
 
         return recipe
-    } catch (error: any) {
-        console.error('Error parsing recipe response:', error)
-        throw new Error(`Failed to parse recipe: ${error.message}`)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error parsing recipe response:')
+        const errorMessage = error instanceof Error ? error.message : 'Unknown parsing error'
+        throw new Error(`Failed to parse recipe: ${errorMessage}`)
     }
 }
 
@@ -349,18 +382,25 @@ function parseRecipeResponse(response: string) {
 /**
  * Calculate HPP for the generated recipe
  */
-async function calculateRecipeHPP(recipe: any, availableIngredients: any[]) {
+async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredient[]) {
     let totalMaterialCost = 0
-    const ingredientBreakdown: any[] = []
+    const ingredientBreakdown: Array<{
+        name: string
+        quantity: number
+        unit: string
+        pricePerUnit: number
+        totalCost: number
+        percentage: number
+    }> = []
 
     for (const recipeIng of recipe.ingredients) {
         // Find matching ingredient in user's inventory
         const ingredient = availableIngredients.find(
-            ing => ing.name.toLowerCase() === recipeIng.name.toLowerCase()
+            (ing: Ingredient) => ing.name.toLowerCase() === recipeIng.name.toLowerCase()
         )
 
         if (!ingredient) {
-            console.warn(`Ingredient not found in inventory: ${recipeIng.name}`)
+            apiLogger.warn(`Ingredient not found in inventory: ${recipeIng.name}`)
             continue
         }
 
@@ -391,7 +431,7 @@ async function calculateRecipeHPP(recipe: any, availableIngredients: any[]) {
     }
 
     // Calculate percentages
-    ingredientBreakdown.forEach(item => {
+    ingredientBreakdown.forEach((item) => {
         item.percentage = totalMaterialCost > 0 ? (item.totalCost / totalMaterialCost) * 100 : 0
     })
 

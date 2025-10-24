@@ -4,6 +4,7 @@ import * as React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 // Simplified route preloading patterns
 const ROUTE_PRELOADING_PATTERNS = {
   '/dashboard': ['/orders', '/finance', '/inventory'],
@@ -20,9 +21,9 @@ const ROUTE_PRELOADING_PATTERNS = {
 export const preloadChartBundle = async () => {
   try {
     await import('recharts')
-    console.log('✅ Chart bundle preloaded')
-  } catch (error: any) {
-    console.warn('❌ Failed to preload chart bundle:', error)
+    apiLogger.info('✅ Chart bundle preloaded')
+  } catch (error: unknown) {
+    apiLogger.warn('❌ Failed to preload chart bundle:', error)
   }
 }
 
@@ -33,9 +34,9 @@ export const preloadTableBundle = async () => {
       import('@/components/ui/table'),
       import('@/components/ui/simple-data-table'),
     ])
-    console.log('✅ Table bundle preloaded')
-  } catch (error: any) {
-    console.warn('❌ Failed to preload table bundle:', error)
+    apiLogger.info('✅ Table bundle preloaded')
+  } catch (error: unknown) {
+    apiLogger.warn('❌ Failed to preload table bundle:', error)
   }
 }
 
@@ -48,9 +49,9 @@ export const preloadModalComponent = async (modalType: string) => {
     if (modalType.includes('dialog')) {
       await import('@/components/ui/dialog')
     }
-    console.log(`✅ Modal ${modalType} preloaded`)
-  } catch (error: any) {
-    console.warn(`❌ Failed to preload modal ${modalType}:`, error)
+    apiLogger.info(`✅ Modal ${modalType} preloaded`)
+  } catch (error: unknown) {
+    apiLogger.warn(`❌ Failed to preload modal ${modalType}:`, error)
   }
 }
 
@@ -174,13 +175,13 @@ export const useIdleTimePreloading = () => {
     const resetIdleTimer = () => {
       clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
-        console.log('🕒 User idle - preloading heavy components')
+        apiLogger.info('🕒 User idle - preloading heavy components')
 
         Promise.all([
           preloadChartBundle(),
           preloadTableBundle(),
         ]).then(() => {
-          console.log('✅ Idle preloading completed')
+          apiLogger.info('✅ Idle preloading completed')
         }).catch(() => { })
       }, 5000) // 5 seconds of inactivity
     }
@@ -212,7 +213,7 @@ export const useNetworkAwarePreloading = () => {
       const isFastConnection = connection.effectiveType === '4g' || connection.downlink > 1.5
 
       if (isFastConnection) {
-        console.log('🚀 Fast connection detected - enabling aggressive preloading')
+        apiLogger.info('🚀 Fast connection detected - enabling aggressive preloading')
 
         setTimeout(() => {
           Promise.all([
@@ -221,7 +222,7 @@ export const useNetworkAwarePreloading = () => {
           ]).catch(() => { })
         }, 1000)
       } else if (isSlowConnection) {
-        console.log('🐌 Slow connection detected - minimal preloading')
+        apiLogger.info('🐌 Slow connection detected - minimal preloading')
       }
     }
   }, [])
@@ -240,7 +241,7 @@ export const LazyLoadingMetrics = {
     LazyLoadingMetrics.loadingTimes.set(componentName, loadTime)
 
     if (loadTime > 1000) {
-      console.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)
+      apiLogger.warn(`⚠️ Slow component load: ${componentName} took ${loadTime.toFixed(2)}ms`)
     }
   },
 

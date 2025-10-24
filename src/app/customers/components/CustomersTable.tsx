@@ -29,16 +29,17 @@ import {
   Trash2,
   Users
 } from 'lucide-react'
+import { CustomersTable } from '@/types/customers'
 import { useMemo, useState } from 'react'
 
 interface CustomersTableProps {
-  customers: any[]
+  customers: CustomersTable['Row'][]
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
-  onView: (customer: any) => void
-  onEdit: (customer: any) => void
-  onDelete: (customer: any) => void
+  onView: (customer: CustomersTable['Row']) => void
+  onEdit: (customer: CustomersTable['Row']) => void
+  onDelete: (customer: CustomersTable['Row']) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
   isMobile?: boolean

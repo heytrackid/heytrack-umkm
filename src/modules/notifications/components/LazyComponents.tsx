@@ -1,8 +1,16 @@
 'use client'
-import * as React from 'react'
 
-import { createLazyComponent, ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
+import { ComponentSkeletons, createLazyComponent } from '@/shared/components/utility/LazyWrapper'
 import { Suspense } from 'react'
+
+// Define FinancialMetrics type for notification components
+export interface FinancialMetrics {
+  grossMargin: number
+  netMargin: number
+  revenue?: number
+  expenses?: number
+  profit?: number
+}
 
 // Lazy load notification components with optimized loading
 export const LazySmartNotificationCenter = createLazyComponent(
@@ -26,16 +34,16 @@ export function NotificationCenterWithProgressiveLoading({
   orders,
   financialMetrics
 }: {
-  ingredients?: any[]
-  orders?: any[]
-  financialMetrics?: any
+  ingredients?: Ingredient[]
+  orders?: OrdersTable['Row'][]
+  financialMetrics?: FinancialMetrics
 }) {
   return (
     <div className="space-y-6">
       {/* Critical above-the-fold content loads first */}
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Notification Center</h1>
-        
+
         {/* Quick stats load immediately (lightweight) */}
         <Suspense fallback={<ComponentSkeletons.Card />}>
           <div className="grid gap-4 md:grid-cols-4">
@@ -47,7 +55,7 @@ export function NotificationCenterWithProgressiveLoading({
       {/* Heavy notification center loads progressively */}
       <div className="space-y-6">
         <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-          <LazySmartNotificationCenter 
+          <LazySmartNotificationCenter
             ingredients={ingredients}
             orders={orders}
             financialMetrics={financialMetrics}
@@ -63,29 +71,34 @@ export function useNotificationProgressiveLoading() {
   const components = [
     () => import('@/components'),
   ]
-  
+
   return useProgressiveLoading(components, 200)
 }
 
 // Smart notification loader with conditional features
-export const SmartNotificationLoader = ({ 
+export const SmartNotificationLoader = ({
   userRole,
   realTimeEnabled = true,
   soundEnabled = true,
-  ...props 
+  ...props
 }: {
   userRole?: 'admin' | 'manager' | 'staff'
   realTimeEnabled?: boolean
   soundEnabled?: boolean
-  [key: string]: any
+  ingredients?: Ingredient[]
+  orders?: OrdersTable['Row'][]
+  financialMetrics?: FinancialMetrics
+  level?: string
+  realTime?: boolean
+  sound?: boolean
 }) => {
   // Different notification levels based on user role
-  const notificationLevel = userRole === 'admin' ? 'all' : 
-                           userRole === 'manager' ? 'business' : 'operational'
+  const notificationLevel = userRole === 'admin' ? 'all' :
+    userRole === 'manager' ? 'business' : 'operational'
 
   return (
     <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-      <LazySmartNotificationCenter 
+      <LazySmartNotificationCenter
         level={notificationLevel}
         realTime={realTimeEnabled}
         sound={soundEnabled}

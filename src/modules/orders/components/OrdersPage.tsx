@@ -58,7 +58,8 @@ export default function OrdersPage({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [activeView, setActiveView] = useState<'dashboard' | 'list' | 'calendar' | 'analytics'>('dashboard')
+  type ActiveView = 'dashboard' | 'list' | 'calendar' | 'analytics'
+  const [activeView, setActiveView] = useState<ActiveView>('dashboard')
 
   // Filters
   const [filters, setFilters] = useState<OrderFilters>({
@@ -357,7 +358,7 @@ export default function OrdersPage({
       </Card>
 
       {/* Navigation Tabs */}
-      <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)}>
+      <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="list">Daftar Pesanan</TabsTrigger>

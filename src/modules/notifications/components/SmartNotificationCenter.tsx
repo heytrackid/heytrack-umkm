@@ -73,8 +73,8 @@ export default function SmartNotificationCenter({
         // Convert to our notification format
         const formattedNotifications: SmartNotification[] = smartNotifications.map((notif, index: number) => ({
           id: `notif-${Date.now()}-${index}`,
-          type: notif.type as any,
-          category: notif.category as any,
+          type: notif.type as SmartNotification['type'],
+          category: notif.category as SmartNotification['category'],
           title: notif.title,
           message: notif.message,
           action: notif.action,
@@ -155,7 +155,7 @@ export default function SmartNotificationCenter({
         if (soundEnabled && formattedNotifications.some(n => n.type === 'critical')) {
           playNotificationSound('critical')
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         uiLogger.error({ err: error }, 'Error generating notifications')
       }
     }

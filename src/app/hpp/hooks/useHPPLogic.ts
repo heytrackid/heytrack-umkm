@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRecipes } from '@/hooks/useSupabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
+import { apiLogger } from '@/lib/logger'
 export const useHPPLogic = () => {
   const { recipes, loading, calculateHPP } = useHPPCalculations()
   const { update: updateRecipe } = useRecipes()
@@ -48,8 +49,8 @@ export const useHPPLogic = () => {
       
       // Show success (you can add toast notification here)
       alert('Recipe updated successfully!')
-    } catch (error: any) {
-      console.error('Error updating recipe:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error updating recipe:')
       alert('Failed to update recipe')
     } finally {
       setIsUpdating(false)

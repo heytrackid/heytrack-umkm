@@ -127,7 +127,7 @@ export const SettingsPageWithLoading = () => (
 
 // Generic page wrapper
 export const withPageLoading = (
-  importFunc: () => Promise<any>,
+  importFunc: () => Promise<unknown>,
   pageName: string
 ) => {
   const LazyPage = lazy(importFunc)

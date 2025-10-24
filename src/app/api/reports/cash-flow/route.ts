@@ -1,6 +1,7 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 interface FinancialTransaction {
   id: string
   reference_id?: string
@@ -32,6 +33,14 @@ interface Subcategory {
   name: string
   total: number
   count: number
+}
+
+interface CategoryBreakdownProcessing {
+  category: string
+  total: number
+  count: number
+  percentage: number
+  subcategories: Record<string, Subcategory>
 }
 
 /**
@@ -66,7 +75,7 @@ export async function GET(request: NextRequest) {
       .order('tanggal', { ascending: true })
 
     if (transError) {
-      console.error('Error fetching transactions:', transError)
+      apiLogger.error({ error: transError }, 'Error fetching transactions:')
       return NextResponse.json(
         { error: 'Failed to fetch transactions' },
         { status: 500 }
@@ -140,7 +149,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response)
 
   } catch (error: unknown) {
-    console.error('Error generating cash flow report:', error)
+    apiLogger.error({ error: error }, 'Error generating cash flow report:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -185,14 +194,15 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
       }
     }
 
+    const currentGroup = grouped[key]!
     const amount = Number(transaction.amount)
     if (transaction.category === 'Revenue') {
-      grouped[key].income += amount
+      currentGroup.income += amount
     } else {
-      grouped[key].expenses += amount
+      currentGroup.expenses += amount
     }
-    grouped[key].net_cash_flow = grouped[key].income - grouped[key].expenses
-    grouped[key].transaction_count++
+    currentGroup.net_cash_flow = currentGroup.income - currentGroup.expenses
+    currentGroup.transaction_count++
   })
 
   return Object.values(grouped).sort((a: PeriodCashFlow, b: PeriodCashFlow) =>
@@ -202,7 +212,7 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
 
 // Helper: Calculate category breakdown
 function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
-  const breakdown: Record<string, CategoryBreakdown> = {}
+  const breakdown: Record<string, CategoryBreakdownProcessing> = {}
 
   transactions.forEach(transaction => {
     const category = transaction.category
@@ -214,7 +224,7 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
         total: 0,
         count: 0,
         percentage: 0,
-        subcategories: {}
+        subcategories: {} as Record<string, Subcategory>
       }
     }
 
@@ -234,17 +244,17 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
   })
 
   // Calculate percentages
-  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: any) => sum + cat.total, 0)
-  Object.values(breakdown).forEach((cat: unknown) => {
+  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + cat.total, 0)
+  Object.values(breakdown).forEach((cat: CategoryBreakdownProcessing) => {
     cat.percentage = totalAmount > 0 ? (cat.total / totalAmount) * 100 : 0
-    cat.subcategories = Object.values(cat.subcategories)
+    ;(cat as any as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
   })
 
-  return Object.values(breakdown).sort((a: any, b: any) => b.total - a.total)
+  return Object.values(breakdown).map(cat => cat as any as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => b.total - a.total)
 }
 
 // Helper: Group by category for summary
-function groupByCategory(transactions: any[]) {
+function groupByCategory(transactions: unknown[]) {
   const grouped: Record<string, number> = {}
   transactions.forEach(t => {
     const category = t.category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : t.category
@@ -254,7 +264,7 @@ function groupByCategory(transactions: any[]) {
 }
 
 // Helper: Calculate trend
-function calculateTrend(cashFlowByPeriod: any[]) {
+function calculateTrend(cashFlowByPeriod: unknown[]) {
   if (cashFlowByPeriod.length < 2) {
     return {
       direction: 'stable',
@@ -282,7 +292,8 @@ function calculateTrend(cashFlowByPeriod: any[]) {
 }
 
 // Helper: Calculate comparison with previous period
-async function calculateComparison(supabase: any, startDate: string, endDate: string, period: string) {
+async function calculateComparison(supabase: ReturnType<typeof createServerSupabaseAdmin>, startDate: string, endDate: string, period: string) {
+  // Remove unused period parameter
   const start = new Date(startDate)
   const end = new Date(endDate)
   const duration = end.getTime() - start.getTime()
@@ -300,11 +311,11 @@ async function calculateComparison(supabase: any, startDate: string, endDate: st
     return null
   }
 
-  const prevIncome = prevTransactions.filter((t: unknown) => t.category === 'Revenue')
-  const prevExpenses = prevTransactions.filter((t: unknown) => t.category !== 'Revenue')
+  const prevIncome = prevTransactions.filter((t: FinancialTransaction) => t.category === 'Revenue')
+  const prevExpenses = prevTransactions.filter((t: FinancialTransaction) => t.category !== 'Revenue')
 
-  const prevTotalIncome = prevIncome.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
-  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
+  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
   const prevNetCashFlow = prevTotalIncome - prevTotalExpenses
 
   return {
@@ -319,7 +330,7 @@ async function calculateComparison(supabase: any, startDate: string, endDate: st
 }
 
 // Helper: Get top transactions
-function getTopTransactions(transactions: any[], limit: number) {
+function getTopTransactions(transactions: unknown[], limit: number) {
   return transactions
     .sort((a, b) => Number(b.amount) - Number(a.amount))
     .slice(0, limit)

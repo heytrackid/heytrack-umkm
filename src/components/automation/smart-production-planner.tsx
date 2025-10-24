@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { apiLogger } from '@/lib/logger'
 import { 
   Factory,
   Clock,
@@ -42,7 +43,7 @@ interface SmartProductionPlannerProps {
   orders: ProductionOrder[]
   recipes: RecipeWithIngredients[]
   inventory: Ingredient[]
-  onScheduleProduction?: (plan: unknown) => void
+  onScheduleProduction?: (plan: any) => void
   onStartProduction?: (orderId: string) => void
 }
 
@@ -53,7 +54,7 @@ export function SmartProductionPlanner({
   onScheduleProduction,
   onStartProduction
 }: SmartProductionPlannerProps) {
-  const [productionPlan, setProductionPlan] = useState<unknown>(null)
+  const [productionPlan, setProductionPlan] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [autoOptimize, setAutoOptimize] = useState(true)
@@ -76,7 +77,7 @@ export function SmartProductionPlanner({
       const plan = automationEngine.generateProductionPlan(orderData, recipes, inventory)
       setProductionPlan(plan)
     } catch (error: unknown) {
-      console.error('Error generating production plan:', error)
+      apiLogger.error({ error: error }, 'Error generating production plan:')
     } finally {
       setLoading(false)
     }
@@ -254,7 +255,7 @@ export function SmartProductionPlanner({
 
           {/* Production Schedule */}
           <div className="space-y-4">
-            {plan.map((item: unknown, index: number) => {
+            {plan.map((item: any, index: number) => {
               const order = orders.find(o => o.recipe_id === item.recipe.id)
               return (
                 <Card key={index} className={`${
@@ -331,8 +332,8 @@ export function SmartProductionPlanner({
                         <div className="font-medium text-red-700 mb-2">Missing Ingredients:</div>
                         <div className="space-y-1">
                           {item.ingredients.requirements
-                            .filter((req: unknown) => !req.sufficient)
-                            .map((req: unknown, idx: number) => (
+                            .filter((req: any) => !req.sufficient)
+                            .map((req: any, idx: number) => (
                               <div key={idx} className="text-sm text-gray-600 dark:text-gray-400">
                                 • {req.ingredient.name}: Need {req.needed} {req.ingredient.unit}, 
                                 have {req.available} {req.ingredient.unit} 
@@ -373,9 +374,9 @@ export function SmartProductionPlanner({
             <CardContent>
               <div className="space-y-4">
                 {plan
-                  .filter((item: unknown) => item.production.canProduce)
+                  .filter((item: any) => item.production.canProduce)
                   .sort((a, b) => new Date(a.production.startTime).getTime() - new Date(b.production.startTime).getTime())
-                  .map((item: unknown, index: number) => (
+                  .map((item: any, index: number) => (
                     <div key={index} className="flex items-center space-x-4 p-3 border rounded-lg">
                       <div className="text-center min-w-[80px]">
                         <div className="font-medium">{formatTime(item.production.startTime)}</div>
@@ -406,7 +407,7 @@ export function SmartProductionPlanner({
                     </div>
                   ))}
                 
-                {plan.filter((item: unknown) => item.production.canProduce).length === 0 && (
+                {plan.filter((item: any) => item.production.canProduce).length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     <Timer className="h-12 w-12 mx-auto mb-4" />
                     <p>Tidak ada produksi yang dapat dijadwalkan untuk hari ini</p>
@@ -419,7 +420,7 @@ export function SmartProductionPlanner({
 
         {/* Optimization Tab */}
         <TabsContent value="optimization" className="space-y-4">
-          {optimizations.map((opt: unknown, index: number) => (
+          {optimizations.map((opt: any, index: number) => (
             <Card key={index}>
               <CardContent className="pt-4">
                 <div className="flex justify-between items-start">
@@ -471,7 +472,7 @@ export function SmartProductionPlanner({
                   <div className="flex justify-between items-center">
                     <span>Total Hours</span>
                     <span className="font-medium">
-                      {plan.reduce((sum: number, item: unknown) => sum + item.production.estimatedDuration, 0).toFixed(1)} jam
+                      {plan.reduce((sum: number, item: any) => sum + item.production.estimatedDuration, 0).toFixed(1)} jam
                     </span>
                   </div>
                 </div>
@@ -518,19 +519,19 @@ export function SmartProductionPlanner({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                    {plan.filter((item: unknown) => item.production.canProduce).length}
+                    {plan.filter((item: any) => item.production.canProduce).length}
                   </div>
                   <div className="text-xs text-muted-foreground">Orders Ready</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                    {plan.reduce((sum: number, item: unknown) => sum + item.production.batchCount, 0)}
+                    {plan.reduce((sum: number, item: any) => sum + item.production.batchCount, 0)}
                   </div>
                   <div className="text-xs text-muted-foreground">Total Batches</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                    {plan.reduce((sum: number, item: unknown) => sum + item.production.estimatedDuration, 0).toFixed(1)}h
+                    {plan.reduce((sum: number, item: any) => sum + item.production.estimatedDuration, 0).toFixed(1)}h
                   </div>
                   <div className="text-xs text-muted-foreground">Production Time</div>
                 </div>

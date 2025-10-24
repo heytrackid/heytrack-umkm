@@ -16,6 +16,38 @@ import {
 import { useRouter } from 'next/navigation'
 import { memo, useCallback, useEffect, useState } from 'react'
 
+// Search data interfaces
+interface IngredientItem {
+  id: string
+  name: string
+  current_stock?: number
+  unit?: string
+}
+
+interface OrderItem {
+  id: string
+  order_no?: string
+  customer_name?: string
+}
+
+interface CustomerItem {
+  id: string
+  name: string
+  email?: string
+  phone?: string
+}
+
+interface RecipeItem {
+  id: string
+  name: string
+}
+
+interface QuickAction {
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  action: () => void
+}
+
 export const GlobalSearch = memo(function GlobalSearch() {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -42,27 +74,27 @@ export const GlobalSearch = memo(function GlobalSearch() {
   }, [])
 
   // Filter results based on debounced search
-  const filteredIngredients = ingredients?.filter((item: any) =>
+  const filteredIngredients = (ingredients as IngredientItem[] | undefined)?.filter((item: IngredientItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
   ).slice(0, 5) || []
 
-  const filteredOrders = orders?.filter((item: any) =>
+  const filteredOrders = (orders as OrderItem[] | undefined)?.filter((item: OrderItem) =>
     item.order_no?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.customer_name?.toLowerCase().includes(debouncedSearch.toLowerCase())
   ).slice(0, 5) || []
 
-  const filteredCustomers = customers?.filter((item: any) =>
+  const filteredCustomers = (customers as CustomerItem[] | undefined)?.filter((item: CustomerItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.email?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
     item.phone?.includes(debouncedSearch)
   ).slice(0, 5) || []
 
-  const filteredRecipes = recipes?.filter((item: any) =>
+  const filteredRecipes = (recipes as RecipeItem[] | undefined)?.filter((item: RecipeItem) =>
     item.name?.toLowerCase().includes(debouncedSearch.toLowerCase())
   ).slice(0, 5) || []
 
   // Quick actions
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     { label: 'Buat Pesanan Baru', icon: ShoppingCart, action: () => router.push('/orders/new') },
     { label: 'Tambah Bahan Baku', icon: Package, action: () => router.push('/ingredients/new') },
     { label: 'Tambah Pelanggan', icon: Users, action: () => router.push('/customers/new') },
@@ -118,7 +150,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
           {/* Ingredients */}
           {filteredIngredients.length > 0 && (
             <CommandGroup heading="Bahan Baku">
-              {filteredIngredients.map((item: any) => (
+              {filteredIngredients.map((item: IngredientItem) => (
                 <CommandItem
                   key={item.id}
                   onSelect={() => handleSelect(() => router.push(`/ingredients/${item.id}`))}
@@ -136,7 +168,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
           {/* Orders */}
           {filteredOrders.length > 0 && (
             <CommandGroup heading="Pesanan">
-              {filteredOrders.map((item: any) => (
+              {filteredOrders.map((item: OrderItem) => (
                 <CommandItem
                   key={item.id}
                   onSelect={() => handleSelect(() => router.push(`/orders/${item.id}`))}
@@ -154,7 +186,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
           {/* Customers */}
           {filteredCustomers.length > 0 && (
             <CommandGroup heading="Pelanggan">
-              {filteredCustomers.map((item: any) => (
+              {filteredCustomers.map((item: CustomerItem) => (
                 <CommandItem
                   key={item.id}
                   onSelect={() => handleSelect(() => router.push(`/customers/${item.id}`))}
@@ -174,7 +206,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
           {/* Recipes */}
           {filteredRecipes.length > 0 && (
             <CommandGroup heading="Resep">
-              {filteredRecipes.map((item: any) => (
+              {filteredRecipes.map((item: RecipeItem) => (
                 <CommandItem
                   key={item.id}
                   onSelect={() => handleSelect(() => router.push(`/resep/${item.id}`))}

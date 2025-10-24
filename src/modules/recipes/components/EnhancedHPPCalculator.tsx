@@ -55,7 +55,7 @@ export default function EnhancedHPPCalculator() {
       )
 
       setCalculationResult(result)
-    } catch (error: any) {
+    } catch (error: unknown) {
       uiLogger.error({ err: error }, 'Error calculating HPP')
       setCalculationResult(null)
     } finally {

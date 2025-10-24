@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -49,14 +50,14 @@ export class OrderValidationService {
         }
 
         // Check each ingredient
-        for (const ri of recipe.recipe_ingredients || []) {
+        for (const ri of (recipe as any).recipe_ingredients || []) {
           if (!ri.ingredient || !ri.ingredient.is_active) {
-            errors.push(`Ingredient ${ri.ingredient?.name || 'unknown'} untuk ${recipe.name} tidak tersedia`)
+            errors.push(`Ingredient ${ri.ingredient?.name || 'unknown'} untuk ${(recipe as any).name} tidak tersedia`)
             continue
           }
 
           const requiredQuantity = ri.quantity * item.quantity
-          const currentStock = ri.ingredient.current_stock ?? 0 || 0
+          const currentStock = (ri.ingredient.current_stock ?? 0) || 0
           const reorderPoint = ri.ingredient.reorder_point || 0
 
           if (currentStock < requiredQuantity) {
@@ -76,7 +77,7 @@ export class OrderValidationService {
         warnings,
         errors
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error validating order against inventory')
       return {
         isValid: false,

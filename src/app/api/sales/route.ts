@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(count / limit)
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     return NextResponse.json(sale, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

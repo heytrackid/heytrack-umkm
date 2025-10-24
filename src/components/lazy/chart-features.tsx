@@ -1,15 +1,41 @@
 'use client'
-import * as React from 'react'
 
-import { lazy, Suspense } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { lazy, Suspense } from 'react'
+
+// Chart component props interfaces
+interface ChartProps {
+  data?: any[]
+  width?: number | string
+  height?: number | string
+  margin?: {
+    top?: number
+    right?: number
+    bottom?: number
+    left?: number
+  }
+  [key: string]: unknown
+}
+
+interface FinancialChartProps extends ChartProps {
+  period?: string
+  showLegend?: boolean
+  showTooltip?: boolean
+  currency?: string
+}
+
+interface InventoryChartProps extends ChartProps {
+  category?: string
+  showLowStock?: boolean
+  alertThreshold?: number
+}
 
 // Chart loading skeleton
-const ChartLoadingSkeleton = ({ 
-  title, 
-  height ="h-64" 
-}: { 
+const ChartLoadingSkeleton = ({
+  title,
+  height = "h-64"
+}: {
   title: string;
   height?: string;
 }) => (
@@ -167,14 +193,14 @@ export const loadChartWhenNeeded = async (chartType: string) => {
 }
 
 // Progressive chart enhancement
-export const useChartProgressive = (chartType: string, data: any[]) => {
+export const useChartProgressive = (chartType: string, data: unknown[]) => {
   // Load simple chart first, then enhance with advanced features
   const shouldLoadAdvancedChart = data.length > 50 // Only load advanced features for large datasets
-  
+
   return {
     shouldLoadAdvancedChart,
-    ChartComponent: shouldLoadAdvancedChart 
-      ? ChartFeatureBundle.Chart 
+    ChartComponent: shouldLoadAdvancedChart
+      ? ChartFeatureBundle.Chart
       : ChartWithLoading
   }
 }

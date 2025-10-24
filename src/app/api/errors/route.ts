@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateInput } from '@/lib/validations'
 
+import { apiLogger } from '@/lib/logger'
 // Simple in-memory error store (in production, use a real database/service)
 const errorStore: Array<{
   id: string
@@ -59,12 +60,12 @@ export async function POST(request: NextRequest) {
     
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error('🔴 Client Error Logged:', {
+      apiLogger.error({ error: {
         id: errorRecord.id,
         message: errorRecord.message,
         url: errorRecord.url,
         timestamp: errorRecord.timestamp
-      })
+      } }, '🔴 Client Error Logged:')
     }
     
     // In production, you might want to:
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
       
       // Example: Check if error is critical and send alert
       if (isCriticalError(errorRecord)) {
-        console.error('🚨 CRITICAL ERROR:', errorRecord)
+        apiLogger.error({ error: errorRecord }, '🚨 CRITICAL ERROR:')
         // await sendCriticalErrorAler""
       }
     }
@@ -89,8 +90,8 @@ export async function POST(request: NextRequest) {
       message: 'Error logged successfully'
     })
     
-  } catch (error: any) {
-    console.error('Failed to log error:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Failed to log error:')
     
     return NextResponse.json(
       { error: 'Failed to log error' },

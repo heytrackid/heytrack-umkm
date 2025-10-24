@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import OrdersTable from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -7,12 +6,15 @@ import { useEffect, useState } from 'react'
 import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
+import { uiLogger } from '@/lib/logger'
+import { Order } from '../types'
+
 export function OrdersTableView() {
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedOrder, setSelectedOrder] = useState<any>(null)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
-  const [editingOrder, setEditingOrder] = useState<any>(null)
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
   useEffect(() => {
@@ -34,17 +36,17 @@ export function OrdersTableView() {
     }
   }
 
-  const handleViewOrder = (order: any) => {
+  const handleViewOrder = (order: Order) => {
     setSelectedOrder(order)
     setShowOrderDetail(true)
   }
 
-  const handleEditOrder = (order: any) => {
+  const handleEditOrder = (order: Order) => {
     setEditingOrder(order)
     setShowOrderForm(true)
   }
 
-  const handleDeleteOrder = async (order: any) => {
+  const handleDeleteOrder = async (order: Order) => {
     try {
       const response = await fetch(`/api/orders/${order.id}`, {
         method: 'DELETE'

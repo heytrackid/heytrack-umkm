@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 // Minimum loading duration untuk smooth UX
 export const MIN_LOADING_DURATION = {
   FAST: 300,    // For simple operations
@@ -23,7 +24,7 @@ export function useSkeletonDebounce(delay: number = MIN_LOADING_DURATION.FAST) {
 }
 
 // Memoized skeleton array untuk menghindari re-renders
-export function useSkeletonArray(length: number, dependency?: any[]) {
+export function useSkeletonArray(length: number, dependency?: unknown[]) {
   return useMemo(
     () => Array.from({ length }, (_, i) => i),
     [length, ...(dependency || [])]
@@ -184,7 +185,7 @@ export function startSkeletonCacheCleanup(intervalMs: number = 300000) { // 5 mi
     const keysToDelete = keys.slice(0, Math.floor(keys.length / 2))
     keysToDelete.forEach(key => skeletonCache.delete(key))
     
-    console.log(`🧹 Skeleton cache cleaned: ${keysToDelete.length} items removed`)
+    apiLogger.info(`🧹 Skeleton cache cleaned: ${keysToDelete.length} items removed`)
   }, intervalMs)
 }
 

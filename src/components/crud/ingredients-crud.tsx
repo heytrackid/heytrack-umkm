@@ -1,24 +1,20 @@
 'use client';
 import * as React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { ConfirmDialog, CrudForm, FormActions, FormField, FormGrid, FormSection } from '@/components/ui/crud-form';
 import { Modal } from '@/components/ui/modal';
 import { SimpleDataTable } from '@/components/ui/simple-data-table';
 import { useSettings } from '@/contexts/settings-context';
-import { useBahanBaku, useFormValidation } from '@/hooks/useSupabaseCRUD';
-import { BahanBaku, BahanBakuFormData } from '@/types';
+import { useBahanBaku } from '@/hooks/useSupabaseCRUD';
+import { BahanBaku } from '@/types';
+import { BahanBakuSchema, type BahanBakuFormData } from '@/lib/validations/form-validations';
 import { useState } from 'react';
 
-const validationRules = {
-  nama_bahan: (value: string) => !value ? 'Nama harus diisi' : null,
-  satuan: (value: string) => !value ? 'Satuan harus diisi' : null,
-  harga_per_satuan: (value: number) => value <= 0 ? 'Harga harus lebih dari 0' : null,
-  stok_minimum: (value: number) => value < 0 ? 'Stok minimum tidak boleh negatif' : null,
-  stok_tersedia: (value: number) => value < 0 ? 'Stok saat ini tidak boleh negatif' : null,
-  jenis_kemasan: () => null,
-};
+import { apiLogger } from '@/lib/logger'
 
-export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: any[] }) {
+export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: unknown[] }) {
   const { formatCurrency } = useSettings();
   const { data: ingredients, loading, error, create, update, remove } = useBahanBaku({
     initial: initialIngredients,
@@ -39,24 +35,29 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<BahanBaku | null>(null);
 
-  const initialFormData: BahanBakuFormData = {
-    nama_bahan: '',
-    satuan: 'kg',
-    harga_per_satuan: 0,
-    stok_tersedia: 0,
-    stok_minimum: 0,
-    jenis_kemasan: '',
-  };
+  const createForm = useForm<BahanBakuFormData>({
+    resolver: zodResolver(BahanBakuSchema),
+    defaultValues: {
+      nama_bahan: '',
+      satuan: 'kg',
+      harga_per_satuan: 0,
+      stok_tersedia: 0,
+      stok_minimum: 0,
+      jenis_kemasan: '',
+    }
+  });
 
-  const {
-    values: formData,
-    errors,
-    touched,
-    handleChange,
-    handleBlur,
-    validateAll,
-    resetForm,
-  } = useFormValidation(initialFormData, validationRules);
+  const editForm = useForm<BahanBakuFormData>({
+    resolver: zodResolver(BahanBakuSchema),
+    defaultValues: {
+      nama_bahan: '',
+      satuan: 'kg',
+      harga_per_satuan: 0,
+      stok_tersedia: 0,
+      stok_minimum: 0,
+      jenis_kemasan: '',
+    }
+  });
 
   const columns = [
     {
@@ -90,49 +91,50 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   ];
 
   const handleCreate = () => {
-    resetForm();
-    setIsCreateModalOpen(true);
-  };
+    createForm.reset()
+    setIsCreateModalOpen(true)
+  }
 
   const handleEdit = (ingredient: BahanBaku) => {
-    setSelectedIngredient(ingredient);
-    Object.keys(initialFormData).forEach(key => {
-      handleChange(key as keyof BahanBakuFormData, (ingredient as any)[key] || '');
-    });
-    setIsEditModalOpen(true);
-  };
+    setSelectedIngredient(ingredient)
+    editForm.reset({
+      nama_bahan: ingredient.nama_bahan,
+      satuan: ingredient.satuan,
+      harga_per_satuan: ingredient.harga_per_satuan,
+      stok_tersedia: ingredient.stok_tersedia,
+      stok_minimum: ingredient.stok_minimum,
+      jenis_kemasan: ingredient.jenis_kemasan || '',
+    })
+    setIsEditModalOpen(true)
+  }
 
   const handleDelete = (ingredient: BahanBaku) => {
-    setSelectedIngredient(ingredient);
-    setIsDeleteDialogOpen(true);
-  };
+    setSelectedIngredient(ingredient)
+    setIsDeleteDialogOpen(true)
+  }
 
-  const handleSubmitCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll()) return;
+  const handleSubmitCreate = async (data: BahanBakuFormData) => {
+    try {
+      await create(data)
+      setIsCreateModalOpen(false)
+      createForm.reset()
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Failed to create ingredient:')
+    }
+  }
+
+  const handleSubmitEdit = async (data: BahanBakuFormData) => {
+    if (!selectedIngredient) return
 
     try {
-      await create(formData as any);
-      setIsCreateModalOpen(false);
-      resetForm();
-    } catch (error: any) {
-      console.error('Failed to create ingredient:', error);
+      await update(selectedIngredient.id, data)
+      setIsEditModalOpen(false)
+      setSelectedIngredient(null)
+      editForm.reset()
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Failed to update ingredient:')
     }
-  };
-
-  const handleSubmitEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateAll() || !selectedIngredient) return;
-
-    try {
-      await update(selectedIngredient.id, formData as any);
-      setIsEditModalOpen(false);
-      setSelectedIngredient(null);
-      resetForm();
-    } catch (error: any) {
-      console.error('Failed to update ingredient:', error);
-    }
-  };
+  }
 
   const handleConfirmDelete = async () => {
     if (!selectedIngredient) return;
@@ -141,18 +143,19 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       await remove(selectedIngredient.id);
       setIsDeleteDialogOpen(false);
       setSelectedIngredient(null);
-    } catch (error: any) {
-      console.error('Failed to delete ingredient:', error);
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Failed to delete ingredient:');
     }
   };
 
   const closeModals = () => {
-    setIsCreateModalOpen(false);
-    setIsEditModalOpen(false);
-    setIsDeleteDialogOpen(false);
-    setSelectedIngredient(null);
-    resetForm();
-  };
+    setIsCreateModalOpen(false)
+    setIsEditModalOpen(false)
+    setIsDeleteDialogOpen(false)
+    setSelectedIngredient(null)
+    createForm.reset()
+    editForm.reset()
+  }
 
   if (error) {
     return (
@@ -184,7 +187,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
         size="lg"
         fullScreenOnMobile={true}
       >
-        <CrudForm onSubmit={handleSubmitCreate}>
+        <CrudForm onSubmit={createForm.handleSubmit(handleSubmitCreate)}>
           <FormSection
             title="Informasi Dasar"
             description="Masukkan informasi dasar bahan baku"
@@ -194,10 +197,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Nama Bahan"
                 name="nama_bahan"
                 type="text"
-                value={formData.nama_bahan}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.nama_bahan ? errors.nama_bahan : undefined}
+                {...createForm.register('nama_bahan')}
+                error={createForm.formState.errors.nama_bahan?.message}
                 required
                 hint="Nama bahan baku yang mudah dikenali"
               />
@@ -206,10 +207,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Satuan"
                 name="satuan"
                 type="select"
-                value={formData.satuan}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.satuan ? errors.satuan : undefined}
+                {...createForm.register('satuan')}
+                error={createForm.formState.errors.satuan?.message}
                 required
                 options={unitOptions}
                 hint="Pilih satuan yang sesuai"
@@ -225,10 +224,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               label="Harga per Unit"
               name="harga_per_satuan"
               type="number"
-              value={formData.harga_per_satuan}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.harga_per_satuan ? errors.harga_per_satuan : undefined}
+              {...createForm.register('harga_per_satuan', { valueAsNumber: true })}
+              error={createForm.formState.errors.harga_per_satuan?.message}
               required
               min={0}
               step={0.01}
@@ -240,10 +237,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Stok Saat Ini"
                 name="stok_tersedia"
                 type="number"
-                value={formData.stok_tersedia}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.stok_tersedia ? errors.stok_tersedia : undefined}
+                {...createForm.register('stok_tersedia', { valueAsNumber: true })}
+                error={createForm.formState.errors.stok_tersedia?.message}
                 required
                 min={0}
                 step={0.01}
@@ -254,10 +249,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Stok Minimum"
                 name="stok_minimum"
                 type="number"
-                value={formData.stok_minimum}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.stok_minimum ? errors.stok_minimum : undefined}
+                {...createForm.register('stok_minimum', { valueAsNumber: true })}
+                error={createForm.formState.errors.stok_minimum?.message}
                 required
                 min={0}
                 step={0.01}
@@ -271,9 +264,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               label="Jenis Kemasan"
               name="jenis_kemasan"
               type="text"
-              value={formData.jenis_kemasan}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              {...createForm.register('jenis_kemasan')}
               hint="Jenis kemasan bahan ini (opsional)"
             />
           </FormSection>
@@ -295,7 +286,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
         size="lg"
         fullScreenOnMobile={true}
       >
-        <CrudForm onSubmit={handleSubmitEdit}>
+        <CrudForm onSubmit={editForm.handleSubmit(handleSubmitEdit)}>
           <FormSection
             title="Informasi Dasar"
             description="Edit informasi dasar bahan baku"
@@ -305,10 +296,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Nama Bahan"
                 name="nama_bahan"
                 type="text"
-                value={formData.nama_bahan}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.nama_bahan ? errors.nama_bahan : undefined}
+                {...editForm.register('nama_bahan')}
+                error={editForm.formState.errors.nama_bahan?.message}
                 required
               />
 
@@ -316,10 +305,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Satuan"
                 name="satuan"
                 type="select"
-                value={formData.satuan}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.satuan ? errors.satuan : undefined}
+                {...editForm.register('satuan')}
+                error={editForm.formState.errors.satuan?.message}
                 required
                 options={unitOptions}
               />
@@ -334,10 +321,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               label="Harga per Unit"
               name="harga_per_satuan"
               type="number"
-              value={formData.harga_per_satuan}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.harga_per_satuan ? errors.harga_per_satuan : undefined}
+              {...editForm.register('harga_per_satuan', { valueAsNumber: true })}
+              error={editForm.formState.errors.harga_per_satuan?.message}
               required
               min={0}
               step={0.01}
@@ -348,10 +333,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Stok Saat Ini"
                 name="stok_tersedia"
                 type="number"
-                value={formData.stok_tersedia}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.stok_tersedia ? errors.stok_tersedia : undefined}
+                {...editForm.register('stok_tersedia', { valueAsNumber: true })}
+                error={editForm.formState.errors.stok_tersedia?.message}
                 required
                 min={0}
                 step={0.01}
@@ -361,10 +344,8 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
                 label="Stok Minimum"
                 name="stok_minimum"
                 type="number"
-                value={formData.stok_minimum}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.stok_minimum ? errors.stok_minimum : undefined}
+                {...editForm.register('stok_minimum', { valueAsNumber: true })}
+                error={editForm.formState.errors.stok_minimum?.message}
                 required
                 min={0}
                 step={0.01}
@@ -377,9 +358,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
               label="Jenis Kemasan"
               name="jenis_kemasan"
               type="text"
-              value={formData.jenis_kemasan}
-              onChange={handleChange}
-              onBlur={handleBlur}
+              {...editForm.register('jenis_kemasan')}
             />
           </FormSection>
 

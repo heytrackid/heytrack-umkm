@@ -28,7 +28,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
   const { toast } = useToast()
   
   const form = useForm<FinancialRecordFormData>({
-    resolver: zodResolver(FinancialRecordSchema) as any,
+    resolver: zodResolver(FinancialRecordSchema),
     defaultValues: {
       type: initialData?.type || 'EXPENSE',
       category: initialData?.category || '',
@@ -52,7 +52,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
       if (!initialData) {
         form.reset()
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan catatan keuangan',

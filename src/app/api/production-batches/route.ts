@@ -16,7 +16,7 @@ export async function GET() {
     if (error) throw error;
 
     return NextResponse.json(batches);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (error) throw error;
 
     return NextResponse.json(batch, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

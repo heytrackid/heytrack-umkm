@@ -35,18 +35,22 @@ export class InventoryUpdateService {
         if (error || !recipe) continue
 
         // Update ingredient stock
-        for (const ri of recipe.recipe_ingredients || []) {
+        for (const ri of (recipe as any).recipe_ingredients || []) {
           if (ri.ingredient) {
             const usedQuantity = ri.quantity * item.quantity
-            const newStock = Math.max(0, (ri.ingredient.current_stock ?? 0 || 0) - usedQuantity)
+            const newStock = Math.max(0, ((ri.ingredient.current_stock ?? 0) || 0) - usedQuantity)
 
-            await supabase
+            const { error: updateError } = await supabase
               .from('ingredients')
               .update({
                 current_stock: newStock,
                 updated_at: new Date().toISOString()
-              })
+              } as any)
               .eq('id', ri.ingredient.id)
+
+            if (updateError) {
+              logger.error({ err: updateError }, 'Error updating ingredient stock')
+            }
 
             // Create stock transaction record
             await supabase
@@ -59,11 +63,11 @@ export class InventoryUpdateService {
                 reference_id: order_id,
                 notes: `Used for order production`,
                 created_at: new Date().toISOString()
-              })
+              } as any)
           }
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error updating inventory for order')
       throw new Error('Failed to update inventory')
     }

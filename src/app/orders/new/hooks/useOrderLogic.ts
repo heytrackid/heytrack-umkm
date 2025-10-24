@@ -4,10 +4,11 @@ import * as React from 'react'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+import { apiLogger } from '@/lib/logger'
 export interface OrderItem {
   id?: string
   recipe_id: string
-  recipe?: any
+  recipe?: unknown
   product_name: string
   quantity: number
   unit_price: number
@@ -82,8 +83,8 @@ export const useOrderLogic = () => {
       } else {
         setAvailableRecipes([])
       }
-    } catch (error: any) {
-      console.error('Failed to fetch recipes:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Failed to fetch recipes:')
       setAvailableRecipes([])
     } finally {
       setLoading(false) // Set loading to false after fetch
@@ -100,8 +101,8 @@ export const useOrderLogic = () => {
       } else {
         setCustomers([])
       }
-    } catch (error: any) {
-      console.error('Failed to fetch customers:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Failed to fetch customers:')
       setCustomers([])
     }
   }

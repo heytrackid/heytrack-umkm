@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 /**
  * Create a text column with sorting enabled
  */
-export function createTextColumn<T extends Record<string, any>>(
+export function createTextColumn<T extends Record<string, unknown>>(
   key: keyof T,
   header: string,
   options?: {
@@ -31,7 +31,7 @@ export function createTextColumn<T extends Record<string, any>>(
 /**
  * Create a number column with sorting and formatting
  */
-export function createNumberColumn<T extends Record<string, any>>(
+export function createNumberColumn<T extends Record<string, unknown>>(
   key: keyof T,
   header: string,
   options?: {
@@ -53,7 +53,7 @@ export function createNumberColumn<T extends Record<string, any>>(
 /**
  * Create a currency column
  */
-export function createCurrencyColumn<T extends Record<string, any>>(
+export function createCurrencyColumn<T extends Record<string, unknown>>(
   key: keyof T,
   header: string,
   options?: {
@@ -81,7 +81,7 @@ export function createCurrencyColumn<T extends Record<string, any>>(
 /**
  * Create a date column
  */
-export function createDateColumn<T extends Record<string, any>>(
+export function createDateColumn<T extends Record<string, unknown>>(
   key: keyof T,
   header: string,
   options?: {
@@ -107,7 +107,7 @@ export function createDateColumn<T extends Record<string, any>>(
 /**
  * Create a status column with badge
  */
-export function createStatusColumn<T extends Record<string, any>>(
+export function createStatusColumn<T extends Record<string, unknown>>(
   key: keyof T,
   header: string,
   statusConfig: Record<string, { label: string; className: string }>
@@ -132,7 +132,7 @@ export function createStatusColumn<T extends Record<string, any>>(
 /**
  * Create an action column with buttons
  */
-export function createActionColumn<T extends Record<string, any>>(
+export function createActionColumn<T extends Record<string, unknown>>(
   actions: Array<{
     label: string
     onClick: (row: T) => void

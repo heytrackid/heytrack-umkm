@@ -1,0 +1,28 @@
+# Bundle Size Budget Configuration
+# Automated monitoring and alerts for bundle size regressions
+
+# Bundle Size Budgets (in KB)
+bundle_budget:
+  total: 500    # Total bundle size limit
+  vendor: 300   # Vendor chunks limit
+  main: 200     # Main application code limit
+
+# Alert Thresholds
+alerts:
+  warning: 80   # Warn at 80% of budget
+  error: 95     # Error at 95% of budget
+
+# Performance Targets
+performance_targets:
+  first_contentful_paint: 1800  # ms
+  largest_contentful_paint: 2500  # ms
+  first_input_delay: 100  # ms
+  cumulative_layout_shift: 0.1
+
+# Monitoring Configuration
+monitoring:
+  enabled: true
+  track_history: true
+  max_history_entries: 10
+  alert_on_regression: true
+  regression_threshold_kb: 5  # Alert if size increases by 5KB+

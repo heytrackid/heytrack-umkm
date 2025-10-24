@@ -19,10 +19,10 @@ interface CacheConfig {
 }
 
 // Request deduplication map
-const pendingRequests = new Map<string, Promise<any>>();
+const pendingRequests = new Map<string, Promise<unknown>>();
 
 class EnhancedApiClient {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private config: CacheConfig;
 
   constructor(config: Partial<CacheConfig> = {}) {
@@ -34,7 +34,7 @@ class EnhancedApiClient {
   }
 
   // Generate cache key from query parameters
-  private generateCacheKey(operation: string, params: any = {}): string {
+  private generateCacheKey(operation: string, params: Record<string, unknown> = {}): string {
     const sortedParams = Object.keys(params)
       .sort((a, b) => a.localeCompare(b))
       .reduce((result, key) => {
@@ -84,7 +84,7 @@ class EnhancedApiClient {
   // Generic fetch method with caching and performance monitoring
   private async fetchWithCache<T>(
     operationName: string,
-    queryFn: () => Promise<any>,
+    queryFn: () => Promise<unknown>,
     cacheKey: string,
     ttl?: number,
     useCache: boolean = true

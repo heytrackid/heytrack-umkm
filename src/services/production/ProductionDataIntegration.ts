@@ -4,13 +4,13 @@
  * Handles order-to-batch conversion and resource availability checks
  */
 
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import {
   batchSchedulingService,
   ProductionBatch,
   SchedulingResult
 } from './BatchSchedulingService'
-import { logger } from '@/lib/logger'
 
 // Core interfaces for integration
 export interface OrderData {
@@ -63,6 +63,12 @@ export interface RecipeRequirement {
   profit_margin: number
 }
 
+export interface SeasonalTrend {
+  period: string
+  demand_multiplier: number
+  notes?: string
+}
+
 export interface ProductionDemand {
   orders: OrderData[]
   totalBatches: number
@@ -74,7 +80,7 @@ export interface ProductionDemand {
   forecastedDemand: {
     next_24h: number
     next_week: number
-    seasonal_trends: unknown[]
+    seasonal_trends: SeasonalTrend[]
   }
 }
 
@@ -108,10 +114,10 @@ export class ProductionDataIntegration {
       if (ordersError) throw ordersError
 
       // Process orders into standardized format
-      const processedOrders: OrderData[] = (orders || []).map((order: unknown) => ({
+      const processedOrders: OrderData[] = (orders || []).map((order: any) => ({
         id: (order as { id: string }).id,
         customer_name: (order as { customer_name?: string }).customer_name || 'Unknown',
-        items: ((order as { order_items?: unknown[] }).order_items || []).map((item: unknown) => ({
+        items: ((order as { order_items?: unknown[] }).order_items || []).map((item: any) => ({
           id: (item as { id: string }).id,
           recipe_id: (item as { recipe_id: string }).recipe_id,
           recipe_name: (item as { recipe?: { name?: string } }).recipe?.name || 'Unknown Recipe',
@@ -151,7 +157,7 @@ export class ProductionDataIntegration {
         resourceConstraints,
         forecastedDemand
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error fetching production demand')
       throw error
     }
@@ -247,7 +253,7 @@ export class ProductionDataIntegration {
       }
 
       return schedule
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error generating production schedule')
       throw error
     }
@@ -302,7 +308,7 @@ export class ProductionDataIntegration {
           .update({ status: 'in_production' })
           .eq('id', orderId)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error updating production progress')
       throw error
     }
@@ -330,7 +336,10 @@ export class ProductionDataIntegration {
       return {
         recipe_id: recipe.id,
         recipe_name: recipe.name,
-        ingredients: (recipe.recipe_ingredients || []).map((ri: any) => ({
+        ingredients: (recipe.recipe_ingredients || []).map((ri: {
+          quantity: number;
+          ingredient: { id: string; name: string; unit: string }
+        }) => ({
           ingredient_id: ri.ingredient.id,
           ingredient_name: ri.ingredient.name,
           quantity_needed: ri.quantity,
@@ -345,7 +354,7 @@ export class ProductionDataIntegration {
         skill_level: 'intermediate',
         profit_margin: recipe.profit_margin || 30
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error getting recipe requirements')
       return null
     }
@@ -402,7 +411,7 @@ export class ProductionDataIntegration {
       }
 
       return blocking
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error checking blocking ingredients')
       return []
     }
@@ -469,7 +478,7 @@ export class ProductionDataIntegration {
         capacity_warnings.push(`Very high production volume: ${totalBatches} total batches scheduled`)
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error checking resource constraints')
     }
 

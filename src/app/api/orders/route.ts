@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { OrderInsertSchema, PaginationQuerySchema } from '@/lib/validations'
+import { OrdersTable } from '@/types/database'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/orders - Get all orders
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +14,7 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -78,7 +80,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching orders:', error)
+      apiLogger.error({ error: error }, 'Error fetching orders:')
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -86,14 +88,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Map data to match our interface (order_items -> items)
-    const mappedData = data?.map((order: any) => ({
+    const mappedData = data?.map((order: OrdersTable['Row'] & { order_items?: unknown[] }) => ({
       ...order,
       items: order.order_items || []
     }))
 
     return NextResponse.json(mappedData)
-  } catch (error: any) {
-    console.error('Error in GET /api/orders:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in GET /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -111,7 +113,7 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      apiLogger.error({ error: authError }, 'Auth error:')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -152,7 +154,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (incomeError) {
-        console.error('Error creating income record:', incomeError)
+        apiLogger.error({ error: incomeError }, 'Error creating income record:')
         return NextResponse.json(
           { error: 'Failed to create income record' },
           { status: 500 }
@@ -190,7 +192,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (orderError) {
-      console.error('Error creating order:', orderError)
+      apiLogger.error({ error: orderError }, 'Error creating order:')
       // Rollback income record if order creation fails
       if (incomeRecordId) {
         await supabase
@@ -231,7 +233,7 @@ export async function POST(request: NextRequest) {
         .insert(orderItems)
 
       if (itemsError) {
-        console.error('Error creating order items:', itemsError)
+        apiLogger.error({ error: itemsError }, 'Error creating order items:')
         // Rollback order creation if items fail
         await supabase
           .from('orders')
@@ -251,8 +253,8 @@ export async function POST(request: NextRequest) {
       ...orderData,
       income_recorded: !!incomeRecordId
     }, { status: 201 })
-  } catch (error: any) {
-    console.error('Error in POST /api/orders:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in POST /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -134,7 +134,7 @@ export const DataTableWithSuspense = ({
 )
 
 // Specialized table loaders
-export const CRUDTableWithSuspense = (props: unknown) => (
+export const CRUDTableWithSuspense = (props: any) => (
   <DataTableWithSuspense 
     columns={6} 
     rows={10} 
@@ -143,7 +143,7 @@ export const CRUDTableWithSuspense = (props: unknown) => (
   />
 )
 
-export const OrdersTableWithSuspense = (props: unknown) => (
+export const OrdersTableWithSuspense = (props: any) => (
   <DataTableWithSuspense 
     columns={6} 
     rows={8} 
@@ -152,7 +152,7 @@ export const OrdersTableWithSuspense = (props: unknown) => (
   />
 )
 
-export const InventoryTableWithSuspense = (props: unknown) => (
+export const InventoryTableWithSuspense = (props: any) => (
   <DataTableWithSuspense 
     columns={7} 
     rows={12} 
@@ -161,7 +161,7 @@ export const InventoryTableWithSuspense = (props: unknown) => (
   />
 )
 
-export const FinanceTableWithSuspense = (props: unknown) => (
+export const FinanceTableWithSuspense = (props: any) => (
   <DataTableWithSuspense 
     columns={5} 
     rows={15} 
@@ -172,19 +172,26 @@ export const FinanceTableWithSuspense = (props: unknown) => (
 
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
-  Promise.all([
-    import('@/components'),
-    import('@/components')
-  ]).then(([tableLib, virtualLib]) => ({
-    default: ({ data, columns, height = 400 }: any) => {
+  Promise.resolve({
+    default: ({ data, height, ...props }: { data?: any[]; height?: number; [key: string]: unknown }) => {
       // This would be a virtualized table implementation
       // For now, return a placeholder
       return <div style={{ height }}>Virtualized table with {data?.length || 0} items</div>
     }
-  }))
+  })
 )
 
-export const VirtualizedTableWithSuspense = ({ data, columns, height = 400, ...props }: any) => (
+export const VirtualizedTableWithSuspense = ({ 
+  data = [], 
+  columns = [], 
+  height = 400,
+  ...props 
+}: { 
+  data?: any[]; 
+  columns?: unknown[]; 
+  height?: number; 
+  [key: string]: unknown 
+}) => (
   <Suspense fallback={
     <TableLoadingSkeleton columns={columns?.length || 6} rows={Math.floor(height / 50)} />
   }>
@@ -242,7 +249,7 @@ export const TableContainer = ({
   ...props 
 }: {
   type: TableType
-  data?: unknown[]
+  data?: any[]
   columns?: unknown[]
   loading?: boolean
   [key: string]: unknown

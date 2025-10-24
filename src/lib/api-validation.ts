@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 // API Response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown > {
   success: boolean
   data?: T
   error?: string
@@ -18,7 +18,7 @@ export interface ApiErrorResponse {
   code?: string
 }
 
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown > {
   success: true
   data: T
   message?: string
@@ -182,7 +182,7 @@ export const BulkUpdateSchema = z.object({
 })
 
 // Error handling for database operations
-export function handleDatabaseError(error: unknown): NextResponse<ApiErrorResponse> {
+export function handleDatabaseError(error: any): NextResponse<ApiErrorResponse> {
   apiLogger.error({ err: error }, 'Database Error')
 
   // Handle specific Supabase/Postgres errors
@@ -312,7 +312,7 @@ export function withAuth(
 // Combined middleware composer
 export function withMiddleware(
   handler: (req: NextRequest, ...args: unknown[]) => Promise<NextResponse>,
-  middlewares: Array<(handler: unknown) => any>
+  middlewares: Array<(handler: any) => unknown>
 ) {
   return middlewares.reduce((wrapped, middleware) => middleware(wrapped), handler)
 }

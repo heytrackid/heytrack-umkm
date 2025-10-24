@@ -8,6 +8,7 @@ import { automationEngine } from '@/lib/automation-engine'
 import { AlertTriangle, Bell, CheckCircle, Info, X, Zap } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 interface SmartNotification {
   id: string
   type: 'critical' | 'warning' | 'info' | 'success'
@@ -57,15 +58,15 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
       ])
 
       // Extract data with fallback to empty arrays
-      let ingredients: any[] = []
-      let orders: any[] = []
+      let ingredients: unknown[] = []
+      let orders: unknown[] = []
 
       if (ingredientsRes.status === 'fulfilled' && ingredientsRes.value.ok) {
         try {
           const data = await ingredientsRes.value.json()
           ingredients = Array.isArray(data) ? data : []
         } catch (e) {
-          console.warn('Failed to parse ingredients data:', e)
+          apiLogger.warn('Failed to parse ingredients data:', e)
         }
       }
 
@@ -74,7 +75,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
           const data = await ordersRes.value.json()
           orders = Array.isArray(data) ? data : []
         } catch (e) {
-          console.warn('Failed to parse orders data:', e)
+          apiLogger.warn('Failed to parse orders data:', e)
         }
       }
 
@@ -106,15 +107,15 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
         
         setNotifications([...formattedNotifications, ...additionalNotifications])
       }
-    } catch (error: any) {
-      console.warn('Error fetching smart notifications (non-critical):', error)
+    } catch (error: unknown) {
+      apiLogger.warn('Error fetching smart notifications (non-critical):', error)
       // Silently fail - notifications are not critical
     } finally {
       setLoading(false)
     }
   }
 
-  const generateAdditionalNotifications = async (ingredients: any[], orders: any[]): Promise<SmartNotification[]> => {
+  const generateAdditionalNotifications = async (ingredients: unknown[], orders: unknown[]): Promise<SmartNotification[]> => {
     const additional: SmartNotification[] = []
 
     // Check for orders with tight delivery schedules

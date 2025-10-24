@@ -1,21 +1,18 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
-import { CalendarIcon, Save, X } from 'lucide-react'
-import * as React from 'react'
+import { OperationalCostFormSchema, type OperationalCostForm } from '@/lib/validations/form-validations'
+import { Save, X } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 interface CostFormProps {
-  cost?: any
-  onSave: (data: any) => void
+  cost?: OperationalCostForm
+  onSave: (data: OperationalCostForm) => void
   onCancel: () => void
   isMobile?: boolean
 }
@@ -36,27 +33,26 @@ const costCategories = [
  * Cost Form Component
  * Extracted from operational-costs/page.tsx for code splitting
  */
-export default function CostForm({ 
-  cost, 
-  onSave, 
+export default function CostForm({
+  cost,
+  onSave,
   onCancel,
-  isMobile = false 
+  isMobile = false
 }: CostFormProps) {
-  const [formData, setFormData] = React.useState(cost || {
-    category: '',
-    description: '',
-    amount: 0,
-    date: new Date(),
-    payment_method: 'cash',
-    notes: ''
+  const form = useForm<OperationalCostForm>({
+    resolver: zodResolver(OperationalCostFormSchema),
+    defaultValues: cost || {
+      category: '',
+      description: '',
+      amount: 0,
+      cost_date: new Date().toISOString().split('T')[0],
+      frequency: 'MONTHLY',
+      is_recurring: true
+    }
   })
 
-  const handleSubmit = () => {
-    if (!formData.category || !formData.amount) {
-      toast.error('Harap isi kategori dan jumlah')
-      return
-    }
-    onSave(formData)
+  const handleSubmit = (data: OperationalCostForm) => {
+    onSave(data)
   }
 
   return (
@@ -65,9 +61,9 @@ export default function CostForm({
         {/* Category */}
         <div className="space-y-2">
           <Label>Kategori *</Label>
-          <Select 
-            value={formData.category}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+          <Select
+            value={form.watch('category')}
+            onValueChange={(value) => form.setValue('category', value)}
           >
             <SelectTrigger>
               <SelectValue />
@@ -80,16 +76,21 @@ export default function CostForm({
               ))}
             </SelectContent>
           </Select>
+          {form.formState.errors.category && (
+            <p className="text-sm text-red-600">{form.formState.errors.category.message}</p>
+          )}
         </div>
 
         {/* Description */}
         <div className="space-y-2">
           <Label>Deskripsi *</Label>
           <Input
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-
+            {...form.register('description')}
+            placeholder="Deskripsikan biaya ini"
           />
+          {form.formState.errors.description && (
+            <p className="text-sm text-red-600">{form.formState.errors.description.message}</p>
+          )}
         </div>
 
         {/* Amount */}
@@ -97,72 +98,69 @@ export default function CostForm({
           <Label>Jumlah *</Label>
           <Input
             type="number"
-            value={formData.amount}
-            onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-
+            {...form.register('amount', { valueAsNumber: true })}
+            placeholder="0"
+            min={0}
+            step={0.01}
           />
+          {form.formState.errors.amount && (
+            <p className="text-sm text-red-600">{form.formState.errors.amount.message}</p>
+          )}
         </div>
 
         {/* Date */}
         <div className="space-y-2">
-          <Label>Tanggal</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !formData.date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {formData.date ? format(new Date(formData.date), "PPP") : <span>Pilih tanggal</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={formData.date ? new Date(formData.date) : undefined}
-                onSelect={(date) => setFormData(prev => ({ ...prev, date }))}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <Label>Tanggal *</Label>
+          <Input
+            type="date"
+            {...form.register('cost_date')}
+          />
+          {form.formState.errors.cost_date && (
+            <p className="text-sm text-red-600">{form.formState.errors.cost_date.message}</p>
+          )}
         </div>
 
-        {/* Payment Method */}
+        {/* Frequency */}
         <div className="space-y-2">
-          <Label>Metode Pembayaran</Label>
+          <Label>Frekuensi</Label>
           <Select
-            value={formData.payment_method}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, payment_method: value }))}
+            value={form.watch('frequency')}
+            onValueChange={(value) => form.setValue('frequency', value)}
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="cash">Tunai</SelectItem>
-              <SelectItem value="transfer">Transfer Bank</SelectItem>
-              <SelectItem value="credit_card">Kartu Kredit</SelectItem>
-              <SelectItem value="digital_wallet">Dompet Digital</SelectItem>
+              <SelectItem value="daily">Harian</SelectItem>
+              <SelectItem value="weekly">Mingguan</SelectItem>
+              <SelectItem value="monthly">Bulanan</SelectItem>
+              <SelectItem value="yearly">Tahunan</SelectItem>
             </SelectContent>
           </Select>
+          {form.formState.errors.frequency && (
+            <p className="text-sm text-red-600">{form.formState.errors.frequency.message}</p>
+          )}
         </div>
 
-        {/* Notes */}
+        {/* Is Recurring */}
         <div className="space-y-2">
-          <Label>Catatan</Label>
-          <Textarea
-            value={formData.notes}
-            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-
-            rows={3}
-          />
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              {...form.register('is_recurring')}
+              className="rounded"
+            />
+            <Label>Biaya berulang</Label>
+          </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
-          <Button onClick={handleSubmit} className="flex-1">
+          <Button
+            onClick={form.handleSubmit(handleSubmit)}
+            className="flex-1"
+            disabled={form.formState.isSubmitting}
+          >
             <Save className="h-4 w-4 mr-2" />
             {cost ? "Update" : "Simpan"}
           </Button>

@@ -2,6 +2,7 @@ import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 import type { HPPAlertsTable } from '@/types'
 
+import { apiLogger } from '@/lib/logger'
 // POST /api/hpp/alerts/:id/dismiss - Dismiss alert
 export async function POST(
     request: NextRequest,
@@ -34,7 +35,7 @@ export async function POST(
             .single()
 
         if (error) {
-            console.error('Error dismissing alert:', error)
+            apiLogger.error({ error: error }, 'Error dismissing alert:')
             return NextResponse.json(
                 { error: 'Failed to dismiss alert', details: error.message },
                 { status: 500 }
@@ -53,8 +54,8 @@ export async function POST(
             data: alert
         })
 
-    } catch (error: any) {
-        console.error('Error in dismiss alert endpoint:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in dismiss alert endpoint:')
         return NextResponse.json(
             { error: 'Internal server error', details: error.message },
             { status: 500 }

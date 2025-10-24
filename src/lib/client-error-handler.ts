@@ -9,6 +9,7 @@ import { toast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { ErrorCode, getErrorMessage } from './auth-errors'
 
+import { apiLogger } from '@/lib/logger'
 /**
  * API Error Response interface
  */
@@ -24,8 +25,8 @@ export interface ApiErrorResponse {
 export function useApiErrorHandler() {
     const router = useRouter()
 
-    const handleError = (error: unknown, customMessage?: string) => {
-        console.error('API Error:', error)
+    const handleError = (error: any, customMessage?: string) => {
+        apiLogger.error({ error: error }, 'API Error:')
 
         // Handle fetch errors
         if (error instanceof Response) {
@@ -123,13 +124,13 @@ async function handleResponseError(
  * Standalone function to handle API errors (for use outside of React components)
  */
 export async function handleApiError(
-    error: unknown,
+    error: any,
     options?: {
         customMessage?: string
         onUnauthorized?: () => void
     }
 ): Promise<void> {
-    console.error('API Error:', error)
+    apiLogger.error({ error: error }, 'API Error:')
 
     // Handle fetch Response errors
     if (error instanceof Response) {

@@ -45,7 +45,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
       setAnalysis(pricingAnalysis)
       setCustomPrice(pricingAnalysis.pricing.standard.price)
-    } catch (error: any) {
+    } catch (error: unknown) {
       uiLogger.error({ err: error }, 'Error analyzing pricing')
     } finally {
       setLoading(false)
@@ -145,7 +145,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
         {/* Pricing Options Tab */}
         <TabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            {Object.entries(analysis.pricing).map(([tier, data]: [string, any]) => (
+            {Object.entries(analysis.pricing).map(([tier, data]: [string, unknown]) => (
               <Card
                 key={tier}
                 className={`cursor-pointer transition-all hover: ${selectedTier === tier ? 'ring-2 ring-primary' : ''

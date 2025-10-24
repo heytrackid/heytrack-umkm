@@ -12,6 +12,7 @@ import * as React from 'react'
 import { useEffect, useState } from 'react'
 import HPPComparisonCard from './HPPComparisonCard'
 
+import { apiLogger } from '@/lib/logger'
 export default function HPPComparisonCardExample() {
     const [comparison, setComparison] = useState<HPPComparison | null>(null)
     const [loading, setLoading] = useState(true)
@@ -30,11 +31,11 @@ export default function HPPComparisonCardExample() {
                 if (data.success) {
                     setComparison(data.data)
                 } else {
-                    console.error('Failed to fetch comparison:', data.error)
+                    apiLogger.error({ error: data.error }, 'Failed to fetch comparison:')
                     setComparison(null)
                 }
             } catch (error) {
-                console.error('Error fetching comparison:', error)
+                apiLogger.error({ error: error }, 'Error fetching comparison:')
                 setComparison(null)
             } finally {
                 setLoading(false)

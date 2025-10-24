@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 
 export class QueryCache {
   private static instance: QueryCache
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   private readonly DEFAULT_TTL = 5 * 60 * 1000 // 5 minutes
 
   static getInstance(): QueryCache {
@@ -22,7 +22,7 @@ export class QueryCache {
     return Date.now() - entry.timestamp < entry.ttl
   }
 
-  private generateKey(table: string, filters: Record<string, any> = {}): string {
+  private generateKey(table: string, filters: Record<string, unknown> = {}): string {
     const filterString = Object.keys(filters)
       .sort((a, b) => a.localeCompare(b))
       .map(key => `${key}:${JSON.stringify(filters[key])}`)
@@ -33,7 +33,7 @@ export class QueryCache {
   async cachedQuery<T>(
     table: string,
     queryBuilder: (query: any) => Promise<T>,
-    filters: Record<string, any> = {},
+    filters: Record<string, unknown> = {},
     ttl: number = this.DEFAULT_TTL
   ): Promise<T> {
     const key = this.generateKey(table, filters)
@@ -54,7 +54,7 @@ export class QueryCache {
       })
 
       return result
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If fresh query fails, return stale cache if available
       if (cached) {
         dbLogger.warn({ err: error, table }, 'Query failed, returning stale cache')
@@ -240,7 +240,7 @@ export const warmUpCache = async () => {
     ])
 
     dbLogger.info('Cache warm-up completed')
-  } catch (error: any) {
+  } catch (error: unknown) {
     dbLogger.warn({ err: error }, 'Cache warm-up failed')
   }
 }

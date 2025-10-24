@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { ChefHat, PackageOpen, Calculator } from 'lucide-react'
 
 interface RecipeStatsProps {
-  recipes: any[]
-  ingredients: any[]
+  recipes: unknown[]
+  ingredients: unknown[]
   formatCurrency: (amount: number) => string
   isMobile?: boolean
 }

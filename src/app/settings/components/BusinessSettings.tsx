@@ -5,8 +5,19 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
 
+interface SystemSettings {
+  defaultTax?: number
+  lowStockThreshold?: number
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  system?: SystemSettings
+  [key: string]: unknown
+}
+
 interface BusinessSettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

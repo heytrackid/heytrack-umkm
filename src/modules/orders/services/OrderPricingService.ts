@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import { HPPCalculationService } from '@/modules/recipes'
 import { ORDER_CONFIG } from '../constants'
@@ -55,14 +56,14 @@ export class OrderPricingService {
       // Calculate each item
       const calculatedItems: OrderItemCalculation[] = await Promise.all(
         items.map(async (item) => {
-          const recipe = recipes.find(r => r.id === item.recipe_id)
+          const recipe = recipes.find((r: any) => r.id === item.recipe_id)
           if (!recipe) {
             throw new Error(`Recipe with ID ${item.recipe_id} not found`)
           }
 
           // Calculate HPP cost
           const hppCalculation = await HPPCalculationService.calculateAdvancedHPP(
-            recipe.id,
+            (recipe as any).id,
             {
               overheadRate: 0.15,
               laborCostPerHour: 25000,
@@ -70,7 +71,7 @@ export class OrderPricingService {
             }
           )
 
-          const unit_price = item.custom_price || recipe.price || hppCalculation.suggestedPricing.standard.price
+          const unit_price = item.custom_price || (recipe as any).price || hppCalculation.suggestedPricing.standard.price
           const total_price = unit_price * item.quantity
           const hpp_cost = hppCalculation.costPerServing
           const total_cost = hpp_cost * item.quantity
@@ -78,8 +79,8 @@ export class OrderPricingService {
           const margin_percentage = total_price > 0 ? (profit / total_price) * 100 : 0
 
           return {
-            recipe_id: recipe.id,
-            recipe_name: recipe.name,
+            recipe_id: (recipe as any).id,
+            recipe_name: (recipe as any).name,
             quantity: item.quantity,
             unit_price,
             total_price,
@@ -122,7 +123,7 @@ export class OrderPricingService {
         total_profit,
         overall_margin
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error calculating order pricing')
       throw new Error('Failed to calculate order pricing')
     }

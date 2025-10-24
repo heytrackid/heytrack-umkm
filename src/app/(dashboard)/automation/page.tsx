@@ -1,12 +1,12 @@
 'use client'
 
-import * as React from 'react'
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CardSkeleton } from '@/components/ui'
+import { apiLogger } from '@/lib/logger'
 import { 
   Play, 
   RefreshCw, 
@@ -33,10 +33,10 @@ interface TaskResult {
   timestamp: string
   task: string
   status: string
-  reorder?: any
-  notifications?: any
-  engine?: any
-  cleanup?: any
+  reorder?: unknown
+  notifications?: unknown
+  engine?: unknown
+  cleanup?: unknown
 }
 
 export default function AutomationPage() {
@@ -59,8 +59,9 @@ export default function AutomationPage() {
       const data = await response.json()
       setStatus(data)
     } catch (err: any) {
-      setError(err.message)
-      console.error('Error fetching status:', err)
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
+      setError(errorMessage)
+      apiLogger.error({ error: err }, 'Error fetching status:')
     } finally {
       setLoading(false)
     }
@@ -89,8 +90,9 @@ export default function AutomationPage() {
       // Refresh status after task completion
       setTimeout(fetchStatus, 1000)
     } catch (err: any) {
-      setError(err.message)
-      console.error('Error running task:', err)
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
+      setError(errorMessage)
+      apiLogger.error({ error: err }, 'Error running task:')
     } finally {
       setRunning(null)
     }

@@ -9,7 +9,7 @@ interface InteractiveGridPatternProps {
   height?: number
   x?: number
   y?: number
-  strokeDasharray?: any
+  strokeDasharray?: unknown
   numSquares?: number
   maxOpacity?: number
   duration?: number

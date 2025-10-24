@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 /**
  * Advanced NLP Processor for HeyTrack AI Chatbot
  * Supports intent recognition, entity extraction, and contextual understanding
@@ -6,16 +7,29 @@
 export interface NLPIntent {
   intent: string
   confidence: number
-  entities: Record<string, unknown>
+  entities: NLPEntities
 }
 
 export interface NLPAnalysis {
   intents: NLPIntent[]
   primaryIntent: string
-  entities: Record<string, unknown>
+  entities: NLPEntities
   sentiment: 'positive' | 'negative' | 'neutral'
   complexity: 'simple' | 'medium' | 'complex'
   context: string[]
+}
+
+export interface NLPEntities {
+  originalQuery?: string
+  numbers?: number[]
+  dates?: string[]
+  currencies?: string[]
+  products?: string[]
+  ingredients?: string[]
+  quantities?: number[]
+  amounts?: string[]
+  period?: string
+  [key: string]: string | number | string[] | number[] | undefined
 }
 
 export interface BusinessData {
@@ -24,7 +38,7 @@ export interface BusinessData {
   feasibleRecipes?: number
   totalValue?: number
   topProducts?: string[]
-  popularRecipes?: unknown[]
+  popularRecipes?: Array<{id: string, name: string, usageCount?: number}>
   breakEven?: string | number
   cashFlowStatus?: string
   totalCustomers?: number
@@ -120,7 +134,7 @@ export class NLPProcessor {
     const primaryIntent = intents.length > 0 ? intents[0].intent : 'general'
 
     // Extract all entities
-    const allEntities = intents.reduce((acc, intent) => ({
+    const allEntities = intents.reduce((acc: NLPEntities, intent) => ({
       ...acc,
       ...intent.entities
     }), this.extractGeneralEntities(query))
@@ -144,8 +158,8 @@ export class NLPProcessor {
     }
   }
 
-  static extractEntities(query: string, intent: string): Record<string, unknown> {
-    const entities: Record<string, unknown> = {}
+  static extractEntities(query: string, intent: string): NLPEntities {
+    const entities: NLPEntities = {}
 
     // Intent-specific entity extraction
     switch (intent) {
@@ -184,8 +198,8 @@ export class NLPProcessor {
     return entities
   }
 
-  static extractGeneralEntities(query: string): Record<string, unknown> {
-    const entities: Record<string, unknown> = {}
+  static extractGeneralEntities(query: string): NLPEntities {
+    const entities: NLPEntities = {}
 
     // Extract numbers
     const numbers = query.match(ENTITY_PATTERNS.numbers)
@@ -238,7 +252,7 @@ export class NLPProcessor {
 
 // Advanced Prompt Templates
 export class PromptTemplates {
-  static getBusinessStrategyPrompt(analysis: NLPAnalysis, data: unknown): PromptTemplate {
+  static getBusinessStrategyPrompt(analysis: NLPAnalysis, data: any): PromptTemplate {
     const basePrompt = `Anda adalah konsultan bisnis senior untuk UMKM bakery di Indonesia.
 
     Konteks bisnis saat ini:
@@ -278,7 +292,7 @@ export class PromptTemplates {
     }
   }
 
-  static getOperationalPrompt(analysis: NLPAnalysis, data: unknown): PromptTemplate {
+  static getOperationalPrompt(analysis: NLPAnalysis, data: any): PromptTemplate {
     const intentSpecificPrompt = this.getIntentSpecificPrompt(analysis.primaryIntent)
 
     return {
@@ -397,7 +411,7 @@ export class AIResponseGenerator {
           return await this.generateGeneralResponse(analysis, businessData)
       }
     } catch (error) {
-      console.error('Error generating AI response:', error)
+      apiLogger.error({ error: error }, 'Error generating AI response:')
       return {
         message: 'Maaf, saya mengalami kesulitan memproses pertanyaan Anda. Silakan coba lagi dengan pertanyaan yang lebih spesifik.',
         suggestions: ['Jelaskan lebih detail pertanyaan Anda', 'Coba tanya tentang aspek tertentu bisnis Anda'],

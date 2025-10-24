@@ -23,8 +23,8 @@ import {
 } from 'lucide-react'
 
 interface RecipeListProps {
-  recipes: any[]
-  ingredients: any[]
+  recipes: unknown[]
+  ingredients: unknown[]
   loading: boolean
   searchTerm: string
   selectedItems: string[]

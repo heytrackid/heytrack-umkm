@@ -82,7 +82,7 @@ export const LazyDateBundle = {
 // }
 
 // Wrapper components untuk vendor libraries
-export const RechartsWithLoading = <T extends ComponentType<any>>(
+export const RechartsWithLoading = <T extends ComponentType<unknown>>(
   ChartComponent: T,
   chartName: string
 ) => {
@@ -93,7 +93,7 @@ export const RechartsWithLoading = <T extends ComponentType<any>>(
   )
 }
 
-export const RadixWithLoading = <T extends ComponentType<any>>(
+export const RadixWithLoading = <T extends ComponentType<unknown>>(
   RadixComponent: T,
   componentName: string
 ) => {

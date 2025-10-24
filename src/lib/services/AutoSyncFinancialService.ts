@@ -5,6 +5,7 @@
  */
 
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 
 export interface SyncStatus {
   isEnabled: boolean
@@ -51,7 +52,7 @@ export class AutoSyncFinancialService {
         .eq('metadata->>auto_synced', 'true')
 
       if (error) {
-        dbLogger.error('Error fetching sync status', { error: error.message })
+        logger.error('Error fetching sync status', { error: error.message })
         return {
           isEnabled: false,
           totalSynced: 0,
@@ -61,7 +62,7 @@ export class AutoSyncFinancialService {
       }
 
       const totalSynced = syncedRecords?.length || 0
-      const lastSyncTime = syncedRecords?.[0]?.created_at
+      const lastSyncTime = (syncedRecords?.[0] as { created_at?: string })?.created_at
       
       // Simple health check based on recent activity
       let syncHealth: 'healthy' | 'warning' | 'error' = 'healthy'
@@ -78,10 +79,11 @@ export class AutoSyncFinancialService {
         .in('type', ['PURCHASE', 'ADJUSTMENT'])
 
       const recentTransactionCount = recentTransactions?.length || 0
-      const recentSyncCount = syncedRecords?.filter(record => 
-        record.metadata?.source === 'stock_transaction' &&
-        new Date(record.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
-      ).length || 0
+      const recentSyncCount = (syncedRecords || []).filter((record: any) => {
+        const r = record as { metadata?: { source?: string }, created_at?: string }
+        return r.metadata?.source === 'stock_transaction' &&
+        new Date(r.created_at || '') > new Date(Date.now() - 24 * 60 * 60 * 1000)
+      }).length || 0
 
       if (recentTransactionCount > 0 && recentSyncCount === 0) {
         syncHealth = 'error' // Transactions exist but no sync records
@@ -94,8 +96,8 @@ export class AutoSyncFinancialService {
         totalErrors: 0, // Could be enhanced to track actual errors
         syncHealth
       }
-    } catch (error: any) {
-      automationLogger.error('Error in getSyncStatus', { error: error.message })
+    } catch (error: unknown) {
+      logger.error('Error in getSyncStatus', { error: error.message })
       return {
         isEnabled: false,
         totalSynced: 0,
@@ -108,7 +110,7 @@ export class AutoSyncFinancialService {
   /**
    * Get list of recent synced transactions for audit/transparency
    */
-  async getRecentSyncedTransactions(limit = 20): Promise<SyncedTransaction[]> {
+  async getRecentSyncedTransactions(_limit = 20): Promise<SyncedTransaction[]> {
     const supabase = createServerSupabaseAdmin()
     
     try {
@@ -117,24 +119,27 @@ export class AutoSyncFinancialService {
         .select('*')
         .eq('metadata->>auto_synced', 'true')
         .order('created_at', { ascending: false })
-        .limit(options.limit)
+        .limit(_limit)
 
       if (error) {
-        dbLogger.error('Error fetching synced transactions', { error: error.message })
+        logger.error('Error fetching synced transactions', { error: error.message })
         return []
       }
 
-      return (records || []).map(record => ({
-        id: record.id,
-        transactionId: record.metadata?.transaction_id || record.id,
-        type: record.metadata?.source || 'unknown',
-        amount: record.amount,
-        syncedAt: record.created_at,
-        source: record.metadata?.source || 'manual',
-        reference: record.reference || 'N/A'
-      }))
-    } catch (error: any) {
-      automationLogger.error('Error in getRecentSyncedTransactions', { error: error.message })
+      return (records || []).map((record: any) => {
+        const r = record as { id?: string, metadata?: { transaction_id?: string, source?: string }, amount?: number, created_at?: string, reference?: string }
+        return {
+          id: r.id || '',
+          transactionId: r.metadata?.transaction_id || r.id || '',
+          type: (r.metadata?.source as 'stock_transaction' | 'operational_cost' | 'order_completion') || 'stock_transaction',
+          amount: r.amount || 0,
+          syncedAt: r.created_at || '',
+          source: r.metadata?.source || 'manual',
+          reference: r.reference || 'N/A'
+        }
+      })
+    } catch (error: unknown) {
+      logger.error('Error in getRecentSyncedTransactions', { error: error.message })
       return []
     }
   }
@@ -155,7 +160,7 @@ export class AutoSyncFinancialService {
         .single()
 
       if (txError || !transaction) {
-        dbLogger.error('Stock transaction not found', { transactionId, error: txError?.message })
+        logger.error('Stock transaction not found', { transactionId, error: txError?.message })
         return false
       }
 
@@ -168,27 +173,29 @@ export class AutoSyncFinancialService {
         .single()
 
       if (existingRecord) {
-        automationLogger.info('Transaction already synced', { transactionId })
+        logger.info('Transaction already synced', { transactionId })
         return true
       }
 
       // Only sync PURCHASE and ADJUSTMENT transactions
-      if (!['PURCHASE', 'ADJUSTMENT'].includes(transaction.type)) {
-        automationLogger.debug('Transaction type not eligible for sync', { 
+      const tx = transaction as { type?: string }
+      if (!['PURCHASE', 'ADJUSTMENT'].includes(tx.type || '')) {
+        logger.info('Transaction type not eligible for sync', { 
           transactionId, 
-          type: transaction.type 
+          type: tx.type 
         })
         return false
       }
 
       // Calculate amount
+      const txTyped = transaction as { total_price?: number, quantity?: number, unit_price?: number }
       const amount = Math.abs(
-        transaction.total_price || 
-        (transaction.quantity * (transaction.unit_price || 0))
+        txTyped.total_price || 
+        ((txTyped.quantity || 0) * (txTyped.unit_price || 0))
       )
 
       if (amount <= 0) {
-        automationLogger.debug('Transaction amount is zero or negative, skipping sync', { 
+        logger.info('Transaction amount is zero or negative, skipping sync', { 
           transactionId, 
           amount 
         })
@@ -196,23 +203,24 @@ export class AutoSyncFinancialService {
       }
 
       // Create financial record
+      const txData = transaction as any
       const { error: insertError } = await supabase
         .from('financial_records')
         .insert({
           type: 'EXPENSE',
-          category: transaction.type === 'PURCHASE' ? 'Pembelian Bahan Baku' : 'Penyesuaian Stock',
+          category: tx.type === 'PURCHASE' ? 'Pembelian Bahan Baku' : 'Penyesuaian Stock',
           amount,
-          description: `[Manual Sync] ${transaction.notes || `${transaction.type} - ${transaction.ingredient_name || 'bahan baku'}`}`,
-          reference: transaction.reference || `MT-${transaction.id}`,
-          date: transaction.date || new Date().toISOString().split('T')[0],
+          description: `[Manual Sync] ${txData.notes || `${tx.type} - ${txData.ingredient_name || 'bahan baku'}`}`,
+          reference: txData.reference || `MT-${txData.id}`,
+          date: txData.date || new Date().toISOString().split('T')[0],
           metadata: {
             source: 'stock_transaction',
-            transaction_id: transaction.id,
-            ingredient_id: transaction.ingredient_id,
-            ingredient_name: transaction.ingredient_name,
-            quantity: transaction.quantity,
-            unit: transaction.unit,
-            unit_price: transaction.unit_price,
+            transaction_id: txData.id,
+            ingredient_id: txData.ingredient_id,
+            ingredient_name: txData.ingredient_name,
+            quantity: txData.quantity,
+            unit: txData.unit,
+            unit_price: txData.unit_price,
             auto_synced: true,
             manual_sync: true,
             sync_timestamp: new Date().toISOString()
@@ -220,17 +228,17 @@ export class AutoSyncFinancialService {
         })
 
       if (insertError) {
-        dbLogger.error('Error creating financial record', { 
+        logger.error('Error creating financial record', { 
           transactionId, 
           error: insertError.message 
         })
         return false
       }
 
-      automationLogger.info('Manual sync successful', { transactionId })
+      logger.info('Manual sync successful', { transactionId })
       return true
-    } catch (error: any) {
-      automationLogger.error('Error in manualSyncStockTransaction', { 
+    } catch (error: unknown) {
+      logger.error('Error in manualSyncStockTransaction', { 
         transactionId, 
         error: error.message 
       })
@@ -270,13 +278,14 @@ export class AutoSyncFinancialService {
       if (unsynced) {
         // Check which ones don't have corresponding financial records
         for (const tx of unsynced) {
+          const txTyped = tx as { id?: string, total_price?: number, unit_price?: number, quantity?: number }
           const { data: existing } = await supabase
             .from('financial_records')
             .select('*')
-            .eq('metadata->>transaction_id', tx.id)
+            .eq('metadata->>transaction_id', txTyped.id)
             .single()
 
-          if (!existing && (tx.total_price > 0 || (tx.unit_price && tx.quantity > 0))) {
+          if (!existing && ((txTyped.total_price || 0) > 0 || ((txTyped.unit_price || 0) && (txTyped.quantity || 0) > 0))) {
             missingSync++
           }
         }
@@ -322,8 +331,8 @@ export class AutoSyncFinancialService {
         missingSync,
         healthScore: Math.max(healthScore, 0)
       }
-    } catch (error: any) {
-      automationLogger.error('Error getting sync recommendations', { error: error.message })
+    } catch (error: unknown) {
+      logger.error('Error getting sync recommendations', { error: error.message })
       return {
         recommendations: ['Error menganalisis sync status'],
         missingSync: 0,
@@ -410,7 +419,7 @@ export class AutoSyncFinancialService {
         expenseBreakdown,
         recentTransactions
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.error('Error in getCashflowSummary', { error: error.message })
       return {
         totalExpenses: 0,

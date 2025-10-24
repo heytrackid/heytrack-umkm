@@ -5,6 +5,40 @@ import { lazy, Suspense } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
+// Automation component props interfaces
+interface AutomationProps {
+  onAction?: (action: string, data?: any) => void
+  refreshInterval?: number
+  autoRefresh?: boolean
+  showAlerts?: boolean
+  filters?: Record<string, unknown>
+  [key: string]: unknown
+}
+
+interface FinancialAutomationProps extends AutomationProps {
+  currency?: string
+  dateRange?: {
+    start: string
+    end: string
+  }
+  budgetLimits?: Record<string, number>
+}
+
+interface ProductionAutomationProps extends AutomationProps {
+  productionCapacity?: number
+  leadTime?: number
+  priorityThreshold?: number
+}
+
+interface InventoryAutomationProps extends AutomationProps {
+  reorderThreshold?: number
+  alertSettings?: {
+    lowStock: boolean
+    overStock: boolean
+    expiryAlerts: boolean
+  }
+}
+
 // Loading states untuk automation features
 const AutomationLoadingSkeleton = ({ title }: { title: string }) => (
   <Card className="w-full">
@@ -89,37 +123,37 @@ const LazyInventoryAnalytics = lazy(
 )
 
 // Wrapped components with loading states
-export const SmartExpenseAutomationWithLoading = (props: any) => (
+export const SmartExpenseAutomationWithLoading = (props: FinancialAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Smart Expense Automation" />}>
     <LazySmartExpenseAutomation {...props} />
   </Suspense>
 )
 
-export const SmartFinancialDashboardWithLoading = (props: any) => (
+export const SmartFinancialDashboardWithLoading = (props: FinancialAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Financial Dashboard" />}>
     <LazySmartFinancialDashboard {...props} />
   </Suspense>
 )
 
-export const SmartProductionPlannerWithLoading = (props: any) => (
+export const SmartProductionPlannerWithLoading = (props: ProductionAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Production Planner" />}>
     <LazySmartProductionPlanner {...props} />
   </Suspense>
 )
 
-export const SmartInventoryManagerWithLoading = (props: any) => (
+export const SmartInventoryManagerWithLoading = (props: InventoryAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Inventory Manager" />}>
     <LazySmartInventoryManager {...props} />
   </Suspense>
 )
 
-export const AdvancedHPPCalculatorWithLoading = (props: any) => (
+export const AdvancedHPPCalculatorWithLoading = (props: FinancialAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="HPP Calculator" />}>
     <LazyAdvancedHPPCalculator {...props} />
   </Suspense>
 )
 
-export const SmartNotificationCenterWithLoading = (props: any) => (
+export const SmartNotificationCenterWithLoading = (props: AutomationProps) => (
   <Suspense fallback={
     <Card className="w-full">
       <CardContent className="p-4 flex items-center justify-center h-32">
@@ -132,19 +166,19 @@ export const SmartNotificationCenterWithLoading = (props: any) => (
   </Suspense>
 )
 
-export const SmartPricingAssistantWithLoading = (props: any) => (
+export const SmartPricingAssistantWithLoading = (props: FinancialAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Pricing Assistant" />}>
     <LazySmartPricingAssistant {...props} />
   </Suspense>
 )
 
-export const ProductionPlanningDashboardWithLoading = (props: any) => (
+export const ProductionPlanningDashboardWithLoading = (props: ProductionAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Production Planning" />}>
     <LazyProductionPlanningDashboard {...props} />
   </Suspense>
 )
 
-export const InventoryAnalyticsWithLoading = (props: any) => (
+export const InventoryAnalyticsWithLoading = (props: InventoryAutomationProps) => (
   <Suspense fallback={<AutomationLoadingSkeleton title="Inventory Analytics" />}>
     <LazyInventoryAnalytics {...props} />
   </Suspense>

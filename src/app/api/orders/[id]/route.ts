@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 
+import { apiLogger } from '@/lib/logger'
 // GET /api/orders/[id] - Get single order
 export async function GET(
   request: NextRequest,
@@ -34,7 +35,7 @@ export async function GET(
           { status: 404 }
         )
       }
-      console.error('Error fetching order:', error)
+      apiLogger.error({ error: error }, 'Error fetching order:')
       return NextResponse.json(
         { error: 'Failed to fetch order' },
         { status: 500 }
@@ -42,8 +43,8 @@ export async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error: any) {
-    console.error('Error in GET /api/orders/[id]:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in GET /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -82,7 +83,7 @@ export async function PUT(
           { status: 404 }
         )
       }
-      console.error('Error updating order:', error)
+      apiLogger.error({ error: error }, 'Error updating order:')
       return NextResponse.json(
         { error: 'Failed to update order' },
         { status: 500 }
@@ -109,7 +110,7 @@ export async function PUT(
           .insert(data)
         
         if (itemsError) {
-          console.error('Error updating order items:', itemsError)
+          apiLogger.error({ error: itemsError }, 'Error updating order items:')
           return NextResponse.json(
             { error: 'Failed to update order items' },
             { status: 500 }
@@ -119,8 +120,8 @@ export async function PUT(
     }
 
     return NextResponse.json(data)
-  } catch (error: any) {
-    console.error('Error in PUT /api/orders/[id]:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in PUT /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -150,7 +151,7 @@ export async function DELETE(
       .eq('id', id)
     
     if (error) {
-      console.error('Error deleting order:', error)
+      apiLogger.error({ error: error }, 'Error deleting order:')
       return NextResponse.json(
         { error: 'Failed to delete order' },
         { status: 500 }
@@ -158,8 +159,8 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: 'Order deleted successfully' })
-  } catch (error: any) {
-    console.error('Error in DELETE /api/orders/[id]:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in DELETE /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

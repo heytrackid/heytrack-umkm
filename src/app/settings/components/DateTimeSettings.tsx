@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Calendar } from 'lucide-react'
 
 interface DateTimeSettingsProps {
-  settings: any
+  settings: unknown
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

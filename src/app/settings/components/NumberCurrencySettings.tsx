@@ -5,8 +5,24 @@ import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
 import { useSettings, currencies } from '@/contexts/settings-context'
 
+interface BusinessSettings {
+  businessName?: string
+  businessType?: string
+  address?: string
+  phone?: string
+  email?: string
+  website?: string
+  description?: string
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  general?: BusinessSettings
+  [key: string]: unknown
+}
+
 interface NumberCurrencySettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

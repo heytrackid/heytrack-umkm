@@ -4,6 +4,7 @@
  * Handles equipment capacity, labor, ingredients, and deadline constraints
  */
 
+import { logger } from '@/lib/logger'
 
 // Core Types
 export interface ProductionConstraints {
@@ -156,7 +157,7 @@ export class BatchSchedulingService {
         warnings,
         suggestions
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error in batch scheduling')
       throw error
     }
@@ -167,7 +168,7 @@ export class BatchSchedulingService {
    */
   private async applyConstraintSolver(batches: ProductionBatch[]): Promise<ProductionBatch[]> {
     const scheduledBatches: ProductionBatch[] = []
-    const resourceTimeline: Map<string, { start: string; end: string; batch_id: string }[]> = new Map()
+    const resourceTimeline: Map<string, Array<{ start: string; end: string; batch_id: string }>> = new Map()
 
     // Initialize resource timelines
     for (let i = 1; i <= this.constraints.oven_capacity; i++) {
@@ -199,7 +200,7 @@ export class BatchSchedulingService {
           batch.status = 'blocked'
           scheduledBatches.push(batch)
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.error({ err: error, batchId: batch.id }, `Error scheduling batch ${batch.id}`)
         batch.status = 'blocked'
         scheduledBatches.push(batch)
@@ -363,14 +364,16 @@ export class BatchSchedulingService {
   /**
    * Helper methods
    */
-  private async validateBatches(batches: any[]): Promise<ProductionBatch[]> {
+  private async validateBatches(batches: Omit<ProductionBatch, 'scheduled_start' | 'scheduled_end'>[]): Promise<ProductionBatch[]> {
     return batches.map(batch => ({
       ...batch,
       profit_score: batch.profit_score || 50,
       urgency_score: 0,
       efficiency_score: 0,
       total_score: 0,
-      status: 'scheduled' as const
+      status: 'scheduled' as const,
+      scheduled_start: undefined,
+      scheduled_end: undefined
     }))
   }
 
@@ -407,7 +410,7 @@ export class BatchSchedulingService {
     startTime: string,
     endTime: string,
     requiredResources: string[],
-    resourceTimeline: Map<string, any[]>
+    resourceTimeline: Map<string, Array<{ start: string; end: string; batch_id: string }>>
   ): string[] {
     const available: string[] = []
 
@@ -434,13 +437,13 @@ export class BatchSchedulingService {
   private reserveResources(
     batch: ProductionBatch,
     slot: { start: string; end: string; resources: string[] },
-    resourceTimeline: Map<string, any[]>
+    resourceTimeline: Map<string, Array<{ start: string; end: string; batch_id: string }>>
   ): void {
     for (const resourceId of slot.resources) {
       if (!resourceTimeline.has(resourceId)) {
-        resourceTimeline.set(key, value)
+        resourceTimeline.set(resourceId, [])
       }
-      resourceTimeline.get(key)!.push({
+      resourceTimeline.get(resourceId)!.push({
         start: slot.start,
         end: slot.end,
         batch_id: batch.id

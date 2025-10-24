@@ -5,6 +5,7 @@
 
 import { useCallback, useState } from 'react'
 
+import { apiLogger } from '@/lib/logger'
 interface UseConfirmOptions {
   onConfirm: () => void | Promise<void>
   title?: string
@@ -29,7 +30,7 @@ export function useConfirm() {
       await config.onConfirm()
       setIsOpen(false)
     } catch (error) {
-      console.error('Confirmation action failed:', error)
+      apiLogger.error({ error: error }, 'Confirmation action failed:')
     } finally {
       setLoading(false)
     }

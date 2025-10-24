@@ -6,12 +6,12 @@ export interface ReportConfig {
   period: 'daily' | 'weekly' | 'monthly' | 'yearly'
 }
 
-export interface Report {
+export interface Report<T = unknown> {
   id: string
   title: string
   description: string
   type: string
-  data: any[]
+  data: T[]
   generated_at: string
 }
 

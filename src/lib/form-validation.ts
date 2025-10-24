@@ -33,10 +33,9 @@ export const ValidationSchemas = {
 /**
  * Parse form data and return errors object
  */
-export function parseFormErrors<T extends Record<string, any>>(
+export function parseFormErrors<T extends Record<string, unknown>>(
   schema: z.ZodSchema<T>,
-  data: unknown
-): {
+  data: any): {
   errors: Partial<Record<keyof T, string>>
   data: null
 } | {
@@ -62,8 +61,8 @@ export function parseFormErrors<T extends Record<string, any>>(
 /**
  * Create a safe form validator that catches errors
  */
-export function createFormValidator<T extends Record<string, any>>(schema: z.ZodSchema<T>) {
-  return (data: unknown) => {
+export function createFormValidator<T extends Record<string, unknown>>(schema: z.ZodSchema<T>) {
+  return (data: any) => {
     try {
       return {
         success: true,

@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
+import { apiLogger } from '@/lib/logger'
 /**
  * Root page - redirects based on auth status
  * Middleware will handle the redirect, but this provides server-side fallback
@@ -17,7 +18,7 @@ export default async function HomePage() {
       redirect('/auth/login')
     }
   } catch (error) {
-    console.error('Error checking auth:', error)
+    apiLogger.error({ error: error }, 'Error checking auth:')
     redirect('/auth/login')
   }
 }

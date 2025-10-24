@@ -9,8 +9,24 @@ import { useState, useEffect } from 'react'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 import { useToast } from '@/hooks/use-toast'
 
+interface BusinessSettings {
+  businessName?: string
+  businessType?: string
+  address?: string
+  phone?: string
+  email?: string
+  website?: string
+  description?: string
+  [key: string]: unknown
+}
+
+interface GeneralSettings {
+  general?: BusinessSettings
+  [key: string]: unknown
+}
+
 interface BusinessInfoSettingsProps {
-  settings: any
+  settings: GeneralSettings
   onSettingChange: (category: string, key: string, value: any) => void
 }
 

@@ -39,7 +39,7 @@ const TableLoadingFallback = () => (
 /**
  * Create dynamically loaded component with custom options
  */
-export function createDynamicComponent<T = any>(
+export function createDynamicComponent<T = unknown >(
   loader: () => Promise<{ default: ComponentType<T> }>,
   options?: {
     loading?: () => JSX.Element
@@ -59,7 +59,7 @@ export const DynamicLoaders = {
   /**
    * For heavy form components
    */
-  form: <T = any>(loader: () => Promise<{ default: ComponentType<T> }>) =>
+  form: <T = unknown >(loader: () => Promise<{ default: ComponentType<T> }>) =>
     dynamic(loader, {
       loading: FormLoadingFallback,
       ssr: false // Forms don't need SSR
@@ -68,7 +68,7 @@ export const DynamicLoaders = {
   /**
    * For data table components
    */
-  table: <T = any>(loader: () => Promise<{ default: ComponentType<T> }>) =>
+  table: <T = unknown >(loader: () => Promise<{ default: ComponentType<T> }>) =>
     dynamic(loader, {
       loading: TableLoadingFallback,
       ssr: true
@@ -77,7 +77,7 @@ export const DynamicLoaders = {
   /**
    * For page-level components
    */
-  page: <T = any>(loader: () => Promise<{ default: ComponentType<T> }>) =>
+  page: <T = unknown >(loader: () => Promise<{ default: ComponentType<T> }>) =>
     dynamic(loader, {
       loading: PageLoadingFallback,
       ssr: true
@@ -86,7 +86,7 @@ export const DynamicLoaders = {
   /**
    * For client-only heavy components (charts, etc)
    */
-  clientOnly: <T = any>(loader: () => Promise<{ default: ComponentType<T> }>) =>
+  clientOnly: <T = unknown >(loader: () => Promise<{ default: ComponentType<T> }>) =>
     dynamic(loader, {
       loading: PageLoadingFallback,
       ssr: false

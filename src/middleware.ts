@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
+import { apiLogger } from '@/lib/logger'
 // Define protected routes as a Set for O(1) lookup performance
 const PROTECTED_ROUTES = new Set([
   '/dashboard',
@@ -56,7 +57,7 @@ export async function middleware(request: NextRequest) {
 
     // Log suspicious requests but don't block them
     if (!headersValidation.success) {
-      console.warn('⚠️ Suspicious request headers detected:', {
+      apiLogger.warn('⚠️ Suspicious request headers detected:', {
         url: request.url,
         headers: Object.fromEntries(request.headers.entries()),
         issues: headersValidation.error.issues,
@@ -64,7 +65,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!urlValidation.success) {
-      console.warn('⚠️ Malformed URL detected:', {
+      apiLogger.warn('⚠️ Malformed URL detected:', {
         url: request.url,
         issues: urlValidation.error.issues,
       })
@@ -105,7 +106,7 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (error) {
-      console.error('Middleware auth error:', error)
+      apiLogger.error({ error: error }, 'Middleware auth error:')
     }
 
     const pathname = request.nextUrl.pathname
@@ -141,7 +142,7 @@ export async function middleware(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error('Middleware error:', error)
+    apiLogger.error({ error: error }, 'Middleware error:')
     // On error, allow request to proceed to avoid blocking the app
     return NextResponse.next()
   }

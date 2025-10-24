@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { apiLogger } from '@/lib/logger'
 import { 
   Package,
   AlertTriangle,
@@ -51,8 +52,8 @@ export function SmartInventoryManager({
     try {
       const inventoryAnalysis = automationEngine.analyzeInventoryNeeds(ingredients, usageData)
       setAnalysis(inventoryAnalysis)
-    } catch (error: any) {
-      console.error('Error analyzing inventory:', error)
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error analyzing inventory:')
     } finally {
       setLoading(false)
     }
@@ -197,7 +198,7 @@ export function SmartInventoryManager({
                 key={filter.key}
                 variant={selectedStatus === filter.key ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setSelectedStatus(filter.key as any)}
+                onClick={() => setSelectedStatus(filter.key)}
                 className="flex items-center gap-1"
               >
                 {filter.label}

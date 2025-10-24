@@ -87,7 +87,7 @@ export default function HPPComparisonCard({
     const TrendIcon = trendIndicator.icon
 
     // Use utility function for period label
-    const periodLabel = getUtilPeriodLabel(period as any)
+    const periodLabel = getUtilPeriodLabel(period)
 
     return (
         <Card>

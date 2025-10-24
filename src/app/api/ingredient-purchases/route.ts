@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 
+import { apiLogger } from '@/lib/logger'
 /**
  * GET /api/ingredient-purchases
  * List all ingredient purchases with optional filters
@@ -62,7 +64,7 @@ export async function GET(request: NextRequest) {
         const { data: purchases, error } = await query
 
         if (error) {
-            console.error('Error fetching purchases:', error)
+            apiLogger.error({ error: error }, 'Error fetching purchases:')
             return NextResponse.json(
                 { error: 'Failed to fetch purchases' },
                 { status: 500 }
@@ -70,8 +72,8 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json(purchases)
-    } catch (error: any) {
-        console.error('Error in GET /api/ingredient-purchases:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in GET /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -99,23 +101,29 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json()
 
-        // Validate required fields
-        if (!body.bahan_id || !body.qty_beli || !body.harga_satuan) {
+        // Validate request body with Zod
+        const validation = IngredientPurchaseInsertSchema.safeParse(body)
+        if (!validation.success) {
             return NextResponse.json(
-                { error: 'Missing required fields: bahan_id, qty_beli, harga_satuan' },
+                {
+                    error: 'Invalid request data',
+                    details: validation.error.issues
+                },
                 { status: 400 }
             )
         }
 
-        const qtyBeli = parseFloat(body.qty_beli)
-        const hargaSatuan = parseFloat(body.harga_satuan)
+        const validatedData = validation.data
+
+        const qtyBeli = validatedData.qty_beli
+        const hargaSatuan = validatedData.harga_satuan
         const totalHarga = qtyBeli * hargaSatuan
 
         // Get ingredient info
         const { data: bahan, error: bahanError } = await supabase
             .from('bahan_baku')
             .select('*')
-            .eq('id', body.bahan_id)
+            .eq('id', validatedData.bahan_id)
             .eq('user_id', user.id)
             .single()
 
@@ -135,14 +143,14 @@ export async function POST(request: NextRequest) {
                 jenis: 'pengeluaran',
                 kategori: 'Pembelian Bahan Baku',
                 nominal: totalHarga,
-                tanggal: body.tanggal_beli || new Date().toISOString().split('T')[0],
-                referensi: `Pembelian: ${bahan.nama_bahan} (${qtyBeli} ${bahan.satuan}) dari ${body.supplier || 'Supplier'}`
+                tanggal: validatedData.tanggal_beli || new Date().toISOString().split('T')[0],
+                referensi: `Pembelian: ${bahan.nama_bahan} (${qtyBeli} ${bahan.satuan}) dari ${validatedData.supplier || 'Supplier'}`
             })
             .select('id')
             .single()
 
         if (transactionError) {
-            console.error('Error creating financial transaction:', transactionError)
+            apiLogger.error({ error: transactionError }, 'Error creating financial transaction:')
             // Continue without financial transaction
         } else {
             financialTransactionId = transaction.id
@@ -153,13 +161,13 @@ export async function POST(request: NextRequest) {
             .from('bahan_baku_pembelian')
             .insert({
                 user_id: user.id,
-                bahan_id: body.bahan_id,
-                supplier: body.supplier || null,
+                bahan_id: validatedData.bahan_id,
+                supplier: validatedData.supplier,
                 qty_beli: qtyBeli,
                 harga_satuan: hargaSatuan,
                 total_harga: totalHarga,
-                tanggal_beli: body.tanggal_beli || new Date().toISOString().split('T')[0],
-                catatan: body.catatan || null
+                tanggal_beli: validatedData.tanggal_beli || new Date().toISOString().split('T')[0],
+                catatan: validatedData.catatan
             })
             .select(`
         *,
@@ -174,7 +182,7 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (purchaseError) {
-            console.error('Error creating purchase:', purchaseError)
+            apiLogger.error({ error: purchaseError }, 'Error creating purchase:')
 
             // Rollback financial transaction if purchase fails
             if (financialTransactionId) {
@@ -196,11 +204,11 @@ export async function POST(request: NextRequest) {
         const { error: stockError } = await supabase
             .from('bahan_baku')
             .update({ stok_tersedia: newStock })
-            .eq('id', body.bahan_id)
+            .eq('id', validatedData.bahan_id)
             .eq('user_id', user.id)
 
         if (stockError) {
-            console.error('Error updating stock:', stockError)
+            apiLogger.error({ error: stockError }, 'Error updating stock:')
             // Note: Purchase is already created, just log the error
         }
 
@@ -209,15 +217,15 @@ export async function POST(request: NextRequest) {
             .from('stock_ledger')
             .insert({
                 user_id: user.id,
-                bahan_id: body.bahan_id,
+                bahan_id: validatedData.bahan_id,
                 qty: qtyBeli,
                 tipe: 'in',
                 ref: `Purchase #${purchase.id.substring(0, 8)}`
             })
 
         return NextResponse.json(purchase, { status: 201 })
-    } catch (error: any) {
-        console.error('Error in POST /api/ingredient-purchases:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in POST /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -305,7 +313,7 @@ export async function DELETE(request: NextRequest) {
             .eq('user_id', user.id)
 
         if (deleteError) {
-            console.error('Error deleting purchase:', deleteError)
+            apiLogger.error({ error: deleteError }, 'Error deleting purchase:')
             return NextResponse.json(
                 { error: 'Failed to delete purchase' },
                 { status: 500 }
@@ -317,8 +325,8 @@ export async function DELETE(request: NextRequest) {
         // In a production system, you might want to add a reference field
 
         return NextResponse.json({ message: 'Purchase deleted successfully' })
-    } catch (error: any) {
-        console.error('Error in DELETE /api/ingredient-purchases:', error)
+    } catch (error: unknown) {
+        apiLogger.error({ error: error }, 'Error in DELETE /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

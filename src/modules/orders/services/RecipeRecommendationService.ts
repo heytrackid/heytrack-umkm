@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import type { RecipeOption } from './OrderRecipeService'
 
@@ -35,7 +36,7 @@ export class RecipeRecommendationService {
       query = query
         .eq('status', 'completed')
         .order('created_at', { ascending: false })
-        .limit(options.limit) // Get recent orders
+        .limit(50) // Get recent orders
 
       const { data: orders, error } = await query
 
@@ -43,12 +44,21 @@ export class RecipeRecommendationService {
       if (!orders) return []
 
       // Analyze order patterns
-      const recipeFrequency = new Map<string, { count: number; recipe: any }>()
+      interface RecipeFrequencyData {
+        count: number
+        recipe: {
+          id: string
+          name: string
+          category: string | null
+          price: number | null
+        }
+      }
+      const recipeFrequency = new Map<string, RecipeFrequencyData>()
 
       orders.forEach(order => {
-        order.order_items?.forEach((item: any) => {
+        order.order_items?.forEach((item: { recipe_id: string; quantity: number; recipe: RecipeFrequencyData['recipe'] | null }) => {
           if (item.recipe) {
-            const existing = recipeFrequency.get(key)
+            const existing = recipeFrequency.get(item.recipe.id)
             if (existing) {
               existing.count += item.quantity
             } else {
@@ -78,7 +88,7 @@ export class RecipeRecommendationService {
         }))
 
       return recommendations
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error }, 'Error getting recipe recommendations')
       return []
     }

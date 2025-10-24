@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { apiLogger } from '@/lib/logger'
 import {
   Select,
   SelectContent,
@@ -87,7 +88,7 @@ export default function NewIngredientPage() {
       router.push('/ingredients');
       router.refresh();
     } catch (err: any) {
-      console.error('Error creating ingredient:', err);
+      apiLogger.error({ error: err }, 'Error creating ingredient:');
       setError(err.message || 'Failed to create ingredient');
     } finally {
       setLoading(false);

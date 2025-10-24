@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { ChatMessage, ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import DataVisualization from './DataVisualization';
 
+import { apiLogger } from '@/lib/logger'
 interface ChatbotInterfaceProps {
   userId: string;
   className?: string;
@@ -101,8 +102,8 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         throw new Error(result.error || 'Unknown API error');
       }
 
-    } catch (error: any) {
-      console.error('Error sending message:', error);
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error sending message:');
       setMessages(prev => [...prev, {
         id: `error_${Date.now()}`,
         type: 'assistant',
@@ -168,8 +169,8 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         throw new Error(apiResult.error || 'Unknown action error');
       }
       
-    } catch (error: any) {
-      console.error('Error executing action:', error);
+    } catch (error: unknown) {
+      apiLogger.error({ error: error }, 'Error executing action:');
       setMessages(prev => [...prev, {
         id: `error_${Date.now()}`,
         type: 'assistant',

@@ -2,6 +2,7 @@ import { triggerWorkflow } from '@/lib/automation-engine'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { apiLogger } from '@/lib/logger'
 // PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
 export async function PATCH(
   request: NextRequest,
@@ -68,7 +69,7 @@ export async function PATCH(
         .single()
 
       if (incomeError) {
-        console.error('Error creating income record:', incomeError)
+        apiLogger.error({ error: incomeError }, 'Error creating income record:')
         return NextResponse.json(
           { error: 'Failed to create income record for delivered order' },
           { status: 500 }
@@ -76,7 +77,7 @@ export async function PATCH(
       }
 
       incomeRecordId = incomeRecord.id
-      console.log(`💰 Income record created for order ${currentOrder.order_no}: ${currentOrder.total_amount}`)
+      apiLogger.info(`💰 Income record created for order ${currentOrder.order_no}: ${currentOrder.total_amount}`)
     }
 
     // Update order status with financial_record_id if income was created
@@ -93,7 +94,7 @@ export async function PATCH(
       .single()
 
     if (updateError) {
-      console.error('Error updating order status:', updateError)
+      apiLogger.error({ error: updateError }, 'Error updating order status:')
       // Rollback income record if order update fails
       if (incomeRecordId) {
         await supabase
@@ -107,13 +108,13 @@ export async function PATCH(
       )
     }
 
-    console.log(`🔄 Order ${currentOrder.order_no}: ${previousStatus} → ${status}`)
+    apiLogger.info(`🔄 Order ${currentOrder.order_no}: ${previousStatus} → ${status}`)
 
     // TRIGGER AUTOMATION WORKFLOWS based on status change
     try {
       // Order completed workflow
       if (status === 'DELIVERED' && previousStatus !== 'DELIVERED') {
-        console.log('🚀 Triggering order completion automation...')
+        apiLogger.info('🚀 Triggering order completion automation...')
         await triggerWorkflow('order.completed', orderId, {
           order: updatedOrder,
           previousStatus,
@@ -123,7 +124,7 @@ export async function PATCH(
 
       // Order cancelled workflow
       if (status === 'CANCELLED' && previousStatus !== 'CANCELLED') {
-        console.log('🚀 Triggering order cancellation automation...')
+        apiLogger.info('🚀 Triggering order cancellation automation...')
         await triggerWorkflow('order.cancelled', orderId, {
           order: updatedOrder,
           previousStatus,
@@ -141,7 +142,7 @@ export async function PATCH(
       })
 
     } catch (automationError) {
-      console.error('⚠️ Automation trigger error (non-blocking):', automationError)
+      apiLogger.error({ error: automationError }, '⚠️ Automation trigger error (non-blocking):')
       // Don't fail the status update if automation fails
     }
 
@@ -166,8 +167,8 @@ export async function PATCH(
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })
 
-  } catch (error: any) {
-    console.error('Error in order status update:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error in order status update:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -216,8 +217,8 @@ export async function GET(
       status_info: statusInfo
     })
 
-  } catch (error: any) {
-    console.error('Error getting order status:', error)
+  } catch (error: unknown) {
+    apiLogger.error({ error: error }, 'Error getting order status:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

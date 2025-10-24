@@ -5,6 +5,7 @@
  */
 
 import { workflowAutomation } from '../automation-engine'
+import { automationLogger } from '../logger'
 import { smartNotificationSystem } from '../smart-notifications'
 
 export interface HPPComponent {
@@ -14,6 +15,52 @@ export interface HPPComponent {
   cost: number
   unit: string
   lastUpdated: string
+}
+
+// Recipe ingredient with pricing info
+export interface RecipeIngredient {
+  ingredientId: string
+  name: string
+  quantity: number
+  unit: string
+  pricePerUnit?: number
+}
+
+// Packaging item for cost calculation
+export interface PackagingItem {
+  name: string
+  quantity: number
+  unit: string
+  costPerUnit: number
+}
+
+// Recipe data structure for HPP calculation
+export interface RecipeData {
+  id: string
+  name: string
+  servings: number
+  prepTime: number
+  cookTime: number
+  estimatedDuration: number
+  ingredients: RecipeIngredient[]
+  packaging?: PackagingItem[]
+}
+
+// Recipe with basic info for affected recipes list
+export interface RecipeBasicInfo {
+  id: string
+  name: string
+}
+
+// HPP recalculation result
+export interface HPPRecalculationResult {
+  recipeId: string
+  recipeName: string
+  oldHPP: number
+  newHPP: number
+  change: number
+  changePercentage: number
+  impactLevel: 'low' | 'medium' | 'high'
 }
 
 export interface RecipeHPP {
@@ -142,7 +189,7 @@ export class HPPAutomationSystem {
   async onOperationalCostChange(costId: string, oldAmount: number, newAmount: number) {
     automationLogger.info({ costId, oldAmount, newAmount }, 'Operational cost changed')
 
-    const costItem = this.operationalCosts.get(key)
+    const costItem = this.operationalCosts.get(costId)
     if (!costItem) {
       automationLogger.error({ costId }, 'Operational cost item not found')
       return
@@ -255,11 +302,11 @@ export class HPPAutomationSystem {
   /**
    * AUTO-RECALCULATE ketika ada perubahan
    */
-  private async recalculateRecipeHPP(recipeId: string): Promise<any> {
-    const oldHPP = this.recipeHPPCache.get(key)
+  private async recalculateRecipeHPP(recipeId: string): Promise<HPPRecalculationResult> {
+    const oldHPP = this.recipeHPPCache.get(recipeId)
     const newHPP = await this.calculateSmartHPP(recipeId)
 
-    const result = {
+    const result: HPPRecalculationResult = {
       recipeId,
       recipeName: newHPP.recipeName,
       oldHPP: oldHPP?.hppPerServing || 0,
@@ -285,13 +332,13 @@ export class HPPAutomationSystem {
     automationLogger.info({ reason }, 'Recalculating all recipes')
 
     const allRecipeIds = await this.getAllRecipeIds()
-    const results = []
+    const results: HPPRecalculationResult[] = []
 
     for (const recipeId of allRecipeIds) {
       try {
         const result = await this.recalculateRecipeHPP(recipeId)
         results.push(result)
-      } catch (error: any) {
+      } catch (error: unknown) {
         automationLogger.error({ err: error, recipeId }, 'Error recalculating recipe')
       }
     }
@@ -313,7 +360,7 @@ export class HPPAutomationSystem {
   // Helper Methods
 
   private trackPriceHistory(ingredientId: string, newPrice: number) {
-    const history = this.ingredientPriceHistory.get(key) || []
+    const history = this.ingredientPriceHistory.get(ingredientId) || []
     history.push({
       date: new Date().toISOString(),
       price: newPrice
@@ -323,24 +370,34 @@ export class HPPAutomationSystem {
     this.ingredientPriceHistory.set(ingredientId, history.slice(-30))
   }
 
-  private async findRecipesUsingIngredient(ingredientId) {
+  private async findRecipesUsingIngredient(ingredientId: string): Promise<RecipeBasicInfo[]> {
     try {
       const response = await fetch(`/api/ingredients/${ingredientId}`)
       if (!response.ok) return []
-      const data = await response.json()
+      const data = await response.json() as { recipes?: RecipeBasicInfo[] }
       return data.recipes || []
-    } catch (error: any) {
+    } catch (error: unknown) {
       automationLogger.error({ err: error, ingredientId }, 'Error fetching recipes for ingredient')
       return []
     }
   }
 
-  private async getRecipeData(recipeId: string) {
+  private async getRecipeData(recipeId: string): Promise<RecipeData | null> {
     // TODO: Implement real recipe data fetching from database
     throw new Error('Recipe data fetching not implemented yet')
   }
 
-  private async calculateIngredientCosts(ingredients: any[]) {
+  private async calculateIngredientCosts(ingredients: RecipeIngredient[]) {
+    const items: Array<{
+      ingredientId: string
+      ingredientName: string
+      quantity: number
+      unit: string
+      pricePerUnit: number
+      totalCost: number
+    }> = []
+    let total = 0
+
     for (const ing of ingredients) {
       // Get latest price from database/cache
       const pricePerUnit = await this.getLatestIngredientPrice(ing.ingredientId)
@@ -393,9 +450,15 @@ export class HPPAutomationSystem {
     }
   }
 
-  private async calculatePackagingCosts(packagingItems: any[]) {
+  private async calculatePackagingCosts(packagingItems: PackagingItem[]) {
     let total = 0
-    const items = []
+    const items: Array<{
+      itemName: string
+      quantity: number
+      unit: string
+      costPerUnit: number
+      totalCost: number
+    }> = []
 
     for (const item of packagingItems) {
       const totalCost = item.quantity * item.costPerUnit
@@ -432,7 +495,7 @@ export class HPPAutomationSystem {
     ]
   }
 
-  private generatePriceChangeNotifications(ingredientId: string, oldPrice: number, newPrice: number, affectedRecipes: any[]) {
+  private generatePriceChangeNotifications(ingredientId: string, oldPrice: number, newPrice: number, affectedRecipes: HPPRecalculationResult[]) {
     const priceChange = ((newPrice - oldPrice) / oldPrice) * 100
     const changeDirection = priceChange > 0 ? 'naik' : 'turun'
     const impactLevel = Math.abs(priceChange) > 10 ? 'high' : Math.abs(priceChange) > 5 ? 'medium' : 'low'
@@ -502,9 +565,9 @@ export class HPPAutomationSystem {
     try {
       const response = await fetch('/api/recipes')
       if (!response.ok) return []
-      const recipes = await response.json()
-      return recipes.map((r: any) => r.id)
-    } catch (error: any) {
+      const recipes = await response.json() as Array<{ id: string }>
+      return recipes.map((r) => r.id)
+    } catch (error: unknown) {
       automationLogger.error({ err: error }, 'Error fetching recipe IDs')
       return []
     }
@@ -522,7 +585,7 @@ export class HPPAutomationSystem {
       style: 'currency',
       currency: 'IDR',
       minimumFractionDigits: 0
-    }).format
+    }).format(amount)
   }
 
   private async checkIngredientPriceChanges() {
@@ -581,21 +644,21 @@ export class HPPAutomationSystem {
     ]
 
     defaultCosts.forEach(cost => {
-      this.operationalCosts.set(cost.key, cost)
+      this.operationalCosts.set(cost.id, cost)
     })
   }
 
   // Public API methods
   public getRecipeHPP(recipeId: string): RecipeHPP | undefined {
-    return this.recipeHPPCache.get(key)
+    return this.recipeHPPCache.get(recipeId)
   }
 
   public getOperationalCosts(): OperationalCost[] {
     return Array.from(this.operationalCosts.values())
   }
 
-  public updateOperationalCost(costId, newAmount) {
-    const cost = this.operationalCosts.get(key)
+  public updateOperationalCost(costId: string, newAmount: number) {
+    const cost = this.operationalCosts.get(costId)
     if (cost) {
       const oldAmount = cost.amount
       this.onOperationalCostChange(costId, oldAmount, newAmount)
@@ -608,10 +671,16 @@ export class HPPAutomationSystem {
   public async monitorIngredientPrices(ingredients: Array<{ id: string; name: string; price_per_unit: number }>) {
     automationLogger.info({ count: ingredients.length }, 'Monitoring ingredient prices')
 
-    const significantChanges = []
+    const significantChanges: Array<{
+      ingredientId: string
+      ingredientName: string
+      oldPrice: number
+      newPrice: number
+      changePercent: number
+    }> = []
 
     for (const ingredient of ingredients) {
-      const history = this.ingredientPriceHistory.get(key) || []
+      const history = this.ingredientPriceHistory.get(ingredient.id) || []
 
       if (history.length > 0) {
         const lastPrice = history[history.length - 1].price

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
 import { generateOrderNumber } from './utils'
 
+import { apiLogger } from '@/lib/logger'
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +29,7 @@ export function useOrders() {
       const data = await response.json()
       setOrders(data)
     } catch (err) {
-      console.error('Error fetching orders:', err)
+      apiLogger.error({ error: err }, 'Error fetching orders:')
       setError(err instanceof Error ? err.message : 'Failed to fetch orders')
     } finally {
       setLoading(false)
@@ -106,7 +107,7 @@ export function useOrders() {
       
       return true
     } catch (err) {
-      console.error('Error creating order:', err)
+      apiLogger.error({ error: err }, 'Error creating order:')
       setError(err instanceof Error ? err.message : 'Failed to create order')
       return false
     }
@@ -139,7 +140,7 @@ export function useOrders() {
       
       return true
     } catch (err) {
-      console.error('Error updating order:', err)
+      apiLogger.error({ error: err }, 'Error updating order:')
       setError(err instanceof Error ? err.message : 'Failed to update order')
       return false
     }
@@ -187,13 +188,13 @@ export function useOrders() {
             dbLogger.info('Inventory auto-updated', { action: inventoryAction })
           }
         } catch (err) {
-          console.error('⚠️ Failed to auto-update inventory for status change:', err)
+          apiLogger.error({ error: err }, '⚠️ Failed to auto-update inventory for status change:')
         }
       }
       
       return true
     } catch (err) {
-      console.error('Error updating order status:', err)
+      apiLogger.error({ error: err }, 'Error updating order status:')
       setError(err instanceof Error ? err.message : 'Failed to update order status')
       return false
     }
@@ -213,7 +214,7 @@ export function useOrders() {
       setOrders(prev => prev.filter(order => order.id !== orderId))
       return true
     } catch (err) {
-      console.error('Error deleting order:', err)
+      apiLogger.error({ error: err }, 'Error deleting order:')
       setError(err instanceof Error ? err.message : 'Failed to delete order')
       return false
     }
