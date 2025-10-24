@@ -1,27 +1,20 @@
 // Production service hooks for Indonesian bakery operations
 'use client'
-import * as React from 'react'
-
 import { useMemo } from 'react'
 import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'
-import { useSupabaseData } from '@/hooks/useSupabaseData'
 import { 
   ProductionBatch,
   IngredientAllocation,
   QualityCheck,
   ProductionEquipment,
   ProductionStaff,
-  ProductionLog,
   CreateBatchData,
   UpdateBatchData,
   ProductionFilters,
   ProductionAnalytics,
   ProductionStatus,
-  BatchPriority,
-  QualityStatus,
   ProductionCapacity,
   BatchSchedule,
-  ProductionNotification,
   TemperatureLog
 } from '../types/production.types'
 import { 
@@ -68,7 +61,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
   const filteredBatches = useMemo(() => {
     if (!batches || !filters) return batches
 
-    return batches.filter(batch => {
+    return batches.filter((batch: ProductionBatch) => {
       // Status filter
       if (filters.status?.length && !filters.status.includes(batch.status)) {
         return false
