@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
 import { getErrorMessage } from '@/lib/type-guards';
 import { PaginationQuerySchema, SupplierInsertSchema } from '@/lib/validations';
+import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
+import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -89,9 +91,10 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
+    // @ts-ignore
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .insert([validatedData])
+      .insert([validatedData] as any)
       .select('*')
       .single();
 

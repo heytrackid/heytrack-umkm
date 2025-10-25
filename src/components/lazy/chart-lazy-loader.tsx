@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { lazy, Suspense } from 'react'
-import { logger } from '@/lib/logger'
+import { uiLogger } from '@/lib/logger'
 
 // Chart Loading Skeleton Component
 const ChartLoadingSkeleton = ({ title, height = 'h-64' }: { title?: string, height?: string }) => (
@@ -42,7 +42,7 @@ export const LazyArea = lazy(() => import('@/components').then(m => ({ default: 
 export const LazyCell = lazy(() => import('@/components').then(m => ({ default: m.Cell })))
 
 // Wrapper Components with Suspense
-export const LineChartWithSuspense = ({ ...props }: { [key: string]: unknown }) => (
+export const LineChartWithSuspense = ({ title, height, children, ...props }: any) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyLineChart {...props}>
@@ -52,7 +52,7 @@ export const LineChartWithSuspense = ({ ...props }: { [key: string]: unknown }) 
   </Suspense>
 )
 
-export const BarChartWithSuspense = ({ ...props }: { [key: string]: unknown }) => (
+export const BarChartWithSuspense = ({ title, height, children, ...props }: any) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyBarChart {...props}>
@@ -62,7 +62,7 @@ export const BarChartWithSuspense = ({ ...props }: { [key: string]: unknown }) =
   </Suspense>
 )
 
-export const AreaChartWithSuspense = ({ ...props }: { [key: string]: unknown }) => (
+export const AreaChartWithSuspense = ({ title, height, children, ...props }: any) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyAreaChart {...props}>
@@ -72,7 +72,7 @@ export const AreaChartWithSuspense = ({ ...props }: { [key: string]: unknown }) 
   </Suspense>
 )
 
-export const PieChartWithSuspense = ({ ...props }: { [key: string]: unknown }) => (
+export const PieChartWithSuspense = ({ title, height, children, ...props }: any) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyPieChart {...props}>
@@ -83,7 +83,7 @@ export const PieChartWithSuspense = ({ ...props }: { [key: string]: unknown }) =
 )
 
 // Advanced Chart Components
-export const ComposedChartWithSuspense = ({ ...props }: { [key: string]: unknown }) => (
+export const ComposedChartWithSuspense = ({ title, height, children, ...props }: any) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyComposedChart {...props}>
@@ -207,7 +207,7 @@ export const useChartPerformance = () => {
       
       const measure = performance.getEntriesByName(`chart-${chartType}-duration`)[0]
       if (measure && measure.duration > 1000) {
-        logger.warn('Slow chart rendering', { 
+        uiLogger.warn('Slow chart rendering', { 
           chartType, 
           duration: measure.duration.toFixed(2) 
         })

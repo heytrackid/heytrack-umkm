@@ -28,6 +28,7 @@ export default function HPPRecipeCard({
   isMobile = false
 }: HPPRecipeCardProps) {
   const ingredients = recipe.recipe_ingredients?.map((ri: any) => ri.ingredient?.name).filter(Boolean) || []
+  const margin = recipe.margin || 0
 
   return (
     <Card className="border-2">
@@ -43,7 +44,7 @@ export default function HPPRecipeCard({
                 Kategori: {recipe.category}
               </p>
             </div>
-            <Badge variant={getMarginBadgeVariant}>
+            <Badge variant={getMarginBadgeVariant(margin) as "default" | "secondary" | "destructive" | "outline"}>
               {recipe.margin.toFixed(1)}% margin
             </Badge>
           </div>
@@ -68,7 +69,7 @@ export default function HPPRecipeCard({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground text-sm">Status:</span>
-                <Badge variant={getMarginBadgeVariant} className="text-xs">
+                <Badge variant={getMarginBadgeVariant(recipe.margin) as "default" | "secondary" | "destructive" | "outline"} className="text-xs">
                   {getMarginStatus(recipe.margin)}
                 </Badge>
               </div>

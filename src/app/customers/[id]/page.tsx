@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { ProfileSkeleton, CardSkeleton } from '@/components/ui'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/useSupabase'
 import {

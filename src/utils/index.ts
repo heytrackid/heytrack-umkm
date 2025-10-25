@@ -11,51 +11,26 @@
 // ============================================================================
 
 export {
-  BREAKPOINTS,
-  DEVICE_BREAKPOINTS,
   isMobile,
   isTablet,
   isDesktop,
   getCurrentBreakpoint,
-  getMediaQueryString,
-  getPrioritizedColumns,
 } from './responsive'
+
+// Re-export BREAKPOINTS and DEVICE_BREAKPOINTS from types
+export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '../types/responsive'
 
 // ============================================================================
 // HPP UTILITIES
 // ============================================================================
 
-export {
-  calculateHPPFromRecipe,
-  updateRecipeHPP,
-  compareHPP,
-} from './hpp-utils'
-
-export {
-  getDateRange,
-  formatDateForDisplay,
-  getMonthRange,
-  getQuarterRange,
-} from './hpp-date-utils'
-
-export {
-  detectPriceAlert,
-  calculateAlertSeverity,
-  generateAlertMessage,
-  getAlertHistory,
-} from './hpp-alert-helpers'
-
-export {
-  formatChartData,
-  prepareTimeSeriesData,
-  formatChartLabels,
-  getChartColors,
-} from './hpp-chart-formatters'
+// Export all HPP utilities from the main hpp-utils module
+export * from './hpp-utils'
 
 // ============================================================================
 // SUPABASE UTILITIES
 // ============================================================================
 
 export { createClient } from './supabase/client'
-export { createServerClient } from './supabase/server'
+export { createClient as createServerClient } from './supabase/server'
 export { updateSession } from './supabase/middleware'

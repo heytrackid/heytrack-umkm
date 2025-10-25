@@ -60,7 +60,7 @@ class ExternalAIService {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.API_KEY}`,
           'HTTP-Referer': 'https://heytrack.vercel.app',
-          'X-Title': 'HeyTrack Bakery Management'
+          'X-Title': 'HeyTrack UMKM Management'
         },
         body: JSON.stringify({
           model: 'anthropic/claude-3-haiku',
@@ -130,7 +130,7 @@ Risiko utama: Over-expansion sebelum operasi stabil.`
 
     // Competition analysis
     if (lowerPrompt.includes('kompetitor') || lowerPrompt.includes('competitor') || lowerPrompt.includes('saingan')) {
-      return `Analisis kompetitor bakery:
+      return `Analisis kompetitor UMKM:
 
 **Kelebihan Kompetitor Modern**:
 - Branding yang kuat
@@ -138,7 +138,7 @@ Risiko utama: Over-expansion sebelum operasi stabil.`
 - Harga premium
 - Variasi produk luas
 
-**Kelebihan UMKM Bakery**:
+**Kelebihan UMKM UMKM**:
 - Produk fresh setiap hari
 - Harga lebih terjangkau
 - Customer service personal
@@ -175,7 +175,7 @@ Apa yang ingin Anda ketahui tentang bisnis kuliner Anda?`
     Berikan insights strategis berdasarkan data ini.`
 
     return await this.generateResponse(
-      'Berikan insights strategis mendalam tentang kondisi bisnis bakery ini berdasarkan data yang tersedia.',
+      'Berikan insights strategis mendalam tentang kondisi bisnis UMKM ini berdasarkan data yang tersedia.',
       context
     )
   }
@@ -188,7 +188,7 @@ Apa yang ingin Anda ketahui tentang bisnis kuliner Anda?`
     User meminta strategi khusus tentang: "${query}"
 
     Berikan rekomendasi strategis yang:
-    - Spesifik untuk bakery UMKM Indonesia
+    - Spesifik untuk UMKM UMKM Indonesia
     - Measurable dengan KPI jelas
     - Implementable dalam timeframe realistis
     - Cost-effective dan low-risk`

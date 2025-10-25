@@ -191,13 +191,13 @@ const PreloadingDebugPanel = () => {
       {metrics && (
         <div className="space-y-2">
           <div>
-            <strong>Current:</strong> {metrics.currentRoute}
+            <strong>Current:</strong> {(metrics as any).currentRoute}
           </div>
           <div>
-            <strong>Preloaded Routes:</strong> {metrics.preloadedRoutesCount}
+            <strong>Preloaded Routes:</strong> {(metrics as any).preloadedRoutesCount}
           </div>
           <div>
-            <strong>Preloaded Components:</strong> {metrics.preloadedComponentsCount}
+            <strong>Preloaded Components:</strong> {(metrics as any).preloadedComponentsCount}
           </div>
           
           {metrics.lazyLoadingMetrics && (
@@ -272,12 +272,12 @@ export const usePreloadingAnalytics = () => {
     const interval = setInterval(() => {
       const metrics = getMetrics()
       
-      if (metrics.preloadedRoutesCount > 0 || metrics.preloadedComponentsCount > 0) {
+      if ((metrics as any).preloadedRoutesCount > 0 || (metrics as any).preloadedComponentsCount > 0) {
         // Here you could send metrics to your analytics service
         apiLogger.info({ params: {
-          route: metrics.currentRoute,
-          preloadedRoutes: metrics.preloadedRoutesCount,
-          preloadedComponents: metrics.preloadedComponentsCount,
+          route: (metrics as any).currentRoute,
+          preloadedRoutes: (metrics as any).preloadedRoutesCount,
+          preloadedComponents: (metrics as any).preloadedComponentsCount,
           timestamp: new Date().toISOString()
         }}, '📊 Preloading Analytics:')
       }

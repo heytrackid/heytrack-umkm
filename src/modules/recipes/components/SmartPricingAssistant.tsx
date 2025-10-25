@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { automationEngine } from '@/lib/automation-engine'
 import { RecipeWithIngredients } from '@/types'
+import { uiLogger } from '@/lib/logger'
 import {
   AlertTriangle,
   Calculator,

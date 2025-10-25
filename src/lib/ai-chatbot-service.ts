@@ -16,21 +16,22 @@ export interface AIResponse {
 }
 
 // Inventory Insights
-export async function getInventoryInsights(query: string): Promise<AIResponse> {
+export async function getInventoryInsights(query: string, userId?: string): Promise<AIResponse> {
   try {
-    logger.info('Processing inventory query', { query })
+    logger.info('Processing inventory query', { query, userId })
 
-    // Get current inventory status
-    const { data: ingredients, error } = await supabase
+    // Get current inventory status for specific user
+    const { data: ingredients, error } = await (supabase
       .from('ingredients')
       .select('*')
       .eq('is_active', true)
+      .eq('user_id', userId) as any)
       .order('current_stock', { ascending: false })
 
     if (error) throw error
 
     const totalItems = ingredients?.length || 0
-    const lowStockItems = ingredients?.filter(item => item.current_stock <= item.minimum_stock) || []
+    const lowStockItems = ingredients?.filter((item: any) => item.current_stock <= (item.minimum_stock || item.min_stock || 0)) || []
     const outOfStockItems = ingredients?.filter(item => item.current_stock <= 0) || []
 
     let message = `📦 **Status Inventory Saat Ini:**\n\n`
@@ -40,12 +41,14 @@ export async function getInventoryInsights(query: string): Promise<AIResponse> {
 
     if (lowStockItems.length > 0) {
       message += `⚠️ **Perlu Perhatian:**\n`
-      lowStockItems.slice(0, 5).forEach(item => {
-        message += `• ${item.name}: ${item.current_stock} ${item.unit} (min: ${item.minimum_stock})\n`
+      lowStockItems.slice(0, 5).forEach((item: any) => {
+        message += `• ${item.name}: ${item.current_stock} ${item.unit} (min: ${item.minimum_stock || item.min_stock || 0})\n`
       })
       if (lowStockItems.length > 5) {
         message += `• ... dan ${lowStockItems.length - 5} bahan lainnya\n`
       }
+    } else if (totalItems > 0) {
+      message += `✅ **Bagus:** Semua bahan dalam kondisi baik!\n`
     }
 
     const suggestions = [
@@ -61,11 +64,12 @@ export async function getInventoryInsights(query: string): Promise<AIResponse> {
         totalItems,
         lowStockCount: lowStockItems.length,
         outOfStockCount: outOfStockItems.length,
-        lowStockItems: lowStockItems.slice(0, 5)
+        lowStockItems: lowStockItems.slice(0, 5),
+        userId
       }
     }
   } catch (error) {
-    logger.error('Error getting inventory insights', { error })
+    logger.error('Error getting inventory insights', { error, userId })
     return {
       message: 'Maaf, saya tidak dapat mengakses data inventory saat ini. Silakan coba lagi nanti.',
       suggestions: ['Cek status koneksi database', 'Refresh halaman']
@@ -74,12 +78,12 @@ export async function getInventoryInsights(query: string): Promise<AIResponse> {
 }
 
 // Recipe Suggestions
-export async function getRecipeSuggestions(query: string): Promise<AIResponse> {
+export async function getRecipeSuggestions(query: string, userId?: string): Promise<AIResponse> {
   try {
-    logger.info('Processing recipe query', { query })
+    logger.info('Processing recipe query', { query, userId })
 
-    // Get recipes with production data
-    const { data: recipes, error } = await supabase
+    // Get recipes with production data for specific user
+    const { data: recipes, error } = await (supabase
       .from('recipes')
       .select(`
         *,
@@ -90,7 +94,7 @@ export async function getRecipeSuggestions(query: string): Promise<AIResponse> {
         )
       `)
       .eq('is_active', true)
-      .order('times_made', { ascending: false })
+      .eq('user_id', userId) as any)
       .limit(10)
 
     if (error) throw error
@@ -103,14 +107,14 @@ export async function getRecipeSuggestions(query: string): Promise<AIResponse> {
 
     if (popularRecipes.length > 0) {
       message += `🔥 **Resep Terpopuler:**\n`
-      popularRecipes.forEach((recipe, index) => {
-        message += `${index + 1}. ${recipe.name} (${recipe.times_made} kali dibuat)\n`
-        message += `   Kategori: ${recipe.category} | HPP: Rp${recipe.total_cost?.toLocaleString() || 'N/A'}\n`
+      popularRecipes.forEach((recipe: any, index: number) => {
+        message += `${index + 1}. ${recipe.name}\n`
+        message += `   Kategori: ${recipe.category}\n`
       })
     }
 
     // Check for recipes that can be made with current inventory
-    const feasibleRecipes = recipes?.filter(recipe => {
+    const feasibleRecipes = recipes?.filter((recipe: any) => {
       return recipe.recipe_ingredients?.every((ri: any) =>
         (ri.ingredients?.current_stock || 0) >= ri.quantity
       )
@@ -118,6 +122,8 @@ export async function getRecipeSuggestions(query: string): Promise<AIResponse> {
 
     if (feasibleRecipes.length > 0) {
       message += `\n✅ **Bisa Dibuat Sekarang:** ${feasibleRecipes.length} resep\n`
+    } else if (totalRecipes > 0) {
+      message += `\n⚠️ **Perlu Restock:** Beberapa bahan perlu ditambah stok\n`
     }
 
     const suggestions = [
@@ -132,11 +138,12 @@ export async function getRecipeSuggestions(query: string): Promise<AIResponse> {
       data: {
         totalRecipes,
         popularRecipes: popularRecipes.map(r => ({ name: r.name, timesMade: r.times_made })),
-        feasibleRecipesCount: feasibleRecipes.length
+        feasibleRecipesCount: feasibleRecipes.length,
+        userId
       }
     }
   } catch (error) {
-    logger.error('Error getting recipe suggestions', { error })
+    logger.error('Error getting recipe suggestions', { error, userId })
     return {
       message: 'Maaf, saya tidak dapat mengakses data resep saat ini.',
       suggestions: ['Cek koneksi database', 'Lihat daftar resep manual']
@@ -145,24 +152,25 @@ export async function getRecipeSuggestions(query: string): Promise<AIResponse> {
 }
 
 // Financial Analysis
-export async function getFinancialAnalysis(query: string): Promise<AIResponse> {
+export async function getFinancialAnalysis(query: string, userId?: string): Promise<AIResponse> {
   try {
-    logger.info('Processing financial query', { query })
+    logger.info('Processing financial query', { query, userId })
 
-    // Get recent financial data (last 30 days)
+    // Get recent financial data (last 30 days) for specific user
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-    const { data: transactions, error } = await supabase
+    const { data: transactions, error } = await (supabase
       .from('financial_records')
       .select('*')
       .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+      .eq('user_id', userId) as any)
       .order('date', { ascending: false })
 
     if (error) throw error
 
-    const income = transactions?.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0) || 0
-    const expenses = transactions?.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0) || 0
+    const income = transactions?.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + t.amount, 0) || 0
+    const expenses = transactions?.filter((t: any) => t.type === 'EXPENSE').reduce((sum: number, t: any) => sum + t.amount, 0) || 0
     const profit = income - expenses
 
     let message = `💰 **Analisis Keuangan (30 hari terakhir):**\n\n`
@@ -179,7 +187,7 @@ export async function getFinancialAnalysis(query: string): Promise<AIResponse> {
       }, {}) || {}
 
     const topCategories = Object.entries(expenseByCategory)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 3)
 
     if (topCategories.length > 0) {
@@ -187,6 +195,9 @@ export async function getFinancialAnalysis(query: string): Promise<AIResponse> {
       topCategories.forEach(([category, amount], index) => {
         message += `${index + 1}. ${category}: Rp${amount.toLocaleString()}\n`
       })
+    } else if (transactions?.length === 0) {
+      message += `📊 **Belum ada data keuangan**\n`
+      message += `Silakan tambahkan transaksi keuangan terlebih dahulu.\n`
     }
 
     const suggestions = [
@@ -203,11 +214,13 @@ export async function getFinancialAnalysis(query: string): Promise<AIResponse> {
         expenses,
         profit,
         profitMargin: income > 0 ? (profit / income) * 100 : 0,
-        topExpenseCategories: topCategories
+        topExpenseCategories: topCategories,
+        userId,
+        totalTransactions: transactions?.length || 0
       }
     }
   } catch (error) {
-    logger.error('Error getting financial analysis', { error })
+    logger.error('Error getting financial analysis', { error, userId })
     return {
       message: 'Maaf, saya tidak dapat mengakses data keuangan saat ini.',
       suggestions: ['Periksa laporan keuangan manual', 'Cek koneksi database']
@@ -216,12 +229,12 @@ export async function getFinancialAnalysis(query: string): Promise<AIResponse> {
 }
 
 // Order Insights
-export async function getOrderInsights(query: string): Promise<AIResponse> {
+export async function getOrderInsights(query: string, userId?: string): Promise<AIResponse> {
   try {
-    logger.info('Processing order query', { query })
+    logger.info('Processing order query', { query, userId })
 
-    // Get recent orders
-    const { data: orders, error } = await supabase
+    // Get recent orders for specific user
+    const { data: orders, error } = await (supabase
       .from('orders')
       .select(`
         *,
@@ -233,14 +246,15 @@ export async function getOrderInsights(query: string): Promise<AIResponse> {
         ),
         customers (name, phone)
       `)
+      .eq('user_id', userId) as any)
       .order('created_at', { ascending: false })
       .limit(20)
 
     if (error) throw error
 
     const totalOrders = orders?.length || 0
-    const pendingOrders = orders?.filter(o => o.status === 'PENDING') || []
-    const deliveredOrders = orders?.filter(o => o.status === 'DELIVERED') || []
+    const pendingOrders = orders?.filter((o: any) => o.status === 'PENDING') || []
+    const deliveredOrders = orders?.filter((o: any) => o.status === 'DELIVERED') || []
 
     const totalRevenue = deliveredOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
 
@@ -260,7 +274,7 @@ export async function getOrderInsights(query: string): Promise<AIResponse> {
     }, {})
 
     const topProducts = Object.entries(productSales)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 3)
 
     if (topProducts.length > 0) {
@@ -268,6 +282,9 @@ export async function getOrderInsights(query: string): Promise<AIResponse> {
       topProducts.forEach(([product, quantity], index) => {
         message += `${index + 1}. ${product}: ${quantity} porsi\n`
       })
+    } else if (totalOrders === 0) {
+      message += `📦 **Belum ada pesanan**\n`
+      message += `Silakan tambahkan pesanan pertama Anda.\n`
     }
 
     const suggestions = [
@@ -284,11 +301,12 @@ export async function getOrderInsights(query: string): Promise<AIResponse> {
         pendingCount: pendingOrders.length,
         deliveredCount: deliveredOrders.length,
         totalRevenue,
-        topProducts
+        topProducts,
+        userId
       }
     }
   } catch (error) {
-    logger.error('Error getting order insights', { error })
+    logger.error('Error getting order insights', { error, userId })
     return {
       message: 'Maaf, saya tidak dapat mengakses data pesanan saat ini.',
       suggestions: ['Periksa daftar pesanan manual', 'Cek status pesanan tertunda']
@@ -303,14 +321,14 @@ export async function getBusinessInsights(): Promise<AIResponse> {
 
     // Get comprehensive business metrics
     const [inventory, orders, financials] = await Promise.all([
-      supabase.from('ingredients').select('current_stock, minimum_stock').eq('is_active', true),
-      supabase.from('orders').select('status, total_amount').gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-      supabase.from('financial_records').select('type, amount').gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
+      (supabase.from('ingredients').select('current_stock, minimum_stock, min_stock') as any).eq('is_active', true),
+      (supabase.from('orders').select('status, total_amount') as any).gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+      (supabase.from('financial_records').select('type, amount') as any).gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
     ])
 
-    const lowStockCount = inventory.data?.filter(item => item.current_stock <= item.minimum_stock).length || 0
-    const weeklyRevenue = orders.data?.filter(o => o.status === 'DELIVERED').reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0
-    const monthlyExpenses = financials.data?.filter(f => f.type === 'EXPENSE').reduce((sum, f) => sum + f.amount, 0) || 0
+    const lowStockCount = inventory.data?.filter((item: any) => item.current_stock <= (item.minimum_stock || item.min_stock || 0)).length || 0
+    const weeklyRevenue = orders.data?.filter((o: any) => o.status === 'DELIVERED').reduce((sum: number, o: any) => sum + (o.total_amount || 0), 0) || 0
+    const monthlyExpenses = financials.data?.filter((f: any) => f.type === 'EXPENSE').reduce((sum: number, f: any) => sum + f.amount, 0) || 0
 
     let message = `🎯 **Ringkasan Bisnis Hari Ini:**\n\n`
     message += `📦 Inventory: ${lowStockCount} bahan perlu restock\n`

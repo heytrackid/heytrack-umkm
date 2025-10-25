@@ -1,22 +1,21 @@
 import { detectHPPAlerts, saveAlerts } from '@/lib/hpp-alert-detector'
+import { getErrorMessage } from '@/lib/type-guards'
 import { createSnapshot } from '@/lib/hpp-snapshot-manager'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
+import { HPPSnapshotSchema } from '@/lib/validations/api-schemas'
+import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import { apiLogger } from '@/lib/logger'
 // POST /api/hpp/snapshot - Create HPP snapshots (internal endpoint for cron jobs)
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json()
-        const { recipe_id, user_id } = body
+        // Validate request body
+        const validatedData = await validateRequestOrRespond(request, HPPSnapshotSchema)
+        if (validatedData instanceof NextResponse) return validatedData
 
-        // Validate required user_id
-        if (!user_id) {
-            return NextResponse.json(
-                { error: 'Missing required parameter: user_id' },
-                { status: 400 }
-            )
-        }
+        const { recipe_ids, user_id } = validatedData
+        const recipe_id = recipe_ids?.[0] // Support single recipe for backward compatibility
 
         const supabase = createServerSupabaseAdmin()
 
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
             if (recipesError) {
                 apiLogger.error({ error: recipesError }, 'Error fetching recipes:')
                 return NextResponse.json(
-                    { error: 'Failed to fetch recipes', details: recipesError.message },
+                    { error: 'Failed to fetch recipes', details: (recipesError as any).message },
                     { status: 500 }
                 )
             }
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
                 })
             }
 
-            recipeIds = recipes.map(r => r.id)
+            recipeIds = recipes.map(r => (r as any).id)
         }
 
         // Process recipes in batches of 50
@@ -73,17 +72,17 @@ export async function POST(request: NextRequest) {
                         .eq('id', id)
                         .single()
 
-                    const sellingPrice = recipe?.selling_price || undefined
+                    const sellingPrice = recipe ? (recipe.selling_price || undefined) : undefined
 
                     // Create snapshot
                     await createSnapshot(id, user_id, sellingPrice)
                     totalSnapshotsCreated++
 
                 } catch (error: unknown) {
-                    apiLogger.error({ error: `Error creating snapshot for recipe ${id}:`, error }, 'Console error replaced with logger')
+                    apiLogger.error({ error: error, message: `Error creating snapshot for recipe ${id}` }, 'Snapshot creation error')
                     errors.push({
                         recipe_id: id,
-                        error: error.message
+                        error: getErrorMessage(error)
                     })
                 }
             }
@@ -126,7 +125,7 @@ export async function POST(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in snapshot endpoint:')
         return NextResponse.json(
-            { error: 'Snapshot creation failed', details: error.message },
+            { error: 'Snapshot creation failed', details: getErrorMessage(error) },
             { status: 500 }
         )
     }
@@ -185,7 +184,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error getting snapshot status:')
         return NextResponse.json(
-            { error: 'Failed to get snapshot status', details: error.message },
+            { error: 'Failed to get snapshot status', details: getErrorMessage(error) },
             { status: 500 }
         )
     }

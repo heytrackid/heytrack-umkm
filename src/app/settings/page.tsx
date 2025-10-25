@@ -91,7 +91,7 @@ export default function SettingsPage() {
     // General Settings
     general: {
       businessName: '',
-      businessType: 'bakery',
+      businessType: 'UMKM',
       address: '',
       phone: '',
       email: '',

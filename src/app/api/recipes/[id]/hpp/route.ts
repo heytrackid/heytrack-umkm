@@ -30,7 +30,7 @@ export async function GET(
           )
         )
       `)
-      .eq('id', resolvedParams.id)
+      .eq('id', (resolvedParams as any).id)
       .single()
     
     if (error) {
@@ -41,10 +41,10 @@ export async function GET(
       )
     }
 
-    if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
+    if (!(recipe as any).recipe_ingredients || (recipe as any).recipe_ingredients.length === 0) {
       return NextResponse.json({
-        recipe_id: resolvedParams.id,
-        recipe_name: recipe.name,
+        recipe_id: (resolvedParams as any).id,
+        recipe_name: (recipe as any).name,
         hpp_breakdown: {
           ingredient_cost: 0,
           overhead_cost: 0,
@@ -75,16 +75,23 @@ export async function GET(
     // Generate cost breakdown per serving
     const costPerServing = pricingAnalysis.breakdown.costPerServing
     
+    if (!recipe) {
+      return NextResponse.json(
+        { error: 'Recipe not found' },
+        { status: 404 }
+      )
+    }
+    
     return NextResponse.json({
-      recipe_id: resolvedParams.id,
-      recipe_name: recipe.name,
-      servings: recipe.servings,
+      recipe_id: (resolvedParams as any).id,
+      recipe_name: (recipe as any).name,
+      servings: (recipe.servings ?? 1),
       hpp_breakdown: {
         ingredient_cost: 0,
         overhead_cost: 0,
         total_cost: 0,
         cost_per_serving: costPerServing,
-        ingredient_details: recipe.recipe_ingredients.map((ri: any) => ({
+        ingredient_details: (recipe as any).recipe_ingredients.map((ri: any) => ({
           name: ri.ingredient.name,
           quantity: ri.quantity,
           unit: ri.unit,
@@ -96,13 +103,13 @@ export async function GET(
       profitability_analysis: {},
       availability,
       recommendations: generateInventoryRecommendations(availability),
-      suggested_selling_price: recipe.selling_price,
+      suggested_selling_price: (recipe as any).selling_price,
       margin_analysis: {
-        current_margin: recipe.selling_price > costPerServing 
-          ? ((recipe.selling_price - costPerServing) / recipe.selling_price * 100).toFixed(1)
+        current_margin: (recipe.selling_price ?? 0) > costPerServing 
+          ? (((recipe.selling_price ?? 0) - costPerServing) / (recipe.selling_price ?? 0) * 100).toFixed(1)
           : 0,
         optimal_margin: 30,
-        is_profitable: recipe.selling_price > costPerServing
+        is_profitable: (recipe.selling_price ?? 0) > costPerServing
       }
     })
   } catch (error: unknown) {
@@ -120,7 +127,7 @@ function checkIngredientAvailability(recipe: any) {
   const missingIngredients: unknown[] = []
   let canProduce = true
   
-  recipe.recipe_ingredients.forEach((ri: any) => {
+  (recipe as any).recipe_ingredients.forEach((ri: any) => {
     const needed = ri.quantity
     const available = ri.ingredient.stock || 0
     const stockDays = available > 0 ? Math.floor(available / needed) : 0
@@ -149,7 +156,7 @@ function checkIngredientAvailability(recipe: any) {
     missing_ingredients: missingIngredients,
     stock_warnings: stockWarnings,
     production_capacity: canProduce ? Math.min(
-      ...recipe.recipe_ingredients.map((ri: any) => 
+      ...(recipe as any).recipe_ingredients.map((ri: any) => 
         Math.floor((ri.ingredient.stock || 0) / ri.quantity)
       )
     ) : 0
@@ -163,7 +170,7 @@ function generateInventoryRecommendations(availability: any): string[] {
   if (!availability.can_produce) {
     recommendations.push('🛑 Tidak bisa produksi - stock bahan tidak mencukupi')
     availability.missing_ingredients.forEach((missing: any) => {
-      recommendations.push(`📦 Butuh tambahan ${missing.shortage.toFixed(2)} ${missing.unit} ${missing.name}`)
+      recommendations.push(`📦 Butuh tambahan ${missing.shortage.toFixed(2)} ${missing.unit} ${(missing as any).name}`)
     })
   }
   

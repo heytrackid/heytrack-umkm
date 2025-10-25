@@ -48,6 +48,7 @@ export const authLogger = createLogger('Auth')
 export const cronLogger = createLogger('Cron')
 export const automationLogger = createLogger('Automation')
 export const uiLogger = createLogger('UI')
+export const middlewareLogger = createLogger('Middleware')
 
 // Default export
 export default logger

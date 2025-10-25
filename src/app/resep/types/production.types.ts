@@ -1,4 +1,5 @@
-// Production module types and interfaces for Indonesian bakery operations
+import type { Tables } from '@/types/supabase-generated'
+// Production module types and interfaces for Indonesian UMKM operations
 
 export interface ProductionBatch {
   id: string
@@ -56,8 +57,8 @@ export interface ProductionBatch {
   updated_at: string
   
   // Relations
-  recipe?: RecipesTable['Row'] // Recipe data type
-  quality_inspector?: UserProfilesTable['Row'] // Staff member
+  recipe?: Tables<'recipes'> // Recipe data type
+  quality_inspector?: Tables<'user_profiles'> // Staff member
   production_logs?: ProductionLog[]
 }
 

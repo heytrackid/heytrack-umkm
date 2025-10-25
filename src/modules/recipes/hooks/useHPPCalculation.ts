@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { HPPCalculationService } from '../services/HPPCalculationService'
+import { uiLogger } from '@/lib/logger'
 
 interface HPPCalculationResult {
   totalCost: number
@@ -54,7 +55,7 @@ export function useHPPCalculation(options: UseHPPCalculationOptions) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'HPP calculation failed'
       setError(errorMessage)
-      logger.error({ err }, 'HPP Calculation Error')
+      uiLogger.error({ err }, 'HPP Calculation Error')
     } finally {
       setLoading(false)
     }

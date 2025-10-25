@@ -286,8 +286,9 @@ export function useAIPowered() {
       if (businessData.recipes && businessData.ingredients) {
         const topRecipes = businessData.recipes.slice(0, 3)
         for (const recipe of topRecipes) {
-          if (recipe.recipe_ingredients) {
-            const ingredients = recipe.recipe_ingredients.map((ri: any) => ({
+          const recipeData = recipe as any
+          if (recipeData.recipe_ingredients) {
+            const ingredients = recipeData.recipe_ingredients.map((ri: any) => ({
               name: ri.ingredient?.name || 'Unknown',
               cost: (ri.ingredient?.price_per_unit || 0) * ri.quantity,
               quantity: ri.quantity
@@ -295,19 +296,19 @@ export function useAIPowered() {
 
             try {
               const pricingAnalysis = await analyzePricing({
-                productName: recipe.name,
+                productName: recipeData.name,
                 ingredients,
-                currentPrice: recipe.selling_price
+                currentPrice: recipeData.selling_price
               })
 
               insights.push({
                 type: 'pricing',
-                productName: recipe.name,
+                productName: recipeData.name,
                 analysis: pricingAnalysis,
                 priority: 'high'
               })
             } catch (error: unknown) {
-              apiLogger.warn(`Pricing analysis failed for ${recipe.name}:`, error)
+              apiLogger.warn(`Pricing analysis failed for ${recipeData.name}:`, error)
             }
           }
         }
@@ -317,7 +318,7 @@ export function useAIPowered() {
       if (businessData.ingredients && businessData.ingredients.length > 0) {
         try {
           const inventoryOptimization = await optimizeInventory({
-            ingredients: businessData.ingredients.map((ing: any) => ({
+            ingredients: (businessData.ingredients as any[]).map((ing: any) => ({
               name: ing.name,
               currentStock: ing.current_stock,
               minStock: ing.min_stock,

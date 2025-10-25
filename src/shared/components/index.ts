@@ -12,8 +12,8 @@ export { default as LoadingSpinner } from './data/LoadingSpinner'
 // TODO: Add other data components as needed (DataTable, StatsCard, EmptyState, ErrorMessage)
 
 // Utility Components - only export existing components
-export { default as LazyWrapper } from './utility/LazyWrapper'
-export { default as ErrorBoundary } from './utility/ErrorBoundary'
+export { LazyWrapper } from './utility/LazyWrapper'
+export { ErrorBoundary } from './utility/ErrorBoundary'
 // TODO: Add ThemeToggle when needed
 
 // NOTE: Other components are commented out until they are created

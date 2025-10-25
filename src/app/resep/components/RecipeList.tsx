@@ -69,7 +69,7 @@ export function RecipeList({
   }
 
   // Filter recipes based on search term
-  const filteredRecipes = (recipes || []).filter(recipe =>
+  const filteredRecipes = (recipes || []).filter((recipe: any) =>
     recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     recipe.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     recipe.category?.toLowerCase().includes(searchTerm.toLowerCase())

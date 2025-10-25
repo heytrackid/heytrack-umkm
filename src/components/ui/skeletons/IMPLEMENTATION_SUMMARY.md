@@ -200,7 +200,7 @@ src/components/ui/skeletons/
 
 ## 🎉 Conclusion
 
-The skeleton loading system is now fully implemented across the HeyTrack bakery management application. The system provides:
+The skeleton loading system is now fully implemented across the HeyTrack UMKM management application. The system provides:
 
 - **Consistent UX** across all pages
 - **High Performance** with optimized rendering

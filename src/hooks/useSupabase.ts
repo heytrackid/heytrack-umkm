@@ -41,12 +41,12 @@ export function useSupabaseQuery<T extends keyof Tables>(
       setError(null)
 
       const supabase = createSupabaseClient()
-      let query = supabase.from(tableName).select(options.select || '*')
+      let query = supabase.from(tableName as any).select(options.select || '*')
 
       // Apply filters
       if (options.filter) {
         Object.entries(options.filter).forEach(([key, value]) => {
-          query = query.eq(key, value)
+          query = (query as any).eq(key, value)
         })
       }
 
@@ -150,7 +150,7 @@ export function useSupabaseMutation<T extends keyof Tables>(
     try {
       const supabase = createSupabaseClient()
       const { data: result, error: createError } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .insert(data)
         .select('*')
         .single()
@@ -176,7 +176,7 @@ export function useSupabaseMutation<T extends keyof Tables>(
     try {
       const supabase = createSupabaseClient()
       const { data: result, error: updateError } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .update(data)
         .eq('id', id)
         .select('*')
@@ -203,7 +203,7 @@ export function useSupabaseMutation<T extends keyof Tables>(
     try {
       const supabase = createSupabaseClient()
       const { error: deleteError } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .delete()
         .eq('id', id)
 
@@ -424,8 +424,8 @@ export function useSupabaseBulkOperations<T extends keyof Tables>(
     try {
       const supabase = createSupabaseClient()
       const { data, error: bulkError } = await supabase
-        .from(tableName)
-        .insert(items)
+        .from(tableName as any)
+        .insert(items as any)
         .select('*')
 
       if (bulkError) throw bulkError
@@ -448,7 +448,7 @@ export function useSupabaseBulkOperations<T extends keyof Tables>(
 
     try {
       const supabase = createSupabaseClient()
-      const { error: bulkError } = await supabase.from(tableName).delete().in('id', ids)
+      const { error: bulkError } = await supabase.from(tableName as any).delete().in('id', ids)
 
       if (bulkError) throw bulkError
 

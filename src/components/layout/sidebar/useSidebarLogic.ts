@@ -249,7 +249,7 @@ export const useSidebarLogic = () => {
           name: "Chat AI",
           href: '/ai-chatbot',
           icon: Bot,
-          description: "Tanya apa saja tentang bisnis bakery Anda"
+          description: "Tanya apa saja tentang bisnis UMKM Anda"
         },
         {
           name: "Generator Resep",

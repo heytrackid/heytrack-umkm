@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -78,7 +78,7 @@ export class OrderValidationService {
         errors
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error validating order against inventory')
+      dbLogger.error({ err: error }, 'Error validating order against inventory')
       return {
         isValid: false,
         warnings,

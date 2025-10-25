@@ -29,7 +29,7 @@ import {
   Trash2,
   Users
 } from 'lucide-react'
-import { CustomersTable } from '@/types/customers'
+import type { CustomersTable } from '@/types/customers'
 import { useMemo, useState } from 'react'
 
 interface CustomersTableProps {
@@ -144,8 +144,8 @@ export default function CustomersTable({
                   <TableCell>
                     <div className="flex flex-col">
                       <span className="font-semibold">{customer.name}</span>
-                      <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="w-fit mt-1 text-xs">
-                        {customer.status === 'active' ? 'Aktif' : 'Tidak Aktif'}
+                      <Badge variant={customer.is_active ? "default" : "secondary"} className="w-fit mt-1 text-xs">
+                        {customer.is_active ? 'Aktif' : 'Tidak Aktif'}
                       </Badge>
                     </div>
                   </TableCell>
@@ -163,17 +163,17 @@ export default function CustomersTable({
                   </TableCell>
                   <TableCell>
                     <span className="font-medium text-green-600">
-                      {formatCurrency(customer.totalSpent)}
+                      {formatCurrency(customer.total_spent)}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.totalOrders}
+                      {customer.total_orders}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="text-sm text-gray-600">
-                      {customer.lastOrderDate}
+                      {customer.last_order_date}
                     </span>
                   </TableCell>
                   <TableCell>

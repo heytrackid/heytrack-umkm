@@ -5,13 +5,13 @@ import type {
   ProfitData,
   ProfitPeriodType,
   ChartDataPoint
-} from './constants'
+} from '../constants'
 import {
   calculateProfitDateRange,
   prepareProductChartData,
   validateProfitData,
   exportProfitReport
-} from './utils'
+} from '../utils'
 
 interface UseProfitReportReturn {
   // State

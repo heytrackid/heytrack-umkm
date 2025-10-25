@@ -1,8 +1,8 @@
-# 🎉 Tutorial Lengkap HeyTrack - Sistem Manajemen Bakery UMKM
+# 🎉 Tutorial Lengkap HeyTrack - Sistem Manajemen UMKM UMKM
 
 Halo sobat UMKM! 👋 
 
-Ini tutorial lengkap buat kamu yang mau pakai HeyTrack buat ngatur bisnis bakery atau kuliner kamu. 
+Ini tutorial lengkap buat kamu yang mau pakai HeyTrack buat ngatur bisnis UMKM atau kuliner kamu. 
 Gue bakal jelasin semua fitur dengan bahasa yang gampang dipahami, kayak ngobrol sama temen. Let's go!
 
 ---
@@ -26,7 +26,7 @@ Gue bakal jelasin semua fitur dengan bahasa yang gampang dipahami, kayak ngobrol
 
 ### Apa Sih HeyTrack Itu?
 
-HeyTrack adalah sistem manajemen bisnis khusus buat UMKM kuliner (terutama bakery). 
+HeyTrack adalah sistem manajemen bisnis khusus buat UMKM kuliner (terutama UMKM). 
 Bayangin punya asisten yang:
 - 📊 Otomatis hitung HPP (Harga Pokok Produksi)
 - 💰 Tracking profit real-time dengan metode WAC
@@ -102,7 +102,7 @@ Supplier: Toko Bahan Kue Sentosa
 4. **Klik "Simpan"**
 
 
-### Contoh Daftar Bahan Lengkap untuk Bakery
+### Contoh Daftar Bahan Lengkap untuk UMKM
 
 | Bahan | Harga/Unit | Satuan | Stok Min |
 |-------|------------|--------|----------|
@@ -1017,7 +1017,7 @@ Sekarang kamu udah paham semua fitur HeyTrack. Saatnya action!
 
 ## 🤖 AI Recipe Generator (NEW!)
 
-Ini fitur paling keren! Generate resep bakery profesional pakai AI dalam hitungan detik.
+Ini fitur paling keren! Generate resep UMKM profesional pakai AI dalam hitungan detik.
 
 ### Apa yang Bisa AI Lakukan?
 
@@ -1265,7 +1265,7 @@ Setelah master basic features, explore ini:
 
 ## 🌟 Success Stories
 
-### Bakery A - Jakarta
+### UMKM A - Jakarta
 **Before HeyTrack:**
 - Manual HPP calculation (sering salah)
 - Gak tau profit real
@@ -1278,7 +1278,7 @@ Setelah master basic features, explore ini:
 - ✅ Waste turun 40% (dari inventory management)
 - ✅ Laporan keuangan rapi & real-time
 
-### Bakery B - Bandung
+### UMKM B - Bandung
 **Before HeyTrack:**
 - Bikin resep trial & error (buang waktu & uang)
 - Gak tau produk mana yang profitable
@@ -1325,7 +1325,7 @@ Setelah master basic features, explore ini:
 ## 🎉 You're Ready!
 
 Sekarang kamu punya semua tools & knowledge untuk:
-- 📊 Manage bisnis bakery secara profesional
+- 📊 Manage bisnis UMKM secara profesional
 - 💰 Hitung HPP & profit dengan akurat
 - 🤖 Generate resep baru dengan AI
 - 📈 Scale bisnis dengan confidence
@@ -1336,7 +1336,7 @@ Sekarang kamu punya semua tools & knowledge untuk:
 - Consistency beats perfection
 - AI is your assistant, not replacement
 
-**Now go build your bakery empire! 🚀🎂**
+**Now go build your UMKM empire! 🚀🎂**
 
 ---
 

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
-import { CustomersTable } from '@/types'
 import { getErrorMessage } from '@/lib/type-guards'
-
 import { apiLogger } from '@/lib/logger'
 // GET /api/customers/[id] - Get single customer
 export async function GET(
@@ -67,26 +65,17 @@ export async function PUT(
 
     const validatedData = validation.data
 
-    const updateData: CustomersTable['Update'] = {
-      name: validatedData.name,
-      email: validatedData.email,
-      phone: validatedData.phone,
-      address: validatedData.address,
-      customer_type: validatedData.customer_type,
-      discount_percentage: validatedData.discount_percentage,
-      notes: validatedData.notes,
-      is_active: validatedData.is_active,
-      loyalty_points: validatedData.loyalty_points,
-      favorite_items: validatedData.favorite_items,
+    const updatePayload = {
+      ...validatedData,
       updated_at: new Date().toISOString()
     }
-    
-    const { data, error } = await (supabase
+
+    const { data, error } = await supabase
       .from('customers')
-      .update(updateData)
+      .update(updatePayload)
       .eq('id', id)
       .select('*')
-      .single())
+      .single()
     
     if (error) {
       if (error.code === 'PGRST116') {

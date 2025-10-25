@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
+import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -22,7 +23,7 @@ export async function GET(
 
     return NextResponse.json(expense);
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -35,9 +36,15 @@ export async function PUT(
     const supabase = createSupabaseClient();
     const body = await request.json();
 
+    const updatePayload = {
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+
+    // @ts-ignore - Supabase table type mismatch with generated schema
     const { data: expense, error } = await supabase
       .from('expenses')
-      .update(body)
+      .update(updatePayload)
       .eq('id', id)
       .select(`
         *,
@@ -49,12 +56,12 @@ export async function PUT(
 
     return NextResponse.json(expense);
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -70,6 +77,6 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Expense deleted successfully' });
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

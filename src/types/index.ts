@@ -481,7 +481,7 @@ export type {
   CustomersTable, DailySalesSummaryTable,
   // Core types
   DatabaseEnums,
-  DatabaseFunctions, FinancialRecordsTable, IngredientsTable,
+  DatabaseFunctions, FinancialRecordsTable, IngredientPurchasesTable, IngredientsTable,
   InventoryAlertsTable,
   InventoryStatusView, InventoryStockLog, InventoryStockLogsTable, Json, NotificationsTable, OrderItemsTable, OrdersTable, OrderStatus, OrderSummaryView, PaymentMethod, PaymentsTable, ProductionSchedulesTable,
   ProductionsTable, ProductionStatus, RecentSyncEventsView, RecipeAvailabilityView, RecipeIngredientsTable, RecipesTable, RecordType, SecurityContext, StockTransactionsTable,
@@ -507,6 +507,20 @@ export type {
   OperationalCost,
   TimePeriod
 } from './hpp-tracking'
+
+// Re-export common aliases
+export type Ingredient = IngredientsTable['Row']
+export type Recipe = RecipesTable['Row']
+export type RecipeIngredient = RecipeIngredientsTable['Row']
+export type Order = OrdersTable['Row']
+export type Customer = CustomersTable['Row']
+export type Supplier = SuppliersTable['Row']
+
+export type RecipeWithIngredients = Recipe & {
+  recipe_ingredients?: Array<RecipeIngredient & {
+    ingredient?: Ingredient
+  }>
+}
 
 // Constants
 export const Constants = {

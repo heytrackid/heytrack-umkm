@@ -1,4 +1,4 @@
-import logger from '@/lib/logger';
+import { dbLogger } from '@/lib/logger';
 
 export interface ExcelExportData<T = Record<string, unknown>> {
   sheetName: string
@@ -154,7 +154,7 @@ export class LazyExcelExportService {
       const defaultFileName = `HeyTrack-Export-${new Date().toISOString().split('T')[0]}.xlsx`
       saveAs(blob, fileName || defaultFileName)
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Excel export failed')
+      dbLogger.error({ err: error }, 'Excel export failed')
       throw new Error('Failed to export Excel file')
     }
   }
@@ -181,8 +181,8 @@ export class LazyExcelExportService {
         {
           sheetName: 'Resep',
           data: Array.isArray(recipes?.recipes) ? recipes.recipes.map((recipe: RecipeResponse): RecipeExportRow => ({
-            id: recipe.id,
-            nama: recipe.name,
+            id: (recipe as any).id,
+            nama: (recipe as any).name,
             deskripsi: recipe.description || '',
             porsi: recipe.servings || 0,
             harga_jual: recipe.selling_price || 0,
@@ -204,12 +204,12 @@ export class LazyExcelExportService {
         {
           sheetName: 'Bahan Baku',
           data: Array.isArray(ingredients?.ingredients) ? ingredients.ingredients.map((ingredient: IngredientResponse): IngredientExportRow => ({
-            id: ingredient.id,
-            nama: ingredient.name,
+            id: (ingredient as any).id,
+            nama: (ingredient as any).name,
             satuan: ingredient.unit || '',
             harga_per_unit: ingredient.cost_per_unit || 0,
             stok_minimum: (ingredient.min_stock ?? 0) || 0,
-            stok_saat_ini: (ingredient.current_stock ?? 0) || 0,
+            stok_saat_ini: ((ingredient as any).current_stock ?? 0) || 0,
             dibuat: ingredient.created_at || ''
           })) : [],
           columns: [
@@ -225,11 +225,11 @@ export class LazyExcelExportService {
         {
           sheetName: 'Pesanan',
           data: Array.isArray(orders?.orders) ? orders.orders.map((order: OrderResponse): OrderExportRow => ({
-            id: order.id,
+            id: (order as any).id,
             nomor_order: order.order_no || '',
             nama_pelanggan: order.customer_name || '',
             tanggal_order: order.order_date || '',
-            status: order.status || '',
+            status: (order as any).status || '',
             total_jumlah: order.total_amount || 0,
             dibuat: order.created_at || ''
           })) : [],
@@ -246,8 +246,8 @@ export class LazyExcelExportService {
         {
           sheetName: 'Pelanggan',
           data: Array.isArray(customers?.customers) ? customers.customers.map((customer: CustomerResponse): CustomerExportRow => ({
-            id: customer.id,
-            nama: customer.name,
+            id: (customer as any).id,
+            nama: (customer as any).name,
             telepon: customer.phone || '',
             email: customer.email || '',
             alamat: customer.address || '',
@@ -266,7 +266,7 @@ export class LazyExcelExportService {
 
       return sheets
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Failed to fetch data for export')
+      dbLogger.error({ err: error }, 'Failed to fetch data for export')
       throw new Error('Failed to fetch data for export')
     }
   }

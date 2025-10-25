@@ -43,30 +43,31 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
 
     let query = supabase
-      .from('resep')
+      .from('recipes')
       .select(`
         *,
-        resep_item (
+        recipe_ingredients (
           id,
-          qty_per_batch,
-          bahan:bahan_baku (
+          quantity,
+          unit,
+          ingredient:ingredients (
             id,
-            nama_bahan,
-            satuan,
-            harga_per_satuan
+            name,
+            unit,
+            price_per_unit
           )
         )
       `)
-      .eq('user_id', user.id)
+      .eq('created_by', (user as any).id)
 
     // Add search filter
     if (search) {
-      query = query.ilike('nama', `%${search}%`)
+      query = query.ilike('name', `%${search}%`)
     }
 
     // Add category filter
     if (category) {
-      query = query.ilike('kategori', `%${category}%`)
+      query = query.ilike('category', `%${category}%`)
     }
 
     // Add status filter
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Add sorting
-    const sortField = sort_by || 'nama'
+    const sortField = sort_by || 'name'
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
     const { recipe_ingredients, ...recipeData } = body
 
     // Validate required fields
-    if (!recipeData.nama) {
+    if (!recipeData.name && !recipeData.nama) {
       return NextResponse.json(
         { error: 'Recipe name is required' },
         { status: 400 }
@@ -133,11 +134,12 @@ export async function POST(request: NextRequest) {
 
     // Start a transaction by creating the recipe first
     const { data: recipe, error: recipeError } = await supabase
-      .from('resep')
+      .from('recipes')
       .insert([{
         ...recipeData,
-        user_id: user.id
-      }])
+        created_by: (user as any).id,
+        name: recipeData.name || recipeData.nama
+      }] as any)
       .select('*')
       .single()
 
@@ -149,27 +151,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If ingredients are provided, add them to resep_item
+    // If ingredients are provided, add them to recipe_ingredients
     if (recipe_ingredients && recipe_ingredients.length > 0) {
       const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
-        resep_id: recipe.id,
-        bahan_id: ingredient.bahan_id || ingredient.ingredient_id,
-        qty_per_batch: ingredient.qty_per_batch || ingredient.quantity,
-        user_id: user.id
+        recipe_id: (recipe as any).id,
+        ingredient_id: ingredient.ingredient_id || ingredient.bahan_id,
+        quantity: ingredient.quantity || ingredient.qty_per_batch,
+        unit: ingredient.unit || 'g'
       }))
 
       const { error: ingredientsError } = await supabase
-        .from('resep_item')
-        .insert(recipeIngredientsToInsert)
+        .from('recipe_ingredients')
+        .insert(recipeIngredientsToInsert as any)
 
       if (ingredientsError) {
         apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
         // If ingredients fail, we should delete the recipe to maintain consistency
         await supabase
-          .from('resep')
+          .from('recipes')
           .delete()
-          .eq('id', recipe.id)
-          .eq('user_id', user.id)
+          .eq('id', (recipe as any).id)
+          .eq('created_by', (user as any).id)
         return NextResponse.json(
           { error: 'Failed to add recipe ingredients' },
           { status: 500 }
@@ -179,22 +181,23 @@ export async function POST(request: NextRequest) {
 
     // Fetch the complete recipe with ingredients for response
     const { data: completeRecipe, error: fetchError } = await supabase
-      .from('resep')
+      .from('recipes')
       .select(`
         *,
-        resep_item (
+        recipe_ingredients (
           id,
-          qty_per_batch,
-          bahan:bahan_baku (
+          quantity,
+          unit,
+          ingredient:ingredients (
             id,
-            nama_bahan,
-            satuan,
-            harga_per_satuan
+            name,
+            unit,
+            price_per_unit
           )
         )
       `)
-      .eq('id', recipe.id)
-      .eq('user_id', user.id)
+      .eq('id', (recipe as any).id)
+      .eq('created_by', (user as any).id)
       .single()
 
     if (fetchError) {

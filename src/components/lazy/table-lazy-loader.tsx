@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ComponentType, lazy, Suspense } from 'react'
-import { logger } from '@/lib/logger'
+import { uiLogger } from '@/lib/logger'
 
 // Table Loading Skeleton Component
 const TableLoadingSkeleton = ({ 
@@ -218,7 +218,7 @@ export const useTablePerformance = () => {
       
       const measure = performance.getEntriesByName(`table-${tableName}-duration`)[0]
       if (measure && measure.duration > 2000) {
-        logger.warn('Slow table rendering', { 
+        uiLogger.warn('Slow table rendering', { 
           tableName, 
           duration: measure.duration.toFixed(2) 
         })

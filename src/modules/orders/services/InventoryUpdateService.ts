@@ -1,4 +1,4 @@
-import logger from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -49,7 +49,7 @@ export class InventoryUpdateService {
               .eq('id', ri.ingredient.id)
 
             if (updateError) {
-              logger.error({ err: updateError }, 'Error updating ingredient stock')
+              dbLogger.error({ err: updateError }, 'Error updating ingredient stock')
             }
 
             // Create stock transaction record
@@ -68,7 +68,7 @@ export class InventoryUpdateService {
         }
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error updating inventory for order')
+      dbLogger.error({ err: error }, 'Error updating inventory for order')
       throw new Error('Failed to update inventory')
     }
   }

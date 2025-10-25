@@ -19,6 +19,7 @@ import { MessageCircle, Plus } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
+import { uiLogger } from '@/lib/logger'
 
 // Lazy load components
 import dynamic from 'next/dynamic'
@@ -74,7 +75,7 @@ export default function WhatsAppTemplatesPage() {
         setTemplates(data)
       }
     } catch (err) {
-      console.error('Error fetching templates:', err)
+      uiLogger.error({ error: err }, 'Error fetching WhatsApp templates')
     } finally {
       setLoading(false)
     }
@@ -96,7 +97,7 @@ export default function WhatsAppTemplatesPage() {
           await fetchTemplates()
         }
       } catch (err) {
-        console.error('Error deleting template:', err)
+        uiLogger.error({ error: err, templateId: id }, 'Error deleting WhatsApp template')
       }
     }
   }
@@ -116,7 +117,7 @@ export default function WhatsAppTemplatesPage() {
         await fetchTemplates()
       }
     } catch (err) {
-      console.error('Error updating template:', err)
+      uiLogger.error({ error: err, template }, 'Error updating WhatsApp template')
     }
   }
 

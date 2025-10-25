@@ -1,7 +1,7 @@
 // Sync Hooks - Real-time synchronization hooks
 
 import { useDataStore } from './store'
-import { apiLogger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 
 export const useRealTimeSync = () => {
   const store = useDataStore()
@@ -12,7 +12,7 @@ export const useRealTimeSync = () => {
     (events) => {
       if (events.length > 0) {
         const latestEvent = events[events.length - 1]
-        apiLogger.info(`Sync event: ${latestEvent.type} from ${latestEvent.source}`)
+        dbLogger.info(`Sync event: ${latestEvent.type} from ${latestEvent.source}`)
       }
     }
   )

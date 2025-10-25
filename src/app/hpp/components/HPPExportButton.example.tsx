@@ -5,7 +5,9 @@
  * It handles the export process, loading states, and error handling automatically.
  */
 
+import { useState } from 'react'
 import HPPExportButton from './HPPExportButton'
+import type { TimePeriod } from '@/types/hpp-tracking'
 
 // Example 1: Basic usage with default styling
 export function BasicExportExample() {

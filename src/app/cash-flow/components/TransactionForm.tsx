@@ -43,12 +43,12 @@ export default function TransactionForm({
   const form = useForm<ExpenseForm>({
     resolver: zodResolver(FinancialRecordSchema),
     defaultValues: {
+      type: transactionType === 'income' ? 'INCOME' : 'EXPENSE',
       amount: 0,
       category: '',
       description: '',
-      expense_date: new Date().toISOString().split('T')[0],
-      payment_method: 'CASH',
-      is_recurring: false
+      date: new Date().toISOString(),
+      payment_method: 'CASH'
     }
   })
 
@@ -143,10 +143,10 @@ export default function TransactionForm({
             <Label>Tanggal</Label>
             <Input
               type="date"
-              {...form.register('expense_date')}
+              {...form.register('date')}
             />
-            {form.formState.errors.expense_date && (
-              <p className="text-sm text-red-600">{form.formState.errors.expense_date.message}</p>
+            {form.formState.errors.date && (
+              <p className="text-sm text-red-600">{form.formState.errors.date.message}</p>
             )}
           </div>
         </form>

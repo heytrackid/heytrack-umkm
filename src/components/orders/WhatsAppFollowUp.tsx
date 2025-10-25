@@ -38,7 +38,7 @@ interface WhatsAppFollowUpProps {
 
 const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({ 
   order, 
-  businessName = 'Bakery UMKM',
+  businessName = 'UMKM UMKM',
   onSent 
 }) => {
   const { formatCurrency } = useSettings();
@@ -46,7 +46,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
   const [customMessage, setCustomMessage] = useState('');
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [isCustomTemplate, setIsCustomTemplate] = useState(false);
-  const [paymentDetails, setPaymentDetails] = useState('BCA 1234567890 a/n Bakery UMKM');
+  const [paymentDetails, setPaymentDetails] = useState('BCA 1234567890 a/n UMKM UMKM');
   const [copied, setCopied] = useState<string | null>(null);
   const [businessSettings, setBusinessSettings] = useState({
     businessNumber: '',

@@ -14,7 +14,7 @@ export function validateFileUpload(file: File | { name: string; size: number; ty
   const validation = FileUploadSchema.safeParse(fileData)
 
   if (!validation.success) {
-    const errors = validation.error.errors.map(err => err.message).join(', ')
+    const errors = validation.error.issues.map(err => err.message).join(', ')
     throw new Error(`File validation failed: ${errors}`)
   }
 
@@ -38,14 +38,14 @@ export function validateImageUpload(
   // First validate as regular file
   const fileValidation = FileUploadSchema.safeParse(fileData)
   if (!fileValidation.success) {
-    const errors = fileValidation.error.errors.map(err => err.message).join(', ')
+    const errors = fileValidation.error.issues.map(err => err.message).join(', ')
     throw new Error(`File validation failed: ${errors}`)
   }
 
   // Then validate as image
   const imageValidation = ImageUploadSchema.safeParse(fileData)
   if (!imageValidation.success) {
-    const errors = imageValidation.error.errors.map(err => err.message).join(', ')
+    const errors = imageValidation.error.issues.map(err => err.message).join(', ')
     throw new Error(`Image validation failed: ${errors}`)
   }
 

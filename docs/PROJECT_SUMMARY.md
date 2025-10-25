@@ -1,6 +1,6 @@
-# 📊 Bakery Management System - Project Summary
+# 📊 UMKM Management System - Project Summary
 
-**Project**: Bakery Management System  
+**Project**: UMKM Management System  
 **Status**: ✅ **Production Ready**  
 **Last Updated**: 2025-10-01  
 **Version**: 1.0.0
@@ -9,7 +9,7 @@
 
 ## 🎯 Project Overview
 
-A comprehensive bakery management system built with Next.js 14, TypeScript, Supabase, and Tailwind CSS. The system provides complete financial tracking with automatic income synchronization, WAC-based profit calculation, and AI-powered business insights.
+A comprehensive UMKM management system built with Next.js 14, TypeScript, Supabase, and Tailwind CSS. The system provides complete financial tracking with automatic income synchronization, WAC-based profit calculation, and AI-powered business insights.
 
 ### Key Features
 - 📦 **Inventory Management** with Weighted Average Cost (WAC)
@@ -167,7 +167,7 @@ If order update fails after income creation, the income record is automatically 
 ## 📁 File Structure
 
 ```
-bakery-management/
+UMKM-management/
 ├── src/
 │   ├── app/                    # Next.js 14 App Router
 │   │   ├── api/               # API Routes (42 endpoints)
@@ -418,7 +418,7 @@ bakery-management/
 
 ## 🎉 Final Notes
 
-This project successfully delivers a **production-ready bakery management system** with:
+This project successfully delivers a **production-ready UMKM management system** with:
 
 1. ✅ **Complete Financial Tracking**
    - Auto-sync income from orders

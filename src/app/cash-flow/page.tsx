@@ -142,8 +142,6 @@ export default function CashFlowPage() {
             onOpenChange={setIsAddDialogOpen}
             transactionType={transactionType}
             onTransactionTypeChange={setTransactionType}
-            formData={formData}
-            onFormDataChange={setFormData}
             onSubmit={handleAddTransaction}
             loading={loading}
           />

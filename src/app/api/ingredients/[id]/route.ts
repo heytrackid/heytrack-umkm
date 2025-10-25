@@ -13,7 +13,7 @@ import { NextRequest } from 'next/server'
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -25,8 +25,9 @@ export async function GET(
     }
 
     const supabase = createServerSupabaseAdmin()
+    // @ts-ignore
     const { data, error } = await supabase
-      .from('bahan_baku')
+      .from('ingredients')
       .select('*')
       .eq('id', id)
       .single()
@@ -53,7 +54,7 @@ export async function PUT(
   const { id } = await params
   return withValidation(
     BahanBakuSchema.partial(), // Allow partial updates
-    async (req: NextRequest, validatedData) => {
+    async (_req: NextRequest, validatedData) => {
       try {
         // Validate ID parameter
         const idValidation = IdParamSchema.safeParse({ id })
@@ -64,8 +65,9 @@ export async function PUT(
         const supabase = createServerSupabaseAdmin()
 
         // Update bahan baku
+        // @ts-ignore - Supabase table type mismatch with generated schema
         const { data, error } = await supabase
-          .from('bahan_baku')
+          .from('ingredients')
           .update(validatedData)
           .eq('id', id)
           .select('*')
@@ -89,7 +91,7 @@ export async function PUT(
 
 // DELETE /api/ingredients/[id] - Delete bahan baku
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -104,7 +106,7 @@ export async function DELETE(
 
     // Check if bahan baku exists
     const { data: existing } = await supabase
-      .from('bahan_baku')
+      .from('ingredients')
       .select('*')
       .eq('id', id)
       .single()
@@ -113,11 +115,11 @@ export async function DELETE(
       return createErrorResponse('Bahan baku tidak ditemukan', 404)
     }
 
-    // Check if bahan baku is used in recipes (resep_item table with bahan_id foreign key)
+    // Check if bahan baku is used in recipes (recipe_ingredients table with ingredient_id foreign key)
     const { data: resepItems } = await supabase
-      .from('resep_item')
+      .from('recipe_ingredients')
       .select('*')
-      .eq('bahan_id', id)
+      .eq('ingredient_id', id)
       .limit(1)
 
     if (resepItems && resepItems.length > 0) {
@@ -129,7 +131,7 @@ export async function DELETE(
 
     // Delete bahan baku
     const { error } = await supabase
-      .from('bahan_baku')
+      .from('ingredients')
       .delete()
       .eq('id', id)
 

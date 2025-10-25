@@ -296,7 +296,7 @@ export const INDONESIAN_CONFIG = {
     timezone: 'Asia/Jakarta'
   },
   
-  // Common Indonesian bakery categories
+  // Common Indonesian UMKM categories
   PRODUCT_CATEGORIES: [
     'Roti', 'Kue', 'Pastry', 'Cookies', 'Donat', 'Cake'
   ]

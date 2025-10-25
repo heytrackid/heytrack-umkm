@@ -104,8 +104,8 @@ export function getPeriodLabel(period: TimePeriod): string {
         '7d': '7 Hari Terakhir',
         '30d': '30 Hari Terakhir',
         '90d': '90 Hari Terakhir',
-        '1y': '1 Tahun Terakhir'
-    }
+        '1y': '1 Tahun Terakhir',
+    'all': '1 Tahun Terakhir' }
 
     return labels[period] || labels['30d']
 }
@@ -120,8 +120,8 @@ export function getShortPeriodLabel(period: TimePeriod): string {
         '7d': '7H',
         '30d': '30H',
         '90d': '90H',
-        '1y': '1T'
-    }
+        '1y': '1T',
+    'all': '1T' }
 
     return labels[period] || labels['30d']
 }
@@ -136,8 +136,8 @@ export function getPeriodDays(period: TimePeriod): number {
         '7d': 7,
         '30d': 30,
         '90d': 90,
-        '1y': 365
-    }
+        '1y': 365,
+    'all': 365 }
 
     return days[period] || 30
 }

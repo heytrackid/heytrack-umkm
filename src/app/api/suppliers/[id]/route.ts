@@ -3,7 +3,7 @@ import { createSupabaseClient } from '@/lib/supabase';
 import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -33,9 +33,15 @@ export async function PUT(
     const supabase = createSupabaseClient();
     const body = await request.json();
 
+    const updatePayload = {
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+
+    // @ts-ignore - Supabase table type mismatch with generated schema
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .update(body as Record<string, unknown>)
+      .update(updatePayload)
       .eq('id', id)
       .select('*')
       .single();
@@ -49,7 +55,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;

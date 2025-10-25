@@ -1,5 +1,6 @@
 'use client'
 import * as React from 'react'
+import { uiLogger } from "@/lib/logger"
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

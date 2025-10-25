@@ -161,7 +161,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                     <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
                     <Bar dataKey="value" fill="#8884d8">
                       {chartData.map((entry: ChartEntry, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell key={`cell-${_index}`} fill={entry.color} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -302,7 +302,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                       dataKey="value"
                     >
                       {pieData.map((entry, _index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell key={`cell-${_index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => [formatCurrency(value), 'Total Spent']} />

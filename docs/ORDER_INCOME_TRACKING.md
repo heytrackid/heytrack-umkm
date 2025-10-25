@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the automatic income tracking system for orders in the Bakery Management System. When an order is marked as DELIVERED (either during creation or through a status update), the system automatically creates a corresponding income record in the `expenses` table to track revenue.
+This document describes the automatic income tracking system for orders in the UMKM Management System. When an order is marked as DELIVERED (either during creation or through a status update), the system automatically creates a corresponding income record in the `expenses` table to track revenue.
 
 ## 📋 Table of Contents
 
@@ -573,4 +573,4 @@ The order income tracking system provides:
 - ✅ Duplicate prevention
 - ✅ Seamless integration with order workflow
 
-This enables accurate financial reporting and real-time revenue visibility for the bakery business.
+This enables accurate financial reporting and real-time revenue visibility for the UMKM business.

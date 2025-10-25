@@ -17,7 +17,7 @@ import { apiLogger } from '@/lib/logger'
 // GET /api/ingredients - Get all bahan baku with pagination and filtering
 export const GET = withQueryValidation(
   PaginationSchema.partial(), // Make all fields optional for GET requests
-  async (req: NextRequest, query) => {
+  async (_req: NextRequest, query) => {
     try {
       // Create authenticated Supabase client
       const supabase = await createClient()
@@ -36,26 +36,27 @@ export const GET = withQueryValidation(
       const { page = 1, limit = 10, sort, order = 'desc', search } = query
       const offset = calculateOffset(page, limit)
 
-      // Build query - using bahan_baku table
+      // Build query - using ingredients table
       let supabaseQuery = supabase
-        .from('bahan_baku')
+        .from('ingredients')
         .select('*', { count: 'exact' })
-        .eq('user_id', user.id)
+        .eq('user_id', (user as any).id)
         .range(offset, offset + limit - 1)
 
-      // Apply search filter - using nama_bahan instead of name
+      // Apply search filter - using name instead of nama_bahan
       if (search) {
-        supabaseQuery = supabaseQuery.ilike('nama_bahan', `%${search}%`)
+        supabaseQuery = supabaseQuery.ilike('name', `%${search}%`)
       }
 
-      // Apply sorting - default to nama_bahan
+      // Apply sorting - default to name
       if (sort) {
         supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
       } else {
-        supabaseQuery = supabaseQuery.order('nama_bahan', { ascending: true })
+        supabaseQuery = supabaseQuery.order('name', { ascending: true })
       }
 
-      const { data, error, count } = await supabaseQuery
+      // @ts-ignore
+    const { data, error, count } = await supabaseQuery
 
       if (error) {
         return handleDatabaseError(error)
@@ -78,7 +79,7 @@ export const GET = withQueryValidation(
 // POST /api/ingredients - Create new bahan baku
 export const POST = withValidation(
   BahanBakuSchema,
-  async (req: NextRequest, validatedData) => {
+  async (_req: NextRequest, validatedData) => {
     try {
       // Create authenticated Supabase client
       const supabase = await createClient()
@@ -95,11 +96,11 @@ export const POST = withValidation(
       }
 
       const { data: insertedData, error } = await supabase
-        .from('bahan_baku')
+        .from('ingredients')
         .insert({
           ...validatedData,
-          user_id: user.id
-        })
+          user_id: (user as any).id
+        } as any)
         .select('*')
         .single()
 

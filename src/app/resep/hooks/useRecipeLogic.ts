@@ -2,7 +2,7 @@
 import * as React from 'react'
 
 import { useState, useCallback } from 'react'
-import { useIngredients } from '@/hooks/useSupabase'
+import { useIngredients, useRecipesWithIngredients } from '@/hooks/useSupabase'
 
 import { apiLogger } from '@/lib/logger'
 export interface Recipe {

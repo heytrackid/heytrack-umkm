@@ -2,7 +2,7 @@
 
 ## Overview
 
-WhatsApp Follow-up feature telah berhasil diintegrasikan ke dalam sistem manajemen pesanan bakery. Fitur ini memungkinkan pengguna untuk mengirim pesan follow-up kepada pelanggan melalui WhatsApp dengan template otomatis yang sesuai konteks bisnis.
+WhatsApp Follow-up feature telah berhasil diintegrasikan ke dalam sistem manajemen pesanan UMKM. Fitur ini memungkinkan pengguna untuk mengirim pesan follow-up kepada pelanggan melalui WhatsApp dengan template otomatis yang sesuai konteks bisnis.
 
 ## 🚀 Features
 

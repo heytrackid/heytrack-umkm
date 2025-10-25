@@ -14,6 +14,7 @@ import { apiLogger } from '@/lib/logger'
 // Import enhanced AI service
 import { getInventoryInsights, getRecipeSuggestions, getFinancialAnalysis, getOrderInsights } from '@/lib/ai-chatbot-service'
 import { AIResponseGenerator } from '@/lib/nlp-processor'
+import { supabase } from '@/lib/supabase'
 
 interface Message {
   id: string
@@ -43,7 +44,7 @@ export default function AIChatbotPage() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: 'Halo! Saya adalah asisten AI HeyTrack untuk membantu mengelola bisnis bakery Anda. Apa yang bisa saya bantu hari ini?',
+      content: 'Halo! Saya adalah asisten AI HeyTrack untuk membantu mengelola bisnis UMKM Anda. Apa yang bisa saya bantu hari ini?',
       timestamp: new Date(),
       suggestions: SUGGESTIONS.slice(0, 3).map(s => s.text)
     }
@@ -105,13 +106,25 @@ export default function AIChatbotPage() {
   }
 
   const processAIQuery = async (query: string) => {
+    // Get current user ID for database filtering
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
+
+    if (!userId) {
+      return {
+        message: '❌ **Error:** Anda perlu login untuk menggunakan AI Chatbot',
+        suggestions: ['Login terlebih dahulu', 'Refresh halaman']
+      }
+    }
+
     try {
-      // Get business data for context
+
+      // Get business data for context with user filtering
       const [inventoryData, recipeData, financialData, orderData] = await Promise.all([
-        getInventoryInsights(query),
-        getRecipeSuggestions(query),
-        getFinancialAnalysis(query),
-        getOrderInsights(query)
+        getInventoryInsights(query, userId),
+        getRecipeSuggestions(query, userId),
+        getFinancialAnalysis(query, userId),
+        getOrderInsights(query, userId)
       ])
 
       // Combine all business data
@@ -119,7 +132,8 @@ export default function AIChatbotPage() {
         inventory: inventoryData.data,
         recipes: recipeData.data,
         financial: financialData.data,
-        orders: orderData.data
+        orders: orderData.data,
+        userId
       }
 
       // Use advanced NLP processing
@@ -142,19 +156,19 @@ export default function AIChatbotPage() {
       const lowerQuery = query.toLowerCase()
 
       if (lowerQuery.includes('stok') || lowerQuery.includes('bahan') || lowerQuery.includes('inventory')) {
-        return await getInventoryInsights(query)
+        return await getInventoryInsights(query, userId)
       }
 
       if (lowerQuery.includes('resep') || lowerQuery.includes('recipe') || lowerQuery.includes('produksi')) {
-        return await getRecipeSuggestions(query)
+        return await getRecipeSuggestions(query, userId)
       }
 
       if (lowerQuery.includes('uang') || lowerQuery.includes('profit') || lowerQuery.includes('harga') || lowerQuery.includes('financial')) {
-        return await getFinancialAnalysis(query)
+        return await getFinancialAnalysis(query, userId)
       }
 
       if (lowerQuery.includes('pesanan') || lowerQuery.includes('order') || lowerQuery.includes('pelanggan')) {
-        return await getOrderInsights(query)
+        return await getOrderInsights(query, userId)
       }
 
       // Default fallback

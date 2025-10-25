@@ -454,7 +454,7 @@ const createPooledClient = () => {
       autoRefreshToken: false,
     },
     global: {
-      headers: { 'x-application': 'bakery-sync' },
+      headers: { 'x-application': 'UMKM-sync' },
     },
   })
 }
@@ -538,4 +538,4 @@ interface InventoryStockLog {
 
 **Built with ❤️ by HeyTrack Team**
 
-*Complete API reference for real-time bakery synchronization*
+*Complete API reference for real-time UMKM synchronization*

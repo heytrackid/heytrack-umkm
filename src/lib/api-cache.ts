@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 /**
  * Advanced API Response Caching System
  * Provides intelligent caching with TTL, invalidation, and memory management

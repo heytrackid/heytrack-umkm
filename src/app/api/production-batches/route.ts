@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/type-guards'
 import { createSupabaseClient } from '@/lib/supabase';
 
 export async function GET() {
@@ -6,7 +7,7 @@ export async function GET() {
     const supabase = createSupabaseClient();
     
     const { data: batches, error } = await supabase
-      .from('production_batches')
+      .from('productions')
       .select(`
         *,
         recipe:recipes(name)
@@ -17,7 +18,7 @@ export async function GET() {
 
     return NextResponse.json(batches);
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -27,8 +28,8 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const { data: batch, error } = await supabase
-      .from('production_batches')
-      .insert([body])
+      .from('productions')
+      .insert([body] as any)
       .select(`
         *,
         recipe:recipes(name)
@@ -39,6 +40,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(batch, { status: 201 });
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

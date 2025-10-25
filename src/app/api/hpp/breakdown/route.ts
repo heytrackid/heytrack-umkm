@@ -1,4 +1,5 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/type-guards'
 import { CostBreakdown } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
         if (snapshotError) {
             apiLogger.error({ error: snapshotError }, 'Error fetching snapshot:')
             return NextResponse.json(
-                { error: 'Failed to fetch snapshot', details: snapshotError.message },
+                { error: 'Failed to fetch snapshot', details: (snapshotError as any).message },
                 { status: 500 }
             )
         }
@@ -75,11 +76,11 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const snapshot = snapshots[0]
+        const snapshot = snapshots[0] as any
         const breakdown = snapshot.cost_breakdown as CostBreakdown
 
         // Sort ingredients by cost (descending) and get top 5
-        const sortedIngredients = [...breakdown.ingredients].sort((a, b) => b.cost - a.cost)
+        const sortedIngredients = [...(breakdown as any).ingredients].sort((a, b) => b.cost - a.cost)
         const top5Ingredients = sortedIngredients.slice(0, 5)
 
         // Check for previous snapshot to identify significant changes
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
             .from('hpp_snapshots')
             .select('cost_breakdown')
             .eq('recipe_id', recipeId)
-            .lt('snapshot_date', snapshot.snapshot_date)
+            .lt('snapshot_date', (snapshot as any).snapshot_date)
             .order('snapshot_date', { ascending: false })
             .limit(1)
 
@@ -95,11 +96,11 @@ export async function GET(request: NextRequest) {
 
         // If we have a previous snapshot, calculate changes
         if (previousSnapshots && previousSnapshots.length > 0) {
-            const previousBreakdown = previousSnapshots[0].cost_breakdown as CostBreakdown
+            const previousBreakdown = (previousSnapshots[0] as any).cost_breakdown as CostBreakdown
 
             ingredientsWithChanges = top5Ingredients.map(ingredient => {
-                const previousIngredient = previousBreakdown.ingredients.find(
-                    i => i.id === ingredient.id
+                const previousIngredient = (previousBreakdown as any).ingredients.find(
+                    i => (i as any).id === (ingredient as any).id
                 )
 
                 if (previousIngredient) {
@@ -120,18 +121,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             success: true,
             data: {
-                total_hpp: snapshot.hpp_value,
-                material_cost: snapshot.material_cost,
-                operational_cost: snapshot.operational_cost,
+                total_hpp: (snapshot as any).hpp_value,
+                material_cost: (snapshot as any).material_cost,
+                operational_cost: (snapshot as any).operational_cost,
                 breakdown: {
                     ingredients: ingredientsWithChanges,
                     operational: breakdown.operational,
-                    all_ingredients: breakdown.ingredients
+                    all_ingredients: (breakdown as any).ingredients
                 },
-                snapshot_date: snapshot.snapshot_date
+                snapshot_date: (snapshot as any).snapshot_date
             },
             meta: {
-                recipe_name: recipe.nama,
+                recipe_name: (recipe as any).nama,
                 total_ingredients: breakdown.ingredients.length,
                 has_previous_data: !!(previousSnapshots && previousSnapshots.length > 0)
             }
@@ -140,7 +141,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in breakdown endpoint:')
         return NextResponse.json(
-            { error: 'Internal server error', details: error.message },
+            { error: 'Internal server error', details: getErrorMessage(error) },
             { status: 500 }
         )
     }

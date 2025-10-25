@@ -1,6 +1,6 @@
 import { dbLogger } from '@/lib/logger';
 import { sanitizeSQL, validateInput } from '@/lib/validations';
-import { Database } from '@/types';
+import type { Database } from '@/types/supabase-generated';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Cache entry type
@@ -94,7 +94,7 @@ function getSupabaseClient(): SupabaseClient<Database> {
       },
       global: {
         headers: {
-          'x-client-info': 'bakery-management-app',
+          'x-client-info': 'UMKM-management-app',
         },
       },
     })
@@ -282,7 +282,7 @@ export const dbService = {
     const result = await supabase
       .from('ingredients')
       // @ts-ignore - Supabase client returns 'never' for ingredients table, using type assertion
-      .update(sanitizedUpdates)
+      .update(sanitizedUpdates as any)
       .eq('id', id)
       .select('*')
       .single()

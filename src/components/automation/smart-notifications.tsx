@@ -119,7 +119,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     const additional: SmartNotification[] = []
 
     // Check for orders with tight delivery schedules
-    const urgentOrders = orders.filter(order => {
+    const urgentOrders = orders.filter((order: any) => {
       if (!order.delivery_date) return false
       const deliveryTime = new Date(order.delivery_date).getTime()
       const now = Date.now()
@@ -142,7 +142,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     }
 
     // Check for profitable vs unprofitable items
-    const lowMarginCount = orders.filter(order => {
+    const lowMarginCount = orders.filter((order: any) => {
       return order.order_items?.some((item: any) => {
         const margin = item.unit_price > 0 ? ((item.unit_price - 5000) / item.unit_price) * 100 : 0
         return margin < 30
@@ -163,7 +163,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     }
 
     // HPP calculation recommendations
-    const needsHPPReview = ingredients.filter(ing => ing.stock > ing.min_stock * 2).length
+    const needsHPPReview = ingredients.filter((ing: any) => ing.stock > ing.min_stock * 2).length
     if (needsHPPReview > 3) {
       additional.push({
         id: `hpp-review-${Date.now()}`,
@@ -182,12 +182,12 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
 
   const markAsRead = (id: string) => {
     setNotifications(prev => 
-      prev.map(notif => notif.id === id ? { ...notif, read: true } : notif)
+      prev.map((notif: any) => notif.id === id ? { ...notif, read: true } : notif)
     )
   }
 
   const dismissNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id))
+    setNotifications(prev => prev.filter((notif: any) => notif.id !== id))
   }
 
   const getNotificationIcon = (type: string) => {
@@ -208,8 +208,8 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     }
   }
 
-  const unreadCount = notifications.filter(n => !n.read).length
-  const highPriorityCount = notifications.filter(n => !n.read && n.priority === 'high').length
+  const unreadCount = notifications.filter((n: any) => !n.read).length
+  const highPriorityCount = notifications.filter((n: any) => !n.read && n.priority === 'high').length
 
   return (
     <div className={`relative ${className}`}>
@@ -351,7 +351,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
                 variant="ghost" 
                 size="sm" 
                 className="w-full text-xs"
-                onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                onClick={() => setNotifications(prev => prev.map((n: any) => ({ ...n, read: true })))}
               >
                 Mark all as read
               </Button>

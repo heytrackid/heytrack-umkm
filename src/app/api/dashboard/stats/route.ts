@@ -65,21 +65,21 @@ export async function GET(request: Request) {
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
     
     const todayRevenue = todayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
     
     const activeOrders = orders?.filter((order: Order) =>
-      ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(String(order.status || ''))).length || 0
+      ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(String((order as any).status || ''))).length || 0
     
     const totalCustomers = customers?.length || 0
     const vipCustomers = customers?.filter((customer: Customer) =>
       String((customer as any as { customer_type?: string }).customer_type || '') === 'vip').length || 0
 
-    const lowStockItems = ingredients?.filter((ingredient: Ingredient) => {
+    const lowStockItems = ingredients?.filter((ingredient: any) => {
       const currentStock = Number(ingredient.current_stock || 0)
-      const minStock = Number(ingredient.min_stock || 0)
+      const minStock = Number(ingredient.min_stock || ingredient.minimum_stock || 0)
       return currentStock <= minStock
     }).length || 0
     
@@ -87,7 +87,7 @@ export async function GET(request: Request) {
     const totalRecipes = recipes?.length || 0
     
     const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: Expense) =>
-      sum + parseFloat(String(expense.amount || 0)), 0) || 0
+      sum + parseFloat(String((expense as any).amount || 0)), 0) || 0
 
     // Calculate yesterday for comparison
     const yesterdayDate = new Date()
@@ -100,14 +100,14 @@ export async function GET(request: Request) {
       .eq('order_date', yesterdayStr)
 
     const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
     
     // Category breakdown for ingredients
-    const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: Ingredient) => {
+    const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: any) => {
       const category = String(ingredient.category || 'General')
       acc[category] = (acc[category] || 0) + 1
       return acc
-    }, {}) || {}
+    }, {} as Record<string, number>) || {}
 
     // Recent orders for activity feed
     const recentOrders = orders
@@ -134,10 +134,10 @@ export async function GET(request: Request) {
         total: orders?.length || 0,
         today: todayOrders?.length || 0,
         recent: recentOrders.map((order: Order) => ({
-          id: order.id,
-          customer: String(order.customer_name || 'Walk-in customer'),
-          amount: order.total_amount,
-          status: order.status,
+          id: (order as any).id,
+          customer: String((order as any).customer_name || 'Walk-in customer'),
+          amount: (order as any).total_amount,
+          status: (order as any).status,
           time: order.created_at
         }))
       },
@@ -200,12 +200,12 @@ export async function POST() {
       .select('*')
       .eq('expense_date', today)
     
-    const todayOrderIds = todayOrders?.map((order: Order) => order.id) || []
+    const todayOrderIds = todayOrders?.map((order: Order) => (order as any).id) || []
     const todayItems = todayOrderItems?.filter((item: any) =>
       todayOrderIds.includes(String((item as { order_id: string }).order_id))) || []
 
     const totalRevenue = todayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
 
     const totalItemsSold = todayItems.reduce((sum: number, item: any) =>
       sum + parseInt(String((item as { quantity: number | string }).quantity || 0), 10), 0) || 0
@@ -213,7 +213,7 @@ export async function POST() {
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
 
     const totalExpenses = todayExpenses?.reduce((sum: number, expense: Expense) =>
-      sum + parseFloat(String(expense.amount || 0)), 0) || 0
+      sum + parseFloat(String((expense as any).amount || 0)), 0) || 0
 
     const profitEstimate = totalRevenue - totalExpenses
 
@@ -229,7 +229,7 @@ export async function POST() {
         expenses_total: totalExpenses,
         profit_estimate: profitEstimate,
         updated_at: new Date().toISOString()
-      }], {
+      }] as any, {
         onConflict: 'sales_date'
       })
     

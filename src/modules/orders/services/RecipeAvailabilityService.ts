@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import { HPPCalculationService } from '@/modules/recipes'
 import type { RecipeOption } from './OrderRecipeService'
@@ -100,7 +100,7 @@ export class RecipeAvailabilityService {
 
       return recipeOptions
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error fetching available recipes')
+      dbLogger.error({ err: error }, 'Error fetching available recipes')
       throw new Error('Failed to fetch available recipes')
     }
   }

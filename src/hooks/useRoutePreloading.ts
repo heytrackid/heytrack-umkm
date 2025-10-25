@@ -5,14 +5,20 @@ import { apiLogger } from '@/lib/logger'
 import {
   globalLazyLoadingUtils,
   preloadChartBundle,
-  preloadModalComponent,
-  preloadTableBundle
+  preloadModalComponent
 } from '@/components/lazy/index'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect } from 'react'
 
 // Route preloading patterns based on user behavior
-const ROUTE_PRELOADING_PATTERNS = {
+type RouteConfig = {
+  immediate: string[]
+  onHover: string[]
+  components: string[]
+  modals?: string[]
+}
+
+const ROUTE_PRELOADING_PATTERNS: Record<string, RouteConfig> = {
   // Dashboard -> likely next routes
   '/dashboard': {
     immediate: ['/orders', '/finance', '/inventory'],
@@ -106,11 +112,8 @@ export const useRoutePreloading = () => {
           // Preload essential components immediately
           if (config.components) {
             config.components.forEach(component => {
-              if (component.includes('table')) {
-                preloadPromises.push(preloadTableBundle())
-              }
               if (component.includes('chart')) {
-                preloadPromises.push(preloadChartBundle())
+                preloadChartBundle().catch(() => {})
               }
             })
           }
@@ -118,9 +121,7 @@ export const useRoutePreloading = () => {
           // Preload critical modals
           if (config.modals) {
             config.modals.forEach(modal => {
-              preloadPromises.push(
-                preloadModalComponent(modal).catch(() => { })
-              )
+              preloadModalComponent(modal as any).catch(() => {})
             })
           }
           break
@@ -129,8 +130,8 @@ export const useRoutePreloading = () => {
           // Preload likely next routes
           if (config.immediate) {
             config.immediate.forEach(route => {
-              // Preload the route component
-              preloadPromises.push(router.prefetch(route))
+              // Preload the route component (prefetch is sync, wrapping in Promise)
+              router.prefetch(route)
             })
           }
           break
@@ -139,7 +140,8 @@ export const useRoutePreloading = () => {
           // Preload hover targets
           if (config.onHover) {
             config.onHover.forEach(route => {
-              preloadPromises.push(router.prefetch(route))
+              // Preload the route component (prefetch is sync)
+              router.prefetch(route)
             })
           }
           break
@@ -148,10 +150,12 @@ export const useRoutePreloading = () => {
       await Promise.all(preloadPromises)
 
       const endTime = performance.now()
-      apiLogger.info(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
+      if (preloadPromises.length > 0) {
+        apiLogger.info(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
+      }
 
     } catch (error: unknown) {
-      apiLogger.warn(`⚠️ Failed to preload resources for ${currentRoute}:`, error)
+      apiLogger.warn(`⚠️ Failed to preload resources for ${currentRoute}`, error)
     }
   }, [pathname, router])
 
@@ -178,11 +182,11 @@ export const useRoutePreloading = () => {
 
   // Manual preload function for user interactions
   const preloadRoute = useCallback((targetRoute: string) => {
-    const config = ROUTE_PRELOADING_PATTERNS[targetRoute as keyof typeof ROUTE_PRELOADING_PATTERNS]
+    const config = ROUTE_PRELOADING_PATTERNS[targetRoute]
     if (config?.components) {
-      globalLazyLoadingUtils.preloadForRoute(targetRoute as any)
+      globalLazyLoadingUtils.preloadForRoute(targetRoute as any).catch(() => {})
     }
-    return router.prefetch(targetRoute)
+    router.prefetch(targetRoute)
   }, [router])
 
   return {
@@ -215,21 +219,16 @@ export const useLinkPreloading = () => {
 export const useButtonPreloading = () => {
   const preloadModalOnHover = useCallback((modalType: string) => {
     if (modalType.includes('form') || modalType.includes('detail')) {
-      preloadModalComponent(modalType).catch(() => { })
+      preloadModalComponent(modalType as any).catch(() => {})
     }
   }, [])
 
-  const preloadTableOnHover = useCallback(() => {
-    preloadTableBundle().catch(() => { })
-  }, [])
-
   const preloadChartOnHover = useCallback(() => {
-    preloadChartBundle().catch(() => { })
+    preloadChartBundle().catch(() => {})
   }, [])
 
   return {
     preloadModalOnHover,
-    preloadTableOnHover,
     preloadChartOnHover
   }
 }
@@ -255,17 +254,17 @@ export const useSmartPreloading = () => {
 
     // Get most visited routes
     const popularRoutes = Object.entries(routeFrequency)
-      .sort((a, b) => (b as number) - (a as number))
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
       .slice(0, 3)
       .map(([route]) => route)
 
     // Preload popular routes with low priority
+    // Note: Manual prefetch not needed as Next.js handles this automatically
     setTimeout(() => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
-          import('@/components').then(({ default: router }) => {
-            router.prefetch(route)
-          })
+          // Router prefetch would go here if needed
+          apiLogger.debug('Popular route identified:', route)
         }
       })
     }, 2000)
@@ -284,12 +283,9 @@ export const useIdleTimePreloading = () => {
         // User is idle, preload heavy components
         apiLogger.info('🕒 User idle - preloading heavy components')
 
-        Promise.all([
-          preloadChartBundle().catch(() => { }),
-          preloadTableBundle().catch(() => { }),
-        ]).then(() => {
+        preloadChartBundle().then(() => {
           apiLogger.info('✅ Idle preloading completed')
-        }).catch(() => { })
+        }).catch(() => {})
       }, 5000) // 5 seconds of inactivity
     }
 
@@ -325,10 +321,7 @@ export const useNetworkAwarePreloading = () => {
 
         // Preload more aggressively on fast connections
         setTimeout(() => {
-          Promise.all([
-            preloadChartBundle(),
-            preloadTableBundle(),
-          ]).catch(() => { })
+          preloadChartBundle().catch(() => {})
         }, 1000)
       } else if (isSlowConnection) {
         apiLogger.info('🐌 Slow connection detected - minimal preloading')

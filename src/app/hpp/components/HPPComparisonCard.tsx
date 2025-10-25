@@ -5,6 +5,7 @@ import { CardSkeleton } from '@/components/ui'
 import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
 import { HPPComparison } from '@/types/hpp-tracking'
+import { getPeriodLabel as getUtilPeriodLabel } from '@/utils/hpp-date-utils'
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
 
 interface HPPComparisonCardProps {

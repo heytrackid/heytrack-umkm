@@ -81,7 +81,7 @@ function MobileHeader({
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
       } catch (error) {
-        apiLogger.error({ error: error }, 'Error getting user:')
+        uiLogger.error({ error: error }, 'Error getting user:')
       } finally {
         setLoading(false)
       }

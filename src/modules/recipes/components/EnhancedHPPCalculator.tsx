@@ -20,6 +20,7 @@ import { SettingsPanel } from './SettingsPanel'
 
 import { useCurrency } from '@/hooks/useCurrency'
 import { Lightbulb } from 'lucide-react'
+import { uiLogger } from '@/lib/logger'
 
 export default function EnhancedHPPCalculator() {
   const { formatCurrency } = useCurrency()

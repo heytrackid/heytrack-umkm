@@ -26,6 +26,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { IngredientPurchaseInsertSchema, type IngredientPurchaseInsert } from '@/lib/validations/database-validations'
 import type { AvailableIngredient } from './types'
+import { uiLogger } from '@/lib/logger'
 
 interface PurchaseFormProps {
   ingredients: AvailableIngredient[]
@@ -65,7 +66,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
       setIsDialogOpen(false)
       onSuccess()
     } catch (error) {
-      console.error('Error creating purchase:', error)
+      uiLogger.error({ error }, 'Error creating purchase')
       alert('Gagal menambahkan pembelian')
     }
   }

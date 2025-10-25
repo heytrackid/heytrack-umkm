@@ -206,7 +206,7 @@ export function SmartFinancialDashboard({
       {alerts.length > 0 && (
         <div className="space-y-2">
           {alerts.map((alert: any, index: number) => (
-            <Alert key={index} className={`${
+            <Alert key={_index} className={`${
               alert.type === 'danger' ? 'border-red-200 bg-gray-100 dark:bg-gray-800' : 'border-yellow-200 bg-gray-100 dark:bg-gray-800'
             }`}>
               <AlertTriangle className={`h-4 w-4 ${
@@ -385,7 +385,7 @@ export function SmartFinancialDashboard({
             <CardContent>
               <div className="space-y-4">
                 {trends.map((week: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div key={_index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="font-medium">{week.week}</div>
                       {index < trends.length - 1 && getTrendIcon(week.revenue, trends[index + 1]?.revenue || 0)}
@@ -425,7 +425,7 @@ export function SmartFinancialDashboard({
             <CardContent>
               <div className="space-y-3">
                 {recommendations.map((rec: string, index: number) => (
-                  <Alert key={index}>
+                  <Alert key={_index}>
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription>{rec}</AlertDescription>
                   </Alert>
@@ -462,8 +462,8 @@ export function SmartFinancialDashboard({
                     score: Math.min(metrics.netMargin * 5, 100),
                     color: 'bg-orange-500'
                   }
-                ].map((item, _index) => (
-                  <div key={index} className="space-y-2">
+                ].map((item,_index) => (
+                  <div key={_index} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{item.name}</span>
                       <span className="text-sm font-bold">{Math.round(item.score)}/100</span>
@@ -543,8 +543,8 @@ export function SmartFinancialDashboard({
                     priority: revenueProgress < 80 ? 'high' : 'medium',
                     action: 'grow_revenue'
                   }
-                ].map((action, _index) => (
-                  <div key={index} className="p-3 border rounded-lg">
+                ].map((action,_index) => (
+                  <div key={_index} className="p-3 border rounded-lg">
                     <div className="flex justify-between items-start mb-2">
                       <div className="font-medium">{action.title}</div>
                       <Badge variant={action.priority === 'high' ? 'destructive' : 'secondary'}>

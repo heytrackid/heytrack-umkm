@@ -1,7 +1,7 @@
-import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { detectAlertsForAllUsers } from './alert-detector.ts'
-import type { AlertDetectionResponse } from './types.ts'
-import { formatErrorResponse, formatSuccessResponse, log } from './utils.ts'
+import { createClient } from '@supabase/supabase-js'
+import { detectAlertsForAllUsers } from './alert-detector'
+import type { AlertDetectionResponse } from './types'
+import { formatErrorResponse, formatSuccessResponse, log } from './utils'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',

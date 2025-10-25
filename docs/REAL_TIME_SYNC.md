@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Real-Time Data Synchronization system is an enterprise-grade solution that ensures instant, consistent data updates across all modules of the bakery management system. Built with PostgreSQL triggers, Supabase real-time features, and event-driven architecture.
+The Real-Time Data Synchronization system is an enterprise-grade solution that ensures instant, consistent data updates across all modules of the UMKM management system. Built with PostgreSQL triggers, Supabase real-time features, and event-driven architecture.
 
 ## 🎯 Key Features
 
@@ -274,7 +274,7 @@ const demoSteps = [
 
 ## 🚀 Benefits
 
-### For Bakery Owners
+### For UMKM Owners
 - **Zero Manual Updates**: Stock, recipes, and reports update automatically
 - **Real-Time Insights**: Instant visibility into business operations
 - **Error Prevention**: Impossible to oversell out-of-stock items
@@ -412,4 +412,4 @@ console.log('Sync Performance:', stats)
 
 **Built with ❤️ by HeyTrack Team**
 
-*Real-time synchronization for modern bakery management*
+*Real-time synchronization for modern UMKM management*

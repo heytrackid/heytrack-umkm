@@ -1,5 +1,5 @@
-import type { AffectedComponents, ComponentChange, HPPSnapshot } from './types.ts'
-import { calculatePercentageChange } from './utils.ts'
+import type { AffectedComponents, ComponentChange, HPPSnapshot } from './types'
+import { calculatePercentageChange } from './utils'
 
 /**
  * Analyze which components (ingredients or operational costs) changed significantly
@@ -36,8 +36,8 @@ function analyzeIngredientChanges(
 ): ComponentChange[] {
     const changes: ComponentChange[] = []
 
-    const currentBreakdown = current.cost_breakdown as any
-    const previousBreakdown = previous.cost_breakdown as any
+    const currentBreakdown = current.cost_breakdown
+    const previousBreakdown = previous.cost_breakdown
 
     // Validate breakdown structure
     if (!currentBreakdown?.ingredients || !previousBreakdown?.ingredients) {
@@ -49,17 +49,17 @@ function analyzeIngredientChanges(
 
     // Compare each ingredient
     for (const currentIng of currentIngredients) {
-        const previousIng = previousIngredients.find((p: any) => p.id === currentIng.id)
+        const previousIng = previousIngredients.find(p => p.id === currentIng.id)
 
-        if (previousIng && previousIng.cost > 0) {
-            const change = calculatePercentageChange(currentIng.cost, previousIng.cost)
+        if (previousIng && previousIng.total_cost > 0) {
+            const change = calculatePercentageChange(currentIng.total_cost, previousIng.total_cost)
 
             // Only include if change is significant (> 5%)
             if (Math.abs(change) > 5) {
                 changes.push({
                     name: currentIng.name,
-                    old: previousIng.cost,
-                    new: currentIng.cost,
+                    old: previousIng.total_cost,
+                    new: currentIng.total_cost,
                     change: change
                 })
             }
@@ -79,32 +79,31 @@ function analyzeOperationalChanges(
 ): ComponentChange[] {
     const changes: ComponentChange[] = []
 
-    const currentBreakdown = current.cost_breakdown as any
-    const previousBreakdown = previous.cost_breakdown as any
+    const currentBreakdown = current.cost_breakdown
+    const previousBreakdown = previous.cost_breakdown
 
     // Validate breakdown structure
-    if (!currentBreakdown?.operational && !currentBreakdown?.operational_costs) {
+    if (!currentBreakdown?.operational_costs) {
         return changes
     }
-    if (!previousBreakdown?.operational && !previousBreakdown?.operational_costs) {
+    if (!previousBreakdown?.operational_costs) {
         return changes
     }
 
-    // Handle both 'operational' and 'operational_costs' field names
-    const currentOps = currentBreakdown.operational || currentBreakdown.operational_costs || []
-    const previousOps = previousBreakdown.operational || previousBreakdown.operational_costs || []
+    // Handle operational_costs field
+    const currentOps = currentBreakdown.operational_costs
+    const previousOps = previousBreakdown.operational_costs
 
     // Compare each operational cost
     for (const currentOp of currentOps) {
-        // Match by category or name field
-        const categoryKey = currentOp.category || currentOp.name
-        const previousOp = previousOps.find((p: any) =>
-            (p.category === categoryKey) || (p.name === categoryKey)
+        // Match by name field
+        const previousOp = previousOps.find(p =>
+            p.name === currentOp.name
         )
 
         if (previousOp) {
-            const previousCost = previousOp.cost || 0
-            const currentCost = currentOp.cost || 0
+            const previousCost = previousOp.cost
+            const currentCost = currentOp.cost
 
             if (previousCost > 0) {
                 const change = calculatePercentageChange(currentCost, previousCost)
@@ -112,7 +111,7 @@ function analyzeOperationalChanges(
                 // Only include if change is significant (> 5%)
                 if (Math.abs(change) > 5) {
                     changes.push({
-                        name: categoryKey,
+                        name: currentOp.name,
                         old: previousCost,
                         new: currentCost,
                         change: change
@@ -135,8 +134,8 @@ export function detectIngredientSpikes(
 ): ComponentChange[] {
     const spikes: ComponentChange[] = []
 
-    const currentBreakdown = current.cost_breakdown as any
-    const previousBreakdown = previous.cost_breakdown as any
+    const currentBreakdown = current.cost_breakdown
+    const previousBreakdown = previous.cost_breakdown
 
     // Validate breakdown structure
     if (!currentBreakdown?.ingredients || !previousBreakdown?.ingredients) {
@@ -148,17 +147,17 @@ export function detectIngredientSpikes(
 
     // Check each ingredient for spikes
     for (const currentIng of currentIngredients) {
-        const previousIng = previousIngredients.find((p: any) => p.id === currentIng.id)
+        const previousIng = previousIngredients.find(p => p.id === currentIng.id)
 
-        if (previousIng && previousIng.cost > 0) {
-            const change = calculatePercentageChange(currentIng.cost, previousIng.cost)
+        if (previousIng && previousIng.total_cost > 0) {
+            const change = calculatePercentageChange(currentIng.total_cost, previousIng.total_cost)
 
             // Detect spikes > 15%
             if (change > 15) {
                 spikes.push({
                     name: currentIng.name,
-                    old: previousIng.cost,
-                    new: currentIng.cost,
+                    old: previousIng.total_cost,
+                    new: currentIng.total_cost,
                     change: change
                 })
             }

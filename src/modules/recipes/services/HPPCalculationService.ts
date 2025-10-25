@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { dbLogger } from '@/lib/logger'
 
 interface HPPCalculationOptions {
   overheadRate: number
@@ -108,7 +109,7 @@ export class HPPCalculationService {
         profitability
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'HPP Calculation Service Error')
+      dbLogger.error({ err: error }, 'HPP Calculation Service Error')
       throw new Error(`Failed to calculate HPP: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -194,7 +195,7 @@ export class HPPCalculationService {
       if (error) throw error
       return true
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Update recipe price error')
+      dbLogger.error({ err: error }, 'Update recipe price error')
       throw error
     }
   }
@@ -215,7 +216,7 @@ export class HPPCalculationService {
         performance: this.calculateRecipePerformance(salesData, productionData)
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Recipe analytics error')
+      dbLogger.error({ err: error }, 'Recipe analytics error')
       throw error
     }
   }

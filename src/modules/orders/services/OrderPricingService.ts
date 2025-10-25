@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import { HPPCalculationService } from '@/modules/recipes'
 import { ORDER_CONFIG } from '../constants'
@@ -124,7 +124,7 @@ export class OrderPricingService {
         overall_margin
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error calculating order pricing')
+      dbLogger.error({ err: error }, 'Error calculating order pricing')
       throw new Error('Failed to calculate order pricing')
     }
   }

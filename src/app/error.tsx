@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Home, RefreshCw } from 'lucide-react'
 import { useEffect } from 'react'
+import { uiLogger } from '@/lib/logger'
 
-import { apiLogger } from '@/lib/logger'
 /**
  * Global error boundary for the application
  * Catches and displays errors gracefully
@@ -18,8 +18,8 @@ export default function Error({
     reset: () => void
 }) {
     useEffect(() => {
-        // Log error to console for debugging
-        apiLogger.error({ error: error }, 'Application error:')
+        // Log error for debugging
+        uiLogger.error({ error, digest: error.digest }, 'Application error occurred')
 
         // TODO: Send to error tracking service (e.g., Sentry)
         // logErrorToService(error)

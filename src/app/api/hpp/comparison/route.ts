@@ -1,4 +1,5 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/type-guards'
 import { HPPComparison, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
         if (currentError) {
             apiLogger.error({ error: currentError }, 'Error fetching current period snapshots:')
             return NextResponse.json(
-                { error: 'Failed to fetch current period data', details: currentError.message },
+                { error: 'Failed to fetch current period data', details: (currentError as any).message },
                 { status: 500 }
             )
         }
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
         if (previousError) {
             apiLogger.error({ error: previousError }, 'Error fetching previous period snapshots:')
             return NextResponse.json(
-                { error: 'Failed to fetch previous period data', details: previousError.message },
+                { error: 'Failed to fetch previous period data', details: (previousError as any).message },
                 { status: 500 }
             )
         }
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
 
         // Calculate statistics for current period
         const currentStats = calculateStatistics(
-            currentSnapshots.map(s => s.hpp_value),
+            currentSnapshots.map(s => (s as any).hpp_value),
             currentPeriod.start,
             currentPeriod.end
         )
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
         // Calculate statistics for previous period (if available)
         const previousStats = previousSnapshots && previousSnapshots.length > 0
             ? calculateStatistics(
-                previousSnapshots.map(s => s.hpp_value),
+                previousSnapshots.map(s => (s as any).hpp_value),
                 previousPeriod.start,
                 previousPeriod.end
             )
@@ -123,7 +124,7 @@ export async function GET(request: NextRequest) {
             success: true,
             data: comparison,
             meta: {
-                recipe_name: recipe.nama,
+                recipe_name: (recipe as any).nama,
                 period,
                 has_previous_data: !!previousStats
             }
@@ -132,7 +133,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in comparison endpoint:')
         return NextResponse.json(
-            { error: 'Internal server error', details: error.message },
+            { error: 'Internal server error', details: getErrorMessage(error) },
             { status: 500 }
         )
     }

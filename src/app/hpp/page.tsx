@@ -8,9 +8,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useResponsive } from '@/hooks/useResponsive'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/use-toast'
 import { AlertCircle, Calculator, RefreshCw, Target, TrendingUp } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 // Dynamic imports for better performance
 const HPPSummaryStats = dynamic(() => import('./components/HPPSummaryStats'), {
@@ -37,12 +40,12 @@ const HPPHistoricalTab = dynamic(() => import('./components/HPPHistoricalTab'), 
 import { useHPPLogic } from './hooks/useHPPLogic'
 
 // Import tracking components
-const HPPAlertsList = dynamic(() => import('./components/HPPAlertsList'), {
+const HPPAlertsList = dynamic(() => import('./components/HPPAlertsList').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => <ListSkeleton items={5} />
 })
 
-const HPPRecommendationsPanel = dynamic(() => import('./components/HPPRecommendationsPanel'), {
+const HPPRecommendationsPanel = dynamic(() => import('./components/HPPRecommendationsPanel').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => <CardSkeleton rows={4} />
 })

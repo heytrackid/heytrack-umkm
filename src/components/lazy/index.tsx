@@ -3,7 +3,7 @@ import * as React from 'react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { ComponentType, lazy, ReactNode, Suspense } from 'react'
-import { logger } from '@/lib/logger'
+import { uiLogger } from '@/lib/logger'
 
 // Loading fallback component
 const LoadingFallback = ({ height ="h-32" }: { height?: string }) => (
@@ -159,9 +159,9 @@ export const preloadChartBundle = async () => {
       import('@/components').then(m => m.FinancialTrendsChart),
       import('@/components').then(m => m.InventoryTrendsChart),
     ])
-    logger.debug('Chart bundle preloaded')
+    uiLogger.debug('Chart bundle preloaded')
   } catch (error) {
-    logger.warn('Failed to preload chart bundle', { error })
+    uiLogger.warn('Failed to preload chart bundle', { error })
   }
 }
 
@@ -169,9 +169,9 @@ export const preloadChartBundle = async () => {
 export const preloadTableBundle = async () => {
   try {
     await import('@/components').then(m => m.SimpleDataTable)
-    logger.debug('Table bundle preloaded')
+    uiLogger.debug('Table bundle preloaded')
   } catch (error) {
-    logger.warn('Failed to preload table bundle', { error })
+    uiLogger.warn('Failed to preload table bundle', { error })
   }
 }
 
@@ -195,11 +195,11 @@ export const preloadModalComponent = async (modalType: string) => {
         // Add order form if exists
         break
       default:
-        logger.warn('Unknown modal type', { modalType })
+        uiLogger.warn('Unknown modal type', { modalType })
     }
-    logger.debug('Modal component preloaded', { modalType })
+    uiLogger.debug('Modal component preloaded', { modalType })
   } catch (error) {
-    logger.warn('Failed to preload modal', { modalType, error })
+    uiLogger.warn('Failed to preload modal', { modalType, error })
   }
 }
 
@@ -257,7 +257,7 @@ export const globalLazyLoadingUtils = {
     })
 
     await Promise.all(preloadPromises)
-    logger.debug('Preloaded components for route', { route })
+    uiLogger.debug('Preloaded components for route', { route })
   },
 
   // Preload all heavy components
@@ -267,9 +267,9 @@ export const globalLazyLoadingUtils = {
         preloadChartBundle(),
         preloadTableBundle(),
       ])
-      logger.debug('All heavy components preloaded')
+      uiLogger.debug('All heavy components preloaded')
     } catch (error) {
-      logger.warn('Failed to preload all components', { error })
+      uiLogger.warn('Failed to preload all components', { error })
     }
   },
 

@@ -5,12 +5,15 @@ import { apiLogger } from '@/lib/logger'
 interface FinancialTransaction {
   id: string
   reference_id?: string
-  expense_date: string
+  date: string
   description: string
   category: string
   subcategory?: string
   amount: string | number
-  tanggal: string
+  type: string
+  user_id: string
+  created_at: string
+  reference?: string
 }
 
 interface PeriodCashFlow {
@@ -68,11 +71,11 @@ export async function GET(request: NextRequest) {
 
     // Get all transactions (income and expenses) within date range
     const { data: transactions, error: transError } = await supabase
-      .from('financial_transactions')
+      .from('financial_records')
       .select('*')
-      .gte('tanggal', startDate)
-      .lte('tanggal', endDate)
-      .order('tanggal', { ascending: true })
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: true })
 
     if (transError) {
       apiLogger.error({ error: transError }, 'Error fetching transactions:')
@@ -83,12 +86,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Separate income and expenses
-    const income = transactions?.filter((t: FinancialTransaction) => t.category === 'Revenue') || []
-    const expenses = transactions?.filter((t: FinancialTransaction) => t.category !== 'Revenue') || []
+    const income = transactions?.filter((t: FinancialTransaction) => (t as any).category === 'Revenue') || []
+    const expenses = transactions?.filter((t: FinancialTransaction) => (t as any).category !== 'Revenue') || []
 
     // Calculate totals
-    const totalIncome = income.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
-    const totalExpenses = expenses.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
+    const totalIncome = income.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
+    const totalExpenses = expenses.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
     const netCashFlow = totalIncome - totalExpenses
 
     // Group by period
@@ -108,13 +111,13 @@ export async function GET(request: NextRequest) {
 
     // Transform transactions for frontend
     const transactionsList = transactions?.map((t: FinancialTransaction) => ({
-      id: t.id,
-      reference_id: t.reference_id || t.id,
-      date: t.expense_date,
-      description: t.description,
-      category: t.category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : t.category,
+      id: (t as any).id,
+      reference_id: t.reference_id || (t as any).id,
+      date: t.date,
+      description: (t as any).description,
+      category: (t as any).category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : (t as any).category,
       amount: Number(t.amount),
-      type: t.category === 'Revenue' ? 'income' : 'expense'
+      type: (t as any).category === 'Revenue' ? 'income' : 'expense'
     })) || []
 
     // Build response
@@ -163,11 +166,11 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
 
   transactions.forEach(transaction => {
     let key = ''
-    const date = new Date(transaction.expense_date)
+    const date = new Date((transaction as any).date)
 
     switch (period) {
       case 'daily':
-        key = transaction.expense_date
+        key = (transaction as any).date
         break
       case 'weekly':
         const weekStart = new Date(date)
@@ -181,7 +184,7 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
         key = `${date.getFullYear()}`
         break
       default:
-        key = transaction.expense_date
+        key = (transaction as any).date
     }
 
     if (!grouped[key]) {
@@ -195,13 +198,13 @@ function groupByPeriod(transactions: FinancialTransaction[], period: string) {
     }
 
     const currentGroup = grouped[key]!
-    const amount = Number(transaction.amount)
-    if (transaction.category === 'Revenue') {
+    const amount = Number((transaction as any).amount)
+    if ((transaction as any).category === 'Revenue') {
       currentGroup.income += amount
     } else {
       currentGroup.expenses += amount
     }
-    currentGroup.net_cash_flow = currentGroup.income - currentGroup.expenses
+    (currentGroup as any).net_cash_flow = currentGroup.income - currentGroup.expenses
     currentGroup.transaction_count++
   })
 
@@ -215,7 +218,7 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
   const breakdown: Record<string, CategoryBreakdownProcessing> = {}
 
   transactions.forEach(transaction => {
-    const category = transaction.category
+    const category = (transaction as any).category
     const subcategory = transaction.subcategory || 'Other'
 
     if (!breakdown[category]) {
@@ -228,7 +231,7 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
       }
     }
 
-    const amount = Number(transaction.amount)
+    const amount = Number((transaction as any).amount)
     breakdown[category].total += amount
     breakdown[category].count++
 
@@ -244,21 +247,21 @@ function calculateCategoryBreakdown(transactions: FinancialTransaction[]) {
   })
 
   // Calculate percentages
-  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + cat.total, 0)
+  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + (cat as any).total, 0)
   Object.values(breakdown).forEach((cat: CategoryBreakdownProcessing) => {
-    cat.percentage = totalAmount > 0 ? (cat.total / totalAmount) * 100 : 0
+    cat.percentage = totalAmount > 0 ? ((cat as any).total / totalAmount) * 100 : 0
     ;(cat as any as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
   })
 
-  return Object.values(breakdown).map(cat => cat as any as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => b.total - a.total)
+  return Object.values(breakdown).map(cat => cat as any as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => (b as any).total - (a as any).total)
 }
 
 // Helper: Group by category for summary
 function groupByCategory(transactions: unknown[]) {
   const grouped: Record<string, number> = {}
   transactions.forEach(t => {
-    const category = t.category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : t.category
-    grouped[category] = (grouped[category] || 0) + Number(t.amount)
+    const category = (t as any).category === 'Revenue' ? ((t as any).subcategory || 'Penjualan Produk') : (t as any).category
+    grouped[category] = (grouped[category] || 0) + Number((t as any).amount)
   })
   return grouped
 }
@@ -269,25 +272,25 @@ function calculateTrend(cashFlowByPeriod: unknown[]) {
     return {
       direction: 'stable',
       change_percentage: 0,
-      average_cash_flow: cashFlowByPeriod[0]?.net_cash_flow || 0
+      average_cash_flow: (cashFlowByPeriod[0] as any)?.net_cash_flow || 0
     }
   }
 
-  const recent = cashFlowByPeriod[cashFlowByPeriod.length - 1].net_cash_flow
-  const previous = cashFlowByPeriod[cashFlowByPeriod.length - 2].net_cash_flow
+  const recent = (cashFlowByPeriod[cashFlowByPeriod.length - 1] as any).net_cash_flow
+  const previous = (cashFlowByPeriod[cashFlowByPeriod.length - 2] as any).net_cash_flow
 
   const change = recent - previous
   const changePercentage = previous !== 0 ? (change / Math.abs(previous)) * 100 : 0
 
-  const avgCashFlow = cashFlowByPeriod.reduce((sum, p) => sum + p.net_cash_flow, 0) / cashFlowByPeriod.length
+  const avgCashFlow = cashFlowByPeriod.reduce((sum: number, p) => sum + (p as any).net_cash_flow, 0) / cashFlowByPeriod.length
 
   return {
     direction: change > 0 ? 'increasing' : change < 0 ? 'decreasing' : 'stable',
     change_amount: change,
     change_percentage: changePercentage,
     average_cash_flow: avgCashFlow,
-    highest_period: cashFlowByPeriod.reduce((max, p) => p.net_cash_flow > max.net_cash_flow ? p : max),
-    lowest_period: cashFlowByPeriod.reduce((min, p) => p.net_cash_flow < min.net_cash_flow ? p : min)
+    highest_period: cashFlowByPeriod.reduce((max, p) => (p as any).net_cash_flow > (max as any).net_cash_flow ? p : max),
+    lowest_period: cashFlowByPeriod.reduce((min, p) => (p as any).net_cash_flow < (min as any).net_cash_flow ? p : min)
   }
 }
 
@@ -302,20 +305,20 @@ async function calculateComparison(supabase: ReturnType<typeof createServerSupab
   const prevEnd = new Date(start.getTime() - 1)
 
   const { data: prevTransactions } = await supabase
-    .from('financial_transactions')
+    .from('financial_records')
     .select('*')
-    .gte('tanggal', prevStart.toISOString().split('T')[0])
-    .lte('tanggal', prevEnd.toISOString().split('T')[0])
+    .gte('date', prevStart.toISOString().split('T')[0])
+    .lte('date', prevEnd.toISOString().split('T')[0])
 
   if (!prevTransactions) {
     return null
   }
 
-  const prevIncome = prevTransactions.filter((t: FinancialTransaction) => t.category === 'Revenue')
-  const prevExpenses = prevTransactions.filter((t: FinancialTransaction) => t.category !== 'Revenue')
+  const prevIncome = prevTransactions.filter((t: FinancialTransaction) => (t as any).category === 'Revenue')
+  const prevExpenses = prevTransactions.filter((t: FinancialTransaction) => (t as any).category !== 'Revenue')
 
-  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
-  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialTransaction) => sum + Number(t.amount), 0)
+  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
+  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
   const prevNetCashFlow = prevTotalIncome - prevTotalExpenses
 
   return {
@@ -332,13 +335,13 @@ async function calculateComparison(supabase: ReturnType<typeof createServerSupab
 // Helper: Get top transactions
 function getTopTransactions(transactions: unknown[], limit: number) {
   return transactions
-    .sort((a, b) => Number(b.amount) - Number(a.amount))
+    .sort((a, b) => Number((b as any).amount) - Number((a as any).amount))
     .slice(0, limit)
     .map(t => ({
-      description: t.description,
-      amount: Number(t.amount),
-      date: t.expense_date,
-      category: t.category,
-      subcategory: t.subcategory
+      description: (t as any).description,
+      amount: Number((t as any).amount),
+      date: (t as any).date,
+      category: (t as any).category,
+      subcategory: (t as any).subcategory
     }))
 }

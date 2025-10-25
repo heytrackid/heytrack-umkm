@@ -1,4 +1,5 @@
 import { TimePeriod } from '@/types/hpp-tracking'
+import { getErrorMessage } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
             .from('recipes')
             .select('name')
             .eq('id', recipeId)
-            .eq('user_id', user.id)
+            .eq('user_id', (user as any).id)
             .single()
 
         if (recipeError || !recipe) {
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
             .from('hpp_snapshots')
             .select('*', { count: 'exact' })
             .eq('recipe_id', recipeId)
-            .eq('user_id', user.id)
+            .eq('user_id', (user as any).id)
             .gte('snapshot_date', dateRange.start)
             .lte('snapshot_date', dateRange.end)
             .order('snapshot_date', { ascending: false })
@@ -70,14 +71,14 @@ export async function GET(request: NextRequest) {
         if (error) {
             apiLogger.error({ error }, 'Error fetching HPP snapshots from database')
             return NextResponse.json(
-                { error: 'Failed to fetch snapshots', details: error.message },
+                { error: 'Failed to fetch snapshots', details: (error as any).message },
                 { status: 500 }
             )
         }
 
         return NextResponse.json({
             snapshots: snapshots || [],
-            recipe_name: recipe.nama,
+            recipe_name: (recipe as any).nama,
             total: count || 0,
             period,
             date_range: dateRange

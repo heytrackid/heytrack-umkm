@@ -73,7 +73,7 @@ export default function RecipeTable({
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
 
-  const filteredRecipes = recipes.filter(recipe =>
+  const filteredRecipes = recipes.filter((recipe: any) =>
     recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     recipe.category?.toLowerCase().includes(searchTerm.toLowerCase())
   )

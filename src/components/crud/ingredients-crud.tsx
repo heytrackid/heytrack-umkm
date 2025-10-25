@@ -38,54 +38,54 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
   const createForm = useForm<BahanBakuFormData>({
     resolver: zodResolver(BahanBakuSchema),
     defaultValues: {
-      nama_bahan: '',
-      satuan: 'kg',
-      harga_per_satuan: 0,
-      stok_tersedia: 0,
-      stok_minimum: 0,
-      jenis_kemasan: '',
+      name: '',
+      unit: 'kg',
+      price_per_unit: 0,
+      current_stock: 0,
+      min_stock: 0,
+      description: '',
     }
   });
 
   const editForm = useForm<BahanBakuFormData>({
     resolver: zodResolver(BahanBakuSchema),
     defaultValues: {
-      nama_bahan: '',
-      satuan: 'kg',
-      harga_per_satuan: 0,
-      stok_tersedia: 0,
-      stok_minimum: 0,
-      jenis_kemasan: '',
+      name: '',
+      unit: 'kg',
+      price_per_unit: 0,
+      current_stock: 0,
+      min_stock: 0,
+      description: '',
     }
   });
 
   const columns = [
     {
-      key: 'nama_bahan',
+      key: 'name',
       header: 'Nama Bahan',
       priority: 'high' as const,
     },
     {
-      key: 'satuan',
+      key: 'unit',
       header: 'Satuan',
       priority: 'high' as const,
     },
     {
-      key: 'harga_per_satuan',
+      key: 'price_per_unit',
       header: 'Harga/Unit',
       render: (value: number) => formatCurrency(value),
       hideOnMobile: true,
     },
     {
-      key: 'stok_tersedia',
+      key: 'current_stock',
       header: 'Stok Saat Ini',
-      render: (value: number, item: BahanBaku) => `${value} ${item.satuan}`,
+      render: (value: number, item: BahanBaku) => `${value} ${(item as any).unit}`,
       priority: 'medium' as const,
     },
     {
-      key: 'stok_minimum',
+      key: 'min_stock',
       header: 'Stok Minimum',
-      render: (value: number, item: BahanBaku) => `${value} ${item.satuan}`,
+      render: (value: number, item: BahanBaku) => `${value} ${(item as any).unit}`,
       hideOnMobile: true,
     },
   ];
@@ -97,13 +97,14 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
   const handleEdit = (ingredient: BahanBaku) => {
     setSelectedIngredient(ingredient)
+    const ing = ingredient as any
     editForm.reset({
-      nama_bahan: ingredient.nama_bahan,
-      satuan: ingredient.satuan,
-      harga_per_satuan: ingredient.harga_per_satuan,
-      stok_tersedia: ingredient.stok_tersedia,
-      stok_minimum: ingredient.stok_minimum,
-      jenis_kemasan: ingredient.jenis_kemasan || '',
+      name: ing.name || ing.nama_bahan,
+      unit: ing.unit || ing.satuan,
+      price_per_unit: ing.price_per_unit || ing.harga_per_satuan,
+      current_stock: ing.current_stock || ing.stok_tersedia,
+      min_stock: ing.min_stock || ing.minimum_stock || ing.stok_minimum,
+      description: ing.description || ing.jenis_kemasan || '',
     })
     setIsEditModalOpen(true)
   }
@@ -195,20 +196,20 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             <FormGrid cols={2}>
               <FormField
                 label="Nama Bahan"
-                name="nama_bahan"
+                name="name"
                 type="text"
-                {...createForm.register('nama_bahan')}
-                error={createForm.formState.errors.nama_bahan?.message}
+                {...createForm.register('name')}
+                error={createForm.formState.errors.name?.message}
                 required
                 hint="Nama bahan baku yang mudah dikenali"
               />
 
               <FormField
                 label="Satuan"
-                name="satuan"
+                name="unit"
                 type="select"
-                {...createForm.register('satuan')}
-                error={createForm.formState.errors.satuan?.message}
+                {...createForm.register('unit')}
+                error={createForm.formState.errors.unit?.message}
                 required
                 options={unitOptions}
                 hint="Pilih satuan yang sesuai"
@@ -222,10 +223,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
           >
             <FormField
               label="Harga per Unit"
-              name="harga_per_satuan"
+              name="price_per_unit"
               type="number"
-              {...createForm.register('harga_per_satuan', { valueAsNumber: true })}
-              error={createForm.formState.errors.harga_per_satuan?.message}
+              {...createForm.register('price_per_unit', { valueAsNumber: true })}
+              error={createForm.formState.errors.price_per_unit?.message}
               required
               min={0}
               step={0.01}
@@ -235,10 +236,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             <FormGrid cols={2}>
               <FormField
                 label="Stok Saat Ini"
-                name="stok_tersedia"
+                name="current_stock"
                 type="number"
-                {...createForm.register('stok_tersedia', { valueAsNumber: true })}
-                error={createForm.formState.errors.stok_tersedia?.message}
+                {...createForm.register('current_stock', { valueAsNumber: true })}
+                error={createForm.formState.errors.current_stock?.message}
                 required
                 min={0}
                 step={0.01}
@@ -247,10 +248,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
               <FormField
                 label="Stok Minimum"
-                name="stok_minimum"
+                name="min_stock"
                 type="number"
-                {...createForm.register('stok_minimum', { valueAsNumber: true })}
-                error={createForm.formState.errors.stok_minimum?.message}
+                {...createForm.register('min_stock', { valueAsNumber: true })}
+                error={createForm.formState.errors.min_stock?.message}
                 required
                 min={0}
                 step={0.01}
@@ -261,11 +262,11 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
           <FormSection title="Informasi Tambahan">
             <FormField
-              label="Jenis Kemasan"
-              name="jenis_kemasan"
+              label="Deskripsi"
+              name="description"
               type="text"
-              {...createForm.register('jenis_kemasan')}
-              hint="Jenis kemasan bahan ini (opsional)"
+              {...createForm.register('description')}
+              hint="Deskripsi atau catatan tambahan (opsional)"
             />
           </FormSection>
 
@@ -294,19 +295,19 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             <FormGrid cols={2}>
               <FormField
                 label="Nama Bahan"
-                name="nama_bahan"
+                name="name"
                 type="text"
-                {...editForm.register('nama_bahan')}
-                error={editForm.formState.errors.nama_bahan?.message}
+                {...editForm.register('name')}
+                error={editForm.formState.errors.name?.message}
                 required
               />
 
               <FormField
                 label="Satuan"
-                name="satuan"
+                name="unit"
                 type="select"
-                {...editForm.register('satuan')}
-                error={editForm.formState.errors.satuan?.message}
+                {...editForm.register('unit')}
+                error={editForm.formState.errors.unit?.message}
                 required
                 options={unitOptions}
               />
@@ -319,10 +320,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
           >
             <FormField
               label="Harga per Unit"
-              name="harga_per_satuan"
+              name="price_per_unit"
               type="number"
-              {...editForm.register('harga_per_satuan', { valueAsNumber: true })}
-              error={editForm.formState.errors.harga_per_satuan?.message}
+              {...editForm.register('price_per_unit', { valueAsNumber: true })}
+              error={editForm.formState.errors.price_per_unit?.message}
               required
               min={0}
               step={0.01}
@@ -331,10 +332,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
             <FormGrid cols={2}>
               <FormField
                 label="Stok Saat Ini"
-                name="stok_tersedia"
+                name="current_stock"
                 type="number"
-                {...editForm.register('stok_tersedia', { valueAsNumber: true })}
-                error={editForm.formState.errors.stok_tersedia?.message}
+                {...editForm.register('current_stock', { valueAsNumber: true })}
+                error={editForm.formState.errors.current_stock?.message}
                 required
                 min={0}
                 step={0.01}
@@ -342,10 +343,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
               <FormField
                 label="Stok Minimum"
-                name="stok_minimum"
+                name="min_stock"
                 type="number"
-                {...editForm.register('stok_minimum', { valueAsNumber: true })}
-                error={editForm.formState.errors.stok_minimum?.message}
+                {...editForm.register('min_stock', { valueAsNumber: true })}
+                error={editForm.formState.errors.min_stock?.message}
                 required
                 min={0}
                 step={0.01}
@@ -355,10 +356,10 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
           <FormSection title="Informasi Tambahan">
             <FormField
-              label="Jenis Kemasan"
-              name="jenis_kemasan"
+              label="Deskripsi"
+              name="description"
               type="text"
-              {...editForm.register('jenis_kemasan')}
+              {...editForm.register('description')}
             />
           </FormSection>
 
@@ -377,7 +378,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
         onClose={closeModals}
         onConfirm={handleConfirmDelete}
         title="Hapus Bahan Baku"
-        message={`Apakah Anda yakin ingin menghapus "${selectedIngredient?.nama_bahan}"? Tindakan ini tidak dapat dibatalkan.`}
+        message={`Apakah Anda yakin ingin menghapus "${(selectedIngredient as any)?.name || (selectedIngredient as any)?.nama_bahan}"? Tindakan ini tidak dapat dibatalkan.`}
         confirmText="Ya, Hapus"
         type="danger"
       />

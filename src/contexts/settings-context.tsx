@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { createContext, useContext, useState, useEffect } from 'react'
-import logger from '@/lib/logger'
+import { uiLogger } from '@/lib/logger'
 
 interface Currency {
   code: string
@@ -81,7 +81,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setSettings(newSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
       } catch (error: unknown) {
-        logger.error({ error }, 'Failed to parse saved settings from localStorage')
+        uiLogger.error({ error }, 'Failed to parse saved settings from localStorage')
         setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }

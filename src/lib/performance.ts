@@ -4,16 +4,16 @@ import { apiLogger } from '@/lib/logger'
 // import { debounce, throttle } from 'lodash-es'
 
 // Lazy loading utilities
-export function createLazyComponent<T extends ComponentType<unknown>>(
+export function createLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   fallback?: ReactNode
 ) {
   const LazyComponent = lazy(importFn)
   
-  return memo((props: Parameters<T>[0]) => 
+  return memo((props: any) => 
     React.createElement(Suspense, { 
-      fallback: fallback || React.createElement("link") 
-    }, React.createElement("div"))
+      fallback: fallback || React.createElement("div") 
+    }, React.createElement(LazyComponent, props))
   )
 }
 
@@ -43,10 +43,10 @@ export class PerformanceMonitor {
       const duration = endTime - startTime
       
       if (!this.metrics.has(label)) {
-        this.metrics.set(key, data)
+        this.metrics.set(label, [])
       }
       
-      this.metrics.get(key)!.push(duration)
+      this.metrics.get(label)!.push(duration)
       
       // Log slow operations (>100ms)
       if (duration > 100) {
@@ -56,7 +56,7 @@ export class PerformanceMonitor {
   }
   
   getMetrics(label: string): { avg: number; min: number; max: number; count: number } | null {
-    const measurements = this.metrics.get(key)
+    const measurements = this.metrics.get(label)
     if (!measurements || measurements.length === 0) return null
     
     return {
@@ -220,11 +220,11 @@ export const analyzeBundleSize = (): void => {
     for (const script of scripts) {
       try {
         const response = await fetch((script as HTMLScriptElement).src)
-        const size = parseInt
+        const size = parseInt(response.headers.get('content-length') || '0', 10)
         totalSize += size
         apiLogger.info(`📦 Script: ${(script as HTMLScriptElement).src} - ${(size / 1024).toFixed(2)}KB`)
       } catch (error: unknown) {
-        apiLogger.warn('Failed to analyze script:', (script as HTMLScriptElement).src)
+        apiLogger.warn({ script: (script as HTMLScriptElement).src }, 'Failed to analyze script')
       }
     }
     
@@ -276,7 +276,7 @@ export const registerServiceWorker = async (): Promise<void> => {
 export class CacheManager {
   private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
   
-  set(key, data): void {
+  set(key: string, data: unknown, ttlMs = 60000): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -284,7 +284,7 @@ export class CacheManager {
     })
   }
   
-  get<T = unknown >(key: string): T | null {
+  get<T = unknown>(key: string): T | null {
     const item = this.cache.get(key)
     
     if (!item) return null
@@ -294,7 +294,7 @@ export class CacheManager {
       return null
     }
     
-    return item.data
+    return item.data as T
   }
   
   clear(): void {
@@ -329,14 +329,15 @@ if (typeof window !== 'undefined') {
 export const measureWebVitals = (): void => {
   if (typeof window === 'undefined') return
   
-  // Import web-vitals dynamically to avoid SSR issues
-  import('@/components').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS((metric) => apiLogger.info('📊 CLS:', metric))
-    getFID((metric) => apiLogger.info({ metric }, '📊 FID'))
-    getFCP((metric) => apiLogger.info({ metric }, '📊 FCP'))
-    getLCP((metric) => apiLogger.info({ metric }, '📊 LCP'))
-    getTTFB((metric) => apiLogger.info({ metric }, '📊 TTFB'))
-  }).catch(() => {
-    apiLogger.warn('web-vitals not available')
-  })
+  // Web vitals monitoring disabled - web-vitals library not configured
+  // TODO: Install and configure web-vitals library if needed
+  // import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+  //   getCLS((metric) => apiLogger.info({ metric }, '📊 CLS'))
+  //   getFID((metric) => apiLogger.info({ metric }, '📊 FID'))
+  //   getFCP((metric) => apiLogger.info({ metric }, '📊 FCP'))
+  //   getLCP((metric) => apiLogger.info({ metric }, '📊 LCP'))
+  //   getTTFB((metric) => apiLogger.info({ metric }, '📊 TTFB'))
+  // }).catch(() => {
+  //   apiLogger.warn('web-vitals not available')
+  // })
 }

@@ -6,7 +6,7 @@
 import { workflowAutomation } from './automation-engine'
 import { smartNotificationSystem } from './smart-notifications'
 
-import { apiLogger } from '@/lib/logger'
+import { automationLogger } from '@/lib/logger'
 import type { IngredientsTable } from '@/types/inventory'
 import type { OrderItemsTable, OrdersTable } from '@/types/orders'
 import type { RecipeIngredientsTable, RecipesTable } from '@/types/recipes'
@@ -83,7 +83,7 @@ export class ProductionPlanningSystem {
    * Generate production schedule untuk orders yang pending
    */
   async generateProductionSchedule(orders: Order[], ingredients: Ingredient[], recipes: Recipe[]): Promise<ProductionSchedule[]> {
-    apiLogger.info('🏭 Generating production schedule...')
+    automationLogger.info('🏭 Generating production schedule...')
 
     // Filter orders yang perlu diproduksi
     const productionOrders = orders.filter(order =>
@@ -91,7 +91,7 @@ export class ProductionPlanningSystem {
       order.delivery_date
     )
 
-    apiLogger.info(`Found ${productionOrders.length} orders for production planning`)
+    automationLogger.info(`Found ${productionOrders.length} orders for production planning`)
 
     // Group orders by delivery date
     const ordersByDate = this.groupOrdersByDeliveryDate(productionOrders)
@@ -425,7 +425,7 @@ export class ProductionPlanningSystem {
         const previousStatus = task.status
         task.status = status
 
-        apiLogger.info(`🔄 Production task ${task.recipeName}: ${previousStatus} → ${status}`)
+        automationLogger.info(`🔄 Production task ${task.recipeName}: ${previousStatus} → ${status}`)
 
         // Trigger workflow automation for completed tasks
         if (status === 'completed' && previousStatus !== 'completed') {
@@ -462,7 +462,7 @@ export class ProductionPlanningSystem {
    * Auto-reschedule berdasarkan perubahan kondisi
    */
   async autoReschedule(triggeredBy: 'inventory_update' | 'order_change' | 'delay') {
-    apiLogger.info(`🔄 Auto-rescheduling production due to: ${triggeredBy}`)
+    automationLogger.info(`🔄 Auto-rescheduling production due to: ${triggeredBy}`)
 
     // Mark schedules as needing update
     // In real implementation, would re-run scheduling algorithm

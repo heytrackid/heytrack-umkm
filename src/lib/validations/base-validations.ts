@@ -31,7 +31,7 @@ export const OrderStatusEnum = z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'R
 export const PaymentMethodEnum = z.enum(['CASH', 'BANK_TRANSFER', 'CREDIT_CARD', 'DIGITAL_WALLET', 'OTHER'])
 export const UserRoleEnum = z.enum(['OWNER', 'MANAGER', 'STAFF', 'VIEWER'])
 export const ProductionStatusEnum = z.enum(['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
-export const BusinessUnitEnum = z.enum(['RESTAURANT', 'CAFE', 'BAKERY', 'CATERING', 'OTHER'])
+export const BusinessUnitEnum = z.enum(['RESTAURANT', 'CAFE', 'UMKM', 'CATERING', 'OTHER'])
 export const RecordTypeEnum = z.enum(['INCOME', 'EXPENSE'])
 export const TransactionTypeEnum = z.enum(['SALES', 'PURCHASE', 'SALARY', 'RENT', 'UTILITIES', 'OTHER'])
 
@@ -129,7 +129,7 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
 }
 
 // Legacy validation function (still used in supabase.ts)
-export function validateInput(data: any, rules?: Record<string, unknown>): { isValid: boolean; errors: string[] } {
+export function validateInput(data: any, rules?: Record<string, any>): { isValid: boolean; errors: string[] } {
   const errors: string[] = []
 
   for (const [field, rule] of Object.entries(rules || {})) {

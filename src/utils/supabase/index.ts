@@ -6,5 +6,5 @@
  */
 
 export { createClient } from './client'
-export { createServerClient } from './server'
+export { createClient as createServerClient } from './server'
 export { updateSession } from './middleware'

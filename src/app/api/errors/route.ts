@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateInput } from '@/lib/validations'
+import { getErrorMessage } from '@/lib/type-guards'
+import { ErrorLogSchema } from '@/lib/validations/api-schemas'
+import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import { apiLogger } from '@/lib/logger'
 // Simple in-memory error store (in production, use a real database/service)
@@ -8,46 +10,26 @@ const errorStore: Array<{
   timestamp: string
   message: string
   stack?: string
-  componentStack?: string
-  url: string
-  userAgent: string
-  errorId: string
+  level: string
+  context?: Record<string, any>
 }> = []
 
 const MAX_ERRORS = 1000 // Keep only last 1000 errors
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    
-    // Validate input
-    const validation = validateInput(body, {
-      message: { required: true, type: 'string', maxLength: 1000 },
-      stack: { type: 'string', maxLength: 10000 },
-      componentStack: { type: 'string', maxLength: 10000 },
-      url: { required: true, type: 'string', maxLength: 500 },
-      userAgent: { required: true, type: 'string', maxLength: 500 },
-      errorId: { required: true, type: 'string', maxLength: 100 },
-      timestamp: { required: true, type: 'string' }
-    })
-    
-    if (!validation.isValid) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: validation.errors },
-        { status: 400 }
-      )
-    }
+    // Validate request body
+    const validatedData = await validateRequestOrRespond(request, ErrorLogSchema)
+    if (validatedData instanceof NextResponse) return validatedData
     
     // Create error record
     const errorRecord = {
       id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: body.timestamp,
-      message: body.message,
-      stack: body.stack,
-      componentStack: body.componentStack,
-      url: body.url,
-      userAgent: body.userAgent,
-      errorId: body.errorId,
+      timestamp: validatedData.timestamp || new Date().toISOString(),
+      message: validatedData.message,
+      stack: validatedData.stack,
+      level: validatedData.level,
+      context: validatedData.context,
     }
     
     // Add to store
@@ -61,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       apiLogger.error({ error: {
-        id: errorRecord.id,
+        id: (errorRecord as any).id,
         message: errorRecord.message,
         url: errorRecord.url,
         timestamp: errorRecord.timestamp
@@ -86,7 +68,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      errorId: errorRecord.id,
+      errorId: (errorRecord as any).id,
       message: 'Error logged successfully'
     })
     
@@ -132,7 +114,7 @@ function isCriticalError(error: typeof errorStore[0]): boolean {
     'security violation'
   ]
   
-  const errorText = `${error.message} ${error.stack}`.toLowerCase()
+  const errorText = `${(error as any).message} ${error.stack}`.toLowerCase()
   
   return criticalKeywords.some(keyword => errorText.includes(keyword))
 }
@@ -140,7 +122,7 @@ function isCriticalError(error: typeof errorStore[0]): boolean {
 // Example function to send to external service
 // async function sendToExternalService(error: typeof errorStore[0]) {
 //   // Sentry example:
-//   // Sentry.captureException(new Error((error instanceof Error ? error.message : String(error))), {
+//   // Sentry.captureException(new Error((error instanceof Error ? (error as any).message : String(error))), {
 //   //   extra: {
 //   //     componentStack: error.componentStack,
 //   //     url: error.url,

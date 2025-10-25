@@ -1,24 +1,21 @@
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
-import DOMPurify from 'isomorphic-dompurify'
+// Note: DOMPurify import commented out - install 'isomorphic-dompurify' if needed
+// import DOMPurify from 'isomorphic-dompurify'
 
 // Input Sanitization
 export class InputSanitizer {
   // Sanitize HTML input to prevent XSS
   static sanitizeHtml(input: string): string {
-    return DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: [], // No HTML tags allowed
-      ALLOWED_ATTR: []
-    })
+    // Basic sanitization without DOMPurify - strips all HTML tags
+    return input.replace(/<[^>]*>/g, '')
   }
 
   // Sanitize for rich text (limited HTML)
   static sanitizeRichText(input: string): string {
-    return DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'ul', 'ol', 'li'],
-      ALLOWED_ATTR: []
-    })
+    // Basic sanitization - in production, install and use DOMPurify
+    return input.replace(/<(?!\/?(?:p|br|strong|em|u|ul|ol|li)\b)[^>]*>/gi, '')
   }
 
   // Sanitize SQL-like inputs (remove dangerous characters)

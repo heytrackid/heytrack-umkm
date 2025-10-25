@@ -2,7 +2,6 @@
 // Focus: TypeScript, React/Next.js, Hooks, and Logger enforcement
 
 import js from "@eslint/js";
-import prettier from "eslint-plugin-prettier";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import ts from "typescript-eslint";
@@ -10,10 +9,6 @@ import ts from "typescript-eslint";
 export default [
   js.configs.recommended,
   ...ts.configs.recommended,
-  react.configs.recommended,
-  reactHooks.configs.recommended,
-  prettier.configs.recommended,
-
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
     languageOptions: {
@@ -22,6 +17,10 @@ export default [
       parserOptions: {
         project: "./tsconfig.json",
       },
+    },
+    plugins: {
+      react,
+      "react-hooks": reactHooks,
     },
     rules: {
       // Core rules
@@ -49,9 +48,6 @@ export default [
       // Hooks
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-
-      // Prettier integration
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
   {

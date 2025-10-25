@@ -2,7 +2,7 @@ import type { Database } from '@/types'
 import type { AffectedComponents, ComponentChange, CostBreakdown, IngredientCost, OperationalCost } from '@/types/hpp-tracking'
 import { formatCurrency } from './hpp-calculator'
 import { createSupabaseClient } from './supabase'
-import { logger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 
 type HPPSnapshotRow = Database['public']['Tables']['hpp_snapshots']['Row']
 type HPPAlertInsert = Database['public']['Tables']['hpp_alerts']['Insert']
@@ -247,7 +247,7 @@ export async function saveAlerts(alerts: HPPAlertInsert[]): Promise<void> {
         .insert(alerts)
 
     if (error) {
-        logger.error({ err: error }, 'Failed to save alerts')
+        dbLogger.error({ err: error }, 'Failed to save alerts')
         throw new Error(`Failed to save alerts: ${error.message}`)
     }
 }

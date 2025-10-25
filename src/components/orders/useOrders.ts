@@ -185,7 +185,7 @@ export function useOrders() {
                 }))
               })
             })
-            dbLogger.info('Inventory auto-updated', { action: inventoryAction })
+            apiLogger.info('Inventory auto-updated', { action: inventoryAction })
           }
         } catch (err) {
           apiLogger.error({ error: err }, '⚠️ Failed to auto-update inventory for status change:')

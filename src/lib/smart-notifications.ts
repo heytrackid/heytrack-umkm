@@ -1,6 +1,6 @@
 import { formatCurrency } from '@/shared/utils/currency'
 
-import { apiLogger } from '@/lib/logger'
+import { automationLogger } from '@/lib/logger'
 /**
  * Smart Notification System
  * Context-aware business intelligence alerts dan notifications
@@ -77,7 +77,7 @@ export class SmartNotificationSystem {
    * Notify subscribers of changes
    */
   private notifySubscribers() {
-    this.subscribers.forEach(callback => callback([...this.notifications]))
+    this.subscribers.forEach((callback: any) => callback([...this.notifications]))
   }
 
   /**
@@ -97,7 +97,7 @@ export class SmartNotificationSystem {
     // Keep only last 100 notifications
     this.notifications = this.notifications.slice(0, 100)
 
-    apiLogger.info('🔔 New notification:', newNotification.title)
+    automationLogger.info('🔔 New notification:', newNotification.title)
 
     this.notifySubscribers()
     return newNotification
@@ -118,7 +118,7 @@ export class SmartNotificationSystem {
    * Mark all notifications as read
    */
   markAllAsRead() {
-    this.notifications.forEach(n => n.isRead = true)
+    this.notifications.forEach((n: any) => n.isRead = true)
     this.notifySubscribers()
   }
 
@@ -133,14 +133,14 @@ export class SmartNotificationSystem {
    * Get notifications by category
    */
   getNotificationsByCategory(category: SmartNotification['category']): SmartNotification[] {
-    return this.notifications.filter(n => n.category === category)
+    return this.notifications.filter((n: any) => n.category === category)
   }
 
   /**
    * Get unread notifications count
    */
   getUnreadCount(): number {
-    return this.notifications.filter(n => !n.isRead).length
+    return this.notifications.filter((n: any) => !n.isRead).length
   }
 
   /**
@@ -149,8 +149,8 @@ export class SmartNotificationSystem {
   getSummary() {
     const total = this.notifications.length
     const unread = this.getUnreadCount()
-    const critical = this.notifications.filter(n => n.priority === 'critical').length
-    const highPriority = this.notifications.filter(n => n.priority === 'high').length
+    const critical = this.notifications.filter((n: any) => n.priority === 'critical').length
+    const highPriority = this.notifications.filter((n: any) => n.priority === 'high').length
 
     const byCategory = this.notifications.reduce((acc, notification) => {
       acc[notification.category] = (acc[notification.category] || 0) + 1
@@ -175,7 +175,7 @@ export class SmartNotificationSystem {
     financial?: unknown
     production?: unknown[]
   }) {
-    apiLogger.info('🧠 Processing business metrics for smart notifications...')
+    automationLogger.info('🧠 Processing business metrics for smart notifications...')
 
     // Process inventory metrics
     if (metrics.inventory) {
@@ -201,11 +201,11 @@ export class SmartNotificationSystem {
    */
   private async processInventoryMetrics(inventory: unknown[]) {
     // Critical stock alerts
-    const criticalItems = inventory.filter(item => 
+    const criticalItems = inventory.filter((item: any) => 
       item.current_stock <= (item.min_stock * 0.3)
     )
 
-    criticalItems.forEach(item => {
+    criticalItems.forEach((item: any) => {
       this.addNotification({
         type: 'error',
         category: 'inventory',
@@ -219,7 +219,7 @@ export class SmartNotificationSystem {
     })
 
     // Low stock warnings
-    const lowStockItems = inventory.filter(item => 
+    const lowStockItems = inventory.filter((item: any) => 
       item.current_stock <= item.min_stock && 
       item.current_stock > (item.min_stock * 0.3)
     )
@@ -237,7 +237,7 @@ export class SmartNotificationSystem {
     }
 
     // Overstocked items
-    const overstockedItems = inventory.filter(item => 
+    const overstockedItems = inventory.filter((item: any) => 
       item.current_stock > (item.min_stock * 5)
     )
 
@@ -306,7 +306,7 @@ export class SmartNotificationSystem {
    */
   private async processOrderMetrics(orders: unknown[]) {
     // Urgent orders (delivery in < 24 hours)
-    const urgentOrders = orders.filter(order => {
+    const urgentOrders = orders.filter((order: any) => {
       if (!order.delivery_date || order.status === 'DELIVERED') return false
       
       const deliveryTime = new Date(order.delivery_date).getTime()
@@ -330,7 +330,7 @@ export class SmartNotificationSystem {
     }
 
     // Overdue orders
-    const overdueOrders = orders.filter(order => {
+    const overdueOrders = orders.filter((order: any) => {
       if (!order.delivery_date || order.status === 'DELIVERED') return false
       
       const deliveryTime = new Date(order.delivery_date).getTime()
@@ -359,14 +359,14 @@ export class SmartNotificationSystem {
     const now = Date.now()
     const initialCount = this.notifications.length
 
-    this.notifications = this.notifications.filter(notification => {
+    this.notifications = this.notifications.filter((notification: any) => {
       if (!notification.expiresAt) return true
       return new Date(notification.expiresAt).getTime() > now
     })
 
     const removedCount = initialCount - this.notifications.length
     if (removedCount > 0) {
-      apiLogger.info(`🧹 Cleaned up ${removedCount} expired notifications`)
+      automationLogger.info(`🧹 Cleaned up ${removedCount} expired notifications`)
       this.notifySubscribers()
     }
   }
@@ -433,7 +433,7 @@ export class SmartNotificationSystem {
     const rule = this.rules.find(r => r.id === ruleId)
     if (rule) {
       rule.enabled = enabled
-      apiLogger.info(`🔔 Rule ${rule.name} ${enabled ? 'enabled' : 'disabled'}`)
+      automationLogger.info(`🔔 Rule ${rule.name} ${enabled ? 'enabled' : 'disabled'}`)
     }
   }
 }

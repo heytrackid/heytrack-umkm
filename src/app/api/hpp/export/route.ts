@@ -1,4 +1,5 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/type-guards'
 import { CostBreakdown, HPPSnapshot, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 import { HPPExportQuerySchema } from '@/lib/validations'
@@ -59,7 +60,7 @@ export async function GET(request: NextRequest) {
         if (snapshotsError) {
             apiLogger.error({ error: snapshotsError }, 'Error fetching snapshots:')
             return NextResponse.json(
-                { error: 'Failed to fetch snapshots', details: snapshotsError.message },
+                { error: 'Failed to fetch snapshots', details: (snapshotsError as any).message },
                 { status: 500 }
             )
         }
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
 
         // Prepare export data
         const exportData = {
-            recipe_name: recipe.nama,
+            recipe_name: recipe.name,
             period,
             date_range: dateRange,
             snapshots: typedSnapshots.map(snapshot => ({
@@ -142,7 +143,7 @@ export async function GET(request: NextRequest) {
             pattern: 'solid',
             fgColor: { argb: 'FF4472C4' }
         }
-        snapshotSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }
+        ;(snapshotSheet.getRow(1).font as any).color = { argb: 'FFFFFFFF' }
         snapshotSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' }
 
         // Add borders to all cells
@@ -174,7 +175,8 @@ export async function GET(request: NextRequest) {
             pattern: 'solid',
             fgColor: { argb: 'FF4472C4' }
         }
-        summarySheet.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FFFFFFFF' } }
+        summarySheet.getCell('A1').font = { bold: true, size: 14 }
+        summarySheet.getCell('A1').font.color = { argb: 'FFFFFFFF' }
         summarySheet.getRow(1).height = 25
 
         // Add data starting from row 3
@@ -221,12 +223,13 @@ export async function GET(request: NextRequest) {
         ]
 
         // Style header
-        breakdownSheet.getRow(1).font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
+        breakdownSheet.getRow(1).font = { bold: true, size: 12 }
         breakdownSheet.getRow(1).fill = {
             type: 'pattern',
             pattern: 'solid',
             fgColor: { argb: 'FF4472C4' }
         }
+        ;(breakdownSheet.getRow(1).font as any).color = { argb: 'FFFFFFFF' }
         breakdownSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' }
 
         // Add ingredients section
@@ -256,7 +259,7 @@ export async function GET(request: NextRequest) {
             fgColor: { argb: 'FFD9E1F2' }
         }
 
-        breakdown.operational.forEach(opCost => {
+        ;(breakdown.operational || breakdown.operational_costs || []).forEach(opCost => {
             breakdownSheet.addRow({
                 component: '  ' + opCost.category,
                 cost: opCost.cost,
@@ -304,12 +307,13 @@ export async function GET(request: NextRequest) {
         ]
 
         // Style header
-        chartDataSheet.getRow(1).font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } }
         chartDataSheet.getRow(1).fill = {
             type: 'pattern',
             pattern: 'solid',
             fgColor: { argb: 'FF4472C4' }
         }
+        chartDataSheet.getRow(1).font = { bold: true, size: 12 }
+        ;(chartDataSheet.getRow(1).font as any).color = { argb: 'FFFFFFFF' }
         chartDataSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' }
 
         // Add chart data
@@ -343,7 +347,7 @@ export async function GET(request: NextRequest) {
         const buffer = await workbook.xlsx.writeBuffer()
 
         // Create filename
-        const filename = `HPP_History_${recipe.nama.replace(/[^a-z0-9]/gi, '_')}_${formatDate(new Date().toISOString())}.xlsx`
+        const filename = `HPP_History_${recipe.name.replace(/[^a-z0-9]/gi, '_')}_${formatDate(new Date().toISOString())}.xlsx`
 
         // Return file as download
         return new NextResponse(buffer, {
@@ -356,7 +360,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in export endpoint:')
         return NextResponse.json(
-            { error: 'Export failed', details: error.message },
+            { error: 'Export failed', details: getErrorMessage(error) },
             { status: 500 }
         )
     }
@@ -417,7 +421,8 @@ function getPeriodLabel(period: TimePeriod): string {
         '7d': '7 Hari Terakhir',
         '30d': '30 Hari Terakhir',
         '90d': '90 Hari Terakhir',
-        '1y': '1 Tahun Terakhir'
+        '1y': '1 Tahun Terakhir',
+        'all': 'Semua Data'
     }
     return labels[period] || period
 }

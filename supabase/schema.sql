@@ -1,4 +1,4 @@
--- Bakery Management System Database Schema
+-- UMKM Management System Database Schema
 -- Run this SQL in your Supabase SQL Editor
 
 -- Enable UUID extension

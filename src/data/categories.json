@@ -15,8 +15,8 @@
       "commonIngredients": ["tepung", "telur", "minyak", "gula", "garam", "bumbu", "keju", "coklat"]
     },
     {
-      "id": "roti-bakery",
-      "name": "Roti & Bakery",
+      "id": "roti-UMKM",
+      "name": "Roti & UMKM",
       "icon": "🍞",
       "description": "Roti tawar, manis, kue, dll",
       "commonIngredients": ["tepung terigu", "telur", "mentega", "gula", "ragi", "susu", "garam", "air"]

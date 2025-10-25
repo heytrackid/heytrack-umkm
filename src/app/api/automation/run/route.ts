@@ -1,5 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { getErrorMessage } from '@/lib/type-guards'
 import { cronJobs } from '@/lib/cron-jobs'
+import { AutomationTaskSchema } from '@/lib/validations/api-schemas'
+import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import { apiLogger } from '@/lib/logger'
 /**
@@ -8,10 +11,13 @@ import { apiLogger } from '@/lib/logger'
  * POST /api/automation/run
  * Body: { task: 'reorder' | 'notifications' | 'engine' | 'all' }
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { task = 'all' } = body
+    // Validate request body
+    const validatedData = await validateRequestOrRespond(request, AutomationTaskSchema)
+    if (validatedData instanceof NextResponse) return validatedData
+
+    const { task } = validatedData
 
     const results: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
@@ -62,7 +68,7 @@ export async function POST(request: Request) {
     return NextResponse.json(results)
   } catch (error: unknown) {
     apiLogger.error({ error: error }, '❌ Error running automation:')
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage = error instanceof Error ? (error as any).message : 'Unknown error'
     return NextResponse.json(
       { error: 'Failed to run automation', message: errorMessage },
       { status: 500 }
@@ -92,7 +98,7 @@ export async function GET() {
     })
   } catch (error: unknown) {
     apiLogger.error({ error: error }, '❌ Error getting automation status:')
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorMessage = error instanceof Error ? (error as any).message : 'Unknown error'
     return NextResponse.json(
       { error: 'Failed to get automation status', message: errorMessage },
       { status: 500 }

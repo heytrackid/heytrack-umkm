@@ -237,7 +237,7 @@ export default function HPPHistoricalChart({
     }, [snapshots, multiSelect, multiProductData])
 
     // Custom tooltip - optimized for touch devices
-    const CustomTooltip = ({ ...props }: { [key: string]: unknown }) => {
+    const CustomTooltip = ({ active, payload, label, ...props }: any) => {
         if (active && payload && payload.length) {
             return (
                 <div className={cn(

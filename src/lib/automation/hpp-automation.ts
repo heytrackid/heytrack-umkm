@@ -599,7 +599,7 @@ export class HPPAutomationSystem {
   }
 
   private loadDefaultOperationalCosts() {
-    // Load default operational costs for Indonesian bakery
+    // Load default operational costs for Indonesian UMKM
     const defaultCosts: OperationalCost[] = [
       {
         id: 'labor_hourly_rate',

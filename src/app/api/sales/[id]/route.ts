@@ -3,7 +3,7 @@ import { createSupabaseClient } from '@/lib/supabase';
 import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -11,12 +11,12 @@ export async function GET(
     const supabase = createSupabaseClient();
     
     const { data: sale, error } = await supabase
-      .from('sales')
+      .from('financial_records')
       .select(`
-        *,
-        recipe:recipes(name)
+        *
       `)
       .eq('id', id)
+      .eq('record_type', 'INCOME')
       .single();
 
     if (error) throw error;
@@ -36,13 +36,18 @@ export async function PUT(
     const supabase = createSupabaseClient();
     const body = await request.json();
 
+    const updatePayload = {
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+
     const { data: sale, error } = await supabase
-      .from('sales')
-      .update(body as Record<string, unknown>)
+      .from('financial_records')
+      .update(updatePayload)
       .eq('id', id)
+      .eq('record_type', 'INCOME')
       .select(`
-        *,
-        recipe:recipes(name)
+        *
       `)
       .single();
 
@@ -55,7 +60,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -63,9 +68,10 @@ export async function DELETE(
     const supabase = createSupabaseClient();
 
     const { error } = await supabase
-      .from('sales')
+      .from('financial_records')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('record_type', 'INCOME');
 
     if (error) throw error;
 

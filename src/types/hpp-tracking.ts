@@ -103,7 +103,7 @@ export interface HPPRecommendation {
     action_items: string[]
 }
 
-export type TimePeriod = '7d' | '30d' | '90d' | '1y'
+export type TimePeriod = '7d' | '30d' | '90d' | '1y' | 'all'
 
 export interface HPPExportData {
     recipe_name: string

@@ -23,38 +23,38 @@ export async function GET(request: NextRequest) {
 
         // Get query parameters
         const searchParams = request.nextUrl.searchParams
-        const bahanId = searchParams.get('bahan_id')
+        const ingredientId = searchParams.get('ingredient_id')
         const startDate = searchParams.get('start_date')
         const endDate = searchParams.get('end_date')
         const supplier = searchParams.get('supplier')
 
         // Build query
         let query = supabase
-            .from('bahan_baku_pembelian')
+            .from('ingredient_purchases')
             .select(`
         *,
-        bahan:bahan_baku (
+        ingredient:ingredients (
           id,
-          nama_bahan,
-          satuan,
-          stok_tersedia,
-          harga_per_satuan
+          name,
+          unit,
+          current_stock,
+          price_per_unit
         )
       `)
-            .eq('user_id', user.id)
-            .order('tanggal_beli', { ascending: false })
+            .eq('user_id', (user as any).id)
+            .order('purchase_date', { ascending: false })
 
         // Apply filters
-        if (bahanId) {
-            query = query.eq('bahan_id', bahanId)
+        if (ingredientId) {
+            query = query.eq('ingredient_id', ingredientId)
         }
 
         if (startDate) {
-            query = query.gte('tanggal_beli', startDate)
+            query = query.gte('purchase_date', startDate)
         }
 
         if (endDate) {
-            query = query.lte('tanggal_beli', endDate)
+            query = query.lte('purchase_date', endDate)
         }
 
         if (supplier) {
@@ -115,19 +115,20 @@ export async function POST(request: NextRequest) {
 
         const validatedData = validation.data
 
-        const qtyBeli = validatedData.qty_beli
-        const hargaSatuan = validatedData.harga_satuan
+        const qtyBeli = validatedData.quantity
+        const hargaSatuan = validatedData.unit_price
         const totalHarga = qtyBeli * hargaSatuan
 
         // Get ingredient info
-        const { data: bahan, error: bahanError } = await supabase
-            .from('bahan_baku')
+        // @ts-ignore
+    const { data: ingredient, error: ingredientError } = await supabase
+            .from('ingredients')
             .select('*')
-            .eq('id', validatedData.bahan_id)
-            .eq('user_id', user.id)
+            .eq('id', validatedData.ingredient_id)
+            .eq('user_id', (user as any).id)
             .single()
 
-        if (bahanError || !bahan) {
+        if (ingredientError || !ingredient) {
             return NextResponse.json(
                 { error: 'Ingredient not found' },
                 { status: 404 }
@@ -137,14 +138,14 @@ export async function POST(request: NextRequest) {
         // 1. Create financial transaction (expense)
         let financialTransactionId = null
         const { data: transaction, error: transactionError } = await supabase
-            .from('financial_transactions')
+            .from('financial_records')
             .insert({
-                user_id: user.id,
-                jenis: 'pengeluaran',
-                kategori: 'Pembelian Bahan Baku',
-                nominal: totalHarga,
-                tanggal: validatedData.tanggal_beli || new Date().toISOString().split('T')[0],
-                referensi: `Pembelian: ${bahan.nama_bahan} (${qtyBeli} ${bahan.satuan}) dari ${validatedData.supplier || 'Supplier'}`
+                user_id: (user as any).id,
+                type: 'EXPENSE',
+                category: 'Pembelian Bahan Baku',
+                amount: totalHarga,
+                date: validatedData.purchase_date || new Date().toISOString().split('T')[0],
+                reference: `Pembelian: ${ingredient.name} (${qtyBeli} ${ingredient.unit}) dari ${validatedData.supplier || 'Supplier'}`
             })
             .select('id')
             .single()
@@ -153,30 +154,30 @@ export async function POST(request: NextRequest) {
             apiLogger.error({ error: transactionError }, 'Error creating financial transaction:')
             // Continue without financial transaction
         } else {
-            financialTransactionId = transaction.id
+            financialTransactionId = (transaction as any).id
         }
 
         // 2. Create purchase record
         const { data: purchase, error: purchaseError } = await supabase
-            .from('bahan_baku_pembelian')
+            .from('ingredient_purchases')
             .insert({
-                user_id: user.id,
-                bahan_id: validatedData.bahan_id,
+                user_id: (user as any).id,
+                ingredient_id: validatedData.ingredient_id,
                 supplier: validatedData.supplier,
-                qty_beli: qtyBeli,
-                harga_satuan: hargaSatuan,
-                total_harga: totalHarga,
-                tanggal_beli: validatedData.tanggal_beli || new Date().toISOString().split('T')[0],
-                catatan: validatedData.catatan
+                quantity: qtyBeli,
+                unit_price: hargaSatuan,
+                total_price: totalHarga,
+                purchase_date: validatedData.purchase_date || new Date().toISOString().split('T')[0],
+                notes: validatedData.notes
             })
             .select(`
         *,
-        bahan:bahan_baku (
+        ingredient:ingredients (
           id,
-          nama_bahan,
-          satuan,
-          stok_tersedia,
-          harga_per_satuan
+          name,
+          unit,
+          current_stock,
+          price_per_unit
         )
       `)
             .single()
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
             // Rollback financial transaction if purchase fails
             if (financialTransactionId) {
                 await supabase
-                    .from('financial_transactions')
+                    .from('financial_records')
                     .delete()
                     .eq('id', financialTransactionId)
             }
@@ -199,13 +200,13 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Update ingredient stock
-        const newStock = (bahan.stok_tersedia || 0) + qtyBeli
+        const newStock = (ingredient.current_stock || 0) + qtyBeli
 
         const { error: stockError } = await supabase
-            .from('bahan_baku')
-            .update({ stok_tersedia: newStock })
-            .eq('id', validatedData.bahan_id)
-            .eq('user_id', user.id)
+            .from('ingredients')
+            .update({ current_stock: newStock } as any)
+            .eq('id', validatedData.ingredient_id)
+            .eq('user_id', (user as any).id)
 
         if (stockError) {
             apiLogger.error({ error: stockError }, 'Error updating stock:')
@@ -214,13 +215,17 @@ export async function POST(request: NextRequest) {
 
         // 4. Create stock ledger entry
         await supabase
-            .from('stock_ledger')
+            .from('inventory_stock_logs')
             .insert({
-                user_id: user.id,
-                bahan_id: validatedData.bahan_id,
-                qty: qtyBeli,
-                tipe: 'in',
-                ref: `Purchase #${purchase.id.substring(0, 8)}`
+                user_id: (user as any).id,
+                ingredient_id: validatedData.ingredient_id,
+                quantity_before: ingredient.current_stock || 0,
+                quantity_after: newStock,
+                quantity_changed: qtyBeli,
+                change_type: 'PURCHASE',
+                reference_id: (purchase as any).id,
+                reference_type: 'ingredient_purchase',
+                transaction_date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
             })
 
         return NextResponse.json(purchase, { status: 201 })
@@ -263,10 +268,10 @@ export async function DELETE(request: NextRequest) {
 
         // Get purchase details
         const { data: purchase, error: fetchError } = await supabase
-            .from('bahan_baku_pembelian')
+            .from('ingredient_purchases')
             .select('*')
             .eq('id', id)
-            .eq('user_id', user.id)
+            .eq('user_id', (user as any).id)
             .single()
 
         if (fetchError || !purchase) {
@@ -277,40 +282,45 @@ export async function DELETE(request: NextRequest) {
         }
 
         // 1. Revert stock
-        const { data: bahan } = await supabase
-            .from('bahan_baku')
-            .select('stok_tersedia')
-            .eq('id', purchase.bahan_id)
-            .eq('user_id', user.id)
+        const { data: ingredient } = await supabase
+            .from('ingredients')
+            .select('current_stock')
+            .eq('id', purchase.ingredient_id)
+            .eq('user_id', (user as any).id)
             .single()
 
-        if (bahan) {
-            const newStock = Math.max(0, (bahan.stok_tersedia || 0) - purchase.qty_beli)
+        if (ingredient) {
+            const newStock = Math.max(0, (ingredient.current_stock || 0) - purchase.quantity)
 
             await supabase
-                .from('bahan_baku')
-                .update({ stok_tersedia: newStock })
-                .eq('id', purchase.bahan_id)
-                .eq('user_id', user.id)
+                .from('ingredients')
+                .update({ current_stock: newStock } as any)
+                .eq('id', purchase.ingredient_id)
+                .eq('user_id', (user as any).id)
         }
 
         // 2. Create stock ledger entry for reversal
         await supabase
-            .from('stock_ledger')
+            .from('inventory_stock_logs')
             .insert({
-                user_id: user.id,
-                bahan_id: purchase.bahan_id,
-                qty: purchase.qty_beli,
-                tipe: 'out',
-                ref: `Reversal: Purchase #${purchase.id.substring(0, 8)}`
+                user_id: (user as any).id,
+                ingredient_id: purchase.ingredient_id,
+                quantity_before: ingredient?.current_stock || 0,
+                quantity_after: ingredient ? Math.max(0, (ingredient.current_stock || 0) - purchase.quantity) : 0,
+                quantity_changed: -purchase.quantity,
+                change_type: 'ADJUSTMENT',
+                reason: 'Purchase deletion',
+                reference_id: purchase.id,
+                reference_type: 'ingredient_purchase',
+                transaction_date: new Date().toISOString().split('T')[0]
             })
 
         // 3. Delete purchase
         const { error: deleteError } = await supabase
-            .from('bahan_baku_pembelian')
+            .from('ingredient_purchases')
             .delete()
             .eq('id', id)
-            .eq('user_id', user.id)
+            .eq('user_id', (user as any).id)
 
         if (deleteError) {
             apiLogger.error({ error: deleteError }, 'Error deleting purchase:')

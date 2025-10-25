@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -64,7 +64,7 @@ export class ProductionTimeService {
         parallel_processing_time
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error calculating production time')
+      dbLogger.error({ err: error }, 'Error calculating production time')
       return {
         total_prep_time: 0,
         total_cook_time: 0,

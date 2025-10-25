@@ -1,11 +1,14 @@
 import { supabase } from '@/lib/supabase'
+import { apiLogger } from '@/lib/logger'
 import type {
   InventoryStockLog,
-  InventoryStockLogInsert,
   SyncEvent,
-  SystemMetric,
-  SystemMetricInsert
+  SystemMetric
 } from '@/types'
+
+// Placeholder types for Insert operations
+type InventoryStockLogInsert = Partial<InventoryStockLog>
+type SystemMetricInsert = Partial<SystemMetric>
 
 // Sync Events API
 export const syncEventApi = {
@@ -91,7 +94,7 @@ export const syncEventApi = {
 // System Metrics API
 export const systemMetricsApi = {
   // Get latest metrics
-  async getLatestMetrics(metricType?: string) {
+  async getLatestMetrics(metricType?: string, limit = 100) {
     let query = supabase
       .from('system_metrics')
       .select('*')
@@ -101,7 +104,7 @@ export const systemMetricsApi = {
       query = query.eq('metric_type', metricType)
     }
 
-    const { data, error } = await query.limit(options.limit)
+    const { data, error } = await query.limit(limit)
 
     if (error) throw error
     return data as SystemMetric[]
@@ -109,8 +112,8 @@ export const systemMetricsApi = {
 
   // Record new metric
   async recordMetric(metric: SystemMetricInsert) {
-    const { data, error } = await supabase
-      .from('system_metrics')
+    const { data, error } = await (supabase
+      .from('system_metrics') as any)
       .insert(metric)
       .select('*')
       .single()
@@ -169,8 +172,8 @@ export const inventoryStockLogsApi = {
 
   // Log stock change
   async logStockChange(log: InventoryStockLogInsert) {
-    const { data, error } = await supabase
-      .from('inventory_stock_logs')
+    const { data, error } = await (supabase
+      .from('inventory_stock_logs') as any)
       .insert(log)
       .select('*')
       .single()

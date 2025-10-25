@@ -1,3 +1,4 @@
+import { automationLogger } from '@/lib/logger'
 import { formatCurrency } from '@/shared/utils/currency'
 
 import {

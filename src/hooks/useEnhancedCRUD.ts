@@ -50,7 +50,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       )
     }
 
-    apiLogger.error({ error: `CRUD ${operation} error:`, error }, 'Console error replaced with logger')
+    apiLogger.error({ message: `CRUD ${operation} error`, error }, 'Console error replaced with logger')
   }, [customErrorHandler, showErrorToast])
 
   const handleSuccess = useCallback((operation: 'create' | 'update' | 'delete') => {
@@ -81,8 +81,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       const { data: result, error } = await supabase
-        .from(table)
-        .insert(data)
+        .from(table as any)
+        .insert(data as any)
         .select('*')
         .single()
 
@@ -116,8 +116,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       const { data: result, error } = await supabase
-        .from(table)
-        .update(data)
+        .from(table as any)
+        .update(data as any)
         .eq('id', id)
         .select('*')
         .single()
@@ -153,7 +153,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await supabase
-        .from(table)
+        .from(table as any)
         .select('*')
         .eq('id', id)
         .single()
@@ -163,7 +163,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       const { error } = await supabase
-        .from(table)
+        .from(table as any)
         .delete()
         .eq('id', id)
 
@@ -192,9 +192,9 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('Data tidak valid atau kosong')
       }
 
-      const { data, error } = await supabase
-        .from(table)
-        .insert(data)
+      const { data: result, error } = await supabase
+        .from(table as any)
+        .insert(records as any)
         .select('*')
 
       if (error) {
@@ -208,7 +208,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         )
       }
 
-      return data
+      return result
     } catch (error: unknown) {
       handleError(error as Error, 'create')
       throw error
@@ -232,9 +232,9 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       const results = []
       for (const update of updates) {
-        const { data, error } = await supabase
-          .from(table)
-          .update(update.data)
+        const { data: result, error } = await supabase
+          .from(table as any)
+          .update(update.data as any)
           .eq('id', update.id)
           .select('*')
           .single()
@@ -243,7 +243,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
           throw new Error(`Gagal update record ${update.id}: ${error.message}`)
         }
 
-        results.push(data)
+        results.push(result)
       }
 
       if (showSuccessToast) {
@@ -274,7 +274,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       const { error } = await supabase
-        .from(table)
+        .from(table as any)
         .delete()
         .in('id', ids)
 

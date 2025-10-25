@@ -2,12 +2,12 @@
 
 import * as React from 'react'
 import { useState, useEffect } from 'react'
-import { useRecipes } from '@/hooks/useSupabase'
+import { useRecipes, useHPPCalculations } from '@/hooks/useSupabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { apiLogger } from '@/lib/logger'
 export const useHPPLogic = () => {
-  const { recipes, loading, calculateHPP } = useHPPCalculations()
+  const { recipes, loading } = useHPPCalculations()
   const { update: updateRecipe } = useRecipes()
   const { formatCurrency } = useCurrency()
   

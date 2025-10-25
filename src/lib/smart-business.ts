@@ -1,5 +1,5 @@
 /**
- * 🧠 Smart Business Logic for UMKM Bakery Management
+ * 🧠 Smart Business Logic for UMKM UMKM Management
  * Advanced automation, recommendations, and intelligent calculations
  */
 

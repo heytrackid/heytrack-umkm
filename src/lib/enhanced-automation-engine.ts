@@ -15,7 +15,7 @@
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types'
 
-import { apiLogger } from '@/lib/logger'
+import { automationLogger } from '@/lib/logger'
 // Type definitions
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -226,7 +226,7 @@ export class EnhancedAutomationEngine {
         margin_analysis: marginAnalysis
       }
     } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Advanced HPP calculation error:')
+      automationLogger.error({ error: error }, 'Advanced HPP calculation error:')
       throw error
     }
   }
@@ -271,7 +271,7 @@ export class EnhancedAutomationEngine {
 
       if (error) throw error
 
-      const analysis = inventoryAnalysis as InventoryAnalysisResult[]
+      const analysis = inventoryAnalysis as unknown as InventoryAnalysisResult[]
 
       // Enhanced analysis with usage predictions
       const usagePredictions = await this.predictUsageTrends()
@@ -307,7 +307,7 @@ export class EnhancedAutomationEngine {
         cost_optimization: costOptimization
       }
     } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Intelligent inventory analysis error:')
+      automationLogger.error({ error: error }, 'Intelligent inventory analysis error:')
       throw error
     }
   }
@@ -366,7 +366,7 @@ export class EnhancedAutomationEngine {
       const bottleneckAnalysis = await this.analyzeProductionBottlenecks(optimization)
       
       // Profitability forecast
-      const profitabilityForecast = this.calculateProfitabilityForecast
+      const profitabilityForecast = this.calculateProfitabilityForecast()
 
       return {
         optimized_schedule: optimizedSchedule,
@@ -375,7 +375,7 @@ export class EnhancedAutomationEngine {
         profitability_forecast: profitabilityForecast
       }
     } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Production optimization error:')
+      automationLogger.error({ error: error }, 'Production optimization error:')
       throw error
     }
   }
@@ -436,7 +436,7 @@ export class EnhancedAutomationEngine {
         business_insights: businessInsights
       }
     } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Contextual alerts generation error:')
+      automationLogger.error({ error: error }, 'Contextual alerts generation error:')
       throw error
     }
   }
@@ -490,7 +490,7 @@ export class EnhancedAutomationEngine {
         growth_strategy: growthStrategy
       }
     } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Business intelligence generation error:')
+      automationLogger.error({ error: error }, 'Business intelligence generation error:')
       throw error
     }
   }
@@ -600,7 +600,7 @@ export class EnhancedAutomationEngine {
         totalItemsNeedingAttention: analysisResult?.length || 0
       }
     } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error analyzing inventory needs:')
+      automationLogger.error({ error: error }, 'Error analyzing inventory needs:')
       return {
         criticalItems: [],
         reorderSuggestions: [],

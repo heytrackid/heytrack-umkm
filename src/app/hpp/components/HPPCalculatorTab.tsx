@@ -31,7 +31,7 @@ export default function HPPCalculatorTab({
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
             {recipes.map(recipe => (
               <HPPRecipeCard
-                key={recipe.id}
+                key={(recipe as any).id}
                 recipe={recipe}
                 formatCurrency={formatCurrency}
                 getMarginBadgeVariant={getMarginBadgeVariant}

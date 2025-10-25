@@ -35,7 +35,7 @@ export function useOptimizedIngredients() {
       lastFetchTime.current = now
 
       const result = await enhancedApiClient.getIngredients()
-      setData(result)
+      setData(result as any)
       hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch ingredients')
@@ -51,9 +51,9 @@ export function useOptimizedIngredients() {
 
   // Check cache first
   useEffect(() => {
-    const cached = hookCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < 60000) { // 1 minute cache
-      setData(cached.data)
+    const cached = hookCache.get(cacheKey) as any as any
+    if (cached && Date.now() - ((cached.timestamp || 0) || 0) < 60000) { // 1 minute cache
+      setData(cached.data || [])
       setLoading(false)
       return
     }
@@ -65,11 +65,11 @@ export function useOptimizedIngredients() {
   const computedData = useMemo(() => {
     if (!data) return { lowStockCount: 0, totalValue: 0, categories: [] }
 
-    const lowStockCount = data.filter(item =>
-      item.current_stock <= (item.min_stock || 0)
+    const lowStockCount = data.filter((item: any) =>
+      (item.current_stock || 0) <= (item.min_stock || 0)
     ).length
 
-    const totalValue = data.reduce((sum, item) =>
+    const totalValue = data.reduce((sum: number, item: any) =>
       sum + ((item.current_stock || 0) * (item.price_per_unit || 0)), 0
     )
 
@@ -107,7 +107,7 @@ export function useOptimizedRecipes() {
       lastFetchTime.current = now
 
       const result = await enhancedApiClient.getRecipes()
-      setData(result)
+      setData(result as any)
       hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch recipes')
@@ -122,9 +122,9 @@ export function useOptimizedRecipes() {
   }, [fetchRecipes])
 
   useEffect(() => {
-    const cached = hookCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < 300000) { // 5 minute cache for recipes
-      setData(cached.data)
+    const cached = hookCache.get(cacheKey) as any
+    if (cached && Date.now() - (cached.timestamp || 0) < 300000) { // 5 minute cache for recipes
+      setData(cached.data || [])
       setLoading(false)
       return
     }
@@ -135,7 +135,7 @@ export function useOptimizedRecipes() {
   const computedData = useMemo(() => {
     if (!data) return { recipesWithIngredients: 0, categories: [], totalRecipes: 0 }
 
-    const recipesWithIngredients = data.filter(recipe =>
+    const recipesWithIngredients = data.filter((recipe: any) =>
       recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0
     ).length
 
@@ -174,7 +174,7 @@ export function useOptimizedOrders(limit: number = 50) {
       lastFetchTime.current = now
 
       const result = await enhancedApiClient.getOrders({ limit })
-      setData(result)
+      setData(result as any)
       hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch orders')
@@ -189,9 +189,9 @@ export function useOptimizedOrders(limit: number = 50) {
   }, [fetchOrders])
 
   useEffect(() => {
-    const cached = hookCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < 30000) { // 30 second cache for orders
-      setData(cached.data)
+    const cached = hookCache.get(cacheKey) as any
+    if (cached && Date.now() - (cached.timestamp || 0) < 30000) { // 30 second cache for orders
+      setData(cached.data || [])
       setLoading(false)
       return
     }
@@ -207,16 +207,16 @@ export function useOptimizedOrders(limit: number = 50) {
       recentOrders: []
     }
 
-    const pendingOrders = data.filter(order =>
+    const pendingOrders = data.filter((order: any) =>
       order.status === 'PENDING' || order.status === 'CONFIRMED'
     ).length
 
     const totalRevenue = data
-      .filter(order => order.status === 'DELIVERED')
-      .reduce((sum, order) => sum + (order.total_amount || 0), 0)
+      .filter((order: any) => order.status === 'DELIVERED')
+      .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0)
 
     const now = new Date()
-    const urgentOrders = data.filter(order => {
+    const urgentOrders = data.filter((order: any) => {
       if (!order.delivery_date || order.status === 'DELIVERED') return false
       const deliveryTime = new Date(order.delivery_date).getTime()
       const hoursUntilDelivery = (deliveryTime - now.getTime()) / (1000 * 60 * 60)
@@ -257,7 +257,7 @@ export function useOptimizedCustomers() {
       lastFetchTime.current = now
 
       const result = await enhancedApiClient.getCustomers()
-      setData(result)
+      setData(result as any)
       hookCache.set(cacheKey, result)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch customers')
@@ -272,9 +272,9 @@ export function useOptimizedCustomers() {
   }, [fetchCustomers])
 
   useEffect(() => {
-    const cached = hookCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < 180000) { // 3 minute cache
-      setData(cached.data)
+    const cached = hookCache.get(cacheKey) as any
+    if (cached && Date.now() - (cached.timestamp || 0) < 180000) { // 3 minute cache
+      setData(cached.data || [])
       setLoading(false)
       return
     }
@@ -290,18 +290,18 @@ export function useOptimizedCustomers() {
       topCustomers: []
     }
 
-    const activeCustomers = data.filter(customer =>
+    const activeCustomers = data.filter((customer: any) =>
       customer.status === 'active'
     ).length
 
     const totalCustomers = data.length
 
-    const avgOrderValue = data.reduce((sum, customer) =>
+    const avgOrderValue = data.reduce((sum: number, customer: any) =>
       sum + (customer.total_spent || 0), 0
     ) / Math.max(totalCustomers, 1)
 
     const topCustomers = [...data]
-      .sort((a, b) => (b.total_spent || 0) - (a.total_spent || 0))
+      .sort((a: any, b: any) => (b.total_spent || 0) - (a.total_spent || 0))
       .slice(0, 5)
 
     return { activeCustomers, totalCustomers, avgOrderValue, topCustomers }

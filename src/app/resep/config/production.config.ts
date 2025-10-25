@@ -1,4 +1,4 @@
-// Production module configuration for Indonesian bakery operations
+// Production module configuration for Indonesian UMKM operations
 import { REGIONAL_DEFAULTS, DEFAULT_CURRENCY } from '@/shared/utils/currency'
 
 export interface ProductionModuleConfig {
@@ -129,7 +129,7 @@ export type QualityStatus =
   | 'conditional'    // Passed with notes
   | 'retesting'
 
-// Default configuration for Indonesian bakery
+// Default configuration for Indonesian UMKM
 export const DEFAULT_PRODUCTION_CONFIG: ProductionModuleConfig = {
   batch: {
     default_size: 50, // 50 units per batch
@@ -142,7 +142,7 @@ export const DEFAULT_PRODUCTION_CONFIG: ProductionModuleConfig = {
   },
   
   scheduling: {
-    default_lead_time_hours: 4, // 4 hours for most bakery items
+    default_lead_time_hours: 4, // 4 hours for most UMKM items
     buffer_time_hours: 1, // 1 hour buffer
     max_concurrent_batches: 5,
     working_hours: {

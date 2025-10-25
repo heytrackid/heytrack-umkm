@@ -3,7 +3,7 @@
  * Dynamically loads AI service modules only when needed
  */
 
-import { logger } from '@/lib/logger'
+import { apiLogger } from '@/lib/logger'
 
 // AI Service Data Interfaces
 export interface PricingData {
@@ -164,7 +164,7 @@ export class AIService {
   constructor() {
     this.apiKey = process.env.OPENROUTER_API_KEY || ''
     if (!this.apiKey) {
-      logger.warn('OPENROUTER_API_KEY not found. AI features will be disabled.')
+      apiLogger.warn('OPENROUTER_API_KEY not found. AI features will be disabled.')
     }
   }
 

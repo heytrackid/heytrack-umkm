@@ -1,5 +1,9 @@
 'use client'
 
+import { useEffect, useState, Suspense, lazy } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/use-toast'
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { apiLogger } from '@/lib/logger'
@@ -16,7 +20,6 @@ import {
   Plus,
   ShoppingCart
 } from 'lucide-react'
-import { Suspense, lazy, useEffect, useState } from 'react'
 
 // Lazy load heavy components
 const OrdersStatsSection = lazy(() => import('./components/OrdersStatsSection'))

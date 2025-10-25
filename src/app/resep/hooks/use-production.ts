@@ -1,4 +1,4 @@
-// Production service hooks for Indonesian bakery operations
+// Production service hooks for Indonesian UMKM operations
 'use client'
 import { useMemo } from 'react'
 import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'

@@ -1,3 +1,4 @@
+import { dbLogger } from '@/lib/logger'
 /**
  * Database Query Optimization & Caching
  * Provides optimized queries with built-in caching for better performance

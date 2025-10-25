@@ -23,7 +23,7 @@ export const preloadChartBundle = async () => {
     await import('recharts')
     apiLogger.info('✅ Chart bundle preloaded')
   } catch (error: unknown) {
-    apiLogger.warn('❌ Failed to preload chart bundle:', error)
+    apiLogger.warn('❌ Failed to preload chart bundle', error)
   }
 }
 
@@ -36,7 +36,7 @@ export const preloadTableBundle = async () => {
     ])
     apiLogger.info('✅ Table bundle preloaded')
   } catch (error: unknown) {
-    apiLogger.warn('❌ Failed to preload table bundle:', error)
+    apiLogger.warn('❌ Failed to preload table bundle', error)
   }
 }
 
@@ -51,7 +51,7 @@ export const preloadModalComponent = async (modalType: string) => {
     }
     apiLogger.info(`✅ Modal ${modalType} preloaded`)
   } catch (error: unknown) {
-    apiLogger.warn(`❌ Failed to preload modal ${modalType}:`, error)
+    apiLogger.warn(`❌ Failed to preload modal ${modalType}`, error)
   }
 }
 

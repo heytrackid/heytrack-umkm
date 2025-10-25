@@ -1,3 +1,4 @@
+import type { Tables } from '@/types/supabase-generated'
 // Orders module types and interfaces with multi-currency support
 export interface OrderItem {
   id: string
@@ -54,7 +55,7 @@ export interface Order {
   
   // Relations
   items: OrderItem[]
-  customer?: CustomersTable['Row'] // Customer data type
+  customer?: Tables<'customers'> // Customer data type
   payments?: OrderPayment[] // Payment history
 }
 

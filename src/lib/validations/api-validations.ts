@@ -48,7 +48,8 @@ export const CustomerFormSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number').optional().or(z.literal('')),
   address: z.string().max(500).optional().or(z.literal('')),
-  customer_type: z.string().max(50).optional().or(z.literal('')),
+  birth_date: z.string().optional(),
+  customer_type: z.enum(['REGULAR', 'VIP', 'WHOLESALE']).default('REGULAR'),
   discount_percentage: z.number().min(0).max(100).optional(),
   notes: z.string().max(1000).optional().or(z.literal('')),
   is_active: z.boolean().default(true),
@@ -58,39 +59,49 @@ export const CustomerFormSchema = z.object({
 
 export const IngredientFormSchema = z.object({
   name: z.string().min(1, 'Ingredient name is required').max(255),
-  category: z.string().min(1, 'Category is required').max(100),
-  unit: z.string().min(1, 'Unit is required').max(50),
+  category: z.string().min(1, 'Category is required').max(100).optional(),
+  unit: z.enum(['kg', 'gram', 'liter', 'ml', 'pcs', 'pack']),
   current_stock: z.number().min(0).default(0),
-  minimum_stock: z.number().min(0).default(0),
-  maximum_stock: z.number().min(0).optional(),
-  unit_cost: z.number().min(0),
+  min_stock: z.number().min(0).default(0),
+  max_stock: z.number().min(0).optional(),
+  price_per_unit: z.number().min(0).optional(),
+  supplier: z.string().optional(),
   supplier_id: UUIDSchema.optional(),
+  supplier_info: z.object({
+    name: z.string().optional(),
+    contact: z.string().optional(),
+  }).optional(),
   is_active: z.boolean().default(true),
   description: z.string().max(500).optional().or(z.literal('')),
   storage_location: z.string().max(100).optional().or(z.literal('')),
   expiry_date: DateStringSchema.optional(),
+  reorder_point: z.number().min(0).optional(),
+  lead_time_days: z.number().min(0).optional(),
   nutritional_info: z.unknown().optional(),
 })
 
 export const RecipeFormSchema = z.object({
   name: z.string().min(1, 'Recipe name is required').max(255),
   description: z.string().max(1000).optional().or(z.literal('')),
-  category: z.string().min(1, 'Category is required').max(100),
-  serving_size: z.number().positive(),
-  preparation_time: z.number().min(0),
-  cooking_time: z.number().min(0),
-  instructions: z.string().min(1, 'Instructions are required'),
-  ingredients: z.array(z.object({
+  category: z.string().min(1, 'Category is required').max(100).optional(),
+  servings: z.number().positive(),
+  prep_time_minutes: z.number().min(0),
+  cook_time_minutes: z.number().min(0).optional(),
+  instructions: z.array(z.string()).min(1, 'Instructions are required'),
+  difficulty_level: z.enum(['EASY', 'MEDIUM', 'HARD']).optional(),
+  tags: z.array(z.string()).optional(),
+  recipe_ingredients: z.array(z.object({
     ingredient_id: UUIDSchema,
     quantity: z.number().positive(),
     unit: z.string().max(50),
   })).min(1, 'Recipe must have at least one ingredient'),
   selling_price: z.number().min(0),
   cost_price: z.number().min(0).optional(),
+  cost_per_serving: z.number().min(0).optional(),
   profit_margin: z.number().min(0).optional(),
   is_active: z.boolean().default(true),
   image_url: z.string().url().optional().or(z.literal('')),
-  nutritional_info: z.unknown().optional(),
+  nutritional_info: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const SupplierFormSchema = z.object({
@@ -174,6 +185,8 @@ export const FileUploadSchema = z.object({
   lastModified: z.number().optional(),
 })
 
+export type FileUpload = z.infer<typeof FileUploadSchema>
+
 export const ImageUploadSchema = FileUploadSchema.extend({
   type: z.string().refine(
     (type) => type.startsWith('image/'),
@@ -182,6 +195,8 @@ export const ImageUploadSchema = FileUploadSchema.extend({
   width: z.number().min(100).max(4096).optional(),
   height: z.number().min(100).max(4096).optional(),
 })
+
+export type ImageUpload = z.infer<typeof ImageUploadSchema>
 
 // Utility function validation schemas
 export const DateRangeSchema = z.object({
@@ -227,7 +242,7 @@ export const UserProfileSettingsSchema = z.object({
 
 export const BusinessInfoSettingsSchema = z.object({
   businessName: z.string().min(1, 'Nama bisnis diperlukan').max(255, 'Nama bisnis maksimal 255 karakter'),
-  businessType: z.enum(['bakery', 'cafe', 'restaurant', 'food-truck', 'catering', 'other']),
+  businessType: z.enum(['UMKM', 'cafe', 'restaurant', 'food-truck', 'catering', 'other']),
   taxId: z.string().max(50, 'NPWP maksimal 50 karakter').optional().or(z.literal('')),
   address: z.string().max(500, 'Alamat maksimal 500 karakter').optional().or(z.literal('')),
   phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number').optional(),
@@ -252,12 +267,12 @@ export const NotificationSettingsSchema = z.object({
   sms: z.object({
     critical: z.boolean().default(true),
     orders: z.boolean().default(false),
-  }).default({}),
+  }).default({}).optional()
 })
 
 export const RegionalSettingsSchema = z.object({
   language: z.enum(['id', 'en', 'jv']).default('id'),
-  timezone: z.string().min(1, 'Timezone diperlukan'),
+  timezone: z.string().min(1).default('Asia/Jakarta'),
   currency: z.enum(['IDR', 'USD', 'EUR', 'SGD', 'MYR']).default('IDR'),
   dateFormat: z.enum(['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD']).default('DD/MM/YYYY'),
   timeFormat: z.enum(['12h', '24h']).default('24h'),

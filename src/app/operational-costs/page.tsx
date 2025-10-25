@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
+import { toast } from '@/hooks/use-toast'
 import * as React from 'react'
 import { lazy, Suspense } from 'react'
 

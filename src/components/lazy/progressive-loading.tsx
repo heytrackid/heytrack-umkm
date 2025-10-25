@@ -220,11 +220,11 @@ export const StatsCardSkeleton = () => (
 )
 
 // Virtual table loader for heavy datasets
-const VirtualizedTableLoader = ({ ...props }: { [key: string]: unknown }) => {
+const VirtualizedTableLoader = ({ data, ...props }: any) => {
   // Simulate heavy data processing
   return (
     <div className="p-4 border rounded-lg bg-muted/50">
-      <p className="text-sm">Optimized view ready for {data.length} items</p>
+      <p className="text-sm">Optimized view ready for {data?.length || 0} items</p>
       <Button className="mt-2" variant="outline" size="sm">
         Load Virtual Table
       </Button>
@@ -233,12 +233,12 @@ const VirtualizedTableLoader = ({ ...props }: { [key: string]: unknown }) => {
 }
 
 // Simple table view for smaller datasets
-const SimpleTableView = ({ ...props }: { [key: string]: unknown }) => (
+const SimpleTableView = ({ data, columns, ...props }: any) => (
   <div className="overflow-x-auto">
     <table className="w-full border-collapse">
       <thead>
         <tr className="border-b">
-          {columns.map((col: any, i: number) => (
+          {columns?.map((col: any, i: number) => (
             <th key={i} className="p-2 text-left font-medium">
               {col.header}
             </th>

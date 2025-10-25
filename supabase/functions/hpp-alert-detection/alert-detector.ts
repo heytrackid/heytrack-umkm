@@ -1,7 +1,7 @@
-import type { SupabaseClient } from 'jsr:@supabase/supabase-js@2'
-import { applyAlertRules } from './alert-rules.ts'
-import type { AlertDetectionResult, HPPAlert, HPPSnapshot } from './types.ts'
-import { log } from './utils.ts'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { applyAlertRules } from './alert-rules'
+import type { AlertDetectionResult, HPPAlert, HPPSnapshot } from './types'
+import { log } from './utils'
 
 /**
  * Detect HPP alerts for all users with active recipes

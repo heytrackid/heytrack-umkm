@@ -1,3 +1,4 @@
+import { apiLogger } from '@/lib/logger'
 import { formatValidationErrors, validateFormData } from '@/lib/validations'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -139,10 +140,10 @@ export function withQueryValidation<T>(
 
 // Pagination schema for common query parameters
 export const PaginationSchema = z.object({
-  page: z.number().int().min(1).default(true),
-  limit: z.number().int().min(1).max(100).default(true),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(10),
   sort: z.string().optional(),
-  order: z.enum(['asc', 'desc']).default("REGULAR"),
+  order: z.enum(['asc', 'desc']).default('desc'),
   search: z.string().optional()
 })
 
@@ -163,7 +164,7 @@ export const DateRangeSchema = z.object({
 })
 
 export const StatusFilterSchema = z.object({
-  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).default("REGULAR")
+  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).default('ALL')
 })
 
 // ID parameter validation
@@ -224,6 +225,7 @@ export function withRateLimit(
 ) {
   return async (req: NextRequest) => {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
+    const key = `ratelimit:${ip}`
     const now = Date.now()
 
     const requestData = requestCounts.get(key)
@@ -319,8 +321,8 @@ export function withMiddleware(
 
 // Utility function to extract pagination info from query
 export function extractPagination(searchParams: URLSearchParams): PaginationQuery {
-  const page = parseInt
-  const limit = parseInt
+  const page = parseInt(searchParams.get("page") || '1', 10)
+  const limit = parseInt(searchParams.get("limit") || '10', 10)
   const sort = searchParams.get("sort") || undefined
   const order = (searchParams.get("order") as 'asc' | 'desc') || 'desc'
   const search = searchParams.get("search") || undefined

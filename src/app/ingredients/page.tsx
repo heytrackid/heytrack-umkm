@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { IngredientsCRUD } from '@/components/crud/ingredients-crud';
 import AppLayout from '@/components/layout/app-layout';
 import {
@@ -16,6 +18,8 @@ import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons';
 import { useSettings } from '@/contexts/settings-context';
 import { useBahanBaku } from '@/hooks/useSupabaseCRUD';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle,
   DollarSign,

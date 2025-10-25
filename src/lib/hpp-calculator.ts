@@ -2,6 +2,7 @@ import { Database } from '@/types'
 import type { CostBreakdown, IngredientCost, OperationalCost } from '@/types/hpp-tracking'
 import { createSupabaseClient } from './supabase'
 import { validateHPPCalculation } from './business-validation'
+import { dbLogger } from './logger'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -318,7 +319,7 @@ export async function calculateHPP(recipeId: string, userId: string): Promise<HP
     .gte('date', thirtyDaysAgo.toISOString())
 
   if (opCostError) {
-    logger.warn({ err: opCostError }, 'Failed to fetch operational costs')
+    dbLogger.warn({ err: opCostError }, 'Failed to fetch operational costs')
   }
 
   // 4. Calculate monthly operational cost

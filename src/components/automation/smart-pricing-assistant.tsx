@@ -312,7 +312,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
                   const cost = ri.ingredient.price_per_unit * ri.quantity
                   const percentage = (cost / analysis.breakdown.ingredientCost) * 100
                   return (
-                    <div key={index} className="flex justify-between items-center py-2">
+                    <div key={_index} className="flex justify-between items-center py-2">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{ri.ingredient.name}</span>
@@ -345,7 +345,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
             <CardContent>
               <div className="space-y-3">
                 {analysis.recommendations.map((rec: string, index: number) => (
-                  <Alert key={index}>
+                  <Alert key={_index}>
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription>{rec}</AlertDescription>
                   </Alert>

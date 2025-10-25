@@ -124,7 +124,7 @@ export default function AutomationPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">🤖 Automation Control</h1>
-          <p className="text-gray-600 mt-1">Manage and monitor your bakery automations</p>
+          <p className="text-gray-600 mt-1">Manage and monitor your UMKM automations</p>
         </div>
         <Button onClick={fetchStatus} variant="outline" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" />

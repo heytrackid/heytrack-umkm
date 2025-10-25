@@ -1,6 +1,6 @@
-import { analyzeAffectedComponents, detectIngredientSpikes } from './component-analysis.ts'
-import type { AlertSeverity, AlertType, HPPAlert, HPPSnapshot } from './types.ts'
-import { calculatePercentageChange, formatCurrency } from './utils.ts'
+import { analyzeAffectedComponents, detectIngredientSpikes } from './component-analysis'
+import type { AlertSeverity, AlertType, HPPAlert, HPPSnapshot } from './types'
+import { calculatePercentageChange, formatCurrency } from './utils'
 
 /**
  * Alert rule definition interface

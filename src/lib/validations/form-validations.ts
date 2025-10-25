@@ -58,22 +58,27 @@ export const IngredientSchema = z.object({
 
 export type IngredientFormData = z.infer<typeof IngredientSchema>
 
-// Bahan Baku validation schema (Indonesian field names matching database)
+// Bahan Baku validation schema (English field names matching database)
 export const BahanBakuSchema = z.object({
-  nama_bahan: indonesianName,
-  satuan: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
+  name: indonesianName,
+  unit: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
     message: 'Satuan tidak valid'
   }),
-  harga_per_satuan: z.number().positive('Harga harus lebih dari 0'),
-  stok_tersedia: positiveNumber,
-  stok_minimum: positiveNumber,
-  jenis_kemasan: optionalString
+  price_per_unit: z.number().positive('Harga harus lebih dari 0'),
+  current_stock: positiveNumber,
+  min_stock: positiveNumber.optional(),
+  minimum_stock: positiveNumber.optional(),
+  description: optionalString
 }).refine(data => {
-  // Custom validation: stok_minimum should be less than or equal to stok_tersedia
-  return data.stok_minimum <= data.stok_tersedia
+  // Custom validation: min_stock should be less than or equal to current_stock
+  const minStock = data.min_stock || data.minimum_stock
+  if (minStock && data.current_stock && minStock > data.current_stock) {
+    return false
+  }
+  return true
 }, {
   message: 'Stok minimum tidak boleh lebih besar dari stok tersedia',
-  path: ['stok_minimum']
+  path: ['min_stock']
 })
 
 export type BahanBakuFormData = z.infer<typeof BahanBakuSchema>
@@ -226,7 +231,7 @@ export const FinancialRecordSchema = z.object({
   }).optional(),
   reference_no: optionalString,
   receipt_url: z.string().url('validation.invalidReceiptUrl').optional(),
-  is_recurring: z.boolean().default(true),
+  is_recurring: z.boolean().optional(),
   recurring_period: z.enum(['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'], {
     message: 'validation.invalidRecurringPeriod'
   }).optional(),
@@ -278,6 +283,16 @@ export const SupplierFormSchema = z.object({
 export const SupplierCreateSchema = SupplierFormSchema
 export const SupplierUpdateSchema = SupplierFormSchema.partial()
 
+// Operational Cost Form Schema
+export const OperationalCostFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  category: z.string().min(1, 'Category is required'),
+  amount: z.number().min(0, 'Amount must be positive'),
+  frequency: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY', 'ONE_TIME']),
+  description: z.string().optional(),
+  is_active: z.boolean().default(true),
+})
+
 // Type exports for forms
 export type CustomerForm = z.infer<typeof CustomerSchema>
 export type IngredientForm = z.infer<typeof IngredientSchema>
@@ -285,3 +300,4 @@ export type RecipeForm = z.infer<typeof RecipeSchema>
 export type OrderForm = z.infer<typeof OrderSchema>
 export type ExpenseForm = z.infer<typeof FinancialRecordSchema>
 export type SupplierForm = z.infer<typeof SupplierFormSchema>
+export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>

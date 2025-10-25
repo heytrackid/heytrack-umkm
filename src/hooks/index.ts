@@ -24,7 +24,6 @@ export { useSupabaseClient } from './useSupabaseClient'
 export {
   useSupabaseQuery,
   useSupabaseMutation,
-  useSupabaseAnalytics,
   useSupabaseBulkOperations,
   useIngredients,
   useRecipes,
@@ -39,16 +38,16 @@ export {
 export { useCurrency } from './useCurrency'
 export { useExpenses } from './useExpenses'
 export { useEnhancedCRUD } from './useEnhancedCRUD'
-export { useOptimizedDatabase } from './useOptimizedDatabase'
+// export { useOptimizedDatabase } from './useOptimizedDatabase' // Deprecated
 export { useAIPowered } from './useAIPowered'
 
 // Performance Hooks
 export { useRoutePreloading } from './useRoutePreloading'
-export { useSimplePreloading } from './useSimplePreloading'
+// export { useSimplePreloading } from './useSimplePreloading' // Not available
 
 // API Hooks
-export { useDashboard } from './api/useDashboard'
-export { useHPP } from './api/useHPP'
+// export { useDashboard } from './api/useDashboard' // Not available
+// export { useHPP } from './api/useHPP' // Not available
 export { useHPPAlerts } from './api/useHPPAlerts'
 export { useHPPComparison } from './api/useHPPComparison'
 export { useHPPExport } from './api/useHPPExport'

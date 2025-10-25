@@ -33,7 +33,7 @@ export type DatabaseFunctions = {
   }
   get_user_role: {
     Args: { user_uuid?: string }
-    Returns: import('@/components').UserRole
+    Returns: import('./index').UserRole
   }
   optimize_production_schedule: {
     Args: { max_duration_hours?: number; target_date: string }
@@ -57,7 +57,7 @@ export type DatabaseFunctions = {
   }
   user_has_business_unit_access: {
     Args: {
-      unit: import('@/components').BusinessUnit
+      unit: import('./index').BusinessUnit
       user_uuid?: string
     }
     Returns: boolean

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the comprehensive data validation system implemented in the HeyTrack Bakery Management application using **Zod** for schema validation and **React Hook Form** for form handling.
+This document describes the comprehensive data validation system implemented in the HeyTrack UMKM Management application using **Zod** for schema validation and **React Hook Form** for form handling.
 
 ## 🎯 Key Benefits
 
@@ -412,5 +412,5 @@ if (!result.success) {
 
 ---
 
-**Built with ❤️ for HeyTrack Bakery Management System**  
+**Built with ❤️ for HeyTrack UMKM Management System**  
 *Comprehensive validation system ensuring data integrity and user experience*

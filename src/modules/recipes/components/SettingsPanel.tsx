@@ -143,7 +143,7 @@ export function SettingsPanel({
 
             />
             <p className="text-xs text-gray-500 mt-1">
-              Rekomendasi: 25-40% untuk produk bakery
+              Rekomendasi: 25-40% untuk produk UMKM
             </p>
           </div>
 

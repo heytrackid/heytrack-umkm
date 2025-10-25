@@ -19,7 +19,7 @@ export class InventoryAutomation {
     return ingredients.map(ingredient => {
       const monthlyUsage = usageData[ingredient.id] || 0
       const dailyUsage = monthlyUsage / 30
-      const daysRemaining = dailyUsage > 0 ? ingredient.current_stock ?? 0 / dailyUsage : Infinity
+      const daysRemaining = dailyUsage > 0 ? (ingredient.current_stock ?? 0) / dailyUsage : Infinity
 
       // Smart reorder calculation
       const reorderPoint = dailyUsage * this.config.autoReorderDays
@@ -27,7 +27,7 @@ export class InventoryAutomation {
 
       return {
         ingredient,
-        status: this.getInventoryStatus(daysRemaining, ingredient.current_stock ?? 0, ingredient.min_stock),
+        status: this.getInventoryStatus(daysRemaining, ingredient.current_stock ?? 0, ingredient.min_stock ?? 0),
         daysRemaining: Math.floor(daysRemaining),
         reorderRecommendation: {
           shouldReorder: ingredient.current_stock ?? 0 <= reorderPoint,
@@ -37,7 +37,7 @@ export class InventoryAutomation {
         },
         insights: this.generateInventoryInsights(ingredient, dailyUsage, daysRemaining)
       }
-    })
+    }) as InventoryAnalysis[]
   }
 
   /**
@@ -50,10 +50,10 @@ export class InventoryAutomation {
     const holdingCostRate = 0.2 // 20% of item value per year
     const holdingCost = ingredient.price_per_unit * holdingCostRate
 
-    if (holdingCost <= 0) return ingredient.min_stock
+    if (holdingCost <= 0) return ingredient.min_stock ?? 0
 
-    const eoq = Math.sqrt(2 * dailyUsage * orderCost / holdingCost)
-    return Math.max(eoq, ingredient.min_stock) // At least minimum stock
+    const eoq = Math.sqrt(2 * annualDemand * orderingCost / holdingCost)
+    return Math.max(eoq, ingredient.min_stock ?? 0) // At least minimum stock
   }
 
   /**
@@ -98,7 +98,7 @@ export class InventoryAutomation {
       insights.push(`📊 Pemakaian bulanan: ${monthlyUsage.toFixed(1)} ${ingredient.unit}`)
       
       // Velocity insights
-      if (dailyUsage > ingredient.min_stock ?? 0 / 30) {
+      if (dailyUsage > (ingredient.min_stock ?? 0) / 30) {
         insights.push(`🚀 Bahan fast-moving, pertimbangkan stok buffer lebih besar`)
       }
     } else {
@@ -112,7 +112,7 @@ export class InventoryAutomation {
     }
 
     // Storage insights
-    if (ingredient.current_stock ?? 0 > ingredient.min_stock ?? 0 * 5) {
+    if ((ingredient.current_stock ?? 0) > (ingredient.min_stock ?? 0) * 5) {
       insights.push(`📦 Possible overstocking, review purchasing patterns`)
     }
 

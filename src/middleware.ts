@@ -2,8 +2,8 @@ import { updateSession } from '@/utils/supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
+import { middlewareLogger } from '@/lib/logger'
 
-import { apiLogger } from '@/lib/logger'
 // Define protected routes as a Set for O(1) lookup performance
 const PROTECTED_ROUTES = new Set([
   '/dashboard',
@@ -55,20 +55,19 @@ export async function middleware(request: NextRequest) {
       search: request.nextUrl.search,
     })
 
-    // Log suspicious requests but don't block them
-    if (!headersValidation.success) {
-      apiLogger.warn('⚠️ Suspicious request headers detected:', {
+    // Log suspicious requests but don't block them (only in production)
+    if (!headersValidation.success && process.env.NODE_ENV === 'production') {
+      middlewareLogger.warn({ 
         url: request.url,
-        headers: Object.fromEntries(request.headers.entries()),
         issues: headersValidation.error.issues,
-      })
+      }, 'Suspicious request headers detected')
     }
 
     if (!urlValidation.success) {
-      apiLogger.warn('⚠️ Malformed URL detected:', {
+      middlewareLogger.warn({ 
         url: request.url,
         issues: urlValidation.error.issues,
-      })
+      }, 'Malformed URL detected')
       return NextResponse.json(
         { error: 'Invalid request URL' },
         { status: 400 }
@@ -106,7 +105,7 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (error) {
-      apiLogger.error({ error: error }, 'Middleware auth error:')
+      middlewareLogger.error({ error }, 'Middleware auth error')
     }
 
     const pathname = request.nextUrl.pathname
@@ -142,7 +141,7 @@ export async function middleware(request: NextRequest) {
 
     return response
   } catch (error) {
-    apiLogger.error({ error: error }, 'Middleware error:')
+    middlewareLogger.error({ error }, 'Middleware error')
     // On error, allow request to proceed to avoid blocking the app
     return NextResponse.next()
   }

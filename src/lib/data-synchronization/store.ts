@@ -4,7 +4,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
-import { apiLogger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import type {
   Ingredient,
   Recipe,
@@ -481,7 +481,7 @@ export const useDataStore = create<DataStore>()(
     syncCrossPlatform: async () => {
       // Placeholder for cross-platform synchronization
       // In a real implementation, this would sync with external APIs, cloud storage, etc.
-      apiLogger.info('Syncing data across platforms...', {
+      dbLogger.info('Syncing data across platforms...', {
         ingredients: get().ingredients.length,
         recipes: get().recipes.length,
         orders: get().orders.length,

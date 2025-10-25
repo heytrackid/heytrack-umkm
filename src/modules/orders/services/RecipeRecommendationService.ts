@@ -1,4 +1,4 @@
-import { logger } from '@/lib/logger'
+import { dbLogger } from '@/lib/logger'
 import { supabase } from '@/lib/supabase'
 import type { RecipeOption } from './OrderRecipeService'
 
@@ -89,7 +89,7 @@ export class RecipeRecommendationService {
 
       return recommendations
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error getting recipe recommendations')
+      dbLogger.error({ err: error }, 'Error getting recipe recommendations')
       return []
     }
   }

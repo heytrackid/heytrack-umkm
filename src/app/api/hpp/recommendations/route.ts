@@ -1,4 +1,5 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/type-guards'
 import { CostBreakdown, HPPRecommendation } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in recommendations endpoint:')
         return NextResponse.json(
-            { error: 'Failed to generate recommendations', details: error.message },
+            { error: 'Failed to generate recommendations', details: getErrorMessage(error) },
             { status: 500 }
         )
     }
@@ -56,7 +57,7 @@ async function getAllRecipeIds(supabase: any): Promise<string[]> {
         return []
     }
 
-    return recipes?.map((r: any) => r.id) || []
+    return recipes?.map((r: any) => (r as any).id) || []
 }
 
 // Helper function to generate recommendations for a recipe
@@ -112,7 +113,7 @@ async function generateRecommendations(
 
             recommendations.push({
                 recipe_id: recipeId,
-                recipe_name: recipe.nama,
+                recipe_name: (recipe as any).nama,
                 type: 'supplier_review',
                 priority: changePercentage > 20 ? 'high' : 'medium',
                 title: 'Review Supplier atau Bahan Alternatif',
@@ -131,19 +132,19 @@ async function generateRecommendations(
     // Rule 2: High operational cost percentage (> 20%) (Requirement 8.2)
     const latestSnapshot = snapshots[snapshots.length - 1]
     const breakdown = latestSnapshot.cost_breakdown as CostBreakdown
-    const operationalPercentage = (latestSnapshot.operational_cost / latestSnapshot.hpp_value) * 100
+    const operationalPercentage = ((latestSnapshot as any).operational_cost / (latestSnapshot as any).hpp_value) * 100
 
     // Check if operational cost increased significantly
     let operationalCostIncrease = 0
     if (snapshots.length >= 2) {
         const firstOperationalCost = snapshots[0].operational_cost
-        const lastOperationalCost = latestSnapshot.operational_cost
+        const lastOperationalCost = (latestSnapshot as any).operational_cost
         operationalCostIncrease = ((lastOperationalCost - firstOperationalCost) / firstOperationalCost) * 100
     }
 
     if (operationalPercentage > 20 || operationalCostIncrease > 20) {
-        const targetOperationalCost = latestSnapshot.hpp_value * 0.15 // Target 15%
-        const potentialSavings = (latestSnapshot.operational_cost - targetOperationalCost) * 10 // Estimate based on 10 units
+        const targetOperationalCost = (latestSnapshot as any).hpp_value * 0.15 // Target 15%
+        const potentialSavings = ((latestSnapshot as any).operational_cost - targetOperationalCost) * 10 // Estimate based on 10 units
 
         const description = operationalCostIncrease > 20
             ? `Biaya operasional ${recipe.nama} naik ${operationalCostIncrease.toFixed(1)}% dalam 30 hari terakhir dan mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
@@ -151,7 +152,7 @@ async function generateRecommendations(
 
         recommendations.push({
             recipe_id: recipeId,
-            recipe_name: recipe.nama,
+            recipe_name: (recipe as any).nama,
             type: 'operational_efficiency',
             priority: operationalCostIncrease > 20 ? 'high' : 'medium',
             title: 'Optimasi Efisiensi Operasional',
@@ -171,8 +172,8 @@ async function generateRecommendations(
     if (latestSnapshot.margin_percentage && latestSnapshot.margin_percentage < 15) {
         const currentMargin = latestSnapshot.margin_percentage
         const targetMargin = 25 // Target 25%
-        const currentPrice = recipe.selling_price || latestSnapshot.selling_price || 0
-        const suggestedPrice = latestSnapshot.hpp_value / (1 - targetMargin / 100)
+        const currentPrice = (recipe as any).selling_price || latestSnapshot.selling_price || 0
+        const suggestedPrice = (latestSnapshot as any).hpp_value / (1 - targetMargin / 100)
         const priceIncrease = suggestedPrice - currentPrice
 
         // Calculate potential additional profit
@@ -180,7 +181,7 @@ async function generateRecommendations(
 
         recommendations.push({
             recipe_id: recipeId,
-            recipe_name: recipe.nama,
+            recipe_name: (recipe as any).nama,
             type: 'price_adjustment',
             priority: currentMargin < 10 ? 'high' : 'medium',
             title: 'Penyesuaian Harga Jual untuk Meningkatkan Margin',
@@ -197,10 +198,10 @@ async function generateRecommendations(
     }
 
     // Rule 4: Expensive ingredients - Calculate potential savings from alternatives (Requirement 8.4)
-    const sortedIngredients = [...breakdown.ingredients].sort((a, b) => b.cost - a.cost)
+    const sortedIngredients = [...(breakdown as any).ingredients].sort((a, b) => b.cost - a.cost)
     if (sortedIngredients.length > 0) {
         const topIngredient = sortedIngredients[0]
-        const ingredientPercentage = (topIngredient.cost / latestSnapshot.material_cost) * 100
+        const ingredientPercentage = (topIngredient.cost / (latestSnapshot as any).material_cost) * 100
 
         if (ingredientPercentage > 30) {
             // Calculate potential savings if ingredient cost reduced by 20%
@@ -209,14 +210,14 @@ async function generateRecommendations(
 
             recommendations.push({
                 recipe_id: recipeId,
-                recipe_name: recipe.nama,
+                recipe_name: (recipe as any).nama,
                 type: 'ingredient_alternative',
                 priority: ingredientPercentage > 40 ? 'medium' : 'low',
                 title: 'Evaluasi Bahan Utama dan Alternatif',
-                description: `${topIngredient.name} menyumbang ${ingredientPercentage.toFixed(1)}% dari biaya bahan. Dengan mencari alternatif atau negosiasi harga, potensi penghematan bisa mencapai ${formatCurrency(potentialSavingsPerUnit)} per unit.`,
+                description: `${(topIngredient as any).name} menyumbang ${ingredientPercentage.toFixed(1)}% dari biaya bahan. Dengan mencari alternatif atau negosiasi harga, potensi penghematan bisa mencapai ${formatCurrency(potentialSavingsPerUnit)} per unit.`,
                 potential_savings: potentialSavingsTotal,
                 action_items: [
-                    `Cari alternatif untuk ${topIngredient.name} dengan harga lebih rendah (target: hemat 20%)`,
+                    `Cari alternatif untuk ${(topIngredient as any).name} dengan harga lebih rendah (target: hemat 20%)`,
                     'Evaluasi apakah jumlah yang digunakan bisa dikurangi tanpa mengurangi kualitas',
                     'Pertimbangkan bulk purchase untuk diskon volume',
                     'Test resep dengan proporsi bahan yang dioptimasi',

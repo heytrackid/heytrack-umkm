@@ -1,9 +1,12 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { AppError, handleError, logError, getErrorMessage } from '@/lib/errors'
+import { getErrorMessage } from '@/lib/type-guards'
 
 import { apiLogger } from '@/lib/logger'
+
+type AppError = Error & { code?: string; statusCode?: number }
+
 interface ErrorState {
   error: AppError | null
   isError: boolean
@@ -43,16 +46,16 @@ export function useErrorHandler() {
   })
 
   const handle = useCallback((error: any, context?: string) => {
-    const appError = handleError(error)
-    logError(error, context)
+    const appError = error instanceof Error ? error : new Error(String(error))
+    apiLogger.error({ error, context }, `Error in ${context || 'component'}`)
 
     setErrorState({
-      error: appError,
+      error: appError as AppError,
       isError: true,
       message: getErrorMessage(error),
     })
 
-    return appError
+    return appError as AppError
   }, [])
 
   const reset = useCallback(() => {
@@ -64,6 +67,7 @@ export function useErrorHandler() {
   }, [])
 
   const throwError = useCallback((error: AppError) => {
+    apiLogger.error({ error }, 'Throwing error')
     setErrorState({
       error,
       isError: true,

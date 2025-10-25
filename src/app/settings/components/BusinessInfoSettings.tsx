@@ -108,11 +108,11 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
             <Label htmlFor="businessType">Jenis Bisnis *</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
-              value={localSettings.businessType || 'bakery'}
+              value={localSettings.businessType || 'UMKM'}
               onChange={(e) => handleChange('businessType', e.target.value)}
               onBlur={() => handleBlur('businessType')}
             >
-              <option value="bakery">Toko Roti</option>
+              <option value="UMKM">Toko Roti</option>
               <option value="cafe">Kafe</option>
               <option value="restaurant">Restoran</option>
               <option value="food-truck">Food Truck</option>

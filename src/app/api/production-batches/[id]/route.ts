@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -11,10 +11,10 @@ export async function GET(
     const supabase = createSupabaseClient();
 
     const { data: batch, error } = await supabase
-      .from('production_log')
+      .from('productions')
       .select(`
         *,
-        recipe:resep(nama)
+        recipe:recipes(name)
       `)
       .eq('id', id)
       .single();
@@ -36,13 +36,18 @@ export async function PUT(
     const supabase = createSupabaseClient();
     const body = await request.json();
 
+    const updatePayload = {
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+
     const { data: batch, error } = await supabase
-      .from('production_log')
-      .update(body as Record<string, unknown>)
+      .from('productions')
+      .update(updatePayload)
       .eq('id', id)
       .select(`
         *,
-        recipe:resep(nama)
+        recipe:recipes(name)
       `)
       .single();
 
@@ -55,7 +60,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -63,7 +68,7 @@ export async function DELETE(
     const supabase = createSupabaseClient();
 
     const { error } = await supabase
-      .from('production_log')
+      .from('productions')
       .delete()
       .eq('id', id);
 

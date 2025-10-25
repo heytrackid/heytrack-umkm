@@ -72,7 +72,7 @@ export {
 export const PRODUCTION_MODULE_INFO = {
   name: 'Production Management',
   version: '1.0.0',
-  description: 'Comprehensive production management system for Indonesian bakery operations with batch tracking, quality control, and resource planning',
+  description: 'Comprehensive production management system for Indonesian UMKM operations with batch tracking, quality control, and resource planning',
   features: [
     'Automated batch scheduling and planning',
     'Comprehensive quality control system',
@@ -88,7 +88,7 @@ export const PRODUCTION_MODULE_INFO = {
     'Staff skill matching and workload balancing',
     'Waste tracking and yield optimization'
   ],
-  bakery_specific_features: [
+  UMKM_specific_features: [
     'Early morning production scheduling (4 AM start)',
     'Temperature-critical process monitoring',
     'Cooling and proofing time management',
@@ -130,8 +130,8 @@ export const PRODUCTION_WORKFLOW = {
   ]
 } as const
 
-// Indonesian bakery standards
-export const INDONESIAN_BAKERY_STANDARDS = {
+// Indonesian UMKM standards
+export const INDONESIAN_UMKM_STANDARDS = {
   WORKING_HOURS: {
     EARLY_SHIFT: { start: '04:00', end: '12:00' }, // Fresh bread production
     DAY_SHIFT: { start: '08:00', end: '16:00' },   // Cakes and pastries

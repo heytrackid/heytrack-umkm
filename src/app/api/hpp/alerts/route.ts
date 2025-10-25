@@ -1,4 +1,5 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/type-guards'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
         if (error) {
             apiLogger.error({ error: error }, 'Error fetching alerts:')
             return NextResponse.json(
-                { error: 'Failed to fetch alerts', details: error.message },
+                { error: 'Failed to fetch alerts', details: getErrorMessage(error) },
                 { status: 500 }
             )
         }
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in alerts endpoint:')
         return NextResponse.json(
-            { error: 'Internal server error', details: error.message },
+            { error: 'Internal server error', details: getErrorMessage(error) },
             { status: 500 }
         )
     }

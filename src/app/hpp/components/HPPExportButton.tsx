@@ -81,7 +81,7 @@ export default function HPPExportButton({
             // Show error toast
             toast({
                 title: 'Export Gagal',
-                description: error.message || 'Terjadi kesalahan saat mengekspor data',
+                description: (error as Error).message || 'Terjadi kesalahan saat mengekspor data',
                 variant: 'destructive'
             })
         } finally {

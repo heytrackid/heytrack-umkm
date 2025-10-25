@@ -27,7 +27,7 @@ export const CustomerInsertSchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
   is_active: z.boolean().default(true).optional().nullable(),
   loyalty_points: NonNegativeNumberSchema.default(0).optional().nullable(),
-  favorite_items: z.unknown().optional().nullable(),
+  favorite_items: z.any().optional().nullable(),
 })
 
 export const CustomerUpdateSchema = CustomerInsertSchema.partial()
@@ -87,9 +87,9 @@ export const IngredientInsertSchema = z.object({
   category: z.string().min(1, 'Category is required').max(100),
   unit: z.string().min(1, 'Unit is required').max(50),
   current_stock: NonNegativeNumberSchema.default(0),
-  minimum_stock: NonNegativeNumberSchema.default(0),
-  maximum_stock: NonNegativeNumberSchema.optional().nullable(),
-  unit_cost: NonNegativeNumberSchema,
+  min_stock: NonNegativeNumberSchema.default(0),
+  max_stock: NonNegativeNumberSchema.optional().nullable(),
+  price_per_unit: NonNegativeNumberSchema,
   supplier_id: UUIDSchema.optional().nullable(),
   is_active: z.boolean().default(true),
   description: z.string().max(500).optional().nullable(),
@@ -199,12 +199,12 @@ export const SalesInsertSchema = z.object({
 export const SalesUpdateSchema = SalesInsertSchema.partial()
 
 export const IngredientPurchaseInsertSchema = z.object({
-  bahan_id: UUIDSchema,
+  ingredient_id: UUIDSchema,
   supplier: z.string().max(255).optional().nullable(),
-  qty_beli: PositiveNumberSchema,
-  harga_satuan: NonNegativeNumberSchema,
-  tanggal_beli: DateStringSchema.optional(),
-  catatan: z.string().max(500).optional().nullable()
+  quantity: PositiveNumberSchema,
+  unit_price: NonNegativeNumberSchema,
+  purchase_date: DateStringSchema.optional(),
+  notes: z.string().max(500).optional().nullable()
 })
 
 export const IngredientPurchaseUpdateSchema = IngredientPurchaseInsertSchema.partial()

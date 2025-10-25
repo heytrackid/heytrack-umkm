@@ -5,19 +5,32 @@
 
 import type { ApiError, ApiResponse } from './api';
 import type {
-    Customer,
-    HppSnapshot,
-    Ingredient,
-    IngredientPurchase,
-    Order,
-    OrderItem,
+    CustomersTable,
+    HPPSnapshotsTable,
+    IngredientsTable,
+    IngredientPurchasesTable,
+    OrdersTable,
+    OrderItemsTable,
     OrderStatus,
-    PaymentStatus,
-    Recipe,
-    RecipeIngredient,
-    Supplier,
-    UserProfile,
+    PaymentMethod,
+    RecipesTable,
+    RecipeIngredientsTable,
+    SuppliersTable,
+    UserProfilesTable
 } from './database';
+
+// Type aliases for easier use in guards
+type Customer = CustomersTable['Row'];
+type HppSnapshot = HPPSnapshotsTable['Row'];
+type Ingredient = IngredientsTable['Row'];
+type IngredientPurchase = IngredientPurchasesTable['Row'];
+type Order = OrdersTable['Row'];
+type OrderItem = OrderItemsTable['Row'];
+type Recipe = RecipesTable['Row'];
+type RecipeIngredient = RecipeIngredientsTable['Row'];
+type Supplier = SuppliersTable['Row'];
+type UserProfile = UserProfilesTable['Row'];
+type PaymentStatus = 'unpaid' | 'partial' | 'paid';
 
 /**
  * Check if a value is a non-null object

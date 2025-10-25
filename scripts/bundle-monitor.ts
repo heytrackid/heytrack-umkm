@@ -124,7 +124,8 @@ class BundleMonitor {
   private static loadPreviousStats(): BundleStats[] {
     try {
       if (fs.existsSync(this.STATS_FILE)) {
-        return JSON.parse(fs.readFileSync(this.STATS_FILE, 'utf-8'));
+        const parsed = JSON.parse(fs.readFileSync(this.STATS_FILE, 'utf-8'));
+        return Array.isArray(parsed) ? parsed : [];
       }
     } catch (error) {
       // Ignore errors
@@ -140,6 +141,10 @@ class BundleMonitor {
     }
 
     const lastStats = previousStats[previousStats.length - 1];
+    if (!lastStats) {
+      return null; // Safety check in case of unexpected empty elements
+    }
+    
     const increase = currentStats.totalSize - lastStats.totalSize;
 
     // Only report significant increases (>5KB)

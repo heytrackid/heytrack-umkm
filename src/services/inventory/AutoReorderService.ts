@@ -4,12 +4,12 @@
  * and generates purchase orders when ingredients reach minimum thresholds
  */
 
-import { logger } from '@/lib/logger'
+import { automationLogger as baseAutomationLogger, dbLogger as baseDbLogger } from '@/lib/logger'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 
 // Create logger instances for different contexts
-const automationLogger = logger.child({ context: 'automation' })
-const dbLogger = logger.child({ context: 'database' })
+const automationLogger = baseAutomationLogger.child({ context: 'automation' })
+const dbLogger = baseDbLogger.child({ context: 'database' })
 
 // Use admin client for server-side automation
 const getSupabaseAdmin = () => {
@@ -22,19 +22,28 @@ const getSupabaseAdmin = () => {
 // Create a supabase instance for non-admin operations
 const supabase = getSupabaseAdmin()
 
-export interface ReorderRule {
+// Type from database
+type DbReorderRule = {
   id: string
   ingredient_id: string
-  min_stock_threshold: number
+  reorder_point: number
   reorder_quantity: number
+  is_active: boolean | null
+  created_at: string | null
+  updated_at: string | null
+  user_id: string
+}
+
+export interface ReorderRule extends Omit<DbReorderRule, 'is_active' | 'created_at' | 'updated_at'> {
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  // Optional extended fields
   preferred_supplier_id?: string
   max_price_per_unit?: number
-  is_active: boolean
   last_reorder_date?: string
   reorder_frequency_days?: number
   auto_approve?: boolean
-  created_at: string
-  updated_at: string
 }
 
 export interface SupplierInfo {
@@ -132,7 +141,7 @@ class AutoReorderService {
       const { data: reorderRules, error: rulesError } = await supabaseAdmin
         .from('inventory_reorder_rules')
         .select('*')
-        .eq('is_active', true)
+        .eq('is_active', true) as { data: DbReorderRule[] | null; error: any }
 
       if (rulesError) throw rulesError
 
@@ -149,14 +158,14 @@ class AutoReorderService {
       let autoOrdersGenerated = 0
 
       for (const ingredient of ingredients || []) {
-        const rule = reorderRules?.find(r => r.ingredient_id === ingredient.id)
-        const currentStock = (ingredient.current_stock ?? 0) || 0
+        const rule = reorderRules?.find(r => r.ingredient_id === (ingredient as any).id) as ReorderRule | undefined
+        const currentStock = ((ingredient as any).current_stock ?? 0) || 0
         const minStock = (ingredient.min_stock ?? 0) || 0
 
         // Debug logging for first few items
         if (alerts.length < 3) {
           automationLogger.debug('Checking ingredient reorder status', {
-            name: ingredient.name,
+            name: (ingredient as any).name,
             currentStock,
             minStock,
             rulePoint: rule?.reorder_point,
@@ -168,34 +177,36 @@ class AutoReorderService {
         if (this.needsReorder(currentStock, minStock, rule)) {
           const urgency = this.calculateUrgency(currentStock, minStock)
           const suggestedQuantity = this.calculateReorderQuantity(ingredient, rule)
-          const preferredSupplier = suppliers?.find(s => s.id === rule?.preferred_supplier_id)
+          const preferredSupplier = rule?.preferred_supplier_id 
+            ? suppliers?.find(s => (s as any).id === rule.preferred_supplier_id) 
+            : undefined
           const estimatedCost = this.estimateReorderCost(suggestedQuantity, ingredient)
 
           const alert: ReorderAlert = {
-            id: `alert_${ingredient.id}_${Date.now()}`,
-            ingredient_id: ingredient.id,
-            ingredient_name: ingredient.name,
+            id: `alert_${(ingredient as any).id}_${Date.now()}`,
+            ingredient_id: (ingredient as any).id,
+            ingredient_name: (ingredient as any).name,
             current_stock: currentStock,
             min_stock: minStock,
             suggested_reorder_quantity: suggestedQuantity,
             preferred_supplier: preferredSupplier,
             estimated_cost: estimatedCost,
             urgency,
-            auto_reorder_enabled: rule?.auto_approve || false,
+            auto_reorder_enabled: rule?.auto_approve ?? false,
             created_at: new Date().toISOString()
           }
 
           alerts.push(alert)
 
           // Auto-generate purchase order if enabled and conditions are met
-          if (rule?.auto_approve && this.shouldAutoReorder(alert, rule)) {
+          if (rule?.auto_approve && rule && this.shouldAutoReorder(alert, rule)) {
             try {
               await this.generateAutoPurchaseOrder(alert, rule, preferredSupplier)
               autoOrdersGenerated++
             } catch (error: unknown) {
               const errorMessage = error instanceof Error ? error.message : 'Unknown error'
               automationLogger.error('Failed to generate auto purchase order', {
-                ingredientName: ingredient.name,
+                ingredientName: (ingredient as any).name,
                 error: errorMessage
               })
             }
@@ -237,20 +248,20 @@ class AutoReorderService {
 
     const purchaseOrder: Omit<PurchaseOrder, 'id'> = {
       po_number: poNumber,
-      supplier_id: supplier.id,
+      supplier_id: (supplier as any).id,
       status: 'draft',
       order_date: new Date().toISOString(),
       expected_delivery_date: this.calculateExpectedDelivery(supplier.delivery_days),
       total_amount: alert.estimated_cost,
       notes: `Auto-generated reorder for ${alert.ingredient_name}`,
       items: [{
-        id: `item_${alert.ingredient_id}_${Date.now()}`,
+        id: `item_${(alert as any).ingredient_id}_${Date.now()}`,
         purchase_order_id: '', // Will be set after PO creation
-        ingredient_id: alert.ingredient_id,
+        ingredient_id: (alert as any).ingredient_id,
         quantity: alert.suggested_reorder_quantity,
         unit_price: alert.estimated_cost / alert.suggested_reorder_quantity,
         total_price: alert.estimated_cost,
-        notes: `Auto reorder - Current stock: ${alert.current_stock}, Min stock: ${alert.min_stock}`
+        notes: `Auto reorder - Current stock: ${(alert as any).current_stock}, Min stock: ${alert.min_stock}`
       }],
       created_by: 'system',
       created_at: new Date().toISOString(),
@@ -259,8 +270,8 @@ class AutoReorderService {
 
     // Create purchase order in database
     const { data: createdPO, error: poError } = await supabase
-      .from('purchase_orders')
-      .insert(purchaseOrder)
+      .from('purchase_orders' as any)
+      .insert(purchaseOrder as any)
       .select('*')
       .single()
 
@@ -269,20 +280,19 @@ class AutoReorderService {
     // Create purchase order items
     const items = purchaseOrder.items.map(item => ({
       ...item,
-      purchase_order_id: createdPO.id
+      purchase_order_id: (createdPO as any).id
     }))
 
     const { error: itemsError } = await supabase
-      .from('purchase_order_items')
-      .insert(items)
+      .from('purchase_order_items' as any)
+      .insert(items as any)
 
     if (itemsError) throw itemsError
 
-    // Update reorder rule last_reorder_date
+    // Update reorder rule updated_at
     await supabase
       .from('inventory_reorder_rules')
       .update({
-        last_reorder_date: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
       .eq('id', rule.id)
@@ -316,13 +326,13 @@ class AutoReorderService {
    */
   async getReorderAlerts(): Promise<ReorderAlert[]> {
     const { data, error } = await supabase
-      .from('inventory_reorder_alerts')
+      .from('inventory_reorder_alerts' as any)
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100)
 
     if (error) throw error
-    return data || []
+    return (data as any) || []
   }
 
   /**
@@ -330,7 +340,7 @@ class AutoReorderService {
    */
   async getPurchaseOrders(status?: PurchaseOrder['status']): Promise<PurchaseOrder[]> {
     let query = supabase
-      .from('purchase_orders')
+      .from('purchase_orders' as any)
       .select(`
         *,
         supplier:suppliers(*),
@@ -342,20 +352,20 @@ class AutoReorderService {
       .order('created_at', { ascending: false })
 
     if (status) {
-      query = query.eq('status', status)
+      query = (query as any).eq('status', status)
     }
 
     const { data, error } = await query
 
     if (error) throw error
-    return data || []
+    return (data as any) || []
   }
 
   /**
    * Private helper methods
    */
   private needsReorder(currentStock: number, minStock: number, rule?: ReorderRule): boolean {
-    const threshold = rule?.min_stock_threshold || minStock
+    const threshold = rule?.reorder_point || minStock
     return currentStock <= threshold
   }
 
@@ -402,7 +412,7 @@ class AutoReorderService {
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
 
     // Get count of POs created today
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('purchase_orders')
       .select('*')
       .gte('created_at', `${today.toISOString().slice(0, 10)}T00:00:00`)
@@ -426,7 +436,7 @@ class AutoReorderService {
 
     // Clear existing alerts for today
     const today = new Date().toISOString().slice(0, 10)
-    await admin
+    await (admin as any)
       .from('inventory_reorder_alerts')
       .delete()
       .gte('created_at', `${today}T00:00:00`)

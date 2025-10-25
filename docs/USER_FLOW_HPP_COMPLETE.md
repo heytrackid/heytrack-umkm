@@ -68,7 +68,7 @@ Supplier 2:
 🏠 Dashboard → Bahan Simple → Tambah Bahan
 ```
 
-**Bahan untuk Bakery (Lengkap):**
+**Bahan untuk UMKM (Lengkap):**
 ```yaml
 Bahan_01:
   nama: "Tepung Terigu Protein Tinggi"

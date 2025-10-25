@@ -70,7 +70,7 @@ export function OrdersTableView() {
 
       if (response.ok) {
         setOrders(prev => prev.map(order =>
-          order.id === orderId ? { ...order, status: newStatus } : order
+          order.id === orderId ? { ...order, status: newStatus as any } : order
         ))
       }
     } catch (err) {
@@ -136,7 +136,7 @@ export function OrdersTableView() {
       <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
         <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_number || selectedOrder?.id}</DialogTitle>
           </DialogHeader>
           {selectedOrder && <OrderDetailView order={selectedOrder} />}
         </DialogContent>
@@ -147,7 +147,7 @@ export function OrdersTableView() {
         <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">
-              {editingOrder ? `Edit Pesanan ${editingOrder.order_no}` : 'Buat Pesanan Baru'}
+              {editingOrder ? `Edit Pesanan ${editingOrder.order_number || editingOrder.id}` : 'Buat Pesanan Baru'}
             </DialogTitle>
           </DialogHeader>
           <OrderForm

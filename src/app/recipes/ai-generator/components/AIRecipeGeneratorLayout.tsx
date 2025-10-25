@@ -222,7 +222,7 @@ export default function AIRecipeGeneratorPage() {
           <div>
             <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
             <p className="text-muted-foreground">
-              Generate resep bakery profesional dengan AI dalam hitungan detik
+              Generate resep UMKM profesional dengan AI dalam hitungan detik
             </p>
           </div>
         </div>

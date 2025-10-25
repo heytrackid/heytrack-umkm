@@ -1,7 +1,7 @@
 {
-  "name": "HeyTrack - UMKM Bakery Management",
+  "name": "HeyTrack - UMKM UMKM Management",
   "short_name": "HeyTrack",
-  "description": "Comprehensive bakery management system for Indonesian UMKM businesses",
+  "description": "Comprehensive UMKM management system for Indonesian UMKM businesses",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

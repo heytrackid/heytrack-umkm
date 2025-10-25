@@ -68,8 +68,8 @@ export default function PricingStrategyTab({
                     Pilih resep untuk kalkulasi harga
                   </SelectItem>
                   {recipes.map(recipe => (
-                    <SelectItem key={recipe.id} value={recipe.id}>
-                      {recipe.name} - HPP: {formatCurrency(Math.round(recipe.hpp))}
+                    <SelectItem key={(recipe as any).id} value={(recipe as any).id}>
+                      {(recipe as any).name} - HPP: {formatCurrency(Math.round((recipe as any).hpp))}
                     </SelectItem>
                   ))}
                 </SelectContent>

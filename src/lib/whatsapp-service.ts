@@ -1,4 +1,4 @@
-import { formatCurrency } from '@/shared/utils/currency'
+import { formatCurrentCurrency } from '@/shared/utils/currency'
 
 export interface WhatsAppTemplate {
   id: string;
@@ -215,7 +215,7 @@ Jangan sampai terlewat ya! Order sekarang:
     template.variables.forEach(variable => {
       const placeholder = `{${variable}}`;
       const value = data[variable] || `[${variable}]`;
-      message = message.replace(new RegExp(placeholder, 'g'), value);
+      message = message.replace(new RegExp(placeholder, 'g'), String(value));
     });
 
     return message;
@@ -224,13 +224,13 @@ Jangan sampai terlewat ya! Order sekarang:
   // Generate order items text
   formatOrderItems(items: OrderData['items']): string {
     return items.map(item => 
-      `• ${item.name} (${item.quantity}x) - ${formatCurrency(item.price)}`
+      `• ${item.name} (${item.quantity}x) - ${formatCurrentCurrency(item.price)}`
     ).join('\n');
   }
 
   // Format currency (using dynamic currency system)
   formatCurrency(amount: number): string {
-    return formatCurrency(amount);
+    return formatCurrentCurrency(amount);
   }
 
   // Format date to Indonesian format
@@ -254,7 +254,7 @@ Jangan sampai terlewat ya! Order sekarang:
       customer_name: orderData.customer_name,
       order_id: orderData.id,
       order_items: this.formatOrderItems(orderData.items),
-      total_amount: formatCurrency(orderData.total_amount),
+      total_amount: formatCurrentCurrency(orderData.total_amount),
       delivery_date: orderData.delivery_date ? this.formatDate(orderData.delivery_date) : 'As agreed',
       business_name: businessName
     };
@@ -279,7 +279,7 @@ Jangan sampai terlewat ya! Order sekarang:
     const templateData = {
       customer_name: orderData.customer_name,
       order_id: orderData.id,
-      total_amount: formatCurrency(orderData.total_amount),
+      total_amount: formatCurrentCurrency(orderData.total_amount),
       due_date: this.formatDate(dueDate),
       payment_details: paymentDetails,
       business_name: businessName

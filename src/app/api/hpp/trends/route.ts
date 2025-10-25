@@ -1,4 +1,5 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { getErrorMessage } from '@/lib/type-guards'
 import { HPPTrendData, TimePeriod } from '@/types/hpp-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         if (recipesError) {
             apiLogger.error({ error: recipesError }, 'Error fetching recipes:')
             return NextResponse.json(
-                { error: 'Failed to fetch recipes', details: recipesError.message },
+                { error: 'Failed to fetch recipes', details: (recipesError as any).message },
                 { status: 500 }
             )
         }
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
         if (snapshotsError) {
             apiLogger.error({ error: snapshotsError }, 'Error fetching snapshots:')
             return NextResponse.json(
-                { error: 'Failed to fetch snapshots', details: snapshotsError.message },
+                { error: 'Failed to fetch snapshots', details: (snapshotsError as any).message },
                 { status: 500 }
             )
         }
@@ -83,13 +84,13 @@ export async function GET(request: NextRequest) {
         const trendData: { [recipe_id: string]: HPPTrendData[] } = {}
 
         recipeIds.forEach(recipeId => {
-            const recipeSnapshots = (snapshots || []).filter(s => s.recipe_id === recipeId)
+            const recipeSnapshots = (snapshots || []).filter(s => (s as any).recipe_id === recipeId)
 
             trendData[recipeId] = recipeSnapshots.map(snapshot => ({
-                date: snapshot.snapshot_date,
-                hpp: snapshot.hpp_value,
-                material_cost: snapshot.material_cost,
-                operational_cost: snapshot.operational_cost
+                date: (snapshot as any).snapshot_date,
+                hpp: (snapshot as any).hpp_value,
+                material_cost: (snapshot as any).material_cost,
+                operational_cost: (snapshot as any).operational_cost
             }))
         })
 
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
             success: true,
             data: trendData,
             meta: {
-                recipes: recipes.map(r => ({ id: r.id, name: r.name })),
+                recipes: recipes.map(r => ({ id: (r as any).id, name: (r as any).name })),
                 period,
                 date_range: dateRange,
                 total_snapshots: snapshots?.length || 0
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
     } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error in trends endpoint:')
         return NextResponse.json(
-            { error: 'Internal server error', details: error.message },
+            { error: 'Internal server error', details: getErrorMessage(error) },
             { status: 500 }
         )
     }

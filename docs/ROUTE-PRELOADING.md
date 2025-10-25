@@ -2,7 +2,7 @@
 
 ## Overview
 
-Aplikasi bakery management sekarang telah dilengkapi dengan sistem route-based preloading yang canggih untuk meningkatkan performa dan user experience. Sistem ini secara pintar memuat komponen dan halaman yang kemungkinan akan diakses user selanjutnya.
+Aplikasi UMKM management sekarang telah dilengkapi dengan sistem route-based preloading yang canggih untuk meningkatkan performa dan user experience. Sistem ini secara pintar memuat komponen dan halaman yang kemungkinan akan diakses user selanjutnya.
 
 ## 🎯 Features
 
@@ -216,7 +216,7 @@ export default function Dashboard() {
 - Better resource utilization
 - Network-optimized loading
 
-🎉 **Your bakery management app is now lightning-fast with intelligent preloading!**
+🎉 **Your UMKM management app is now lightning-fast with intelligent preloading!**
 
 ---
 

@@ -3,7 +3,7 @@ import { costCategories } from './constants'
 
 /**
  * Generate quick setup template for operational costs
- * Provides common operational costs for Indonesian UMKM bakery
+ * Provides common operational costs for Indonesian UMKM UMKM
  */
 export function getQuickSetupTemplate(): OperationalCost[] {
   const now = Date.now()

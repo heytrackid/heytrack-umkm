@@ -2,7 +2,7 @@
  * Centralized error handling for the application
  */
 
-import logger from '@/lib/logger'
+import { apiLogger } from '@/lib/logger'
 
 export type ErrorCode =
   | 'VALIDATION_ERROR'
@@ -204,9 +204,9 @@ export function logError(error: any, context?: string) {
 
   if (typeof window === 'undefined') {
     // Server-side logging
-    logger.error({ err: normalizedError, context }, 'Server error')
+    apiLogger.error({ err: normalizedError, context }, 'Server error')
   } else {
     // Client-side logging (could send to monitoring service)
-    logger.error({ context, message: normalizedError.message }, 'Client error')
+    apiLogger.error({ context, message: normalizedError.message }, 'Client error')
   }
 }

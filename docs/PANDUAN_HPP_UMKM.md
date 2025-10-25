@@ -46,7 +46,7 @@ HPP adalah **total biaya yang dikeluarkan untuk memproduksi satu unit produk**. 
 ```
 
 #### 2.2 Input Data Setiap Bahan
-**Contoh untuk Bakery:**
+**Contoh untuk UMKM:**
 ```
 Nama: Tepung Terigu
 Harga: Rp 15.000

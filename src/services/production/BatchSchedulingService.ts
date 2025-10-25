@@ -4,7 +4,7 @@
  * Handles equipment capacity, labor, ingredients, and deadline constraints
  */
 
-import { logger } from '@/lib/logger'
+import { automationLogger } from '@/lib/logger'
 
 // Core Types
 export interface ProductionConstraints {
@@ -158,7 +158,7 @@ export class BatchSchedulingService {
         suggestions
       }
     } catch (error: unknown) {
-      logger.error({ err: error }, 'Error in batch scheduling')
+      automationLogger.error({ err: error }, 'Error in batch scheduling')
       throw error
     }
   }
@@ -189,7 +189,7 @@ export class BatchSchedulingService {
         if (scheduledSlot) {
           batch.scheduled_start = scheduledSlot.start
           batch.scheduled_end = scheduledSlot.end
-          batch.status = 'scheduled'
+          (batch as any).status = 'scheduled'
 
           // Reserve resources
           this.reserveResources(batch, scheduledSlot, resourceTimeline)
@@ -197,12 +197,12 @@ export class BatchSchedulingService {
           scheduledBatches.push(batch)
         } else {
           // Cannot schedule - mark as blocked
-          batch.status = 'blocked'
+          (batch as any).status = 'blocked'
           scheduledBatches.push(batch)
         }
       } catch (error: unknown) {
-        logger.error({ err: error, batchId: batch.id }, `Error scheduling batch ${batch.id}`)
-        batch.status = 'blocked'
+        automationLogger.error({ err: error, batchId: (batch as any).id }, `Error scheduling batch ${(batch as any).id}`)
+        (batch as any).status = 'blocked'
         scheduledBatches.push(batch)
       }
     }
@@ -296,7 +296,7 @@ export class BatchSchedulingService {
       timeline.push({
         start_time: batch.scheduled_start!,
         end_time: batch.scheduled_end!,
-        batch_id: batch.id,
+        batch_id: (batch as any).id,
         resource_type: 'oven',
         resource_id: `oven_1`, // Simplified - would be more complex in real implementation
         status: 'scheduled'
@@ -308,7 +308,7 @@ export class BatchSchedulingService {
         timeline.push({
           start_time: prepStart.toISOString(),
           end_time: batch.scheduled_start!,
-          batch_id: batch.id,
+          batch_id: (batch as any).id,
           resource_type: 'mixer',
           resource_id: 'mixer_1',
           status: 'scheduled'
@@ -446,7 +446,7 @@ export class BatchSchedulingService {
       resourceTimeline.get(resourceId)!.push({
         start: slot.start,
         end: slot.end,
-        batch_id: batch.id
+        batch_id: (batch as any).id
       })
     }
   }
@@ -480,7 +480,7 @@ export class BatchSchedulingService {
     const suggestions: string[] = []
 
     // Check for blocked batches
-    const blockedBatches = batches.filter(b => b.status === 'blocked')
+    const blockedBatches = batches.filter(b => (b as any).status === 'blocked')
     if (blockedBatches.length > 0) {
       warnings.push(`${blockedBatches.length} batches cannot be scheduled due to constraints`)
     }

@@ -1,28 +1,28 @@
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
-
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   try {
     const supabase = createServerSupabaseAdmin()
     const { data: recipe, error } = await supabase
-      .from('resep')
+      .from('recipes')
       .select(`
         *,
-        resep_item (
+        recipe_ingredients (
           id,
-          qty_per_batch,
-          bahan:bahan_baku (
+          quantity,
+          unit,
+          ingredient:ingredients (
             id,
-            nama_bahan,
-            satuan,
-            harga_per_satuan
+            name,
+            unit,
+            price_per_unit
           )
         )
       `)
@@ -66,8 +66,8 @@ export async function PUT(
 
     // Update the recipe
     const { data: recipe, error: recipeError } = await supabase
-      .from('resep')
-      .update(recipeData as Record<string, unknown>)
+      .from('recipes')
+      .update(recipeData)
       .eq('id', id)
       .select('*')
       .single()
@@ -90,9 +90,9 @@ export async function PUT(
     if (recipe_ingredients !== undefined) {
       // Delete existing recipe ingredients
       const { error: deleteError } = await supabase
-        .from('resep_item')
+        .from('recipe_ingredients')
         .delete()
-        .eq('resep_id', id)
+        .eq('recipe_id', id)
 
       if (deleteError) {
         apiLogger.error({ error: deleteError }, 'Error deleting existing ingredients:')
@@ -111,15 +111,16 @@ export async function PUT(
 
           const ing = ingredient as Record<string, unknown>
           return {
-            resep_id: id,
-            bahan_id: ing.bahan_id || ing.ingredient_id,
-            qty_per_batch: ing.qty_per_batch || ing.quantity
+            recipe_id: id,
+            ingredient_id: ing.ingredient_id || ing.bahan_id,
+            quantity: ing.quantity || ing.qty_per_batch,
+            unit: ing.unit || 'g'
           }
         })
 
         const { error: insertError } = await supabase
-          .from('resep_item')
-          .insert(recipeIngredientsToInsert)
+          .from('recipe_ingredients')
+          .insert(recipeIngredientsToInsert as any)
 
         if (insertError) {
           apiLogger.error({ error: insertError }, 'Error adding new ingredients:')
@@ -133,17 +134,18 @@ export async function PUT(
 
     // Fetch the complete updated recipe with ingredients
     const { data: completeRecipe, error: fetchError } = await supabase
-      .from('resep')
+      .from('recipes')
       .select(`
         *,
-        resep_item (
+        recipe_ingredients (
           id,
-          qty_per_batch,
-          bahan:bahan_baku (
+          quantity,
+          unit,
+          ingredient:ingredients (
             id,
-            nama_bahan,
-            satuan,
-            harga_per_satuan
+            name,
+            unit,
+            price_per_unit
           )
         )
       `)
@@ -176,7 +178,7 @@ export async function DELETE(
 
     // Check if recipe exists first
     const { data: existingRecipe, error: checkError } = await supabase
-      .from('resep')
+      .from('recipes')
       .select('*')
       .eq('id', id)
       .single()
@@ -188,9 +190,9 @@ export async function DELETE(
       )
     }
 
-    // Delete the recipe (cascade will handle resep_item)
+    // Delete the recipe (cascade will handle recipe_ingredients)
     const { error } = await supabase
-      .from('resep')
+      .from('recipes')
       .delete()
       .eq('id', id)
 

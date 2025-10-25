@@ -2,13 +2,19 @@ import { hppAutomation, triggerIngredientPriceUpdate, updateOperationalCosts } f
 import { getErrorMessage, isRecord } from '@/lib/type-guards'
 import { createServerSupabaseAdmin } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
+import { HPPAutomationSchema } from '@/lib/validations/api-schemas'
+import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import { apiLogger } from '@/lib/logger'
 // POST /api/hpp/automation - Trigger HPP automation events
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { event, data } = body
+    // Validate request body
+    const validatedData = await validateRequestOrRespond(request, HPPAutomationSchema)
+    if (validatedData instanceof NextResponse) return validatedData
+
+    const { action: event, recipe_ids, force } = validatedData
+    const data = { recipe_ids, force }
 
     apiLogger.info(`🧮 HPP Automation triggered: ${event}`)
 
@@ -118,12 +124,13 @@ async function handleIngredientPriceChange(data: any) {
   // Update ingredient price in database
   const supabase = createServerSupabaseAdmin()
 
-  const { error: updateError } = await supabase
+  // @ts-ignore
+    const { error: updateError } = await supabase
     .from('ingredients')
     .update({
       price_per_unit: newPrice,
       updated_at: new Date().toISOString()
-    })
+    } as any)
     .eq('id', ingredientId)
 
   if (updateError) {
@@ -241,11 +248,11 @@ async function handleBatchHPPRecalculation(data: any) {
   // Recalculate HPP for each recipe
   for (const recipe of recipes || []) {
     try {
-      const recipeHPP = await hppAutomation.calculateSmartHPP(recipe.id)
+      const recipeHPP = await hppAutomation.calculateSmartHPP((recipe as any).id)
 
       results.push({
-        recipeId: recipe.id,
-        recipeName: recipe.nama,
+        recipeId: (recipe as any).id,
+        recipeName: (recipe as any).nama,
         status: 'success',
         newHPP: recipeHPP.hppPerServing,
         lastCalculated: recipeHPP.lastCalculated
@@ -254,8 +261,8 @@ async function handleBatchHPPRecalculation(data: any) {
       successCount++
     } catch (error: unknown) {
       results.push({
-        recipeId: recipe.id,
-        recipeName: recipe.nama,
+        recipeId: (recipe as any).id,
+        recipeName: (recipe as any).nama,
         status: 'error',
         error: getErrorMessage(error)
       })

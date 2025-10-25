@@ -1,4 +1,4 @@
-import type { AlertDetectionData, AlertErrorCode, ErrorResponse } from './types.ts'
+import type { AlertDetectionData, AlertErrorCode, ErrorResponse } from './types'
 
 // ============================================================================
 // Logging Utilities

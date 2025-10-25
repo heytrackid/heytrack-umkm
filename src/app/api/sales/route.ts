@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/type-guards'
 import { createSupabaseClient } from '@/lib/supabase';
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations';
+import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
+import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -45,12 +48,12 @@ export async function GET(request: NextRequest) {
     // Calculate offset for pagination
     const offset = (page - 1) * limit
 
-    let query = supabase
-      .from('sales')
+    let query: any = supabase
+      .from('financial_records')
       .select(`
-        *,
-        recipe:recipes(name)
+        *
       `)
+      .eq('record_type', 'INCOME')
       .range(offset, offset + limit - 1)
 
     // Add filters
@@ -84,7 +87,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error;
 
     // Get total count
-    let countQuery = supabase.from('sales').select('*', { count: 'exact', head: true })
+    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME')
 
     // Apply same filters to count query
     if (search) {
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -139,11 +142,10 @@ export async function POST(request: Request) {
     const validatedData = validation.data
 
     const { data: sale, error } = await supabase
-      .from('sales')
-      .insert([validatedData])
+      .from('financial_records')
+      .insert([{ ...validatedData, record_type: 'INCOME' }] as any)
       .select(`
-        *,
-        recipe:recipes(name)
+        *
       `)
       .single();
 
@@ -151,6 +153,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(sale, { status: 201 });
   } catch (error: unknown) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { apiLogger } from '@/lib/logger'
+import { toast } from 'sonner'
 // Types and constants embedded in hook file for now
 export interface Transaction {
   id: string
