@@ -1,15 +1,12 @@
+import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
+import { withValidation } from '@/lib/api-core/middleware'
+import { handleDatabaseError } from '@/lib/errors'
+import { createServiceRoleClient } from '@/utils/supabase'
 import {
-  createErrorResponse,
-  createSuccessResponse,
-  handleDatabaseError,
-  withValidation
-} from '@/lib/api-validation'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import {
-  BahanBakuSchema,
-  IdParamSchema
+  IdParamSchema,
+  IngredientUpdateSchema
 } from '@/lib/validations'
-import { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(
@@ -24,8 +21,7 @@ export async function GET(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServerSupabaseAdmin()
-    // @ts-ignore
+    const supabase = createServiceRoleClient()
     const { data, error } = await supabase
       .from('ingredients')
       .select('*')
@@ -39,7 +35,7 @@ export async function GET(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(data)
+    return createSuccessResponse(data as any)
 
   } catch (error: unknown) {
     return handleDatabaseError(error)
@@ -52,41 +48,43 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  return withValidation(
-    BahanBakuSchema.partial(), // Allow partial updates
-    async (_req: NextRequest, validatedData) => {
-      try {
-        // Validate ID parameter
-        const idValidation = IdParamSchema.safeParse({ id })
-        if (!idValidation.success) {
-          return createErrorResponse('Invalid bahan baku ID format', 400)
-        }
+  const validationResult = await withValidation(IngredientUpdateSchema)(request)
 
-        const supabase = createServerSupabaseAdmin()
+  if (validationResult instanceof Response) {
+    return validationResult
+  }
 
-        // Update bahan baku
-        // @ts-ignore - Supabase table type mismatch with generated schema
-        const { data, error } = await supabase
-          .from('ingredients')
-          .update(validatedData)
-          .eq('id', id)
-          .select('*')
-          .single()
+  const validatedData = validationResult
 
-        if (error) {
-          if (error.code === 'PGRST116') {
-            return createErrorResponse('Bahan baku tidak ditemukan', 404)
-          }
-          return handleDatabaseError(error)
-        }
-
-        return createSuccessResponse(data, 'Bahan baku berhasil diupdate')
-
-      } catch (error: unknown) {
-        return handleDatabaseError(error)
-      }
+  try {
+    // Validate ID parameter
+    const idValidation = IdParamSchema.safeParse({ id })
+    if (!idValidation.success) {
+      return createErrorResponse('Invalid bahan baku ID format', 400)
     }
-  )(request)
+
+    const supabase = createServiceRoleClient()
+
+    // Update bahan baku
+    const { data, error } = await supabase
+      .from('ingredients')
+      .update(validatedData as any)
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return createErrorResponse('Bahan baku tidak ditemukan', 404)
+      }
+      return handleDatabaseError(error)
+    }
+
+    return createSuccessResponse(data as any, 'Bahan baku berhasil diupdate')
+
+  } catch (error: unknown) {
+    return handleDatabaseError(error)
+  }
 }
 
 // DELETE /api/ingredients/[id] - Delete bahan baku
@@ -102,7 +100,7 @@ export async function DELETE(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
 
     // Check if bahan baku exists
     const { data: existing } = await supabase
@@ -139,7 +137,7 @@ export async function DELETE(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(null, 'Bahan baku berhasil dihapus')
+    return createSuccessResponse(null as any, 'Bahan baku berhasil dihapus')
 
   } catch (error: unknown) {
     return handleDatabaseError(error)

@@ -1,7 +1,8 @@
-import { TimePeriod } from '@/types/hpp-tracking'
+import type { TimePeriod } from '@/types/hpp-tracking'
 import { getErrorMessage } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 
 // GET /api/hpp/snapshots - Get HPP snapshots with filters
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Query snapshots with date range
-        let query = supabase
+        const query = supabase
             .from('hpp_snapshots')
             .select('*', { count: 'exact' })
             .eq('recipe_id', recipeId)

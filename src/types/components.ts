@@ -3,7 +3,7 @@
  * Provides reusable type definitions for React components
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * Base props that most components should accept
@@ -37,7 +37,7 @@ export interface ColumnDef<T> {
     header: string;
     accessorKey?: keyof T;
     accessorFn?: (row: T) => unknown;
-    cell?: (value: any, row: T) => ReactNode;
+    cell?: (value: unknown, row: T) => ReactNode;
     sortable?: boolean;
     width?: string | number;
 }

@@ -116,7 +116,7 @@ function MobileHeader({
 
   // Auto-collapse search on outside click
   useEffect(() => {
-    if (!isSearchExpanded) return
+    if (!isSearchExpanded) {return}
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element

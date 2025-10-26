@@ -1,10 +1,14 @@
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
-import type { ExpensesTable } from '@/types'
-import { OperationalCostInsertSchema, OperationalCostUpdateSchema } from '@/lib/validations/database-validations'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import type { Database } from '@/types'
 import { getErrorMessage } from '@/lib/type-guards'
 
 import { apiLogger } from '@/lib/logger'
+
+type ExpensesTable = Database['public']['Tables']['expenses']
 /**
  * GET /api/operational-costs
  * 
@@ -154,24 +158,23 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    // @ts-ignore
     const { data, error } = await supabase
       .from('expenses')
       .insert({
         user_id: (user as any).id,
         category: validatedData.category,
-        subcategory: (validatedData as any).subcategory,
+        subcategory: validatedData.subcategory,
         amount: validatedData.amount,
-        description: (validatedData as any).description,
-        expense_date: validatedData.cost_date,
-        supplier: null,
+        description: validatedData.description,
+        expense_date: validatedData.date,
+        supplier: validatedData.vendor_name,
         payment_method: 'CASH',
-        status: 'paid',
-        receipt_number: null,
+        status: validatedData.is_paid ? 'paid' : 'pending',
+        receipt_number: validatedData.invoice_number,
         is_recurring: validatedData.is_recurring,
-        recurring_frequency: validatedData.frequency,
+        recurring_frequency: validatedData.recurring_frequency,
         tags: []
-      })
+      } as any)
       .select('*')
       .single()
 
@@ -218,7 +221,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
 
     // Validate request body with Zod (excluding id which is in URL)
-    const updateValidation = OperationalCostUpdateSchema.safeParse(body)
+    const updateValidation = OperationalCostInsertSchema.safeParse(body)
     if (!updateValidation.success) {
       return NextResponse.json(
         {
@@ -241,13 +244,16 @@ export async function PUT(request: NextRequest) {
 
     // Build update object from validated data
     const updateData: ExpensesTable['Update'] = {}
-    if ((validatedData as any).category !== undefined) (updateData as any).category = (validatedData as any).category
-    if (validatedData.subcategory !== undefined) (updateData as any).subcategory = (validatedData as any).subcategory
-    if (validatedData.amount !== undefined) (updateData as any).amount = (validatedData as any).amount
-    if (validatedData.description !== undefined) (updateData as any).description = (validatedData as any).description
-    if (validatedData.cost_date !== undefined) (updateData as any).expense_date = validatedData.cost_date
-    if (validatedData.is_recurring !== undefined) updateData.is_recurring = validatedData.is_recurring
-    if (validatedData.frequency !== undefined) updateData.recurring_frequency = validatedData.frequency
+    if (validatedData.category !== undefined) {(updateData as any).category = validatedData.category}
+    if (validatedData.subcategory !== undefined) {(updateData as any).subcategory = validatedData.subcategory}
+    if (validatedData.amount !== undefined) {(updateData as any).amount = validatedData.amount}
+    if (validatedData.description !== undefined) {(updateData as any).description = validatedData.description}
+    if (validatedData.date !== undefined) {(updateData as any).expense_date = validatedData.date}
+    if (validatedData.is_recurring !== undefined) {updateData.is_recurring = validatedData.is_recurring}
+    if (validatedData.recurring_frequency !== undefined) {updateData.recurring_frequency = validatedData.recurring_frequency}
+    if (validatedData.vendor_name !== undefined) {(updateData as any).supplier = validatedData.vendor_name}
+    if (validatedData.invoice_number !== undefined) {(updateData as any).receipt_number = validatedData.invoice_number}
+    if (validatedData.is_paid !== undefined) {(updateData as any).status = validatedData.is_paid ? 'paid' : 'pending'}
 
     const { data, error } = await supabase
       .from('expenses')

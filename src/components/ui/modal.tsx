@@ -55,7 +55,7 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const sizeClasses = {
     sm: 'max-w-sm',
@@ -176,7 +176,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const positionClasses = {
     bottom: {

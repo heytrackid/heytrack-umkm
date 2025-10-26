@@ -1,6 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 
 interface ModalConfig {
@@ -109,7 +110,7 @@ function ModalRenderer() {
           key={modal.id}
           open={true}
           onOpenChange={(open) => {
-            if (!open) closeModal(modal.id)
+            if (!open) {closeModal(modal.id)}
           }}
         >
           <DialogContent className={sizeClasses[modal.size || 'md']}>

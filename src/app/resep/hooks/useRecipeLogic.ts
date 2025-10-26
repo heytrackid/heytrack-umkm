@@ -2,7 +2,8 @@
 import * as React from 'react'
 
 import { useState, useCallback } from 'react'
-import { useIngredients, useRecipesWithIngredients } from '@/hooks/useSupabase'
+import { useIngredients } from '@/hooks'
+import { useRecipesWithIngredients } from '@/modules/recipes/hooks/useRecipesWithIngredients'
 
 import { apiLogger } from '@/lib/logger'
 export interface Recipe {
@@ -18,7 +19,7 @@ export interface Recipe {
 }
 
 export function useRecipeLogic() {
-  const { data: recipes, loading, refetch } = useRecipesWithIngredients()
+  const { data: recipes = [], loading, refetch } = useRecipesWithIngredients()
   const { data: ingredients } = useIngredients()
   
   const [currentView, setCurrentView] = useState<'list' | 'add' | 'edit'>('list')
@@ -46,7 +47,7 @@ export function useRecipeLogic() {
   const handleSaveRecipe = useCallback(async () => {
     try {
       // API call to save recipe would go here
-      apiLogger.info('Saving recipe:', newRecipe)
+      apiLogger.info({ recipe: newRecipe }, 'Saving recipe')
       
       resetForm()
       setCurrentView('list')
@@ -73,14 +74,14 @@ export function useRecipeLogic() {
 
   const handleViewRecipe = useCallback((recipe: any) => {
     // Implement recipe view logic
-    apiLogger.info({ params: recipe }, 'Viewing recipe:')
+    apiLogger.info({ recipe }, 'Viewing recipe')
   }, [])
 
   const handleDeleteRecipe = useCallback(async (recipe: any) => {
     if (window.confirm('Are you sure you want to delete this recipe?')) {
       try {
         // API call to delete recipe would go here
-        apiLogger.info({ params: recipe.id }, 'Deleting recipe:')
+        apiLogger.info({ recipeId: recipe.id }, 'Deleting recipe')
         await refetch()
       } catch (error: unknown) {
         apiLogger.error({ error: error }, 'Error deleting recipe:')
@@ -98,7 +99,7 @@ export function useRecipeLogic() {
 
   const handleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
-      setSelectedItems(recipes?.map(recipe => recipe.id) || [])
+      setSelectedItems(recipes.map(recipe => recipe.id))
     } else {
       setSelectedItems([])
     }

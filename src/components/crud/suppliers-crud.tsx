@@ -4,12 +4,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useState } from 'react';
-import { useSuppliers } from '@/hooks/useSupabaseCRUD';
+import { useSuppliers } from '@/hooks';
+import { useSupabaseCRUD } from '@/hooks/supabase';
 import { SimpleDataTable } from '@/components/ui/simple-data-table';
-import { Modal } from '@/components/ui/modal';
-import { FormField, CrudForm, FormActions, FormGrid, FormSection, ConfirmDialog } from '@/components/ui/crud-form';
 import { SupplierFormSchema, type SupplierForm } from '@/lib/validations/form-validations';
-import { Database } from '@/types';
+
+// Shared components
+import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields';
+import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
 
 import { apiLogger } from '@/lib/logger'
 
@@ -28,7 +30,8 @@ type SupplierInsert = Omit<Supplier, 'id' | 'created_at' | 'updated_at'>;
 type SupplierUpdate = Partial<SupplierInsert>;
 
 export function SuppliersCRUD() {
-  const { data: suppliersData, loading, error, create, update, remove } = useSuppliers();
+  const { data: suppliersData, loading, error } = useSuppliers();
+  const { create: createSupplier, update: updateSupplier, delete: deleteSupplier } = useSupabaseCRUD('suppliers');
   const suppliers = suppliersData || [];
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -110,7 +113,7 @@ export function SuppliersCRUD() {
 
   const handleSubmitCreate = async (data: SupplierForm) => {
     try {
-      await create(data)
+      await createSupplier(data)
       setIsCreateModalOpen(false)
       createForm.reset()
     } catch (error: unknown) {
@@ -119,10 +122,10 @@ export function SuppliersCRUD() {
   }
 
   const handleSubmitEdit = async (data: SupplierForm) => {
-    if (!selectedSupplier) return
+    if (!selectedSupplier) {return}
 
     try {
-      await update(selectedSupplier.id, data)
+      await updateSupplier(selectedSupplier.id, data)
       setIsEditModalOpen(false)
       setSelectedSupplier(null)
       editForm.reset()
@@ -132,14 +135,14 @@ export function SuppliersCRUD() {
   }
 
   const handleConfirmDelete = async () => {
-    if (!selectedSupplier) return
+    if (!selectedSupplier) {return}
 
     try {
-      await remove(selectedSupplier.id)
-      setIsDeleteDialogOpen(false)
-      setSelectedSupplier(null)
+      await deleteSupplier(selectedSupplier.id)
+      setIsDeleteDialogOpen(false);
+      setSelectedSupplier(null);
     } catch (error: unknown) {
-      apiLogger.error({ error }, 'Failed to delete supplier:')
+      apiLogger.error({ error }, 'Failed to delete supplier:');
     }
   }
 
@@ -168,159 +171,49 @@ export function SuppliersCRUD() {
         loading={loading}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onCreate={handleCreate}
+        onAdd={handleCreate}
         title="Suppliers"
-        createButtonText="Add Supplier"
+        addButtonText="Add Supplier"
         emptyMessage="No suppliers found. Add your first supplier to get started."
-        searchable={true}
       />
 
-      <Modal
+      <CreateModal
         isOpen={isCreateModalOpen}
-        onClose={closeModals}
-        title="Add New Supplier"
-        size="md"
+        onClose={() => setIsCreateModalOpen(false)}
+        entityName="Supplier"
+        form={createForm}
+        onSubmit={handleSubmitCreate}
+        isLoading={loading}
       >
-        <CrudForm onSubmit={createForm.handleSubmit(handleSubmitCreate)}>
-          <FormField
-            label="Name"
-            name="name"
-            type="text"
-            {...createForm.register('name')}
-            error={createForm.formState.errors.name?.message}
-            required
-          />
-
-          <FormField
-            label="Contact Person"
-            name="contact_person"
-            type="text"
-            {...createForm.register('contact_person')}
-            error={createForm.formState.errors.contact_person?.message}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              label="Phone"
-              name="phone"
-              type="text"
-              {...createForm.register('phone')}
-              error={createForm.formState.errors.phone?.message}
-            />
-
-            <FormField
-              label="Email"
-              name="email"
-              type="email"
-              {...createForm.register('email')}
-              error={createForm.formState.errors.email?.message}
-            />
-          </div>
-
-          <FormField
-            label="Address"
-            name="address"
-            type="textarea"
-            {...createForm.register('address')}
-            error={createForm.formState.errors.address?.message}
-            rows={3}
-          />
-
-          <FormField
-            label="Notes"
-            name="notes"
-            type="textarea"
-            {...createForm.register('notes')}
-            error={createForm.formState.errors.notes?.message}
-            rows={2}
-          />
-
-          <FormActions
-            onCancel={closeModals}
-            submitText="Create Supplier"
-            loading={loading}
-          />
-        </CrudForm>
-      </Modal>
+        <SupplierFormFields
+          register={createForm.register}
+          errors={createForm.formState.errors}
+        />
+      </CreateModal>
 
       {/* Edit Modal */}
-      <Modal
+      <EditModal
         isOpen={isEditModalOpen}
-        onClose={closeModals}
-        title="Edit Supplier"
-        size="md"
+        onClose={() => setIsEditModalOpen(false)}
+        entityName="Supplier"
+        form={editForm}
+        onSubmit={handleSubmitEdit}
+        isLoading={loading}
       >
-        <CrudForm onSubmit={editForm.handleSubmit(handleSubmitEdit)}>
-          <FormField
-            label="Name"
-            name="name"
-            type="text"
-            {...editForm.register('name')}
-            error={editForm.formState.errors.name?.message}
-            required
-          />
-
-          <FormField
-            label="Contact Person"
-            name="contact_person"
-            type="text"
-            {...editForm.register('contact_person')}
-            error={editForm.formState.errors.contact_person?.message}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              label="Phone"
-              name="phone"
-              type="text"
-              {...editForm.register('phone')}
-              error={editForm.formState.errors.phone?.message}
-            />
-
-            <FormField
-              label="Email"
-              name="email"
-              type="email"
-              {...editForm.register('email')}
-              error={editForm.formState.errors.email?.message}
-            />
-          </div>
-
-          <FormField
-            label="Address"
-            name="address"
-            type="textarea"
-            {...editForm.register('address')}
-            error={editForm.formState.errors.address?.message}
-            rows={3}
-          />
-
-          <FormField
-            label="Notes"
-            name="notes"
-            type="textarea"
-            {...editForm.register('notes')}
-            error={editForm.formState.errors.notes?.message}
-            rows={2}
-          />
-
-          <FormActions
-            onCancel={closeModals}
-            submitText="Update Supplier"
-            loading={loading}
-          />
-        </CrudForm>
-      </Modal>
+        <SupplierFormFields
+          register={editForm.register}
+          errors={editForm.formState.errors}
+        />
+      </EditModal>
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
+      <DeleteModal
         isOpen={isDeleteDialogOpen}
-        onClose={closeModals}
+        onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Supplier"
-        message={`Are you sure you want to delete"${selectedSupplier?.name}"? This action cannot be undone.`}
-        confirmText="Delete"
-        type="danger"
+        entityName="Supplier"
+        itemName={selectedSupplier?.name}
+        isLoading={loading}
       />
     </div>
   );

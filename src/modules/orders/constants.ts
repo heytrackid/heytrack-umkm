@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentStatus, PaymentMethod, DeliveryMethod } from './types'
+import type { OrderStatus, PaymentStatus, PaymentMethod, DeliveryMethod } from './types'
 import { formatCurrentCurrency } from '@/lib/currency'
 
 // Order Configuration Constants

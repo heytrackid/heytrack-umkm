@@ -58,31 +58,6 @@ export const IngredientSchema = z.object({
 
 export type IngredientFormData = z.infer<typeof IngredientSchema>
 
-// Bahan Baku validation schema (English field names matching database)
-export const BahanBakuSchema = z.object({
-  name: indonesianName,
-  unit: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
-    message: 'Satuan tidak valid'
-  }),
-  price_per_unit: z.number().positive('Harga harus lebih dari 0'),
-  current_stock: positiveNumber,
-  min_stock: positiveNumber.optional(),
-  minimum_stock: positiveNumber.optional(),
-  description: optionalString
-}).refine(data => {
-  // Custom validation: min_stock should be less than or equal to current_stock
-  const minStock = data.min_stock || data.minimum_stock
-  if (minStock && data.current_stock && minStock > data.current_stock) {
-    return false
-  }
-  return true
-}, {
-  message: 'Stok minimum tidak boleh lebih besar dari stok tersedia',
-  path: ['min_stock']
-})
-
-export type BahanBakuFormData = z.infer<typeof BahanBakuSchema>
-
 // Recipe validation schema
 export const RecipeSchema = z.object({
   name: indonesianName,
@@ -293,6 +268,31 @@ export const OperationalCostFormSchema = z.object({
   is_active: z.boolean().default(true),
 })
 
+// Simple Ingredient Form Schema (matches the form fields used)
+export const IngredientFormSchema = z.object({
+  name: indonesianName,
+  unit: z.enum(['kg', 'g', 'l', 'ml', 'pcs', 'dozen'], {
+    message: 'Satuan tidak valid'
+  }),
+  price_per_unit: z.number().positive('Harga harus lebih dari 0'),
+  current_stock: positiveNumber,
+  min_stock: positiveNumber.optional(),
+  description: optionalString
+}).refine(data => {
+  // Custom validation: min_stock should be less than or equal to current_stock
+  const minStock = data.min_stock
+  if (minStock && data.current_stock && minStock > data.current_stock) {
+    return false
+  }
+  return true
+}, {
+  message: 'Stok minimum tidak boleh lebih besar dari stok tersedia',
+  path: ['min_stock']
+})
+
+// Use the existing IngredientFormData type but make it compatible with form
+export type SimpleIngredientFormData = z.infer<typeof IngredientFormSchema>
+
 // Type exports for forms
 export type CustomerForm = z.infer<typeof CustomerSchema>
 export type IngredientForm = z.infer<typeof IngredientSchema>
@@ -301,3 +301,26 @@ export type OrderForm = z.infer<typeof OrderSchema>
 export type ExpenseForm = z.infer<typeof FinancialRecordSchema>
 export type SupplierForm = z.infer<typeof SupplierFormSchema>
 export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
+
+// Order validation helper function (moved from components/orders/utils.ts)
+export function validateOrderData(data: any): string[] {
+  const errors: string[] = []
+
+  if (!data.customer_name?.trim()) {
+    errors.push('Nama pelanggan harus diisi')
+  }
+
+  if (!data.customer_phone?.trim()) {
+    errors.push('Nomor telepon harus diisi')
+  }
+
+  if (!data.delivery_date) {
+    errors.push('Tanggal pengiriman harus diisi')
+  }
+
+  if (!data.order_items || data.order_items.length === 0) {
+    errors.push('Minimal harus ada 1 item pesanan')
+  }
+
+  return errors
+}

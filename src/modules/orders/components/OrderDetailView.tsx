@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { MapPin, Phone, Users } from 'lucide-react'
-import { Order } from '../types'
+import type { Order, OrderItem } from '../types'
 import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
 interface OrderDetailViewProps {
@@ -106,7 +106,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
       <TabsContent value="items" className="space-y-4">
         <h3 className="font-medium">Item Pesanan ({order.order_items?.length || 0})</h3>
         <div className="space-y-2">
-          {order.order_items?.map((item: any, index: number) => (
+          {order.order_items?.map((item: OrderItem, index: number) => (
             <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg">
               <div>
                 <p className="font-medium">{item.product_name}</p>
@@ -126,7 +126,7 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
         </div>
         <div className="pt-4 border-t">
           <div className="flex justify-between items-center font-medium">
-            <span>Total Item: {order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0}</span>
+            <span>Total Item: {order.order_items?.reduce((sum: number, item: OrderItem) => sum + (item.quantity || 0), 0) || 0}</span>
             <span>Subtotal: {formatCurrency((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0))}</span>
           </div>
         </div>

@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { User, Upload } from 'lucide-react'
+import type { AppSettingsState, SettingsUpdateHandler } from '../types'
 
 interface ProfileSettingsProps {
-  settings: unknown
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**

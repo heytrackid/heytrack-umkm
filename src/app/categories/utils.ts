@@ -42,7 +42,7 @@ export function validateCategoryForm(formData: CategoryFormData): { isValid: boo
  * Filter categories based on search term
  */
 export function filterCategories(categories: Category[], searchTerm: string): Category[] {
-  if (!searchTerm.trim()) return categories
+  if (!searchTerm.trim()) {return categories}
 
   const term = searchTerm.toLowerCase()
   return categories.filter(category =>

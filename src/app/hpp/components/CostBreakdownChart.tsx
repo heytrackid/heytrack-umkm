@@ -91,7 +91,7 @@ export default function CostBreakdownChart({
 
         try {
             const params = new URLSearchParams({ recipe_id: recipeId })
-            if (date) params.append('date', date)
+            if (date) {params.append('date', date)}
 
             const response = await fetch(`/api/hpp/breakdown?${params}`)
 
@@ -118,7 +118,7 @@ export default function CostBreakdownChart({
 
     // Prepare pie chart data for material vs operational
     const pieData = useMemo(() => {
-        if (!data) return []
+        if (!data) {return []}
 
         return [
             {

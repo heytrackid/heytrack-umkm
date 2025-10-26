@@ -3,9 +3,19 @@
  */
 
 import { useSettings } from '@/contexts/settings-context'
-import { formatCurrency } from '@/lib/currency'
+import type { Currency } from '@/shared'
 
-export function useCurrency() {
+interface UseCurrencyReturn {
+  formatPrice: (amount: number) => string
+  formatAmount: (amount: number) => string
+  formatCurrency: (amount: number) => string
+  getCurrencySymbol: () => string
+  getCurrencyCode: () => string
+  getCurrencyDecimals: () => number
+  currency: Currency
+}
+
+export function useCurrency(): UseCurrencyReturn {
   const { settings, formatCurrency: contextFormatCurrency } = useSettings()
   
   const formatPrice = (amount: number) => {

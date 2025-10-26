@@ -48,7 +48,7 @@ export function ContextAwareChatbot() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading) {return}
 
     await sendMessage(input)
     setInput('')

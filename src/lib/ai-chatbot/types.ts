@@ -1,5 +1,6 @@
 /**
  * AI Chatbot Types
+ * Type definitions for AI chatbot functionality
  */
 
 export interface ChatMessage {
@@ -7,29 +8,47 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: Date
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
-export interface ChatbotContext {
+export interface ChatContext {
   userId?: string
-  sessionId: string
-  history: ChatMessage[]
+  sessionId?: string
+  conversationHistory: ChatMessage[]
+  currentPage?: string
+  userPreferences?: Record<string, unknown>
 }
 
-export interface ChatbotResponse {
+export interface ChatbotConfig {
+  model?: string
+  temperature?: number
+  maxTokens?: number
+  systemPrompt?: string
+}
+
+export interface ChatResponse {
   message: string
   suggestions?: string[]
-  data?: any
-}
-
-export interface ChatbotIntent {
-  type: 'query' | 'command' | 'help'
-  confidence: number
-  entities?: Record<string, any>
+  actions?: ChatAction[]
+  metadata?: Record<string, unknown>
 }
 
 export interface ChatAction {
-  type: string
-  payload?: any
-  callback?: () => void
+  type: 'navigate' | 'execute' | 'display'
+  label: string
+  payload: unknown
+}
+
+export interface NLPAnalysis {
+  intent: string
+  entities: Record<string, unknown>
+  confidence: number
+  sentiment?: 'positive' | 'negative' | 'neutral'
+}
+
+export interface ChatbotState {
+  messages: ChatMessage[]
+  isLoading: boolean
+  error: string | null
+  context: ChatContext
 }

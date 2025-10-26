@@ -10,7 +10,7 @@ import { format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { productionDataIntegration } from '@/services/production/ProductionDataIntegration'
-import { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 
 // Lazy load all production components
 import dynamic from 'next/dynamic'
@@ -58,7 +58,7 @@ export default function ProductionBatchExecution({
     setRefreshInterval(interval)
 
     return () => {
-      if (interval) clearInterval(interval)
+      if (interval) {clearInterval(interval)}
     }
   }, [batches])
 
@@ -138,7 +138,7 @@ export default function ProductionBatchExecution({
 
   const handlePauseBatch = (batchId: string) => {
     const state = executionStates.get(batchId)
-    if (!state) return
+    if (!state) {return}
 
     const updatedBatch = { ...state.batch, status: 'scheduled' as const }
     const newState = {
@@ -160,7 +160,7 @@ export default function ProductionBatchExecution({
 
   const handleCompleteBatch = async (batchId: string) => {
     const state = executionStates.get(batchId)
-    if (!state) return
+    if (!state) {return}
 
     // Check if all quality checks are completed
     const allQualityChecksPassed = state.qualityChecks.every(check => check.completed && check.passed !== false)
@@ -213,7 +213,7 @@ export default function ProductionBatchExecution({
 
   const handleQualityCheck = (batchId: string, checkId: string, passed: boolean, notes?: string) => {
     const state = executionStates.get(batchId)
-    if (!state) return
+    if (!state) {return}
 
     const updatedChecks = state.qualityChecks.map(check =>
       check.id === checkId
@@ -242,10 +242,10 @@ export default function ProductionBatchExecution({
   }
 
   const addNote = (batchId: string) => {
-    if (!currentNotes.trim()) return
+    if (!currentNotes.trim()) {return}
 
     const state = executionStates.get(batchId)
-    if (!state) return
+    if (!state) {return}
 
     const newState = {
       ...state,

@@ -13,7 +13,7 @@ interface RecommendationsCardProps {
  * Recommendations display card component
  */
 export function RecommendationsCard({ calculationResult }: RecommendationsCardProps) {
-  if (calculationResult.recommendations.length === 0) return null
+  if (calculationResult.recommendations.length === 0) {return null}
 
   return (
     <Card>

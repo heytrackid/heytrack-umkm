@@ -57,11 +57,11 @@ export function RecipeList({
   const { formatCurrency } = useSettings()
 
   const calculateRecipeHPP = (recipe: any) => {
-    if (!recipe.recipe_ingredients || !ingredients) return 0
+    if (!recipe.recipe_ingredients || !ingredients) {return 0}
     
     return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
       const ingredient = ingredients.find(ing => ing.id === recipeIngredient.ingredient_id)
-      if (!ingredient) return total
+      if (!ingredient) {return total}
       
       const cost = ingredient.price_per_unit * recipeIngredient.quantity
       return total + cost

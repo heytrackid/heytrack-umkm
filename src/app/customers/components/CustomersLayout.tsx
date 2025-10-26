@@ -11,21 +11,18 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
-import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import { LOADING_KEYS, useLoading } from '@/hooks/loading'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
 import { apiLogger } from '@/lib/logger'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb'
+
+// Shared components
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
+import { PageHeader } from '@/components/ui/page-patterns'
+import { PageActions } from '@/components/ui/page-patterns'
 import { Plus, RefreshCw, Users } from 'lucide-react'
 import * as React from 'react'
 
@@ -46,6 +43,7 @@ const CustomerSearchFilters = dynamic(() => import('./CustomerSearchFilters'), {
 })
 
 import type { Customer } from './types'
+import type { CustomersTable } from '@/types/customers'
 
 export default function CustomersLayout() {
   const router = useRouter()
@@ -59,7 +57,7 @@ export default function CustomersLayout() {
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const [customers, setCustomers] = useState<CustomersTable['Row'][]>([])
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
 
@@ -95,7 +93,7 @@ export default function CustomersLayout() {
         return
       }
 
-      if (!response.ok) throw new Error('Failed to fetch customers')
+      if (!response.ok) {throw new Error('Failed to fetch customers')}
       const data = await response.json()
       setCustomers(data)
     } catch (error: unknown) {
@@ -136,7 +134,7 @@ export default function CustomersLayout() {
   }
 
   const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return
+    if (selectedItems.length === 0) {return}
 
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
     const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
@@ -170,7 +168,7 @@ export default function CustomersLayout() {
   }
 
   const handleBulkEdit = () => {
-    if (selectedItems.length === 0) return
+    if (selectedItems.length === 0) {return}
 
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
 
@@ -195,7 +193,7 @@ export default function CustomersLayout() {
     if (confirmed) {
       try {
         const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
-        if (!response.ok) throw new Error('Failed')
+        if (!response.ok) {throw new Error('Failed')}
         toast({
           title: 'Berhasil',
           description: 'Pelanggan berhasil dihapus',
@@ -239,22 +237,11 @@ export default function CustomersLayout() {
     return (
       <AppLayout>
         <div className="space-y-6">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <PrefetchLink href="/">Dashboard</PrefetchLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Pelanggan</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Data Pelanggan</h1>
-          </div>
+          <PageBreadcrumb items={BreadcrumbPatterns.customers} />
+          <PageHeader
+            title="Data Pelanggan"
+            description="Kelola database pelanggan dan riwayat pembelian"
+          />
           <div className="grid gap-4 md:grid-cols-3">
             {Array.from({ length: 3 }, (_, i) => (
               <StatsCardSkeleton key={i} />
@@ -270,48 +257,25 @@ export default function CustomersLayout() {
     <AppLayout>
       <div className="space-y-6">
         {/* Breadcrumb */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            {getBreadcrumbItems().map((item, index) => (
-              <React.Fragment key={index}>
-                <BreadcrumbItem>
-                  {item.href ? (
-                    <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
-                        {item.label}
-                      </PrefetchLink>
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                  )}
-                </BreadcrumbItem>
-                {index < getBreadcrumbItems().length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
+        <PageBreadcrumb items={BreadcrumbPatterns.customers} />
 
         {/* Header */}
-        <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
-          <div className={isMobile ? 'text-center' : ''}>
-            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              Data Pelanggan
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola database pelanggan dan riwayat pembelian
-            </p>
-          </div>
-          <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
-            <Button className={isMobile ? 'w-full' : ''}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button className={isMobile ? 'w-full' : ''} onClick={() => setCurrentView('add')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Pelanggan
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title="Data Pelanggan"
+          description="Kelola database pelanggan dan riwayat pembelian"
+          actions={
+            <PageActions
+              onAdd={() => setCurrentView('add')}
+              addText="Tambah Pelanggan"
+              addIcon={Plus}
+            >
+              <Button>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </PageActions>
+          }
+        />
 
         {/* Customer Stats - Lazy Loaded */}
         <CustomerStats

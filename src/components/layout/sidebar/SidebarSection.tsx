@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 import { ChevronDown } from 'lucide-react'
 import * as React from 'react'
 import SidebarItem from './SidebarItem'
-import { NavigationSection } from './useSidebarLogic'
+import type { NavigationSection } from './useSidebarLogic'
 
 interface SidebarSectionProps {
   section: NavigationSection

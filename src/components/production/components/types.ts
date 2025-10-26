@@ -1,7 +1,7 @@
 // Production Components Types
 // Type definitions for production batch execution components
 
-import { ProductionBatch } from '@/services/production/BatchSchedulingService'
+import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 
 export interface BatchExecutionState {
   batch: ProductionBatch

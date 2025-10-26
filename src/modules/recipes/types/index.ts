@@ -74,3 +74,77 @@ export interface PricingRecommendation {
     margin: number
   }
 }
+
+// Advanced HPP helper types
+export type PricingMethod = 'list_price' | 'weighted' | 'fifo' | 'moving' | 'latest'
+
+export interface RecipePricingAlternative {
+  method: PricingMethod
+  methodDescription: string
+  costPerUnit: number
+}
+
+export interface RecipePricingSuggestion {
+  price: number
+  margin: number
+  rationale: string
+}
+
+export interface RecipePricingSuggestions {
+  economy: RecipePricingSuggestion
+  standard: RecipePricingSuggestion
+  premium: RecipePricingSuggestion
+}
+
+export interface RecipeHppIngredientBreakdown {
+  ingredientName: string
+  cost: number
+  percentage: number
+}
+
+export interface RecipeHppBreakdown {
+  ingredientCost: number
+  operationalCost: number
+  laborCost: number
+  packagingCost: number
+  totalCost: number
+  costPerServing: number
+  ingredientBreakdown: RecipeHppIngredientBreakdown[]
+}
+
+export type RecipeRiskLevel = 'LOW' | 'MEDIUM' | 'HIGH'
+
+export interface RecipeMarginAnalysis {
+  isProfitable: boolean
+  riskLevel: RecipeRiskLevel
+  currentMargin: number
+  recommendedMargin: number
+}
+
+export interface RecipePricingAnalysis {
+  currentPrice: number
+  currentMargin: number
+  breakEvenPrice: number
+  competitorPriceRange: {
+    min: number
+    max: number
+  }
+}
+
+export interface RecipeAvailability {
+  canProduce: boolean
+  productionCapacity: number
+  limitingIngredients: string[]
+  stockWarnings: string[]
+}
+
+export interface RecipeHppResult {
+  servings: number
+  breakdown: RecipeHppBreakdown
+  pricingAnalysis: RecipePricingAnalysis
+  marginAnalysis: RecipeMarginAnalysis
+  suggestions: RecipePricingSuggestions
+  availability: RecipeAvailability
+  pricingAlternatives: RecipePricingAlternative[]
+  recommendations: string[]
+}

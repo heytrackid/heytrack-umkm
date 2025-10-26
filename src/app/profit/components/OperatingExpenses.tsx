@@ -1,16 +1,16 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Receipt } from 'lucide-react'
-import type { OperatingExpense, ProfitSummary } from '../constants'
+import type { ProfitData } from './types'
 
 interface OperatingExpensesProps {
-  expenses: OperatingExpense[]
-  summary: ProfitSummary | null
+  operating_expenses: ProfitData['operating_expenses']
+  summary: ProfitData['summary']
   formatCurrency: (amount: number) => string
 }
 
 export function OperatingExpenses({
-  expenses,
+  operating_expenses,
   summary,
   formatCurrency
 }: OperatingExpensesProps) {
@@ -24,7 +24,7 @@ export function OperatingExpenses({
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {(expenses || []).map((expense, index) => (
+          {(operating_expenses || []).map((expense, index) => (
             <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
@@ -40,7 +40,7 @@ export function OperatingExpenses({
           <div className="flex items-center justify-between py-3 border-t-2 font-bold">
             <span>Total Biaya Operasional</span>
             <span className="text-lg text-red-600">
-              {formatCurrency(summary?.total_operating_expenses || 0)}
+              {formatCurrency(summary.total_operating_expenses)}
             </span>
           </div>
         </div>

@@ -1,7 +1,8 @@
 import { hppAutomation, triggerIngredientPriceUpdate, updateOperationalCosts } from '@/lib/automation/hpp-automation'
-import { getErrorMessage, isRecord } from '@/lib/type-guards'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { getErrorMessage, isObject } from '@/lib/type-guards'
+import { createServiceRoleClient } from '@/utils/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { HPPAutomationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     // Validate request body
     const validatedData = await validateRequestOrRespond(request, HPPAutomationSchema)
-    if (validatedData instanceof NextResponse) return validatedData
+    if (validatedData instanceof NextResponse) {return validatedData}
 
     const { action: event, recipe_ids, force } = validatedData
     const data = { recipe_ids, force }
@@ -103,7 +104,7 @@ export async function GET(request: NextRequest) {
 // Handler Functions
 
 async function handleIngredientPriceChange(data: any) {
-  if (!isRecord(data)) {
+  if (!isObject(data)) {
     throw new Error('Invalid data format: expected object')
   }
 
@@ -122,7 +123,7 @@ async function handleIngredientPriceChange(data: any) {
   await triggerIngredientPriceUpdate(ingredientId, oldPrice, newPrice)
 
   // Update ingredient price in database
-  const supabase = createServerSupabaseAdmin()
+  const supabase = createServiceRoleClient()
 
   // @ts-ignore
     const { error: updateError } = await supabase
@@ -150,7 +151,7 @@ async function handleIngredientPriceChange(data: any) {
 }
 
 async function handleOperationalCostChange(data: any) {
-  if (!isRecord(data)) {
+  if (!isObject(data)) {
     throw new Error('Invalid data format: expected object')
   }
 
@@ -181,7 +182,7 @@ async function handleOperationalCostChange(data: any) {
 }
 
 async function handleRecipeHPPCalculation(data: any) {
-  if (!isRecord(data)) {
+  if (!isObject(data)) {
     throw new Error('Invalid data format: expected object')
   }
 
@@ -217,7 +218,7 @@ async function handleRecipeHPPCalculation(data: any) {
 }
 
 async function handleBatchHPPRecalculation(data: any) {
-  if (!isRecord(data)) {
+  if (!isObject(data)) {
     throw new Error('Invalid data format: expected object')
   }
 
@@ -230,7 +231,7 @@ async function handleBatchHPPRecalculation(data: any) {
   apiLogger.info({ reason }, '🔄 Processing batch HPP recalculation')
 
   // Get all recipe IDs from database
-  const supabase = createServerSupabaseAdmin()
+  const supabase = createServiceRoleClient()
 
   const { data: recipes, error } = await supabase
     .from('recipes')

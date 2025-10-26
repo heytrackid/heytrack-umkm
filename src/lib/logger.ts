@@ -49,6 +49,8 @@ export const cronLogger = createLogger('Cron')
 export const automationLogger = createLogger('Automation')
 export const uiLogger = createLogger('UI')
 export const middlewareLogger = createLogger('Middleware')
+export const productionLogger = createLogger('ProductionService')
+export const inventoryLogger = createLogger('InventoryService')
 
 // Default export
 export default logger

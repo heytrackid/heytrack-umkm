@@ -48,7 +48,7 @@ export function calculateOrderTotals(orderItems: OrderItemWithPrice[], discount:
  * Get payment status from amounts
  */
 export function getPaymentStatus(totalAmount: number, paidAmount: number): string {
-  if (paidAmount >= totalAmount) return 'PAID'
-  if (paidAmount > 0) return 'PARTIAL'
+  if (paidAmount >= totalAmount) {return 'PAID'}
+  if (paidAmount > 0) {return 'PARTIAL'}
   return 'UNPAID'
 }

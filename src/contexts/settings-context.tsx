@@ -4,20 +4,20 @@ import * as React from 'react'
 import { createContext, useContext, useState, useEffect } from 'react'
 import { uiLogger } from '@/lib/logger'
 
-interface Currency {
+export interface Currency {
   code: string
   symbol: string
   name: string
   decimals: number
 }
 
-interface Language {
+export interface Language {
   code: string
   name: string
   flag: string
 }
 
-interface Settings {
+export interface Settings {
   currency: Currency
   language: Language
 }

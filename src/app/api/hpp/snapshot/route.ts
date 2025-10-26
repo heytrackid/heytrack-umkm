@@ -1,8 +1,8 @@
-import { detectHPPAlerts, saveAlerts } from '@/lib/hpp-alert-detector'
+import { detectHPPAlerts, takeSnapshot } from '@/lib/hpp'
 import { getErrorMessage } from '@/lib/type-guards'
-import { createSnapshot } from '@/lib/hpp-snapshot-manager'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { HPPSnapshotSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
@@ -12,24 +12,24 @@ export async function POST(request: NextRequest) {
     try {
         // Validate request body
         const validatedData = await validateRequestOrRespond(request, HPPSnapshotSchema)
-        if (validatedData instanceof NextResponse) return validatedData
+        if (validatedData instanceof NextResponse) {return validatedData}
 
         const { recipe_ids, user_id } = validatedData
         const recipe_id = recipe_ids?.[0] // Support single recipe for backward compatibility
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         let recipeIds: string[] = []
 
         // If recipe_id provided, snapshot only that recipe
-        if (recipe_id) {
+        if (recipe_id && typeof recipe_id === 'string') {
             recipeIds = [recipe_id]
         } else {
             // Otherwise, snapshot all active recipes for the user
             const { data: recipes, error: recipesError } = await supabase
                 .from('recipes')
                 .select('id')
-                .eq('user_id', user_id)
+                .eq('user_id', user_id || '')
                 .eq('is_active', true)
 
             if (recipesError) {
@@ -65,17 +65,8 @@ export async function POST(request: NextRequest) {
             // Process batch
             for (const id of batch) {
                 try {
-                    // Get recipe selling price
-                    const { data: recipe } = await supabase
-                        .from('recipes')
-                        .select('selling_price')
-                        .eq('id', id)
-                        .single()
-
-                    const sellingPrice = recipe ? (recipe.selling_price || undefined) : undefined
-
                     // Create snapshot
-                    await createSnapshot(id, user_id, sellingPrice)
+                    await takeSnapshot(id, user_id || '')
                     totalSnapshotsCreated++
 
                 } catch (error: unknown) {
@@ -96,11 +87,8 @@ export async function POST(request: NextRequest) {
         // Trigger alert detection after snapshots are created
         let alertsGenerated = 0
         try {
-            const alertResult = await detectHPPAlerts(user_id, recipe_id)
-
-            // Save alerts to database
-            if (alertResult.alerts.length > 0) {
-                await saveAlerts(alertResult.alerts)
+            if (user_id) {
+                const alertResult = await detectHPPAlerts(user_id)
                 alertsGenerated = alertResult.alerts.length
             }
         } catch (error: unknown) {
@@ -137,14 +125,14 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const userId = searchParams.get('user_id')
 
-        if (!userId) {
+        if (!userId || typeof userId !== 'string') {
             return NextResponse.json(
                 { error: 'Missing required parameter: user_id' },
                 { status: 400 }
             )
         }
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Get latest snapshot date
         const { data: latestSnapshot } = await supabase

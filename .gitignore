@@ -99,3 +99,6 @@ supabase/.temp/
 
 # Vercel
 .vercel
+
+.gemini/
+gha-creds-*.json

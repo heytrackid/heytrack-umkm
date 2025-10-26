@@ -1,4 +1,6 @@
-import { Database } from '@/types'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+import type { Database } from '@/types'
 
 // Database types
 export type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -7,6 +9,12 @@ export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients'
 
 // Configuration for automation rules
 export interface AutomationConfig {
+  // General settings
+  enabled: boolean
+  maxConcurrentJobs: number
+  retryAttempts: number
+  notificationEnabled: boolean
+
   // Pricing automation
   defaultProfitMargin: number // e.g., 60% 
   minimumProfitMargin: number // e.g., 30%
@@ -182,14 +190,35 @@ export interface SmartNotification {
   data?: any
 }
 
-// Order types for automation
-export interface OrderForProduction {
-  recipe_id: string
-  quantity: number
-  delivery_date: string
+// Event types untuk automation triggers
+export type WorkflowEvent =
+  | 'order.status_changed'
+  | 'order.completed'
+  | 'order.cancelled'
+  | 'inventory.low_stock'
+  | 'inventory.out_of_stock'
+  | 'production.batch_completed'
+  | 'ingredient.price_changed'
+  | 'operational_cost.changed'
+  | 'hpp.recalculation_needed'
+
+export interface WorkflowEventData {
+  event: WorkflowEvent
+  entityId: string
+  data: unknown
+  timestamp: string
 }
 
-export interface OrderForNotification {
-  delivery_date: string
-  status: string
+export interface WorkflowResult {
+  success: boolean
+  message: string
+  data?: any
+  error?: string
+}
+
+export interface WorkflowContext {
+  event: WorkflowEventData
+  supabase: SupabaseClient<Database> | null
+  logger: any // Logger instance
+  config: AutomationConfig
 }

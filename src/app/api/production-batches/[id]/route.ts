@@ -1,4 +1,4 @@
-import { createSupabaseClient } from '@/lib/supabase';
+import { createClient as createSupabaseClient } from '@/utils/supabase';
 import { NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/type-guards';
 
@@ -19,7 +19,7 @@ export async function GET(
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(batch);
   } catch (error: unknown) {
@@ -51,7 +51,7 @@ export async function PUT(
       `)
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(batch);
   } catch (error: unknown) {
@@ -72,7 +72,7 @@ export async function DELETE(
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json({ message: 'Production log deleted successfully' });
   } catch (error: unknown) {

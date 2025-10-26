@@ -1,7 +1,8 @@
 'use client'
 import * as React from 'react'
 
-import { lazy, Suspense, ComponentType, useState, useEffect } from 'react'
+import type { ComponentType} from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 

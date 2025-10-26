@@ -1929,6 +1929,75 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_history: {
+        Row: {
+          id: string
+          user_id: string
+          session_id: string
+          role: string
+          content: string
+          context: Json | null
+          metadata: Json | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          session_id: string
+          role: string
+          content: string
+          context?: Json | null
+          metadata?: Json | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          session_id?: string
+          role?: string
+          content?: string
+          context?: Json | null
+          metadata?: Json | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      conversation_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          title: string | null
+          last_message_at: string | null
+          message_count: number | null
+          context_summary: Json | null
+          is_active: boolean | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title?: string | null
+          last_message_at?: string | null
+          message_count?: number | null
+          context_summary?: Json | null
+          is_active?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string | null
+          last_message_at?: string | null
+          message_count?: number | null
+          context_summary?: Json | null
+          is_active?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       analyze_inventory_needs: {

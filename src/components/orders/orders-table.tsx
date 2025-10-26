@@ -307,7 +307,7 @@ const OrdersTable = ({
                   checked={isAllSelected}
                   onCheckedChange={handleSelectAll}
                   ref={(el) => {
-                    if (el) el.indeterminate = isIndeterminate
+                    if (el) {el.indeterminate = isIndeterminate}
                   }}
                 />
               </TableHead>

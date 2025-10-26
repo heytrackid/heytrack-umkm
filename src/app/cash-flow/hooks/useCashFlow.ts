@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useLoading } from '@/hooks/loading/useLoading'
 
 import { apiLogger } from '@/lib/logger'
-import { toast } from 'sonner'
 // Types and constants embedded in hook file for now
 export interface Transaction {
   id: string
@@ -73,8 +73,8 @@ const expenseCategories = [
 function calculateDateRange(period: PeriodType, startDate?: string, endDate?: string) {
   const today = new Date()
   let calculatedStartDate = startDate
-  let calculatedEndDate = endDate || today.toISOString().split('T')[0]
-  
+  const calculatedEndDate = endDate || today.toISOString().split('T')[0]
+
   if (!startDate) {
     if (period === 'week') {
       const weekAgo = new Date(today)
@@ -91,17 +91,17 @@ function calculateDateRange(period: PeriodType, startDate?: string, endDate?: st
 }
 
 function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
-  if (!transactions || transactions.length === 0) return []
-  
+  if (!transactions || transactions.length === 0) {return []}
+
   const dataByDate: Record<string, { date: string; income: number; expense: number; net: number }> = {}
-  
+
   transactions.forEach(transaction => {
     const date = new Date(transaction.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })
-    
+
     if (!dataByDate[date]) {
       dataByDate[date] = { date, income: 0, expense: 0, net: 0 }
     }
-    
+
     if (transaction.type === 'income') {
       dataByDate[date].income += transaction.amount
     } else {
@@ -109,7 +109,7 @@ function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
     }
     dataByDate[date].net = dataByDate[date].income - dataByDate[date].expense
   })
-  
+
   return Object.values(dataByDate).sort((a, b) => {
     return a.date.localeCompare(b.date)
   }).slice(-14)
@@ -239,8 +239,8 @@ export function useCashFlow(): UseCashFlowReturn {
       )
 
       const params = new URLSearchParams()
-      if (calculatedStartDate) params.append('start_date', calculatedStartDate)
-      if (calculatedEndDate) params.append('end_date', calculatedEndDate)
+      if (calculatedStartDate) {params.append('start_date', calculatedStartDate)}
+      if (calculatedEndDate) {params.append('end_date', calculatedEndDate)}
 
       const response = await fetch(`/api/reports/cash-flow?${params.toString()}`)
 
@@ -250,9 +250,9 @@ export function useCashFlow(): UseCashFlowReturn {
 
       const data = await response.json()
       setCashFlowData(data)
-    } catch (err: any) {
+    } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error fetching cash flow data:')
-      setError(err.message || 'Terjadi kesalahan saat mengambil data')
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
     }
@@ -262,13 +262,13 @@ export function useCashFlow(): UseCashFlowReturn {
   const handleAddTransaction = async () => {
     const validation = validateTransactionForm(formData)
     if (!validation.isValid) {
-      toast.error(validation.errors.join(', '))
+      alert(validation.errors.join('\n'))
       return
     }
 
     const amount = parseFloat(formData.amount)
     if (isNaN(amount) || amount <= 0) {
-      toast.error('Jumlah harus lebih dari 0')
+      alert('Jumlah harus lebih dari 0')
       return
     }
 
@@ -288,7 +288,7 @@ export function useCashFlow(): UseCashFlowReturn {
           })
         })
 
-        if (!response.ok) throw new Error('Gagal menyimpan pengeluaran')
+        if (!response.ok) {throw new Error('Gagal menyimpan pengeluaran')}
       } else {
         // Save to income/sales table (would need to implement based on your API)
         // For now, we'll assume income goes to a sales endpoint
@@ -303,7 +303,7 @@ export function useCashFlow(): UseCashFlowReturn {
           })
         })
 
-        if (!response.ok) throw new Error('Gagal menyimpan pemasukan')
+        if (!response.ok) {throw new Error('Gagal menyimpan pemasukan')}
       }
 
       // Reset form
@@ -318,9 +318,9 @@ export function useCashFlow(): UseCashFlowReturn {
       // Refresh data
       await fetchCashFlowData()
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error adding transaction:')
-      alert('Gagal menambah transaksi: ' + err.message)
+      alert('Gagal menambah transaksi: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -328,7 +328,7 @@ export function useCashFlow(): UseCashFlowReturn {
 
   // Handle delete transaction
   const handleDeleteTransaction = async (transaction: Transaction) => {
-    if (!confirm(`Hapus transaksi "${transaction.description}"?`)) return
+    if (!confirm(`Hapus transaksi "${transaction.description}"?`)) {return}
 
     try {
       setLoading(true)
@@ -338,13 +338,13 @@ export function useCashFlow(): UseCashFlowReturn {
           method: 'DELETE'
         })
 
-        if (!response.ok) throw new Error('Gagal menghapus transaksi')
+        if (!response.ok) {throw new Error('Gagal menghapus transaksi')}
       }
 
       await fetchCashFlowData()
-    } catch (err: any) {
+    } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error deleting transaction:')
-      alert('Gagal menghapus transaksi: ' + err.message)
+      alert('Gagal menghapus transaksi: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -352,7 +352,7 @@ export function useCashFlow(): UseCashFlowReturn {
 
   // Handle export report
   const exportReport = async (format: 'csv') => {
-    if (!cashFlowData) return
+    if (!cashFlowData) {return}
 
     try {
       const filename = `arus-kas-${new Date().toISOString().split('T')[0]}.${format}`
@@ -411,5 +411,5 @@ export function useCashFlow(): UseCashFlowReturn {
 }
 
 // Export constants and utility functions for use in components
-export { calculateDateRange, expenseCategories, incomeCategories, prepareChartData, validateTransactionForm }
+export { incomeCategories, expenseCategories, calculateDateRange, prepareChartData, validateTransactionForm }
 

@@ -25,7 +25,8 @@ import {
   Package,
   AlertCircle
 } from 'lucide-react'
-import { FormSkeleton, CardSkeleton } from '@/components/ui'
+import { StepSkeleton } from '@/components/ui/StepSkeleton'
+import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
 // Import hooks
 import { useOrderLogic } from './hooks/useOrderLogic'
@@ -58,7 +59,7 @@ const OrderDeliveryStep = dynamic(
 const OrderPaymentStep = dynamic(
   () => import('./_components/OrderPaymentStep'),
   { 
-    loading: () => <FormSkeleton fields={4} />,
+    loading: () => <OrderFormSkeleton />,
     ssr: false
   }
 )
@@ -66,7 +67,7 @@ const OrderPaymentStep = dynamic(
 const OrderSummary = dynamic(
   () => import('./_components/OrderSummary'),
   { 
-    loading: () => <CardSkeleton rows={4} />,
+    loading: () => <OrderFormSkeleton />,
     ssr: false
   }
 )
@@ -107,7 +108,7 @@ export default function NewOrderPage() {
   if (loading) {
     return (
       <AppLayout>
-        <FormSkeleton fields={6} hasSubmit />
+        <OrderFormSkeleton />
       </AppLayout>
     )
   }

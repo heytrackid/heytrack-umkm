@@ -1,7 +1,8 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { getErrorMessage } from '@/lib/type-guards'
-import { HPPTrendData, TimePeriod } from '@/types/hpp-tracking'
-import { NextRequest, NextResponse } from 'next/server'
+import type { HPPTrendData, TimePeriod } from '@/types/hpp-tracking'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/trends - Get HPP trend data for multiple recipes
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
         // Calculate date range
         const dateRange = calculateDateRange(period)
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Get recipe names
         const { data: recipes, error: recipesError } = await supabase

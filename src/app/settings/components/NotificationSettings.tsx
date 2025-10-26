@@ -4,26 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Bell } from 'lucide-react'
-
-interface NotificationSettings {
-  emailNotifications?: boolean
-  pushNotifications?: boolean
-  lowStockAlert?: boolean
-  orderUpdates?: boolean
-  dailyReports?: boolean
-  weeklyReports?: boolean
-  monthlyReports?: boolean
-  [key: string]: unknown
-}
-
-interface GeneralSettings {
-  notifications?: NotificationSettings
-  [key: string]: unknown
-}
+import type { AppSettingsState, SettingsUpdateHandler } from '../types'
 
 interface NotificationSettingsProps {
-  settings: GeneralSettings
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**
@@ -47,7 +32,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.emailNotifications}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'emailNotifications', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'emailNotifications', checked)
+            }
           />
         </div>
         <Separator />
@@ -58,7 +45,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.pushNotifications}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'pushNotifications', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'pushNotifications', checked)
+            }
           />
         </div>
         <Separator />
@@ -69,7 +58,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.lowStockAlert}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'lowStockAlert', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'lowStockAlert', checked)
+            }
           />
         </div>
         <Separator />
@@ -80,7 +71,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.orderUpdates}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'orderUpdates', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'orderUpdates', checked)
+            }
           />
         </div>
         <Separator />
@@ -91,7 +84,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.dailyReports}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'dailyReports', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'dailyReports', checked)
+            }
           />
         </div>
         <Separator />
@@ -102,7 +97,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.weeklyReports}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'weeklyReports', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'weeklyReports', checked)
+            }
           />
         </div>
         <Separator />
@@ -113,7 +110,9 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
           </div>
           <Switch
             checked={settings.notifications.monthlyReports}
-            onCheckedChange={(checked) => onSettingChange('notifications', 'monthlyReports', checked)}
+            onCheckedChange={(checked) =>
+              onSettingChange('notifications', 'monthlyReports', checked)
+            }
           />
         </div>
       </CardContent>

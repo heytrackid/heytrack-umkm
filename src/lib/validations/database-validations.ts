@@ -27,7 +27,7 @@ export const CustomerInsertSchema = z.object({
   notes: z.string().max(1000).optional().nullable(),
   is_active: z.boolean().default(true).optional().nullable(),
   loyalty_points: NonNegativeNumberSchema.default(0).optional().nullable(),
-  favorite_items: z.any().optional().nullable(),
+  favorite_items: z.array(z.string()).optional().nullable(),
 })
 
 export const CustomerUpdateSchema = CustomerInsertSchema.partial()

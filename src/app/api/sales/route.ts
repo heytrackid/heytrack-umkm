@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/type-guards'
-import { createSupabaseClient } from '@/lib/supabase';
+import { createClient as createSupabaseClient } from '@/utils/supabase';
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations';
 import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
 import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
@@ -29,7 +30,8 @@ export async function GET(request: NextRequest) {
     start_date: searchParams.get('start_date'),
     end_date: searchParams.get('end_date'),
     recipe_id: searchParams.get('recipe_id'),
-    customer_name: searchParams.get('customer_name'),
+    period: searchParams.get('period') || 'monthly',
+    include_trends: searchParams.get('include_trends') === 'true',
   })
 
   if (!salesQueryValidation.success) {
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { page, limit, search, sort_by, sort_order } = paginationValidation.data
-  const { start_date, end_date, recipe_id, customer_name } = salesQueryValidation.data
+  const { start_date, end_date, recipe_id } = salesQueryValidation.data
 
   try {
     const supabase = createSupabaseClient();
@@ -73,10 +75,6 @@ export async function GET(request: NextRequest) {
       query = query.eq('recipe_id', recipe_id)
     }
 
-    if (customer_name) {
-      query = query.ilike('customer_name', `%${customer_name}%`)
-    }
-
     // Add sorting
     const sortField = sort_by || 'date'
     const sortDirection = sort_order === 'asc'
@@ -84,7 +82,7 @@ export async function GET(request: NextRequest) {
 
     const { data: sales, error } = await query
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     // Get total count
     let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME')
@@ -102,9 +100,6 @@ export async function GET(request: NextRequest) {
     if (recipe_id) {
       countQuery = countQuery.eq('recipe_id', recipe_id)
     }
-    if (customer_name) {
-      countQuery = countQuery.ilike('customer_name', `%${customer_name}%`)
-    }
 
     const { count } = await countQuery
 
@@ -113,8 +108,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count,
-        totalPages: Math.ceil(count / limit)
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit)
       }
     });
   } catch (error: unknown) {
@@ -149,7 +144,7 @@ export async function POST(request: Request) {
       `)
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(sale, { status: 201 });
   } catch (error: unknown) {

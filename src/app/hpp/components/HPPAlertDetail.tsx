@@ -13,14 +13,8 @@ import {
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { formatCurrentCurrency } from '@/lib/currency'
-import { HPPAlert } from '@/types/hpp-tracking'
-import {
-    formatChangePercentage,
-    formatTimeAgo,
-    getAlertTypeLabel,
-    getSeverityColors,
-    getSeverityLabel
-} from '@/utils/hpp-alert-helpers'
+import type { HPPAlert } from '@/types/hpp-tracking'
+import { HPPUtils } from '@/lib/hpp'
 import { AlertCircle, AlertTriangle, ArrowRight, DollarSign, Info, TrendingDown, TrendingUp } from 'lucide-react'
 
 interface HPPAlertDetailProps {
@@ -32,7 +26,7 @@ interface HPPAlertDetailProps {
 
 // Helper function to get severity config - using utility
 const getSeverityConfig = (severity: HPPAlert['severity']) => {
-    const colors = getSeverityColors(severity)
+    const colors = HPPUtils.getSeverityColors(severity)
     const icon = severity === 'critical' ? AlertCircle : severity === 'high' ? AlertTriangle : Info
     const bgColor = severity === 'critical' || severity === 'high' ? 'bg-destructive/10' :
         severity === 'medium' ? 'bg-primary/10' : 'bg-secondary/10'
@@ -40,7 +34,7 @@ const getSeverityConfig = (severity: HPPAlert['severity']) => {
     return {
         color: colors.badgeVariant,
         icon,
-        label: getSeverityLabel(severity),
+        label: HPPUtils.getSeverityLabel(severity),
         bgColor
     }
 }
@@ -60,7 +54,7 @@ const getAlertTypeConfig = (alertType: HPPAlert['alert_type']) => {
 
     return {
         icon,
-        label: getAlertTypeLabel(alertType),
+        label: HPPUtils.getAlertTypeLabel(alertType),
         description: descriptions[alertType]
     }
 }
@@ -143,7 +137,7 @@ export function HPPAlertDetail({ alert, open, onOpenChange, onDismiss }: HPPAler
                                             {formatCurrentCurrency(Math.abs(alert.new_value - alert.old_value))}
                                         </div>
                                         <div className={`text-sm font-medium ${isIncrease ? 'text-destructive' : 'text-green-600'}`}>
-                                            {formatChangePercentage(changePercentage)}
+                                            {HPPUtils.formatChangePercentage(changePercentage)}
                                         </div>
                                     </div>
                                 </div>
@@ -215,7 +209,7 @@ export function HPPAlertDetail({ alert, open, onOpenChange, onDismiss }: HPPAler
 
                     {/* Timestamp */}
                     <div className="text-xs text-muted-foreground text-center">
-                        Alert dibuat {formatTimeAgo(alert.created_at)}
+                        Alert dibuat {HPPUtils.formatTimeAgo(alert.created_at)}
                     </div>
                 </div>
 

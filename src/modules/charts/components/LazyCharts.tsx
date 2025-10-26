@@ -181,7 +181,7 @@ export const ChartPerformanceUtils = {
 
   // Optimize data for rendering
   optimizeChartData: (data: unknown[], maxPoints = 50) => {
-    if (data.length <= maxPoints) return data
+    if (data.length <= maxPoints) {return data}
     
     // Sample data points to reduce rendering load
     const step = Math.ceil(data.length / maxPoints)

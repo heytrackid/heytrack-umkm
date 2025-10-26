@@ -32,11 +32,11 @@ export default function RecipeStats({
     
     // Calculate average HPP
     const totalHPP = recipes.reduce((sum, recipe) => {
-      if (!recipe.recipe_ingredients || !ingredients) return sum
+      if (!recipe.recipe_ingredients || !ingredients) {return sum}
       
       const hpp = recipe.recipe_ingredients.reduce((total: number, ri: any) => {
         const ingredient = ingredients.find(ing => ing.id === ri.ingredient_id)
-        if (!ingredient) return total
+        if (!ingredient) {return total}
         return total + (ingredient.price_per_unit * ri.quantity)
       }, 0)
       

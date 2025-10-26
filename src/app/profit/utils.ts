@@ -6,7 +6,7 @@ import type { ProfitData, ProfitPeriodType, ChartDataPoint } from './constants'
 export function calculateProfitDateRange(period: ProfitPeriodType, startDate?: string, endDate?: string) {
   const today = new Date()
   let calculatedStartDate = startDate
-  let calculatedEndDate = endDate || today.toISOString().split('T')[0]
+  const calculatedEndDate = endDate || today.toISOString().split('T')[0]
 
   if (!startDate) {
     if (period === 'week') {
@@ -28,7 +28,7 @@ export function calculateProfitDateRange(period: ProfitPeriodType, startDate?: s
  * Prepare chart data for product profitability
  */
 export function prepareProductChartData(products: ProfitData['products']): ChartDataPoint[] {
-  if (!products || products.length === 0) return []
+  if (!products || products.length === 0) {return []}
 
   return products
     .slice(0, 10) // Top 10 products
@@ -81,7 +81,7 @@ export function validateProfitData(data: ProfitData): boolean {
  * Export profit report to various formats
  */
 export function exportProfitReport(data: ProfitData, format: 'csv' | 'pdf' | 'xlsx', filename: string) {
-  if (!data) return
+  if (!data) {return}
 
   // For CSV export
   if (format === 'csv') {

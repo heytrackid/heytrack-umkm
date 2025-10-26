@@ -1,7 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/utils/supabase/client'
 
 import { apiLogger } from '@/lib/logger'
 // Dashboard stats type
@@ -85,7 +85,7 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
 
-    if (todayError) throw todayError
+    if (todayError) {throw todayError}
 
     const { data: weeklyOrders, error: weeklyError } = await supabase
       .from('orders')
@@ -93,21 +93,21 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       .gte('created_at', weekStart.toISOString())
       .lt('created_at', todayEnd.toISOString())
 
-    if (weeklyError) throw weeklyError
+    if (weeklyError) {throw weeklyError}
 
     // Fetch customers
     const { data: customers, error: customersError } = await supabase
       .from('customers')
       .select('*')
 
-    if (customersError) throw customersError
+    if (customersError) {throw customersError}
 
     // Fetch inventory with low stock
     const { data: inventory, error: inventoryError } = await supabase
       .from('ingredients')
       .select('*')
 
-    if (inventoryError) throw inventoryError
+    if (inventoryError) {throw inventoryError}
 
     // Calculate stats
     const todayRevenue = todayOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
@@ -205,7 +205,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
         .gte('created_at', dayStart.toISOString())
         .lt('created_at', dayEnd.toISOString())
 
-      if (error) throw error
+      if (error) {throw error}
 
       const revenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
       

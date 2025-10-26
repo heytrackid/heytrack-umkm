@@ -1,19 +1,20 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 interface FinancialTransaction {
   id: string
   reference_id?: string
-  date: string
+  date: string | null
   description: string
   category: string
   subcategory?: string
   amount: string | number
   type: string
   user_id: string
-  created_at: string
-  reference?: string
+  created_at: string | null
+  reference?: string | null
 }
 
 interface PeriodCashFlow {
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || 'daily'
     const compare = searchParams.get('compare') === 'true'
 
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
 
     // Get all transactions (income and expenses) within date range
     const { data: transactions, error: transError } = await supabase
@@ -86,8 +87,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Separate income and expenses
-    const income = transactions?.filter((t: FinancialTransaction) => (t as any).category === 'Revenue') || []
-    const expenses = transactions?.filter((t: FinancialTransaction) => (t as any).category !== 'Revenue') || []
+    const validTransactions = (transactions || []).filter((t: any) => t.date !== null) as FinancialTransaction[]
+    const income = validTransactions.filter((t: FinancialTransaction) => (t as any).category === 'Revenue')
+    const expenses = validTransactions.filter((t: FinancialTransaction) => (t as any).category !== 'Revenue')
 
     // Calculate totals
     const totalIncome = income.reduce((sum: number, t: FinancialTransaction) => sum + Number((t as any).amount), 0)
@@ -95,10 +97,10 @@ export async function GET(request: NextRequest) {
     const netCashFlow = totalIncome - totalExpenses
 
     // Group by period
-    const cashFlowByPeriod = groupByPeriod(transactions || [], period)
+    const cashFlowByPeriod = groupByPeriod(validTransactions, period)
 
     // Category breakdown
-    const categoryBreakdown = calculateCategoryBreakdown(transactions || [])
+    const categoryBreakdown = calculateCategoryBreakdown(validTransactions)
 
     // Trend analysis
     const trend = calculateTrend(cashFlowByPeriod)
@@ -110,15 +112,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform transactions for frontend
-    const transactionsList = transactions?.map((t: FinancialTransaction) => ({
+    const transactionsList = validTransactions.map((t: FinancialTransaction) => ({
       id: (t as any).id,
       reference_id: t.reference_id || (t as any).id,
-      date: t.date,
+      date: t.date || '',
       description: (t as any).description,
       category: (t as any).category === 'Revenue' ? (t.subcategory || 'Penjualan Produk') : (t as any).category,
       amount: Number(t.amount),
       type: (t as any).category === 'Revenue' ? 'income' : 'expense'
-    })) || []
+    }))
 
     // Build response
     const response = {
@@ -295,7 +297,7 @@ function calculateTrend(cashFlowByPeriod: unknown[]) {
 }
 
 // Helper: Calculate comparison with previous period
-async function calculateComparison(supabase: ReturnType<typeof createServerSupabaseAdmin>, startDate: string, endDate: string, period: string) {
+async function calculateComparison(supabase: ReturnType<typeof createServiceRoleClient>, startDate: string, endDate: string, period: string) {
   // Remove unused period parameter
   const start = new Date(startDate)
   const end = new Date(endDate)

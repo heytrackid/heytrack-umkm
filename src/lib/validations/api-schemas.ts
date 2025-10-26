@@ -273,6 +273,7 @@ export const AutomationTaskSchema = z.object({
 
 export const ErrorLogSchema = z.object({
   message: z.string().min(1),
+  url: z.string().optional(),
   stack: z.string().optional(),
   level: z.enum(['error', 'warn', 'info']).default('error'),
   context: z.record(z.any()).optional(),

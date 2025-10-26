@@ -30,7 +30,14 @@ import { uiLogger } from '@/lib/logger'
 
 interface PurchaseFormProps {
   ingredients: AvailableIngredient[]
-  onSubmit: (formData: IngredientPurchaseInsert) => void
+  onSubmit: (formData: {
+    ingredient_id: string
+    quantity: number
+    unit_price: number
+    supplier?: string
+    purchase_date?: string
+    notes?: string
+  }) => void
   onSuccess: () => void
 }
 
@@ -40,10 +47,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
   const form = useForm<IngredientPurchaseInsert>({
     resolver: zodResolver(IngredientPurchaseInsertSchema),
     defaultValues: {
-      bahan_id: '',
+      ingredient_id: '',
       supplier: '',
-      qty_beli: 0,
-      harga_satuan: 0,
+      quantity: 0,
+      unit_price: 0,
       tanggal_beli: new Date().toISOString().split('T')[0],
       catatan: ''
     }
@@ -55,10 +62,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
 
       // Reset form
       form.reset({
-        bahan_id: '',
+        ingredient_id: '',
         supplier: '',
-        qty_beli: 0,
-        harga_satuan: 0,
+        quantity: 0,
+        unit_price: 0,
         tanggal_beli: new Date().toISOString().split('T')[0],
         catatan: ''
       })
@@ -71,8 +78,8 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
     }
   }
 
-  const watchedQty = form.watch('qty_beli')
-  const watchedPrice = form.watch('harga_satuan')
+  const watchedQty = form.watch('quantity')
+  const watchedPrice = form.watch('unit_price')
   const total = watchedQty && watchedPrice ? watchedQty * watchedPrice : 0
 
   return (
@@ -94,10 +101,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
 
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="bahan_id">Bahan Baku *</Label>
+              <Label htmlFor="ingredient_id">Bahan Baku *</Label>
               <Select
-                value={form.watch('bahan_id')}
-                onValueChange={(value) => form.setValue('bahan_id', value)}
+                value={form.watch('ingredient_id')}
+                onValueChange={(value) => form.setValue('ingredient_id', value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -110,35 +117,35 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
                   ))}
                 </SelectContent>
               </Select>
-              {form.formState.errors.bahan_id && (
-                <p className="text-sm text-red-600">{form.formState.errors.bahan_id.message}</p>
+              {form.formState.errors.ingredient_id && (
+                <p className="text-sm text-red-600">{form.formState.errors.ingredient_id.message}</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="qty_beli">Jumlah *</Label>
+                <Label htmlFor="quantity">Jumlah *</Label>
                 <Input
                   id="qty_beli"
                   type="number"
                   step="0.01"
-                  {...form.register('qty_beli', { valueAsNumber: true })}
+                  {...form.register('quantity', { valueAsNumber: true })}
                 />
-                {form.formState.errors.qty_beli && (
-                  <p className="text-sm text-red-600">{form.formState.errors.qty_beli.message}</p>
+                {form.formState.errors.quantity && (
+                  <p className="text-sm text-red-600">{form.formState.errors.quantity.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="harga_satuan">Harga Satuan *</Label>
+                <Label htmlFor="unit_price">Harga Satuan *</Label>
                 <Input
-                  id="harga_satuan"
+                  id="unit_price"
                   type="number"
                   step="0.01"
-                  {...form.register('harga_satuan', { valueAsNumber: true })}
+                  {...form.register('unit_price', { valueAsNumber: true })}
                 />
-                {form.formState.errors.harga_satuan && (
-                  <p className="text-sm text-red-600">{form.formState.errors.harga_satuan.message}</p>
+                {form.formState.errors.unit_price && (
+                  <p className="text-sm text-red-600">{form.formState.errors.unit_price.message}</p>
                 )}
               </div>
             </div>
@@ -159,10 +166,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
               <Input
                 id="tanggal_beli"
                 type="date"
-                {...form.register('tanggal_beli')}
+                {...form.register('purchase_date')}
               />
-              {form.formState.errors.tanggal_beli && (
-                <p className="text-sm text-red-600">{form.formState.errors.tanggal_beli.message}</p>
+              {form.formState.errors.purchase_date && (
+                <p className="text-sm text-red-600">{form.formState.errors.purchase_date.message}</p>
               )}
             </div>
 
@@ -170,10 +177,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
               <Label htmlFor="catatan">Catatan</Label>
               <Input
                 id="catatan"
-                {...form.register('catatan')}
+                {...form.register('notes')}
               />
-              {form.formState.errors.catatan && (
-                <p className="text-sm text-red-600">{form.formState.errors.catatan.message}</p>
+              {form.formState.errors.notes && (
+                <p className="text-sm text-red-600">{form.formState.errors.notes.message}</p>
               )}
             </div>
 

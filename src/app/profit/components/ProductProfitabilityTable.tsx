@@ -1,10 +1,10 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import type { ProductProfit } from '../constants'
+import type { ProfitData } from './types'
 
 interface ProductProfitabilityTableProps {
-  products: ProductProfit[]
+  products: ProfitData['products']
   formatCurrency: (amount: number) => string
 }
 

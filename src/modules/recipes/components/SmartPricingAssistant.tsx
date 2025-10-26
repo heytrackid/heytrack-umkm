@@ -8,8 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
-import { automationEngine } from '@/lib/automation-engine'
-import { RecipeWithIngredients } from '@/types'
+
+import type { RecipeWithIngredients } from '@/types'
+import type { SmartPricingAnalysis } from '@/types/analytics'
 import { uiLogger } from '@/lib/logger'
 import {
   AlertTriangle,
@@ -28,10 +29,12 @@ interface SmartPricingAssistantProps {
 
 export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAssistantProps) {
   const { formatCurrency } = useCurrency()
-  const [analysis, setAnalysis] = useState<any>(null)
+  const [analysis, setAnalysis] = useState<SmartPricingAnalysis | null>(null)
   const [selectedTier, setSelectedTier] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)
   const [loading, setLoading] = useState(false)
+  
+  type PricingTierKey = 'economy' | 'standard' | 'premium'
 
   useEffect(() => {
     if (recipe && recipe.recipe_ingredients) {
@@ -42,19 +45,64 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
   const analyzePricing = async () => {
     setLoading(true)
     try {
-      // Simulate API call - in real app, this would call your pricing API
-      const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
+      // Call API endpoint to calculate smart pricing
+      const response = await fetch(`/api/recipes/${recipe.id}/pricing`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipe })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`)
+      }
+      
+      const pricingAnalysis = await response.json() as SmartPricingAnalysis
       setAnalysis(pricingAnalysis)
       setCustomPrice(pricingAnalysis.pricing.standard.price)
     } catch (error: unknown) {
       uiLogger.error({ err: error }, 'Error analyzing pricing')
+      // Set fallback analysis to prevent UI breaks
+      // Calculate basic analysis as fallback for now
+      if (recipe?.recipe_ingredients && recipe.recipe_ingredients.length > 0) {
+        const totalCost = recipe.recipe_ingredients.reduce((sum, ri) => sum + (ri.ingredient.price_per_unit * ri.quantity), 0)
+        const fallbackAnalysis: SmartPricingAnalysis = {
+          breakdown: {
+            ingredientCost: totalCost,
+            overheadCost: totalCost * 0.15,
+            totalCost: totalCost * 1.15,
+            costPerServing: (totalCost * 1.15) / (recipe.servings || 1)
+          },
+          pricing: {
+            economy: {
+              price: Math.ceil((totalCost * 1.15 * 1.3) / 500) * 500,
+              margin: 30,
+              positioning: 'Harga terjangkau untuk volume tinggi'
+            },
+            standard: {
+              price: Math.ceil((totalCost * 1.15 * 1.6) / 500) * 500,
+              margin: 60,
+              positioning: 'Harga optimal untuk profit maksimal'
+            },
+            premium: {
+              price: Math.ceil((totalCost * 1.15 * 2.0) / 1000) * 1000,
+              margin: 100,
+              positioning: 'Harga premium untuk positioning eksklusif'
+            }
+          },
+          recommendations: ['Gagal memuat analisis harga otomatis. Silakan coba lagi nanti.']
+        }
+        setAnalysis(fallbackAnalysis)
+        setCustomPrice(fallbackAnalysis.pricing.standard.price)
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  const handleApplyPrice = (tier: 'economy' | 'standard' | 'premium' | 'custom') => {
-    if (!analysis) return
+  const handleApplyPrice = (tier: PricingTierKey | 'custom') => {
+    if (!analysis) {return}
 
     let price: number
     let margin: number
@@ -146,12 +194,12 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
         {/* Pricing Options Tab */}
         <TabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            {Object.entries(analysis.pricing).map(([tier, data]: [string, unknown]) => (
+            {(Object.entries(analysis.pricing) as [PricingTierKey, typeof analysis.pricing.economy][]).map(([tier, data]) => (
               <Card
                 key={tier}
                 className={`cursor-pointer transition-all hover: ${selectedTier === tier ? 'ring-2 ring-primary' : ''
                   }`}
-                onClick={() => setSelectedTier(tier as any)}
+                onClick={() => setSelectedTier(tier)}
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
@@ -187,7 +235,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                     className="w-full mt-3"
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleApplyPrice(tier as any)
+                      handleApplyPrice(tier)
                     }}
                   >
                     Gunakan Harga Ini
@@ -293,7 +341,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {recipe.recipe_ingredients?.map((ri, _index) => {
+                {recipe.recipe_ingredients?.map((ri, index) => {
                   const cost = ri.ingredient.price_per_unit * ri.quantity
                   const percentage = (cost / analysis.breakdown.ingredientCost) * 100
                   return (

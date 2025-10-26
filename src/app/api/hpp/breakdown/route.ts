@@ -1,7 +1,8 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { getErrorMessage } from '@/lib/type-guards'
-import { CostBreakdown } from '@/types/hpp-tracking'
-import { NextRequest, NextResponse } from 'next/server'
+import type { CostBreakdown } from '@/types/hpp-tracking'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/breakdown - Get detailed cost breakdown for a recipe
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Get recipe name
         const { data: recipe, error: recipeError } = await supabase
@@ -98,9 +99,9 @@ export async function GET(request: NextRequest) {
         if (previousSnapshots && previousSnapshots.length > 0) {
             const previousBreakdown = (previousSnapshots[0] as any).cost_breakdown as CostBreakdown
 
-            ingredientsWithChanges = top5Ingredients.map(ingredient => {
+            ingredientsWithChanges = top5Ingredients.map((ingredient: any, _i: number) => {
                 const previousIngredient = (previousBreakdown as any).ingredients.find(
-                    i => (i as any).id === (ingredient as any).id
+                    (i: any) => (i as any).id === (ingredient as any).id
                 )
 
                 if (previousIngredient) {

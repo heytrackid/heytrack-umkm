@@ -89,8 +89,8 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   const { formatCurrency } = useCurrency();
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
-  const formatNumber = (value: number) =>
-    new Intl.NumberFormat.format;
+  const formatNumber = (value: number): string =>
+    new Intl.NumberFormat().format(value);
 
   // Financial Performance Visualization
   const FinancialChart = ({ data }: { data: FinancialData }) => {
@@ -161,7 +161,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                     <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
                     <Bar dataKey="value" fill="#8884d8">
                       {chartData.map((entry: ChartEntry, index: number) => (
-                        <Cell key={`cell-${_index}`} fill={entry.color} />
+                        <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -277,11 +277,11 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
                 <div className="text-sm text-gray-500">Total Customers</div>
               </div>
               <div>
-                <div className="text-xl font-bold">{data.summary.split('T')[1]?.split('T')[1]?.replace(')', '') || 'N/A'}</div>
+                <div className="text-xl font-bold">{data.summary ? data.summary.split('T')[1]?.split('T')[1]?.replace(')', '') || 'N/A' : 'N/A'}</div>
                 <div className="text-sm text-gray-500">Retention Rate</div>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <div className="text-xl font-bold">{data.summary.split('T')[1] || 'N/A'}</div>
+                <div className="text-xl font-bold">{data.summary ? data.summary.split('T')[1] || 'N/A' : 'N/A'}</div>
                 <div className="text-sm text-gray-500">Avg Order Value</div>
               </div>
             </div>
@@ -417,29 +417,72 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
     );
   };
 
+  // Type guards for runtime validation
+  const isFinancialData = (data: unknown): data is FinancialData => {
+    if (!data || typeof data !== 'object') {return false;}
+    return 'revenue' in data && 'costs' in data && 'profitMargin' in data;
+  };
+
+  const isInventoryData = (data: unknown): data is InventoryData => {
+    if (!data || typeof data !== 'object') {return false;}
+    return 'criticalItems' in data && 'alerts' in data && Array.isArray((data as InventoryData).criticalItems);
+  };
+
+  const isCustomerData = (data: unknown): data is CustomerData => {
+    if (!data || typeof data !== 'object') {return false;}
+    return 'topCustomers' in data && 'summary' in data && Array.isArray((data as CustomerData).topCustomers);
+  };
+
+  const isProductData = (data: unknown): data is ProductData => {
+    if (!data || typeof data !== 'object') {return false;}
+    return 'topRecipes' in data && 'recommendations' in data && Array.isArray((data as ProductData).topRecipes);
+  };
+
+  const isAnalysisData = (data: unknown): data is AnalysisData => {
+    if (!data || typeof data !== 'object') {return false;}
+    return 'analysis' in data && typeof (data as AnalysisData).analysis === 'object';
+  };
+
   // Render appropriate chart based on type
   switch (type) {
     case 'financial':
-      return <FinancialChart data={data} />;
+      if (isFinancialData(data)) {
+        return <FinancialChart data={data} />;
+      }
+      break;
     case 'inventory':
-      return <InventoryChart data={data} />;
+      if (isInventoryData(data)) {
+        return <InventoryChart data={data} />;
+      }
+      break;
     case 'customers':
-      return <CustomerChart data={data} />;
+      if (isCustomerData(data)) {
+        return <CustomerChart data={data} />;
+      }
+      break;
     case 'products':
-      return <ProductChart data={data} />;
+      if (isProductData(data)) {
+        return <ProductChart data={data} />;
+      }
+      break;
     case 'analysis':
-      return <AnalysisChart data={data} />;
+      if (isAnalysisData(data)) {
+        return <AnalysisChart data={data} />;
+      }
+      break;
     default:
-      return (
-        <Card>
-          <CardContent className="p-4">
-            <div className="text-center text-gray-500">
-              Data visualization not available for this type.
-            </div>
-          </CardContent>
-        </Card>
-      );
+      break;
   }
+
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="text-center text-gray-500">
+          Data visualization not available for this type or data validation failed.
+        </div>
+      </CardContent>
+    </Card>
+  );
 };
 
 export default DataVisualization;

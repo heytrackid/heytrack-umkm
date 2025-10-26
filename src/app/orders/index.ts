@@ -73,6 +73,6 @@ export const ORDERS_MODULE_INFO = {
   dependencies: [
     '@/hooks/useSupabaseCRUD',
     '@/hooks/useSupabaseData',
-    '@/shared/utils/currency'
+    '@/lib/shared/utils/currency'
   ]
 } as const

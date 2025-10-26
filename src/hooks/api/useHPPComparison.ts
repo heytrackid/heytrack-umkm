@@ -111,7 +111,7 @@ export const useHPPComparison = ({
 
     // Memoize expensive calculations
     const trendIndicator = useMemo(() => {
-        if (!query.data?.data) return null
+        if (!query.data?.data) {return null}
         return calculateTrendIndicator(query.data.data.change.percentage)
     }, [query.data?.data])
 

@@ -1,8 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
 
 import { apiLogger } from '@/lib/logger'
+import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 // GET /api/recipes - Get all recipes with ingredient relationships
 export async function GET(request: NextRequest) {
   try {
@@ -42,59 +44,73 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const status = searchParams.get('status')
 
-    let query = supabase
-      .from('recipes')
-      .select(`
-        *,
-        recipe_ingredients (
-          id,
-          quantity,
-          unit,
-          ingredient:ingredients (
+    // Create cache key based on query parameters
+    const cacheKey = `${cacheKeys.recipes.all}:${user.id}:${page}:${limit}:${search || ''}:${sort_by || ''}:${sort_order || ''}:${category || ''}:${status || ''}`
+
+    // Wrap database query with caching
+    const recipes = await withCache(async () => {
+      let query = supabase
+        .from('recipes')
+        .select(`
+          *,
+          recipe_ingredients (
             id,
-            name,
+            quantity,
             unit,
-            price_per_unit
+            ingredient:ingredients (
+              id,
+              name,
+              unit,
+              price_per_unit
+            )
           )
-        )
-      `)
-      .eq('created_by', (user as any).id)
+        `)
+        .eq('created_by', (user as any).id)
 
-    // Add search filter
-    if (search) {
-      query = query.ilike('name', `%${search}%`)
-    }
+      // Add search filter
+      if (search) {
+        query = query.ilike('name', `%${search}%`)
+      }
 
-    // Add category filter
-    if (category) {
-      query = query.ilike('category', `%${category}%`)
-    }
+      // Add category filter
+      if (category) {
+        query = query.ilike('category', `%${category}%`)
+      }
 
-    // Add status filter
-    if (status) {
-      query = query.eq('status', status)
-    }
+      // Add status filter
+      if (status) {
+        query = query.eq('status', status)
+      }
 
-    // Add sorting
-    const sortField = sort_by || 'name'
-    const sortDirection = sort_order === 'asc'
-    query = query.order(sortField, { ascending: sortDirection })
+      // Add sorting
+      const sortField = sort_by || 'name'
+      const sortDirection = sort_order === 'asc'
+      query = query.order(sortField, { ascending: sortDirection })
 
-    // Add pagination
-    const offset = (page - 1) * limit
-    query = query.range(offset, offset + limit - 1)
+      // Add pagination
+      const offset = (page - 1) * limit
+      query = query.range(offset, offset + limit - 1)
 
-    const { data: recipes, error } = await query
+      const { data: recipes, error } = await query
 
-    if (error) {
-      apiLogger.error({ error: error }, 'Error fetching recipes:')
-      return NextResponse.json(
-        { error: 'Failed to fetch recipes' },
-        { status: 500 }
-      )
-    }
+      if (error) {
+        throw new Error(`Database error: ${error.message}`)
+      }
+
+      return recipes
+    }, cacheKey, 10 * 60 * 1000) // Cache for 10 minutes
+
+    apiLogger.info({
+      userId: user.id,
+      cached: true,
+      page,
+      limit,
+      search: search || '',
+      resultCount: recipes?.length || 0
+    }, 'Recipes fetched (cached)')
 
     return NextResponse.json(recipes)
+
   } catch (error: unknown) {
     apiLogger.error({ error: error }, 'Error in GET /api/recipes:')
     return NextResponse.json(
@@ -204,6 +220,9 @@ export async function POST(request: NextRequest) {
       apiLogger.error({ error: fetchError }, 'Error fetching complete recipe:')
       return NextResponse.json(recipe, { status: 201 })
     }
+
+    // Invalidate cache after successful creation
+    cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe, { status: 201 })
   } catch (error: unknown) {

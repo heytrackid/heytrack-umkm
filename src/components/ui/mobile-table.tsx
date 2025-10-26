@@ -101,7 +101,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
 
   // Filter data based on search query
   const filteredData = React.useMemo(() => {
-    if (!searchQuery) return data
+    if (!searchQuery) {return data}
     
     return data.filter(item =>
       columns.some(col => {
@@ -148,7 +148,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
 
   // Render search bar
   const renderSearchBar = () => {
-    if (!searchable) return null
+    if (!searchable) {return null}
     
     return (
       <div className="mb-4">
@@ -167,7 +167,7 @@ export const MobileTable = memo(function MobileTable<T extends Record<string, an
 
   // Render sort indicator
   const renderSortIndicator = (column: MobileTableColumn<T>) => {
-    if (!sortable || !column.sortable) return null
+    if (!sortable || !column.sortable) {return null}
     
     if (sortKey === column.key) {
       return sortDirection === 'asc' ? 

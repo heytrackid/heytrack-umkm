@@ -42,12 +42,12 @@ export default function CostForm({
   const form = useForm<OperationalCostForm>({
     resolver: zodResolver(OperationalCostFormSchema),
     defaultValues: cost || {
+      name: '',
       category: '',
       description: '',
       amount: 0,
-      cost_date: new Date().toISOString().split('T')[0],
       frequency: 'MONTHLY',
-      is_recurring: true
+      is_active: true
     }
   })
 
@@ -110,13 +110,13 @@ export default function CostForm({
 
         {/* Date */}
         <div className="space-y-2">
-          <Label>Tanggal *</Label>
+          <Label>Nama Biaya *</Label>
           <Input
-            type="date"
-            {...form.register('cost_date')}
+            {...form.register('name')}
+            placeholder="Nama biaya operasional"
           />
-          {form.formState.errors.cost_date && (
-            <p className="text-sm text-red-600">{form.formState.errors.cost_date.message}</p>
+          {form.formState.errors.name && (
+            <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
           )}
         </div>
 
@@ -147,10 +147,10 @@ export default function CostForm({
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
-              {...form.register('is_recurring')}
+              {...form.register('is_active')}
               className="rounded"
             />
-            <Label>Biaya berulang</Label>
+            <Label>Aktif</Label>
           </div>
         </div>
 

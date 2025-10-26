@@ -251,26 +251,3 @@ export function ModalFormSkeleton({ className }: SkeletonProps) {
     </div>
   )
 }
-
-// Skeleton untuk Search Form
-export function SearchFormSkeleton({ className }: SkeletonProps) {
-  return (
-    <div className={cn("space-y-4", className)}>
-      <div className="flex items-center space-x-2">
-        <Skeleton className="h-9 flex-1" />
-        <SkeletonButton className="w-20" />
-        <SkeletonButton className="w-8 h-8" />
-      </div>
-      
-      {/* Filters */}
-      <div className="flex items-center space-x-2">
-        <SkeletonText className="h-4 w-16" />
-        <div className="flex space-x-2">
-          {Array.from({ length: 4 }, (_, i) => (
-            <Skeleton key={i} className="h-6 w-16 rounded-full" />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}

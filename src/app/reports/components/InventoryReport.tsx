@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/useSupabase'
+import { useSupabaseCRUD } from '@/hooks/supabase'
 
 interface InventoryReportProps {
   dateRange: {

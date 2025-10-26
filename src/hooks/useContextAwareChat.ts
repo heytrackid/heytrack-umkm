@@ -59,7 +59,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
   }, [])
 
   const sendMessage = useCallback(async (query: string) => {
-    if (!query.trim()) return
+    if (!query.trim()) {return}
 
     setIsLoading(true)
     setError(null)

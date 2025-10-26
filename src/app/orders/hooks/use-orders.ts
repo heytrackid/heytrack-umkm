@@ -3,203 +3,152 @@
 
 import * as React from 'react'
 import { useMemo } from 'react'
-import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'
-import { useSupabaseData } from '@/hooks/useSupabaseData'
-import { 
-  Order, 
-  OrderItem, 
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks';
+import type {
+  Order,
+  OrderItem,
   OrderPayment,
-  CreateOrderData, 
-  UpdateOrderData, 
+  CreateOrderData,
+  UpdateOrderData,
   OrderFilters,
   OrderSummary,
-  OrderAnalytics,
   OrderStatus,
   OrderTotalsBreakdown,
   InvoiceData
+} from '../types/orders.types';
+import {
+  OrderAnalytics
 } from '../types/orders.types'
-import { 
+import {
   DEFAULT_ORDERS_CONFIG,
   calculateOrderTotals,
   type OrdersModuleConfig
 } from '../config/orders.config'
-import { formatCurrency, parseCurrency } from '@/shared/utils/currency'
+import { REGIONAL_DEFAULTS, RegionalDefaults } from '@/lib/shared/utils/currency'
+import { formatCurrency, parseCurrencyString } from '@/lib/currency'
 
 // Main orders hook
 export function useOrders(filters?: OrderFilters) {
-  const { 
-    data: orders, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<Order, CreateOrderData, UpdateOrderData>({
-    table: 'orders',
-    relationConfig: {
-      items: {
-        table: 'order_items',
-        foreignKey: 'order_id'
-      },
-      payments: {
-        table: 'order_payments',
-        foreignKey: 'order_id'
-      }
-    },
-    orderBy: [{ column: 'created_at', ascending: false }]
+  // Use useSupabaseQuery for fetching data
+  const {
+    data: ordersData,
+    loading: queryLoading,
+    error: queryError,
+    refetch
+  } = useSupabaseQuery('orders', {
+    orderBy: { column: 'created_at', ascending: false },
+    realtime: true
   })
 
-  // Filter orders based on criteria
-  const filteredOrders = useMemo(() => {
-    if (!orders || !filters) return orders
+  // Use useSupabaseCRUD for operations
+  const {
+    create: createRecord,
+    update: updateRecord,
+    delete: deleteRecord,
+    loading: crudLoading,
+    error: crudError,
+    clearError
+  } = useSupabaseCRUD('orders')
 
-    return orders.filter(order => {
-      // Status filter
-      if (filters.status?.length && !filters.status.includes(order.status)) {
-        return false
-      }
+  // Combine loading states
+  const loading = queryLoading || crudLoading
 
-      // Priority filter
-      if (filters.priority?.length && !filters.priority.includes(order.priority)) {
-        return false
-      }
+  // Combine errors
+  const error = queryError || crudError
 
-      // Customer filter
-      if (filters.customer_id && order.customer_id !== filters.customer_id) {
-        return false
-      }
+  // Memoized orders data
+  const orders = useMemo(() => {
+    if (!ordersData) return []
 
-      // Currency filter
-      if (filters.currency?.length && !filters.currency.includes(order.currency)) {
-        return false
-      }
+    // Apply filters if provided
+    let filteredOrders = ordersData
 
-      // Payment status filter
-      if (filters.payment_status?.length && !filters.payment_status.includes(order.payment_status)) {
-        return false
+    if (filters) {
+      if (filters.status) {
+        filteredOrders = filteredOrders.filter(order => order.status === filters.status)
       }
-
-      // Payment method filter
-      if (filters.payment_method?.length && order.payment_method && 
-          !filters.payment_method.includes(order.payment_method)) {
-        return false
+      if (filters.payment_status) {
+        filteredOrders = filteredOrders.filter(order => order.payment_status === filters.payment_status)
       }
-
-      // Date range filter
-      if (filters.date_from && order.order_date < filters.date_from) {
-        return false
+      if (filters.priority) {
+        filteredOrders = filteredOrders.filter(order => order.priority === filters.priority)
       }
-      if (filters.date_to && order.order_date > filters.date_to) {
-        return false
+      if (filters.date_from) {
+        filteredOrders = filteredOrders.filter(order => new Date(order.created_at!) >= new Date(filters.date_from!))
       }
-
-      // Delivery date range filter
-      if (filters.delivery_date_from && order.delivery_date && 
-          order.delivery_date < filters.delivery_date_from) {
-        return false
+      if (filters.date_to) {
+        filteredOrders = filteredOrders.filter(order => new Date(order.created_at!) <= new Date(filters.date_to!))
       }
-      if (filters.delivery_date_to && order.delivery_date && 
-          order.delivery_date > filters.delivery_date_to) {
-        return false
-      }
-
-      // Amount range filter
-      if (filters.min_amount !== undefined && order.total_amount < filters.min_amount) {
-        return false
-      }
-      if (filters.max_amount !== undefined && order.total_amount > filters.max_amount) {
-        return false
-      }
-
-      // Tags filter
-      if (filters.tags?.length && order.tags && 
-          !filters.tags.some(tag => order.tags!.includes(tag))) {
-        return false
-      }
-
-      // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase()
-        const searchableText = [
-          order.order_number || '',
-          order.customer_name || '',
-          order.notes || '',
-          order.internal_notes || ''
-        ].filter(Boolean).join(' ').toLowerCase()
-        
-        if (!searchableText.includes(searchLower)) {
-          return false
-        }
+        filteredOrders = filteredOrders.filter(order =>
+          order.customer_name?.toLowerCase().includes(searchLower) ||
+          order.order_no?.toLowerCase().includes(searchLower)
+        )
       }
+    }
 
-      return true
-    })
-  }, [orders, filters])
+    return filteredOrders
+  }, [ordersData, filters])
 
   return {
-    orders: filteredOrders,
-    allOrders: orders,
+    data: orders,
+    orders,
     loading,
     error,
-    createOrder: create,
-    updateOrder: update,
-    deleteOrder: remove,
-    refreshOrders: refresh
+    create: createRecord,
+    update: updateRecord,
+    remove: deleteRecord,
+    refresh: refetch,
+    clearError
   }
 }
 
 // Order items management
 export function useOrderItems(orderId: string) {
-  const { 
-    data: items, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<OrderItem>({
-    table: 'order_items',
-    filter: [{ column: 'order_id', operator: 'eq', value: orderId }],
-    orderBy: [{ column: 'created_at', ascending: true }]
+  // Use useSupabaseQuery for data fetching
+  const {
+    data: items,
+    loading,
+    error,
+    refetch
+  } = useSupabaseQuery('order_items', {
+    filter: { order_id: orderId },
+    orderBy: { column: 'created_at', ascending: true }
   })
 
+  // Use useSupabaseCRUD for operations
+  const {
+    create,
+    update,
+    delete: deleteItem
+  } = useSupabaseCRUD('order_items')
+
   return {
+    data: items || [],
     items: items || [],
     loading,
     error,
-    addItem: create,
-    updateItem: update,
-    removeItem: remove,
-    refreshItems: refresh
+    create,
+    update,
+    remove: deleteItem,
+    refresh: refetch
   }
 }
 
 // Order payments tracking
 export function useOrderPayments(orderId: string) {
-  const { 
-    data: payments, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<OrderPayment>({
-    table: 'order_payments',
-    filter: [{ column: 'order_id', operator: 'eq', value: orderId }],
-    orderBy: [{ column: 'payment_date', ascending: false }]
-  })
-
+  // TODO: Implement when order_payments table is created
+  // For now, return empty data structure
   return {
-    payments: payments || [],
-    loading,
-    error,
-    addPayment: create,
-    updatePayment: update,
-    removePayment: remove,
-    refreshPayments: refresh
+    data: [],
+    payments: [],
+    loading: false,
+    error: null,
+    create: async () => { throw new Error('Order payments not yet implemented') },
+    update: async () => { throw new Error('Order payments not yet implemented') },
+    remove: async () => { throw new Error('Order payments not yet implemented') },
+    refresh: async () => {}
   }
 }
 
@@ -241,7 +190,7 @@ export function useOrderSummary(filters?: OrderFilters): {
   const { orders, loading, error } = useOrders(filters)
 
   const summary = useMemo((): OrderSummary | null => {
-    if (!orders) return null
+    if (!orders) {return null}
 
     const revenueByCurrency: Record<string, number> = {}
     const topSellingItems: Record<string, {
@@ -317,22 +266,31 @@ export function useOrderSummary(filters?: OrderFilters): {
 
 // Order status management
 export function useOrderStatus(orderId: string) {
-  const { updateOrder } = useOrders()
+  const { update } = useOrders()
 
-  const updateStatus = async (newStatus: OrderStatus, reason?: string) => {
+  const updateStatus = async (newStatus: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED', reason?: string) => {
     try {
-      await updateOrder(orderId, { 
+      await update(orderId, {
         status: newStatus,
-        internal_notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
+        notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
       })
     } catch (error: unknown) {
       throw new Error(`Failed to update order status: ${error}`)
     }
   }
 
-  const canTransitionTo = (currentStatus: OrderStatus, targetStatus: OrderStatus): boolean => {
-    const transitions = DEFAULT_ORDERS_CONFIG.workflow.auto_transitions[currentStatus] || []
-    return transitions.includes(targetStatus)
+  const canTransitionTo = (currentStatus: string, targetStatus: string): boolean => {
+    // Define allowed transitions
+    const transitions: Record<string, string[]> = {
+      'PENDING': ['CONFIRMED', 'CANCELLED'],
+      'CONFIRMED': ['IN_PROGRESS', 'CANCELLED'],
+      'IN_PROGRESS': ['READY', 'CANCELLED'],
+      'READY': ['DELIVERED', 'CANCELLED'],
+      'DELIVERED': [],
+      'CANCELLED': []
+    }
+
+    return transitions[currentStatus]?.includes(targetStatus) || false
   }
 
   return {
@@ -349,11 +307,11 @@ export function useOrderCurrency(currency?: string) {
     showSymbol?: boolean
     showCode?: boolean
   }) => {
-    return formatCurrency(amount, currency || defaultCurrency, options)
+    return formatCurrency(amount, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
   }
 
   const parseAmount = (currencyString: string) => {
-    return parseCurrency(currencyString, currency || defaultCurrency)
+    return parseCurrencyString(currencyString, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
   }
 
   return {

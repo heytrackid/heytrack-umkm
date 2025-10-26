@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ListSkeleton } from '@/components/ui'
 import { formatCurrentCurrency } from '@/lib/currency'
-import { HPPAlert } from '@/types/hpp-tracking'
-import { formatChangePercentage, getSeverityColors } from '@/utils/hpp-alert-helpers'
+import type { HPPAlert } from '@/types/hpp-tracking'
+import { HPPUtils } from '@/lib/hpp'
 import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, ArrowRight, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -20,10 +20,6 @@ interface AlertsResponse {
     }
 }
 
-// Helper function to get severity color - using utility
-const getSeverityColor = (severity: HPPAlert['severity']) => {
-    return getSeverityColors(severity).badgeVariant
-}
 
 export default function HPPAlertsWidget() {
     const router = useRouter()
@@ -107,8 +103,8 @@ export default function HPPAlertsWidget() {
                                     <span className="text-muted-foreground">
                                         {formatCurrentCurrency(alert.old_value)} → {formatCurrentCurrency(alert.new_value)}
                                     </span>
-                                    <Badge variant={getSeverityColor(alert.severity)} className="text-xs">
-                                        {formatChangePercentage(alert.change_percentage)}
+                                    <Badge variant={HPPUtils.getSeverityColor(alert.severity)} className="text-xs">
+                                        {HPPUtils.formatChangePercentage(alert.change_percentage)}
                                     </Badge>
                                 </div>
                             </div>

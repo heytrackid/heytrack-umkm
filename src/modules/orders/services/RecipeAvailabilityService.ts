@@ -1,5 +1,5 @@
 import { dbLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
+import supabase from '@/utils/supabase'
 import { HPPCalculationService } from '@/modules/recipes'
 import type { RecipeOption } from './OrderRecipeService'
 
@@ -19,7 +19,7 @@ export class RecipeAvailabilityService {
     } | null
   }>): boolean {
     return recipeIngredients.every(ri => {
-      if (!ri.ingredient || !ri.ingredient.is_active) return false
+      if (!ri.ingredient || !ri.ingredient.is_active) {return false}
 
       // Check if current stock is above reorder point
       const currentStock = ri.ingredient.current_stock ?? 0 || 0
@@ -64,8 +64,8 @@ export class RecipeAvailabilityService {
         .eq('is_active', true)
         .order('name')
 
-      if (error) throw error
-      if (!recipes) return []
+      if (error) {throw error}
+      if (!recipes) {return []}
 
       // Process recipes and check availability
       const recipeOptions: RecipeOption[] = await Promise.all(

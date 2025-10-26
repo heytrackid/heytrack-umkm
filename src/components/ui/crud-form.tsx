@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
-interface FormFieldProps {
+interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
   label: string;
   name: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'date' | 'datetime-local' | 'tel' | 'url';
-  value: unknown;
-  onChange: (name: string, value: any) => void;
+  value?: unknown;
+  onChange?: (name: string, value: unknown) => void;
   onBlur?: (name: string) => void;
   error?: string;
   success?: string;
@@ -23,27 +23,37 @@ interface FormFieldProps {
   fullWidth?: boolean;
 }
 
-export const FormField: React.FC<FormFieldProps> = ({
-  label,
-  name,
-  type = 'text',
-  value,
-  onChange,
-  onBlur,
-  error,
-  success,
-  placeholder,
-  required = false,
-  options = [],
-  disabled = false,
-  min,
-  max,
-  step,
-  rows = 3,
-  hint,
-  icon,
-  fullWidth = true,
-}) => {
+export const FormField: React.FC<FormFieldProps> = (props) => {
+  const {
+    label,
+    name,
+    type = 'text',
+    value: propValue,
+    onChange: propOnChange,
+    onBlur: propOnBlur,
+    error,
+    success,
+    placeholder,
+    required = false,
+    options = [],
+    disabled = false,
+    min,
+    max,
+    step,
+    rows = 3,
+    hint,
+    icon,
+    fullWidth = true,
+    // Extract react-hook-form specific props if present
+    ref: rhfRef,
+    onChange: rhfOnChange,
+    onBlur: rhfOnBlur,
+    value: rhfValue,
+    ...restProps
+  } = props;
+
+  // Determine if we're using react-hook-form by checking for its props
+  const isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -74,33 +84,48 @@ export const FormField: React.FC<FormFieldProps> = ({
     let newValue: unknown = e.target.value;
     
     if (type === 'number') {
-      newValue = e.target.value === '' ? '' : parseFloat || 0;
+      newValue = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
     }
     
-    onChange(name, newValue);
+    if (propOnChange) {
+      propOnChange(name, newValue);
+    }
   };
 
   const handleBlur = () => {
     setFocused(false);
-    onBlur?.(name);
+    if (propOnBlur) {
+      propOnBlur(name);
+    }
   };
 
   const handleFocus = () => {
     setFocused(true);
   };
 
-  const inputProps = {
+  // Extract all props including react-hook-form props
+  const allProps = {
     id: name,
     name,
-    value: value || '',
-    onChange: handleChange,
-    onBlur: handleBlur,
-    onFocus: handleFocus,
     placeholder,
     disabled,
     className: getInputClasses(),
     'aria-invalid': hasError,
     'aria-describedby': error ? `${name}-error` : hint ? `${name}-hint` : undefined,
+    onFocus: handleFocus,
+    ...restProps
+  };
+
+  // Prepare the basic props for the input element
+  const basicInputProps = {
+    id: name,
+    name,
+    placeholder,
+    disabled,
+    className: getInputClasses(),
+    'aria-invalid': hasError,
+    'aria-describedby': error ? `${name}-error` : hint ? `${name}-hint` : undefined,
+    onFocus: handleFocus,
   };
 
   return (
@@ -131,18 +156,18 @@ export const FormField: React.FC<FormFieldProps> = ({
         {/* Input Field */}
         {type === 'textarea' ? (
           <textarea
-            {...inputProps}
+            {...basicInputProps}
             rows={rows}
             className={`${getInputClasses()} resize-vertical min-h-[80px] ${icon ? 'pl-10' : ''}`}
           />
         ) : type === 'select' ? (
           <div className="relative">
             <select
-              {...inputProps}
+              {...basicInputProps}
               className={`${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`}
             >
               <option value="" disabled>
-                {placeholder || Informasi}
+                {placeholder || "Pilih opsi"}
               </option>
               {options.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -156,20 +181,11 @@ export const FormField: React.FC<FormFieldProps> = ({
           </div>
         ) : (
           <input
-            {...inputProps}
+            {...basicInputProps}
             type={isPassword && showPassword ? 'text' : type}
             min={min}
             max={max}
             step={step}
-            className={`${getInputClasses()} ${icon ? 'pl-10' : ''} ${isPassword ? 'pr-10' : ''}`}
-            // Mobile-specific attributes
-            autoComplete={type === 'password' ? 'current-password' : type === 'email' ? 'email' : 'on'}
-            inputMode={
-              type === 'number' ? 'numeric' :
-              type === 'email' ? 'email' :
-              type === 'tel' ? 'tel' :
-              type === 'url' ? 'url' : 'text'
-            }
           />
         )}
         

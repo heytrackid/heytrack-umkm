@@ -31,12 +31,12 @@ export function PullToRefresh({
   const { isMobile } = useResponsive()
 
   const handleTouchStart = (e: TouchEvent) => {
-    if (disabled || !isMobile || window.scrollY > 0) return
+    if (disabled || !isMobile || window.scrollY > 0) {return}
     startY.current = e.touches[0].clientY
   }
 
   const handleTouchMove = (e: TouchEvent) => {
-    if (disabled || !isMobile || isRefreshing || startY.current === 0) return
+    if (disabled || !isMobile || isRefreshing || startY.current === 0) {return}
 
     currentY.current = e.touches[0].clientY
     const distance = currentY.current - startY.current
@@ -55,7 +55,7 @@ export function PullToRefresh({
   }
 
   const handleTouchEnd = async () => {
-    if (disabled || !isMobile || startY.current === 0) return
+    if (disabled || !isMobile || startY.current === 0) {return}
 
     if (canRefresh && !isRefreshing) {
       setIsRefreshing(true)
@@ -76,7 +76,7 @@ export function PullToRefresh({
   }
 
   useEffect(() => {
-    if (!isMobile) return
+    if (!isMobile) {return}
 
     const element = document.body
 
@@ -180,7 +180,7 @@ export function InfiniteScroll({
   const [isNearBottom, setIsNearBottom] = useState(false)
 
   const handleScroll = useCallback(() => {
-    if (!containerRef.current || loading || !hasMore) return
+    if (!containerRef.current || loading || !hasMore) {return}
 
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement
     const distanceFromBottom = scrollHeight - (scrollTop + clientHeight)
@@ -314,7 +314,7 @@ export function SwipeActions({
   const { isMobile, isTouchDevice } = useResponsive()
 
   const handleTouchStart = (e: TouchEvent | React.TouchEvent) => {
-    if (!isTouchDevice || actions.length === 0) return
+    if (!isTouchDevice || actions.length === 0) {return}
     
     const touch = 'touches' in e ? e.touches[0] : e
     startX.current = touch.clientX
@@ -323,7 +323,7 @@ export function SwipeActions({
   }
 
   const handleTouchMove = (e: TouchEvent | React.TouchEvent) => {
-    if (!isTouchDevice || !isSwipeActive || startX.current === 0) return
+    if (!isTouchDevice || !isSwipeActive || startX.current === 0) {return}
 
     const touch = 'touches' in e ? e.touches[0] : e
     currentX.current = touch.clientX
@@ -337,7 +337,7 @@ export function SwipeActions({
   }
 
   const handleTouchEnd = () => {
-    if (!isTouchDevice || !isSwipeActive) return
+    if (!isTouchDevice || !isSwipeActive) {return}
 
     setIsSwipeActive(false)
     onSwipeEnd?.()

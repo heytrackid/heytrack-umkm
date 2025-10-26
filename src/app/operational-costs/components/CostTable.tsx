@@ -29,11 +29,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
+import type { OperationalCostsTable } from '@/types'
 
 interface CostTableProps {
-  costs: unknown[]
-  onEdit: (cost: any) => void
-  onDelete: (cost: any) => void
+  costs: OperationalCostsTable['Row'][]
+  onEdit: (cost: OperationalCostsTable['Row']) => void
+  onDelete: (cost: OperationalCostsTable['Row']) => void
   formatCurrency: (amount: number) => string
   isMobile?: boolean
 }

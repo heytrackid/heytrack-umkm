@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { lazy, Suspense, ComponentType } from 'react'
+import type { ComponentType } from 'react';
+import { lazy, Suspense } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 
 /**
@@ -53,10 +54,10 @@ export function createLazyRoute<T extends Record<string, unknown>>(
 ) {
   const LazyComponent = lazy(loader)
   
-  return function LazyRoute(props: T) {
+  return function LazyRoute<P extends Record<string, unknown>>(props: P) {
     return (
       <Suspense fallback={fallback || <DefaultFallback />}>
-        <LazyComponent {...props} />
+        <LazyComponent {...(props as any)} />
       </Suspense>
     )
   }

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { ChatMessage, ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
+import type { ChatMessage, ChatAction, ChatContext } from '@/lib/ai-chatbot/types';
 import DataVisualization from './DataVisualization';
 
 import { apiLogger } from '@/lib/logger'
@@ -52,7 +52,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   // Handle sending messages via API
   const handleSendMessage = async (message?: string) => {
     const messageToSend = message || inputValue.trim();
-    if (!messageToSend || isLoading) return;
+    if (!messageToSend || isLoading) {return;}
 
     setIsLoading(true);
     setInputValue('');
@@ -117,7 +117,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
 
   // Handle action button clicks via API
   const handleActionClick = async (action: ChatAction) => {
-    if (!context) return;
+    if (!context) {return;}
 
     try {
       setIsLoading(true);

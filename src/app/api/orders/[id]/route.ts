@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { apiLogger } from '@/lib/logger'
 // GET /api/orders/[id] - Get single order
 export async function GET(
@@ -8,7 +9,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     // @ts-ignore
     const { data, error } = await supabase
       .from('orders')
@@ -59,7 +60,7 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     const body = await request.json()
     
     // Extract order items from body if present
@@ -139,7 +140,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     
     // Delete order items first (cascade should handle this, but being explicit)
     await supabase

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 
 import { apiLogger } from '@/lib/logger'
@@ -120,7 +121,6 @@ export async function POST(request: NextRequest) {
         const totalHarga = qtyBeli * hargaSatuan
 
         // Get ingredient info
-        // @ts-ignore
     const { data: ingredient, error: ingredientError } = await supabase
             .from('ingredients')
             .select('*')

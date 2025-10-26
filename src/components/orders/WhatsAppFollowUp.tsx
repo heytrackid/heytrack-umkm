@@ -12,11 +12,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { WhatsAppService, WhatsAppTemplate, OrderData, whatsappService } from '@/lib/whatsapp-service';
+import type { OrderData, WhatsAppTemplate } from '@/lib/communications/types';
+import { WhatsAppService } from '@/lib/communications/whatsapp';
 import { toast } from 'react-hot-toast';
 import { useSettings } from '@/contexts/settings-context';
 
 import { apiLogger } from '@/lib/logger'
+interface OrderItemData {
+  recipe_name: string;
+  quantity: number;
+  price_per_unit: number;
+  name?: string;
+}
+
 interface WhatsAppFollowUpProps {
   order: {
     id: string;
@@ -25,11 +33,7 @@ interface WhatsAppFollowUpProps {
     total_amount: number;
     delivery_date?: string;
     status: string;
-    order_items?: Array<{
-      recipe_name: string;
-      quantity: number;
-      price_per_unit: number;
-    }>;
+    order_items?: OrderItemData[];
     notes?: string;
   };
   businessName?: string;
@@ -53,17 +57,17 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     useBusinessAPI: false
   });
 
-  const templates = whatsappService.getTemplates();
+  const templates = WhatsAppService.getDefaultTemplates();
 
   // Convert order data to WhatsApp service format
-  const convertOrderData = (order: any): OrderData => ({
+  const convertOrderData = (order: WhatsAppFollowUpProps['order']): OrderData => ({
     id: order.id,
     customer_name: order.customer_name,
     customer_phone: order.customer_phone,
     total_amount: order.total_amount,
     delivery_date: order.delivery_date,
     status: order.status,
-    items: order.order_items?.map((item: any) => ({
+    items: order.order_items?.map((item: OrderItemData) => ({
       name: item.recipe_name || item.name || 'Product',
       quantity: item.quantity || 1,
       price: item.price_per_unit || 0
@@ -80,45 +84,42 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
 
     try {
       const orderData = convertOrderData(order);
-      let result;
-
-      switch (selectedTemplate) {
-        case 'order_confirmation':
-          result = whatsappService.generateOrderConfirmation(orderData, businessName);
-          break;
-        case 'payment_reminder':
-          result = whatsappService.generatePaymentReminder(orderData, businessName, paymentDetails);
-          break;
-        case 'follow_up':
-          result = whatsappService.generateFollowUp(orderData, businessName, 10);
-          break;
-        default:
-          // For other templates, use the generic method
-          const template = templates.find(t => t.id === selectedTemplate);
-          if (template) {
-            const templateData = {
-              customer_name: orderData.customer_name,
-              order_id: orderData.id,
-              total_amount: whatsappService.formatCurrency(orderData.total_amount),
-              delivery_date: orderData.delivery_date ? whatsappService.formatDate(orderData.delivery_date) : 'Sesuai kesepakatan',
-              business_name: businessName,
-              order_items: whatsappService.formatOrderItems(orderData.items),
-              ready_time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-              delivery_status: 'Dalam perjalanan',
-              estimated_arrival: '30 menit',
-              additional_notes: 'Driver akan menghubungi Anda',
-              due_date: whatsappService.formatDate(new Date()),
-              payment_details: paymentDetails,
-              product_name: orderData.items[0]?.name || 'pesanan',
-              discount: '10'
-            };
-            result = whatsappService.generateCustomMessage(selectedTemplate, templateData, orderData.customer_phone);
-          } else {
-            throw new Error('Template not found');
-          }
+      const template = templates.find(t => t.id === selectedTemplate);
+      
+      if (!template) {
+        throw new Error('Template not found');
       }
 
-      setGeneratedMessage(result.message);
+      let message = template.template;
+      
+      // Format order items
+      const orderItems = orderData.items.map(item =>
+        `• ${item.name} (${item.quantity}x) - ${formatCurrency(item.price * item.quantity)}`
+      ).join('\n');
+
+      // Replace variables in template
+      const replacements: Record<string, string> = {
+        customer_name: orderData.customer_name,
+        order_id: orderData.id,
+        total_amount: formatCurrency(orderData.total_amount),
+        delivery_date: orderData.delivery_date || 'Sesuai kesepakatan',
+        business_name: businessName,
+        order_items: orderItems,
+        notes: orderData.notes || '',
+        payment_deadline: new Date().toLocaleDateString('id-ID'),
+        payment_account: paymentDetails,
+        delivery_status: 'Dalam perjalanan',
+        estimated_time: '30 menit',
+        driver_name: 'Driver',
+        driver_phone: '-'
+      };
+
+      // Replace all variables
+      Object.entries(replacements).forEach(([key, value]) => {
+        message = message.replace(new RegExp(`{${key}}`, 'g'), value);
+      });
+
+      setGeneratedMessage(message);
     } catch (error: unknown) {
       apiLogger.error({ error: error }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
@@ -129,10 +130,12 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
   const getWhatsAppURLs = () => {
     const orderData = convertOrderData(order);
     const message = generatedMessage || customMessage;
+    const encodedMessage = encodeURIComponent(message);
+    const phone = orderData.customer_phone.replace(/\D/g, ''); // Remove non-digits
     
     return {
-      whatsapp: whatsappService.generateWhatsAppURL(orderData.customer_phone, message, false),
-      business: whatsappService.generateWhatsAppURL(orderData.customer_phone, message, true)
+      whatsapp: `https://wa.me/${phone}?text=${encodedMessage}`,
+      business: `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`
     };
   };
 
@@ -152,13 +155,14 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
   const handleSend = (type: 'whatsapp' | 'business') => {
     const urls = getWhatsAppURLs();
     const url = type === 'whatsapp' ? urls.whatsapp : urls.business;
+    const message = generatedMessage || customMessage;
     
     // Open WhatsApp with the message
     window.open(url, '_blank');
     
     // Call callback if provided
     if (onSent) {
-      onSent();
+      onSent(type, message);
     }
     
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);

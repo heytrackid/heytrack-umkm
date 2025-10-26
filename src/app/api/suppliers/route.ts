@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseClient } from '@/lib/supabase';
-import { getErrorMessage } from '@/lib/type-guards';
-import { PaginationQuerySchema, SupplierInsertSchema } from '@/lib/validations';
+import { createClient } from '@/utils/supabase/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import type { Database } from '@/types'
+
+import { apiLogger } from '@/lib/logger';
+import { getErrorMessage } from '@/lib/type-guards'
 import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
 import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
 
@@ -27,7 +32,7 @@ export async function GET(request: NextRequest) {
   const { page, limit, search, sort_by, sort_order } = queryValidation.data
 
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
@@ -49,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     const { data: suppliers, error } = await query
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     // Get total count
     let countQuery = supabase.from('suppliers').select('*', { count: 'exact', head: true })
@@ -63,8 +68,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count,
-        totalPages: Math.ceil(count / limit)
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit)
       }
     });
   } catch (error: unknown) {
@@ -74,7 +79,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const body = await request.json();
 
     // Validate request body
@@ -91,14 +96,13 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    // @ts-ignore
     const { data: supplier, error } = await supabase
       .from('suppliers')
       .insert([validatedData] as any)
       .select('*')
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(supplier, { status: 201 });
   } catch (error: unknown) {

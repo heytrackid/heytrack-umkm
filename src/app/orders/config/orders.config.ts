@@ -1,5 +1,29 @@
 // Orders module configuration with multi-currency and optional VAT support
-import { REGIONAL_DEFAULTS, DEFAULT_CURRENCY } from '@/shared/utils/currency'
+
+// Regional defaults for different countries
+interface RegionalDefaults {
+  country_code: string
+  currency: string
+  tax_rate: number
+  business_culture: {
+    typical_margins: { min: number, max: number }
+    payment_terms_days: number
+    common_payment_methods: string[]
+  }
+}
+
+const REGIONAL_DEFAULTS: Record<string, RegionalDefaults> = {
+  ID: { // Indonesia
+    country_code: 'ID',
+    currency: 'IDR',
+    tax_rate: 0.11,
+    business_culture: {
+      typical_margins: { min: 20, max: 50 },
+      payment_terms_days: 7,
+      common_payment_methods: ['cash', 'bank_transfer', 'qris', 'ewallet']
+    }
+  }
+}
 
 export interface OrdersModuleConfig {
   // Pricing and currency
@@ -100,7 +124,7 @@ export type OrderPriority =
 // Default configuration
 export const DEFAULT_ORDERS_CONFIG: OrdersModuleConfig = {
   currency: {
-    default: DEFAULT_CURRENCY,
+    default: 'IDR',
     supported: ['IDR', 'USD', 'EUR', 'SGD', 'MYR'],
     allow_multi_currency: true,
     exchange_rates_source: 'manual'

@@ -1,7 +1,5 @@
 'use client'
-import React from 'react'
-
-import { useState, useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,15 +33,26 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useSettings } from '@/contexts/settings-context'
+import type { RecipeWithIngredients } from '@/types'
+
+type RecipeIngredientEntry = NonNullable<RecipeWithIngredients['recipe_ingredients']>[number]
+
+const extractIngredientCost = (entry: RecipeIngredientEntry): { costPerUnit: number; quantity: number } => {
+  const ingredientDetails = entry.ingredients ?? entry.ingredient
+  const costPerUnit = ingredientDetails?.cost_per_unit ?? 0
+  const quantity = entry.quantity ?? 0
+
+  return { costPerUnit, quantity }
+}
 
 interface RecipeTableProps {
-  recipes: unknown[]
+  recipes: RecipeWithIngredients[]
   searchTerm: string
   onSearchChange: (term: string) => void
   onAddNew: () => void
-  onEdit: (recipe: any) => void
-  onDelete: (recipe: any) => void
-  onView: (recipe: any) => void
+  onEdit: (recipe: RecipeWithIngredients) => void
+  onDelete: (recipe: RecipeWithIngredients) => void
+  onView: (recipe: RecipeWithIngredients) => void
   selectedItems?: string[]
   onSelectItem?: (itemId: string) => void
   onSelectAll?: () => void
@@ -73,9 +82,10 @@ export default function RecipeTable({
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
 
-  const filteredRecipes = recipes.filter((recipe: any) =>
-    recipe.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    recipe.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  const normalizedSearchTerm = searchTerm.toLowerCase()
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipe.name?.toLowerCase().includes(normalizedSearchTerm) ||
+    recipe.category?.toLowerCase().includes(normalizedSearchTerm)
   )
   
   // Calculate pagination
@@ -149,22 +159,25 @@ export default function RecipeTable({
               </TableHeader>
               <TableBody>
                 {paginatedRecipes.map((recipe) => {
-                  const ingredientCount = recipe.recipe_ingredients?.length || 0
-                  const hpp = recipe.recipe_ingredients?.reduce((sum: number, ri: any) => {
-                    const ing = ri.ingredients
-                    if (!ing) return sum
-                    const costPerUnit = ing.cost_per_unit || 0
-                    const quantity = ri.quantity || 0
-                    return sum + (costPerUnit * quantity)
-                  }, 0) || 0
+                  const ingredientCount = recipe.recipe_ingredients?.length ?? 0
+                  const hpp = recipe.recipe_ingredients?.reduce((sum: number, entry: RecipeIngredientEntry) => {
+                    const { costPerUnit, quantity } = extractIngredientCost(entry)
+                    if (costPerUnit === 0 || quantity === 0) {
+                      return sum
+                    }
+                    return sum + costPerUnit * quantity
+                  }, 0) ?? 0
 
                   return (
-                    <TableRow key={recipe.id}>
+                    <TableRow key={recipe.id ?? `recipe-${recipe.name}`}>
                       {onSelectItem && (
                         <TableCell>
                           <Checkbox
-                            checked={selectedItems.includes(recipe.id.toString())}
-                            onCheckedChange={() => onSelectItem(recipe.id.toString())}
+                            checked={recipe.id ? selectedItems.includes(String(recipe.id)) : false}
+                            onCheckedChange={() => {
+                              if (!recipe.id) {return}
+                              onSelectItem(recipe.id.toString())
+                            }}
                           />
                         </TableCell>
                       )}

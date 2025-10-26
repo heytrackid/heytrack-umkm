@@ -3,7 +3,7 @@
  * Common column definitions for reuse
  */
 
-import { ColumnDef } from '@tanstack/react-table'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -19,9 +19,7 @@ export function createTextColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: {
-      cell: ({ column }) => header,
-    },
+    header: ({ column }) => header,
     cell: ({ getValue }) => getValue(),
     enableSorting: options?.sortable !== false,
     size: options?.width as any,
@@ -96,7 +94,7 @@ export function createDateColumn<T extends Record<string, unknown>>(
     header: header,
     cell: ({ getValue }) => {
       const value = getValue()
-      if (!value) return '-'
+      if (!value) {return '-'}
       const date = new Date(value as string)
       return options?.format ? options.format(date) : defaultFormat(date)
     },
@@ -118,7 +116,7 @@ export function createStatusColumn<T extends Record<string, unknown>>(
     cell: ({ getValue }) => {
       const value = getValue() as string
       const config = statusConfig[value]
-      if (!config) return value
+      if (!config) {return value}
 
       return (
         <div className={`inline-block px-2 py-1 rounded text-sm font-medium ${config.className}`}>

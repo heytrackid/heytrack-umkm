@@ -1,302 +1,171 @@
 /**
- * Centralized API Client
- * Handles all HTTP requests with interceptors, error handling, retry logic, etc.
+ * API Client
+ * Centralized API client with error handling and type safety
  */
 
 import { apiLogger } from '@/lib/logger'
 
-interface RequestConfig extends RequestInit {
-  baseURL?: string
-  retry?: number
-  timeout?: number
-  skipErrorLog?: boolean
-}
-
-interface ApiResponse<T = unknown> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
-  status: number
+  message?: string
 }
 
-interface ApiError extends Error {
-  status: number
-  data?: any
-  response?: Response
-}
-
-// Request/Response logging utilities
-const logger = {
-  log: (message: string, data?: any) => {
-    apiLogger.debug({ data }, message)
-  },
-  error: (message: string, error?: any) => {
-    apiLogger.error({ err: error }, message)
-  },
-  warn: (message: string, data?: any) => {
-    apiLogger.warn({ data }, message)
-  },
+export interface ApiRequestOptions extends RequestInit {
+  params?: Record<string, string | number | boolean>
 }
 
 /**
- * Retry mechanism with exponential backoff
+ * Base API client
  */
-function getRetryDelay(attempt: number): number {
-  return Math.min(1000 * Math.pow(2, attempt), 10000) + Math.random() * 1000
-}
+export class ApiClient {
+  private baseUrl: string
 
-async function retryRequest(
-  fn: () => Promise<Response>,
-  maxRetries: number = 3,
-  attempt: number = 0
-): Promise<Response> {
-  try {
-    return await fn()
-  } catch (error) {
-    if (attempt < maxRetries) {
-      const delay = getRetryDelay(attempt)
-      logger.warn(`Request failed, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`)
-      await new Promise((resolve) => setTimeout(resolve, delay))
-      return retryRequest(fn, maxRetries, attempt + 1)
-    }
-    throw error
-  }
-}
-
-/**
- * Main API Client class
- */
-class APIClient {
-  private baseURL: string
-  private defaultTimeout: number = 30000
-  private requestInterceptors: Array<(config: RequestConfig) => RequestConfig> = []
-  private responseInterceptors: Array<(response: Response) => Promise<Response>> = []
-  private errorInterceptors: Array<(error: ApiError) => Promise<void>> = []
-
-  constructor(baseURL: string = '') {
-    this.baseURL = baseURL
+  constructor(baseUrl: string = '/api') {
+    this.baseUrl = baseUrl
   }
 
   /**
-   * Register request interceptor
+   * Make a GET request
    */
-  useRequestInterceptor(interceptor: (config: RequestConfig) => RequestConfig) {
-    this.requestInterceptors.push(interceptor)
-  }
-
-  /**
-   * Register response interceptor
-   */
-  useResponseInterceptor(interceptor: (response: Response) => Promise<Response>) {
-    this.responseInterceptors.push(interceptor)
-  }
-
-  /**
-   * Register error interceptor
-   */
-  useErrorInterceptor(interceptor: (error: ApiError) => Promise<void>) {
-    this.errorInterceptors.push(interceptor)
-  }
-
-  /**
-   * Apply request interceptors
-   */
-  private async applyRequestInterceptors(config: RequestConfig): Promise<RequestConfig> {
-    let finalConfig = config
-    for (const interceptor of this.requestInterceptors) {
-      finalConfig = interceptor(finalConfig)
-    }
-    return finalConfig
-  }
-
-  /**
-   * Apply response interceptors
-   */
-  private async applyResponseInterceptors(response: Response): Promise<Response> {
-    let finalResponse = response
-    for (const interceptor of this.responseInterceptors) {
-      finalResponse = await interceptor(finalResponse)
-    }
-    return finalResponse
-  }
-
-  /**
-   * Apply error interceptors
-   */
-  private async applyErrorInterceptors(error: ApiError): Promise<void> {
-    for (const interceptor of this.errorInterceptors) {
-      await interceptor(error)
-    }
-  }
-
-  /**
-   * Create ApiError from response
-   */
-  private async createApiError(response: Response, data?: any): Promise<ApiError> {
-    const dataObj = data as { error?: string; message?: string } | undefined
-    const error = new Error(
-      dataObj?.error || dataObj?.message || `API Error: ${response.status}`
-    ) as ApiError
-    error.status = response.status
-    error.response = response
-    error.data = data
-    return error
-  }
-
-  /**
-   * Make HTTP request with full error handling and interceptors
-   */
-  async request<T = unknown>(
-    endpoint: string,
-    config: RequestConfig = {}
-  ): Promise<ApiResponse<T>> {
-    const {
-      baseURL = this.baseURL,
-      retry = 0,
-      timeout = this.defaultTimeout,
-      skipErrorLog = false,
-      ...fetchConfig
-    } = config
-
-    const url = `${baseURL}${endpoint}`
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-
+  async get<T>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
     try {
-      // Set default headers
-      const headers = {
-        'Content-Type': 'application/json',
-        ...fetchConfig.headers,
-      }
-
-      let finalConfig: RequestConfig = {
-        ...fetchConfig,
-        headers,
-        signal: controller.signal,
-      }
-
-      // Apply request interceptors
-      finalConfig = await this.applyRequestInterceptors(finalConfig)
-
-      logger.log(`${finalConfig.method || 'GET'} ${url}`, {
-        config: finalConfig,
+      const url = this.buildUrl(endpoint, options?.params)
+      const response = await fetch(url, {
+        ...options,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers
+        }
       })
 
-      // Make request with retry
-      const makeRequest = () => fetch(url, finalConfig)
-      let response = await retryRequest(makeRequest, retry)
-
-      // Apply response interceptors
-      response = await this.applyResponseInterceptors(response)
-
-      // Parse response
-      const contentType = response.headers.get('content-type')
-      const isJson = contentType?.includes('application/json')
-      const data = isJson ? await response.json() : await response.text()
-
-      if (!response.ok) {
-        const error = await this.createApiError(response, data)
-
-        // Apply error interceptors
-        if (!skipErrorLog) {
-          await this.applyErrorInterceptors(error)
-        }
-
-        logger.error(`${response.status} ${url}`, error)
-
-        return {
-          success: false,
-          error: (error instanceof Error ? error.message : String(error)),
-          status: response.status,
-        }
-      }
-
-      logger.log(`Success ${response.status} ${url}`, data)
-
-      return {
-        success: true,
-        data: data as T,
-        status: response.status,
-      }
+      return await this.handleResponse<T>(response)
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred'
-
-      if (!skipErrorLog) {
-        logger.error(errorMessage, error)
-      }
-
-      // Handle timeout
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        return {
-          success: false,
-          error: 'Request timeout',
-          status: 408,
-        }
-      }
-
-      return {
-        success: false,
-        error: errorMessage,
-        status: 0,
-      }
-    } finally {
-      clearTimeout(timeoutId)
+      return this.handleError(error)
     }
   }
 
   /**
-   * GET request
+   * Make a POST request
    */
-  get<T = unknown>(endpoint: string, config?: RequestConfig) {
-    return this.request<T>(endpoint, { ...config, method: 'GET' })
+  async post<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+    try {
+      const url = this.buildUrl(endpoint, options?.params)
+      const response = await fetch(url, {
+        ...options,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers
+        },
+        body: data ? JSON.stringify(data) : undefined
+      })
+
+      return await this.handleResponse<T>(response)
+    } catch (error) {
+      return this.handleError(error)
+    }
   }
 
   /**
-   * POST request
+   * Make a PUT request
    */
-  post<T = unknown>(endpoint: string, body?: any, config?: RequestConfig) {
-    return this.request<T>(endpoint, {
-      ...config,
-      method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+  async put<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+    try {
+      const url = this.buildUrl(endpoint, options?.params)
+      const response = await fetch(url, {
+        ...options,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers
+        },
+        body: data ? JSON.stringify(data) : undefined
+      })
+
+      return await this.handleResponse<T>(response)
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Make a DELETE request
+   */
+  async delete<T>(endpoint: string, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+    try {
+      const url = this.buildUrl(endpoint, options?.params)
+      const response = await fetch(url, {
+        ...options,
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers
+        }
+      })
+
+      return await this.handleResponse<T>(response)
+    } catch (error) {
+      return this.handleError(error)
+    }
+  }
+
+  /**
+   * Build URL with query parameters
+   */
+  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
+    const url = `${this.baseUrl}${endpoint}`
+    
+    if (!params) return url
+
+    const searchParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      searchParams.append(key, String(value))
     })
+
+    return `${url}?${searchParams.toString()}`
   }
 
   /**
-   * PUT request
+   * Handle API response
    */
-  put<T = unknown>(endpoint: string, body?: any, config?: RequestConfig) {
-    return this.request<T>(endpoint, {
-      ...config,
-      method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
-    })
+  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+    const contentType = response.headers.get('content-type')
+    const isJson = contentType?.includes('application/json')
+
+    if (!response.ok) {
+      const error = isJson ? await response.json() : { error: response.statusText }
+      apiLogger.error({ error, status: response.status }, 'API request failed')
+      
+      return {
+        success: false,
+        error: error.error || error.message || 'Request failed'
+      }
+    }
+
+    const data = isJson ? await response.json() : null
+
+    return {
+      success: true,
+      data: data as T
+    }
   }
 
   /**
-   * PATCH request
+   * Handle errors
    */
-  patch<T = unknown>(endpoint: string, body?: any, config?: RequestConfig) {
-    return this.request<T>(endpoint, {
-      ...config,
-      method: 'PATCH',
-      body: body ? JSON.stringify(body) : undefined,
-    })
-  }
+  private handleError(error: unknown): ApiResponse {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    apiLogger.error({ error }, 'API client error')
 
-  /**
-   * DELETE request
-   */
-  delete<T = unknown>(endpoint: string, config?: RequestConfig) {
-    return this.request<T>(endpoint, { ...config, method: 'DELETE' })
+    return {
+      success: false,
+      error: message
+    }
   }
 }
 
-// Create singleton instance
-const apiClient = new APIClient()
-
-// Export for direct use
-export { apiClient, APIClient }
-export type { ApiError, ApiResponse, RequestConfig }
-
+// Export default instance
+export const apiClient = new ApiClient()

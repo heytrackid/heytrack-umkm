@@ -23,7 +23,7 @@ export function useConfirm() {
   }, [])
 
   const handleConfirm = useCallback(async () => {
-    if (!config) return
+    if (!config) {return}
 
     try {
       setLoading(true)

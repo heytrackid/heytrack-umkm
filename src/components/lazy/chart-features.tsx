@@ -70,22 +70,18 @@ const MiniChartLoadingSkeleton = () => (
 // Lazy chart components
 const LazyFinancialTrendsChart = lazy(
   () => import('@/modules/charts/components/FinancialTrendsChart')
-    .then(module => ({ default: module.FinancialTrendsChart }))
 )
 
 const LazyInventoryTrendsChart = lazy(
   () => import('@/modules/charts/components/FinancialTrendsChart')
-    .then(module => ({ default: module.InventoryTrendsChart }))
 )
 
 const LazyChart = lazy(
   () => import('@/modules/charts/components/FinancialTrendsChart')
-    .then(module => ({ default: module.Chart }))
 )
 
 const LazyMiniChart = lazy(
   () => import('@/modules/charts/components/FinancialTrendsChart')
-    .then(module => ({ default: module.MiniChart }))
 )
 
 // Recharts components (heavy library) - removed for now as it causes typing issues
@@ -120,19 +116,19 @@ export const MiniChartWithLoading = (props: any) => (
 
 // Advanced chart components yang bisa di-lazy load
 const LazyPieChart = lazy(
-  () => import('@/modules/charts/components/FinancialTrendsChart').then(module => ({ default: module.PieChart }))
+  () => import('@/modules/charts/components/FinancialTrendsChart')
 )
 
 const LazyLineChart = lazy(
-  () => import('@/modules/charts/components/FinancialTrendsChart').then(module => ({ default: module.LineChart }))
+  () => import('@/modules/charts/components/FinancialTrendsChart')
 )
 
 const LazyBarChart = lazy(
-  () => import('@/modules/charts/components/FinancialTrendsChart').then(module => ({ default: module.BarChart }))
+  () => import('@/modules/charts/components/FinancialTrendsChart')
 )
 
 const LazyAreaChart = lazy(
-  () => import('@/modules/charts/components/FinancialTrendsChart').then(module => ({ default: module.AreaChart }))
+  () => import('@/modules/charts/components/FinancialTrendsChart')
 )
 
 // Custom chart wrapper untuk specific chart types

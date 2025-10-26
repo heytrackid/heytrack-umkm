@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useLoading } from '@/hooks/useLoading'
+import { useLoading } from '@/hooks/loading/useLoading'
 import { apiLogger } from '@/lib/logger'
 import type {
   ProfitData,
@@ -65,8 +65,8 @@ export function useProfitReport(): UseProfitReportReturn {
       )
 
       const params = new URLSearchParams()
-      if (calculatedStartDate) params.append('start_date', calculatedStartDate)
-      if (calculatedEndDate) params.append('end_date', calculatedEndDate)
+      if (calculatedStartDate) {params.append('start_date', calculatedStartDate)}
+      if (calculatedEndDate) {params.append('end_date', calculatedEndDate)}
 
       const response = await fetch(`/api/reports/profit?${params.toString()}`)
 
@@ -81,9 +81,9 @@ export function useProfitReport(): UseProfitReportReturn {
       }
 
       setProfitData(data)
-    } catch (err: any) {
+    } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error fetching profit data:')
-      setError(err.message || 'Terjadi kesalahan saat mengambil data')
+      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
       setLoading(false)
     }
@@ -91,7 +91,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
   // Handle export report
   const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
-    if (!profitData) return
+    if (!profitData) {return}
 
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`

@@ -31,20 +31,17 @@ export default function ResetPasswordPage() {
     const emailValue = formData.get('email') as string
 
     // Client-side validation
-    const emailError = validateEmail(emailValue)
-    if (emailError) {
-      setFieldErrors({ email: emailError })
+    const emailValidation = validateEmail(emailValue)
+    if (!emailValidation.isValid) {
+      setFieldErrors({ email: emailValidation.error })
       return
     }
 
     startTransition(async () => {
       const result = await resetPassword(formData)
       if (result?.error) {
-        const authError = getAuthErrorMessage(result.error)
-        setError(authError.message)
-        if (authError.action) {
-          setErrorAction(authError.action)
-        }
+        const authErrorMessage = getAuthErrorMessage(result.error)
+        setError(authErrorMessage)
       } else if (result?.success) {
         setSuccess(true)
       }

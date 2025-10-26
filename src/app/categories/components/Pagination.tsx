@@ -26,7 +26,7 @@ export function Pagination({
   onPageChange,
   onPageSizeChange
 }: PaginationProps) {
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) {return null}
 
   return (
     <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">

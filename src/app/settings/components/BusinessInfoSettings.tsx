@@ -8,26 +8,13 @@ import { Building } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { validateBusinessInfoSettings } from '@/lib/settings-validation'
 import { useToast } from '@/hooks/use-toast'
+import type { AppSettingsState, SettingsUpdateHandler } from '../types'
 
-interface BusinessSettings {
-  businessName?: string
-  businessType?: string
-  address?: string
-  phone?: string
-  email?: string
-  website?: string
-  description?: string
-  [key: string]: unknown
-}
-
-interface GeneralSettings {
-  general?: BusinessSettings
-  [key: string]: unknown
-}
+type BusinessSettingsState = AppSettingsState['general']
 
 interface BusinessInfoSettingsProps {
-  settings: GeneralSettings
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**
@@ -35,16 +22,16 @@ interface BusinessInfoSettingsProps {
  */
 export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfoSettingsProps) {
   const { toast } = useToast()
-  const [localSettings, setLocalSettings] = useState(settings.general || {})
+  const [localSettings, setLocalSettings] = useState<BusinessSettingsState>(settings.general)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Update local state when settings change
   useEffect(() => {
-    setLocalSettings(settings.general || {})
+    setLocalSettings(settings.general)
   }, [settings.general])
 
   const handleChange = (field: string, value: string) => {
-    const newSettings = { ...localSettings, [field]: value }
+    const newSettings: BusinessSettingsState = { ...localSettings, [field]: value }
     setLocalSettings(newSettings)
 
     // Validate on change
@@ -52,7 +39,7 @@ export function BusinessInfoSettings({ settings, onSettingChange }: BusinessInfo
       const validatedData = validateBusinessInfoSettings(newSettings)
       setErrors({})
       // If validation passes, update parent
-      onSettingChange('general', field, value)
+      onSettingChange('general', field, validatedData[field] ?? value)
     } catch (error) {
       // Don't update parent if validation fails, but allow user to continue typing
       if (error instanceof Error) {

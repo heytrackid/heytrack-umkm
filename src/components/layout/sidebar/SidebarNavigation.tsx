@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import SidebarSection from './SidebarSection'
-import { NavigationSection } from './useSidebarLogic'
+import type { NavigationSection } from './useSidebarLogic'
 
 interface SidebarNavigationProps {
   sections: NavigationSection[]

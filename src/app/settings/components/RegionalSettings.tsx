@@ -7,23 +7,11 @@ import { useSettings } from '@/contexts/settings-context'
 import { Settings, RotateCcw } from 'lucide-react'
 import * as React from 'react'
 import { useState } from 'react'
-
-interface RegionalSettings {
-  timezone?: string
-  language?: string
-  currency?: string
-  region?: string
-  [key: string]: unknown
-}
-
-interface GeneralSettings {
-  regional?: RegionalSettings
-  [key: string]: unknown
-}
+import type { AppSettingsState, SettingsUpdateHandler } from '../types'
 
 interface RegionalSettingsProps {
-  settings: GeneralSettings
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**
@@ -55,7 +43,6 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
     resetToDefault()
     setTimeout(() => {
       setIsResetting(false)
-      window.location.reload() // Refresh untuk apply changes
     }, 500)
   }
 
@@ -91,12 +78,13 @@ export function RegionalSettings({ settings, onSettingChange }: RegionalSettings
             <Label htmlFor="currency">Mata Uang</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
-              value={contextSettings?.currency?.code || 'IDR'}
+              value={contextSettings?.currency?.code || settings.general.currency}
               onChange={(e) => {
                 const selected = currencies.find(c => c.code === e.target.value)
                 if (selected) {
                   updateCurrency(selected)
-                  onSettingChange('general', 'currency', e.target.value)
+                  onSettingChange('general', 'currency', selected.code)
+                  onSettingChange('ui', 'currency', selected.code)
                 }
               }}
             >

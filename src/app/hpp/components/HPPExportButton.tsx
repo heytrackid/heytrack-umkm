@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
-import { TimePeriod } from '@/types/hpp-tracking'
+import type { TimePeriod } from '@/types/hpp-tracking'
 import { Download, Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { useState } from 'react'

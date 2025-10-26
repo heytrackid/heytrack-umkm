@@ -1,4 +1,5 @@
-import { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
+import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
+import { formatCurrentCurrency, formatDate } from '@/shared'
 
 // Order Status Configurations
 export const orderStatuses: Record<OrderStatus, StatusInfo> = {
@@ -52,22 +53,7 @@ export function calculateOrderTotal(orderItems: Array<{quantity: number; price: 
 }
 
 // Format currency
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR'
-  }).format(amount)
-}
-
-// Date formatting
-export function formatDate(date: string | Date): string {
-  return new Date(date).toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
+export const formatCurrency = formatCurrentCurrency
 
 export function formatTime(date: string | Date): string {
   return new Date(date).toLocaleTimeString('id-ID', {
@@ -77,27 +63,7 @@ export function formatTime(date: string | Date): string {
 }
 
 // Validation
-export function validateOrderData(data: any): string[] {
-  const errors: string[] = []
-  
-  if (!data.customer_name?.trim()) {
-    errors.push('Nama pelanggan harus diisi')
-  }
-  
-  if (!data.customer_phone?.trim()) {
-    errors.push('Nomor telepon harus diisi')
-  }
-  
-  if (!data.delivery_date) {
-    errors.push('Tanggal pengiriman harus diisi')
-  }
-  
-  if (!data.order_items || data.order_items.length === 0) {
-    errors.push('Minimal harus ada 1 item pesanan')
-  }
-  
-  return errors
-}
+export { validateOrderData } from '@/lib/validations/form-validations'
 
 // Status flow validation
 export function canUpdateStatus(currentStatus: OrderStatus, newStatus: OrderStatus): boolean {

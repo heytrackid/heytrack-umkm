@@ -1,8 +1,8 @@
 // Production service hooks for Indonesian UMKM operations
 'use client'
 import { useMemo } from 'react'
-import { useSupabaseCRUD } from '@/hooks/useSupabaseCRUD'
-import { 
+import { useSupabaseCRUD } from '@/hooks';
+import type { 
   ProductionBatch,
   IngredientAllocation,
   QualityCheck,
@@ -21,8 +21,9 @@ import {
   DEFAULT_PRODUCTION_CONFIG,
   calculateProductionTimeline,
   type ProductionModuleConfig
-} from '../config/production.config'
-import { formatCurrency } from '@/shared/utils/currency'
+} from '../../config/production.config'
+import { formatCurrency, currencies } from '@/lib/currency'
+import { REGIONAL_DEFAULTS } from '@/lib/shared/utils/currency'
 
 // Main production batches hook
 export function useProductionBatches(filters?: ProductionFilters) {
@@ -59,7 +60,7 @@ export function useProductionBatches(filters?: ProductionFilters) {
 
   // Filter batches based on criteria
   const filteredBatches = useMemo((): ProductionBatch[] | undefined => {
-    if (!batches || !filters) return batches as ProductionBatch[] | undefined
+    if (!batches || !filters) {return batches as ProductionBatch[] | undefined}
 
     return (batches as ProductionBatch[]).filter((batch: ProductionBatch) => {
       // Status filter
@@ -307,7 +308,7 @@ export function useProductionCapacity(date: string): {
   const { staff } = useProductionStaff({ active: true })
 
   const capacity = useMemo((): ProductionCapacity | null => {
-    if (!batches || !equipment || !staff) return null
+    if (!batches || !equipment || !staff) {return null}
 
     const eqArray = equipment as ProductionEquipment[]
     const staffArray = staff as ProductionStaff[]
@@ -404,7 +405,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
   const { batches, loading, error } = useProductionBatches(filters)
 
   const analytics = useMemo((): ProductionAnalytics | null => {
-    if (!batches) return null
+    if (!batches) {return null}
 
     const batchArray = batches as ProductionBatch[]
     const completedBatches = batchArray.filter((b: ProductionBatch) => b.status === 'completed')
@@ -572,13 +573,13 @@ export function useTemperatureMonitoring(batchId: string) {
 
 // Currency formatting for production costs
 export function useProductionCurrency(currency?: string) {
-  const defaultCurrency = DEFAULT_PRODUCTION_CONFIG.regional.currency
+  const defaultCurrency = DEFAULT_CURRENCY
 
   const formatCost = (amount: number, options?: {
     showSymbol?: boolean
     showCode?: boolean
   }) => {
-    return formatCurrency(amount, currency || defaultCurrency, options)
+    return formatCurrency(amount, currency || defaultCurrency)
   }
 
   return {

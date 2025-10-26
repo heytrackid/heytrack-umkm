@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import { uiLogger } from "@/lib/logger"
+import { uiLogger } from '@/lib/logger'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,28 +11,54 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '../constants'
-import { OrderFormProps, OrderItem } from '../types'
+import type { Customer, Order, OrderFormProps, OrderItem, PaymentMethod } from '../types'
 import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
+import { warningToast } from '@/hooks/use-toast'
+import type { RecipesTable } from '@/types/recipes'
+
+type FormState = {
+  customer_name: string
+  customer_phone: string
+  customer_address: string
+  order_date: string
+  delivery_date: string
+  delivery_time: string
+  delivery_fee: number
+  discount: number
+  tax_amount: number
+  payment_method: PaymentMethod
+  paid_amount: number
+  priority: Order['priority']
+  notes: string
+  special_instructions: string
+}
+
+const parseNumberInput = (value: string) => {
+  const parsed = Number.parseFloat(value)
+  return Number.isNaN(parsed) ? 0 : parsed
+}
 
 export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) {
   const { formatCurrency } = useCurrency()
-  const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
-  const [availableCustomers, setAvailableCustomers] = useState<any[]>([])
+  const [availableRecipes, setAvailableRecipes] = useState<RecipesTable['Row'][]>([])
+  const [availableCustomers, setAvailableCustomers] = useState<Customer[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
   const [showNewCustomer, setShowNewCustomer] = useState(false)
   const [hppCalculations, setHppCalculations] = useState<Record<string, unknown>>({})
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormState>({
     customer_name: order?.customer_name || '',
     customer_phone: order?.customer_phone || '',
     customer_address: order?.customer_address || '',
     order_date: order?.order_date || new Date().toISOString().split('T')[0],
     delivery_date: order?.delivery_date || '',
-    delivery_time: order?.delivery_date || '',
+    delivery_time: order?.delivery_date && order.delivery_date.includes('T')
+      ? order.delivery_date.split('T')[1]?.slice(0, 5) ?? ''
+      : '',
     delivery_fee: order?.delivery_fee || ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
     discount: order?.discount_amount || 0,
     tax_amount: order?.tax_rate || ORDER_CONFIG.DEFAULT_TAX_RATE,
-    payment_method: 'cash', // Default payment method
+    payment_method: 'cash',
     paid_amount: order?.paid_amount || 0,
     priority: order?.priority || ORDER_CONFIG.DEFAULT_PRIORITY,
     notes: order?.notes || '',
@@ -58,8 +84,8 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
     try {
       const response = await fetch('/api/recipes')
       if (response.ok) {
-        const data = await response.json()
-        setAvailableRecipes(data.filter((recipe: any) => recipe.is_active))
+        const data: RecipesTable['Row'][] = await response.json()
+        setAvailableRecipes(data.filter(recipe => recipe.is_active))
       }
     } catch (err) {
       uiLogger.error({ err }, 'Error fetching recipes')
@@ -70,7 +96,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
     try {
       const response = await fetch('/api/customers')
       if (response.ok) {
-        const data = await response.json()
+        const data: Customer[] = await response.json()
         setAvailableCustomers(data)
       }
     } catch (err) {
@@ -78,11 +104,12 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const selectCustomer = (customer: any) => {
+  const selectCustomer = (customer: Customer | undefined) => {
+    if (!customer) return
     setFormData(prev => ({
       ...prev,
       customer_name: customer.name,
@@ -94,7 +121,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
 
   const addOrderItem = () => {
     if (availableRecipes.length === 0) {
-      alert
+      warningToast('Resep tidak tersedia', 'Tambahkan resep baru sebelum membuat item pesanan')
       return
     }
 
@@ -103,10 +130,17 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
       id: `temp-${Date.now()}`,
       order_id: '',
       recipe_id: firstRecipe.id,
-      recipe: firstRecipe,
+      recipe: {
+        id: firstRecipe.id,
+        name: firstRecipe.name,
+        price: firstRecipe.selling_price ?? 0,
+        category: firstRecipe.category ?? 'Uncategorized',
+        servings: firstRecipe.servings ?? 0,
+        description: firstRecipe.description ?? undefined
+      },
       quantity: 1,
-      unit_price: firstRecipe.selling_price || 0,
-      total_price: firstRecipe.selling_price || 0,
+      unit_price: firstRecipe.selling_price ?? 0,
+      total_price: firstRecipe.selling_price ?? 0,
       notes: '',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -114,7 +148,11 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
     setOrderItems(prev => [...prev, newItem])
   }
 
-  const updateOrderItem = (index: number, field: string, value: any) => {
+  const updateOrderItem = <K extends keyof OrderItem>(
+    index: number,
+    field: K,
+    value: OrderItem[K] | string
+  ) => {
     setOrderItems(prev => {
       const updated = [...prev]
       if (field === 'recipe_id') {
@@ -122,21 +160,28 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
         if (selectedRecipe) {
           updated[index] = {
             ...updated[index],
-            recipe_id: value,
-            recipe: selectedRecipe,
-            unit_price: selectedRecipe.selling_price || updated[index].unit_price,
-            total_price: (selectedRecipe.selling_price || updated[index].unit_price) * updated[index].quantity
+            recipe_id: value as string,
+            recipe: {
+              id: selectedRecipe.id,
+              name: selectedRecipe.name,
+              price: selectedRecipe.selling_price ?? updated[index].unit_price,
+              category: selectedRecipe.category ?? 'Uncategorized',
+              servings: selectedRecipe.servings ?? 0,
+              description: selectedRecipe.description ?? undefined
+            },
+            unit_price: selectedRecipe.selling_price ?? updated[index].unit_price,
+            total_price: (selectedRecipe.selling_price ?? updated[index].unit_price) * updated[index].quantity
           }
         }
       } else if (field === 'quantity') {
-        const qty = parseInt || 0
+        const qty = Number.parseInt(value as string, 10) || 0
         updated[index] = {
           ...updated[index],
           quantity: qty,
           total_price: updated[index].unit_price * qty
         }
       } else if (field === 'unit_price') {
-        const price = parseFloat || 0
+        const price = Number.parseFloat(value as string) || 0
         updated[index] = {
           ...updated[index],
           unit_price: price,
@@ -154,10 +199,10 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault
+    e.preventDefault()
 
     if (!formData.customer_name || orderItems.length === 0) {
-      alert
+      warningToast('Data belum lengkap', 'Pastikan pelanggan dan minimal satu item pesanan terisi')
       return
     }
 
@@ -189,7 +234,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
       }))
     }
 
-    await onSubmit(data)
+    await onSubmit(orderData)
   }
 
   return (
@@ -219,7 +264,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
               onClick={() => setShowNewCustomer(!showNewCustomer)}
               className="self-end sm:self-auto"
             >
-              {showNewCustomer ? Informasi : Informasi}
+              {showNewCustomer ? "Batalkan" : "Pelanggan Baru"}
             </Button>
           </div>
 
@@ -307,7 +352,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.priority}
-                onChange={(e) => handleInputChange('priority', e.target.value)}
+                onChange={(e) => handleInputChange('priority', e.target.value as Order['priority'])}
               >
                 {Object.entries(ORDER_PRIORITIES).map(([key, config]) => (
                   <option key={key} value={key}>{config.label}</option>
@@ -389,7 +434,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
                         <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <Input
                           type="number"
-                          className={`text-sm mt-1`}
+                          className="text-sm mt-1"
                           value={item.unit_price}
                           onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
                           min="0"
@@ -429,7 +474,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
                         <Label className="text-xs font-medium text-muted-foreground">Informasi</Label>
                         <Input
                           type="number"
-                          className={`text-sm mt-1`}
+                          className="text-sm mt-1"
                           value={item.unit_price}
                           onChange={(e) => updateOrderItem(index, 'unit_price', e.target.value)}
                           min="0"
@@ -497,7 +542,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
                 type="number"
 
                 value={formData.delivery_fee}
-                onChange={(e) => handleInputChange('delivery_fee', parseFloat || 0)}
+                onChange={(e) => handleInputChange('delivery_fee', parseNumberInput(e.target.value))}
                 min="0"
                 step="1000"
                 className="mt-1"
@@ -533,12 +578,13 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
               <select
                 className="w-full p-2 border border-input rounded-md bg-background mt-1"
                 value={formData.payment_method}
-                onChange={(e) => handleInputChange('payment_method', e.target.value)}
+                onChange={(e) => handleInputChange('payment_method', e.target.value as PaymentMethod)}
               >
                 <option value="cash">Informasi</option>
                 <option value="transfer">Informasi</option>
-                <option value="creditCard">Informasi</option>
-                <option value="digitalWallet">Informasi</option>
+                <option value="qris">Informasi</option>
+                <option value="card">Informasi</option>
+                <option value="ewallet">Informasi</option>
               </select>
             </div>
             <div>
@@ -548,7 +594,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
                 type="number"
 
                 value={formData.discount}
-                onChange={(e) => handleInputChange('discount', parseFloat || 0)}
+                onChange={(e) => handleInputChange('discount', parseNumberInput(e.target.value))}
                 min="0"
                 className="mt-1"
               />
@@ -560,7 +606,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
                 type="number"
 
                 value={formData.tax_amount}
-                onChange={(e) => handleInputChange('tax_amount', parseFloat || 0)}
+                onChange={(e) => handleInputChange('tax_amount', parseNumberInput(e.target.value))}
                 min="0"
                 max="100"
                 className="mt-1"
@@ -573,7 +619,7 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
                 type="number"
 
                 value={formData.paid_amount}
-                onChange={(e) => handleInputChange('paid_amount', parseFloat || 0)}
+                onChange={(e) => handleInputChange('paid_amount', parseNumberInput(e.target.value))}
                 min="0"
                 step="1000"
                 className="mt-1"
@@ -620,10 +666,10 @@ export const OrderForm = memo(function OrderForm({ order, onSubmit, onCancel, lo
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onCancel} className="order-2 sm:order-1">
-            Informasi
+            Batalkan
           </Button>
           <Button type="submit" disabled={loading} className="order-1 sm:order-2">
-            {loading ? Informasi : order ? Informasi : Informasi}
+            {loading ? "Menyimpan..." : order ? "Update Pesanan" : "Simpan Pesanan"}
           </Button>
         </div>
       </Tabs>

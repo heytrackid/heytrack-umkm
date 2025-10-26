@@ -1,4 +1,5 @@
 import type { Json } from './common'
+import type { UserRole, BusinessUnit } from './index'
 
 // Database functions
 export type DatabaseFunctions = {
@@ -33,7 +34,7 @@ export type DatabaseFunctions = {
   }
   get_user_role: {
     Args: { user_uuid?: string }
-    Returns: import('./index').UserRole
+    Returns: UserRole
   }
   optimize_production_schedule: {
     Args: { max_duration_hours?: number; target_date: string }
@@ -57,7 +58,7 @@ export type DatabaseFunctions = {
   }
   user_has_business_unit_access: {
     Args: {
-      unit: import('./index').BusinessUnit
+      unit: BusinessUnit
       user_uuid?: string
     }
     Returns: boolean

@@ -4,26 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
 import { useSettings, currencies } from '@/contexts/settings-context'
-
-interface BusinessSettings {
-  businessName?: string
-  businessType?: string
-  address?: string
-  phone?: string
-  email?: string
-  website?: string
-  description?: string
-  [key: string]: unknown
-}
-
-interface GeneralSettings {
-  general?: BusinessSettings
-  [key: string]: unknown
-}
+import type { AppSettingsState, SettingsUpdateHandler } from '../types'
 
 interface NumberCurrencySettingsProps {
-  settings: GeneralSettings
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**
@@ -64,6 +49,7 @@ export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurr
               const selectedCurrency = currencies.find(c => c.code === e.target.value)
               if (selectedCurrency) {
                 updateCurrency(selectedCurrency)
+                onSettingChange('ui', 'currency', selectedCurrency.code)
               }
             }}
           >

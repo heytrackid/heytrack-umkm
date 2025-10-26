@@ -72,7 +72,7 @@ function validateCategoryForm(formData: CategoryFormData): { isValid: boolean; e
 }
 
 function filterCategories(categories: Category[], searchTerm: string): Category[] {
-  if (!searchTerm.trim()) return categories
+  if (!searchTerm.trim()) {return categories}
 
   const term = searchTerm.toLowerCase()
   return categories.filter(category =>
@@ -297,7 +297,7 @@ export function useCategories(): UseCategoriesReturn {
   // Handle delete category
   const handleDeleteCategory = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId)
-    if (!category) return
+    if (!category) {return}
 
     if (confirm(`Apakah Anda yakin ingin menghapus kategori "${category.name}"?`)) {
       setCategories(prev => prev.filter(cat => cat.id !== categoryId))
@@ -324,7 +324,7 @@ export function useCategories(): UseCategoriesReturn {
   }
 
   const handleBulkDelete = () => {
-    if (selectedItems.length === 0) return
+    if (selectedItems.length === 0) {return}
 
     const selectedCategories = filteredCategories.filter(category =>
       selectedItems.includes(category.id)
@@ -343,7 +343,7 @@ export function useCategories(): UseCategoriesReturn {
   }
 
   const handleBulkEdit = () => {
-    if (selectedItems.length === 0) return
+    if (selectedItems.length === 0) {return}
 
     const selectedCategories = filteredCategories.filter(category =>
       selectedItems.includes(category.id)

@@ -1,7 +1,8 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { getErrorMessage } from '@/lib/type-guards'
-import { HPPComparison, TimePeriod } from '@/types/hpp-tracking'
-import { NextRequest, NextResponse } from 'next/server'
+import type { HPPComparison, TimePeriod } from '@/types/hpp-tracking'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/comparison - Compare HPP between current and previous period
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Get recipe name
         const { data: recipe, error: recipeError } = await supabase
@@ -220,7 +221,7 @@ function calculateStatistics(
 function determineTrend(current: number, previous: number): 'up' | 'down' | 'stable' {
     const changePercentage = ((current - previous) / previous) * 100
 
-    if (changePercentage > 5) return 'up'
-    if (changePercentage < -5) return 'down'
+    if (changePercentage > 5) {return 'up'}
+    if (changePercentage < -5) {return 'down'}
     return 'stable'
 }

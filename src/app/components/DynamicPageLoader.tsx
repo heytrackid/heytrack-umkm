@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import dynamic from 'next/dynamic'
-import { ComponentType } from 'react'
+import type { ComponentType } from 'react'
 
 /**
  * Dynamic Page Loading with next/dynamic

@@ -11,22 +11,24 @@ export * from './form-validations'
 export {
   CustomerInsertSchema,
   CustomerUpdateSchema,
+  OrderItemInsertSchema,
   OrderInsertSchema,
   OrderUpdateSchema,
-  RecipeInsertSchema,
-  RecipeUpdateSchema,
   IngredientInsertSchema,
   IngredientUpdateSchema,
-  SupplierInsertSchema,
-  SupplierUpdateSchema,
-  SalesInsertSchema,
-  SalesUpdateSchema,
-  ExpenseInsertSchema,
-  ExpenseUpdateSchema,
-  OperationalCostInsertSchema,
-  OperationalCostUpdateSchema,
   IngredientPurchaseInsertSchema,
   IngredientPurchaseUpdateSchema,
+  RecipeIngredientInsertSchema,
+  RecipeInsertSchema,
+  RecipeUpdateSchema,
+  SupplierInsertSchema,
+  SupplierUpdateSchema,
+  OperationalCostInsertSchema,
+  OperationalCostUpdateSchema,
+  ExpenseInsertSchema,
+  ExpenseUpdateSchema,
+  SalesInsertSchema,
+  SalesUpdateSchema,
 } from './database-validations'
 
 // API validations - export commonly used schemas
@@ -36,33 +38,54 @@ export {
   OrderFormSchema,
   RecipeFormSchema,
   CustomerFormSchema,
-  
+
   // Query schemas
   PaginationQuerySchema,
   DateRangeQuerySchema,
   PaginationSchema,
   DateRangeSchema,
-  
+
   // HPP schemas
   HPPExportQuerySchema,
   HPPComparisonQuerySchema,
   HPPAnalysisQuerySchema,
-  
+
   // Other schemas
   IdParamSchema,
   ReportQuerySchema,
   SalesQuerySchema,
   FileUploadSchema,
   ImageUploadSchema,
-} from './api-validations'
+} from './domains'
 
+// Domain-specific exports
+export {
+  // Validation helpers
+  CustomerValidationHelpers,
+  OrderValidationHelpers,
+  IngredientValidationHelpers,
+  RecipeValidationHelpers,
+} from './domains'
+
+// Enhanced schemas with business rules
 export type {
-  IngredientForm,
-  OrderForm,
-  RecipeForm,
-  CustomerForm,
-  PaginationQuery,
-  DateRangeQuery,
-  FileUpload,
-  ImageUpload,
-} from './api-validations'
+  EnhancedCustomerInsert,
+  EnhancedCustomerUpdate,
+  EnhancedOrderInsert,
+  EnhancedOrderUpdate,
+  EnhancedIngredientInsert,
+  EnhancedIngredientUpdate,
+  EnhancedRecipeInsert,
+  EnhancedRecipeUpdate,
+} from './domains'
+
+// Validation caching
+export {
+  validationCache,
+  withValidationCache,
+  CachedValidationHelpers,
+  ValidationPerformanceMonitor,
+  ValidationCache,
+} from './cache'
+
+export type { ValidationCacheConfig } from './cache'

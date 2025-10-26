@@ -1,5 +1,6 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import type { HPPAlertsTable } from '@/types'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
@@ -18,7 +19,7 @@ export async function POST(
             )
         }
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Update alert to mark as dismissed
         const updateData: HPPAlertsTable['Update'] = {
@@ -27,7 +28,6 @@ export async function POST(
             updated_at: new Date().toISOString()
         }
         
-        // @ts-ignore - Supabase table type mismatch with generated schema
         const { data: alert, error } = await supabase
             .from('hpp_alerts')
             .update(updateData)

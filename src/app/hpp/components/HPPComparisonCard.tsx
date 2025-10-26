@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CardSkeleton } from '@/components/ui'
 import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
-import { HPPComparison } from '@/types/hpp-tracking'
+import type { HPPComparison, TimePeriod } from '@/types/hpp-tracking'
 import { getPeriodLabel as getUtilPeriodLabel } from '@/utils/hpp-date-utils'
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
 
@@ -88,7 +88,7 @@ export default function HPPComparisonCard({
     const TrendIcon = trendIndicator.icon
 
     // Use utility function for period label
-    const periodLabel = getUtilPeriodLabel(period)
+    const periodLabel = getUtilPeriodLabel(period as TimePeriod)
 
     return (
         <Card>

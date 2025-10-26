@@ -16,7 +16,7 @@ export type {
   PaymentStatus,
   Priority,
   StatusInfo,
-  OrderFilters
+  OrderFilters as OrderFiltersType
 } from './types'
 
 // Utils

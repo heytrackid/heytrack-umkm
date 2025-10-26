@@ -3,7 +3,7 @@ import * as React from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ComponentProps, MouseEvent } from 'react'
+import type { ComponentProps, MouseEvent } from 'react'
 
 import { apiLogger } from '@/lib/logger'
 interface PrefetchLinkProps extends ComponentProps<typeof Link> {

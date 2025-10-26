@@ -35,8 +35,9 @@ import {
 import { format } from 'date-fns'
 import { toast } from 'react-hot-toast'
 
+import type { 
+  ProductionConstraints} from '@/services/production/BatchSchedulingService';
 import { 
-  ProductionConstraints, 
   batchSchedulingService 
 } from '@/services/production/BatchSchedulingService'
 

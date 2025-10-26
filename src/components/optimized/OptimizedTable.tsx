@@ -13,7 +13,7 @@ import { MoreHorizontal, Edit2, Trash2, Eye } from 'lucide-react'
 interface ColumnDefinition<T> {
   key: keyof T | string
   label: string
-  render?: (value: any, item: T) => React.ReactNode
+  render?: (value: unknown, item: T) => React.ReactNode
 }
 
 interface OptimizedTableRowProps<T extends { id: string | number }> {
@@ -24,7 +24,7 @@ interface OptimizedTableRowProps<T extends { id: string | number }> {
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
   onView?: (item: T) => void
-  formatValue?: (key: string, value: any, item: T) => React.ReactNode
+  formatValue?: (key: string, value: unknown, item: T) => React.ReactNode
 }
 
 // Memoized row component to prevent unnecessary re-renders
@@ -133,7 +133,7 @@ const BulkActionsBar = memo(<T extends { id: string | number, name?: string, tit
   onBulkDelete,
   getPreviewNames
 }: BulkActionsBarProps<T>) => {
-  if (selectedCount === 0) return null
+  if (selectedCount === 0) {return null}
 
   return (
     <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -191,7 +191,7 @@ interface OptimizedTableProps<T extends { id: string | number }> {
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
   onView?: (item: T) => void
-  formatValue?: (key: string, value: any, item: T) => React.ReactNode
+  formatValue?: (key: string, value: unknown, item: T) => React.ReactNode
   emptyStateComponent?: React.ReactNode
   title?: string
   description?: string

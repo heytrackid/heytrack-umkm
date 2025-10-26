@@ -1,4 +1,4 @@
-import {
+import type {
   AutomationConfig,
   Ingredient,
   InventoryAnalysis,
@@ -50,7 +50,7 @@ export class InventoryAutomation {
     const holdingCostRate = 0.2 // 20% of item value per year
     const holdingCost = ingredient.price_per_unit * holdingCostRate
 
-    if (holdingCost <= 0) return ingredient.min_stock ?? 0
+    if (holdingCost <= 0) {return ingredient.min_stock ?? 0}
 
     const eoq = Math.sqrt(2 * annualDemand * orderingCost / holdingCost)
     return Math.max(eoq, ingredient.min_stock ?? 0) // At least minimum stock
@@ -64,9 +64,9 @@ export class InventoryAutomation {
     currentStock: number, 
     minStock: number
   ): InventoryStatus {
-    if (currentStock <= minStock * 0.5) return 'critical'
-    if (currentStock <= minStock) return 'low'
-    if (currentStock > minStock * 3) return 'overstocked'
+    if (currentStock <= minStock * 0.5) {return 'critical'}
+    if (currentStock <= minStock) {return 'low'}
+    if (currentStock > minStock * 3) {return 'overstocked'}
     return 'adequate'
   }
 
@@ -74,8 +74,8 @@ export class InventoryAutomation {
    * Determine reorder urgency
    */
   private getReorderUrgency(daysRemaining: number): ReorderUrgency {
-    if (daysRemaining <= 3) return 'urgent'
-    if (daysRemaining <= 7) return 'soon'
+    if (daysRemaining <= 3) {return 'urgent'}
+    if (daysRemaining <= 7) {return 'soon'}
     return 'normal'
   }
 
@@ -275,7 +275,7 @@ export class InventoryAutomation {
     const avgStock = (ingredient.current_stock ?? 0 + ingredient.min_stock) / 2
     const estimatedMonthlyCOGS = avgStock * ingredient.price_per_unit * 0.1 // Assume 10% monthly usage
     
-    if (avgStock === 0) return 0
+    if (avgStock === 0) {return 0}
     return estimatedMonthlyCOGS / (avgStock * ingredient.price_per_unit) * 12
   }
 
@@ -287,7 +287,7 @@ export class InventoryAutomation {
     const currentRatio = ingredient.current_stock ?? 0 / optimalStock
     
     // Efficiency score: 100% when at optimal, decreases with over/understocking
-    if (currentRatio <= 1) return currentRatio * 100
+    if (currentRatio <= 1) {return currentRatio * 100}
     return Math.max(0, 100 - (currentRatio - 1) * 50)
   }
 }

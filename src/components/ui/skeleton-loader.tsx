@@ -1,7 +1,7 @@
 'use client'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib'
+import { cn } from '@/lib/utils'
 
 /**
  * Card Skeleton - Loading placeholder for card components

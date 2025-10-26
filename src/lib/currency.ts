@@ -34,6 +34,9 @@ export const currencies: Currency[] = [
   { code: 'PHP', symbol: '₱', name: 'Philippine Peso', decimals: 2 }
 ]
 
+export const DEFAULT_CURRENCY: Currency =
+  currencies.find((currency) => currency.code === 'IDR') ?? currencies[0]
+
 // Extended currency configurations
 export const currencyConfigs: Record<string, CurrencyConfig> = {
   IDR: {
@@ -158,16 +161,27 @@ export function formatCurrency(amount: number, currency: Currency): string {
  * Get currency from localStorage or default to IDR
  */
 export function getCurrentCurrency(): Currency {
+  if (typeof window === 'undefined') {
+    return DEFAULT_CURRENCY
+  }
+
   try {
-    const savedSettings = localStorage.getItem('heytrack-settings')
+    const savedSettings = window.localStorage.getItem('heytrack-settings')
     if (savedSettings) {
-      const parsed = JSON.parse(savedSettings)
-      return parsed.currency || currencies[0]
+      const parsed = JSON.parse(savedSettings) as { currency?: Partial<Currency> }
+      const savedCurrency = parsed?.currency
+      if (savedCurrency && typeof savedCurrency.code === 'string') {
+        const config = currencyConfigs[savedCurrency.code]
+        if (config) {
+          return config
+        }
+      }
     }
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error loading currency settings:')
+    apiLogger.error({ error }, 'Error loading currency settings')
   }
-  return currencies[0] // Default to IDR
+
+  return DEFAULT_CURRENCY
 }
 
 /**
@@ -224,7 +238,7 @@ export function formatCurrencyIntl(amount: number, currency: Currency): string {
  * Remove currency symbol and convert to number
  */
 export function parseCurrencyString(currencyString: string, currency: Currency): number {
-  if (!currencyString) return 0
+  if (!currencyString) {return 0}
   
   // Get config for advanced parsing
   const config = currencyConfigs[currency.code]
@@ -276,12 +290,12 @@ export function formatCurrencyInput(
   currencyCode: string = 'IDR'
 ): string {
   const config = currencyConfigs[currencyCode]
-  if (!config) return value
+  if (!config) {return value}
   
   // Remove non-numeric characters except decimal separator
-  let cleaned = value.replace(/[^\d]/g, '')
+  const cleaned = value.replace(/[^\d]/g, '')
   
-  if (cleaned === '') return ''
+  if (cleaned === '') {return ''}
   
   const number = parseInt(cleaned) || 0
   
@@ -335,6 +349,6 @@ export function convertCurrency(
   toCurrency: string,
   exchangeRate: number
 ): number {
-  if (fromCurrency === toCurrency) return amount
+  if (fromCurrency === toCurrency) {return amount}
   return amount * exchangeRate
 }

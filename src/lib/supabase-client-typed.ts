@@ -1,96 +1,36 @@
 /**
- * Typed Supabase Client Wrappers
- * Provides properly typed wrappers for Supabase operations to avoid 'never' type issues
+ * Typed Supabase Client Operations
+ * Enhanced Supabase operations with proper typing
  */
 
-import type { Database } from '@/types/database'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
 
-// Generic insert wrapper
-export async function typedInsert<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<Database>,
-  table: T,
-  data: Database['public']['Tables'][T]['Insert'] | Database['public']['Tables'][T]['Insert'][]
+// Typed insert operation
+export async function typedInsert<T>(
+  table: string,
+  data: Partial<T>,
+  client?: any
 ) {
-  const isArray = Array.isArray(data)
-  const result = await supabase
-    .from(table)
-    .insert(data as any)
-    .select()
-
-  return result as {
-    data: Database['public']['Tables'][T]['Row'][] | null
-    error: any
-  }
+  const supabase = client || createClient()
+  return await supabase.from(table).insert(data as any)
 }
 
-// Generic update wrapper
-export async function typedUpdate<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<Database>,
-  table: T,
-  id: string,
-  data: Database['public']['Tables'][T]['Update']
+// Typed update operation
+export async function typedUpdate<T>(
+  table: string,
+  id: string | number,
+  data: Partial<T>,
+  client?: any
 ) {
-  const result = await supabase
-    .from(table)
-    .update(data as any)
-    .eq('id', id)
-    .select()
-    .single()
-
-  return result as {
-    data: Database['public']['Tables'][T]['Row'] | null
-    error: any
-  }
+  const supabase = client || createClient()
+  return await supabase.from(table).update(data as any).eq('id', id)
 }
 
-// Generic select wrapper
-export async function typedSelect<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<Database>,
-  table: T,
-  id?: string
-) {
-  let query = supabase.from(table).select('*')
-  
-  if (id) {
-    const singleResult = await query.eq('id', id).single()
-    return singleResult as {
-      data: Database['public']['Tables'][T]['Row'] | null
-      error: any
-    }
-  }
-
-  const result = await query
-  return result as {
-    data: Database['public']['Tables'][T]['Row'][] | null
-    error: any
-  }
+// Type casting helpers (re-exported for convenience)
+export function castRow<T>(row: any): T {
+  return row as T
 }
 
-// Generic delete wrapper
-export async function typedDelete<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<Database>,
-  table: T,
-  id: string
-) {
-  const result = await supabase
-    .from(table)
-    .delete()
-    .eq('id', id)
-
-  return result
-}
-
-// Helper to cast query results
-export function castRow<T extends keyof Database['public']['Tables']>(
-  data: unknown
-): Database['public']['Tables'][T]['Row'] {
-  return data as Database['public']['Tables'][T]['Row']
-}
-
-// Helper to cast query array results  
-export function castRows<T extends keyof Database['public']['Tables']>(
-  data: unknown[]
-): Database['public']['Tables'][T]['Row'][] {
-  return data as Database['public']['Tables'][T]['Row'][]
+export function castRows<T>(rows: any[]): T[] {
+  return rows as T[]
 }

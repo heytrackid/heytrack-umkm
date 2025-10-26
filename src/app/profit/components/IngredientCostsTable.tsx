@@ -1,9 +1,9 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import type { IngredientCost } from '../constants'
+import type { ProfitData } from './types'
 
 interface IngredientCostsTableProps {
-  ingredients: IngredientCost[]
+  ingredients: ProfitData['ingredients']
   formatCurrency: (amount: number) => string
 }
 

@@ -9,7 +9,8 @@ import { useMobile } from '@/hooks/useResponsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
-import { memo, ReactNode, useEffect, useState } from 'react'
+import type { ReactNode} from 'react';
+import { memo, useEffect, useState } from 'react'
 import MobileHeader from './mobile-header'
 import SimpleSidebar from './sidebar'
 // Supabase auth

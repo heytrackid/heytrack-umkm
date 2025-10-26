@@ -12,18 +12,34 @@ export * from './pricing-automation'
 export * from './production-automation'
 export * from './types'
 
+// Re-export workflow system
+export * from './workflows'
+
 // Import for default engine
-import { AutomationConfig } from './types'
+import type { AutomationConfig } from './types'
 
 // Default configuration for Indonesian UMKM F&B
 export const UMKM_CONFIG: AutomationConfig = {
+  // General settings
+  enabled: true,
+  maxConcurrentJobs: 5,
+  retryAttempts: 3,
+  notificationEnabled: true,
+
+  // Pricing automation
   defaultProfitMargin: 60, // 60% margin - typical for F&B
   minimumProfitMargin: 30, // 30% minimum
   maximumProfitMargin: 150, // 150% for premium products
+
+  // Inventory automation
   autoReorderDays: 7, // Reorder 7 days before stock out
   safetyStockMultiplier: 1.5, // 50% safety stock
+
+  // Production automation
   productionLeadTime: 4, // 4 hours production buffer
   batchOptimizationThreshold: 5, // Minimum 5 units per batch
+
+  // Financial automation
   lowProfitabilityThreshold: 20, // Alert if margin below 20%
   cashFlowWarningDays: 7 // Cash flow warning 7 days ahead
 }

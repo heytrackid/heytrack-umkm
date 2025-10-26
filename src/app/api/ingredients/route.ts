@@ -1,117 +1,128 @@
 import {
-  calculateOffset,
-  createPaginationMeta,
   createSuccessResponse,
-  handleDatabaseError,
+  createErrorResponse,
+  handleAPIError,
+  withValidation,
   withQueryValidation,
-  withValidation
-} from '@/lib/api-validation'
+  PaginationSchema,
+  calculateOffset,
+  createPaginationMeta
+} from '@/lib/api-core'
 import {
-  BahanBakuSchema,
-  PaginationSchema
-} from '@/lib/validations'
+  IngredientInsertSchema,
+  IngredientUpdateSchema
+} from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
 
 import { apiLogger } from '@/lib/logger'
+
+// Extended schema for ingredients query
+const IngredientsQuerySchema = PaginationSchema.extend({
+  sort: z.string().optional(),
+  order: z.enum(['asc', 'desc']).default('desc'),
+  search: z.string().optional()
+})
 // GET /api/ingredients - Get all bahan baku with pagination and filtering
-export const GET = withQueryValidation(
-  PaginationSchema.partial(), // Make all fields optional for GET requests
-  async (_req: NextRequest, query) => {
-    try {
-      // Create authenticated Supabase client
-      const supabase = await createClient()
+export async function GET(request: NextRequest) {
+  try {
+    // Validate query parameters
+    const queryValidation = withQueryValidation(IngredientsQuerySchema)(request)
+    if (queryValidation instanceof Response) {
+      return queryValidation // Return error response
+    }
 
-      // Validate session
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { page = 1, limit = 10, sort, order = 'desc', search } = queryValidation
+    const offset = calculateOffset(page, limit)
 
-      if (authError || !user) {
-        apiLogger.error({ error: authError }, 'Auth error:')
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        )
-      }
+    // Create authenticated Supabase client
+    const supabase = await createClient()
 
-      const { page = 1, limit = 10, sort, order = 'desc', search } = query
-      const offset = calculateOffset(page, limit)
+    // Validate session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-      // Build query - using ingredients table
-      let supabaseQuery = supabase
-        .from('ingredients')
-        .select('*', { count: 'exact' })
-        .eq('user_id', (user as any).id)
-        .range(offset, offset + limit - 1)
+    if (authError || !user) {
+      apiLogger.error({ error: authError }, 'Auth error:')
+      return createErrorResponse('Unauthorized', 401)
+    }
 
-      // Apply search filter - using name instead of nama_bahan
-      if (search) {
-        supabaseQuery = supabaseQuery.ilike('name', `%${search}%`)
-      }
+    // Build query - using ingredients table
+    let supabaseQuery = supabase
+      .from('ingredients')
+      .select('*', { count: 'exact' })
+      .eq('user_id', (user as any).id)
+      .range(offset, offset + limit - 1)
 
-      // Apply sorting - default to name
-      if (sort) {
-        supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
-      } else {
-        supabaseQuery = supabaseQuery.order('name', { ascending: true })
-      }
+    // Apply search filter - using name instead of nama_bahan
+    if (search) {
+      supabaseQuery = supabaseQuery.ilike('name', `%${search}%`)
+    }
 
-      // @ts-ignore
+    // Apply sorting - default to name
+    if (sort) {
+      supabaseQuery = supabaseQuery.order(sort, { ascending: order === 'asc' })
+    } else {
+      supabaseQuery = supabaseQuery.order('name', { ascending: true })
+    }
+
+    // @ts-ignore
     const { data, error, count } = await supabaseQuery
 
-      if (error) {
-        return handleDatabaseError(error)
-      }
-
-      // Create pagination metadata
-      const pagination = createPaginationMeta(count || 0, page, limit)
-
-      return createSuccessResponse({
-        ingredients: data,
-        pagination
-      })
-
-    } catch (error: unknown) {
-      return handleDatabaseError(error)
+    if (error) {
+      return handleAPIError(error)
     }
+
+    // Create pagination metadata
+    const pagination = createPaginationMeta(count || 0, page, limit)
+
+    return createSuccessResponse({
+      ingredients: data,
+      pagination
+    })
+
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
-)
+}
 
 // POST /api/ingredients - Create new bahan baku
-export const POST = withValidation(
-  BahanBakuSchema,
-  async (_req: NextRequest, validatedData) => {
-    try {
-      // Create authenticated Supabase client
-      const supabase = await createClient()
-
-      // Validate session
-      const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-      if (authError || !user) {
-        apiLogger.error({ error: authError }, 'Auth error:')
-        return NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
-        )
-      }
-
-      const { data: insertedData, error } = await supabase
-        .from('ingredients')
-        .insert({
-          ...validatedData,
-          user_id: (user as any).id
-        } as any)
-        .select('*')
-        .single()
-
-      if (error) {
-        return handleDatabaseError(error)
-      }
-
-      return createSuccessResponse(insertedData, '201')
-
-    } catch (error: unknown) {
-      return handleDatabaseError(error)
+export async function POST(request: NextRequest) {
+  try {
+    // Validate request body
+    const bodyValidation = withValidation(IngredientInsertSchema)(request)
+    if (bodyValidation instanceof Response) {
+      return bodyValidation // Return error response
     }
+
+    // Create authenticated Supabase client
+    const supabase = await createClient()
+
+    // Validate session
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      apiLogger.error({ error: authError }, 'Auth error:')
+      return createErrorResponse('Unauthorized', 401)
+    }
+
+    const { data: insertedData, error } = await supabase
+      .from('ingredients')
+      .insert({
+        ...bodyValidation,
+        user_id: (user as any).id
+      } as any)
+      .select('*')
+      .single()
+
+    if (error) {
+      return handleAPIError(error)
+    }
+
+    return createSuccessResponse(insertedData, '201')
+
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
-)
+}

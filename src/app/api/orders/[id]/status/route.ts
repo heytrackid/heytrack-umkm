@@ -1,6 +1,7 @@
 import { triggerWorkflow } from '@/lib/automation-engine'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 // PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
@@ -35,7 +36,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
 
     // Get current order to check previous status
     // @ts-ignore
@@ -188,7 +189,7 @@ export async function GET(
     const resolvedParams = await params
     const orderId = (resolvedParams as any).id
 
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
 
     // Get order with basic info
     const { data: order, error: orderError } = await supabase

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
+import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
 import { generateOrderNumber } from './utils'
 
 import { apiLogger } from '@/lib/logger'

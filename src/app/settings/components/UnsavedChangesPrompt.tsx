@@ -16,7 +16,7 @@ interface UnsavedChangesPromptProps {
  * Unsaved changes prompt component
  */
 export function UnsavedChangesPrompt({ isUnsavedChanges, onReset, onSave, isSaving }: UnsavedChangesPromptProps) {
-  if (!isUnsavedChanges) return null
+  if (!isUnsavedChanges) {return null}
 
   return (
     <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20 sticky bottom-4 z-20 shadow-lg">

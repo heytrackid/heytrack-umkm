@@ -13,7 +13,7 @@ import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
-import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
+import { LOADING_KEYS, useLoading } from '@/hooks/loading'
 import { useResponsive } from '@/hooks/useResponsive'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import {
@@ -174,7 +174,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {settings.businessName || 'HeyTrack'}
+                HeyTrack
               </h1>
               <p className="text-muted-foreground mt-1">
                 {currentTime.toLocaleDateString('id-ID', {

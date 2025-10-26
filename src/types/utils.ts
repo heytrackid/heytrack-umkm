@@ -75,13 +75,13 @@ export type DeepReadonly<T> = {
  * Type guard function type
  * @template T - The type to guard for
  */
-export type TypeGuard<T> = (value: any) => value is T;
+export type TypeGuard<T> = (value: unknown) => value is T;
 
 /**
  * Type assertion function type
  * @template T - The type to assert
  */
-export type TypeAssertion<T> = (value: any) => asserts value is T;
+export type TypeAssertion<T> = (value: unknown) => asserts value is T;
 
 /**
  * Extract non-nullable keys from an object type

@@ -3,10 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Calendar } from 'lucide-react'
+import type {
+  AppSettingsState,
+  SettingsUpdateHandler,
+  DateFormatOption,
+  TimeFormatOption,
+} from '../types'
 
 interface DateTimeSettingsProps {
-  settings: unknown
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**
@@ -29,7 +35,9 @@ export function DateTimeSettings({ settings, onSettingChange }: DateTimeSettings
             id="dateFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.dateFormat}
-            onChange={(e) => onSettingChange('ui', 'dateFormat', e.target.value)}
+            onChange={(e) =>
+              onSettingChange('ui', 'dateFormat', e.target.value as DateFormatOption)
+            }
           >
             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -42,7 +50,9 @@ export function DateTimeSettings({ settings, onSettingChange }: DateTimeSettings
             id="timeFormat"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.timeFormat}
-            onChange={(e) => onSettingChange('ui', 'timeFormat', e.target.value)}
+            onChange={(e) =>
+              onSettingChange('ui', 'timeFormat', e.target.value as TimeFormatOption)
+            }
           >
             <option value="24h">24 jam</option>
             <option value="12h">12 jam</option>

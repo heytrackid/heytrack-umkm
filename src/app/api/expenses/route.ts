@@ -1,12 +1,12 @@
-import { formatCurrency } from '@/shared/utils/currency'
+import { formatCurrency } from '@/shared'
 import { getErrorMessage } from '@/lib/type-guards'
-import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseClient } from '@/lib/supabase'
-import { PaginationQuerySchema, DateRangeQuerySchema, ExpenseInsertSchema } from '@/lib/validations'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
+import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/api-validations'
+import { FinancialRecordInsertSchema } from '@/lib/validations/domains/finance'
 
 import { apiLogger } from '@/lib/logger'
-import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
-import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category')
 
   try {
-    const supabase = createSupabaseClient()
+    const supabase = await createClient()
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 
     const { data: expenses, error } = await query
 
-    if (error) throw error
+    if (error) {throw error}
 
     // Get total count for pagination
     let countQuery = supabase.from('expenses').select('*', { count: 'exact', head: true })
@@ -151,11 +151,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClient()
+    const supabase = await createClient()
     const body = await request.json()
 
     // Validate request body
-    const validation = ExpenseInsertSchema.safeParse(body)
+    const validation = FinancialRecordInsertSchema.safeParse(body)
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -174,14 +174,13 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString()
     }
 
-    // @ts-ignore
     const { data: expense, error } = await supabase
       .from('expenses')
       .insert([insertPayload] as any)
       .select('*')
       .single()
 
-    if (error) throw error
+    if (error) {throw error}
 
     // Create notification for large expenses
     if ((validatedData as any).amount > 1000000) { // More than 1M IDR

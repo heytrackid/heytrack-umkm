@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
 import { Calculator, Save } from 'lucide-react'
 import * as React from 'react'
-import { OrderFormData, OrderItem } from '../hooks/useOrderLogic'
+import type { OrderFormData, OrderItem } from '../hooks/useOrderLogic'
 
 interface OrderSummaryProps {
   formData: OrderFormData

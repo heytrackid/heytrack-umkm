@@ -2,7 +2,7 @@
  * Barrel export for utility functions
  * 
  * Usage:
- *   import { formatDate, calculateAlert } from '@/utils'
+ *   import { isMobile, isTablet } from '@/utils'
  *   import { createClient } from '@/utils/supabase'
  */
 
@@ -21,16 +21,10 @@ export {
 export { BREAKPOINTS, DEVICE_BREAKPOINTS } from '../types/responsive'
 
 // ============================================================================
-// HPP UTILITIES
-// ============================================================================
-
-// Export all HPP utilities from the main hpp-utils module
-export * from './hpp-utils'
-
-// ============================================================================
 // SUPABASE UTILITIES
 // ============================================================================
 
 export { createClient } from './supabase/client'
-export { createClient as createServerClient } from './supabase/server'
+// Server client functionality is only available in server contexts
+// import { createClient } from '@/utils/supabase/server' directly when needed
 export { updateSession } from './supabase/middleware'

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseClient } from '@/lib/supabase'
-import { DateRangeQuerySchema } from '@/lib/validations'
-import { Database } from '@/types'
+import { createClient } from '@/utils/supabase/server'
+import { DateRangeQuerySchema } from '@/lib/validations/api-validations'
+import type { Database } from '@/types/supabase-generated'
 
 import { apiLogger } from '@/lib/logger'
 type Order = Database['public']['Tables']['orders']['Row']
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
     const { start_date: _start_date, end_date: _end_date } = dateRangeValidation.data
 
-    const supabase = createSupabaseClient()
+    const supabase = await createClient()
     const today = new Date().toISOString().split('T')[0] as string
     
     // Get orders statistics
@@ -65,21 +65,21 @@ export async function GET(request: Request) {
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
-    
+      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+
     const todayRevenue = todayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
-    
+      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+
     const activeOrders = orders?.filter((order: Order) =>
-      ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(String((order as any).status || ''))).length || 0
-    
+      ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(String(order.status || ''))).length || 0
+
     const totalCustomers = customers?.length || 0
     const vipCustomers = customers?.filter((customer: Customer) =>
-      String((customer as any as { customer_type?: string }).customer_type || '') === 'vip').length || 0
+      String(customer.customer_type || '') === 'vip').length || 0
 
-    const lowStockItems = ingredients?.filter((ingredient: any) => {
+    const lowStockItems = ingredients?.filter((ingredient: Ingredient) => {
       const currentStock = Number(ingredient.current_stock || 0)
-      const minStock = Number(ingredient.min_stock || ingredient.minimum_stock || 0)
+      const minStock = Number(ingredient.min_stock || 0)
       return currentStock <= minStock
     }).length || 0
     
@@ -87,7 +87,7 @@ export async function GET(request: Request) {
     const totalRecipes = recipes?.length || 0
     
     const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: Expense) =>
-      sum + parseFloat(String((expense as any).amount || 0)), 0) || 0
+      sum + parseFloat(String(expense.amount || 0)), 0) || 0
 
     // Calculate yesterday for comparison
     const yesterdayDate = new Date()
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
       sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
     
     // Category breakdown for ingredients
-    const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: any) => {
+    const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: Ingredient) => {
       const category = String(ingredient.category || 'General')
       acc[category] = (acc[category] || 0) + 1
       return acc
@@ -134,10 +134,10 @@ export async function GET(request: Request) {
         total: orders?.length || 0,
         today: todayOrders?.length || 0,
         recent: recentOrders.map((order: Order) => ({
-          id: (order as any).id,
-          customer: String((order as any).customer_name || 'Walk-in customer'),
-          amount: (order as any).total_amount,
-          status: (order as any).status,
+          id: order.id,
+          customer: String(order.customer_name || 'Walk-in customer'),
+          amount: order.total_amount,
+          status: order.status,
           time: order.created_at
         }))
       },
@@ -156,8 +156,8 @@ export async function GET(request: Request) {
         total: totalRecipes,
         popular: recipes
           ?.sort((a: Recipe, b: Recipe) => {
-            const aUsage = Number((a as any as { times_made?: number }).times_made || 0)
-            const bUsage = Number((b as any as { times_made?: number }).times_made || 0)
+            const aUsage = Number(a.times_made || 0)
+            const bUsage = Number(b.times_made || 0)
             return bUsage - aUsage
           })
           ?.slice(0, 3) || []
@@ -182,7 +182,7 @@ export async function GET(request: Request) {
 // Update daily sales summary
 export async function POST() {
   try {
-    const supabase = createSupabaseClient()
+    const supabase = await createClient()
     const today = new Date().toISOString().split('T')[0] as string
     
     // Get today's data
@@ -200,24 +200,28 @@ export async function POST() {
       .select('*')
       .eq('expense_date', today)
     
-    const todayOrderIds = todayOrders?.map((order: Order) => (order as any).id) || []
-    const todayItems = todayOrderItems?.filter((item: any) =>
-      todayOrderIds.includes(String((item as { order_id: string }).order_id))) || []
+    const todayOrderIds = todayOrders?.map((order: Order) => order.id) || []
+    type OrderItem = Database['public']['Tables']['order_items']['Row']
+    
+    const todayItems = todayOrderItems?.filter((item: OrderItem) =>
+      todayOrderIds.includes(item.order_id)) || []
 
     const totalRevenue = todayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
+      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
 
-    const totalItemsSold = todayItems.reduce((sum: number, item: any) =>
-      sum + parseInt(String((item as { quantity: number | string }).quantity || 0), 10), 0) || 0
+    const totalItemsSold = todayItems.reduce((sum: number, item: OrderItem) =>
+      sum + parseInt(String(item.quantity || 0), 10), 0) || 0
 
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
 
     const totalExpenses = todayExpenses?.reduce((sum: number, expense: Expense) =>
-      sum + parseFloat(String((expense as any).amount || 0)), 0) || 0
+      sum + parseFloat(String(expense.amount || 0)), 0) || 0
 
     const profitEstimate = totalRevenue - totalExpenses
 
     // Upsert daily summary
+    type DailySalesSummary = Database['public']['Tables']['daily_sales_summary']['Insert']
+    
     const { error } = await supabase
       .from('daily_sales_summary')
       .upsert([{
@@ -229,11 +233,11 @@ export async function POST() {
         expenses_total: totalExpenses,
         profit_estimate: profitEstimate,
         updated_at: new Date().toISOString()
-      }] as any, {
+      } as DailySalesSummary], {
         onConflict: 'sales_date'
       })
     
-    if (error) throw error
+    if (error) {throw error}
     
     return NextResponse.json({ success: true, message: 'Daily summary updated' })
     

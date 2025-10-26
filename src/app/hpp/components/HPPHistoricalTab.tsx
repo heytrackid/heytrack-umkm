@@ -23,7 +23,7 @@ import { HPPAlertsList } from './HPPAlertsList'
 import HPPComparisonCard from './HPPComparisonCard'
 import HPPExportButton from './HPPExportButton'
 import HPPHistoricalChart from './HPPHistoricalChart'
-import { HPPRecommendationsPanel } from './HPPRecommendationsPanel'
+import HPPRecommendationsPanel from './HPPRecommendationsPanel'
 
 interface HPPHistoricalTabProps {
     recipes: Array<{ id: string; name: string }>
@@ -47,7 +47,7 @@ export default function HPPHistoricalTab({
     const { data: comparisonData, isLoading: comparisonLoading } = useQuery({
         queryKey: ['hpp-comparison', selectedRecipeId, selectedPeriod],
         queryFn: async () => {
-            if (!selectedRecipeId) return null
+            if (!selectedRecipeId) {return null}
             const response = await fetch(
                 `/api/hpp/comparison?recipe_id=${selectedRecipeId}&period=${selectedPeriod}`
             )

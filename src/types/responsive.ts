@@ -1,4 +1,4 @@
-import * as React from 'react'
+import type * as React from 'react'
 // Responsive design types and utilities for mobile-first development
 
 export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -52,7 +52,7 @@ export interface ResponsiveColumn {
   priority: ColumnPriority;
   hideOnMobile?: boolean;
   minWidth?: string;
-  render?: (value: any, item: any) => React.ReactNode;
+  render?: (value: unknown, item: unknown) => React.ReactNode;
 }
 
 // Form field responsive configuration
@@ -69,7 +69,7 @@ export interface ResponsiveFormField {
     minLength?: number;
     maxLength?: number;
     pattern?: string;
-    custom?: (value: any) => string | undefined;
+    custom?: (value: unknown) => string | undefined;
   };
 }
 

@@ -1,6 +1,7 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { getErrorMessage } from '@/lib/type-guards'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 // GET /api/hpp/alerts - List HPP alerts with filters
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '20')
         const offset = parseInt(searchParams.get('offset') || '0')
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Build query
         let query = supabase

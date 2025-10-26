@@ -38,7 +38,7 @@ export function calculateRecipeHPP(
   packagingCost: number = 0
 ) {
   const ingredientCost = ingredients.reduce((total, recipeIngredient) => {
-    if (!recipeIngredient.ingredient) return total
+    if (!recipeIngredient.ingredient) {return total}
     
     const cost = calculateIngredientCost(
       recipeIngredient.quantity,
@@ -78,7 +78,7 @@ export function calculateIngredientCost(
  * Calculate profit margin
  */
 export function calculateProfitMargin(sellingPrice: number, totalCost: number): number {
-  if (sellingPrice <= 0) return 0
+  if (sellingPrice <= 0) {return 0}
   return ((sellingPrice - totalCost) / sellingPrice) * 100
 }
 
@@ -86,7 +86,7 @@ export function calculateProfitMargin(sellingPrice: number, totalCost: number): 
  * Format recipe servings with proper pluralization
  */
 export function formatRecipeServings(servings: number): string {
-  if (servings === 1) return '1 porsi'
+  if (servings === 1) {return '1 porsi'}
   return `${servings} porsi`
 }
 
@@ -146,7 +146,7 @@ export function validateRecipe(recipe: Partial<Recipe>): { isValid: boolean; err
  * Get unit conversion factor between different measurement units
  */
 function getUnitConversionFactor(fromUnit: string, toUnit: string): number {
-  if (fromUnit === toUnit) return 1
+  if (fromUnit === toUnit) {return 1}
   
   // Common Indonesian F&B unit conversions
   const conversions: Record<string, Record<string, number>> = {

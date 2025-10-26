@@ -67,7 +67,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
         <CardTitle>{initialData ? 'Edit Catatan Keuangan' : 'Tambah Catatan Keuangan'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Tipe Transaksi" 

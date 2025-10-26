@@ -12,23 +12,23 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { 
-  IngredientSchema,
-  type IngredientFormData
-} from '@/lib/validations'
+import {
+  IngredientFormSchema,
+  type IngredientForm
+} from '@/lib/validations/domains/ingredient'
 import { FormField } from './shared/FormField'
 
 interface IngredientFormProps {
-  initialData?: Partial<IngredientFormData>
-  onSubmit: (data: IngredientFormData) => Promise<void>
+  initialData?: Partial<IngredientForm>
+  onSubmit: (data: IngredientForm) => Promise<void>
   isLoading?: boolean
 }
 
 export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientFormProps) {
   const { toast } = useToast()
   
-  const form = useForm<IngredientFormData>({
-    resolver: zodResolver(IngredientSchema),
+  const form = useForm<IngredientForm>({
+    resolver: zodResolver(IngredientFormSchema),
     mode: 'onChange',
     defaultValues: {
       name: initialData?.name || '',
@@ -45,7 +45,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
     }
   })
 
-  const handleSubmit = async (data: IngredientFormData) => {
+  const handleSubmit = async (data: IngredientForm) => {
     try {
       await onSubmit(data)
       toast({
@@ -70,7 +70,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
         <CardTitle>{initialData ? 'Edit Bahan' : 'Tambah Bahan'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Nama Bahan" 

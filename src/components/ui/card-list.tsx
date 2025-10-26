@@ -4,7 +4,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Badge } from './badge'
 import { Card, CardContent } from './card'
 

@@ -33,9 +33,9 @@ export default function LoginPage() {
     // Client-side validation
     const errors: { email?: string; password?: string } = {}
 
-    const emailError = validateEmail(email)
-    if (emailError) {
-      errors.email = emailError
+    const emailValidation = validateEmail(email)
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.error
     }
 
     if (!password) {
@@ -51,10 +51,9 @@ export default function LoginPage() {
       const result = await login(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        setError(authError.message)
-        if (authError.action) {
-          setErrorAction(authError.action)
-        }
+        setError(authError)
+        // For now, no specific action - could be extended later
+        setErrorAction(null)
       }
     })
   }

@@ -81,7 +81,7 @@ export const RecipeForm = memo(function RecipeForm({ initialData, onSubmit, isLo
         <CardTitle>{initialData ? 'Edit Resep' : 'Tambah Resep'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Nama Resep" 

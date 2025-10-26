@@ -101,7 +101,7 @@ export function createSkeletonObserver(
   callback: (isVisible: boolean) => void,
   options?: IntersectionObserverInit
 ) {
-  if (typeof window === 'undefined') return null
+  if (typeof window === 'undefined') {return null}
 
   return new IntersectionObserver(
     (entries) => {

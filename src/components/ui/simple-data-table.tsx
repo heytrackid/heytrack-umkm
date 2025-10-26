@@ -82,20 +82,20 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   pageSizeOptions,
   initialPageSize
 }: SimpleDataTableProps<T>) {
-  const { isMobile, shouldUseCompactUI } = useMobile()
+  const { isMobile } = useMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [sortBy, setSortBy] = useState<string>('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const sanitizedPageSizeOptions = useMemo(() => {
-    if (!enablePagination) return [Math.max(data.length, 1)]
-    if (pageSizeOptions && pageSizeOptions.length > 0) return pageSizeOptions
+    if (!enablePagination) {return [Math.max(data.length, 1)]}
+    if (pageSizeOptions && pageSizeOptions.length > 0) {return pageSizeOptions}
     return [10, 25, 50]
   }, [enablePagination, pageSizeOptions, data.length])
 
   const sanitizedInitialPageSize = useMemo(() => {
-    if (!enablePagination) return Math.max(data.length, 1)
+    if (!enablePagination) {return Math.max(data.length, 1)}
     if (initialPageSize && sanitizedPageSizeOptions.includes(initialPageSize)) {
       return initialPageSize
     }
@@ -116,7 +116,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
 
     // Column filters
     const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
-      if (!filterValue || filterValue === 'all') return true
+      if (!filterValue || filterValue === 'all') {return true}
       const itemValue = getValue(item, key)
       return String(itemValue) === filterValue
     })
@@ -154,12 +154,12 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   }
 
   useEffect(() => {
-    if (!enablePagination) return
+    if (!enablePagination) {return}
     setCurrentPage(1)
   }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
 
   useEffect(() => {
-    if (!enablePagination) return
+    if (!enablePagination) {return}
     const maxPage = Math.max(1, Math.ceil(totalItems / rowsPerPage))
     if (currentPage > maxPage) {
       setCurrentPage(maxPage)
@@ -167,7 +167,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   }, [currentPage, rowsPerPage, totalItems, enablePagination])
 
   useEffect(() => {
-    if (!enablePagination) return
+    if (!enablePagination) {return}
     if (!sanitizedPageSizeOptions.includes(rowsPerPage)) {
       setRowsPerPage(sanitizedInitialPageSize)
     }
@@ -190,7 +190,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   }
 
   function handleExport() {
-    if (!exportData) return
+    if (!exportData) {return}
     
     const csvContent = [
       columns.map(col => col.header).join(','),
@@ -232,7 +232,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
     <Card>
       {/* Header */}
       {(title || onAdd) && (
-        <CardHeader className={shouldUseCompactUI ? 'p-4' : ''}>
+        <CardHeader className={isMobile ? 'p-4' : ''}>
           <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-col sm:flex-row sm:items-center sm:justify-between gap-4'}`}>
             <div>
               {title && <CardTitle className={isMobile ? 'text-lg' : ''}>{title}</CardTitle>}
@@ -248,7 +248,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
               {onAdd && (
                 <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
-                  {addButtonText || Informasi}
+                  {addButtonText || "Tambah Data"}
                 </Button>
               )}
             </div>
@@ -256,7 +256,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
         </CardHeader>
       )}
 
-      <CardContent className={shouldUseCompactUI ? 'p-4' : ''}>
+      <CardContent className={isMobile ? 'p-4' : ''}>
         {/* Search and Filters */}
         <div className={`${isMobile ? 'space-y-3' : 'flex flex-col sm:flex-row gap-4'} mb-6`}>
           {/* Search */}
@@ -267,7 +267,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
-              size={isMobile ? 'default' : 'default'}
+              size={isMobile ? 14 : 14}
             />
           </div>
 
@@ -302,7 +302,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
         {/* Table / Mobile Cards */}
         {sortedData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">{emptyMessage || Informasi}</p>
+            <p className="text-muted-foreground">{emptyMessage || "Tidak ada data"}</p>
           </div>
         ) : isMobile ? (
           /* Mobile Card Layout */

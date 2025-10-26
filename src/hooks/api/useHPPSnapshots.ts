@@ -32,8 +32,8 @@ const fetchHPPSnapshots = async ({
         period,
     })
 
-    if (startDate) params.append('start_date', startDate)
-    if (endDate) params.append('end_date', endDate)
+    if (startDate) {params.append('start_date', startDate)}
+    if (endDate) {params.append('end_date', endDate)}
 
     const response = await fetch(`/api/hpp/snapshots?${params.toString()}`)
 

@@ -89,7 +89,7 @@ export default function AdvancedHPPCalculator({
   }
 
   const applyPricingSuggestion = (pricingTier: 'economy' | 'standard' | 'premium') => {
-    if (!hppResult) return
+    if (!hppResult) {return}
 
     const suggestion = hppResult.pricing_suggestions[pricingTier]
     setCustomPrice(suggestion.price.toString())
@@ -109,8 +109,8 @@ export default function AdvancedHPPCalculator({
   }
 
   const getMarginColor = (margin: number) => {
-    if (margin >= 50) return 'text-gray-600 dark:text-gray-400'
-    if (margin >= 30) return 'text-gray-600 dark:text-gray-400'
+    if (margin >= 50) {return 'text-gray-600 dark:text-gray-400'}
+    if (margin >= 30) {return 'text-gray-600 dark:text-gray-400'}
     return 'text-gray-600 dark:text-gray-400'
   }
 

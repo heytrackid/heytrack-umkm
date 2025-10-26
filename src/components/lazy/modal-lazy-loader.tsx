@@ -219,7 +219,7 @@ export const useLazyModal = () => {
   }, [])
 
   const ModalRenderer = useCallback(() => {
-    if (!modalState.component) return null
+    if (!modalState.component) {return null}
 
     return (
       <LazyModal

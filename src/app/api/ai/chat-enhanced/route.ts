@@ -2,13 +2,13 @@
  * Enhanced AI Chat API with Context Awareness
  */
 
-import { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const maxDuration = 30
 
 export async function POST(request: NextRequest) {

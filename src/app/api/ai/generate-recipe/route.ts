@@ -1,7 +1,8 @@
-import { createSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
@@ -45,7 +46,7 @@ export const maxDuration = 60
 export async function POST(request: NextRequest) {
     try {
         // 1. Authenticate user first
-        const supabase = createSupabaseClient()
+        const supabase = await createClient()
         const { data: { user }, error: authError } = await supabase.auth.getUser()
         
         if (authError || !user) {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         
         // 2. Validate request body
         const validatedData = await validateRequestOrRespond(request, AIRecipeGenerationSchema)
-        if (validatedData instanceof NextResponse) return validatedData
+        if (validatedData instanceof NextResponse) {return validatedData}
 
         const {
             name: productName,
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
         } = validatedData
 
         // 3. Get user's available ingredients from database
-        const { data: ingredients, error: ingredientsError } = await supabase
+        const { data: ingredients, error: ingredientsError } = await (await supabase)
             .from('ingredients')
             .select('*')
             .eq('user_id', userId)
@@ -98,14 +99,14 @@ export async function POST(request: NextRequest) {
         const recipe = parseRecipeResponse(aiResponse)
 
         // Check for duplicate recipe names
-        const { data: existingRecipes } = await supabase
+        const { data: existingRecipes } = await (await supabase)
             .from('recipes')
             .select('id, name')
-            .eq('name', (recipe as any).name)
+            .eq('name', (recipe as Partial<Recipe>).name || '')
             .eq('user_id', userId)
 
         if (existingRecipes && existingRecipes.length > 0) {
-            apiLogger.warn({ recipeName: (recipe as any).name, count: existingRecipes.length }, 'Duplicate recipe name detected')
+            apiLogger.warn({ recipeName: (recipe as Partial<Recipe>).name || 'Unknown', count: existingRecipes.length }, 'Duplicate recipe name detected')
             // Add version suffix to name
             ;(recipe as any).name = `${(recipe as any).name} v${existingRecipes.length + 1}`
         }
@@ -534,20 +535,20 @@ function findBestIngredientMatch(searchName: string, ingredients: Ingredient[]):
     let match = ingredients.find(i => 
         (i as any).name.toLowerCase() === search
     )
-    if (match) return match
+    if (match) {return match}
     
     // 2. Contains match
     match = ingredients.find(i => 
         (i as any).name.toLowerCase().includes(search) ||
         search.includes((i as any).name.toLowerCase())
     )
-    if (match) return match
+    if (match) {return match}
     
     // 3. Partial word match
     const searchWords = search.split(' ')
-    match = ingredients.find(i => {
+    match = ingredients.find((i: Ingredient) => {
         const nameWords = (i as any).name.toLowerCase().split(' ')
-        return searchWords.some(sw => nameWords.some(nw => nw.includes(sw) || sw.includes(nw)))
+        return searchWords.some((sw: string) => nameWords.some((nw: string) => nw.includes(sw) || sw.includes(nw)))
     })
     
     return match || null
@@ -567,7 +568,7 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
         percentage: number
     }> = []
     
-    const supabase = createSupabaseClient()
+    const supabase = createClient()
 
     for (const recipeIng of (recipe as any).ingredients) {
         // Find matching ingredient using fuzzy matching
@@ -611,12 +612,12 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
 
     // Fetch actual operational costs from database
     const today = new Date().toISOString().split('T')[0]
-    const { data: opCosts } = await supabase
-        .from('operational_costs')
+    const { data: opCosts } = await (await supabase)
+        .from('expenses')
         .select('amount')
         .eq('user_id', userId)
-        .gte('date', today)
-        .lte('date', today)
+        .gte('expense_date', today)
+        .lte('expense_date', today)
     
     const dailyOpCost = opCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0
     

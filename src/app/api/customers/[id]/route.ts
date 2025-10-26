@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
@@ -10,7 +11,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     const { data, error } = await supabase
       .from('customers')
       .select('*')
@@ -48,7 +49,7 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     const body = await request.json()
 
     // Validate request body with Zod
@@ -114,7 +115,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     
     // Check if customer has orders
     const { data: orders } = await supabase

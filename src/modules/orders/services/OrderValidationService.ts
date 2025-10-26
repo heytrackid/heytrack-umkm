@@ -1,5 +1,25 @@
 import { dbLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
+import supabase from '@/utils/supabase'
+
+/**
+ * Recipe with ingredients for validation
+ */
+type RecipeValidationQueryResult = {
+  id: string
+  name: string
+  recipe_ingredients: Array<{
+    quantity: number
+    unit: string
+    ingredient: Array<{
+      id: string
+      name: string
+      current_stock: number | null
+      reorder_point: number | null
+      unit_type: string | null
+      is_active: boolean | null
+    }>
+  }>
+}
 
 /**
  * Service for handling order validation against inventory
@@ -49,24 +69,29 @@ export class OrderValidationService {
           continue
         }
 
+        const typedRecipe = recipe as RecipeValidationQueryResult
+
         // Check each ingredient
-        for (const ri of (recipe as any).recipe_ingredients || []) {
-          if (!ri.ingredient || !ri.ingredient.is_active) {
-            errors.push(`Ingredient ${ri.ingredient?.name || 'unknown'} untuk ${(recipe as any).name} tidak tersedia`)
+        for (const ri of typedRecipe.recipe_ingredients || []) {
+          // Supabase returns arrays for joined data, get first element
+          const ingredient = ri.ingredient?.[0]
+          
+          if (!ingredient || !ingredient.is_active) {
+            errors.push(`Ingredient ${ingredient?.name || 'unknown'} untuk ${typedRecipe.name} tidak tersedia`)
             continue
           }
 
           const requiredQuantity = ri.quantity * item.quantity
-          const currentStock = (ri.ingredient.current_stock ?? 0) || 0
-          const reorderPoint = ri.ingredient.reorder_point || 0
+          const currentStock = ingredient.current_stock ?? 0
+          const reorderPoint = ingredient.reorder_point ?? 0
 
           if (currentStock < requiredQuantity) {
             errors.push(
-              `Stock ${ri.ingredient.name} tidak cukup. Dibutuhkan: ${requiredQuantity}, Tersedia: ${currentStock}`
+              `Stock ${ingredient.name} tidak cukup. Dibutuhkan: ${requiredQuantity}, Tersedia: ${currentStock}`
             )
           } else if (currentStock - requiredQuantity < reorderPoint) {
             warnings.push(
-              `Stock ${ri.ingredient.name} akan di bawah reorder point setelah produksi`
+              `Stock ${ingredient.name} akan di bawah reorder point setelah produksi`
             )
           }
         }

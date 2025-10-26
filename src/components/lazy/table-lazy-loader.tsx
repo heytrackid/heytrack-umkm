@@ -3,7 +3,8 @@ import * as React from 'react'
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ComponentType, lazy, Suspense } from 'react'
+import type { ComponentType} from 'react';
+import { lazy, Suspense } from 'react'
 import { uiLogger } from '@/lib/logger'
 
 // Table Loading Skeleton Component
@@ -134,7 +135,11 @@ export const DataTableWithSuspense = ({
 )
 
 // Specialized table loaders
-export const CRUDTableWithSuspense = (props: any) => (
+interface TableProps {
+  [key: string]: unknown;
+}
+
+export const CRUDTableWithSuspense = (props: TableProps) => (
   <DataTableWithSuspense 
     columns={6} 
     rows={10} 
@@ -143,7 +148,7 @@ export const CRUDTableWithSuspense = (props: any) => (
   />
 )
 
-export const OrdersTableWithSuspense = (props: any) => (
+export const OrdersTableWithSuspense = (props: TableProps) => (
   <DataTableWithSuspense 
     columns={6} 
     rows={8} 
@@ -152,7 +157,7 @@ export const OrdersTableWithSuspense = (props: any) => (
   />
 )
 
-export const InventoryTableWithSuspense = (props: any) => (
+export const InventoryTableWithSuspense = (props: TableProps) => (
   <DataTableWithSuspense 
     columns={7} 
     rows={12} 
@@ -161,7 +166,7 @@ export const InventoryTableWithSuspense = (props: any) => (
   />
 )
 
-export const FinanceTableWithSuspense = (props: any) => (
+export const FinanceTableWithSuspense = (props: TableProps) => (
   <DataTableWithSuspense 
     columns={5} 
     rows={15} 
@@ -173,10 +178,10 @@ export const FinanceTableWithSuspense = (props: any) => (
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
   Promise.resolve({
-    default: ({ data, height, ...props }: { data?: any[]; height?: number; [key: string]: unknown }) => {
+    default: ({ data, height, ...props }: { data?: unknown[]; height?: number; [key: string]: unknown }) => {
       // This would be a virtualized table implementation
       // For now, return a placeholder
-      return <div style={{ height }}>Virtualized table with {data?.length || 0} items</div>
+      return <div style={{ height: height }}>Virtualized table with {data?.length || 0} items</div>
     }
   })
 )
@@ -249,7 +254,7 @@ export const TableContainer = ({
   ...props 
 }: {
   type: TableType
-  data?: any[]
+  data?: unknown[]
   columns?: unknown[]
   loading?: boolean
   [key: string]: unknown

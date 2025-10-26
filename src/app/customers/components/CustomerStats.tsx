@@ -5,12 +5,19 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { UserPlus, Users } from 'lucide-react'
-import type { Customer, CustomerStats } from './types'
+import type { CustomersTable } from '@/types/customers'
 
 interface CustomerStatsProps {
-  customers: Customer[]
+  customers: CustomersTable['Row'][]
   isLoading: boolean
   isMobile: boolean
+}
+
+interface CustomerStatsData {
+  total: number
+  active: number
+  averageSpent: number
+  averageOrders: number
 }
 
 export default function CustomerStats({
@@ -20,9 +27,9 @@ export default function CustomerStats({
 }: CustomerStatsProps) {
   const { formatCurrency, settings } = useSettings()
 
-  const stats: CustomerStats = {
+  const stats: CustomerStatsData = {
     total: customers.length,
-    active: customers.filter(c => c.status === 'active').length,
+    active: customers.filter(c => c.is_active).length,
     averageSpent: customers.length > 0
       ? customers.reduce((sum, c) => sum + (c.total_spent || 0), 0) / customers.length
       : 0,

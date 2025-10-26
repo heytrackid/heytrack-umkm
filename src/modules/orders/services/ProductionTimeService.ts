@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
+import supabase from '@/utils/supabase'
+import type { Recipe } from '@/types'
 
 /**
  * Service for calculating production time estimates for orders
@@ -26,17 +27,17 @@ export class ProductionTimeService {
         .select('id, prep_time, cook_time')
         .in('id', recipeIds)
 
-      if (error) throw error
+      if (error) {throw error}
 
       let total_prep_time = 0
       let total_cook_time = 0
       let max_single_recipe_time = 0
 
       items.forEach(item => {
-        const recipe = recipes?.find((r: any) => r.id === item.recipe_id) as any
+        const recipe = recipes?.find((r: Recipe) => r.id === item.recipe_id)
         if (recipe) {
-          const prep_time = ((recipe.prep_time as number | null) ?? 0) * item.quantity
-          const cook_time = ((recipe.cook_time as number | null) ?? 0) * item.quantity
+          const prep_time = (recipe.prep_time ?? 0) * item.quantity
+          const cook_time = (recipe.cook_time ?? 0) * item.quantity
 
           total_prep_time += prep_time
           total_cook_time += cook_time

@@ -5,8 +5,10 @@
  * Provides consistent error handling and type safety
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { z, ZodError } from 'zod'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import type { z} from 'zod';
+import { ZodError } from 'zod'
 
 /**
  * Validation result type

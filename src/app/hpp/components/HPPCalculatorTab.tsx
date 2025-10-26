@@ -3,8 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import HPPRecipeCard from './HPPRecipeCard'
 
+interface RecipeType {
+  id: string
+  name: string
+  category: string
+  hpp: number
+  selling_price?: number
+  margin: number
+  profit: number
+  recipe_ingredients?: unknown[]
+}
+
 interface HPPCalculatorTabProps {
-  recipes: unknown[]
+  recipes: RecipeType[]
   formatCurrency: (amount: number) => string
   getMarginBadgeVariant: (margin: number) => 'default' | 'secondary' | 'destructive'
   getMarginStatus: (margin: number) => string
@@ -31,7 +42,7 @@ export default function HPPCalculatorTab({
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2'}`}>
             {recipes.map(recipe => (
               <HPPRecipeCard
-                key={(recipe as any).id}
+                key={recipe.id}
                 recipe={recipe}
                 formatCurrency={formatCurrency}
                 getMarginBadgeVariant={getMarginBadgeVariant}

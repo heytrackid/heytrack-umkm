@@ -32,7 +32,10 @@ export default [
       "no-var": "error",
 
       // TypeScript rules
-      "@typescript-eslint/no-explicit-any": "warn",
+      // Prevent any usage to maintain type safety
+      // For legitimate cases (e.g., third-party library gaps), use:
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Reason: [explain why any is necessary]
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -59,6 +62,11 @@ export default [
       "dist/**",
       ".git/**",
       "eslint.config.js",
+      "*.cjs", // CommonJS utility scripts
+      "eslint-plugin-heytrack.js",
+      "eslint-rules/**",
+      "*.config.js",
+      "*.config.ts",
     ],
   },
 ];

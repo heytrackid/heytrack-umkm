@@ -1,250 +1,277 @@
 'use client'
 
-import { useEffect, useState, Suspense, lazy } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
-import { useToast } from '@/hooks/use-toast'
+import * as React from 'react'
+import { useState } from 'react'
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb';
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
-import { apiLogger } from '@/lib/logger'
-import {
-  StatsCardSkeleton
-} from '@/components/ui/skeletons/dashboard-skeletons'
-import { SearchFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
-import {
-  OrdersTableSkeleton
-} from '@/components/ui/skeletons/table-skeletons'
-import { useCurrency } from '@/hooks/useCurrency'
-import { LOADING_KEYS, useLoading } from '@/hooks/useLoading'
-import {
-  Plus,
-  ShoppingCart
-} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useResponsive } from '@/hooks/responsive';
+import { PullToRefresh } from '@/components/ui/mobile-gestures'
+import { Clock, ShoppingCart, CheckCircle, TrendingUp, ArrowLeft } from 'lucide-react'
 
-// Lazy load heavy components
-const OrdersStatsSection = lazy(() => import('./components/OrdersStatsSection'))
-const OrdersFilters = lazy(() => import('./components/OrdersFilters'))
-const OrdersQuickActions = lazy(() => import('./components/OrdersQuickActions'))
-const OrdersTableSection = lazy(() => import('./components/OrdersTableSection'))
+// Shared components
+import {
+  PageHeader,
+  SharedStatsCards,
+  ErrorCard,
+  ActionButtons
+} from '@/components/shared'
+
+// Import modular components
+import type {
+  Order,
+  OrderFormData
+} from '@/components/orders';
+import {
+  OrdersList,
+  OrderForm,
+  OrderFilters,
+  useOrders
+} from '@/components/orders'
+
+type ViewMode = 'list' | 'add' | 'edit' | 'detail'
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
-  const { formatCurrency } = useCurrency()
-  const { loading, setLoading, isLoading } = useLoading({
-    [LOADING_KEYS.FETCH_ORDERS]: true
-  })
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
-  const { toast } = useToast()
-  const router = useRouter()
+  const { isMobile } = useResponsive()
+  const [currentView, setCurrentView] = useState<ViewMode>('list')
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [showDialog, setShowDialog] = useState(false)
 
-  // Fetch orders from API
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      fetchOrders()
+  // Use the orders hook for all data management
+  const {
+    orders,
+    stats,
+    loading,
+    error,
+    filters,
+    createOrder,
+    updateOrder,
+    updateOrderStatus,
+    deleteOrder,
+    setFilters,
+    resetFilters,
+    refreshData
+  } = useOrders()
+
+  // Handle pull-to-refresh
+  const handleRefresh = async () => {
+    await refreshData()
+  }
+
+  // Handle order actions
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order)
+    setCurrentView('detail')
+  }
+
+  const handleEditOrder = (order: Order) => {
+    setSelectedOrder(order)
+    setCurrentView('edit')
+  }
+
+  const handleAddOrder = () => {
+    setSelectedOrder(null)
+    setCurrentView('add')
+  }
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (confirm('Apakah Anda yakin ingin menghapus pesanan ini?')) {
+      await deleteOrder(orderId)
     }
-  }, [isAuthLoading, isAuthenticated])
+  }
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(LOADING_KEYS.FETCH_ORDERS, true)
-      const response = await fetch('/api/orders')
+  const handleSaveOrder = async (orderData: OrderFormData) => {
+    const success = selectedOrder 
+      ? await updateOrder(selectedOrder.id, orderData)
+      : await createOrder(orderData)
+    
+    if (success) {
+      setCurrentView('list')
+      setSelectedOrder(null)
+    }
+  }
 
-      if (response.status === 401) {
-        toast({
-          title: 'Sesi berakhir',
-          description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-          variant: 'destructive',
-        })
-        router.push('/auth/login')
-        return
-      }
+  const handleCancel = () => {
+    setCurrentView('list')
+    setSelectedOrder(null)
+  }
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch orders')
-      }
+  // Breadcrumb items
+  const getBreadcrumbItems = () => {
+    const items = [
+      { label: 'Dashboard', href: '/' },
+      { label: 'Pesanan', href: '/orders' }
+    ]
 
-      const data = await response.json()
-      setOrders(data)
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error fetching orders:')
-      toast({
-        title: 'Terjadi kesalahan',
-        description: 'Gagal memuat data pesanan. Silakan coba lagi.',
-        variant: 'destructive',
+    if (currentView !== 'list') {
+      items.push({
+        label: currentView === 'add' ? 'Tambah Pesanan' :
+               currentView === 'edit' ? 'Edit Pesanan' : 'Detail Pesanan',
+        href: currentView === 'add' ? '/orders/new' : undefined
       })
-    } finally {
-      setLoading(LOADING_KEYS.FETCH_ORDERS, false)
     }
+
+    return items
   }
 
-  // Status configurations using hardcoded strings
-  const ORDER_STATUS_CONFIG = {
-    pending: { label: 'Pending', color: 'bg-gray-100 text-gray-800' },
-    confirmed: { label: 'Dikonfirmasi', color: 'bg-gray-200 text-gray-900' },
-    in_production: { label: 'Sedang Diproduksi', color: 'bg-gray-300 text-gray-900' },
-    completed: { label: 'Selesai', color: 'bg-gray-400 text-white' },
-    cancelled: { label: 'Dibatalkan', color: 'bg-gray-500 text-white' }
-  }
+  // List view using shared components
+  const ListView = () => (
+    <div className="space-y-6">
+      <PageBreadcrumb items={getBreadcrumbItems()} />
 
-  const PAYMENT_STATUS_CONFIG = {
-    unpaid: { label: 'Belum Dibayar', color: 'bg-gray-100 text-gray-800' },
-    partial: { label: 'Dibayar Sebagian', color: 'bg-gray-200 text-gray-900' },
-    paid: { label: 'Lunas', color: 'bg-gray-300 text-gray-900' }
-  }
+      <PageHeader
+        title="Kelola Pesanan"
+        description="Terima dan proses pesanan dari pelanggan"
+        actions={
+          <ActionButtons
+            onRefresh={handleRefresh}
+            onAdd={handleAddOrder}
+            addLabel="Tambah Pesanan"
+            refreshLabel="Refresh"
+            size={isMobile ? "lg" : "md"}
+            variant="horizontal"
+          />
+        }
+      />
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
+      {/* Stats */}
+      <SharedStatsCards
+        stats={[
+          {
+            title: 'Total Pesanan',
+            value: stats.totalOrders,
+            icon: <ShoppingCart className="h-8 w-8 text-primary" />
+          },
+          {
+            title: 'Menunggu Proses',
+            value: stats.pendingOrders,
+            icon: <Clock className="h-8 w-8 text-yellow-600" />
+          },
+          {
+            title: 'Selesai',
+            value: stats.completedOrders,
+            icon: <CheckCircle className="h-8 w-8 text-green-600" />
+          },
+          {
+            title: 'Rata-rata Nilai',
+            value: `Rp ${Math.round(stats.averageOrderValue).toLocaleString()}`,
+            icon: <TrendingUp className="h-8 w-8 text-blue-600" />
+          }
+        ]}
+      />
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.order_number?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-    const matchesDateFrom = !dateFrom || order.order_date >= dateFrom
-    const matchesDateTo = !dateTo || order.order_date <= dateTo
+      {/* Filters */}
+      <OrderFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onReset={resetFilters}
+      />
 
-    return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo
-  })
+      {/* Error Display */}
+      {error && <ErrorCard error={error} onRetry={handleRefresh} />}
 
+      {/* Orders List */}
+      <OrdersList
+        orders={orders}
+        onViewOrder={handleViewOrder}
+        onEditOrder={handleEditOrder}
+        onDeleteOrder={handleDeleteOrder}
+        onUpdateStatus={updateOrderStatus}
+        loading={loading}
+      />
+    </div>
+  )
 
+  // Form view (add/edit)
+  const FormView = () => (
+    <OrderForm
+      order={selectedOrder || undefined}
+      onSave={handleSaveOrder}
+      onCancel={handleCancel}
+      loading={loading}
+    />
+  )
 
-  // Stats calculations
-  const totalOrders = orders.length
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total_amount, 0)
-  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
-  const pendingRevenue = orders.filter(o => o.payment_status === 'unpaid').reduce((sum, o) => sum + o.total_amount, 0)
+  // Detail view using Card component
+  const DetailView = () => {
+    if (!selectedOrder) {return null}
 
-  // Show loading state while auth is initializing
-  if (isAuthLoading) {
     return (
-      <AppLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={handleCancel} className="p-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Kembali
+            </Button>
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <ShoppingCart className="h-8 w-8" />
-                Pesanan
-              </h1>
+              <h2 className="text-xl sm:text-2xl font-bold">
+                Detail Pesanan {selectedOrder.order_no}
+              </h2>
               <p className="text-muted-foreground">
-                Kelola pesanan pelanggan
+                Informasi lengkap pesanan
               </p>
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
+          <div className="flex gap-2">
+            <Button onClick={() => handleEditOrder(selectedOrder)} className="flex-1">
+              Edit Pesanan
+            </Button>
+            <Button variant="outline" onClick={handleCancel}>
+              Tutup
+            </Button>
           </div>
-          <OrdersTableSkeleton rows={5} />
         </div>
-      </AppLayout>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Informasi Pesanan</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium">Pelanggan</p>
+                <p>{selectedOrder.customer_name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Telepon</p>
+                <p>{selectedOrder.customer_phone}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Status</p>
+                <p>{selectedOrder.status}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Total</p>
+                <p className="font-bold">Rp {selectedOrder.total_amount?.toLocaleString()}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
+
+  const content = (
+    <>
+      {/* Content based on current view */}
+      {currentView === 'list' && <ListView />}
+      {(currentView === 'add' || currentView === 'edit') && <FormView />}
+      {currentView === 'detail' && <DetailView />}
+    </>
+  )
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <ShoppingCart className="h-8 w-8" />
-              Pesanan
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola pesanan pelanggan
-            </p>
-          </div>
-          <Button onClick={() => window.location.href = '/orders/new'}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Pesanan
-          </Button>
-        </div>
-
-        {/* Stats Cards (Suspense boundary) */}
-        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
-          <div className="grid gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
-          </div>
+        {isMobile ? (
+          <PullToRefresh onRefresh={handleRefresh}>
+            {content}
+          </PullToRefresh>
         ) : (
-          <Suspense fallback={
-            <div className="grid gap-4 md:grid-cols-4">
-              {Array.from({ length: 4 }, (_, i) => (
-                <StatsCardSkeleton key={i} />
-              ))}
-            </div>
-          }>
-            <OrdersStatsSection
-              totalOrders={totalOrders}
-              totalRevenue={totalRevenue}
-              averageOrderValue={averageOrderValue}
-              pendingRevenue={pendingRevenue}
-              formatCurrency={formatCurrency}
-            />
-          </Suspense>
-        )}
-
-        {/* Quick Actions */}
-        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
-          <div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />
-        ) : (
-          <Suspense fallback={<div className="animate-pulse h-16 bg-gray-200 dark:bg-gray-800 rounded" />}>
-            <OrdersQuickActions />
-          </Suspense>
-        )}
-
-        {/* Filters */}
-        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
-          <SearchFormSkeleton />
-        ) : (
-          <Suspense fallback={<SearchFormSkeleton />}>
-            <OrdersFilters
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              dateFrom={dateFrom}
-              setDateFrom={setDateFrom}
-              dateTo={dateTo}
-              setDateTo={setDateTo}
-              statusConfig={ORDER_STATUS_CONFIG}
-            />
-          </Suspense>
-        )}
-
-        {/* Orders Table */}
-        {isLoading(LOADING_KEYS.FETCH_ORDERS) ? (
-          <OrdersTableSkeleton rows={5} />
-        ) : filteredOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 border rounded-md bg-muted/30 text-center">
-            <ShoppingCart className="h-10 w-10 mb-3 opacity-60" />
-            <p className="text-lg font-medium">Belum ada pesanan</p>
-            <p className="text-sm text-muted-foreground mb-4">Klik tombol di bawah untuk membuat pesanan pertama Anda.</p>
-            <Button onClick={() => window.location.href = '/orders/new'}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Pesanan
-            </Button>
-          </div>
-        ) : (
-          <Suspense fallback={<OrdersTableSkeleton rows={5} />}>
-            <OrdersTableSection
-              orders={filteredOrders}
-              formatCurrency={formatCurrency}
-              formatDate={formatDate}
-              ORDER_STATUS_CONFIG={ORDER_STATUS_CONFIG}
-              PAYMENT_STATUS_CONFIG={PAYMENT_STATUS_CONFIG}
-            />
-          </Suspense>
+          content
         )}
       </div>
     </AppLayout>

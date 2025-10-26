@@ -130,42 +130,42 @@ export class RateLimitError extends TypedError {
 /**
  * Type guard for TypedError
  */
-export function isTypedError(error: any): error is TypedError {
+export function isTypedError(error: unknown): error is TypedError {
     return error instanceof TypedError;
 }
 
 /**
  * Type guard for ValidationError
  */
-export function isValidationError(error: any): error is ValidationError {
+export function isValidationError(error: unknown): error is ValidationError {
     return error instanceof ValidationError;
 }
 
 /**
  * Type guard for NotFoundError
  */
-export function isNotFoundError(error: any): error is NotFoundError {
+export function isNotFoundError(error: unknown): error is NotFoundError {
     return error instanceof NotFoundError;
 }
 
 /**
  * Type guard for AuthenticationError
  */
-export function isAuthenticationError(error: any): error is AuthenticationError {
+export function isAuthenticationError(error: unknown): error is AuthenticationError {
     return error instanceof AuthenticationError;
 }
 
 /**
  * Type guard for AuthorizationError
  */
-export function isAuthorizationError(error: any): error is AuthorizationError {
+export function isAuthorizationError(error: unknown): error is AuthorizationError {
     return error instanceof AuthorizationError;
 }
 
 /**
  * Error handler utility - converts any error to ApiError format
  */
-export function handleError(error: any) {
+export function handleError(error: unknown) {
     if (isTypedError(error)) {
         return {
             code: error.code,
@@ -193,7 +193,7 @@ export function handleError(error: any) {
 /**
  * Safe error message extractor
  */
-export function getErrorMessage(error: any): string {
+export function getErrorMessage(error: unknown): string {
     if (error instanceof Error) {
         return error.message;
     }
@@ -208,7 +208,7 @@ export function getErrorMessage(error: any): string {
 /**
  * Safe error code extractor
  */
-export function getErrorCode(error: any): string {
+export function getErrorCode(error: unknown): string {
     if (isTypedError(error)) {
         return error.code;
     }

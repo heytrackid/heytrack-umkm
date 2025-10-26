@@ -282,18 +282,10 @@ export const RegionalSettingsSchema = z.object({
 export const SecuritySettingsSchema = z.object({
   twoFactorEnabled: z.boolean().default(false),
   sessionTimeout: z.number().min(5).max(480).default(60), // minutes
-  passwordMinLength: z.number().min(8).max(32).default(12),
-  loginNotifications: z.boolean().default(true),
+  passwordMinLength: z.number().int().min(6).default(8),
+  requireSymbols: z.boolean().default(true),
+  requireNumbers: z.boolean().default(true),
   suspiciousActivityAlerts: z.boolean().default(true),
-})
-
-export const BackupSettingsSchema = z.object({
-  autoBackup: z.boolean().default(true),
-  backupFrequency: z.enum(['daily', 'weekly', 'monthly']).default('daily'),
-  retentionPeriod: z.number().min(1).max(365).default(30), // days
-  backupLocation: z.enum(['local', 'cloud', 'both']).default('both'),
-  includeAttachments: z.boolean().default(true),
-  encryptBackups: z.boolean().default(true),
 })
 
 export const ThemeSettingsSchema = z.object({
@@ -311,7 +303,6 @@ export const AppSettingsSchema = z.object({
   notifications: NotificationSettingsSchema.optional(),
   regional: RegionalSettingsSchema.optional(),
   security: SecuritySettingsSchema.optional(),
-  backup: BackupSettingsSchema.optional(),
   theme: ThemeSettingsSchema.optional(),
 })
 
@@ -458,6 +449,51 @@ export const CronJobConfigSchema = z.object({
   notificationOnFailure: z.boolean().default(true),
   priority: z.enum(['low', 'normal', 'high', 'critical']).default('normal'),
 })
+
+// Infer types from schemas
+export type UserProfileSettings = z.infer<typeof UserProfileSettingsSchema>
+export type BusinessInfoSettings = z.infer<typeof BusinessInfoSettingsSchema>
+export type NotificationSettings = z.infer<typeof NotificationSettingsSchema>
+export type RegionalSettings = z.infer<typeof RegionalSettingsSchema>
+export type SecuritySettings = z.infer<typeof SecuritySettingsSchema>
+export type ThemeSettings = z.infer<typeof ThemeSettingsSchema>
+export type AppSettings = z.infer<typeof AppSettingsSchema>
+
+/**
+ * Validates user profile settings
+ */
+export function validateUserProfileSettings(data: unknown): UserProfileSettings {
+  const result = UserProfileSettingsSchema.safeParse(data)
+  if (!result.success) {
+    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+    throw new Error(`User profile validation failed: ${errors}`)
+  }
+  return result.data
+}
+
+/**
+ * Validates business information settings
+ */
+export function validateBusinessInfoSettings(data: unknown): BusinessInfoSettings {
+  const result = BusinessInfoSettingsSchema.safeParse(data)
+  if (!result.success) {
+    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+    throw new Error(`Business info validation failed: ${errors}`)
+  }
+  return result.data
+}
+
+/**
+ * Validates notification settings
+ */
+export function validateNotificationSettings(data: unknown): NotificationSettings {
+  const result = NotificationSettingsSchema.safeParse(data)
+  if (!result.success) {
+    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
+    throw new Error(`Notification validation failed: ${errors}`)
+  }
+  return result.data
+}
 
 // Type exports for API schemas
 export type PaginationQuery = z.infer<typeof PaginationQuerySchema>

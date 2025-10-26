@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import * as React from 'react'
-import { NavigationItem } from './useSidebarLogic'
+import type { NavigationItem } from './useSidebarLogic'
 
 interface SidebarItemProps {
   item: NavigationItem

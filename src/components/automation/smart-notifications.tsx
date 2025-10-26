@@ -4,11 +4,13 @@ import * as React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { automationEngine } from '@/lib/automation-engine'
+// import { automationEngine } from '@/lib/automation-engine'
 import { AlertTriangle, Bell, CheckCircle, Info, X, Zap } from 'lucide-react'
 import { memo, useEffect, useState } from 'react'
 
 import { apiLogger } from '@/lib/logger'
+import type { NotificationData, Order, OrderItem, Ingredient } from '@/types'
+
 interface SmartNotification {
   id: string
   type: 'critical' | 'warning' | 'info' | 'success'
@@ -19,7 +21,7 @@ interface SmartNotification {
   priority: 'high' | 'medium' | 'low'
   timestamp: Date
   read: boolean
-  data?: any
+  data?: NotificationData
 }
 
 interface SmartNotificationsProps {
@@ -66,7 +68,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
           const data = await ingredientsRes.value.json()
           ingredients = Array.isArray(data) ? data : []
         } catch (e) {
-          apiLogger.warn('Failed to parse ingredients data:', e)
+          apiLogger.warn({ error: e }, 'Failed to parse ingredients data')
         }
       }
 
@@ -75,40 +77,40 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
           const data = await ordersRes.value.json()
           orders = Array.isArray(data) ? data : []
         } catch (e) {
-          apiLogger.warn('Failed to parse orders data:', e)
+          apiLogger.warn({ error: e }, 'Failed to parse orders data')
         }
       }
 
       // Only proceed if we have some data
       if (ingredients.length > 0 || orders.length > 0) {
         // Generate smart notifications using automation engine
-        const smartNotifications = automationEngine.notifications.generateSmartNotifications(
-          ingredients,
-          orders,
-          {} // TODO: Implement real financial metrics fetching
-        )
+        // const smartNotifications = automationEngine.notifications.generateSmartNotifications(
+        //   ingredients,
+        //   orders,
+        //   {} // TODO: Implement real financial metrics fetching
+        // )
 
         // Convert to our notification format
-        const formattedNotifications: SmartNotification[] = smartNotifications.map((notif: any, index: number) => ({
-          id: `smart-${Date.now()}-${index}`,
-          type: notif.type,
-          category: notif.category,
-          title: notif.title,
-          message: notif.message,
-          action: notif.action,
-          priority: notif.priority,
-          timestamp: new Date(),
-          read: false,
-          data: notif.data
-        }))
+        // const formattedNotifications: SmartNotification[] = smartNotifications.map((notif: SmartNotification, index: number) => ({
+        //   id: `smart-${Date.now()}-${index}`,
+        //   type: notif.type,
+        //   category: notif.category,
+        //   title: notif.title,
+        //   message: notif.message,
+        //   action: notif.action,
+        //   priority: notif.priority,
+        //   timestamp: new Date(),
+        //   read: false,
+        //   data: notif.data
+        // }))
 
         // Add additional custom notifications
         const additionalNotifications = await generateAdditionalNotifications(ingredients, orders)
         
-        setNotifications([...formattedNotifications, ...additionalNotifications])
+        setNotifications([...additionalNotifications])
       }
     } catch (error: unknown) {
-      apiLogger.warn('Error fetching smart notifications (non-critical):', error)
+      apiLogger.warn({ error }, 'Error fetching smart notifications (non-critical)')
       // Silently fail - notifications are not critical
     } finally {
       setLoading(false)
@@ -119,12 +121,14 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     const additional: SmartNotification[] = []
 
     // Check for orders with tight delivery schedules
-    const urgentOrders = orders.filter((order: any) => {
-      if (!order.delivery_date) return false
-      const deliveryTime = new Date(order.delivery_date).getTime()
+    const urgentOrders = orders.filter((order: unknown): order is Order => {
+      if (!order || typeof order !== 'object') {return false}
+      const orderData = order as Order
+      if (!orderData.delivery_date) {return false}
+      const deliveryTime = new Date(orderData.delivery_date).getTime()
       const now = Date.now()
       const hoursUntilDelivery = (deliveryTime - now) / (1000 * 60 * 60)
-      return hoursUntilDelivery <= 24 && hoursUntilDelivery > 0 && order.status !== 'DELIVERED'
+      return hoursUntilDelivery <= 24 && hoursUntilDelivery > 0 && orderData.status !== 'DELIVERED'
     })
 
     if (urgentOrders.length > 0) {
@@ -142,11 +146,13 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     }
 
     // Check for profitable vs unprofitable items
-    const lowMarginCount = orders.filter((order: any) => {
-      return order.order_items?.some((item: any) => {
+    const lowMarginCount = orders.filter((order: unknown): order is Order => {
+      if (!order || typeof order !== 'object') {return false}
+      const orderData = order as Order & { order_items?: OrderItem[] }
+      return orderData.order_items?.some((item: OrderItem) => {
         const margin = item.unit_price > 0 ? ((item.unit_price - 5000) / item.unit_price) * 100 : 0
         return margin < 30
-      })
+      }) ?? false
     }).length
 
     if (lowMarginCount > 0) {
@@ -163,7 +169,11 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     }
 
     // HPP calculation recommendations
-    const needsHPPReview = ingredients.filter((ing: any) => ing.stock > ing.min_stock * 2).length
+    const needsHPPReview = ingredients.filter((ing: unknown): ing is Ingredient => {
+      if (!ing || typeof ing !== 'object') {return false}
+      const ingData = ing as Ingredient
+      return (ingData.current_stock ?? 0) > (ingData.min_stock ?? 0) * 2
+    }).length
     if (needsHPPReview > 3) {
       additional.push({
         id: `hpp-review-${Date.now()}`,
@@ -182,12 +192,12 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
 
   const markAsRead = (id: string) => {
     setNotifications(prev => 
-      prev.map((notif: any) => notif.id === id ? { ...notif, read: true } : notif)
+      prev.map((notif: SmartNotification) => notif.id === id ? { ...notif, read: true } : notif)
     )
   }
 
   const dismissNotification = (id: string) => {
-    setNotifications(prev => prev.filter((notif: any) => notif.id !== id))
+    setNotifications(prev => prev.filter((notif: SmartNotification) => notif.id !== id))
   }
 
   const getNotificationIcon = (type: string) => {
@@ -208,8 +218,8 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
     }
   }
 
-  const unreadCount = notifications.filter((n: any) => !n.read).length
-  const highPriorityCount = notifications.filter((n: any) => !n.read && n.priority === 'high').length
+  const unreadCount = notifications.filter((n: SmartNotification) => !n.read).length
+  const highPriorityCount = notifications.filter((n: SmartNotification) => !n.read && n.priority === 'high').length
 
   return (
     <div className={`relative ${className}`}>
@@ -351,7 +361,7 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
                 variant="ghost" 
                 size="sm" 
                 className="w-full text-xs"
-                onClick={() => setNotifications(prev => prev.map((n: any) => ({ ...n, read: true })))}
+                onClick={() => setNotifications(prev => prev.map((n: SmartNotification) => ({ ...n, read: true })))}
               >
                 Mark all as read
               </Button>

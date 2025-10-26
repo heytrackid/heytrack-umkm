@@ -26,10 +26,11 @@ import {
 } from 'lucide-react'
 import { format, addHours, startOfDay, endOfDay, differenceInMinutes } from 'date-fns'
 
-import { 
+import type { 
   ProductionBatch, 
   TimelineSlot, 
-  SchedulingResult,
+  SchedulingResult} from '@/services/production/BatchSchedulingService';
+import {
   batchSchedulingService 
 } from '@/services/production/BatchSchedulingService'
 
@@ -115,7 +116,7 @@ export default function ProductionTimeline({
 
   // Calculate position of batch on timeline
   const calculateBatchPosition = (batch: ProductionBatch) => {
-    if (!batch.scheduled_start || !batch.scheduled_end) return null
+    if (!batch.scheduled_start || !batch.scheduled_end) {return null}
 
     const batchStart = new Date(batch.scheduled_start)
     const batchEnd = new Date(batch.scheduled_end)
@@ -144,7 +145,7 @@ export default function ProductionTimeline({
 
   // Group timeline slots by resource
   const resourceGroups = useMemo(() => {
-    if (!schedulingResult?.timeline) return []
+    if (!schedulingResult?.timeline) {return []}
 
     const groups: Record<string, TimelineSlot[]> = {}
     
@@ -334,10 +335,10 @@ export default function ProductionTimeline({
                         {/* Production batches */}
                         {slots.map((slot) => {
                           const batch = schedulingResult.schedule.find(b => b.id === slot.batch_id)
-                          if (!batch) return null
+                          if (!batch) {return null}
 
                           const position = calculateBatchPosition(batch)
-                          if (!position) return null
+                          if (!position) {return null}
 
                           return (
                             <Tooltip key={slot.batch_id}>

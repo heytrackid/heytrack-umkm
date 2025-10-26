@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
-import { getErrorMessage } from '@/lib/type-guards'
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { DateRangeQuerySchema } from '@/lib/validations/api-validations'
+import type { Database } from '@/types'
 
 import { apiLogger } from '@/lib/logger'
 /**
@@ -250,11 +252,11 @@ async function calculateProfitMetrics(
   })
 
   // Calculate operating expenses
-  const totalOperatingExpenses = expenses.reduce((sum: number, exp) => sum + (+(exp.amount || 0)), 0)
+  const totalOperatingExpenses = expenses.reduce((sum: number, exp: { amount: number | string }) => sum + Number(exp.amount || 0), 0)
 
   // Calculate operating expenses breakdown by category
   const operatingExpensesBreakdown: Record<string, unknown> = {}
-  expenses.forEach(exp => {
+  expenses.forEach((exp: { amount: number | string; category: string }) => {
     const category = exp.category || 'Other'
     if (!operatingExpensesBreakdown[category]) {
       operatingExpensesBreakdown[category] = {
@@ -264,13 +266,14 @@ async function calculateProfitMetrics(
         percentage: 0
       }
     }
-    (operatingExpensesBreakdown[category] as any).total += (+(exp.amount || 0))
+    const currentTotal = (operatingExpensesBreakdown[category] as any).total || 0
+    ;(operatingExpensesBreakdown[category] as any).total = currentTotal + Number(exp.amount || 0)
     (operatingExpensesBreakdown[category] as any).count++
   })
 
   // Calculate percentages for operating expenses
   Object.values(operatingExpensesBreakdown).forEach((cat: any) => {
-    const catTotal = +(cat.total || 0)
+    const catTotal = Number(cat.total || 0)
     cat.percentage = totalOperatingExpenses > 0
       ? (catTotal / totalOperatingExpenses) * 100
       : 0
@@ -363,9 +366,9 @@ function calculateCOGSBreakdown(orders: any[], recipeCostMap: Map<string, any>) 
   })
 
   // Calculate percentages
-  const totalCOGS = Object.values(breakdown).reduce((sum: number, ing: any) => sum + (+(ing.total_cost || 0)), 0)
+  const totalCOGS = Object.values(breakdown).reduce((sum: number, ing: any) => sum + Number(ing.total_cost || 0), 0)
   Object.values(breakdown).forEach((ing: any) => {
-    const ingCost = +(ing.total_cost || 0)
+    const ingCost = Number(ing.total_cost || 0)
     ing.percentage = totalCOGS > 0 ? (ingCost / totalCOGS) * 100 : 0
   })
 

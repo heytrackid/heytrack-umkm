@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
-import { Order, OrderFormData, Priority } from './types'
+import type { Order, OrderFormData, Priority } from './types'
 import { generateOrderNumber, calculateOrderTotal, validateOrderData } from './utils'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -90,7 +90,10 @@ export default function OrderForm({
     }
   }
 
-  const handleInputChange = (field: keyof OrderFormData, value: any) => {
+  const handleInputChange = <K extends keyof OrderFormData>(
+    field: K,
+    value: OrderFormData[K]
+  ) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors.length > 0) {
       setErrors([]) // Clear errors when user starts typing
@@ -110,7 +113,11 @@ export default function OrderForm({
     }))
   }
 
-  const updateOrderItem = (index: number, field: string, value: any) => {
+  const updateOrderItem = <K extends keyof Omit<OrderItem, 'id'>>(
+    index: number,
+    field: K,
+    value: Omit<OrderItem, 'id'>[K]
+  ) => {
     setFormData(prev => ({
       ...prev,
       order_items: prev.order_items.map((item, i) => 
@@ -127,7 +134,7 @@ export default function OrderForm({
   }
 
   const handleRecipeSelect = (index: number, recipeId: string) => {
-    if (recipeId === 'placeholder') return // Ignore placeholder selection
+    if (recipeId === 'placeholder') {return} // Ignore placeholder selection
     
     const recipe = recipes.find(r => r.id === recipeId)
     if (recipe) {

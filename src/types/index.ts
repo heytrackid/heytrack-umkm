@@ -508,11 +508,111 @@ export type {
   TimePeriod
 } from './hpp-tracking'
 
+// Re-export form types
+export type {
+  ArrayItemUpdate,
+  FormAction,
+  FormFieldUpdate,
+  FormFieldUpdater,
+  FormState,
+  FormValidationError,
+  FormValidationResult,
+  OrderItemUpdate
+} from './forms'
+
+// Re-export analytics types
+export type {
+  BusinessSummary,
+  CompetitorPrice,
+  CostBreakdownAnalysis,
+  CustomerSegment,
+  DashboardAnalytics,
+  ExpenseCategory,
+  FinancialAnalytics,
+  InventoryAlert,
+  InventoryAnalysis,
+  InventoryMetrics,
+  InventoryStatus,
+  MarketComparison,
+  PricingAnalysis,
+  PricingImpact,
+  PricingRecommendation,
+  PricingTier,
+  PricingTiers,
+  ProductPerformance,
+  RevenueCategory,
+  SalesAnalytics,
+  SalesTrend,
+  SystemAlert,
+  TimePeriod as AnalyticsTimePeriod
+} from './analytics'
+
+// Re-export export types
+export type {
+  BatchExportConfig,
+  BorderStyle,
+  CSVExportOptions,
+  CellStyle,
+  ColumnConfig,
+  ExcelExportOptions,
+  ExcelStyles,
+  ExportData,
+  ExportFormat,
+  ExportMetadata,
+  ExportOptions,
+  ExportResult,
+  ExportTemplate,
+  ImportData,
+  ImportError,
+  ImportMetadata,
+  ImportOptions,
+  ImportWarning
+} from './export'
+
+// Re-export chart types
+export type {
+  BarChartData,
+  BarChartSeries,
+  ChartConfig,
+  ChartDataPoint,
+  ChartDataset,
+  ChartDataTransformer,
+  ChartFilterOptions,
+  ChartFont,
+  ChartLegend,
+  ChartOptions,
+  ChartProps,
+  ChartScale,
+  ChartScales,
+  ChartSeriesConfig,
+  ChartTitle,
+  ChartTooltip,
+  ChartType,
+  HeatmapData,
+  LineChartData,
+  LineChartSeries,
+  MultiSeriesChartData,
+  PieChartData,
+  ScatterDataPoint,
+  TimeSeriesDataPoint
+} from './charts'
+
+// Re-export notification types
+export type {
+  NotificationCategory,
+  NotificationData,
+  NotificationPreferences,
+  NotificationPriority,
+  NotificationType,
+  SmartNotification
+} from './notifications'
+
 // Re-export common aliases
 export type Ingredient = IngredientsTable['Row']
 export type Recipe = RecipesTable['Row']
 export type RecipeIngredient = RecipeIngredientsTable['Row']
 export type Order = OrdersTable['Row']
+export type OrderItem = OrderItemsTable['Row']
 export type Customer = CustomersTable['Row']
 export type Supplier = SuppliersTable['Row']
 
@@ -521,6 +621,50 @@ export type RecipeWithIngredients = Recipe & {
     ingredient?: Ingredient
   }>
 }
+
+// Re-export type guards and validation functions
+export {
+  assertArrayOf,
+  assertCustomer,
+  assertIngredient,
+  assertNonNull,
+  assertOrder,
+  assertOrderItem,
+  assertRecipe,
+  assertRecipeIngredient,
+  assertRecipeWithIngredients,
+  assertSupplier,
+  isApiError,
+  isApiResponse,
+  isArrayOf,
+  isBoolean,
+  isCustomer,
+  isDateString,
+  isHppSnapshot,
+  isIngredient,
+  isIngredientPurchase,
+  isNonNegativeNumber,
+  isNonNull,
+  isNumber,
+  isOrder,
+  isOrderItem,
+  isOrderStatus,
+  isPartialOf,
+  isPaymentStatus,
+  isPositiveNumber,
+  isRecord,
+  isRecipe,
+  isRecipeIngredient,
+  isRecipeWithIngredients,
+  isString,
+  isSupplier,
+  isUserProfile,
+  isUUID,
+  validateIngredient,
+  validateOrder,
+  validateOrderItem,
+  validateRecipe
+} from './guards'
 
 // Constants
 export const Constants = {

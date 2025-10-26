@@ -10,7 +10,7 @@ interface SummaryCardsProps {
 }
 
 export default function SummaryCards({ summary, formatCurrency, isMobile }: SummaryCardsProps) {
-  if (!summary) return null
+  if (!summary) {return null}
 
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>

@@ -1,5 +1,6 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 // GET /api/recipes/[id] - Get single recipe with ingredients
@@ -9,7 +10,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     const { data: recipe, error } = await supabase
       .from('recipes')
       .select(`
@@ -60,7 +61,7 @@ export async function PUT(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     const body = await request.json()
     const { recipe_ingredients, ...recipeData } = body
 
@@ -174,7 +175,7 @@ export async function DELETE(
 ) {
   const { id } = await params
   try {
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
 
     // Check if recipe exists first
     const { data: existingRecipe, error: checkError } = await supabase

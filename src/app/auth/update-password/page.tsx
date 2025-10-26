@@ -9,7 +9,6 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import {
   getAuthErrorMessage,
   validatePassword,
-  validatePasswordMatch,
 } from '@/lib/auth-errors'
 import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
 import Link from 'next/link'
@@ -33,11 +32,11 @@ export default function UpdatePasswordPage() {
   // Password strength calculation
   const getPasswordStrength = (pwd: string) => {
     let strength = 0
-    if (pwd.length >= 8) strength++
-    if (pwd.length >= 12) strength++
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) strength++
-    if (/\d/.test(pwd)) strength++
-    if (/[^a-zA-Z\d]/.test(pwd)) strength++
+    if (pwd.length >= 8) {strength++}
+    if (pwd.length >= 12) {strength++}
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) {strength++}
+    if (/\d/.test(pwd)) {strength++}
+    if (/[^a-zA-Z\d]/.test(pwd)) {strength++}
     return strength
   }
 
@@ -63,14 +62,13 @@ export default function UpdatePasswordPage() {
     // Client-side validation
     const errors: { password?: string; confirmPassword?: string } = {}
 
-    const passwordError = validatePassword(pwd)
-    if (passwordError) {
-      errors.password = passwordError
+    const passwordValidation = validatePassword(pwd)
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.error
     }
 
-    const passwordMatchError = validatePasswordMatch(pwd, confirmPwd)
-    if (passwordMatchError) {
-      errors.confirmPassword = passwordMatchError
+    if (pwd !== confirmPwd) {
+      errors.confirmPassword = 'Password konfirmasi tidak cocok'
     }
 
     if (Object.keys(errors).length > 0) {
@@ -82,7 +80,7 @@ export default function UpdatePasswordPage() {
       const result = await updatePassword(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        setError(authError.message)
+        setError(authError)
       } else if (result?.success) {
         setSuccess(true)
       }

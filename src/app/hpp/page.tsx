@@ -2,7 +2,8 @@
 
 import AppLayout from '@/components/layout/app-layout'
 import { CardSkeleton, ListSkeleton, StatsSkeleton } from '@/components/ui'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb';
+import { PageHeader } from '@/components/ui/page-patterns';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import PrefetchLink from '@/components/ui/prefetch-link'
@@ -93,19 +94,7 @@ export default function HPPAndPricingPage() {
       <AppLayout>
         <div className="space-y-6">
           {/* Breadcrumb Navigation */}
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <PrefetchLink href="/">Dashboard</PrefetchLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>HPP & Pricing</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          <PageBreadcrumb items={BreadcrumbPatterns.hpp} />
 
           <div className={`${isMobile ? 'text-center' : ''}`}>
             <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
@@ -132,35 +121,19 @@ export default function HPPAndPricingPage() {
     <AppLayout>
       <div className="space-y-6">
         {/* Breadcrumb Navigation */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <PrefetchLink href="/">Dashboard</PrefetchLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>HPP & Pricing</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <PageBreadcrumb items={BreadcrumbPatterns.hpp} />
 
         {/* Header */}
-        <div className={`flex gap-4 ${isMobile ? 'flex-col items-center text-center' : 'justify-between items-center'}`}>
-          <div className={isMobile ? 'text-center' : ''}>
-            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              HPP & Pricing
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola Harga Pokok Produksi (HPP) dan strategi pricing untuk setiap produk
-            </p>
-          </div>
-          <Button variant="outline" className={isMobile ? 'w-full' : ''} onClick={() => window.location.reload()}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh Data
-          </Button>
-        </div>
+        <PageHeader
+          title="HPP & Pricing"
+          description="Kelola Harga Pokok Produksi (HPP) dan strategi pricing untuk setiap produk"
+          actions={
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh Data
+            </Button>
+          }
+        />
 
         {recipes.length === 0 ? (
           <Card>

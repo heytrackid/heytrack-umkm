@@ -1,9 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
-import { OrderInsertSchema, PaginationQuerySchema } from '@/lib/validations'
-import type { OrdersTable } from '@/types/database'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { OrderInsertSchema } from '@/lib/validations/domains/order'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import type { Database } from '@/types'
 
 import { apiLogger } from '@/lib/logger'
+
+type OrdersTable = Database['public']['Tables']['orders']
 // GET /api/orders - Get all orders
 export async function GET(request: NextRequest) {
   try {
@@ -180,12 +184,9 @@ export async function POST(request: NextRequest) {
         delivery_date: (validatedData as any).delivery_date,
         delivery_time: validatedData.delivery_time,
         total_amount: (validatedData as any).total_amount,
-        discount: validatedData.discount || 0,
         tax_amount: validatedData.tax_amount || 0,
-        paid_amount: validatedData.paid_amount || 0,
         payment_status: validatedData.payment_status || 'UNPAID',
         payment_method: validatedData.payment_method,
-        priority: validatedData.priority || 'normal',
         notes: validatedData.notes,
         special_instructions: validatedData.special_instructions,
         financial_record_id: incomeRecordId

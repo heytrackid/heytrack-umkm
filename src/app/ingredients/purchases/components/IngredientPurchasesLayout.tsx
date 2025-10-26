@@ -84,8 +84,15 @@ export default function IngredientPurchasesLayout() {
     }
   }
 
-  const handlePurchaseSubmit = async (formData: PurchaseFormData) => {
-    const totalPrice = parseFloat(formData.quantity) * parseFloat(formData.unit_price)
+  const handlePurchaseSubmit = async (formData: {
+    ingredient_id: string;
+    quantity: number;
+    unit_price: number;
+    supplier?: string;
+    purchase_date?: string;
+    notes?: string;
+  }) => {
+    const totalPrice = formData.quantity * formData.unit_price;
 
     const response = await fetch('/api/ingredient-purchases', {
       method: 'POST',

@@ -25,7 +25,7 @@ import { useEffect, useState } from 'react'
 export interface NavigationItem {
   name: string
   href: string
-  icon: unknown
+  icon: LucideIcon
   isSimple?: boolean
   badge?: string
   stepNumber?: number

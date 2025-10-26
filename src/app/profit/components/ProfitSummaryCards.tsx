@@ -1,24 +1,22 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, TrendingDown, Package } from 'lucide-react'
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Package
+} from 'lucide-react'
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
-import type { ProfitSummary, ProfitTrends } from '../constants'
+import type { ProfitData } from './types'
 
 interface ProfitSummaryCardsProps {
-  summary: ProfitSummary | null
-  trends: ProfitTrends | null
+  summary: ProfitData['summary']
+  trends: ProfitData['trends']
   formatCurrency: (amount: number) => string
   isMobile: boolean
 }
 
-export function ProfitSummaryCards({
-  summary,
-  trends,
-  formatCurrency,
-  isMobile
-}: ProfitSummaryCardsProps) {
-  if (!summary) return null
-
+export function ProfitSummaryCards({ summary, trends, formatCurrency, isMobile }: ProfitSummaryCardsProps) {
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
       {/* Total Revenue */}

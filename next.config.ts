@@ -15,6 +15,21 @@ const nextConfig: NextConfig = {
   poweredByHeader: false, // Remove X-Powered-By header for security
   compress: true, // Enable gzip compression
 
+  // Output optimizations
+  output: 'standalone', // Enable standalone output for better performance
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
+
+  // Experimental features for performance
+  experimental: {
+    // Enable faster CSS processing
+    optimizeCss: true,
+    // Enable faster package imports
+    optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'react', 'react-dom'],
+    // Enable WebAssembly support
+  },
+
   // Turbopack configuration (Next.js 16+)
   // Empty config to silence webpack warning - Turbopack handles HMR automatically
   turbopack: {},
@@ -96,7 +111,6 @@ const nextConfig: NextConfig = {
 
   // External packages for server components
   serverExternalPackages: [
-    '@supabase/supabase-js',
     '@supabase/realtime-js',
     '@supabase/ssr'
   ],

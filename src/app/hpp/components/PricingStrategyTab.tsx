@@ -8,9 +8,20 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RefreshCw, Target } from 'lucide-react'
 
+interface Recipe {
+  id: string
+  name: string
+  category: string
+  hpp: number
+  selling_price?: number
+  margin: number
+  profit: number
+  recipe_ingredients?: unknown[]
+}
+
 interface PricingStrategyTabProps {
-  recipes: unknown[]
-  selectedRecipe: unknown
+  recipes: Recipe[]
+  selectedRecipe: Recipe | null
   selectedRecipeId: string
   setSelectedRecipeId: (id: string) => void
   targetMargin: number
@@ -218,7 +229,7 @@ export default function PricingStrategyTab({
               <Card key={index} className="border-2">
                 <CardContent className="p-4">
                   <div className="space-y-2">
-                    <Badge variant={category.color as 'default' | 'secondary' | 'outline' | 'destructive' | 'ghost'} className="w-full justify-center">
+                    <Badge variant={category.color === 'ghost' ? 'secondary' : category.color as 'default' | 'secondary' | 'outline' | 'destructive'} className="w-full justify-center">
                       {category.range}
                     </Badge>
                     <h3 className="font-medium text-center">{category.label}</h3>

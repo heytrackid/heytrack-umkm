@@ -1,14 +1,13 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import type { ProfitSummary } from '../constants'
+import type { ProfitData } from './types'
 
 interface ProfitBreakdownProps {
-  summary: ProfitSummary | null
+  summary: ProfitData['summary']
   formatCurrency: (amount: number) => string
 }
 
 export function ProfitBreakdown({ summary, formatCurrency }: ProfitBreakdownProps) {
-  if (!summary) return null
 
   return (
     <Card>

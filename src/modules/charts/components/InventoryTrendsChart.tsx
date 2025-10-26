@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from"@/components/ui/chart"
+import type { ChartConfig } from '@/types/charts'
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { 
@@ -27,7 +28,18 @@ const ResponsiveContainer = dynamic(
   }
 )
 
-const inventoryData = [
+/**
+ * Inventory trend data point
+ */
+interface InventoryTrendDataPoint {
+  month: string
+  stock: number
+  purchases: number
+  usage: number
+  waste: number
+}
+
+const inventoryData: InventoryTrendDataPoint[] = [
   {
     month:"Jan",
     stock: 850,
@@ -72,7 +84,17 @@ const inventoryData = [
   },
 ]
 
-const chartConfig = {
+/**
+ * Props for InventoryTrendsChart component
+ */
+interface InventoryTrendsChartProps {
+  data?: InventoryTrendDataPoint[]
+  config?: ChartConfig
+  height?: number
+  className?: string
+}
+
+const chartConfig: ChartConfig = {
   stock: {
     label:"Stok Tersedia",
     color:"#22c55e",
@@ -91,13 +113,18 @@ const chartConfig = {
   },
 }
 
-export default function InventoryTrendsChart(props: any) {
+export default function InventoryTrendsChart({ 
+  data = inventoryData, 
+  config = chartConfig,
+  height = 400,
+  className 
+}: InventoryTrendsChartProps) {
   return (
-    <ChartContainer config={chartConfig}>
-      <ResponsiveContainer width="100%" height={400}>
+    <ChartContainer config={config} className={className}>
+      <ResponsiveContainer width="100%" height={height}>
         <LineChart
           accessibilityLayer
-          data={inventoryData}
+          data={data}
           margin={{
             left: 12,
             right: 12,

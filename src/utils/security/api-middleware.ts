@@ -1,7 +1,8 @@
 // API Security Middleware
 // Rate limiting, input sanitization, and security checks for API routes
 
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { RateLimiter, APISecurity } from '@/utils/security'
 import { apiLogger } from '@/lib/logger'
 

@@ -18,7 +18,7 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { ProfileSkeleton, CardSkeleton } from '@/components/ui'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/useSupabase'
+import { useSupabaseCRUD } from '@/hooks/supabase'
 import {
     ArrowLeft,
     Edit,

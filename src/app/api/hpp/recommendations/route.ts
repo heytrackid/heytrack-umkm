@@ -1,16 +1,33 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
+
+import { createServiceRoleClient } from '@/utils/supabase'
 import { getErrorMessage } from '@/lib/type-guards'
-import { CostBreakdown, HPPRecommendation } from '@/types/hpp-tracking'
-import { NextRequest, NextResponse } from 'next/server'
+import type { CostBreakdown, HPPRecommendation } from '@/types/hpp-tracking'
 
 import { apiLogger } from '@/lib/logger'
+
+type RecipeRow = { id: string; name: string; selling_price: number | null }
+type HPPSnapshotRow = {
+  id: string
+  recipe_id: string
+  snapshot_date: string
+  hpp_value: number
+  material_cost: number
+  operational_cost: number
+  cost_breakdown: CostBreakdown
+  selling_price: number | null
+  margin_percentage: number | null
+  created_at: string
+  user_id: string
+}
 // GET /api/hpp/recommendations - Get HPP optimization recommendations
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url)
         const recipeId = searchParams.get('recipe_id')
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // If recipe_id provided, get recommendations for that recipe
         // Otherwise, get recommendations for all recipes
@@ -46,7 +63,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper function to get all recipe IDs
-async function getAllRecipeIds(supabase: any): Promise<string[]> {
+async function getAllRecipeIds(supabase: ReturnType<typeof createServiceRoleClient>): Promise<string[]> {
     const { data: recipes, error } = await supabase
         .from('recipes')
         .select('id')
@@ -57,12 +74,12 @@ async function getAllRecipeIds(supabase: any): Promise<string[]> {
         return []
     }
 
-    return recipes?.map((r: any) => (r as any).id) || []
+    return recipes?.map((r) => r.id) || []
 }
 
 // Helper function to generate recommendations for a recipe
 async function generateRecommendations(
-    supabase: any,
+    supabase: ReturnType<typeof createServiceRoleClient>,
     recipeId: string
 ): Promise<Array<HPPRecommendation & { recipe_id: string; recipe_name: string }>> {
     const recommendations: Array<HPPRecommendation & { recipe_id: string; recipe_name: string }> = []
@@ -77,6 +94,8 @@ async function generateRecommendations(
     if (recipeError || !recipe) {
         return recommendations
     }
+
+    type RecipeData = { name: string; selling_price: number | null }
 
     // Get last 30 days of snapshots
     const thirtyDaysAgo = new Date()
@@ -93,31 +112,34 @@ async function generateRecommendations(
         return recommendations
     }
 
+    const typedSnapshots = snapshots as unknown as HPPSnapshotRow[]
+
     // Rule 1: Consistent HPP increase over 30 days (Requirement 8.1)
-    if (snapshots.length >= 5) {
-        const firstHPP = snapshots[0].hpp_value
-        const lastHPP = snapshots[snapshots.length - 1].hpp_value
+    if (typedSnapshots.length >= 5) {
+        const firstHPP = typedSnapshots[0].hpp_value
+        const lastHPP = typedSnapshots[typedSnapshots.length - 1].hpp_value
         const changePercentage = ((lastHPP - firstHPP) / firstHPP) * 100
 
         // Check if trend is consistently increasing
         let increasingCount = 0
-        for (let i = 1; i < snapshots.length; i++) {
-            if (snapshots[i].hpp_value > snapshots[i - 1].hpp_value) {
+        for (let i = 1; i < typedSnapshots.length; i++) {
+            if (typedSnapshots[i].hpp_value > typedSnapshots[i - 1].hpp_value) {
                 increasingCount++
             }
         }
-        const isConsistentIncrease = increasingCount >= snapshots.length * 0.6 // 60% of snapshots show increase
+        const isConsistentIncrease = increasingCount >= typedSnapshots.length * 0.6 // 60% of snapshots show increase
 
         if (changePercentage > 10 && isConsistentIncrease) {
             const potentialSavings = (lastHPP - firstHPP) * 10 // Estimate based on 10 units
+            const recipeName = (recipe as RecipeData).name
 
             recommendations.push({
                 recipe_id: recipeId,
-                recipe_name: (recipe as any).nama,
+                recipe_name: recipeName,
                 type: 'supplier_review',
                 priority: changePercentage > 20 ? 'high' : 'medium',
                 title: 'Review Supplier atau Bahan Alternatif',
-                description: `HPP ${recipe.nama} naik konsisten ${changePercentage.toFixed(1)}% dalam 30 hari terakhir. Pertimbangkan untuk mencari supplier dengan harga lebih kompetitif atau bahan alternatif.`,
+                description: `HPP ${recipeName} naik konsisten ${changePercentage.toFixed(1)}% dalam 30 hari terakhir. Pertimbangkan untuk mencari supplier dengan harga lebih kompetitif atau bahan alternatif.`,
                 potential_savings: potentialSavings,
                 action_items: [
                     'Bandingkan harga dari minimal 3 supplier berbeda',
@@ -130,29 +152,30 @@ async function generateRecommendations(
     }
 
     // Rule 2: High operational cost percentage (> 20%) (Requirement 8.2)
-    const latestSnapshot = snapshots[snapshots.length - 1]
+    const latestSnapshot = typedSnapshots[typedSnapshots.length - 1]
     const breakdown = latestSnapshot.cost_breakdown as CostBreakdown
-    const operationalPercentage = ((latestSnapshot as any).operational_cost / (latestSnapshot as any).hpp_value) * 100
+    const operationalPercentage = (latestSnapshot.operational_cost / latestSnapshot.hpp_value) * 100
 
     // Check if operational cost increased significantly
     let operationalCostIncrease = 0
-    if (snapshots.length >= 2) {
-        const firstOperationalCost = snapshots[0].operational_cost
-        const lastOperationalCost = (latestSnapshot as any).operational_cost
+    if (typedSnapshots.length >= 2) {
+        const firstOperationalCost = typedSnapshots[0].operational_cost
+        const lastOperationalCost = latestSnapshot.operational_cost
         operationalCostIncrease = ((lastOperationalCost - firstOperationalCost) / firstOperationalCost) * 100
     }
 
     if (operationalPercentage > 20 || operationalCostIncrease > 20) {
-        const targetOperationalCost = (latestSnapshot as any).hpp_value * 0.15 // Target 15%
-        const potentialSavings = ((latestSnapshot as any).operational_cost - targetOperationalCost) * 10 // Estimate based on 10 units
+        const targetOperationalCost = latestSnapshot.hpp_value * 0.15 // Target 15%
+        const potentialSavings = (latestSnapshot.operational_cost - targetOperationalCost) * 10 // Estimate based on 10 units
+        const recipeName = (recipe as RecipeData).name
 
         const description = operationalCostIncrease > 20
-            ? `Biaya operasional ${recipe.nama} naik ${operationalCostIncrease.toFixed(1)}% dalam 30 hari terakhir dan mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
-            : `Biaya operasional ${recipe.nama} mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
+            ? `Biaya operasional ${recipeName} naik ${operationalCostIncrease.toFixed(1)}% dalam 30 hari terakhir dan mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
+            : `Biaya operasional ${recipeName} mencapai ${operationalPercentage.toFixed(1)}% dari HPP. Target ideal adalah 15-20%.`
 
         recommendations.push({
             recipe_id: recipeId,
-            recipe_name: (recipe as any).nama,
+            recipe_name: recipeName,
             type: 'operational_efficiency',
             priority: operationalCostIncrease > 20 ? 'high' : 'medium',
             title: 'Optimasi Efisiensi Operasional',
@@ -172,8 +195,10 @@ async function generateRecommendations(
     if (latestSnapshot.margin_percentage && latestSnapshot.margin_percentage < 15) {
         const currentMargin = latestSnapshot.margin_percentage
         const targetMargin = 25 // Target 25%
-        const currentPrice = (recipe as any).selling_price || latestSnapshot.selling_price || 0
-        const suggestedPrice = (latestSnapshot as any).hpp_value / (1 - targetMargin / 100)
+        const recipeName = (recipe as RecipeData).name
+        const recipePrice = (recipe as RecipeData).selling_price
+        const currentPrice = recipePrice || latestSnapshot.selling_price || 0
+        const suggestedPrice = latestSnapshot.hpp_value / (1 - targetMargin / 100)
         const priceIncrease = suggestedPrice - currentPrice
 
         // Calculate potential additional profit
@@ -181,11 +206,11 @@ async function generateRecommendations(
 
         recommendations.push({
             recipe_id: recipeId,
-            recipe_name: (recipe as any).nama,
+            recipe_name: recipeName,
             type: 'price_adjustment',
             priority: currentMargin < 10 ? 'high' : 'medium',
             title: 'Penyesuaian Harga Jual untuk Meningkatkan Margin',
-            description: `Margin profit ${recipe.nama} hanya ${currentMargin.toFixed(1)}%. Dengan meningkatkan harga atau mengurangi HPP, margin bisa ditingkatkan ke target 25%.`,
+            description: `Margin profit ${recipeName} hanya ${currentMargin.toFixed(1)}%. Dengan meningkatkan harga atau mengurangi HPP, margin bisa ditingkatkan ke target 25%.`,
             potential_savings: potentialAdditionalProfit,
             action_items: [
                 `Opsi 1: Naikkan harga jual dari ${formatCurrency(currentPrice)} ke ${formatCurrency(suggestedPrice)} (margin 25%)`,
@@ -198,32 +223,35 @@ async function generateRecommendations(
     }
 
     // Rule 4: Expensive ingredients - Calculate potential savings from alternatives (Requirement 8.4)
-    const sortedIngredients = [...(breakdown as any).ingredients].sort((a, b) => b.cost - a.cost)
-    if (sortedIngredients.length > 0) {
-        const topIngredient = sortedIngredients[0]
-        const ingredientPercentage = (topIngredient.cost / (latestSnapshot as any).material_cost) * 100
+    if (breakdown && breakdown.ingredients && Array.isArray(breakdown.ingredients)) {
+        const sortedIngredients = [...breakdown.ingredients].sort((a, b) => b.cost - a.cost)
+        if (sortedIngredients.length > 0) {
+            const topIngredient = sortedIngredients[0]
+            const ingredientPercentage = (topIngredient.cost / latestSnapshot.material_cost) * 100
+            const recipeName = (recipe as RecipeData).name
 
-        if (ingredientPercentage > 30) {
-            // Calculate potential savings if ingredient cost reduced by 20%
-            const potentialSavingsPerUnit = topIngredient.cost * 0.2
-            const potentialSavingsTotal = potentialSavingsPerUnit * 10 // Estimate based on 10 units
+            if (ingredientPercentage > 30) {
+                // Calculate potential savings if ingredient cost reduced by 20%
+                const potentialSavingsPerUnit = topIngredient.cost * 0.2
+                const potentialSavingsTotal = potentialSavingsPerUnit * 10 // Estimate based on 10 units
 
-            recommendations.push({
-                recipe_id: recipeId,
-                recipe_name: (recipe as any).nama,
-                type: 'ingredient_alternative',
-                priority: ingredientPercentage > 40 ? 'medium' : 'low',
-                title: 'Evaluasi Bahan Utama dan Alternatif',
-                description: `${(topIngredient as any).name} menyumbang ${ingredientPercentage.toFixed(1)}% dari biaya bahan. Dengan mencari alternatif atau negosiasi harga, potensi penghematan bisa mencapai ${formatCurrency(potentialSavingsPerUnit)} per unit.`,
-                potential_savings: potentialSavingsTotal,
-                action_items: [
-                    `Cari alternatif untuk ${(topIngredient as any).name} dengan harga lebih rendah (target: hemat 20%)`,
-                    'Evaluasi apakah jumlah yang digunakan bisa dikurangi tanpa mengurangi kualitas',
-                    'Pertimbangkan bulk purchase untuk diskon volume',
-                    'Test resep dengan proporsi bahan yang dioptimasi',
-                    'Negosiasi harga dengan supplier untuk pembelian dalam jumlah besar'
-                ]
-            })
+                recommendations.push({
+                    recipe_id: recipeId,
+                    recipe_name: recipeName,
+                    type: 'ingredient_alternative',
+                    priority: ingredientPercentage > 40 ? 'medium' : 'low',
+                    title: 'Evaluasi Bahan Utama dan Alternatif',
+                    description: `${topIngredient.name} menyumbang ${ingredientPercentage.toFixed(1)}% dari biaya bahan. Dengan mencari alternatif atau negosiasi harga, potensi penghematan bisa mencapai ${formatCurrency(potentialSavingsPerUnit)} per unit.`,
+                    potential_savings: potentialSavingsTotal,
+                    action_items: [
+                        `Cari alternatif untuk ${topIngredient.name} dengan harga lebih rendah (target: hemat 20%)`,
+                        'Evaluasi apakah jumlah yang digunakan bisa dikurangi tanpa mengurangi kualitas',
+                        'Pertimbangkan bulk purchase untuk diskon volume',
+                        'Test resep dengan proporsi bahan yang dioptimasi',
+                        'Negosiasi harga dengan supplier untuk pembelian dalam jumlah besar'
+                    ]
+                })
+            }
         }
     }
 

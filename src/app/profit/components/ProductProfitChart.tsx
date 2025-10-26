@@ -109,8 +109,8 @@ export function ProductProfitChart({
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                     tickFormatter={(value) => {
-                      if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`
-                      if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`
+                      if (value >= 1000000) {return `${(value / 1000000).toFixed(1)}jt`}
+                      if (value >= 1000) {return `${(value / 1000).toFixed(0)}rb`}
                       return value.toString()
                     }}
                   />

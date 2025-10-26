@@ -2,13 +2,13 @@
 
 import * as React from 'react'
 import { useState, useEffect } from 'react'
-import { useRecipes, useHPPCalculations } from '@/hooks/useSupabase'
+import { useRecipes, useSupabaseCRUD } from '@/hooks/supabase'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { apiLogger } from '@/lib/logger'
 export const useHPPLogic = () => {
-  const { recipes, loading } = useHPPCalculations()
-  const { update: updateRecipe } = useRecipes()
+  const { data: recipes, loading } = useRecipes()
+  const { update: updateRecipe } = useSupabaseCRUD('recipes')
   const { formatCurrency } = useCurrency()
   
   // Pricing states
@@ -37,7 +37,7 @@ export const useHPPLogic = () => {
   }, [productCost, targetMargin])
 
   const handleUpdateRecipePrice = async () => {
-    if (!selectedRecipeId || recommendedPrice <= 0) return
+    if (!selectedRecipeId || recommendedPrice <= 0) {return}
     
     try {
       setIsUpdating(true)

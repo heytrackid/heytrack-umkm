@@ -1,18 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { apiLogger } from '@/lib/logger'
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -24,168 +15,167 @@ import {
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import {
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Package,
-  Receipt,
-  Download,
-  Calendar,
-  AlertCircle,
-  ArrowUpRight,
-  ArrowDownRight,
-  Loader2,
-  BarChart3
-} from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { StatsSkeleton, CardSkeleton } from '@/components/ui'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Download, Loader2, AlertCircle } from 'lucide-react'
+import { StatsSkeleton } from '@/components/ui'
+import { Suspense, useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import { useProfitData, useProductChartData } from './components'
 
-interface ProfitData {
-  summary: {
-    total_revenue: number
-    total_cogs: number
-    gross_profit: number
-    gross_profit_margin: number
-    total_operating_expenses: number
-    net_profit: number
-    net_profit_margin: number
-  }
-  products: Array<{
-    product_name: string
-    quantity_sold: number
-    revenue: number
-    cogs: number
-    profit: number
-    profit_margin: number
-  }>
-  ingredients: Array<{
-    ingredient_name: string
-    quantity_used: number
-    wac_cost: number
-    total_cost: number
-  }>
-  operating_expenses: Array<{
-    category: string
-    total_amount: number
-  }>
-  trends: {
-    revenue_trend: number
-    profit_trend: number
-  }
-}
+// Lazy load heavy components
+const ProfitFilters = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitFilters })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="h-10 bg-muted rounded"></div>
+            <div className="h-10 bg-muted rounded"></div>
+            <div className="h-10 bg-muted rounded"></div>
+            <div className="h-10 bg-muted rounded"></div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+const ProfitSummaryCards = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitSummaryCards })), {
+  loading: () => <StatsSkeleton count={4} />
+})
+
+const ProductProfitabilityChart = dynamic(() => import('./components').then(mod => ({ default: mod.ProductProfitabilityChart })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+const ProductProfitabilityTable = dynamic(() => import('./components').then(mod => ({ default: mod.ProductProfitabilityTable })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/3"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="h-12 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+const IngredientCostsTable = dynamic(() => import('./components').then(mod => ({ default: mod.IngredientCostsTable })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 3 }, (_, i) => (
+              <div key={i} className="h-12 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+const OperatingExpenses = dynamic(() => import('./components').then(mod => ({ default: mod.OperatingExpenses })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/3"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="h-10 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+const ProfitBreakdown = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitBreakdown })), {
+  loading: () => (
+    <Card>
+      <CardContent className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="h-6 bg-muted rounded"></div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+const ProfitInfoCard = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitInfoCard })), {
+  loading: () => (
+    <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+      <CardContent className="pt-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-muted rounded w-1/2"></div>
+          <div className="space-y-2">
+            <div className="h-3 bg-muted rounded"></div>
+            <div className="h-3 bg-muted rounded w-3/4"></div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
 
 export default function ProfitReportPage() {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
-  
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [profitData, setProfitData] = useState<ProfitData | null>(null)
-  
-  // Filters
-  const [selectedPeriod, setSelectedPeriod] = useState('month')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
 
-  useEffect(() => {
-    fetchProfitData()
-  }, [selectedPeriod, startDate, endDate])
+  const {
+    loading,
+    error,
+    profitData,
+    filters,
+    updateFilters,
+    refetch,
+    exportReport
+  } = useProfitData()
 
-  const fetchProfitData = async () => {
-    setLoading(true)
-    setError(null)
-    
-    try {
-      // Calculate date range based on period
-      const today = new Date()
-      let calculatedStartDate = startDate
-      let calculatedEndDate = endDate || today.toISOString().split('T')[0]
-      
-      if (!startDate) {
-        if (selectedPeriod === 'week') {
-          calculatedStartDate = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0]
-        } else if (selectedPeriod === 'month') {
-          calculatedStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
-        } else if (selectedPeriod === 'quarter') {
-          const quarter = Math.floor(today.getMonth() / 3)
-          calculatedStartDate = new Date(today.getFullYear(), quarter * 3, 1).toISOString().split('T')[0]
-        } else if (selectedPeriod === 'year') {
-          calculatedStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
-        }
-      }
+  const productChartData = useProductChartData(profitData)
 
-      const params = new URLSearchParams()
-      if (calculatedStartDate) params.append('start_date', calculatedStartDate)
-      if (calculatedEndDate) params.append('end_date', calculatedEndDate)
-
-      const response = await fetch(`/api/reports/profit?${params.toString()}`)
-      
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data laporan laba')
-      }
-
-      const data = await response.json()
-      setProfitData(data)
-    } catch (err: any) {
-      apiLogger.error({ error: err }, 'Error fetching profit data:')
-      setError(err.message || 'Terjadi kesalahan saat mengambil data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const exportReport = async (format: 'csv' | 'pdf' | 'xlsx') => {
-    try {
-      const params = new URLSearchParams()
-      if (startDate) params.append('start_date', startDate)
-      if (endDate) params.append('end_date', endDate)
-      params.append('export', format)
-
-      const response = await fetch(`/api/reports/profit?${params.toString()}`)
-      const blob = await response.blob()
-      
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (err) {
-      apiLogger.error({ error: err }, 'Error exporting report:')
-      alert('Gagal mengekspor laporan')
-    }
-  }
-
-  // Prepare chart data for product profitability - MOVED BEFORE EARLY RETURNS
-  const productChartData = React.useMemo(() => {
-    if (!profitData || !profitData.products || profitData.products.length === 0) return []
-    return profitData.products
-      .slice(0, 10) // Top 10 products
-      .map(product => ({
-        name: product.product_name.length > 15 
-          ? product.product_name.substring(0, 15) + '...' 
-          : product.product_name,
-        revenue: product.revenue,
-        cogs: product.cogs,
-        profit: product.profit
-      }))
-  }, [profitData])
-
+  // Loading state
   if (loading) {
     return (
       <AppLayout>
         <div className="space-y-6">
           <StatsSkeleton count={4} />
-          <CardSkeleton rows={5} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="p-6">
+              <div className="h-[350px] bg-muted animate-pulse rounded" />
+            </Card>
+            <Card className="p-6">
+              <div className="h-[350px] bg-muted animate-pulse rounded" />
+            </Card>
+          </div>
         </div>
       </AppLayout>
     )
   }
 
+  // Error state
   if (error) {
     return (
       <AppLayout>
@@ -195,7 +185,7 @@ export default function ProfitReportPage() {
               <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Terjadi Kesalahan</h3>
               <p className="text-muted-foreground mb-4">{error}</p>
-              <Button onClick={fetchProfitData}>Coba Lagi</Button>
+              <Button onClick={refetch}>Coba Lagi</Button>
             </div>
           </CardContent>
         </Card>
@@ -207,7 +197,7 @@ export default function ProfitReportPage() {
     return null
   }
 
-  const { summary, products = [], ingredients = [], operating_expenses = [], trends } = profitData
+  const { summary, products = [], ingredients = [], operating_expenses = [] } = profitData
 
   return (
     <AppLayout>
@@ -237,18 +227,18 @@ export default function ProfitReportPage() {
               Analisis keuntungan dengan metode WAC (Weighted Average Cost)
             </p>
           </div>
-          
+
           <div className={`flex gap-2 ${isMobile ? 'flex-col w-full' : ''}`}>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => exportReport('csv')}
               className={isMobile ? 'w-full' : ''}
             >
               <Download className="h-4 w-4 mr-2" />
               Ekspor CSV
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => exportReport('xlsx')}
               className={isMobile ? 'w-full' : ''}
             >
@@ -259,494 +249,159 @@ export default function ProfitReportPage() {
         </div>
 
         {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Filter Periode
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-4'}`}>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Periode</label>
-                <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="week">Minggu Ini</SelectItem>
-                    <SelectItem value="month">Bulan Ini</SelectItem>
-                    <SelectItem value="quarter">Kuartal Ini</SelectItem>
-                    <SelectItem value="year">Tahun Ini</SelectItem>
-                    <SelectItem value="custom">Kustom</SelectItem>
-                  </SelectContent>
-                </Select>
+        <Suspense fallback={
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-1/4"></div>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="h-10 bg-muted rounded"></div>
+                  <div className="h-10 bg-muted rounded"></div>
+                  <div className="h-10 bg-muted rounded"></div>
+                  <div className="h-10 bg-muted rounded"></div>
+                </div>
               </div>
-              
-              {selectedPeriod === 'custom' && (
-                <>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    />
-                  </div>
-                </>
-              )}
-              
-              <div className="flex items-end">
-                <Button onClick={fetchProfitData} className="w-full">
-                  Terapkan Filter
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        }>
+          <ProfitFilters
+            filters={filters}
+            onFiltersChange={updateFilters}
+            onApplyFilters={refetch}
+            isMobile={isMobile}
+          />
+        </Suspense>
 
         {/* Summary Cards */}
-        <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
-          {/* Total Revenue */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Pendapatan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold">{formatCurrency(summary.total_revenue)}</p>
-                  {trends?.revenue_trend && trends.revenue_trend !== 0 && (
-                    <p className={`text-xs flex items-center gap-1 mt-1 ${
-                      trends.revenue_trend > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {trends.revenue_trend > 0 ? (
-                        <ArrowUpRight className="h-3 w-3" />
-                      ) : (
-                        <ArrowDownRight className="h-3 w-3" />
-                      )}
-                      {Math.abs(trends.revenue_trend).toFixed(1)}%
-                    </p>
-                  )}
-                </div>
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-muted-foreground" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Gross Profit */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Laba Kotor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold">{formatCurrency(summary.gross_profit)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Margin: {summary.gross_profit_margin.toFixed(1)}%
-                  </p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-muted-foreground" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Net Profit */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Laba Bersih
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-2xl font-bold ${
-                    summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {formatCurrency(summary.net_profit)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Margin: {summary.net_profit_margin.toFixed(1)}%
-                  </p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                  {summary.net_profit >= 0 ? (
-                    <TrendingUp className="h-6 w-6 text-muted-foreground" />
-                  ) : (
-                    <TrendingDown className="h-6 w-6 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* COGS */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Harga Pokok Penjualan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold">{formatCurrency(summary.total_cogs)}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Metode: WAC
-                  </p>
-                </div>
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                  <Package className="h-6 w-6 text-muted-foreground" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Suspense fallback={<StatsSkeleton count={4} />}>
+          <ProfitSummaryCards
+            summary={summary}
+            trends={profitData.trends}
+            formatCurrency={formatCurrency}
+            isMobile={isMobile}
+          />
+        </Suspense>
 
         {/* Product Profitability Chart */}
-        <Card>
-          {productChartData.length === 0 ? (
-            <CardContent className="py-12">
-              <div className="text-center text-muted-foreground">
-                <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="font-medium mb-2">Belum Ada Data untuk Grafik</p>
-                <p className="text-sm">Grafik akan muncul setelah ada penjualan produk di periode yang dipilih</p>
+        <Suspense fallback={
+          <Card>
+            <CardContent className="p-6">
+              <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             </CardContent>
-          ) : (
-            <>
-            <CardHeader>
-              <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-start justify-between'}`}>
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Grafik Profitabilitas Produk
-                  </CardTitle>
-                  <CardDescription className="mt-1">
-                    Perbandingan pendapatan, HPP, dan laba per produk (Top 10)
-                  </CardDescription>
-                </div>
-                <div className={`flex ${isMobile ? 'flex-col w-full' : 'gap-2'} ${!isMobile && 'gap-2'}`}>
-                  <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                    <SelectTrigger className={`${isMobile ? 'w-full' : 'w-[140px]'} h-9`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="week">7 Hari</SelectItem>
-                      <SelectItem value="month">30 Hari</SelectItem>
-                      <SelectItem value="quarter">Kuartal</SelectItem>
-                      <SelectItem value="year">1 Tahun</SelectItem>
-                      <SelectItem value="custom">Kustom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {selectedPeriod === 'custom' && (
-                    <div className={`flex gap-2 ${isMobile ? 'mt-2' : ''}`}>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
-                        placeholder="Mulai"
-                      />
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className={`h-9 ${isMobile ? 'flex-1' : 'w-[130px]'} rounded-md border border-input bg-background px-2 text-xs`}
-                        placeholder="Akhir"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[350px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={productChartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis 
-                      dataKey="name" 
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
-                      angle={-45}
-                      textAnchor="end"
-                      height={80}
-                    />
-                    <YAxis 
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => {
-                        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`
-                        if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`
-                        return value.toString()
-                      }}
-                    />
-                    <Tooltip 
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="bg-background border rounded-lg p-3 shadow-lg">
-                              <p className="font-medium mb-2">{payload[0].payload.name}</p>
-                              <div className="space-y-1 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                                  <span>Pendapatan: {formatCurrency(payload[0].value as number)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                                  <span>HPP (COGS): {formatCurrency(payload[1].value as number)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                                  <span>Laba: {formatCurrency(payload[2].value as number)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Legend 
-                      wrapperStyle={{ paddingTop: '10px' }}
-                      formatter={(value) => {
-                        const labels: Record<string, string> = {
-                          revenue: 'Pendapatan',
-                          cogs: 'HPP (COGS)',
-                          profit: 'Laba'
-                        }
-                        return labels[value] || value
-                      }}
-                    />
-                    <Bar 
-                      dataKey="revenue" 
-                      fill="#3b82f6"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="cogs" 
-                      fill="#f97316"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="profit" 
-                      fill="#22c55e"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-            </>
-          )}
-        </Card>
+          </Card>
+        }>
+          <ProductProfitabilityChart
+            chartData={productChartData}
+            filters={filters}
+            onFiltersChange={updateFilters}
+            formatCurrency={formatCurrency}
+            isMobile={isMobile}
+          />
+        </Suspense>
 
         {/* Product Profitability Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Detail Profitabilitas Produk</CardTitle>
-            <CardDescription>
-              Analisis keuntungan per produk menggunakan WAC
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium">Produk</th>
-                    <th className="text-right py-3 px-4 font-medium">Terjual</th>
-                    <th className="text-right py-3 px-4 font-medium">Pendapatan</th>
-                    <th className="text-right py-3 px-4 font-medium">HPP</th>
-                    <th className="text-right py-3 px-4 font-medium">Laba</th>
-                    <th className="text-right py-3 px-4 font-medium">Margin</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(products || []).map((product, index) => (
-                    <tr key={index} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4 font-medium">{product.product_name}</td>
-                      <td className="py-3 px-4 text-right">{product.quantity_sold}</td>
-                      <td className="py-3 px-4 text-right">{formatCurrency(product.revenue)}</td>
-                      <td className="py-3 px-4 text-right text-orange-600">
-                        {formatCurrency(product.cogs)}
-                      </td>
-                      <td className={`py-3 px-4 text-right font-semibold ${
-                        product.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {formatCurrency(product.profit)}
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <Badge variant={product.profit_margin >= 30 ? 'default' : 'secondary'}>
-                          {product.profit_margin.toFixed(1)}%
-                        </Badge>
-                      </td>
-                    </tr>
+        <Suspense fallback={
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="space-y-2">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <div key={i} className="h-12 bg-muted rounded"></div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        }>
+          <ProductProfitabilityTable
+            products={products}
+            formatCurrency={formatCurrency}
+          />
+        </Suspense>
 
         {/* Ingredient Costs */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Biaya Bahan Baku (WAC)</CardTitle>
-            <CardDescription>
-              Rincian biaya bahan baku dengan metode Weighted Average Cost
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium">Bahan Baku</th>
-                    <th className="text-right py-3 px-4 font-medium">Jumlah Terpakai</th>
-                    <th className="text-right py-3 px-4 font-medium">Harga WAC</th>
-                    <th className="text-right py-3 px-4 font-medium">Total Biaya</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(ingredients || []).map((ingredient, index) => (
-                    <tr key={index} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4">{ingredient.ingredient_name}</td>
-                      <td className="py-3 px-4 text-right">{ingredient.quantity_used.toFixed(2)}</td>
-                      <td className="py-3 px-4 text-right">{formatCurrency(ingredient.wac_cost)}</td>
-                      <td className="py-3 px-4 text-right font-medium">
-                        {formatCurrency(ingredient.total_cost)}
-                      </td>
-                    </tr>
+        <Suspense fallback={
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-1/4"></div>
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }, (_, i) => (
+                    <div key={i} className="h-12 bg-muted rounded"></div>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        }>
+          <IngredientCostsTable
+            ingredients={ingredients}
+            formatCurrency={formatCurrency}
+          />
+        </Suspense>
 
         {/* Operating Expenses */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Biaya Operasional</CardTitle>
-            <CardDescription>
-              Rincian pengeluaran operasional periode ini
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {(operating_expenses || []).map((expense, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
-                      <Receipt className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    </div>
-                    <span className="font-medium">{expense.category}</span>
-                  </div>
-                  <span className="text-lg font-semibold text-red-600">
-                    {formatCurrency(expense.total_amount)}
-                  </span>
+        <Suspense fallback={
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="space-y-2">
+                  {Array.from({ length: 4 }, (_, i) => (
+                    <div key={i} className="h-10 bg-muted rounded"></div>
+                  ))}
                 </div>
-              ))}
-              <div className="flex items-center justify-between py-3 border-t-2 font-bold">
-                <span>Total Biaya Operasional</span>
-                <span className="text-lg text-red-600">
-                  {formatCurrency(summary.total_operating_expenses)}
-                </span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        }>
+          <OperatingExpenses
+            operating_expenses={operating_expenses}
+            summary={summary}
+            formatCurrency={formatCurrency}
+          />
+        </Suspense>
 
         {/* Profit Breakdown */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ringkasan Laba Rugi</CardTitle>
-            <CardDescription>
-              Perhitungan laba dengan metode WAC
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between py-2">
-                <span className="font-medium">Total Pendapatan</span>
-                <span className="font-semibold text-blue-600">
-                  {formatCurrency(summary.total_revenue)}
-                </span>
+        <Suspense fallback={
+          <Card>
+            <CardContent className="p-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-1/4"></div>
+                <div className="space-y-2">
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <div key={i} className="h-6 bg-muted rounded"></div>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-between py-2">
-                <span className="font-medium">Harga Pokok Penjualan (WAC)</span>
-                <span className="font-semibold text-orange-600">
-                  - {formatCurrency(summary.total_cogs)}
-                </span>
-              </div>
-              <div className="flex justify-between py-2 border-t">
-                <span className="font-semibold">Laba Kotor</span>
-                <span className="font-semibold text-green-600">
-                  {formatCurrency(summary.gross_profit)} ({summary.gross_profit_margin.toFixed(1)}%)
-                </span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span className="font-medium">Biaya Operasional</span>
-                <span className="font-semibold text-red-600">
-                  - {formatCurrency(summary.total_operating_expenses)}
-                </span>
-              </div>
-              <div className="flex justify-between py-3 border-t-2 border-primary">
-                <span className="text-lg font-bold">Laba Bersih</span>
-                <span className={`text-xl font-bold ${
-                  summary.net_profit >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {formatCurrency(summary.net_profit)} ({summary.net_profit_margin.toFixed(1)}%)
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        }>
+          <ProfitBreakdown
+            summary={summary}
+            formatCurrency={formatCurrency}
+          />
+        </Suspense>
 
         {/* Info Card */}
-        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-          <CardContent className="pt-6">
-            <div className="flex gap-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2 text-sm">
-                <p className="font-semibold text-blue-900 dark:text-blue-100">
-                  Tentang Metode WAC (Weighted Average Cost)
-                </p>
-                <p className="text-blue-800 dark:text-blue-200">
-                  Laporan ini menggunakan metode WAC untuk menghitung Harga Pokok Penjualan (HPP). 
-                  WAC menghitung rata-rata tertimbang dari semua pembelian bahan baku, memberikan 
-                  gambaran biaya produksi yang lebih akurat dibanding FIFO atau LIFO.
-                </p>
-                <p className="text-blue-800 dark:text-blue-200">
-                  <strong>Formula:</strong> Laba Bersih = Pendapatan - HPP (WAC) - Biaya Operasional
-                </p>
+        <Suspense fallback={
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+            <CardContent className="pt-6">
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-muted rounded"></div>
+                  <div className="h-3 bg-muted rounded w-3/4"></div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        }>
+          <ProfitInfoCard />
+        </Suspense>
       </div>
     </AppLayout>
   )

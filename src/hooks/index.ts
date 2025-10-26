@@ -8,47 +8,51 @@
 
 // UI Hooks
 export { useResponsive, useMobile, useIsMobile, useMediaQuery, useScreenSize, useOrientation, useTouchDevice } from './useResponsive'
-export { useSidebar } from './useSidebar'
-export { useLoading } from './useLoading'
+// export { useSidebar } from './useSidebar'
+// export { useLoading } from './useLoading'
 export { useConfirm } from './useConfirm'
 export { useToast } from './use-toast'
 
 // Error Handling Hooks
-export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
+// export { useErrorHandler, useAsyncError, useFormErrors, useRetry } from './useErrorHandler'
 
 // Auth Hooks
 export { useAuth } from './useAuth'
-export { useSupabaseClient } from './useSupabaseClient'
 
 // Database Hooks
 export {
   useSupabaseQuery,
-  useSupabaseMutation,
-  useSupabaseBulkOperations,
+  useSupabaseCRUD,
+  useSupabaseBulk,
   useIngredients,
   useRecipes,
   useOrders,
   useCustomers,
-  useFinancialRecords,
-  useProductions,
-  useSupabaseCRUD,
-} from './useSupabase'
+  useSuppliers,
+  useExpenses,
+} from './supabase'
 
 // Business Logic Hooks
 export { useCurrency } from './useCurrency'
-export { useExpenses } from './useExpenses'
-export { useEnhancedCRUD } from './useEnhancedCRUD'
-// export { useOptimizedDatabase } from './useOptimizedDatabase' // Deprecated
-export { useAIPowered } from './useAIPowered'
+// export { useEnhancedCRUD } from './useEnhancedCRUD'
+// export { default as useAIPowered } from './useAIPowered'
 
 // Performance Hooks
 export { useRoutePreloading } from './useRoutePreloading'
-// export { useSimplePreloading } from './useSimplePreloading' // Not available
 
 // API Hooks
-// export { useDashboard } from './api/useDashboard' // Not available
-// export { useHPP } from './api/useHPP' // Not available
 export { useHPPAlerts } from './api/useHPPAlerts'
 export { useHPPComparison } from './api/useHPPComparison'
 export { useHPPExport } from './api/useHPPExport'
 export { useHPPSnapshots } from './api/useHPPSnapshots'
+
+// Inventory Hooks
+export { useInventoryAlerts, useIngredientStockStatus } from './useInventoryAlerts'
+export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderManagement'
+
+// HPP Automation Hooks
+// export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
+
+// Performance Hooks
+export { useServiceWorker } from './useServiceWorker'
+export { usePerformanceMonitoring } from './usePerformanceMonitoring'

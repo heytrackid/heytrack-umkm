@@ -55,10 +55,12 @@ export default function AutomationPage() {
       setLoading(true)
       setError(null)
       const response = await fetch('/api/automation/run')
-      if (!response.ok) throw new Error('Failed to fetch status')
+      if (!response.ok) {
+        throw new Error('Failed to fetch status')
+      }
       const data = await response.json()
       setStatus(data)
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
       setError(errorMessage)
       apiLogger.error({ error: err }, 'Error fetching status:')
@@ -89,7 +91,7 @@ export default function AutomationPage() {
       
       // Refresh status after task completion
       setTimeout(fetchStatus, 1000)
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred'
       setError(errorMessage)
       apiLogger.error({ error: err }, 'Error running task:')
@@ -99,7 +101,7 @@ export default function AutomationPage() {
   }
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Never'
+    if (!dateString) {return 'Never'}
     const date = new Date(dateString)
     return date.toLocaleString('id-ID', {
       day: '2-digit',

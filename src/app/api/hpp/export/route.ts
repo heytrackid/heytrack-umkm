@@ -1,7 +1,8 @@
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { getErrorMessage } from '@/lib/type-guards'
-import { CostBreakdown, HPPSnapshot, TimePeriod } from '@/types/hpp-tracking'
-import { NextRequest, NextResponse } from 'next/server'
+import type { CostBreakdown, HPPSnapshot, TimePeriod } from '@/types/hpp-tracking'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { HPPExportQuerySchema } from '@/lib/validations'
 
 import { apiLogger } from '@/lib/logger'
@@ -12,9 +13,11 @@ export async function GET(request: NextRequest) {
 
         // Validate query parameters
         const queryValidation = HPPExportQuerySchema.safeParse({
-            recipe_id: searchParams.get('recipe_id'),
-            period: searchParams.get('period'),
-            format: searchParams.get('format'),
+            recipe_ids: searchParams.get('recipe_ids')?.split(','),
+            start_date: searchParams.get('start_date'),
+            end_date: searchParams.get('end_date'),
+            include_trends: searchParams.get('include_trends') === 'true',
+            include_cost_breakdown: searchParams.get('include_cost_breakdown') === 'true',
         })
 
         if (!queryValidation.success) {
@@ -27,32 +30,35 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        const { recipe_id, period, format } = queryValidation.data
+        const { recipe_ids, start_date, end_date, include_trends, include_cost_breakdown } = queryValidation.data
 
-        const supabase = createServerSupabaseAdmin()
+        const supabase = createServiceRoleClient()
 
         // Get recipe details
-        const { data: recipe, error: recipeError } = await supabase
+        const { data: recipes, error: recipeError } = await supabase
             .from('recipes')
-            .select('name')
-            .eq('id', recipe_id)
-            .single()
+            .select('id, name')
+            .in('id', recipe_ids || [])
 
-        if (recipeError || !recipe) {
+        if (recipeError) {
             return NextResponse.json(
-                { error: 'Recipe not found' },
-                { status: 404 }
+                { error: 'Failed to fetch recipe data', details: recipeError.message },
+                { status: 500 }
             )
         }
 
+        // Generate filename with timestamp
+        const timestamp = new Date().toISOString().slice(0, 10)
+        const filename = `hpp-export-${timestamp}.xlsx`
+
         // Calculate date range
-        const dateRange = calculateDateRange(period)
+        const dateRange = calculateDateRange('30d')
 
         // Fetch snapshots
         const { data: snapshots, error: snapshotsError } = await supabase
             .from('hpp_snapshots')
             .select('*')
-            .eq('recipe_id', recipe_id)
+            .in('recipe_id', recipe_ids || [])
             .gte('snapshot_date', dateRange.start)
             .lte('snapshot_date', dateRange.end)
             .order('snapshot_date', { ascending: true })
@@ -65,15 +71,15 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        if (!snapshots || snapshots.length === 0) {
+        // Type the snapshots with proper casting
+        const typedSnapshots = (snapshots as unknown[]) as HPPSnapshot[]
+
+        if (!typedSnapshots || typedSnapshots.length === 0) {
             return NextResponse.json(
-                { error: 'No data available for export' },
+                { error: 'No HPP data found for the selected recipes and date range' },
                 { status: 404 }
             )
         }
-
-        // Type cast snapshots to HPPSnapshot[]
-        const typedSnapshots = snapshots as any as HPPSnapshot[]
 
         // Calculate summary statistics
         const hppValues = typedSnapshots.map(s => s.hpp_value)
@@ -88,8 +94,8 @@ export async function GET(request: NextRequest) {
 
         // Prepare export data
         const exportData = {
-            recipe_name: recipe.name,
-            period,
+            recipe_name: recipes?.[0]?.name || 'Multiple Recipes',
+            period: 'custom',
             date_range: dateRange,
             snapshots: typedSnapshots.map(snapshot => ({
                 date: formatDate(snapshot.snapshot_date),
@@ -182,7 +188,7 @@ export async function GET(request: NextRequest) {
         // Add data starting from row 3
         summarySheet.addRow({})
         summarySheet.addRow({ metric: 'Nama Produk', value: exportData.recipe_name })
-        summarySheet.addRow({ metric: 'Periode', value: getPeriodLabel(period) })
+        summarySheet.addRow({ metric: 'Periode', value: getPeriodLabel('30d') })
         summarySheet.addRow({ metric: 'Tanggal Mulai', value: formatDate(dateRange.start) })
         summarySheet.addRow({ metric: 'Tanggal Akhir', value: formatDate(dateRange.end) })
         summarySheet.addRow({ metric: '', value: '' })
@@ -347,13 +353,13 @@ export async function GET(request: NextRequest) {
         const buffer = await workbook.xlsx.writeBuffer()
 
         // Create filename
-        const filename = `HPP_History_${recipe.name.replace(/[^a-z0-9]/gi, '_')}_${formatDate(new Date().toISOString())}.xlsx`
+        const exportFilename = `HPP_History_${exportData.recipe_name.replace(/[^a-z0-9]/gi, '_')}_${formatDate(new Date().toISOString())}.xlsx`
 
         // Return file as download
         return new NextResponse(buffer, {
             headers: {
                 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition': `attachment; filename="${filename}"`
+                'Content-Disposition': `attachment; filename="${exportFilename}"`
             }
         })
 
@@ -429,13 +435,13 @@ function getPeriodLabel(period: TimePeriod): string {
 
 // Helper function to determine trend
 function determineTrend(snapshots: HPPSnapshot[]): string {
-    if (snapshots.length < 2) return 'Stable'
+    if (snapshots.length < 2) {return 'Stable'}
 
     const firstValue = snapshots[0].hpp_value
     const lastValue = snapshots[snapshots.length - 1].hpp_value
     const changePercentage = ((lastValue - firstValue) / firstValue) * 100
 
-    if (changePercentage > 5) return 'Naik'
-    if (changePercentage < -5) return 'Turun'
+    if (changePercentage > 5) {return 'Naik'}
+    if (changePercentage < -5) {return 'Turun'}
     return 'Stabil'
 }

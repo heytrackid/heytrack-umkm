@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/type-guards'
-import { createSupabaseClient } from '@/lib/supabase';
+import { createClient as createSupabaseClient } from '@/utils/supabase';
 
 export async function GET() {
   try {
@@ -14,7 +14,7 @@ export async function GET() {
       `)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(batches);
   } catch (error: unknown) {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       `)
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(batch, { status: 201 });
   } catch (error: unknown) {

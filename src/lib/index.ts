@@ -10,14 +10,10 @@
  * - Business Logic: Domain-specific business logic
  * - AI & Automation: AI and automation features
  * - External Services: Third-party integrations
- * - Performance: Optimization utilities
- * - Production: Production-related utilities
- * - Validation & Security: Request validation and auth
  * 
  * Usage Examples:
- *   import { cn, formatCurrency } from '@/lib'
+ *   import { cn, formatCurrentCurrency } from '@/lib'
  *   import { AppError, ValidationError } from '@/lib/errors'
- *   import { createSupabaseClient } from '@/lib'
  *   import { calculateHPP, detectAlerts } from '@/lib'
  */
 
@@ -25,30 +21,33 @@
 // UTILITIES
 // ============================================================================
 
-export { cn } from './utils'
-export { debounce } from './debounce'
+export { cn } from '../shared'
 export { logger, uiLogger } from './logger'
+
+// ============================================================================
+// SUPABASE CLIENT UTILITIES
+// ============================================================================
+
+export {
+  getSupabaseClient,
+  typedInsert,
+  typedUpdate,
+  typedDelete,
+  typedSelect,
+  isAuthenticated,
+  getCurrentUser,
+  signOut,
+  updateSession,
+} from './supabase-client'
+
+export type {
+  QueryResult,
+  QueryArrayResult,
+} from './supabase-client'
 
 // ============================================================================
 // VALIDATION & ERRORS
 // ============================================================================
-
-// TODO: Create unified errors.ts module
-// export type { ErrorCode, ErrorDetails } from './errors'
-// export {
-//   AppError,
-//   ValidationError,
-//   NotFoundError,
-//   UnauthorizedError,
-//   ForbiddenError,
-//   ConflictError,
-//   DatabaseError,
-//   AuthError,
-//   NetworkError,
-//   handleError,
-//   getErrorMessage,
-//   logError,
-// } from './errors'
 
 export {
   requiredString,
@@ -67,49 +66,133 @@ export {
   sanitizeSQL,
   formatValidationErrors,
   zodErrorsToFieldErrors,
-} from './validations'
+} from './validations/'
 
 // ============================================================================
-// DATABASE & API
+// SHARED UTILITIES
 // ============================================================================
 
-export { 
-  createSupabaseClient,
-  supabase,
-  dbService,
-} from './supabase'
+export {
+  // Core utilities
+
+  // Date utilities
+  formatDate,
+  formatDateTime,
+  formatRelativeTime,
+
+  // Array/Object utilities
+  groupBy,
+  sortBy,
+  unique,
+  uniqueBy,
+
+  // String utilities
+  capitalize,
+  slugify,
+  truncate,
+  formatNumber,
+
+  // Validation utilities
+  isEmail,
+  isPhoneNumber,
+  formatPhoneNumber,
+
+  // Business utilities
+  formatProductName,
+  formatOrderStatus,
+  getStatusColor,
+  calculatePercentage,
+  calculateTrend,
+
+  // Constants
+  BUSINESS_TYPES,
+  ORDER_STATUSES,
+  PAYMENT_METHODS,
+  CATEGORIES,
+  UNITS,
+} from '../shared'
+
+export type {
+  BusinessType,
+  OrderStatus,
+  PaymentMethod,
+  Category,
+  Unit,
+  BusinessEntity,
+  Address,
+  Contact,
+} from '../shared'
+
+// ============================================================================
+// API CORE
+// ============================================================================
 
 export {
-  QueryCache,
-  optimizedQueries,
-  suggestedIndexes,
-  warmUpCache,
-} from './query-cache'
+  // Cache system
+  apiCache,
 
-export type { ApiResponse, ApiErrorResponse, ValidationResult } from './api/route-handler'
-export {
-  createRouteHandler,
-  validateRequiredFields,
-  validateMethod,
-  validateAuth,
-  successResponse,
-  errorResponse,
-  validationErrorResponse,
-  paginatedResponse,
-  withCORS,
-  withCache,
+  // Response utilities
+  createSuccessResponse,
+  createErrorResponse,
+  createPaginatedResponse,
+
+  // Validation utilities
+  validateRequestData,
+  validateRequestOrRespond,
+
+  // Pagination utilities
+  extractPagination,
+  calculateOffset,
+  createPaginationMeta,
+  usePagination,
+
+  // Middleware utilities
+  withValidation,
+  withQueryValidation,
   withRateLimit,
-  handleGET,
-  handlePOST,
-  handlePUT,
-  handleDELETE,
-} from './api/route-handler'
+  withCors,
+  withAuth,
+  withMiddleware,
+
+  // Error handling
+  handleAPIError,
+  createAPIErrorResponse,
+
+  // Common schemas
+  IdParamSchema,
+  PaginationSchema,
+  DateRangeSchema,
+  StatusFilterSchema,
+  SearchSchema,
+  BulkDeleteSchema,
+  BulkUpdateSchema,
+
+  // Route handler utilities
+  createRouteHandler,
+
+  // Utility functions
+  parseSearchParams,
+  getClientIP,
+  createETag,
+  handleConditionalGET,
+} from './api-core/'
+
+export type {
+  ApiSuccessResponse,
+  ApiErrorResponse,
+  PaginatedResponse,
+  ValidationResult,
+  PaginationParams,
+  PaginationState,
+  MiddlewareOptions,
+  APIError,
+} from './api-core/'
 
 // ============================================================================
 // CURRENCY & CALCULATIONS
 // ============================================================================
 
-export { 
+export {
   formatCurrentCurrency,
   formatCurrency,
   parseCurrencyString,
@@ -117,165 +200,82 @@ export {
   currencyConfigs,
 } from './currency'
 
+// ============================================================================
+// SCHEDULING & CRON JOBS
+// ============================================================================
+
 export {
-  HPPCalculator,
-  formatNumber,
-  formatPercentage,
-} from './hpp-calculator'
-export type { HPPCalculation, HPPCalculationResult, RecipeWithIngredients } from './hpp-calculator'
+  CronScheduler,
+  InventoryCronJobs,
+  FinancialCronJobs,
+  OrderCronJobs,
+  HPPCronJobs,
+  GeneralCronJobs,
+  runScheduledJobs,
+  setupCronJobs,
+  getAutomationStatus,
+} from './cron/'
+
+// ============================================================================
+// BUSINESS SERVICES
+// ============================================================================
+
+// Note: Business services module is under development
+// Current exports are minimal until full implementation is complete
 
 // ============================================================================
 // BUSINESS LOGIC
 // ============================================================================
 
-// TODO: Verify and fix these exports
-// export {
-//   detectAlerts,
-//   getAlertSeverity,
-//   formatAlertMessage,
-// } from './hpp-alert-detector'
+export {
+  HPPCalculator,
+  HPPAlertDetector,
+  HPPSnapshotManager,
+  HPPUtils,
+  calculateHPP,
+  detectHPPAlerts,
+  takeSnapshot,
+  getSnapshots,
+  compareSnapshots,
+} from './hpp/'
 
-// export {
-//   takeSnapshot,
-//   getSnapshots,
-//   compareSnapshots,
-// } from './hpp-snapshot-manager'
+export {
+  AIClient,
+  AISecurity,
+  PromptBuilder,
+  AIService,
+  NLPProcessor,
+  BusinessAI,
+  processChatbotQuery,
+  trainNLPModel,
+  parseNaturalLanguage,
+  generateAIInsights,
+} from './ai'
 
-// export {
-//   synchronizeData,
-//   syncWithExternal,
-//   handleSyncErrors,
-// } from './data-synchronization'
+export {
+  captureError,
+  captureMessage,
+  handleApiError,
+  handleAuthError,
+  logAuthError,
+  createAuthError,
+  handleDatabaseError,
+  AUTH_ERROR_MESSAGES,
+} from './errors'
 
-// export {
-//   sendNotification,
-//   createSmartNotification,
-//   getNotificationPreferences,
-// } from './smart-notifications'
+// Auth error utilities
+export {
+  getAuthErrorMessage,
+  validateEmail,
+  validatePassword,
+  LoginSchema,
+  RegisterSchema,
+  PasswordResetSchema,
+  UpdatePasswordSchema,
+} from './auth-errors'
 
-// export {
-//   sendWhatsAppMessage,
-//   broadcastMessage,
-//   scheduleMessage,
-// } from './whatsapp-service'
-
-// ============================================================================
-// AI & AUTOMATION
-// ============================================================================
-
-// TODO: Verify and fix these exports
-// export {
-//   processChatbotQuery,
-//   trainNLPModel,
-//   parseNaturalLanguage,
-// } from './nlp-processor'
-
-// export {
-//   generateAIInsights,
-//   getPredictions,
-//   optimizeInventory,
-// } from './smart-business'
-
-// export {
-//   detectAnomalies,
-//   getOptimizations,
-//   suggestActions,
-// } from './smart-inventory-intelligence'
-
-// export {
-//   runAutomation,
-//   scheduleAutomation,
-//   getAutomationStatus,
-// } from './automation-engine'
-
-// export {
-//   runScheduledJobs,
-//   setupCronJobs,
-// } from './cron-jobs'
-
-// ============================================================================
-// EXTERNAL SERVICES
-// ============================================================================
-
-// TODO: Verify and fix these exports
-// export {
-//   callExternalAI,
-//   getModelResponse,
-// } from './external-ai-service'
-
-// export {
-//   getAIChatResponse,
-//   trainChatbot,
-// } from './ai-chatbot-service'
-
-// ============================================================================
-// PERFORMANCE & OPTIMIZATION
-// ============================================================================
-
-// TODO: Verify and fix these exports
-// export {
-//   measurePerformance,
-//   getPerformanceReport,
-// } from './performance'
-
-// export {
-//   quickPerformanceCheck,
-// } from './performance-simple'
-
-// export {
-//   optimizeQuery,
-//   analyzeQueryPerformance,
-// } from './query-optimization'
-
-// export {
-//   optimizeAPI,
-//   getOptimizedEndpoints,
-// } from './optimized-api'
-
-// export {
-//   enhanceAPI,
-//   addAPIMiddleware,
-// } from './enhanced-api'
-
-// ============================================================================
-// PRODUCTION & AUTOMATION
-// ============================================================================
-
-// TODO: Verify and fix these exports
-// export {
-//   automateProduction,
-//   startProduction,
-//   stopProduction,
-// } from './production-automation'
-
-// export {
-//   enhanceAutomation,
-//   getAutomationEnhancements,
-// } from './enhanced-automation-engine'
-
-// ============================================================================
-// VALIDATION & SECURITY
-// ============================================================================
-
-// TODO: Verify and fix these exports
-// export {
-//   validateAPI,
-//   validateRequest,
-// } from './api-validation'
-
-// export {
-//   handleAuthError,
-//   logAuthError,
-//   createAuthError,
-// } from './auth-errors'
-
-// export {
-//   handleAPIError,
-//   normalizeError,
-// } from './error-handler'
-
-// Note: The lib directory contains many interdependent modules.
-// Import specific items as needed, or use namespace imports for related modules:
-// import * as HPP from '@/lib/hpp-*'
-// import * as AI from '@/lib/ai-*'
-// import * as Automation from '@/lib/automation-*'
+export type {
+  ErrorSeverity,
+  ErrorContext,
+  AuthError,
+} from './errors'

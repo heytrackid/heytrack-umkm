@@ -1,8 +1,18 @@
 import { dbLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
+import supabase from '@/utils/supabase'
 import { HPPCalculationService } from '@/modules/recipes'
 import { ORDER_CONFIG } from '../constants'
 import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
+import type { Recipe, RecipeIngredient, Ingredient } from '@/types'
+
+/**
+ * Recipe with ingredients for pricing calculation
+ */
+interface RecipeWithIngredients extends Recipe {
+  recipe_ingredients?: Array<RecipeIngredient & {
+    ingredient?: Ingredient
+  }>
+}
 
 /**
  * Service for handling order pricing calculations
@@ -37,33 +47,49 @@ export class OrderPricingService {
         .select(`
           id,
           name,
-          price,
+          selling_price,
           servings,
           recipe_ingredients (
             quantity,
             unit,
             ingredient:ingredients (
-              unit_cost,
-              unit_type
+              price_per_unit,
+              unit
             )
           )
         `)
         .in('id', recipeIds)
 
-      if (error) throw error
-      if (!recipes) throw new Error('Recipes not found')
+      if (error) {throw error}
+      if (!recipes) {throw new Error('Recipes not found')}
+
+      // Type assertion for Supabase query result
+      type RecipeQueryResult = {
+        id: string
+        name: string
+        selling_price: number | null
+        servings: number | null
+        recipe_ingredients: Array<{
+          quantity: number
+          unit: string
+          ingredient: {
+            price_per_unit: number
+            unit: string
+          }[]
+        }>
+      }
 
       // Calculate each item
       const calculatedItems: OrderItemCalculation[] = await Promise.all(
         items.map(async (item) => {
-          const recipe = recipes.find((r: any) => r.id === item.recipe_id)
+          const recipe = (recipes as RecipeQueryResult[]).find(r => r.id === item.recipe_id)
           if (!recipe) {
             throw new Error(`Recipe with ID ${item.recipe_id} not found`)
           }
 
           // Calculate HPP cost
           const hppCalculation = await HPPCalculationService.calculateAdvancedHPP(
-            (recipe as any).id,
+            recipe.id,
             {
               overheadRate: 0.15,
               laborCostPerHour: 25000,
@@ -71,7 +97,7 @@ export class OrderPricingService {
             }
           )
 
-          const unit_price = item.custom_price || (recipe as any).price || hppCalculation.suggestedPricing.standard.price
+          const unit_price = item.custom_price || recipe.selling_price || hppCalculation.suggestedPricing.standard.price
           const total_price = unit_price * item.quantity
           const hpp_cost = hppCalculation.costPerServing
           const total_cost = hpp_cost * item.quantity
@@ -79,8 +105,8 @@ export class OrderPricingService {
           const margin_percentage = total_price > 0 ? (profit / total_price) * 100 : 0
 
           return {
-            recipe_id: (recipe as any).id,
-            recipe_name: (recipe as any).name,
+            recipe_id: recipe.id,
+            recipe_name: recipe.name,
             quantity: item.quantity,
             unit_price,
             total_price,

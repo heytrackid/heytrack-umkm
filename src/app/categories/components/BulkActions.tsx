@@ -18,7 +18,7 @@ export function BulkActions({
   onBulkEdit,
   onBulkDelete
 }: BulkActionsProps) {
-  if (selectedItems.length === 0) return null
+  if (selectedItems.length === 0) {return null}
 
   const selectedCategories = filteredCategories.filter(category =>
     selectedItems.includes(category.id)

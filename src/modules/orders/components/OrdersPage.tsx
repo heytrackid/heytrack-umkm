@@ -31,14 +31,16 @@ import {
   ORDER_STATUSES,
   PAYMENT_STATUSES
 } from '../constants'
-import {
+import type {
   Order,
-  ORDER_STATUS_LABELS,
   OrderFilters,
   OrderStats,
   OrderStatus,
-  PAYMENT_STATUS_LABELS,
   PaymentStatus
+} from '../types';
+import {
+  ORDER_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS
 } from '../types'
 
 
@@ -100,7 +102,7 @@ export default function OrdersPage({
 
       // Fetch orders from API
       const response = await fetch('/api/orders')
-      if (!response.ok) throw new Error('Failed to fetch orders')
+      if (!response.ok) {throw new Error('Failed to fetch orders')}
       const fetchedOrders: Order[] = await response.json()
 
       setOrders(fetchedOrders)

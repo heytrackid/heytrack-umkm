@@ -1,10 +1,11 @@
-import {
+import type {
   Breakpoint,
   ScreenSize,
-  BREAKPOINTS,
-  DEVICE_BREAKPOINTS,
   ResponsiveValue,
-  ColumnPriority,
+  ColumnPriority} from '../types/responsive';
+import {
+  BREAKPOINTS,
+  DEVICE_BREAKPOINTS
 } from '../types/responsive';
 
 // Utility functions for responsive design
@@ -34,11 +35,11 @@ export function isDesktop(width: number): boolean {
  * Get the current breakpoint based on window width
  */
 export function getCurrentBreakpoint(width: number): Breakpoint {
-  if (width >= BREAKPOINTS['2xl']) return '2xl';
-  if (width >= BREAKPOINTS.xl) return 'xl';
-  if (width >= BREAKPOINTS.lg) return 'lg';
-  if (width >= BREAKPOINTS.md) return 'md';
-  if (width >= BREAKPOINTS.sm) return 'sm';
+  if (width >= BREAKPOINTS['2xl']) {return '2xl';}
+  if (width >= BREAKPOINTS.xl) {return 'xl';}
+  if (width >= BREAKPOINTS.lg) {return 'lg';}
+  if (width >= BREAKPOINTS.md) {return 'md';}
+  if (width >= BREAKPOINTS.sm) {return 'sm';}
   return 'xs';
 }
 
@@ -46,8 +47,8 @@ export function getCurrentBreakpoint(width: number): Breakpoint {
  * Get the current screen size category
  */
 export function getScreenSize(width: number): ScreenSize {
-  if (width >= DEVICE_BREAKPOINTS.desktop) return 'desktop';
-  if (width >= DEVICE_BREAKPOINTS.tablet) return 'tablet';
+  if (width >= DEVICE_BREAKPOINTS.desktop) {return 'desktop';}
+  if (width >= DEVICE_BREAKPOINTS.tablet) {return 'tablet';}
   return 'mobile';
 }
 
@@ -55,7 +56,7 @@ export function getScreenSize(width: number): ScreenSize {
  * Check if a media query matches
  */
 export function matchesMediaQuery(query: string): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   return window.matchMedia(query).matches;
 }
 
@@ -130,12 +131,12 @@ export function generateMediaQuery(breakpoint: Breakpoint, maxWidth: boolean = f
  * Check if device supports touch
  */
 export function isTouchDevice(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   
   return (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0 ||
-    // @ts-expect-error - legacy support for IE
+
     navigator.msMaxTouchPoints > 0
   );
 }
@@ -144,7 +145,7 @@ export function isTouchDevice(): boolean {
  * Check if user prefers reduced motion
  */
 export function prefersReducedMotion(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   return matchesMediaQuery('(prefers-reduced-motion: reduce)');
 }
 
@@ -152,7 +153,7 @@ export function prefersReducedMotion(): boolean {
  * Check if user prefers dark mode
  */
 export function prefersDarkMode(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   return matchesMediaQuery('(prefers-color-scheme: dark)');
 }
 
@@ -160,7 +161,7 @@ export function prefersDarkMode(): boolean {
  * Check if user prefers high contrast
  */
 export function prefersHighContrast(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') {return false;}
   return matchesMediaQuery('(prefers-contrast: high)');
 }
 
@@ -233,7 +234,7 @@ export function calculateOptimalColumns(
   minItemWidth: number,
   gap: number = 16
 ): number {
-  if (containerWidth <= minItemWidth) return 1;
+  if (containerWidth <= minItemWidth) {return 1;}
   
   const availableWidth = containerWidth - gap;
   const itemsWithGap = minItemWidth + gap;
@@ -259,7 +260,7 @@ export function filterColumnsByPriority<T extends { priority: ColumnPriority; hi
   
   // Mobile
   return columns.filter(col => {
-    if (col.hideOnMobile) return false;
+    if (col.hideOnMobile) {return false;}
     return col.priority === 'high';
   });
 }
@@ -314,9 +315,9 @@ export function getResponsiveClasses(
 ): string {
   const classes: string[] = [];
   
-  if (classMap.mobile) classes.push(classMap.mobile);
-  if (screenSize !== 'mobile' && classMap.tablet) classes.push(`sm:${classMap.tablet}`);
-  if (screenSize === 'desktop' && classMap.desktop) classes.push(`lg:${classMap.desktop}`);
+  if (classMap.mobile) {classes.push(classMap.mobile);}
+  if (screenSize !== 'mobile' && classMap.tablet) {classes.push(`sm:${classMap.tablet}`);}
+  if (screenSize === 'desktop' && classMap.desktop) {classes.push(`lg:${classMap.desktop}`);}
   
   return classes.join(' ');
 }
@@ -353,7 +354,7 @@ export function scrollToElement(
     ? document.querySelector(element) as HTMLElement
     : element;
     
-  if (!targetElement) return;
+  if (!targetElement) {return;}
   
   const { behavior = 'smooth', block = 'start', inline = 'nearest', offset = 0 } = options;
   
@@ -397,7 +398,7 @@ export function createResponsiveCSSProperties(
  * Get device pixel ratio
  */
 export function getDevicePixelRatio(): number {
-  if (typeof window === 'undefined') return 1;
+  if (typeof window === 'undefined') {return 1;}
   return window.devicePixelRatio || 1;
 }
 

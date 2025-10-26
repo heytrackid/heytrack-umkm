@@ -7,7 +7,7 @@ import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
 import { uiLogger } from '@/lib/logger'
-import { Order } from '../types'
+import type { Order, OrderStatus } from '../types'
 
 export function OrdersTableView() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -70,7 +70,7 @@ export function OrdersTableView() {
 
       if (response.ok) {
         setOrders(prev => prev.map(order =>
-          order.id === orderId ? { ...order, status: newStatus as any } : order
+          order.id === orderId ? { ...order, status: newStatus as OrderStatus } : order
         ))
       }
     } catch (err) {

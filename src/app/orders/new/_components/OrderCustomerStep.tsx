@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { OrderFormData } from '../hooks/useOrderLogic'
+import type { OrderFormData } from '../hooks/useOrderLogic'
 
 interface OrderCustomerStepProps {
   formData: OrderFormData
@@ -26,7 +26,7 @@ export default function OrderCustomerStep({
         {customers.length > 0 && (
           <Select onValueChange={(value) => {
             const customer = customers.find(c => c.id === value)
-            if (customer) onSelectCustomer(customer)
+            if (customer) {onSelectCustomer(customer)}
           }}>
             <SelectTrigger className="w-48">
               <SelectValue />

@@ -132,7 +132,7 @@ export const useMarkAlertAsRead = () => {
             queryClient.setQueriesData<HPPAlertsResponse>(
                 { queryKey: ['hpp', 'alerts'] },
                 (old) => {
-                    if (!old) return old
+                    if (!old) {return old}
 
                     return {
                         ...old,

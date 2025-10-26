@@ -1,511 +1,77 @@
 /**
- * ProductionDataIntegration
- * Integrates real-time order data and inventory levels with production planning
- * Handles order-to-batch conversion and resource availability checks
+ * Production Data Integration Service
+ * Integrates production data with inventory and orders
  */
 
-import { automationLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
-import {
-  batchSchedulingService,
-  ProductionBatch,
-  SchedulingResult
-} from './BatchSchedulingService'
+import { apiLogger } from '@/lib/logger'
+import type { ProductionBatch } from './BatchSchedulingService'
 
-// Core interfaces for integration
-export interface OrderData {
-  id: string
-  customer_name: string
-  items: OrderItem[]
-  delivery_date: string
-  priority: number
-  status: 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'DELIVERED' | 'CANCELLED'
-  special_instructions?: string
-  created_at: string
-}
-
-export interface OrderItem {
-  id: string
-  recipe_id: string
-  recipe_name: string
-  quantity: number
-  unit_price: number
-  customizations?: Record<string, unknown>
-}
-
-export interface InventoryLevel {
-  ingredient_id: string
-  ingredient_name: string
-  current_stock: number
-  unit: string
-  minimum_stock: number
-  cost_per_unit: number
-  supplier_id?: string
-  last_updated: string
-}
-
-export interface RecipeRequirement {
-  recipe_id: string
-  recipe_name: string
-  ingredients: {
-    ingredient_id: string
-    ingredient_name: string
-    quantity_needed: number
-    unit: string
-  }[]
-  estimated_production_time: number // minutes
-  equipment_requirements: {
-    oven_slots: number
-    mixing_time: number
-    decorating_time?: number
-  }
-  skill_level: 'basic' | 'intermediate' | 'advanced'
-  profit_margin: number
-}
-
-export interface SeasonalTrend {
-  period: string
-  demand_multiplier: number
-  notes?: string
-}
-
-export interface ProductionDemand {
-  orders: OrderData[]
-  totalBatches: number
-  urgentOrders: OrderData[]
-  resourceConstraints: {
-    ingredient_shortfalls: { ingredient_name: string; shortage: number }[]
-    capacity_warnings: string[]
-  }
-  forecastedDemand: {
-    next_24h: number
-    next_week: number
-    seasonal_trends: SeasonalTrend[]
-  }
+export interface ProductionMetrics {
+  total_batches: number
+  completed_batches: number
+  in_progress_batches: number
+  total_quantity_produced: number
+  average_completion_time: number
 }
 
 export class ProductionDataIntegration {
   /**
-   * Fetch and analyze current production demand from orders
+   * Get production metrics
    */
-  async getCurrentProductionDemand(days_ahead = 7): Promise<ProductionDemand> {
+  static async getProductionMetrics(
+    startDate?: string,
+    endDate?: string
+  ): Promise<ProductionMetrics> {
     try {
-      // Get pending and confirmed orders
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            recipe:recipes (
-              id, name, estimated_production_time,
-              recipe_ingredients (
-                ingredient:ingredients (name),
-                quantity
-              )
-            )
-          )
-        `)
-        .in('status', ['PENDING', 'CONFIRMED'])
-        .gte('delivery_date', new Date().toISOString())
-        .lte('delivery_date', new Date(Date.now() + days_ahead * 24 * 60 * 60 * 1000).toISOString())
-        .order('delivery_date', { ascending: true })
+      const params = new URLSearchParams()
+      if (startDate) params.append('start_date', startDate)
+      if (endDate) params.append('end_date', endDate)
 
-      if (ordersError) throw ordersError
+      const response = await fetch(`/api/production/metrics?${params}`)
+      if (!response.ok) throw new Error('Failed to fetch metrics')
+      
+      return await response.json()
+    } catch (error) {
+      apiLogger.error({ error }, 'Error fetching production metrics')
+      return {
+        total_batches: 0,
+        completed_batches: 0,
+        in_progress_batches: 0,
+        total_quantity_produced: 0,
+        average_completion_time: 0
+      }
+    }
+  }
 
-      // Process orders into standardized format
-      const processedOrders = (orders || []).map((order: any) => ({
-        id: (order as { id: string }).id,
-        customer_name: (order as { customer_name?: string }).customer_name || 'Unknown',
-        items: ((order as { order_items?: unknown[] }).order_items || []).map((item: any) => ({
-          id: (item as { id: string }).id,
-          recipe_id: (item as { recipe_id: string }).recipe_id,
-          recipe_name: (item as { recipe?: { name?: string } }).recipe?.name || 'Unknown Recipe',
-          quantity: (item as { quantity: number }).quantity,
-          unit_price: (item as { unit_price?: number }).unit_price || 0,
-          customizations: (item as { customizations?: unknown }).customizations
-        })),
-        delivery_date: (order as { delivery_date: string }).delivery_date,
-        priority: (order as { priority?: number }).priority || 5,
-        status: (order as { status: string }).status as OrderData['status'],
-        special_instructions: (order as { special_instructions?: string }).special_instructions,
-        created_at: (order as { created_at: string }).created_at
-      })) as OrderData[]
-
-      // Calculate total batches needed
-      const totalBatches = processedOrders.reduce((sum, order) =>
-        sum + order.items.length, 0
-      )
-
-      // Identify urgent orders (within 24 hours)
-      const urgentOrders = processedOrders.filter(order => {
-        const deliveryTime = new Date(order.delivery_date).getTime()
-        const now = Date.now()
-        return (deliveryTime - now) < (24 * 60 * 60 * 1000)
+  /**
+   * Sync production with inventory
+   */
+  static async syncWithInventory(batchId: string): Promise<boolean> {
+    try {
+      const response = await fetch(`/api/production/batches/${batchId}/sync-inventory`, {
+        method: 'POST'
       })
-
-      // Check inventory constraints
-      const resourceConstraints = await this.checkResourceConstraints(processedOrders)
-
-      // Calculate forecasted demand
-      const forecastedDemand = await this.calculateDemandForecast(processedOrders)
-
-      return {
-        orders: processedOrders,
-        totalBatches,
-        urgentOrders,
-        resourceConstraints,
-        forecastedDemand
-      }
-    } catch (error: unknown) {
-      automationLogger.error({ err: error }, 'Error fetching production demand')
-      throw error
+      return response.ok
+    } catch (error) {
+      apiLogger.error({ error }, 'Error syncing with inventory')
+      return false
     }
   }
 
   /**
-   * Convert orders to production batches for scheduling
+   * Link production batch to order
    */
-  async convertOrdersToBatches(orders: OrderData[]): Promise<Omit<ProductionBatch, 'scheduled_start' | 'scheduled_end'>[]> {
-    const batches: Omit<ProductionBatch, 'scheduled_start' | 'scheduled_end'>[] = []
-
-    for (const order of orders) {
-      for (const item of order.items) {
-        // Get recipe details
-        const recipeData = await this.getRecipeRequirements(item.recipe_id)
-        if (!recipeData) continue
-
-        // Calculate batch timing
-        const deliveryDate = new Date(order.delivery_date)
-        const productionBuffer = 2 * 60 * 60 * 1000 // 2 hours before delivery
-        const deadline = new Date(deliveryDate.getTime() - productionBuffer)
-
-        // Calculate earliest start (considering ingredients availability)
-        const earliestStart = await this.calculateEarliestStart(recipeData, item.quantity)
-
-        // Calculate priority score
-        const urgencyScore = this.calculateUrgencyScore(order.delivery_date)
-        const profitScore = Math.min(100, (recipeData as any).profit_margin * 2) // Scale to 0-100
-
-        const batch: Omit<ProductionBatch, 'scheduled_start' | 'scheduled_end'> = {
-          id: `batch_${(order as any).id}_${(item as any).id}`,
-          recipe_id: item.recipe_id,
-          recipe_name: item.recipe_name,
-          quantity: item.quantity,
-          priority: Math.max(1, Math.min(10, Math.ceil(urgencyScore / 10))),
-
-          earliest_start: earliestStart.toISOString(),
-          deadline: deadline.toISOString(),
-          estimated_duration: (recipeData as any).estimated_production_time,
-
-          oven_slots_required: recipeData.equipment_requirements.oven_slots,
-          baker_hours_required: Math.ceil((recipeData as any).estimated_production_time / 60),
-          decorator_hours_required: recipeData.equipment_requirements.decorating_time ?
-            Math.ceil(recipeData.equipment_requirements.decorating_time / 60) : 0,
-
-          prerequisite_batches: [],
-          blocking_ingredients: await this.getBlockingIngredients(item.recipe_id, item.quantity),
-
-          status: 'scheduled',
-          profit_score: profitScore,
-          urgency_score: urgencyScore,
-          efficiency_score: 0, // Will be calculated by scheduling service
-          total_score: 0 // Will be calculated by scheduling service
-        }
-
-        batches.push(batch)
-      }
-    }
-
-    return batches
-  }
-
-  /**
-   * Generate optimized production schedule from current orders
-   */
-  async generateProductionSchedule(days_ahead = 3): Promise<SchedulingResult> {
+  static async linkToOrder(batchId: string, orderId: string): Promise<boolean> {
     try {
-      // Get current demand
-      const demand = await this.getCurrentProductionDemand(days_ahead)
-
-      // Convert orders to batches
-      const batches = await this.convertOrdersToBatches(demand.orders)
-
-      // Get current production capacity
-      const constraints = await batchSchedulingService.getProductionCapacity()
-
-      // Generate schedule
-      const schedule = await batchSchedulingService.scheduleProductionBatches(batches, constraints)
-
-      // Add order context to warnings
-      if (demand.urgentOrders.length > 0) {
-        schedule.warnings.unshift(
-          `${demand.urgentOrders.length} orders need delivery within 24 hours`
-        )
-      }
-
-      if (demand.resourceConstraints.ingredient_shortfalls.length > 0) {
-        schedule.warnings.push(
-          `Ingredient shortfalls: ${demand.resourceConstraints.ingredient_shortfalls
-            .map(s => `${s.ingredient_name} (${s.shortage} units short)`)
-            .join(', ')}`
-        )
-      }
-
-      return schedule
-    } catch (error: unknown) {
-      automationLogger.error({ err: error }, 'Error generating production schedule')
-      throw error
-    }
-  }
-
-  /**
-   * Update production progress and sync with orders
-   */
-  async updateProductionProgress(batchId: string, status: ProductionBatch['status']): Promise<void> {
-    try {
-      // Extract order and item IDs from batch ID
-      const [, orderId, itemId] = batchId.split('T')
-
-      // Update order item status
-      // Map production batch status to order status
-      if (status === 'completed') {
-        await supabase
-          .from('order_items')
-          .update({
-            // Note: order_items table doesn't have status field in schema
-            // status: 'DELIVERED',
-            // completed_at: new Date().toISOString()
-          } as any)
-          .eq('id', itemId)
-
-        // Check if all order items are completed
-        const { data: orderItems } = await supabase
-          .from('order_items')
-          .select('*')
-          .eq('order_id', orderId)
-
-        // Check if all order items are completed to mark order as DELIVERED
-        const allCompleted = orderItems?.every(item => (item as any).status === 'DELIVERED')
-
-        if (allCompleted) {
-          await supabase
-            .from('orders')
-            .update({
-              status: 'DELIVERED',
-              completed_at: new Date().toISOString()
-            } as any)
-            .eq('id', orderId)
-        }
-      } else if (status === 'in_progress') {
-        await supabase
-          .from('order_items')
-          .update({
-            // Note: order_items table doesn't have these fields in schema
-            // status: 'IN_PROGRESS',
-            // production_started_at: new Date().toISOString()
-          } as any)
-          .eq('id', itemId)
-
-        await supabase
-          .from('orders')
-          .update({ status: 'IN_PROGRESS' } as any)
-          .eq('id', orderId)
-      }
-    } catch (error: unknown) {
-      automationLogger.error({ err: error }, 'Error updating production progress')
-      throw error
-    }
-  }
-
-  /**
-   * Private helper methods
-   */
-  private async getRecipeRequirements(recipeId: string): Promise<RecipeRequirement | null> {
-    try {
-      const { data: recipe, error } = await supabase
-        .from('recipes')
-        .select(`
-          id, name, estimated_production_time, profit_margin,
-          recipe_ingredients (
-            quantity,
-            ingredient:ingredients (id, name, unit)
-          )
-        `)
-        .eq('id', recipeId)
-        .single()
-
-      if (error || !recipe) return null
-
-      return {
-        recipe_id: (recipe as any).id,
-        recipe_name: (recipe as any).name,
-        ingredients: ((recipe as any).recipe_ingredients || []).map((ri: {
-          quantity: number;
-          ingredient: { id: string; name: string; unit: string }
-        }) => ({
-          ingredient_id: (ri.ingredient as any).id,
-          ingredient_name: (ri.ingredient as any).name,
-          quantity_needed: ri.quantity,
-          unit: ri.ingredient.unit
-        })),
-        estimated_production_time: (recipe as any).estimated_production_time || 60,
-        equipment_requirements: {
-          oven_slots: 1, // Default - could be recipe-specific
-          mixing_time: 30, // Default
-          decorating_time: (recipe as any).name.toLowerCase().includes('cake') ? 45 : undefined
-        },
-        skill_level: 'intermediate',
-        profit_margin: (recipe as any).profit_margin || 30
-      }
-    } catch (error: unknown) {
-      automationLogger.error({ err: error }, 'Error getting recipe requirements')
-      return null
-    }
-  }
-
-  private async calculateEarliestStart(recipeData: RecipeRequirement, quantity: number): Promise<Date> {
-    // Check ingredient availability and lead times
-    const now = new Date()
-
-    // For now, assume ingredients are available immediately
-    // In a full implementation, this would check:
-    // 1. Current inventory levels
-    // 2. Supplier lead times
-    // 3. Existing production commitments
-
-    return now
-  }
-
-  private calculateUrgencyScore(deliveryDate: string): number {
-    const now = Date.now()
-    const delivery = new Date(deliveryDate).getTime()
-    const hoursUntilDelivery = (delivery - now) / (1000 * 60 * 60)
-
-    // Higher score for more urgent orders
-    if (hoursUntilDelivery < 6) return 100
-    if (hoursUntilDelivery < 24) return 80
-    if (hoursUntilDelivery < 48) return 60
-    if (hoursUntilDelivery < 72) return 40
-    return 20
-  }
-
-  private async getBlockingIngredients(recipeId: string, quantity: number): Promise<string[]> {
-    try {
-      // Get current inventory levels
-      const { data: inventory } = await supabase
-        .from('ingredients')
-        .select('*')
-
-      // Get recipe ingredient requirements
-      const { data: recipeIngredients } = await supabase
-        .from('recipe_ingredients')
-        .select('*')
-        .eq('recipe_id', recipeId)
-
-      const blocking: string[] = []
-
-      for (const ingredient of recipeIngredients || []) {
-        const inventoryItem = inventory?.find(inv => (inv as any).id === (ingredient as any).ingredient_id)
-        const requiredQuantity = ingredient.quantity * quantity
-
-        if (!inventoryItem || (inventoryItem as any).current_stock < requiredQuantity) {
-          blocking.push((ingredient as any).ingredient_id)
-        }
-      }
-
-      return blocking
-    } catch (error: unknown) {
-      automationLogger.error({ err: error }, 'Error checking blocking ingredients')
-      return []
-    }
-  }
-
-  private async checkResourceConstraints(orders: OrderData[]): Promise<{
-    ingredient_shortfalls: { ingredient_name: string; shortage: number }[]
-    capacity_warnings: string[]
-  }> {
-    const ingredient_shortfalls: { ingredient_name: string; shortage: number }[] = []
-    const capacity_warnings: string[] = []
-
-    try {
-      // Calculate total ingredient requirements
-      const ingredientRequirements = new Map<string, { name: string; required: number }>()
-
-      for (const order of orders) {
-        for (const item of order.items) {
-          const { data: recipeIngredients } = await supabase
-            .from('recipe_ingredients')
-            .select(`
-              quantity,
-              ingredient:ingredients (id, name)
-            `)
-            .eq('recipe_id', item.recipe_id)
-
-          for (const ri of recipeIngredients || []) {
-            const key = (ri.ingredient as any).id
-            const existing = ingredientRequirements.get(key) || { name: (ri.ingredient as any).name, required: 0 }
-            existing.required += ri.quantity * item.quantity
-            ingredientRequirements.set(key, existing)
-          }
-        }
-      }
-
-      // Check against current inventory
-      const { data: inventory } = await supabase
-        .from('ingredients')
-        .select('*')
-
-      for (const [ingredientId, requirement] of ingredientRequirements) {
-        const inventoryItem = inventory?.find(inv => (inv as any).id === ingredientId)
-
-        if (!inventoryItem || (inventoryItem as any).current_stock < requirement.required) {
-          const shortage = requirement.required - (inventoryItem?.current_stock || 0)
-          ingredient_shortfalls.push({
-            ingredient_name: (requirement as any).name,
-            shortage
-          })
-        }
-      }
-
-      // Check capacity constraints
-      const totalBatches = orders.reduce((sum, order) => sum + order.items.length, 0)
-      const urgentBatches = orders
-        .filter(order => new Date(order.delivery_date).getTime() - Date.now() < 24 * 60 * 60 * 1000)
-        .reduce((sum, order) => sum + order.items.length, 0)
-
-      if (urgentBatches > 10) {
-        capacity_warnings.push(`High volume of urgent orders: ${urgentBatches} batches needed within 24 hours`)
-      }
-
-      if (totalBatches > 50) {
-        capacity_warnings.push(`Very high production volume: ${totalBatches} total batches scheduled`)
-      }
-
-    } catch (error: unknown) {
-      automationLogger.error({ err: error }, 'Error checking resource constraints')
-    }
-
-    return { ingredient_shortfalls, capacity_warnings }
-  }
-
-  private async calculateDemandForecast(orders: OrderData[]) {
-    const now = Date.now()
-    const next24h = orders
-      .filter(order => new Date(order.delivery_date).getTime() - now < 24 * 60 * 60 * 1000)
-      .reduce((sum, order) => sum + order.items.length, 0)
-
-    const nextWeek = orders
-      .filter(order => new Date(order.delivery_date).getTime() - now < 7 * 24 * 60 * 60 * 1000)
-      .reduce((sum, order) => sum + order.items.length, 0)
-
-    return {
-      next_24h: next24h,
-      next_week: nextWeek,
-      seasonal_trends: [] // Would implement seasonal analysis
+      const response = await fetch(`/api/production/batches/${batchId}/link-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId })
+      })
+      return response.ok
+    } catch (error) {
+      apiLogger.error({ error }, 'Error linking batch to order')
+      return false
     }
   }
 }
-
-export const productionDataIntegration = new ProductionDataIntegration()
-export default ProductionDataIntegration

@@ -12,7 +12,7 @@ import {
 } from"@/components/ui/alert-dialog"
 import { Button } from"@/components/ui/button"
 import { AlertTriangle, Trash2, CheckCircle, XCircle } from"lucide-react"
-import { ReactNode } from"react"
+import type { ReactNode } from"react"
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -92,7 +92,7 @@ export function ConfirmationDialog({
         <AlertDialogFooter className="flex flex-row gap-2 justify-end">
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={loading}>
-              {cancelText || Informasi}
+              {cancelText || "Batal"}
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -107,7 +107,7 @@ export function ConfirmationDialog({
                   Informasi
                 </>
               ) : (
-                confirmText || Informasi
+                confirmText || "Konfirmasi"
               )}
             </Button>
           </AlertDialogAction>

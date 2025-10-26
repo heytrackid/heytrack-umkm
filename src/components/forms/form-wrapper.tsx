@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-interface FormWrapperProps extends React.FormHTMLAttributes<HTMLFormElement> {
+interface FormWrapperProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onError'> {
   children: React.ReactNode
   isLoading?: boolean
   error?: string | null

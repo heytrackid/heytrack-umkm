@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseAdmin } from '@/lib/supabase'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { createServiceRoleClient } from '@/utils/supabase'
 import { automationEngine } from '@/lib/automation-engine'
 
 import { apiLogger } from '@/lib/logger'
@@ -10,7 +11,7 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params
-    const supabase = createServerSupabaseAdmin()
+    const supabase = createServiceRoleClient()
     
     // Fetch recipe with ingredients
     const { data: recipe, error } = await supabase
@@ -75,13 +76,6 @@ export async function GET(
     // Generate cost breakdown per serving
     const costPerServing = pricingAnalysis.breakdown.costPerServing
     
-    if (!recipe) {
-      return NextResponse.json(
-        { error: 'Recipe not found' },
-        { status: 404 }
-      )
-    }
-    
     return NextResponse.json({
       recipe_id: (resolvedParams as any).id,
       recipe_name: (recipe as any).name,
@@ -105,11 +99,11 @@ export async function GET(
       recommendations: generateInventoryRecommendations(availability),
       suggested_selling_price: (recipe as any).selling_price,
       margin_analysis: {
-        current_margin: (recipe.selling_price ?? 0) > costPerServing 
-          ? (((recipe.selling_price ?? 0) - costPerServing) / (recipe.selling_price ?? 0) * 100).toFixed(1)
-          : 0,
+        current_margin: String(((recipe?.selling_price ?? 0) > costPerServing 
+          ? (((recipe?.selling_price ?? 0) - costPerServing) / (recipe?.selling_price ?? 0) * 100)
+          : 0).toFixed(1)),
         optimal_margin: 30,
-        is_profitable: (recipe.selling_price ?? 0) > costPerServing
+        is_profitable: (recipe?.selling_price ?? 0) > costPerServing
       }
     })
   } catch (error: unknown) {
@@ -151,15 +145,17 @@ function checkIngredientAvailability(recipe: any) {
     }
   })
   
+  const productionCapacities = (recipe as any).recipe_ingredients.map((ri: any) => 
+    Math.floor((ri.ingredient.stock || 0) / ri.quantity)
+  )
+  
   return {
     can_produce: canProduce,
     missing_ingredients: missingIngredients,
     stock_warnings: stockWarnings,
-    production_capacity: canProduce ? Math.min(
-      ...(recipe as any).recipe_ingredients.map((ri: any) => 
-        Math.floor((ri.ingredient.stock || 0) / ri.quantity)
-      )
-    ) : 0
+    production_capacity: canProduce && productionCapacities.length > 0 
+      ? Math.min(...productionCapacities) 
+      : 0
   }
 }
 
@@ -170,7 +166,7 @@ function generateInventoryRecommendations(availability: any): string[] {
   if (!availability.can_produce) {
     recommendations.push('🛑 Tidak bisa produksi - stock bahan tidak mencukupi')
     availability.missing_ingredients.forEach((missing: any) => {
-      recommendations.push(`📦 Butuh tambahan ${missing.shortage.toFixed(2)} ${missing.unit} ${(missing as any).name}`)
+      recommendations.push(`📦 Butuh tambahan ${Number(missing.shortage).toFixed(2)} ${missing.unit} ${(missing as any).name}`)
     })
   }
   

@@ -73,7 +73,7 @@ export function RecipeForm({
   }
 
   const handleQuickAddIngredients = () => {
-    if (!ingredients) return
+    if (!ingredients) {return}
     
     const commonIngredientNames = getCommonIngredientsByCategory(recipe.category)
     const availableIngredients = commonIngredientNames

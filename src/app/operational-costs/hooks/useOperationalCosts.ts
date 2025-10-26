@@ -1,8 +1,10 @@
-import { useLoading } from '@/hooks/useLoading'
+import { useLoading } from '@/hooks/loading'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { apiLogger } from '@/lib/logger'
+import type { OperationalCostsTable } from '@/types'
+
 // Types and constants embedded in hook file for now
 export interface OperationalCost {
   id: string
@@ -181,10 +183,10 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
     startLoading(LOADING_KEYS.LOAD_COSTS)
     try {
       const response = await fetch('/api/operational-costs')
-      if (!response.ok) throw new Error('Failed to fetch costs')
+      if (!response.ok) {throw new Error('Failed to fetch costs')}
 
       const data = await response.json()
-      const transformedCosts = data.costs.map((cost: any) => ({
+      const transformedCosts = data.costs.map((cost: OperationalCostsTable['Row']) => ({
         id: cost.id,
         name: cost.name,
         category: cost.category,
@@ -228,7 +230,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
           body: JSON.stringify(newCost)
         })
 
-        if (!response.ok) throw new Error('Failed to create cost')
+        if (!response.ok) {throw new Error('Failed to create cost')}
 
         toast.success('Biaya operasional berhasil ditambahkan!')
       } else if (currentView === 'edit' && editingCost) {
@@ -239,7 +241,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
           body: JSON.stringify({ ...newCost, id: editingCost.id })
         })
 
-        if (!response.ok) throw new Error('Failed to update cost')
+        if (!response.ok) {throw new Error('Failed to update cost')}
 
         toast.success('Biaya operasional berhasil diperbarui!')
       }
@@ -265,7 +267,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
   // Handle delete single cost
   const handleDeleteCost = async (costId: string) => {
-    if (!confirm('Yakin ingin menghapus biaya operasional ini?')) return
+    if (!confirm('Yakin ingin menghapus biaya operasional ini?')) {return}
 
     setIsLoading(true)
     try {
@@ -275,7 +277,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
         body: JSON.stringify({ ids: [costId] })
       })
 
-      if (!response.ok) throw new Error('Failed to delete cost')
+      if (!response.ok) {throw new Error('Failed to delete cost')}
 
       // Refresh the list
       await fetchCosts()
@@ -290,13 +292,13 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
   // Handle bulk delete
   const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return
+    if (selectedItems.length === 0) {return}
 
     const confirmed = window.confirm(
       `⚠️ Yakin ingin menghapus ${selectedItems.length} biaya operasional?\n\n❗ Tindakan ini tidak bisa dibatalkan!`
     )
 
-    if (!confirmed) return
+    if (!confirmed) {return}
 
     setIsLoading(true)
     try {
@@ -306,7 +308,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
         body: JSON.stringify({ ids: selectedItems })
       })
 
-      if (!response.ok) throw new Error('Failed to delete costs')
+      if (!response.ok) {throw new Error('Failed to delete costs')}
 
       // Refresh the list and clear selection
       await fetchCosts()
@@ -330,7 +332,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
     }
 
     const confirmed = window.confirm("Tambahkan template biaya operasional?")
-    if (!confirmed) return
+    if (!confirmed) {return}
 
     setIsLoading(true)
     try {

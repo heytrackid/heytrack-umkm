@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseClient } from '@/lib/supabase';
+import { createClient as createSupabaseClient } from '@/utils/supabase';
 import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
@@ -16,7 +16,7 @@ export async function GET(
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(supplier);
   } catch (error: unknown) {
@@ -38,7 +38,6 @@ export async function PUT(
       updated_at: new Date().toISOString()
     };
 
-    // @ts-ignore - Supabase table type mismatch with generated schema
     const { data: supplier, error } = await supabase
       .from('suppliers')
       .update(updatePayload)
@@ -46,7 +45,7 @@ export async function PUT(
       .select('*')
       .single();
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json(supplier);
   } catch (error: unknown) {
@@ -67,7 +66,7 @@ export async function DELETE(
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     return NextResponse.json({ message: 'Supplier deleted successfully' });
   } catch (error: unknown) {

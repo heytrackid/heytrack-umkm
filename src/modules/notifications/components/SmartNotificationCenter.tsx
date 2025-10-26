@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { automationEngine } from '@/lib/automation-engine'
+// import { automationEngine } from '@/lib/automation-engine'
 import { uiLogger } from '@/lib/logger'
-import { Ingredient } from '@/types'
+import type { Ingredient } from '@/types'
 import {
   AlertCircle,
   AlertTriangle,
@@ -64,14 +64,26 @@ export default function SmartNotificationCenter({
   useEffect(() => {
     const generateNotificationsStable = () => {
       try {
-        const smartNotifications = automationEngine.generateSmartNotifications(
-          ingredients,
-          orders,
-          financialMetrics
-        )
+        // const smartNotifications = automationEngine.generateSmartNotifications(
+        //   ingredients,
+        //   orders,
+        //   financialMetrics
+        // )
+        
+        // Mock smart notifications for now
+        const mockNotifications = [
+          {
+            type: 'info' as const,
+            category: 'system' as const,
+            title: 'Smart notifications temporarily disabled',
+            message: 'Business intelligence features are currently unavailable',
+            action: 'check_later',
+            priority: 'low' as const
+          }
+        ]
 
         // Convert to our notification format
-        const formattedNotifications: SmartNotification[] = smartNotifications.map((notif, index: number) => ({
+        const formattedNotifications: SmartNotification[] = mockNotifications.map((notif, index: number) => ({
           id: `notif-${Date.now()}-${index}`,
           type: notif.type as SmartNotification['type'],
           category: notif.category as SmartNotification['category'],
@@ -164,7 +176,7 @@ export default function SmartNotificationCenter({
   }, [ingredients, orders, financialMetrics, soundEnabled])
 
   useEffect(() => {
-    if (!autoRefresh) return
+    if (!autoRefresh) {return}
 
     const interval = setInterval(() => {
       // Use a fresh timestamp for interval-based updates
@@ -178,7 +190,7 @@ export default function SmartNotificationCenter({
   }, [autoRefresh])
 
   const playNotificationSound = (type: 'critical' | 'warning' | 'info') => {
-    if (!soundEnabled) return
+    if (!soundEnabled) {return}
 
     // In a real app, you'd have audio files for different notification types
     const audio = new Audio('/notification-sound.mp3')

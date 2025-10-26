@@ -6,7 +6,7 @@ import type { CashFlowData, Transaction, ChartDataPoint } from './constants'
 export function calculateDateRange(period: 'week' | 'month' | 'year' | 'custom', startDate?: string, endDate?: string) {
   const today = new Date()
   let calculatedStartDate = startDate
-  let calculatedEndDate = endDate || today.toISOString().split('T')[0]
+  const calculatedEndDate = endDate || today.toISOString().split('T')[0]
 
   if (!startDate) {
     if (period === 'week') {
@@ -27,7 +27,7 @@ export function calculateDateRange(period: 'week' | 'month' | 'year' | 'custom',
  * Prepare chart data from transactions
  */
 export function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
-  if (!transactions || transactions.length === 0) return []
+  if (!transactions || transactions.length === 0) {return []}
 
   const dataByDate: Record<string, { date: string; income: number; expense: number; net: number }> = {}
 

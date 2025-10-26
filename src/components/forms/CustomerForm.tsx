@@ -15,8 +15,9 @@ import { useToast } from '@/hooks/use-toast'
 import { 
   CustomerFormSchema,
   type CustomerForm
-} from '@/lib/validations'
+} from '@/lib/validations/domains/customer'
 import { FormField } from './shared/FormField'
+import { useFormWithValidation, createFormSubmitHandler, CUSTOMER_TYPES } from '@/lib/shared'
 
 interface CustomerFormProps {
   initialData?: Partial<CustomerForm>
@@ -25,10 +26,7 @@ interface CustomerFormProps {
 }
 
 export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormProps) {
-  const { toast } = useToast()
-  
-  const form = useForm<CustomerForm>({
-    resolver: zodResolver(CustomerFormSchema),
+  const form = useFormWithValidation(CustomerFormSchema, {
     defaultValues: {
       name: initialData?.name || '',
       email: initialData?.email || '',
@@ -42,24 +40,15 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
     }
   })
 
-  const handleSubmit = async (data: CustomerForm) => {
-    try {
-      await onSubmit(data)
-      toast({
-        title: 'Berhasil',
-        description: 'Data customer berhasil disimpan'
-      })
-      if (!initialData) {
-        form.reset()
-      }
-    } catch (error: unknown) {
-      toast({
-        title: 'Error',
-        description: 'Gagal menyimpan data customer',
-        variant: 'destructive'
-      })
-    }
-  }
+  const handleSubmit = createFormSubmitHandler(
+    form,
+    onSubmit,
+    'Data customer berhasil disimpan',
+    'Gagal menyimpan data customer',
+    !initialData,
+    'Berhasil',
+    'Error'
+  )
 
   return (
     <Card>
@@ -67,7 +56,7 @@ export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormP
         <CardTitle>{initialData ? 'Edit Customer' : 'Tambah Customer'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField 
               label="Nama Customer" 

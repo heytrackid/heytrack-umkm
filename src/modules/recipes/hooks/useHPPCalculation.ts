@@ -36,7 +36,7 @@ export function useHPPCalculation(options: UseHPPCalculationOptions) {
   const [error, setError] = useState<string | null>(null)
 
   const calculateHPP = useCallback(async () => {
-    if (!options.recipeId) return
+    if (!options.recipeId) {return}
 
     setLoading(true)
     setError(null)

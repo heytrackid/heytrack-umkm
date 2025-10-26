@@ -4,9 +4,20 @@ import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Edit2, Trash2 } from 'lucide-react'
 
+interface OperationalCost {
+  id: string
+  name: string
+  category: string
+  amount: number
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly'
+  description?: string
+  isFixed: boolean
+  icon: string
+}
+
 interface BulkActionsProps {
   selectedItems: string[]
-  costs: unknown[]
+  costs: OperationalCost[]
   onClearSelection: () => void
   onBulkEdit: () => void
   onBulkDelete: () => void
@@ -23,7 +34,7 @@ export default function BulkActions({
   onBulkEdit,
   onBulkDelete
 }: BulkActionsProps) {
-  if (selectedItems.length === 0) return null
+  if (selectedItems.length === 0) {return null}
   
   const selectedCostNames = costs
     .filter(cost => selectedItems.includes(cost.id))

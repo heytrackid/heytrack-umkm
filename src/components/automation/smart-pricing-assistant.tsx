@@ -20,8 +20,8 @@ import {
   Target,
   Zap
 } from 'lucide-react'
-import { automationEngine } from '@/lib/automation-engine'
-import { RecipeWithIngredients } from '@/types'
+// import { automationEngine } from '@/lib/automation-engine'
+import type { RecipeWithIngredients, SmartPricingAnalysis } from '@/types'
 
 interface SmartPricingAssistantProps {
   recipe: RecipeWithIngredients
@@ -29,7 +29,7 @@ interface SmartPricingAssistantProps {
 }
 
 export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAssistantProps) {
-  const [analysis, setAnalysis] = useState<any>(null)
+  const [analysis, setAnalysis] = useState<SmartPricingAnalysis | null>(null)
   const [selectedTier, setSelectedTier] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)
   const [loading, setLoading] = useState(false)
@@ -50,9 +50,38 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
       }
       
       // Simulate API call - in real app, this would call your pricing API
-      const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
+      // const pricingAnalysis = automationEngine.calculateSmartPricing(recipe)
       
-      if (pricingAnalysis && pricingAnalysis.pricing) {
+      // Mock analysis for now
+      const totalCost = recipe.recipe_ingredients?.reduce((sum, ri) => sum + (ri.ingredient.price_per_unit * ri.quantity), 0) || 0
+      const pricingAnalysis = {
+        breakdown: {
+          ingredientCost: totalCost,
+          overheadCost: totalCost * 0.15,
+          totalCost: totalCost * 1.15,
+          costPerServing: (totalCost * 1.15) / (recipe.servings || 1)
+        },
+        pricing: {
+          economy: {
+            price: Math.ceil((totalCost * 1.15 * 1.3) / 500) * 500,
+            margin: 30,
+            positioning: 'Harga terjangkau untuk volume tinggi'
+          },
+          standard: {
+            price: Math.ceil((totalCost * 1.15 * 1.6) / 500) * 500,
+            margin: 60,
+            positioning: 'Harga optimal untuk profit maksimal'
+          },
+          premium: {
+            price: Math.ceil((totalCost * 1.15 * 2.0) / 1000) * 1000,
+            margin: 100,
+            positioning: 'Harga premium untuk positioning eksklusif'
+          }
+        },
+        recommendations: ['Pricing analysis temporarily disabled - using basic calculation']
+      }
+      
+      if (pricingAnalysis) {
         setAnalysis(pricingAnalysis)
         setCustomPrice(pricingAnalysis.pricing.standard.price)
       } else {
@@ -68,7 +97,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
   }
 
   const handleApplyPrice = (tier: 'economy' | 'standard' | 'premium' | 'custom') => {
-    if (!analysis) return
+    if (!analysis) {return}
     
     let price: number
     let margin: number
@@ -160,13 +189,13 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
         {/* Pricing Options Tab */}
         <TabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            {Object.entries(analysis.pricing).map(([tier, data]: [string, unknown]) => (
+            {Object.entries(analysis.pricing).map(([tier, data]) => (
               <Card 
                 key={tier}
                 className={`cursor-pointer transition-all hover: ${
                   selectedTier === tier ? 'ring-2 ring-primary' : ''
                 }`}
-                onClick={() => setSelectedTier(tier)}
+                onClick={() => setSelectedTier(tier as 'economy' | 'standard' | 'premium')}
               >
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between">
@@ -202,7 +231,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
                     className="w-full mt-3"
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleApplyPrice(tier)
+                      handleApplyPrice(tier as 'economy' | 'standard' | 'premium')
                     }}
                   >
                     Gunakan Harga Ini
@@ -345,7 +374,7 @@ export function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPricingAss
             <CardContent>
               <div className="space-y-3">
                 {analysis.recommendations.map((rec: string, index: number) => (
-                  <Alert key={_index}>
+                  <Alert key={index}>
                     <CheckCircle className="h-4 w-4" />
                     <AlertDescription>{rec}</AlertDescription>
                   </Alert>

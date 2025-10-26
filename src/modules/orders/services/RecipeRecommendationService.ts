@@ -1,5 +1,5 @@
 import { dbLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
+import supabase from '@/utils/supabase'
 import type { RecipeOption } from './OrderRecipeService'
 
 /**
@@ -40,8 +40,8 @@ export class RecipeRecommendationService {
 
       const { data: orders, error } = await query
 
-      if (error) throw error
-      if (!orders) return []
+      if (error) {throw error}
+      if (!orders) {return []}
 
       // Analyze order patterns
       interface RecipeFrequencyData {

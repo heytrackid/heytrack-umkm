@@ -1,161 +1,67 @@
-// Settings validation schemas are not yet implemented in validations module
-// Using placeholder types for now
+/**
+ * Settings Validation
+ * Validation schemas and functions for application settings
+ */
+
 import { z } from 'zod'
 
-// Placeholder schemas - these should be implemented in validations module
-const UserProfileSettingsSchema = z.object({}).passthrough()
-const BusinessInfoSettingsSchema = z.object({}).passthrough()
-const NotificationSettingsSchema = z.object({}).passthrough()
-const RegionalSettingsSchema = z.object({}).passthrough()
-const SecuritySettingsSchema = z.object({}).passthrough()
-const BackupSettingsSchema = z.object({}).passthrough()
-const ThemeSettingsSchema = z.object({}).passthrough()
-const AppSettingsSchema = z.object({}).passthrough()
+// Business info validation schema
+export const BusinessInfoSchema = z.object({
+  businessName: z.string()
+    .min(1, 'Nama bisnis wajib diisi')
+    .max(100, 'Nama bisnis terlalu panjang'),
+  businessType: z.enum(['UMKM', 'cafe', 'restaurant', 'food-truck', 'catering', 'other'])
+    .default('UMKM'),
+  address: z.string()
+    .max(500, 'Alamat terlalu panjang')
+    .optional(),
+  phone: z.string()
+    .regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Format nomor telepon tidak valid')
+    .optional()
+    .or(z.literal('')),
+  email: z.string()
+    .email('Format email tidak valid')
+    .optional()
+    .or(z.literal('')),
+  website: z.string()
+    .url('Format URL tidak valid')
+    .optional()
+    .or(z.literal('')),
+  description: z.string()
+    .max(1000, 'Deskripsi terlalu panjang')
+    .optional()
+})
 
-// Infer types from schemas
-type UserProfileSettings = z.infer<typeof UserProfileSettingsSchema>
-type BusinessInfoSettings = z.infer<typeof BusinessInfoSettingsSchema>
-type NotificationSettings = z.infer<typeof NotificationSettingsSchema>
-type RegionalSettings = z.infer<typeof RegionalSettingsSchema>
-type SecuritySettings = z.infer<typeof SecuritySettingsSchema>
-type BackupSettings = z.infer<typeof BackupSettingsSchema>
-type ThemeSettings = z.infer<typeof ThemeSettingsSchema>
-type AppSettings = z.infer<typeof AppSettingsSchema>
+export type BusinessInfoData = z.infer<typeof BusinessInfoSchema>
 
 /**
- * Validates user profile settings
+ * Validate business info settings
  */
-export function validateUserProfileSettings(data: any): UserProfileSettings {
-  const result = UserProfileSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`User profile validation failed: ${errors}`)
-  }
-  return result.data
+export function validateBusinessInfoSettings(data: Record<string, any>): BusinessInfoData {
+  return BusinessInfoSchema.parse(data)
 }
 
 /**
- * Validates business information settings
+ * Validate business info settings safely (returns errors instead of throwing)
  */
-export function validateBusinessInfoSettings(data: any): BusinessInfoSettings {
-  const result = BusinessInfoSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`Business info validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates notification settings
- */
-export function validateNotificationSettings(data: any): NotificationSettings {
-  const result = NotificationSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`Notification settings validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates regional settings
- */
-export function validateRegionalSettings(data: any): RegionalSettings {
-  const result = RegionalSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`Regional settings validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates security settings
- */
-export function validateSecuritySettings(data: any): SecuritySettings {
-  const result = SecuritySettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`Security settings validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates backup settings
- */
-export function validateBackupSettings(data: any): BackupSettings {
-  const result = BackupSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`Backup settings validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates theme settings
- */
-export function validateThemeSettings(data: any): ThemeSettings {
-  const result = ThemeSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`Theme settings validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates complete app settings
- */
-export function validateAppSettings(data: any): AppSettings {
-  const result = AppSettingsSchema.safeParse(data)
-  if (!result.success) {
-    const errors = result.error.issues.map(err => `${err.path.join('.')}: ${err.message}`).join(', ')
-    throw new Error(`App settings validation failed: ${errors}`)
-  }
-  return result.data
-}
-
-/**
- * Validates individual settings category and returns validation result
- */
-export function validateSettingsCategory(category: string, data: any): { success: boolean; data?: Record<string, unknown>; errors?: string[] } {
+export function validateBusinessInfoSettingsSafe(data: Record<string, any>): {
+  isValid: boolean
+  data?: BusinessInfoData
+  errors?: Record<string, string>
+} {
   try {
-    let validatedData: Record<string, unknown>
-
-    switch (category) {
-      case 'user':
-        validatedData = validateUserProfileSettings(data) as Record<string, unknown>
-        break
-      case 'business':
-        validatedData = validateBusinessInfoSettings(data) as Record<string, unknown>
-        break
-      case 'notifications':
-        validatedData = validateNotificationSettings(data) as Record<string, unknown>
-        break
-      case 'regional':
-        validatedData = validateRegionalSettings(data) as Record<string, unknown>
-        break
-      case 'security':
-        validatedData = validateSecuritySettings(data) as Record<string, unknown>
-        break
-      case 'backup':
-        validatedData = validateBackupSettings(data) as Record<string, unknown>
-        break
-      case 'theme':
-        validatedData = validateThemeSettings(data) as Record<string, unknown>
-        break
-      default:
-        return { success: false, errors: [`Unknown settings category: ${category}`] }
-    }
-
-    return { success: true, data: validatedData }
+    const validatedData = BusinessInfoSchema.parse(data)
+    return { isValid: true, data: validatedData }
   } catch (error) {
-    return {
-      success: false,
-      errors: [error instanceof Error ? error.message : 'Validation failed']
+    if (error instanceof z.ZodError) {
+      const errors: Record<string, string> = {}
+      error.issues.forEach((err) => {
+        if (err.path.length > 0) {
+          errors[err.path[0] as string] = err.message
+        }
+      })
+      return { isValid: false, errors }
     }
+    return { isValid: false, errors: { general: 'Validation failed' } }
   }
 }

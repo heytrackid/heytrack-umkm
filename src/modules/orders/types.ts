@@ -268,9 +268,9 @@ export interface UseOrdersDataReturn {
 
 export interface UseOrderFormReturn {
   formData: CreateOrderRequest
-  updateFormData: (field: keyof CreateOrderRequest, value: any) => void
+  updateFormData: <K extends keyof CreateOrderRequest>(field: K, value: CreateOrderRequest[K]) => void
   addItem: () => void
-  updateItem: (index: number, field: keyof OrderItem, value: any) => void
+  updateItem: <K extends keyof OrderItem>(index: number, field: K, value: OrderItem[K]) => void
   removeItem: (index: number) => void
   calculateTotals: () => {
     subtotal: number

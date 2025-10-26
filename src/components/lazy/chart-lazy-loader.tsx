@@ -42,7 +42,14 @@ export const LazyArea = lazy(() => import('@/components').then(m => ({ default: 
 export const LazyCell = lazy(() => import('@/components').then(m => ({ default: m.Cell })))
 
 // Wrapper Components with Suspense
-export const LineChartWithSuspense = ({ title, height, children, ...props }: any) => (
+interface ChartSuspenseProps {
+  title?: string;
+  height?: string;
+  children: React.ReactNode;
+  [key: string]: unknown;
+}
+
+export const LineChartWithSuspense = ({ title, height, children, ...props }: ChartSuspenseProps) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyLineChart {...props}>
@@ -52,7 +59,7 @@ export const LineChartWithSuspense = ({ title, height, children, ...props }: any
   </Suspense>
 )
 
-export const BarChartWithSuspense = ({ title, height, children, ...props }: any) => (
+export const BarChartWithSuspense = ({ title, height, children, ...props }: ChartSuspenseProps) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyBarChart {...props}>
@@ -62,7 +69,7 @@ export const BarChartWithSuspense = ({ title, height, children, ...props }: any)
   </Suspense>
 )
 
-export const AreaChartWithSuspense = ({ title, height, children, ...props }: any) => (
+export const AreaChartWithSuspense = ({ title, height, children, ...props }: ChartSuspenseProps) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyAreaChart {...props}>
@@ -72,7 +79,7 @@ export const AreaChartWithSuspense = ({ title, height, children, ...props }: any
   </Suspense>
 )
 
-export const PieChartWithSuspense = ({ title, height, children, ...props }: any) => (
+export const PieChartWithSuspense = ({ title, height, children, ...props }: ChartSuspenseProps) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyPieChart {...props}>
@@ -83,7 +90,7 @@ export const PieChartWithSuspense = ({ title, height, children, ...props }: any)
 )
 
 // Advanced Chart Components
-export const ComposedChartWithSuspense = ({ title, height, children, ...props }: any) => (
+export const ComposedChartWithSuspense = ({ title, height, children, ...props }: ChartSuspenseProps) => (
   <Suspense fallback={<ChartLoadingSkeleton title={title} height={height} />}>
     <LazyResponsiveContainer width="100%" height={300}>
       <LazyComposedChart {...props}>
@@ -94,56 +101,60 @@ export const ComposedChartWithSuspense = ({ title, height, children, ...props }:
 )
 
 // Chart Component Elements with Suspense
-export const CartesianGridWithSuspense = (props: any) => (
+interface ChartElementProps {
+  [key: string]: unknown;
+}
+
+export const CartesianGridWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyCartesianGrid {...props} />
   </Suspense>
 )
 
-export const TooltipWithSuspense = (props: any) => (
+export const TooltipWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyTooltip {...props} />
   </Suspense>
 )
 
-export const LegendWithSuspense = (props: any) => (
+export const LegendWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyLegend {...props} />
   </Suspense>
 )
 
-export const XAxisWithSuspense = (props: any) => (
+export const XAxisWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyXAxis {...props} />
   </Suspense>
 )
 
-export const YAxisWithSuspense = (props: any) => (
+export const YAxisWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyYAxis {...props} />
   </Suspense>
 )
 
 // Chart Data Elements with Suspense
-export const LineWithSuspense = (props: any) => (
+export const LineWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyLine {...props} />
   </Suspense>
 )
 
-export const BarWithSuspense = (props: any) => (
+export const BarWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyBar {...props} />
   </Suspense>
 )
 
-export const AreaWithSuspense = (props: any) => (
+export const AreaWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyArea {...props} />
   </Suspense>
 )
 
-export const CellWithSuspense = (props: any) => (
+export const CellWithSuspense = (props: ChartElementProps) => (
   <Suspense fallback={null}>
     <LazyCell {...props} />
   </Suspense>

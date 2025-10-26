@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ErrorLogSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
@@ -9,6 +10,7 @@ const errorStore: Array<{
   id: string
   timestamp: string
   message: string
+  url: string
   stack?: string
   level: string
   context?: Record<string, any>
@@ -20,13 +22,14 @@ export async function POST(request: NextRequest) {
   try {
     // Validate request body
     const validatedData = await validateRequestOrRespond(request, ErrorLogSchema)
-    if (validatedData instanceof NextResponse) return validatedData
+    if (validatedData instanceof NextResponse) {return validatedData}
     
     // Create error record
     const errorRecord = {
       id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: validatedData.timestamp || new Date().toISOString(),
       message: validatedData.message,
+      url: validatedData.url || request.url || '',
       stack: validatedData.stack,
       level: validatedData.level,
       context: validatedData.context,

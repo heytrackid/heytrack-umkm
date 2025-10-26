@@ -1,10 +1,17 @@
 /**
  * Barrel export for Supabase utilities
- * 
+ *
  * Usage:
  *   import { createClient, createServerClient } from '@/utils/supabase'
+ *   import supabase from '@/utils/supabase' // Default client instance
  */
 
 export { createClient } from './client'
-export { createClient as createServerClient } from './server'
+// Server client functionality is only available in server contexts
+// export { createClient as createServerClient } from './server' 
+export { createServiceRoleClient } from './service-role'
 export { updateSession } from './middleware'
+
+// Default export for backward compatibility - creates a client instance
+import { createClient } from './client'
+export default createClient()

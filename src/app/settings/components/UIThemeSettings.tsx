@@ -4,28 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Palette } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
-
-interface UIThemeSettings {
-  theme?: string
-  numberFormat?: string
-  [key: string]: unknown
-}
-
-interface GeneralSettings {
-  ui?: UIThemeSettings
-  [key: string]: unknown
-}
+import type {
+  AppSettingsState,
+  SettingsUpdateHandler,
+  ThemeOption,
+  LanguageOption,
+} from '../types'
 
 interface UIThemeSettingsProps {
-  settings: GeneralSettings
-  onSettingChange: (category: string, key: string, value: any) => void
+  settings: AppSettingsState
+  onSettingChange: SettingsUpdateHandler
 }
 
 /**
  * UI theme settings component
  */
 export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsProps) {
-  const { updateLanguage } = useSettings()
+  const { settings: contextSettings, languages, updateLanguage } = useSettings()
 
   return (
     <Card>
@@ -42,7 +37,9 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
             id="theme"
             className="w-full p-2 border border-input rounded-md bg-background"
             value={settings.ui.theme}
-            onChange={(e) => onSettingChange('ui', 'theme', e.target.value)}
+            onChange={(e) =>
+              onSettingChange('ui', 'theme', e.target.value as ThemeOption)
+            }
           >
             <option value="light">Terang</option>
             <option value="dark">Gelap</option>
@@ -54,15 +51,20 @@ export function UIThemeSettings({ settings, onSettingChange }: UIThemeSettingsPr
           <select
             id="language"
             className="w-full p-2 border border-input rounded-md bg-background"
-            value={useSettings().settings.language.code}
+            value={settings.ui.language}
             onChange={(e) => {
-              const { languages, updateLanguage } = useSettings()
               const selected = languages.find(l => l.code === e.target.value)
-              if (selected) updateLanguage(selected)
+              if (selected) {
+                updateLanguage(selected)
+                onSettingChange('ui', 'language', selected.code as LanguageOption)
+              }
             }}
           >
-            <option value="id">🇮🇩 Indonesian</option>
-            <option value="en">🇺🇸 English</option>
+            {languages.map(language => (
+              <option key={language.code} value={language.code}>
+                {language.flag} {language.name}
+              </option>
+            ))}
           </select>
           <p className="text-sm text-muted-foreground mt-1">
             Perubahan bahasa memengaruhi teks antarmuka aplikasi.

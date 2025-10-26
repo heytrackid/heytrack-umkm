@@ -4,20 +4,10 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { IngredientsCRUD } from '@/components/crud/ingredients-crud';
 import AppLayout from '@/components/layout/app-layout';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PrefetchLink } from '@/components/ui/prefetch-link';
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons';
+import { StatsCards, StatCardPatterns } from '@/components/ui';
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui';
 import { useSettings } from '@/contexts/settings-context';
-import { useBahanBaku } from '@/hooks/useSupabaseCRUD';
+import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -30,19 +20,18 @@ import {
 } from 'lucide-react';
 
 export default function IngredientsPage() {
-  // Share single useBahanBaku hook call - IngredientsCRUD will use this
-  const { data: ingredients, loading, error } = useBahanBaku({ refetchOnMount: false });
   const { formatCurrency } = useSettings();
+  const { data: ingredients, loading, error } = useIngredients({ realtime: true });
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
   // Handle auth errors
   useEffect(() => {
-    if (error && error.message?.includes('401')) {
+    if (error && typeof error === 'object' && (error as Error).message?.includes('401')) {
       toast({
         title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
+        description: typeof error === 'string' ? error : (error as Error).message || 'Terjadi kesalahan autentikasi',
         variant: 'destructive',
       });
       router.push('/auth/login');
@@ -70,19 +59,7 @@ export default function IngredientsPage() {
     return (
       <AppLayout>
         <div className="space-y-6">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <PrefetchLink href="/">Dashboard</PrefetchLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Bahan Baku</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+          <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -94,11 +71,7 @@ export default function IngredientsPage() {
               </p>
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
-          </div>
+          <StatsCards stats={StatCardPatterns.ingredients({ total: 0, lowStock: 0, outOfStock: 0, totalValue: 0 })} />
         </div>
       </AppLayout>
     );
@@ -107,20 +80,7 @@ export default function IngredientsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Breadcrumb */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <PrefetchLink href="/">Dashboard</PrefetchLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Bahan Baku</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -134,113 +94,48 @@ export default function IngredientsPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => window.location.href = '/ingredients/purchases'}>
+            <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
               <ShoppingCart className="h-4 w-4 mr-2" />
               Pembelian
-            </Button>
-            <Button onClick={() => window.location.href = '/ingredients/new'}>
+            </button>
+            <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
               <Plus className="h-4 w-4 mr-2" />
               Tambah Bahan Baku
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        {loading ? (
-          <div className="grid gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Bahan
-                </CardTitle>
-                <Package className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalIngredients}</div>
-                <p className="text-xs text-muted-foreground">
-                  Jenis bahan baku terdaftar
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Stok Rendah
-                </CardTitle>
-                <TrendingDown className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{lowStockCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  Perlu segera dipesan
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Stok Habis
-                </CardTitle>
-                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{outOfStockCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  Bahan tidak tersedia
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Nilai Total
-                </CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
-                <p className="text-xs text-muted-foreground">
-                  Total nilai inventori
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+        {!loading && (
+          <StatsCards stats={StatCardPatterns.ingredients({
+            total: totalIngredients,
+            lowStock: lowStockCount,
+            outOfStock: outOfStockCount,
+            totalValue: totalValue
+          })} />
         )}
 
         {/* Alert for Low Stock */}
         {!loading && lowStockCount > 0 && (
-          <Card className="border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/50">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-orange-900 dark:text-orange-100 text-sm mb-1">
-                    Peringatan Stok Rendah
-                  </h3>
-                  <p className="text-sm text-orange-700 dark:text-orange-300">
-                    {lowStockCount} bahan baku mencapai atau di bawah stok minimum. Segera lakukan pemesanan untuk menghindari kehabisan stok.
-                  </p>
-                </div>
+          <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold text-orange-900 text-sm mb-1">
+                  Peringatan Stok Rendah
+                </h3>
+                <p className="text-sm text-orange-700">
+                  {lowStockCount} bahan baku mencapai atau di bawah stok minimum. Segera lakukan pemesanan untuk menghindari kehabisan stok.
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Main Content */}
-        <Card>
-          <CardContent className="p-0">
-            <IngredientsCRUD />
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg border">
+          <IngredientsCRUD />
+        </div>
       </div>
     </AppLayout>
   );

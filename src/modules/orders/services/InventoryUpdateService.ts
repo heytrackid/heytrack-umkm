@@ -1,5 +1,19 @@
 import { dbLogger } from '@/lib/logger'
-import { supabase } from '@/lib/supabase'
+import supabase from '@/utils/supabase'
+import type { TablesInsert, TablesUpdate } from '@/types'
+
+/**
+ * Recipe ingredients query result type
+ */
+type RecipeIngredientsQueryResult = {
+  recipe_ingredients: Array<{
+    quantity: number
+    ingredient: {
+      id: string
+      current_stock: number | null
+    }[]
+  }>
+}
 
 /**
  * Service for updating inventory after order confirmation
@@ -32,38 +46,46 @@ export class InventoryUpdateService {
           .eq('id', item.recipe_id)
           .single()
 
-        if (error || !recipe) continue
+        if (error || !recipe) {continue}
+
+        const typedRecipe = recipe as RecipeIngredientsQueryResult
 
         // Update ingredient stock
-        for (const ri of (recipe as any).recipe_ingredients || []) {
-          if (ri.ingredient) {
+        for (const ri of typedRecipe.recipe_ingredients || []) {
+          // Supabase returns arrays for joined data, get first element
+          const ingredient = ri.ingredient?.[0]
+          if (ingredient) {
             const usedQuantity = ri.quantity * item.quantity
-            const newStock = Math.max(0, ((ri.ingredient.current_stock ?? 0) || 0) - usedQuantity)
+            const currentStock = ingredient.current_stock ?? 0
+            const newStock = Math.max(0, currentStock - usedQuantity)
+
+            const ingredientUpdate: TablesUpdate<'ingredients'> = {
+              current_stock: newStock,
+              updated_at: new Date().toISOString()
+            }
 
             const { error: updateError } = await supabase
               .from('ingredients')
-              .update({
-                current_stock: newStock,
-                updated_at: new Date().toISOString()
-              } as any)
-              .eq('id', ri.ingredient.id)
+              .update(ingredientUpdate)
+              .eq('id', ingredient.id)
 
             if (updateError) {
               dbLogger.error({ err: updateError }, 'Error updating ingredient stock')
             }
 
             // Create stock transaction record
+            const stockTransaction: TablesInsert<'stock_transactions'> = {
+              ingredient_id: ingredient.id,
+              type: 'USAGE',
+              quantity: -usedQuantity, // Negative for usage
+              reference: order_id,
+              notes: `Used for order production`,
+              user_id: '' // Should be set from auth context
+            }
+
             await supabase
               .from('stock_transactions')
-              .insert({
-                ingredient_id: ri.ingredient.id,
-                transaction_type: 'out',
-                quantity: usedQuantity,
-                reference_type: 'order',
-                reference_id: order_id,
-                notes: `Used for order production`,
-                created_at: new Date().toISOString()
-              } as any)
+              .insert(stockTransaction)
           }
         }
       }

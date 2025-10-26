@@ -100,8 +100,7 @@ export const PRODUCTION_MODULE_INFO = {
   ],
   dependencies: [
     '@/hooks/useSupabaseCRUD',
-    '@/hooks/useSupabaseData',
-    '@/shared/utils/currency',
+    '@/lib/shared/utils/currency',
     '@/app/recipes (integration)',
     '@/app/orders (integration)',
     '@/app/inventory (integration)'

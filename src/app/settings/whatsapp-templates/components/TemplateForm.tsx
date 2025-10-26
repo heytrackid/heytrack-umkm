@@ -133,7 +133,7 @@ export default function TemplateForm({
   return (
     <Dialog open={showDialog} onOpenChange={(open) => {
       onOpenChange(open)
-      if (!open) resetForm()
+      if (!open) {resetForm()}
     }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

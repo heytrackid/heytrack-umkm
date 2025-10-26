@@ -19,7 +19,7 @@ import {
     Trash2
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Order, OrderStatus } from './types'
+import type { Order, OrderStatus } from './types'
 import { getPaymentInfo, getPriorityInfo, getStatusInfo } from './utils'
 
 interface OrdersListProps {

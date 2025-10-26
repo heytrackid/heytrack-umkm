@@ -10,7 +10,7 @@ import { ChefHat, Sparkles } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { createSupabaseClient } from '@/lib/supabase'
+import { createClient as createSupabaseClient } from '@/utils/supabase'
 import { apiLogger } from '@/lib/logger'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
 
@@ -120,7 +120,7 @@ export default function AIRecipeGeneratorPage() {
   }
 
   const handleSaveRecipe = async () => {
-    if (!generatedRecipe) return
+    if (!generatedRecipe) {return}
 
     try {
       const supabase = createSupabaseClient()
@@ -150,7 +150,7 @@ export default function AIRecipeGeneratorPage() {
         .select()
         .single()
 
-      if (recipeError) throw recipeError
+      if (recipeError) {throw recipeError}
 
       // Save recipe ingredients
       const recipeIngredients = generatedRecipe.ingredients.map((ing) => {
@@ -171,7 +171,7 @@ export default function AIRecipeGeneratorPage() {
         .from('recipe_ingredients')
         .insert(recipeIngredients)
 
-      if (ingredientsError) throw ingredientsError
+      if (ingredientsError) {throw ingredientsError}
 
       alert('✅ Resep berhasil disimpan!')
 

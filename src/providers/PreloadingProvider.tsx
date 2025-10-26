@@ -7,9 +7,8 @@ import { apiLogger } from '@/lib/logger'
 import { 
   useSmartPreloading, 
   useIdleTimePreloading,
-  useNetworkAwarePreloading,
-  LazyLoadingMetrics
-} from '@/hooks/useSimplePreloading'
+  useNetworkAwarePreloading
+} from '@/hooks/route-preloading'
 import { useRoutePreloading } from '@/hooks/useRoutePreloading'
 
 interface PreloadingContextType {
@@ -70,7 +69,7 @@ export const PreloadingProvider = ({
   // Track preloaded routes
   const preloadRoute = async (route: string) => {
     if (preloadedRoutes.has(route)) {
-      if (debug) apiLogger.info(`🔄 Route ${route} already preloaded`)
+      if (debug) {apiLogger.info(`🔄 Route ${route} already preloaded`)}
       return
     }
 
@@ -87,21 +86,12 @@ export const PreloadingProvider = ({
       }
     } catch (error: unknown) {
       if (debug) {
-        apiLogger.warn(`❌ Failed to preload route ${route}:`, error)
+        apiLogger.warn(`❌ Failed to preload route ${route}: ${error}`)
       }
     } finally {
       setIsPreloading(false)
     }
   }
-
-  // Track component loads
-  useEffect(() => {
-    const originalPush = LazyLoadingMetrics.loadedComponents.add
-    LazyLoadingMetrics.loadedComponents.add = function(componentName: string) {
-      setPreloadedComponents(prev => new Set([...prev, componentName]))
-      return originalPush.call(this, componentName)
-    }
-  }, [])
 
   // Debug logging
   useEffect(() => {
@@ -118,8 +108,7 @@ export const PreloadingProvider = ({
     preloadedRoutesCount: preloadedRoutes.size,
     preloadedComponentsCount: preloadedComponents.size,
     preloadedRoutes: Array.from(preloadedRoutes),
-    preloadedComponents: Array.from(preloadedComponents),
-    lazyLoadingMetrics: LazyLoadingMetrics.getMetrics()
+    preloadedComponents: Array.from(preloadedComponents)
   })
 
   // Context value

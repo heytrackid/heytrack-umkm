@@ -3,28 +3,16 @@
  * Main entry point untuk semua domain modules
  */
 
-// Domain Modules
-export * as InventoryModule from './inventory'
+// Domain Modules (only export modules that exist)
 export * as OrdersModule from './orders'
 export * as RecipesModule from './recipes'
-export * as FinanceModule from './finance'
 export * as ProductionModule from './production'
 export * as ReportsModule from './reports'
 
-// Shared Modules
-export * as SharedComponents from '../shared/components'
-export * as SharedHooks from '../shared/hooks'
-export * as SharedUtils from '../shared/utils'
-export * as SharedApi from '../shared/api'
+// Re-export shared helpers via shared index
+export * from '@/shared'
 
 // Type Re-exports (for convenience)
-export type {
-  // Inventory Types
-  Ingredient,
-  StockTransaction,
-  InventoryStats
-} from './inventory/types'
-
 export type {
   // Orders Types  
   Order,
@@ -36,15 +24,10 @@ export type {
   // Recipes Types
   Recipe,
   RecipeIngredient,
-  HPPCalculation
+  HPPCalculation,
+  RecipeHppResult,
+  RecipePricingSuggestions
 } from './recipes/types'
-
-export type {
-  // Finance Types
-  Expense,
-  FinancialRecord,
-  BudgetItem
-} from './finance/types'
 
 // Module Configuration
 export const MODULES_CONFIG = {

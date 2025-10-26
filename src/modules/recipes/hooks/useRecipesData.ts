@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSupabaseData } from '@/shared/hooks'
+import { useSupabaseCRUD } from '@/hooks'
 
 interface Recipe {
   id: string
@@ -37,16 +37,14 @@ export function useRecipesData(options: UseRecipesDataOptions = {}) {
     filters.is_active = true
   }
 
-  const { data: recipes, loading, error, refetch } = useSupabaseData<Recipe>({
-    table: 'recipes',
-    filters,
+  const { data: recipes, loading, error, refetch } = useSupabaseCRUD<Recipe>('recipes', {
+    filter: filters,
     orderBy: { column: 'name', ascending: true },
-    realtime: true
   })
 
   // Client-side filtering for search term
   const filteredRecipes = recipes.filter(recipe => {
-    if (!options.searchTerm) return true
+    if (!options.searchTerm) {return true}
     
     const searchLower = options.searchTerm.toLowerCase()
     return (

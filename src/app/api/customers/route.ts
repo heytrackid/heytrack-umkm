@@ -1,9 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
-import { CustomerInsertSchema } from '@/lib/validations/database-validations'
-import { getErrorMessage } from '@/lib/type-guards'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
+import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import type { Database } from '@/types'
 
 import { apiLogger } from '@/lib/logger'
+import { createApiResponse } from '@/lib/shared/api'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
@@ -64,7 +67,7 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Unexpected error in GET /api/customers')
     return NextResponse.json(
-      { error: getErrorMessage(error) },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     )
   }
@@ -103,7 +106,6 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    // @ts-ignore
     const { data, error } = await supabase
       .from('customers')
       .insert({
@@ -140,7 +142,7 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Unexpected error in POST /api/customers')
     return NextResponse.json(
-      { error: getErrorMessage(error) },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     )
   }

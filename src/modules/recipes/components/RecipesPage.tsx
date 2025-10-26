@@ -58,6 +58,8 @@ export default function RecipesPage({
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'list' | 'hpp' | 'pricing' | 'analytics'>('list')
+  
+  type ActiveView = 'list' | 'hpp' | 'pricing' | 'analytics'
 
   useEffect(() => {
     // Preload recipe components for better performance
@@ -70,7 +72,7 @@ export default function RecipesPage({
       setLoading(true)
       // Fetch recipes from API
       const response = await fetch('/api/recipes')
-      if (!response.ok) throw new Error('Failed to fetch recipes')
+      if (!response.ok) {throw new Error('Failed to fetch recipes')}
       const fetchedRecipes: Recipe[] = await response.json()
       setRecipes(fetchedRecipes)
       if (fetchedRecipes.length > 0) {
@@ -323,7 +325,7 @@ export default function RecipesPage({
               </Card>
 
               {/* Navigation Tabs */}
-              <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)}>
+              <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="list">📋 Detail</TabsTrigger>
                   <TabsTrigger value="hpp">💰 HPP</TabsTrigger>
