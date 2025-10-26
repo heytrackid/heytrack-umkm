@@ -20,8 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
-import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
 interface AppLayoutProps {
@@ -41,7 +41,7 @@ const AppLayout = memo(function AppLayout({
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Check auth state on mount
   useEffect(() => {

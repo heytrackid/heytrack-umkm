@@ -32,8 +32,8 @@ import {
   SheetTrigger
 } from "@/components/ui/sheet"
 import { useMobile } from '@/hooks/useResponsive'
-import type { User as SupabaseUser } from '@supabase/auth-helpers-nextjs'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { createClient } from '@/utils/supabase/client'
 import SimpleSidebar from './sidebar'
 
 interface MobileHeaderProps {
@@ -72,7 +72,7 @@ function MobileHeader({
   const [loading, setLoading] = useState(true)
   const { isMobile } = useMobile()
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Check auth state on mount
   useEffect(() => {
@@ -91,7 +91,7 @@ function MobileHeader({
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: string, session: any) => {
         setUser(session?.user ?? null)
         setLoading(false)
       }

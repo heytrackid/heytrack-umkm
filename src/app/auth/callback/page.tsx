@@ -3,13 +3,13 @@
 import * as React from 'react'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/utils/supabase/client'
 import { Loader2 } from 'lucide-react'
 
 import { apiLogger } from '@/lib/logger'
 export default function AuthCallbackPage() {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     const handleAuthCallback = async () => {

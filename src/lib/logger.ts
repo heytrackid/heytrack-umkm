@@ -13,20 +13,21 @@ const isTest = process.env.NODE_ENV === 'test'
 
 // Configure Pino logger
 const logger = pino({
-  level: isDevelopment ? 'debug' : 'info',
+  level: isTest ? 'silent' : isDevelopment ? 'info' : 'info',
   browser: {
     asObject: true,
   },
-  ...(isDevelopment && {
-    transport: {
-      target: 'pino-pretty',
-      options: {
-        colorize: true,
-        translateTime: 'HH:MM:ss',
-        ignore: 'pid,hostname',
-      },
-    },
-  }),
+  // Disable transport in development to avoid thread-stream issues
+  // ...(isDevelopment && {
+  //   transport: {
+  //     target: 'pino-pretty',
+  //     options: {
+  //       colorize: true,
+  //       translateTime: 'HH:MM:ss',
+  //       ignore: 'pid,hostname',
+  //     },
+  //   },
+  // }),
 })
 
 // Suppress logs in test environment

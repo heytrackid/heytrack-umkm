@@ -1,4 +1,17 @@
 {
   "mcpServers": {
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "puppeteer-mcp-server"
+      ],
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "puppeteer_connect_active_tab",
+        "puppeteer_connect_active_tab"
+      ]
+    }
   }
 }

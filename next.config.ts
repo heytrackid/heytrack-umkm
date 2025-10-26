@@ -23,11 +23,14 @@ const nextConfig: NextConfig = {
 
   // Experimental features for performance
   experimental: {
-    // Enable faster CSS processing
-    optimizeCss: true,
+    // Enable faster CSS processing - disabled due to critters dependency issue
+    // optimizeCss: true,
     // Enable faster package imports
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'react', 'react-dom'],
-    // Enable WebAssembly support
+    // Server Actions configuration for development
+    serverActions: {
+      allowedOrigins: ['localhost:3000', '127.0.0.1:64869'],
+    },
   },
 
   // Turbopack configuration (Next.js 16+)

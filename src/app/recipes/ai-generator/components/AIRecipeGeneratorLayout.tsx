@@ -1,12 +1,12 @@
-// AI Recipe Generator Layout - Main Page with Lazy Components
-// Main layout component that orchestrates all lazy-loaded AI recipe generation components
+// AI Recipe Generator Layout - Enhanced Interactive Version
+// Improved UX with live preview, quick mode, and better guidance
 
 'use client'
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
-import { ChefHat, Sparkles } from 'lucide-react'
+import { ChefHat, Sparkles, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
@@ -17,12 +17,16 @@ import type { GeneratedRecipe, AvailableIngredient } from './types'
 // Lazy load heavy components
 import dynamic from 'next/dynamic'
 
-const RecipeGeneratorForm = dynamic(() => import('./RecipeGeneratorForm'), {
+const RecipeGeneratorForm = dynamic(() => import('./RecipeGeneratorFormEnhanced'), {
   loading: () => <div className="p-4">Loading form...</div>
 })
 
 const GeneratedRecipeDisplay = dynamic(() => import('./GeneratedRecipeDisplay'), {
   loading: () => <div className="p-4">Loading recipe display...</div>
+})
+
+const RecipePreviewCard = dynamic(() => import('./RecipePreviewCard'), {
+  loading: () => <div className="p-4">Loading preview...</div>
 })
 
 export default function AIRecipeGeneratorPage() {
@@ -42,6 +46,9 @@ export default function AIRecipeGeneratorPage() {
   // Generation state
   const [loading, setLoading] = useState(false)
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
+  
+  // Mode state (quick vs complete)
+  const [mode, setMode] = useState<'quick' | 'complete'>('quick')
 
   // Handle auth errors
   useEffect(() => {
@@ -73,7 +80,11 @@ export default function AIRecipeGeneratorPage() {
 
   const handleGenerate = async () => {
     if (!productName || !productType || !servings) {
-      alert('Mohon isi semua field yang wajib')
+      toast({
+        title: 'Data belum lengkap',
+        description: 'Mohon isi nama produk dan jumlah hasil',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -94,12 +105,12 @@ export default function AIRecipeGeneratorPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          productName,
-          productType,
+          name: productName,
+          type: productType,
           servings,
           targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
           dietaryRestrictions,
-          availableIngredients: selectedIngredients,
+          preferredIngredients: selectedIngredients,
           userId: user.id
         })
       })
@@ -111,9 +122,18 @@ export default function AIRecipeGeneratorPage() {
 
       const data = await response.json()
       setGeneratedRecipe(data.recipe)
+      
+      toast({
+        title: '✨ Resep berhasil dibuat!',
+        description: 'AI telah meracik resep profesional untuk Anda',
+      })
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error generating recipe:')
-      alert((error as Error).message || 'Gagal generate resep')
+      toast({
+        title: 'Gagal generate resep',
+        description: (error as Error).message || 'Terjadi kesalahan, coba lagi',
+        variant: 'destructive',
+      })
     } finally {
       setLoading(false)
     }
@@ -173,7 +193,10 @@ export default function AIRecipeGeneratorPage() {
 
       if (ingredientsError) {throw ingredientsError}
 
-      alert('✅ Resep berhasil disimpan!')
+      toast({
+        title: '✅ Resep berhasil disimpan!',
+        description: 'Resep sudah tersimpan di database Anda',
+      })
 
       // Reset form
       setGeneratedRecipe(null)
@@ -184,7 +207,11 @@ export default function AIRecipeGeneratorPage() {
 
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error saving recipe:')
-      alert('Gagal menyimpan resep: ' + ((error as Error).message || String(error)))
+      toast({
+        title: 'Gagal menyimpan resep',
+        description: (error as Error).message || 'Terjadi kesalahan',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -213,22 +240,50 @@ export default function AIRecipeGeneratorPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <Sparkles className="h-6 w-6 text-white" />
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Header with Mode Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
+              <p className="text-muted-foreground">
+                Generate resep UMKM profesional dengan AI dalam hitungan detik
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
-            <p className="text-muted-foreground">
-              Generate resep UMKM profesional dengan AI dalam hitungan detik
-            </p>
+          
+          {/* Mode Toggle */}
+          <div className="flex gap-2 bg-muted p-1 rounded-lg">
+            <button
+              onClick={() => setMode('quick')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                mode === 'quick'
+                  ? 'bg-background shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Zap className="h-4 w-4" />
+              Mode Cepat
+            </button>
+            <button
+              onClick={() => setMode('complete')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                mode === 'complete'
+                  ? 'bg-background shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ChefHat className="h-4 w-4" />
+              Mode Lengkap
+            </button>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Input Form - Lazy Loaded */}
+          {/* Input Form - Enhanced */}
           <RecipeGeneratorForm
             productName={productName}
             setProductName={setProductName}
@@ -245,22 +300,28 @@ export default function AIRecipeGeneratorPage() {
             availableIngredients={availableIngredients}
             loading={loading}
             onGenerate={handleGenerate}
+            mode={mode}
           />
 
-          {/* Generated Recipe Display */}
+          {/* Right Side - Preview or Result */}
           <div className="space-y-6">
             {loading && (
               <Card>
                 <CardContent className="py-12">
                   <div className="text-center space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto animate-pulse">
-                      <ChefHat className="h-8 w-8 text-white" />
+                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto">
+                      <ChefHat className="h-8 w-8 text-white animate-bounce" />
                     </div>
                     <div>
-                      <p className="font-medium">AI sedang meracik resep...</p>
+                      <p className="font-medium text-lg">🧑‍🍳 AI sedang meracik resep...</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         Tunggu sebentar ya, ini butuh waktu 10-30 detik
                       </p>
+                      <div className="mt-4 flex justify-center gap-1">
+                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -277,17 +338,14 @@ export default function AIRecipeGeneratorPage() {
             )}
 
             {!loading && !generatedRecipe && (
-              <Card>
-                <CardContent className="py-12">
-                  <div className="text-center text-muted-foreground">
-                    <ChefHat className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">Resep akan muncul di sini</p>
-                    <p className="text-sm mt-1">
-                      Isi form di sebelah kiri dan klik "Generate Resep dengan AI"
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              <RecipePreviewCard
+                productName={productName}
+                productType={productType}
+                servings={servings}
+                targetPrice={targetPrice}
+                selectedIngredients={selectedIngredients}
+                availableIngredients={availableIngredients}
+              />
             )}
           </div>
         </div>
