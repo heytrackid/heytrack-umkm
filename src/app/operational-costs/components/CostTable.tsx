@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,7 +31,7 @@ import { format } from 'date-fns'
 import type { OperationalCostsTable } from '@/types'
 
 interface CostTableProps {
-  costs: OperationalCostsTable['Row'][]
+  costs: Array<OperationalCostsTable['Row']>
   onEdit: (cost: OperationalCostsTable['Row']) => void
   onDelete: (cost: OperationalCostsTable['Row']) => void
   formatCurrency: (amount: number) => string
@@ -80,7 +79,7 @@ export default function CostTable({
   
   // Reset to page 1 when costs change
   useMemo(() => {
-    setCurrentPage(1)
+    void setCurrentPage(1)
   }, [costs.length])
   
   if (costs.length === 0) {
@@ -184,7 +183,7 @@ export default function CostTable({
                   <span className="text-sm text-muted-foreground">Per halaman:</span>
                   <Select value={pageSize.toString()} onValueChange={(value) => {
                     setPageSize(Number(value))
-                    setCurrentPage(1)
+                    void setCurrentPage(1)
                   }}>
                     <SelectTrigger className="w-20 h-8">
                       <SelectValue />

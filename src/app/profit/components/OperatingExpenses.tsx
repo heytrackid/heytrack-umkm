@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Receipt } from 'lucide-react'
 import type { ProfitData } from './types'
@@ -9,12 +8,11 @@ interface OperatingExpensesProps {
   formatCurrency: (amount: number) => string
 }
 
-export function OperatingExpenses({
+export const OperatingExpenses = ({
   operating_expenses,
   summary,
   formatCurrency
-}: OperatingExpensesProps) {
-  return (
+}: OperatingExpensesProps) => (
     <Card>
       <CardHeader>
         <CardTitle>Biaya Operasional</CardTitle>
@@ -47,4 +45,3 @@ export function OperatingExpenses({
       </CardContent>
     </Card>
   )
-}

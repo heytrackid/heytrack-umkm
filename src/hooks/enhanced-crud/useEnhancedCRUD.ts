@@ -27,7 +27,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
   } = options
 
   const handleSuccess = useCallback((operation: 'create' | 'update' | 'delete') => {
-    setError(null)
+    void setError(null)
 
     if (showSuccessToast) {
       const defaultMessages = {
@@ -44,8 +44,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
   const createRecord = useCallback(async (data: Tables[T]['Insert']) => {
     validateCRUDInputs('create', data)
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -60,21 +60,21 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
-      handleSuccess('create')
+      void handleSuccess('create')
       return result
     } catch (error: unknown) {
-      handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
+      void handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
       throw error
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
   const updateRecord = useCallback(async (id: string, data: Tables[T]['Update']) => {
     validateCRUDInputs('update', data, id)
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -94,21 +94,21 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error('Data tidak ditemukan')
       }
 
-      handleSuccess('update')
+      void handleSuccess('update')
       return result
     } catch (error: unknown) {
-      handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
+      void handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
       throw error
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
   const deleteRecord = useCallback(async (id: string) => {
     validateCRUDInputs('delete', undefined, id)
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -133,21 +133,21 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         throw new Error((error instanceof Error ? error.message : String(error)))
       }
 
-      handleSuccess('delete')
+      void handleSuccess('delete')
       return true
     } catch (error: unknown) {
-      handleCRUDError(error as Error, 'delete', showErrorToast, customErrorHandler)
+      void handleCRUDError(error as Error, 'delete', showErrorToast, customErrorHandler)
       throw error
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
-  const bulkCreate = useCallback(async (records: Tables[T]['Insert'][]) => {
+  const bulkCreate = useCallback(async (records: Array<Tables[T]['Insert']>) => {
     validateBulkInputs('create', records)
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -170,20 +170,20 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       return result
     } catch (error: unknown) {
-      handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
+      void handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
       throw error
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const bulkUpdate = useCallback(async (
-    updates: BulkUpdateItem<T>[]
+    updates: Array<BulkUpdateItem<T>>
   ) => {
     validateBulkInputs('update', updates)
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -213,18 +213,18 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       return results
     } catch (error: unknown) {
-      handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
+      void handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
       throw error
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const bulkDelete = useCallback(async (ids: string[]) => {
     validateBulkInputs('delete', ids)
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -247,15 +247,15 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       return true
     } catch (error: unknown) {
-      handleCRUDError(error as Error, 'delete', showErrorToast, customErrorHandler)
+      void handleCRUDError(error as Error, 'delete', showErrorToast, customErrorHandler)
       throw error
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const clearError = useCallback(() => {
-    setError(null)
+    void setError(null)
   }, [])
 
   return {

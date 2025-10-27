@@ -184,7 +184,7 @@ export const globalLazyLoadingUtils = {
   // Preload critical components for the current route
   preloadForRoute: async (routeName: keyof typeof RouteLazyLoadingConfig) => {
     const config = RouteLazyLoadingConfig[routeName]
-    const preloadPromises: Promise<unknown>[] = []
+    const preloadPromises: Array<Promise<unknown>> = []
 
     // Preload essential components
     if (config.essential) {
@@ -221,7 +221,7 @@ export const globalLazyLoadingUtils = {
   // Monitor bundle size impact
   monitorBundleImpact: () => {
     if (typeof performance !== 'undefined' && 'memory' in performance) {
-      const memory = (performance as any).memory
+      const {memory} = (performance as any)
       apiLogger.debug('Current memory usage', {
         memoryMB: (memory.usedJSHeapSize / 1024 / 1024).toFixed(2)
       })

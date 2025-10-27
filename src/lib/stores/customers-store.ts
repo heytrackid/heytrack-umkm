@@ -5,8 +5,8 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { dbLogger } from '@/lib/logger'
-import type { Customer, SyncEvent } from '../data-synchronization/types'
-import { syncEmitter } from '../data-synchronization/sync-events'
+import type { Customer, SyncEvent } from '@/lib/data-synchronization/types'
+import { syncEmitter } from '@/lib/data-synchronization/sync-events'
 
 interface CustomersStore {
   // Data
@@ -83,14 +83,12 @@ export const useCustomersStore = create<CustomersStore>()(
     },
 
     // Business logic
-    findCustomerByPhone: (phone) => {
-      return get().customers.find(customer => customer.nomorTelepon === phone)
-    },
+    findCustomerByPhone: (phone) => get().customers.find(customer => customer.nomorTelepon === phone),
 
-    getTopCustomers: (limit = 10) => {
+    getTopCustomers: (limit = 10) => 
       // Sort by total orders or revenue (would need order data integration)
-      return get().customers.slice(0, limit)
-    },
+       get().customers.slice(0, limit)
+    ,
 
     // Sync functions
     emitSyncEvent: (event) => {

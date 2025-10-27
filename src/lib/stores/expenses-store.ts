@@ -5,8 +5,8 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { dbLogger } from '@/lib/logger'
-import type { Expense, SyncEvent } from '../data-synchronization/types'
-import { syncEmitter } from '../data-synchronization/sync-events'
+import type { Expense, SyncEvent } from '@/lib/data-synchronization/types'
+import { syncEmitter } from '@/lib/data-synchronization/sync-events'
 
 interface ExpensesStore {
   // Data
@@ -90,14 +90,12 @@ export const useExpensesStore = create<ExpensesStore>()(
     },
 
     // Business logic
-    getExpensesByCategory: (category) => {
-      return get().expenses.filter(expense => expense.kategori === category)
-    },
+    getExpensesByCategory: (category) => get().expenses.filter(expense => expense.kategori === category),
 
     getTotalExpenses: (startDate, endDate) => {
       const expenses = get().expenses.filter(expense => {
-        if (startDate && expense.tanggal < startDate) return false
-        if (endDate && expense.tanggal > endDate) return false
+        if (startDate && expense.tanggal < startDate) {return false}
+        if (endDate && expense.tanggal > endDate) {return false}
         return true
       })
 

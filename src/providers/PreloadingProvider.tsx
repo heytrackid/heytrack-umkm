@@ -1,11 +1,10 @@
 'use client'
-import * as React from 'react'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { apiLogger } from '@/lib/logger'
-import { 
-  useSmartPreloading, 
+import {
+  useSmartPreloading,
   useIdleTimePreloading,
   useNetworkAwarePreloading
 } from '@/hooks/route-preloading'
@@ -30,15 +29,15 @@ export const usePreloading = () => {
 }
 
 interface PreloadingProviderProps {
-  children: React.ReactNode
+  children: ReactNode
   enableSmartPreloading?: boolean
   enableIdlePreloading?: boolean
   enableNetworkAware?: boolean
   debug?: boolean
 }
 
-export const PreloadingProvider = ({ 
-  children, 
+export const PreloadingProvider = ({
+  children,
   enableSmartPreloading = true,
   enableIdlePreloading = true,
   enableNetworkAware = true,
@@ -46,7 +45,7 @@ export const PreloadingProvider = ({
 }: PreloadingProviderProps) => {
   const pathname = usePathname()
   const { preloadRoute: hookPreloadRoute } = useRoutePreloading()
-  
+
   const [isPreloading, setIsPreloading] = useState(false)
   const [preloadedRoutes, setPreloadedRoutes] = useState(new Set<string>())
   const [preloadedComponents, setPreloadedComponents] = useState(new Set<string>())
@@ -55,12 +54,12 @@ export const PreloadingProvider = ({
   if (enableSmartPreloading) {
     useSmartPreloading()
   }
-  
+
   // Enable idle time preloading
   if (enableIdlePreloading) {
     useIdleTimePreloading()
   }
-  
+
   // Enable network-aware preloading
   if (enableNetworkAware) {
     useNetworkAwarePreloading()
@@ -69,27 +68,27 @@ export const PreloadingProvider = ({
   // Track preloaded routes
   const preloadRoute = async (route: string) => {
     if (preloadedRoutes.has(route)) {
-      if (debug) {apiLogger.info(`🔄 Route ${route} already preloaded`)}
+      if (debug) { apiLogger.info(`🔄 Route ${route} already preloaded`) }
       return
     }
 
-    setIsPreloading(true)
+    void setIsPreloading(true)
     const startTime = performance.now()
-    
+
     try {
       await hookPreloadRoute(route)
       setPreloadedRoutes(prev => new Set([...prev, route]))
-      
+
       const endTime = performance.now()
       if (debug) {
         apiLogger.info(`✅ Preloaded route ${route} in ${(endTime - startTime).toFixed(2)}ms`)
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       if (debug) {
         apiLogger.warn(`❌ Failed to preload route ${route}: ${error}`)
       }
     } finally {
-      setIsPreloading(false)
+      void setIsPreloading(false)
     }
   }
 
@@ -140,7 +139,7 @@ const PreloadingDebugPanel = () => {
         setMetrics(getMetrics())
       }
     }, 1000)
-    
+
     return () => clearInterval(interval)
   }, [showDebug, getMetrics])
 
@@ -148,7 +147,7 @@ const PreloadingDebugPanel = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'P') {
-        setShowDebug(prev => !prev)
+        void setShowDebug(prev => !prev)
       }
     }
 
@@ -176,31 +175,31 @@ const PreloadingDebugPanel = () => {
         <h3 className="font-bold">Preloading Debug</h3>
         <button onClick={() => setShowDebug(false)}>✕</button>
       </div>
-      
+
       {metrics && (
         <div className="space-y-2">
           <div>
-            <strong>Current:</strong> {(metrics as any).currentRoute}
+            <strong>Current:</strong> {(metrics).currentRoute}
           </div>
           <div>
-            <strong>Preloaded Routes:</strong> {(metrics as any).preloadedRoutesCount}
+            <strong>Preloaded Routes:</strong> {(metrics).preloadedRoutesCount}
           </div>
           <div>
-            <strong>Preloaded Components:</strong> {(metrics as any).preloadedComponentsCount}
+            <strong>Preloaded Components:</strong> {(metrics).preloadedComponentsCount}
           </div>
-          
+
           {metrics.lazyLoadingMetrics && (
             <div>
               <strong>Avg Load Time:</strong> {metrics.lazyLoadingMetrics.averageLoadTime?.toFixed(2) || 0}ms
             </div>
           )}
-          
+
           {isPreloading && (
             <div className="text-yellow-400">
               🔄 Preloading in progress...
             </div>
           )}
-          
+
           <details className="mt-2">
             <summary className="cursor-pointer">Routes</summary>
             <div className="mt-1 text-gray-300">
@@ -209,7 +208,7 @@ const PreloadingDebugPanel = () => {
               ))}
             </div>
           </details>
-          
+
           <details className="mt-2">
             <summary className="cursor-pointer">Components</summary>
             <div className="mt-1 text-gray-300">
@@ -220,7 +219,7 @@ const PreloadingDebugPanel = () => {
           </details>
         </div>
       )}
-      
+
       <div className="mt-2 text-gray-400 text-xs">
         Ctrl+Shift+P to toggle
       </div>
@@ -231,22 +230,22 @@ const PreloadingDebugPanel = () => {
 // Hook to preload specific page resources
 export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' | 'inventory' | 'customers') => {
   const { preloadRoute } = usePreloading()
-  
+
   useEffect(() => {
     const preloadTargets: Record<string, string[]> = {
       dashboard: ['/orders', '/finance', '/inventory'],
       orders: ['/orders/new', '/customers', '/finance'],
       finance: ['/orders', '/dashboard', '/reports'],
-      inventory: ['/ingredients', '/orders', '/resep'],
+      inventory: ['/ingredients', '/orders', '/recipes'],
       customers: ['/orders', '/orders/new', '/finance']
     }
-    
+
     const targets = preloadTargets[pageType] || []
-    
+
     // Preload with staggered timing
     targets.forEach((route, index: number) => {
       setTimeout(() => {
-        preloadRoute(route)
+        void preloadRoute(route)
       }, index * 200) // 200ms delay between each preload
     })
   }, [pageType, preloadRoute])
@@ -255,23 +254,25 @@ export const usePagePreloading = (pageType: 'dashboard' | 'orders' | 'finance' |
 // Performance monitoring hook
 export const usePreloadingAnalytics = () => {
   const { getMetrics } = usePreloading()
-  
+
   useEffect(() => {
     // Send analytics every 30 seconds if there's activity
     const interval = setInterval(() => {
       const metrics = getMetrics()
-      
+
       if ((metrics as any).preloadedRoutesCount > 0 || (metrics as any).preloadedComponentsCount > 0) {
         // Here you could send metrics to your analytics service
-        apiLogger.info({ params: {
-          route: (metrics as any).currentRoute,
-          preloadedRoutes: (metrics as any).preloadedRoutesCount,
-          preloadedComponents: (metrics as any).preloadedComponentsCount,
-          timestamp: new Date().toISOString()
-        }}, '📊 Preloading Analytics:')
+        apiLogger.info({
+          params: {
+            route: (metrics as any).currentRoute,
+            preloadedRoutes: (metrics as any).preloadedRoutesCount,
+            preloadedComponents: (metrics as any).preloadedComponentsCount,
+            timestamp: new Date().toISOString()
+          }
+        }, '📊 Preloading Analytics:')
       }
     }, 30000)
-    
+
     return () => clearInterval(interval)
   }, [getMetrics])
 }

@@ -1,10 +1,10 @@
 'use client'
 
-import * as React from 'react'
+import { type ReactNode, type FormHTMLAttributes, forwardRef, useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
-interface FormWrapperProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'onError'> {
-  children: React.ReactNode
+interface FormWrapperProps extends Omit<FormHTMLAttributes<HTMLFormElement>, 'onError'> {
+  children: ReactNode
   isLoading?: boolean
   error?: string | null
   onError?: (error: Error) => void
@@ -13,9 +13,8 @@ interface FormWrapperProps extends Omit<React.FormHTMLAttributes<HTMLFormElement
 /**
  * FormWrapper - Unified form component with consistent error handling
  */
-export const FormWrapper = React.forwardRef<HTMLFormElement, FormWrapperProps>(
-  ({ children, isLoading, error, className, onError, ...props }, ref) => {
-    return (
+export const FormWrapper = forwardRef<HTMLFormElement, FormWrapperProps>(
+  ({ children, isLoading, error, className, onError, ...props }, ref) => (
       <form ref={ref} className={cn('space-y-6', className)} {...props}>
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
@@ -44,7 +43,6 @@ export const FormWrapper = React.forwardRef<HTMLFormElement, FormWrapperProps>(
         </div>
       </form>
     )
-  }
 )
 
 FormWrapper.displayName = 'FormWrapper'

@@ -1,85 +1,54 @@
 'use client'
-import * as React from 'react'
 
-import { createLazyComponent, ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
+import { createLazyComponent, ChartSkeleton } from '@/components/lazy/LazyWrapper'
 import { Suspense } from 'react'
 
-// Lazy load chart components with optimized loading
 export const LazyFinancialTrendsChart = createLazyComponent(
-  () => import('@/components'),
-  {
-    name: 'Financial Trends Chart',
-    fallback: <ComponentSkeletons.Chart height={400} />,
-    minLoadingTime: 400,
-  }
+  () => import('@/modules/charts/components/FinancialTrendsChart'),
+  ChartSkeleton
 )
 
 export const LazyInventoryTrendsChart = createLazyComponent(
-  () => import('@/components'),
-  {
-    name: 'Inventory Trends Chart', 
-    fallback: <ComponentSkeletons.Chart height={400} />,
-    minLoadingTime: 400,
-  }
+  () => import('@/modules/charts/components/InventoryTrendsChart'),
+  ChartSkeleton
 )
 
-export const LazyMiniChart = createLazyComponent(
-  () => import('@/components'),
-  {
-    name: 'Mini Chart',
-    fallback: <ComponentSkeletons.Chart height={60} />,
-    minLoadingTime: 200,
-  }
+export const LazyMiniChart = lazy(() =>
+  import('@/components/ui/charts').then(m => ({ default: m.MiniChart }))
 )
 
 // Lazy load heavy chart libraries
 export const LazyRechartsLineChart = createLazyComponent(
-  () => import('@/components').then(module => ({ default: module.LineChart })),
-  {
-    name: 'Recharts Line Chart',
-    fallback: <ComponentSkeletons.Chart height={300} />,
-    minLoadingTime: 500,
-  }
+  () => import('recharts').then(module => ({ default: module.LineChart })),
+  ChartSkeleton
 )
 
 export const LazyRechartsBarChart = createLazyComponent(
-  () => import('@/components').then(module => ({ default: module.BarChart })),
-  {
-    name: 'Recharts Bar Chart',
-    fallback: <ComponentSkeletons.Chart height={300} />,
-    minLoadingTime: 500,
-  }
+  () => import('recharts').then(module => ({ default: module.BarChart })),
+  ChartSkeleton
 )
 
 export const LazyRechartsAreaChart = createLazyComponent(
-  () => import('@/components').then(module => ({ default: module.AreaChart })),
-  {
-    name: 'Recharts Area Chart',
-    fallback: <ComponentSkeletons.Chart height={300} />,
-    minLoadingTime: 500,
-  }
+  () => import('recharts').then(module => ({ default: module.AreaChart })),
+  ChartSkeleton
 )
 
 export const LazyRechartsPieChart = createLazyComponent(
-  () => import('@/components').then(module => ({ default: module.PieChart })),
-  {
-    name: 'Recharts Pie Chart',
-    fallback: <ComponentSkeletons.Chart height={300} />,
-    minLoadingTime: 500,
-  }
+  () => import('recharts').then(module => ({ default: module.PieChart })),
+  ChartSkeleton
 )
 
 // Preload chart components for better UX
 export const preloadChartComponents = () => {
   // Preload most commonly used charts
-  import('@/components')
-  import('@/components')
-  import('@/components')
+  import('@/modules/charts/components/FinancialTrendsChart')
+  import('@/modules/charts/components/InventoryTrendsChart')
+  import('@/components/ui/charts')
 }
 
 // Preload heavy libraries separately
 export const preloadRechartsBundle = () => {
-  import('@/components')
+  import('recharts')
 }
 
 // Smart chart loader with conditional loading based on data size
@@ -107,14 +76,14 @@ export const SmartChartLoader = ({
   const ChartComponent = ChartComponents[chartType]
 
   return (
-    <Suspense fallback={<ComponentSkeletons.Chart height={height} />}>
+    <Suspense fallback={<ChartSkeleton />}>
       <ChartComponent data={data} height={height} dataKey="value" {...props} />
     </Suspense>
   )
 }
 
 // Progressive chart dashboard component
-export function ChartDashboardWithProgressiveLoading({
+export const ChartDashboardWithProgressiveLoading = ({
   charts
 }: {
   charts: Array<{
@@ -123,7 +92,7 @@ export function ChartDashboardWithProgressiveLoading({
     priority: 'high' | 'medium' | 'low'
     data?: any[]
   }>
-}) {
+}) => {
   // Sort charts by priority
   const sortedCharts = charts.sort((a, b) => {
     const priorityOrder = { high: 3, medium: 2, low: 1 }
@@ -132,13 +101,10 @@ export function ChartDashboardWithProgressiveLoading({
 
   return (
     <div className="space-y-6">
-      {sortedCharts.map((chart, index: number) => {
-        // Stagger loading times based on priority
-        const loadingDelay = chart.priority === 'high' ? 0 : chart.priority === 'medium' ? 200 : 400
-
+      {sortedCharts.map((chart) => {
         return (
           <div key={chart.id} className="chart-container">
-            <Suspense fallback={<ComponentSkeletons.Chart />}>
+            <Suspense fallback={<ChartSkeleton />}>
               {chart.type === 'financial' && (
                 <LazyFinancialTrendsChart />
               )}
@@ -159,22 +125,34 @@ export function ChartDashboardWithProgressiveLoading({
 // Hook for progressive chart loading with metrics
 export function useChartProgressiveLoading() {
   const components = [
-    () => import('@/components'),
-    () => import('@/components'),
-    () => import('@/components'),
-    () => import('@/components'), // Heavy library
+    () => import('@/modules/charts/components/FinancialTrendsChart'),
+    () => import('@/modules/charts/components/InventoryTrendsChart'),
+    () => import('@/components/ui/charts'),
+    () => import('recharts'), // Heavy library
   ]
   
-  return useProgressiveLoading(components, 300)
+  // Simple implementation since useProgressiveLoading doesn't exist
+  return {
+    loadNext: async () => {
+      // Simple sequential loading
+      for (const component of components) {
+        await component()
+      }
+    },
+    isLoading: false,
+    loadedCount: components.length
+  }
 }
 
 // Chart performance utilities
 export const ChartPerformanceUtils = {
   // Debounce chart updates to prevent excessive re-renders
   debounceChartUpdate: (callback: Function, delay = 300) => {
-    let timeoutId: NodeJS.Timeout
+    let timeoutId: NodeJS.Timeout | undefined
     return (...args: unknown[]) => {
-      clearTimeout
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
       timeoutId = setTimeout(() => callback(...args), delay)
     }
   },
@@ -195,5 +173,3 @@ export const ChartPerformanceUtils = {
     return data.slice(startIndex, endIndex)
   }
 }
-
-import { useProgressiveLoading } from '@/shared/components/utility/LazyWrapper'

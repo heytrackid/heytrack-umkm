@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { UUIDSchema, DateStringSchema, NonNegativeNumberSchema } from '../base-validations'
+import { UUIDSchema, DateStringSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
 
 // Pagination schemas
 export const PaginationSchema = z.object({

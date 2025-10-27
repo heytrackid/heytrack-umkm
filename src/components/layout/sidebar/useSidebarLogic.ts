@@ -1,12 +1,11 @@
 'use client'
-import * as React from 'react'
-
-import { apiLogger } from '@/lib/logger'
+import type { LucideIcon } from 'lucide-react'
 import {
   Bot,
   Calculator,
   ChefHat,
   DollarSign,
+  Factory,
   Layers,
   LayoutDashboard,
   Package,
@@ -17,7 +16,8 @@ import {
   Users,
   FileText,
   Settings,
-  Sparkles
+  Sparkles,
+  BarChart3
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -44,29 +44,6 @@ export interface NavigationSection {
 export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
-
-  // HPP Alerts count state
-  const [hppAlertsCount, setHppAlertsCount] = useState(0)
-
-  // Fetch HPP alerts count
-  useEffect(() => {
-    const fetchAlertsCount = async () => {
-      try {
-        const response = await fetch('/api/hpp/alerts?limit=1')
-        if (response.ok) {
-          const data = await response.json()
-          setHppAlertsCount(data.meta?.unread_count || 0)
-        }
-      } catch (error) {
-        apiLogger.error({ error: error }, 'Failed to fetch alerts count:')
-      }
-    }
-
-    fetchAlertsCount()
-    // Refetch every minute
-    const interval = setInterval(fetchAlertsCount, 60000)
-    return () => clearInterval(interval)
-  }, [])
 
   // Collapsible sections state - initialize from localStorage if available
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
@@ -97,12 +74,12 @@ export const useSidebarLogic = () => {
   // Prefetch next likely routes to reduce navigation latency
   useEffect(() => {
     const routesToPrefetch = [
-      '/', '/orders', '/ingredients', '/hpp', '/resep', '/customers', 
+      '/', '/orders', '/ingredients', '/recipes', '/customers', 
       '/cash-flow', '/profit', '/ai-chatbot', '/reports', '/settings', 
       '/recipes/ai-generator'
     ]
     routesToPrefetch.forEach((r) => {
-      try { router.prefetch(r) } catch { }
+      try { router.prefetch(r) } catch (error) { }
     })
   }, [router])
 
@@ -119,181 +96,156 @@ export const useSidebarLogic = () => {
       ]
     },
     {
-      title: "Kelola Data",
-      description: "Kelola data dasar bisnis",
+      title: "1️⃣ Setup Awal",
+      description: "Langkah pertama: Siapkan data dasar",
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: "Bahan Baku",
+          name: "1. Bahan Baku",
           href: '/ingredients',
           icon: Package,
           isSimple: true,
-          badge: "DATA",
           stepNumber: 1,
-          description: "Kelola bahan baku dan stok"
+          description: "Input semua bahan baku dan harga"
         },
         {
-          name: "Kategori",
-          href: '/categories',
-          icon: Layers,
-          isSimple: true,
-          badge: "ORGANISIR",
-          stepNumber: 2,
-          description: "Kategori produk dan bahan"
-        },
-        {
-          name: "Biaya Operasional",
-          href: '/operational-costs',
-          icon: Receipt,
-          isSimple: true,
-          badge: "BIAYA",
-          stepNumber: 3,
-          description: "Biaya operasional harian"
-        },
-        {
-          name: "Resep",
-          href: '/resep',
+          name: "2. Resep Produk",
+          href: '/recipes',
           icon: ChefHat,
           isSimple: true,
-          badge: "RESEP",
-          stepNumber: 4,
-          description: "Formula resep dan komposisi"
+          stepNumber: 2,
+          description: "Buat resep dengan komposisi bahan"
         },
-      ]
-    },
-    {
-      title: "Perhitungan",
-      description: "Hitung HPP dan strategi harga",
-      isWorkflow: true,
-      isCollapsible: true,
-      items: [
         {
-          name: "Kalkulator HPP",
+          name: "3. Biaya & Harga",
           href: '/hpp',
           icon: Calculator,
           isSimple: true,
-          badge: "HITUNG",
-          stepNumber: 1,
-          description: "Perhitungan Harga Pokok Produksi"
-        },
-        {
-          name: "HPP Lanjutan",
-          href: '/hpp-enhanced',
-          icon: Target,
-          isSimple: true,
-          badge: hppAlertsCount > 0 ? `${hppAlertsCount} ALERT` : "LANJUTAN",
-          stepNumber: 2,
-          description: "HPP dengan analisa mendalam"
+          stepNumber: 3,
+          description: "Hitung biaya dan tentukan harga jual"
         },
       ]
     },
     {
-      title: "Operasional",
-      description: "Kelola pesanan dan pelanggan",
+      title: "2️⃣ Operasional Harian",
+      description: "Jalankan bisnis sehari-hari",
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: "Pesanan",
-          href: '/orders',
-          icon: ShoppingCart,
-          isSimple: true,
-          badge: "ORDER",
-          stepNumber: 1,
-          description: "Kelola pesanan dan pengiriman"
-        },
-        {
-          name: "Pelanggan",
+          name: "4. Pelanggan",
           href: '/customers',
           icon: Users,
           isSimple: true,
-          badge: "CRM",
-          stepNumber: 2,
-          description: "Database pelanggan dan riwayat"
+          stepNumber: 4,
+          description: "Kelola data pelanggan"
+        },
+        {
+          name: "5. Pesanan",
+          href: '/orders',
+          icon: ShoppingCart,
+          isSimple: true,
+          stepNumber: 5,
+          description: "Terima dan kelola pesanan"
+        },
+        {
+          name: "6. Produksi",
+          href: '/production',
+          icon: Factory,
+          isSimple: true,
+          stepNumber: 6,
+          description: "Track batch produksi"
+        },
+        {
+          name: "7. Biaya Operasional",
+          href: '/operational-costs',
+          icon: Receipt,
+          isSimple: true,
+          stepNumber: 7,
+          description: "Catat biaya harian (listrik, gas, dll)"
         },
       ]
     },
     {
-      title: "Monitoring",
-      description: "Laporan keuangan dan profitabilitas",
+      title: "3️⃣ Monitoring & Laporan",
+      description: "Pantau keuangan dan performa",
       isWorkflow: true,
       isCollapsible: true,
       items: [
         {
-          name: "Arus Kas",
+          name: "8. Arus Kas",
           href: '/cash-flow',
           icon: DollarSign,
           isSimple: true,
-          badge: "UANG",
-          stepNumber: 1,
-          description: "Semua transaksi masuk dan keluar"
+          stepNumber: 7,
+          description: "Lihat uang masuk dan keluar"
         },
         {
-          name: "Laba Riil",
+          name: "8. Laba Rugi",
           href: '/profit',
           icon: TrendingUp,
           isSimple: true,
-          badge: "PROFIT",
-          stepNumber: 2,
-          description: "Profit margin dengan metode WAC"
+          stepNumber: 8,
+          description: "Analisis untung rugi bisnis"
         },
+        {
+          name: "9. Laporan Lengkap",
+          href: '/reports',
+          icon: FileText,
+          isSimple: true,
+          stepNumber: 9,
+          description: "Semua laporan dan analytics"
+        }
       ]
     },
-
     {
-      title: "Asisten AI",
-      description: "Bantuan cerdas untuk pengelolaan bisnis",
+      title: "🤖 Asisten AI",
+      description: "Bantuan cerdas untuk bisnis",
+      isCollapsible: true,
       items: [
         {
           name: "Chat AI",
           href: '/ai-chatbot',
           icon: Bot,
-          description: "Tanya apa saja tentang bisnis UMKM Anda"
+          description: "Tanya apa saja tentang bisnis"
         },
         {
           name: "Generator Resep",
           href: '/recipes/ai-generator',
           icon: Sparkles,
-          description: "Buat resep baru dengan bantuan AI"
+          description: "Buat resep baru dengan AI"
         }
       ]
     },
     {
-      title: "Analytics & Laporan",
-      description: "Laporan terperinci dan analitik",
+      title: "⚙️ Lainnya",
+      description: "Pengaturan dan tools tambahan",
+      isCollapsible: true,
       items: [
         {
-          name: "Laporan Lengkap",
-          href: '/reports',
-          icon: FileText,
-          description: "Lihat semua laporan dan analytics"
-        }
-      ]
-    },
-    {
-      title: "Pengaturan",
-      description: "Konfigurasi aplikasi",
-      items: [
+          name: "Kategori",
+          href: '/categories',
+          icon: Layers,
+          description: "Organisir produk dan bahan"
+        },
         {
-          name: "Pengaturan Aplikasi",
+          name: "Pengaturan",
           href: '/settings',
           icon: Settings,
-          description: "Kelola pengaturan bisnis dan akun"
+          description: "Konfigurasi aplikasi"
         }
       ]
     },
   ]
 
-  const isItemActive = (item: NavigationItem): boolean => {
-    return pathname === item.href ||
+  const isItemActive = (item: NavigationItem): boolean => pathname === item.href ||
       (item.href.includes('#') && pathname === item.href.split('#')[0])
-  }
 
   const prefetchRoute = (href: string) => {
     try {
-      router.prefetch(href)
-    } catch { }
+      void router.prefetch(href)
+    } catch (error) { }
   }
 
   const toggleSection = (sectionTitle: string) => {
@@ -303,9 +255,7 @@ export const useSidebarLogic = () => {
     }))
   }
 
-  const isSectionCollapsed = (sectionTitle: string): boolean => {
-    return collapsedSections[sectionTitle] || false
-  }
+  const isSectionCollapsed = (sectionTitle: string): boolean => collapsedSections[sectionTitle] || false
 
   return {
     navigationSections,

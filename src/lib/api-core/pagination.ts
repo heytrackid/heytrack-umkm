@@ -3,7 +3,7 @@
  * Pagination utilities for API responses
  */
 
-import { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server'
 import type { PaginationParams, PaginationState } from './types'
 
 /**

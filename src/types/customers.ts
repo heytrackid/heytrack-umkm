@@ -1,7 +1,7 @@
 import type { Json } from './common'
 
 // Customer-related types
-export type CustomersTable = {
+export interface CustomersTable {
   Row: {
     address: string | null
     created_at: string | null

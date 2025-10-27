@@ -9,8 +9,7 @@ const PROTECTED_ROUTES = new Set([
   '/dashboard',
   '/orders',
   '/ingredients',
-  '/hpp',
-  '/resep',
+  '/recipes',
   '/customers',
   '/cash-flow',
   '/profit',
@@ -108,7 +107,7 @@ export async function middleware(request: NextRequest) {
       middlewareLogger.error({ error }, 'Middleware auth error')
     }
 
-    const pathname = request.nextUrl.pathname
+    const {pathname} = request.nextUrl
 
     // Check if the current path is protected (optimized with Set)
     const isProtectedRoute = Array.from(PROTECTED_ROUTES).some((route) =>

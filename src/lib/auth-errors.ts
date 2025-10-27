@@ -130,11 +130,11 @@ export function validatePassword(password: string): {
     }
 
     return { isValid: true, strength }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (err) {
+    if (err instanceof z.ZodError) {
       return {
         isValid: false,
-        error: error.issues[0]?.message || 'Password tidak valid'
+        error: err.issues[0]?.message || 'Password tidak valid'
       }
     }
     return {
@@ -194,8 +194,8 @@ export const UpdatePasswordSchema = z.object({
  * Extract error message from various error formats
  */
 export function extractAuthError(error: unknown): string {
-  if (typeof error === 'string') return error
-  if (error instanceof Error) return error.message
+  if (typeof error === 'string') {return error}
+  if (error instanceof Error) {return error.message}
   if (typeof error === 'object' && error !== null && 'message' in error) {
     return String(error.message)
   }

@@ -3,13 +3,12 @@
  * Optimized pie chart for mobile devices
  */
 
-import * as React from 'react'
-import { memo } from 'react'
+import { React, memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
-import { CHART_COLORS, BaseMobileChartProps, PieLabelProps } from './types'
+import { type BaseMobileChartProps, CHART_COLORS, PieLabelProps } from './types'
 
 interface MobilePieChartProps extends BaseMobileChartProps {
   valueKey: string
@@ -23,7 +22,7 @@ interface MobilePieChartProps extends BaseMobileChartProps {
  * MobilePieChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobilePieChart = memo(function MobilePieChart({
+export const MobilePieChart = memo(({
   data,
   valueKey,
   nameKey,
@@ -31,7 +30,7 @@ export const MobilePieChart = memo(function MobilePieChart({
   showLabels = true,
   innerRadius = 0,
   ...baseProps
-}: MobilePieChartProps) {
+}: MobilePieChartProps) => {
   const { isMobile } = useResponsive()
 
   const renderLabel = (props: any) => {
@@ -88,6 +87,4 @@ export const MobilePieChart = memo(function MobilePieChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => {
-  return prevProps.data === nextProps.data && prevProps.valueKey === nextProps.valueKey
-})
+}, (prevProps: MobilePieChartProps, nextProps: MobilePieChartProps) => prevProps.data === nextProps.data && prevProps.valueKey === nextProps.valueKey)

@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -78,8 +77,8 @@ export default function CostListTable({
   const paginatedCosts = costs.slice(startIndex, endIndex)
 
   // Reset to page 1 when search changes
-  React.useEffect(() => {
-    setCurrentPage(1)
+  useEffect(() => {
+    void setCurrentPage(1)
   }, [searchTerm])
 
   const handlePreviousPage = () => {

@@ -31,11 +31,11 @@ export class BatchSchedulingService {
   static async getScheduledBatches(): Promise<ProductionBatch[]> {
     try {
       const response = await fetch('/api/production/batches')
-      if (!response.ok) throw new Error('Failed to fetch batches')
+      if (!response.ok) {throw new Error('Failed to fetch batches')}
       const data = await response.json()
       return data.batches || []
-    } catch (error) {
-      apiLogger.error({ error }, 'Error fetching scheduled batches')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error fetching scheduled batches')
       return []
     }
   }
@@ -50,10 +50,10 @@ export class BatchSchedulingService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(batch)
       })
-      if (!response.ok) throw new Error('Failed to create batch')
+      if (!response.ok) {throw new Error('Failed to create batch')}
       return await response.json()
-    } catch (error) {
-      apiLogger.error({ error }, 'Error creating batch')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error creating batch')
       return null
     }
   }
@@ -72,8 +72,8 @@ export class BatchSchedulingService {
         body: JSON.stringify({ status })
       })
       return response.ok
-    } catch (error) {
-      apiLogger.error({ error }, 'Error updating batch status')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error updating batch status')
       return false
     }
   }

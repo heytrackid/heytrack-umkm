@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useForm, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import type { z } from 'zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FormField } from '@/components/ui/crud-form'
@@ -23,7 +23,7 @@ interface FormFieldConfig {
   required?: boolean
   placeholder?: string
   hint?: string
-  options?: { value: string; label: string }[]
+  options?: Array<{ value: string; label: string }>
   min?: number
   max?: number
   step?: number
@@ -66,7 +66,7 @@ interface SharedFormProps<T extends Record<string, unknown>> {
  * - Responsive design
  * - Type-safe form handling
  */
-export function SharedForm<T extends Record<string, unknown>>({
+export const SharedForm = <T extends Record<string, unknown>>({
   sections,
   schema,
   defaultValues,
@@ -79,7 +79,7 @@ export function SharedForm<T extends Record<string, unknown>>({
   onCancel,
   className = "",
   compact = false
-}: SharedFormProps<T>) {
+}: SharedFormProps<T>) => {
   const form = useForm<T>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as any,
@@ -88,8 +88,8 @@ export function SharedForm<T extends Record<string, unknown>>({
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-    } catch (error) {
-      uiLogger.error({ error: error }, 'Form submission error:')
+    } catch (err) {
+      uiLogger.error({ error }, 'Form submission error:')
     }
   }
 
@@ -199,14 +199,14 @@ interface SharedModalFormProps<T extends Record<string, unknown>> extends Shared
   size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-export function SharedModalForm<T extends Record<string, unknown>>({
+export const SharedModalForm = <T extends Record<string, unknown>>({
   isOpen,
   onClose,
   modalTitle,
   size = 'md',
   ...formProps
-}: SharedModalFormProps<T>) {
-  if (!isOpen) return null
+}: SharedModalFormProps<T>) => {
+  if (!isOpen) {return null}
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">

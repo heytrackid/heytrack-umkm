@@ -75,7 +75,7 @@ export {
 } from './UserComponents'
 
 // Re-export utilities
-export * from '../../lib/shared/utilities'
-export * from '../../lib/shared/constants'
-export * from '../../lib/shared/validation'
-export * from '../../lib/shared/data-management'
+export * from '@/lib/shared/utilities'
+export * from '@/lib/shared/constants'
+export * from '@/lib/shared/validation'
+export * from '@/lib/shared/data-management'

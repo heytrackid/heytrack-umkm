@@ -5,6 +5,7 @@
 
 import { useToast } from '@/hooks/use-toast'
 import { getErrorMessage } from '@/shared'
+import { logger } from '@/lib/logger'
 
 // Error types
 export interface AppError {
@@ -51,7 +52,7 @@ export function useErrorHandler() {
     const message = getErrorMessage(error)
     const title = context ? `${context} Error` : 'Error'
 
-    console.error(`[${context || 'App'} Error]`, error)
+    logger.error(`${context || 'App'} Error`, { error })
 
     toast({
       title,
@@ -68,8 +69,8 @@ export function useErrorHandler() {
   ): Promise<T | null> => {
     try {
       return await asyncFn()
-    } catch (error) {
-      handleError(error, context)
+    } catch (err) {
+      void handleError(_error, context)
       return null
     }
   }
@@ -118,7 +119,7 @@ export function formatFormErrors(errors: Record<string, any>): string[] {
 // Error boundary helpers
 export function logErrorToService(error: Error, context?: any) {
   // In a real app, send to error monitoring service like Sentry
-  console.error('Error logged to service:', {
+  logger.error('Error logged to service', {
     error: error.message,
     stack: error.stack,
     context,
@@ -131,8 +132,8 @@ export function logErrorToService(error: Error, context?: any) {
 // Retry utilities
 export function withRetry<T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  delay: number = 1000
+  maxRetries = 3,
+  delay = 1000
 ): Promise<T> {
   return new Promise((resolve, reject) => {
     let retries = 0
@@ -143,7 +144,7 @@ export function withRetry<T>(
         .catch((error) => {
           if (retries < maxRetries) {
             retries++
-            setTimeout(attempt, delay * retries)
+            void setTimeout(attempt, delay * retries)
           } else {
             reject(error)
           }
@@ -163,8 +164,8 @@ export function createErrorRecovery<T>(
   return async (): Promise<T> => {
     try {
       return await primaryFn()
-    } catch (error) {
-      errorHandler?.(error as Error)
+    } catch (err) {
+      errorHandler?.(_error as Error)
 
       if (fallbackFn) {
         try {
@@ -174,7 +175,7 @@ export function createErrorRecovery<T>(
         }
       }
 
-      throw error
+      throw err
     }
   }
 }
@@ -194,15 +195,15 @@ export const ERROR_MESSAGES = {
 // Error classification
 export function classifyError(error: unknown): keyof typeof ERROR_MESSAGES {
   if (typeof error === 'string') {
-    if (error.includes('network') || error.includes('fetch')) return 'NETWORK'
-    if (error.includes('timeout')) return 'TIMEOUT'
+    if (error.includes('network') || error.includes('fetch')) {return 'NETWORK'}
+    if (error.includes('timeout')) {return 'TIMEOUT'}
   }
 
   if (error instanceof Error) {
-    if (error.message.includes('401')) return 'UNAUTHORIZED'
-    if (error.message.includes('403')) return 'FORBIDDEN'
-    if (error.message.includes('404')) return 'NOT_FOUND'
-    if (error.message.includes('500')) return 'SERVER_ERROR'
+    if (error.message.includes('401')) {return 'UNAUTHORIZED'}
+    if (error.message.includes('403')) {return 'FORBIDDEN'}
+    if (error.message.includes('404')) {return 'NOT_FOUND'}
+    if (error.message.includes('500')) {return 'SERVER_ERROR'}
   }
 
   return 'UNKNOWN'

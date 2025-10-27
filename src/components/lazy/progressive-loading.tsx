@@ -1,8 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import type { ReactNode} from 'react';
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -21,7 +19,7 @@ export const ProgressiveLoader = ({
   fallback,
   timeout = 3000,
   showRetry = true,
-  loadingMessage ="Loading content..."
+  loadingMessage = "Loading content..."
 }: ProgressiveLoaderProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -36,7 +34,7 @@ export const ProgressiveLoader = ({
 
     // Simulate loading completion
     const loadTimer = setTimeout(() => {
-      setIsLoading(false)
+      void setIsLoading(false)
     }, Math.random() * 2000 + 500)
 
     return () => {
@@ -46,8 +44,8 @@ export const ProgressiveLoader = ({
   }, [timeout, isLoading])
 
   const handleRetry = () => {
-    setIsLoading(true)
-    setHasError(false)
+    void setIsLoading(true)
+    void setHasError(false)
     setShowTimeout
   }
 
@@ -73,7 +71,7 @@ export const ProgressiveLoader = ({
       <Card className="w-full">
         <CardContent className="p-6">
           <div className="flex items-center justify-center mb-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             <span className="ml-3">{loadingMessage}</span>
           </div>
           {showTimeout && (
@@ -113,10 +111,10 @@ export const ProgressiveDataTable = ({
   const displayedData = data.slice(0, loadedPages * pageSize)
 
   const loadMore = async () => {
-    setIsLoadingMore(true)
+    void setIsLoadingMore(true)
     await new Promise(resolve => setTimeout)
-    setLoadedPages(prev => prev + 1)
-    setIsLoadingMore(false)
+    void setLoadedPages(prev => prev + 1)
+    void setIsLoadingMore(false)
   }
 
   if (shouldVirtualize) {
@@ -136,17 +134,17 @@ export const ProgressiveDataTable = ({
   return (
     <div>
       <SimpleTableView data={displayedData} columns={columns} />
-      
+
       {displayedData.length < data.length && (
         <div className="text-center p-4 border-t">
-          <Button 
-            onClick={loadMore} 
+          <Button
+            onClick={loadMore}
             disabled={isLoadingMore}
             variant="outline"
           >
             {isLoadingMore ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" />
                 Loading more...
               </>
             ) : (
@@ -221,9 +219,9 @@ export const StatsCardSkeleton = () => (
 )
 
 // Virtual table loader for heavy datasets
-const VirtualizedTableLoader = ({ data, ...props }: any) => {
+const VirtualizedTableLoader = ({ data, ...props }: any) => 
   // Simulate heavy data processing
-  return (
+   (
     <div className="p-4 border rounded-lg bg-muted/50">
       <p className="text-sm">Optimized view ready for {data?.length || 0} items</p>
       <Button className="mt-2" variant="outline" size="sm">
@@ -231,7 +229,7 @@ const VirtualizedTableLoader = ({ data, ...props }: any) => {
       </Button>
     </div>
   )
-}
+
 
 // Simple table view for smaller datasets
 const SimpleTableView = ({ data, columns, ...props }: any) => (
@@ -262,10 +260,10 @@ const SimpleTableView = ({ data, columns, ...props }: any) => (
 )
 
 // Progressive image loading
-export const ProgressiveImage = ({ 
-  src, 
-  alt, 
-  className ="",
+export const ProgressiveImage = ({
+  src,
+  alt,
+  className = "",
   fallback
 }: {
   src: string
@@ -305,24 +303,24 @@ export function useProgressiveData<T>(
 
   const loadData = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
       const result = await fetchFunction()
-      setData(result)
+      void setData(result)
     } catch (err) {
-      setError(err as Error)
+      void setError(err as Error)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const retry = () => {
     setRetryCount
-    loadData()
+    void loadData()
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [...deps, retryCount])
 
   return { data, loading, error, retry }

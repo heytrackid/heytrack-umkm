@@ -1,15 +1,14 @@
 'use client'
-import * as React from 'react'
 
-import { useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useState, useEffect, useMemo } from 'react'
 import { useMobile } from '@/hooks/useResponsive'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Search, 
-  Filter, 
+import {
+  Search,
+  Filter,
   Plus,
   Eye,
   Edit,
@@ -24,24 +23,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from"@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from"@/components/ui/select"
+} from "@/components/ui/select"
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
 
 interface SimpleColumn<T> {
   key: keyof T | string
   header: string
-  render?: (value: any, item: T) => React.ReactNode
+  render?: (value: any, item: T) => ReactNode
   sortable?: boolean
   filterable?: boolean
   filterType?: 'text' | 'select'
-  filterOptions?: { label: string; value: string }[]
+  filterOptions?: Array<{ label: string; value: string }>
   hideOnMobile?: boolean
 }
 
@@ -49,7 +48,7 @@ interface SimpleDataTableProps<T> {
   title?: string
   description?: string
   data: T[]
-  columns: SimpleColumn<T>[]
+  columns: Array<SimpleColumn<T>>
   searchPlaceholder?: string
   onAdd?: () => void
   onView?: (item: T) => void
@@ -64,7 +63,7 @@ interface SimpleDataTableProps<T> {
   initialPageSize?: number
 }
 
-export function SimpleDataTable<T extends Record<string, unknown>>({
+export const SimpleDataTable = <T extends Record<string, unknown>>({
   title,
   description,
   data,
@@ -81,7 +80,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   enablePagination = true,
   pageSizeOptions,
   initialPageSize
-}: SimpleDataTableProps<T>) {
+}: SimpleDataTableProps<T>) => {
   const { isMobile } = useMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -89,13 +88,13 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const sanitizedPageSizeOptions = useMemo(() => {
-    if (!enablePagination) {return [Math.max(data.length, 1)]}
-    if (pageSizeOptions && pageSizeOptions.length > 0) {return pageSizeOptions}
+    if (!enablePagination) { return [Math.max(data.length, 1)] }
+    if (pageSizeOptions && pageSizeOptions.length > 0) { return pageSizeOptions }
     return [10, 25, 50]
   }, [enablePagination, pageSizeOptions, data.length])
 
   const sanitizedInitialPageSize = useMemo(() => {
-    if (!enablePagination) {return Math.max(data.length, 1)}
+    if (!enablePagination) { return Math.max(data.length, 1) }
     if (initialPageSize && sanitizedPageSizeOptions.includes(initialPageSize)) {
       return initialPageSize
     }
@@ -108,7 +107,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   // Filter data berdasarkan search dan filter
   const filteredData = data.filter(item => {
     // Search filter
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       columns.some(col => {
         const value = getValue(item, col.key)
         return value != null && String(value).toLowerCase().includes(searchTerm.toLowerCase())
@@ -116,7 +115,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
 
     // Column filters
     const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
-      if (!filterValue || filterValue === 'all') {return true}
+      if (!filterValue || filterValue === 'all') { return true }
       const itemValue = getValue(item, key)
       return String(itemValue) === filterValue
     })
@@ -128,12 +127,12 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   const sortedData = sortBy ? [...filteredData].sort((a, b) => {
     const aVal = getValue(a, sortBy)
     const bVal = getValue(b, sortBy)
-    
+
     if (sortOrder === 'asc') {
       return aVal > bVal ? 1 : -1
-    } else {
+    } 
       return aVal < bVal ? 1 : -1
-    }
+    
   }) : filteredData
 
   const totalItems = sortedData.length
@@ -154,31 +153,31 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   }
 
   useEffect(() => {
-    if (!enablePagination) {return}
-    setCurrentPage(1)
+    if (!enablePagination) { return }
+    void setCurrentPage(1)
   }, [searchTerm, JSON.stringify(filters), sortBy, sortOrder, rowsPerPage, enablePagination])
 
   useEffect(() => {
-    if (!enablePagination) {return}
+    if (!enablePagination) { return }
     const maxPage = Math.max(1, Math.ceil(totalItems / rowsPerPage))
     if (currentPage > maxPage) {
-      setCurrentPage(maxPage)
+      void setCurrentPage(maxPage)
     }
   }, [currentPage, rowsPerPage, totalItems, enablePagination])
 
   useEffect(() => {
-    if (!enablePagination) {return}
+    if (!enablePagination) { return }
     if (!sanitizedPageSizeOptions.includes(rowsPerPage)) {
-      setRowsPerPage(sanitizedInitialPageSize)
+      void setRowsPerPage(sanitizedInitialPageSize)
     }
   }, [rowsPerPage, sanitizedInitialPageSize, sanitizedPageSizeOptions, enablePagination])
 
   function handleSort(columnKey: string) {
     if (sortBy === columnKey) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+      void setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
     } else {
-      setSortBy(columnKey)
-      setSortOrder('asc')
+      void setSortBy(columnKey)
+      void setSortOrder('asc')
     }
   }
 
@@ -190,11 +189,11 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
   }
 
   function handleExport() {
-    if (!exportData) {return}
-    
+    if (!exportData) { return }
+
     const csvContent = [
       columns.map(col => col.header).join(','),
-      ...sortedData.map(item => 
+      ...sortedData.map(item =>
         columns.map(col => {
           const value = getValue(item, col.key)
           return `"${String(value || '')}"`
@@ -218,9 +217,9 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
       <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4" />
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-4 bg-gray-200 rounded"></div>
+              <div key={i} className="h-4 bg-gray-200 rounded" />
             ))}
           </div>
         </CardContent>
@@ -240,13 +239,13 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
             </div>
             <div className={`flex gap-2 ${isMobile ? 'w-full' : ''}`}>
               {exportData && (
-                <Button variant="outline" size={isMobile ?"sm" :"sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
+                <Button variant="outline" size={isMobile ? "sm" : "sm"} onClick={handleExport} className={isMobile ? 'flex-1' : ''}>
                   <Download className="h-4 w-4 mr-2" />
                   Informasi
                 </Button>
               )}
               {onAdd && (
-                <Button onClick={onAdd} size={isMobile ?"sm" :"default"} className={isMobile ? 'flex-1' : ''}>
+                <Button onClick={onAdd} size={isMobile ? "sm" : "default"} className={isMobile ? 'flex-1' : ''}>
                   <Plus className="h-4 w-4 mr-2" />
                   {addButtonText || "Tambah Data"}
                 </Button>
@@ -320,7 +319,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                               {col.header}:
                             </span>
                             <div className="text-sm flex-1 text-right">
-                              {col.render 
+                              {col.render
                                 ? col.render(getValue(item, col.key), item)
                                 : String(getValue(item, col.key) || '-')
                               }
@@ -328,7 +327,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                           </div>
                         ))
                       }
-                      
+
                       {(onView || onEdit || onDelete) && (
                         <div className="flex gap-2 pt-3 border-t">
                           {onView && (
@@ -364,8 +363,8 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                 onPageChange={setCurrentPage}
                 pageSize={rowsPerPage}
                 onPageSizeChange={(size) => {
-                  setRowsPerPage(size)
-                  setCurrentPage(1)
+                  void setRowsPerPage(size)
+                  void setCurrentPage(1)
                 }}
                 totalItems={totalItems}
                 pageStart={pageStart}
@@ -385,9 +384,8 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                     {columns.map(col => (
                       <th
                         key={String(col.key)}
-                        className={`text-left p-2 font-medium text-muted-foreground ${
-                          col.hideOnMobile ? 'hidden sm:table-cell' : ''
-                        }`}
+                        className={`text-left p-2 font-medium text-muted-foreground ${col.hideOnMobile ? 'hidden sm:table-cell' : ''
+                          }`}
                       >
                         {col.sortable ? (
                           <Button
@@ -423,7 +421,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                           key={String(col.key)}
                           className={`p-2 ${col.hideOnMobile ? 'hidden sm:table-cell' : ''}`}
                         >
-                          {col.render 
+                          {col.render
                             ? col.render(getValue(item, col.key), item)
                             : String(getValue(item, col.key) || '-')
                           }
@@ -453,7 +451,7 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                                 </DropdownMenuItem>
                               )}
                               {onDelete && (
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   onClick={() => onDelete(item)}
                                   className="text-red-600"
                                 >
@@ -478,8 +476,8 @@ export function SimpleDataTable<T extends Record<string, unknown>>({
                 onPageChange={setCurrentPage}
                 pageSize={rowsPerPage}
                 onPageSizeChange={(size) => {
-                  setRowsPerPage(size)
-                  setCurrentPage(1)
+                  void setRowsPerPage(size)
+                  void setCurrentPage(1)
                 }}
                 totalItems={totalItems}
                 pageStart={pageStart}

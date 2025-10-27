@@ -24,24 +24,49 @@ import {
   XCircle
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { arrayCalculations } from '@/lib/performance-optimized'
 
 // Types and constants
 import { useCurrency } from '@/hooks/useCurrency'
 import {
   ORDER_STATUSES,
   PAYMENT_STATUSES
-} from '../constants'
+} from '@/lib/constants'
 import type {
   Order,
-  OrderFilters,
-  OrderStats,
-  OrderStatus,
-  PaymentStatus
-} from '../types';
+  OrderStatus
+} from '@/app/orders/types/orders.types'
 import {
   ORDER_STATUS_LABELS,
   PAYMENT_STATUS_LABELS
-} from '../types'
+} from '@/modules/orders/types'
+
+// Local types
+interface OrderFilters {
+  status: OrderStatus[]
+  payment_status: string[]
+  date_from: string
+  date_to: string
+  customer_search?: string
+}
+
+interface OrderStats {
+  total_orders: number
+  pending_orders: number
+  confirmed_orders: number
+  in_production_orders: number
+  completed_orders: number
+  cancelled_orders: number
+  total_revenue: number
+  pending_revenue: number
+  paid_revenue: number
+  average_order_value: number
+  total_customers: number
+  repeat_customers: number
+  period_growth: number
+  revenue_growth: number
+  order_growth: number
+}
 
 
 interface OrdersPageProps {
@@ -49,17 +74,13 @@ interface OrdersPageProps {
   enableAdvancedFeatures?: boolean
 }
 
-export default function OrdersPage({
-  userRole = 'manager',
-  enableAdvancedFeatures = true
-}: OrdersPageProps) {
+export default function OrdersPage({ }: OrdersPageProps) {
   const { formatCurrency } = useCurrency()
 
   // State management
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   type ActiveView = 'dashboard' | 'list' | 'calendar' | 'analytics'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
 
@@ -92,80 +113,83 @@ export default function OrdersPage({
   })
 
   useEffect(() => {
-    fetchOrders()
+    void fetchOrders()
   }, [filters])
 
   const fetchOrders = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
 
       // Fetch orders from API
       const response = await fetch('/api/orders')
-      if (!response.ok) {throw new Error('Failed to fetch orders')}
+      if (!response.ok) { throw new Error('Failed to fetch orders') }
       const fetchedOrders: Order[] = await response.json()
 
-      setOrders(fetchedOrders)
+      void setOrders(fetchedOrders)
 
-      // Calculate stats
+      // Calculate stats with optimized array operations
       const newStats: OrderStats = {
         total_orders: fetchedOrders.length,
-        pending_orders: fetchedOrders.filter(o => o.status === 'pending').length,
-        confirmed_orders: fetchedOrders.filter(o => o.status === 'confirmed').length,
-        in_production_orders: fetchedOrders.filter(o => o.status === 'in_production').length,
-        completed_orders: fetchedOrders.filter(o => o.status === 'completed').length,
-        cancelled_orders: fetchedOrders.filter(o => o.status === 'cancelled').length,
-        total_revenue: fetchedOrders.reduce((sum, o) => sum + o.total_amount, 0),
-        pending_revenue: fetchedOrders.filter(o => o.payment_status === 'unpaid').reduce((sum, o) => sum + o.total_amount, 0),
-        paid_revenue: fetchedOrders.reduce((sum, o) => sum + o.paid_amount, 0),
-        average_order_value: fetchedOrders.length > 0 ? fetchedOrders.reduce((sum, o) => sum + o.total_amount, 0) / fetchedOrders.length : 0,
-        total_customers: new Set(orders.map(o => o.customer_id)).size,
+        pending_orders: fetchedOrders.filter(o => o.status === 'PENDING').length,
+        confirmed_orders: fetchedOrders.filter(o => o.status === 'CONFIRMED').length,
+        in_production_orders: fetchedOrders.filter(o => o.status === 'IN_PROGRESS').length,
+        completed_orders: fetchedOrders.filter(o => o.status === 'DELIVERED').length,
+        cancelled_orders: fetchedOrders.filter(o => o.status === 'CANCELLED').length,
+        total_revenue: arrayCalculations.sum(fetchedOrders, 'total_amount'),
+        pending_revenue: arrayCalculations.sum(
+          fetchedOrders.filter(o => o.payment_status === 'UNPAID'),
+          'total_amount'
+        ),
+        paid_revenue: fetchedOrders.reduce((sum, o) => sum + (o.paid_amount || 0), 0),
+        average_order_value: arrayCalculations.average(fetchedOrders, 'total_amount'),
+        total_customers: new Set(fetchedOrders.filter(o => o.customer_id).map(o => o.customer_id)).size,
         repeat_customers: 0,
         period_growth: 0,
         revenue_growth: 0,
         order_growth: 0
       }
 
-      setStats(newStats)
+      void setStats(newStats)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memuat data pesanan')
+      void setError(_err instanceof Error ? _err.message : 'Gagal memuat data pesanan')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const getStatusColor = (status: OrderStatus) => {
     const config = ORDER_STATUSES[status]
-    return `${config.color} ${config.bgColor}`
+    if (!config) return 'bg-gray-100 text-gray-800'
+    return config.color
   }
 
-  const getPaymentStatusColor = (status: PaymentStatus) => {
-    const config = PAYMENT_STATUSES[status]
-    return `${config.color} ${config.bgColor}`
+  const getPaymentStatusColor = (status: string) => {
+    const config = PAYMENT_STATUSES[status as keyof typeof PAYMENT_STATUSES]
+    if (!config) return 'bg-gray-100 text-gray-800'
+    return config.color
   }
 
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
-  }
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
 
   const handleCreateOrder = () => {
     // Will implement order form
     uiLogger.debug('Create order button clicked')
   }
 
-  const handleEditOrder = (order: Order) => {
-    setSelectedOrder(order)
+  const handleEditOrder = (_order: Order) => {
     // Will open edit form
+    uiLogger.debug('Edit order button clicked')
   }
 
-  const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order)
+  const handleViewOrder = (_order: Order) => {
     // Will open detail view
+    uiLogger.debug('View order button clicked')
   }
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
@@ -177,7 +201,7 @@ export default function OrdersPage({
           : order
       ))
     } catch (err) {
-      uiLogger.error({ err }, 'Failed to update status')
+      uiLogger.error({ err: _err }, 'Failed to update status')
     }
   }
 
@@ -198,7 +222,7 @@ export default function OrdersPage({
 
         <div className="grid gap-6 lg:grid-cols-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-lg"></div>
+            <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-lg" />
           ))}
         </div>
       </div>
@@ -227,7 +251,7 @@ export default function OrdersPage({
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <ShoppingCart className="h-8 w-8" />
-            Order Management
+            Kelola Pesanan
           </h1>
           <p className="text-muted-foreground">
             Kelola pesanan dan penjualan dengan sistem terintegrasi
@@ -260,7 +284,7 @@ export default function OrdersPage({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Pendapatan</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.total_revenue)}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                   {stats.revenue_growth}% dari periode sebelumnya
@@ -288,7 +312,7 @@ export default function OrdersPage({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending Revenue</p>
+                <p className="text-sm font-medium text-muted-foreground">Pendapatan Tertunda</p>
                 <p className="text-2xl font-bold">{formatCurrency(stats.pending_revenue)}</p>
                 <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
               </div>
@@ -353,7 +377,7 @@ export default function OrdersPage({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-600">{stats.total_customers}</div>
-              <div className="text-xs text-muted-foreground">Customer</div>
+              <div className="text-xs text-muted-foreground">Pelanggan</div>
             </div>
           </div>
         </CardContent>
@@ -362,10 +386,10 @@ export default function OrdersPage({
       {/* Navigation Tabs */}
       <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="dashboard">Ringkasan</TabsTrigger>
           <TabsTrigger value="list">Daftar Pesanan</TabsTrigger>
           <TabsTrigger value="calendar">Kalender</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="analytics">Analitik</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="mt-6">
@@ -421,7 +445,7 @@ export default function OrdersPage({
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${config.bgColor.replace('bg-', 'bg-opacity-60 bg-')}`}
+                            className={`h-2 rounded-full ${config.color.replace('text-', 'bg-')}`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -438,123 +462,180 @@ export default function OrdersPage({
           {/* Filters */}
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <div className="flex gap-4 flex-wrap">
-                <div className="flex-1 min-w-[200px]">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-
-                      value={filters.customer_search || ''}
-                      onChange={(e) => setFilters(prev => ({ ...prev, customer_search: e.target.value }))}
-                      className="pl-8"
-                    />
+              <div className="space-y-4">
+                <div className="flex gap-4 flex-wrap">
+                  <div className="flex-1 min-w-[200px]">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Cari nama pelanggan atau nomor pesanan..."
+                        value={filters.customer_search || ''}
+                        onChange={(e) => setFilters(prev => ({ ...prev, customer_search: e.target.value }))}
+                        className="pl-8"
+                      />
+                    </div>
                   </div>
+
+                  <Select
+                    value={filters.status?.join(',') || 'all'}
+                    onValueChange={(value) => {
+                      setFilters(prev => ({
+                        ...prev,
+                        status: value === 'all' ? [] : [value as OrderStatus]
+                      }))
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Semua Status</SelectItem>
+                      {Object.entries(ORDER_STATUSES).map(([status, config]) => (
+                        <SelectItem key={status} value={status}>
+                          {config.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button variant="outline">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter Lainnya
+                  </Button>
                 </div>
 
-                <Select
-                  value={filters.status?.join(',') || 'all'}
-                  onValueChange={(value) => {
-                    setFilters(prev => ({
-                      ...prev,
-                      status: value === 'all' ? [] : [value as OrderStatus]
-                    }))
-                  }}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Semua Status</SelectItem>
-                    {Object.entries(ORDER_STATUSES).map(([status, config]) => (
-                      <SelectItem key={status} value={status}>
-                        {config.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Button variant="outline">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter Lainnya
-                </Button>
+                {/* Search Results Info */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="text-muted-foreground">
+                    Menampilkan <span className="font-semibold text-foreground">{orders.length}</span> pesanan
+                    {(filters.status?.length || filters.customer_search) && (
+                      <span> (dari total {stats.total_orders} pesanan)</span>
+                    )}
+                  </div>
+                  {(filters.status?.length || filters.customer_search) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })}
+                      className="h-8"
+                    >
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Hapus Filter
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Orders List */}
           <div className="space-y-4">
-            {orders.map((order) => (
-              <Card key={order.id} className="hover: transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="space-y-1">
-                      <div className="font-semibold text-lg">{order.order_number}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {order.customer_name} • {formatDate(order.order_date)}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusColor(order.status)}>
-                        {ORDER_STATUS_LABELS[order.status]}
-                      </Badge>
-                      <Badge className={getPaymentStatusColor(order.payment_status)}>
-                        {PAYMENT_STATUS_LABELS[order.payment_status]}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                      <div className="text-sm text-muted-foreground">Items</div>
-                      <div className="font-medium">
-                        {order.items.length} produk ({order.items.reduce((sum, item) => sum + item.quantity, 0)} qty)
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Total Amount</div>
-                      <div className="font-medium text-lg">{formatCurrency(order.total_amount)}</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-muted-foreground">Due Date</div>
-                      <div className="font-medium">{formatDate(order.due_date)}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 flex-wrap">
-                    <Button variant="outline" size="sm" onClick={() => handleViewOrder(order)}>
-                      <Eye className="h-3 w-3 mr-1" />
-                      Detail
-                    </Button>
-                    {ORDER_STATUSES[order.status].allowEdit && (
-                      <Button variant="outline" size="sm" onClick={() => handleEditOrder(order)}>
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                    )}
-                    {ORDER_STATUSES[order.status].nextStatuses.length > 0 && (
-                      <Select
-                        value={order.status}
-                        onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
+            {orders.length === 0 ? (
+              <Card>
+                <CardContent className="py-16">
+                  <div className="text-center">
+                    <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-semibold mb-2">
+                      {filters.customer_search || filters.status?.length
+                        ? 'Tidak Ada Pesanan yang Cocok'
+                        : 'Belum Ada Pesanan'}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {filters.customer_search || filters.status?.length
+                        ? 'Coba ubah filter atau kata kunci pencarian'
+                        : 'Klik tombol "Pesanan Baru" untuk membuat pesanan pertama'}
+                    </p>
+                    {(filters.customer_search || filters.status?.length) ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => setFilters({ status: [], payment_status: [], date_from: '', date_to: '', customer_search: '' })}
                       >
-                        <SelectTrigger className="w-[200px] h-8 text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={order.status || 'PENDING'} disabled>
-                            {ORDER_STATUS_LABELS[order.status] || 'Status Tidak Diketahui'}
-                          </SelectItem>
-                          {ORDER_STATUSES[order.status].nextStatuses.map(status => (
-                            <SelectItem key={status} value={status}>
-                              {ORDER_STATUS_LABELS[status]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Hapus Filter
+                      </Button>
+                    ) : (
+                      <Button onClick={handleCreateOrder}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Buat Pesanan Pertama
+                      </Button>
                     )}
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              <>
+                {orders.map((order) => (
+                  <Card key={order.id} className="hover: transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="space-y-1">
+                          <div className="font-semibold text-lg">{order.order_number}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {order.customer_name} • {formatDate(order.order_date)}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(order.status)}>
+                            {ORDER_STATUS_LABELS[order.status]}
+                          </Badge>
+                          <Badge className={getPaymentStatusColor(order.payment_status)}>
+                            {PAYMENT_STATUS_LABELS[order.payment_status]}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <div className="text-sm text-muted-foreground">Item</div>
+                          <div className="font-medium">
+                            {order.items.length} produk ({order.items.reduce((sum, item) => sum + item.quantity, 0)} pcs)
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-muted-foreground">Total Tagihan</div>
+                          <div className="font-medium text-lg">{formatCurrency(order.total_amount)}</div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-muted-foreground">Tanggal Kirim</div>
+                          <div className="font-medium">{order.delivery_date ? formatDate(order.delivery_date) : '-'}</div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 flex-wrap">
+                        <Button variant="outline" size="sm" onClick={() => handleViewOrder(order)}>
+                          <Eye className="h-3 w-3 mr-1" />
+                          Detail
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleEditOrder(order)}>
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        {ORDER_STATUSES[order.status]?.nextStatuses && ORDER_STATUSES[order.status].nextStatuses.length > 0 && (
+                          <Select
+                            value={order.status}
+                            onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
+                          >
+                            <SelectTrigger className="w-[200px] h-8 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={order.status || 'PENDING'} disabled>
+                                {ORDER_STATUS_LABELS[order.status] || 'Status Tidak Diketahui'}
+                              </SelectItem>
+                              {ORDER_STATUSES[order.status]?.nextStatuses?.map((status: OrderStatus) => (
+                                <SelectItem key={status} value={status}>
+                                  {ORDER_STATUS_LABELS[status]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )}
           </div>
         </TabsContent>
 
@@ -563,9 +644,9 @@ export default function OrdersPage({
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="font-medium mb-2">Calendar View</h3>
+                <h3 className="font-medium mb-2">Tampilan Kalender</h3>
                 <p className="text-sm text-muted-foreground">
-                  Kalender pesanan berdasarkan due date akan ditampilkan di sini
+                  Kalender pesanan berdasarkan tanggal kirim akan ditampilkan di sini
                 </p>
               </div>
             </CardContent>
@@ -577,15 +658,15 @@ export default function OrdersPage({
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <TrendingUp className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="font-medium mb-2">Analytics Dashboard</h3>
+                <h3 className="font-medium mb-2">Analitik Penjualan</h3>
                 <p className="text-sm text-muted-foreground">
-                  Analitik penjualan dan trend bisnis akan ditampilkan di sini
+                  Grafik penjualan dan tren bisnis akan ditampilkan di sini
                 </p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </div >
   )
 }

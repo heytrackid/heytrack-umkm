@@ -53,7 +53,7 @@ export interface OrderFormData {
   delivery_time: string
   priority: Priority
   notes?: string
-  order_items: Omit<OrderItem, 'id'>[]
+  order_items: Array<Omit<OrderItem, 'id'>>
 }
 
 export interface OrderStats {

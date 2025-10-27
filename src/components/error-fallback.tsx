@@ -19,13 +19,13 @@ interface ErrorFallbackProps {
  * Usage in ErrorBoundary:
  * <ErrorBoundary fallback={<ErrorFallback />}>
  */
-export function ErrorFallback({
+export const ErrorFallback = ({
   error,
   resetError,
   title = 'Oops! Something went wrong',
   message = 'We encountered an unexpected error. Please try again.',
   showDetails = process.env.NODE_ENV === 'development',
-}: ErrorFallbackProps) {
+}: ErrorFallbackProps) => {
   const router = useRouter()
 
   return (
@@ -97,7 +97,7 @@ export function ErrorFallback({
  * Not Found Error Fallback
  * Specific fallback for 404 errors
  */
-export function NotFoundFallback() {
+export const NotFoundFallback = () => {
   const router = useRouter()
 
   return (
@@ -140,7 +140,7 @@ export function NotFoundFallback() {
  * Server Error Fallback
  * Specific fallback for 500 errors
  */
-export function ServerErrorFallback() {
+export const ServerErrorFallback = () => {
   const router = useRouter()
 
   return (

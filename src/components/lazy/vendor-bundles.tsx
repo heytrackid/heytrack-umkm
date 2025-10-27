@@ -1,8 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import type { ComponentType} from 'react';
-import { lazy, Suspense, useState, useEffect } from 'react'
+import { lazy, Suspense, useState, useEffect, type ComponentType } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -10,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 const VendorLoadingSkeleton = ({ name }: { name: string }) => (
   <Card className="w-full">
     <CardContent className="p-6 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       <span className="ml-3 text-sm">Loading {name}...</span>
     </CardContent>
   </Card>
@@ -24,7 +22,7 @@ export const LazyRechartsBundle = {
   PieChart: lazy(() => import('recharts').then(m => ({ default: m.PieChart }))),
   RadarChart: lazy(() => import('recharts').then(m => ({ default: m.RadarChart }))),
   ComposedChart: lazy(() => import('recharts').then(m => ({ default: m.ComposedChart }))),
-  
+
   // Recharts components
   XAxis: lazy(() => import('recharts').then(m => ({ default: m.XAxis }))),
   YAxis: lazy(() => import('recharts').then(m => ({ default: m.YAxis }))),
@@ -32,7 +30,7 @@ export const LazyRechartsBundle = {
   Tooltip: lazy(() => import('recharts').then(m => ({ default: m.Tooltip }))),
   Legend: lazy(() => import('recharts').then(m => ({ default: m.Legend }))),
   ResponsiveContainer: lazy(() => import('recharts').then(m => ({ default: m.ResponsiveContainer }))),
-  
+
   // Chart elements
   Line: lazy(() => import('recharts').then(m => ({ default: m.Line }))),
   Bar: lazy(() => import('recharts').then(m => ({ default: m.Bar }))),
@@ -46,17 +44,17 @@ export const LazyRadixBundle = {
   NavigationMenu: lazy(() => import('@radix-ui/react-navigation-menu').then(m => ({ default: m.Root }))),
   Menubar: lazy(() => import('@radix-ui/react-menubar').then(m => ({ default: m.Root }))),
   ContextMenu: lazy(() => import('@radix-ui/react-context-menu').then(m => ({ default: m.Root }))),
-  
+
   // Layout & Container
   ScrollArea: lazy(() => import('@radix-ui/react-scroll-area').then(m => ({ default: m.Root }))),
   Separator: lazy(() => import('@radix-ui/react-separator').then(m => ({ default: m.Root }))),
   AspectRatio: lazy(() => import('@radix-ui/react-aspect-ratio').then(m => ({ default: m.Root }))),
-  
+
   // Advanced Inputs
   Slider: lazy(() => import('@radix-ui/react-slider').then(m => ({ default: m.Root }))),
   RadioGroup: lazy(() => import('@radix-ui/react-radio-group').then(m => ({ default: m.Root }))),
   ToggleGroup: lazy(() => import('@radix-ui/react-toggle-group').then(m => ({ default: m.Root }))),
-  
+
   // Overlay & Modal
   HoverCard: lazy(() => import('@radix-ui/react-hover-card').then(m => ({ default: m.Root }))),
   Popover: lazy(() => import('@radix-ui/react-popover').then(m => ({ default: m.Root }))),
@@ -86,24 +84,20 @@ export const LazyDateBundle = {
 export const RechartsWithLoading = <T extends ComponentType<unknown>>(
   ChartComponent: T,
   chartName: string
-) => {
-  return (props: any) => (
+) => (props: any) => (
     <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
       <ChartComponent {...props} />
     </Suspense>
   )
-}
 
 export const RadixWithLoading = <T extends ComponentType<unknown>>(
   RadixComponent: T,
   componentName: string
-) => {
-  return (props: any) => (
+) => (props: any) => (
     <Suspense fallback={<VendorLoadingSkeleton name={`${componentName} Component`} />}>
       <RadixComponent {...props} />
     </Suspense>
   )
-}
 
 // Pre-wrapped common components
 export const LineChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.LineChart, 'Line')
@@ -144,14 +138,14 @@ export const useVendorLib = (vendorName: string) => {
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
-    loadVendorWhenNeeded(vendorName)
+    void loadVendorWhenNeeded(vendorName)
       .then(module => {
-        setLib(module)
-        setLoading(false)
+        void setLib(module)
+        void setLoading(false)
       })
       .catch(err => {
-        setError(err)
-        setLoading(false)
+        void setError(err)
+        void setLoading(false)
       })
   }, [vendorName])
 
@@ -162,19 +156,19 @@ export const useVendorLib = (vendorName: string) => {
 export const VendorLoadingStrategy = {
   // Essential vendors (load immediately)
   essential: ['react', 'react-dom', 'next'],
-  
+
   // UI vendors (load on first UI interaction)
   ui: ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-button'],
-  
+
   // Chart vendors (load when charts are needed)
   charts: ['recharts'],
-  
+
   // Form vendors (load when forms are opened)
   forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-  
+
   // Advanced vendors (load on demand)
   advanced: ['@tanstack/react-table', '@radix-ui/react-navigation-menu'],
-  
+
   // Mobile vendors (load on mobile detection)
   mobile: ['vaul', 'embla-carousel-react'],
 }

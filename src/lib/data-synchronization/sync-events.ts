@@ -26,7 +26,7 @@ export type SyncEventType = keyof SyncEventPayloads
 export type SyncEventData<T extends SyncEventType> = SyncEventPayloads[T]
 
 export class SyncEventEmitter {
-  private listeners: Map<SyncEventType, ((event: SyncEvent) => void)[]> = new Map()
+  private listeners: Map<SyncEventType, Array<(event: SyncEvent) => void>> = new Map()
 
   on<T extends SyncEventType>(eventType: T, listener: (event: SyncEvent & { payload: SyncEventData<T> }) => void) {
     if (!this.listeners.has(eventType)) {
@@ -45,7 +45,7 @@ export class SyncEventEmitter {
     }
   }
 
-  emit<T extends SyncEventType>(eventType: T, payload: SyncEventData<T>, source: string = 'system') {
+  emit<T extends SyncEventType>(eventType: T, payload: SyncEventData<T>, source = 'system') {
     const event: SyncEvent = {
       type: eventType,
       payload,

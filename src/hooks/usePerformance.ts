@@ -14,10 +14,7 @@ export function usePerformanceMonitor(componentName: string) {
       const endTime = performance.now()
       const loadTime = endTime - startTime
 
-      // Log to console in development
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`⚡ ${componentName} loaded in ${loadTime.toFixed(2)}ms`)
-      }
+      // Performance monitoring in development is handled by Next.js compiler
 
       // Send to analytics in production
       if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -39,22 +36,13 @@ export function logBundleMetrics() {
 
     if (navigation) {
       const loadTime = navigation.loadEventEnd - navigation.fetchStart
-      const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart
-
-      console.log('🚀 Page Performance:', {
-        totalLoadTime: `${loadTime.toFixed(0)}ms`,
-        domContentLoaded: `${domContentLoaded.toFixed(0)}ms`,
-        timestamp: new Date().toISOString()
-      })
+      // Performance metrics tracked silently
     }
 
     // Monitor largest contentful paint
     if ('PerformanceObserver' in window) {
       const observer = new PerformanceObserver((list) => {
-        const entries = list.getEntries()
-        const lastEntry = entries[entries.length - 1]
-
-        console.log('🎨 LCP:', `${lastEntry.startTime.toFixed(0)}ms`)
+        // LCP tracked silently
       })
 
       observer.observe({ entryTypes: ['largest-contentful-paint'] })
@@ -70,16 +58,16 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
   const [element, setElement] = useState<Element | null>(null)
 
   const observer = useCallback((node: Element | null) => {
-    setElement(node)
+    void setElement(node)
   }, [])
 
   useEffect(() => {
-    if (!element) return
+    if (!element) {return}
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsIntersecting(true)
+          void setIsIntersecting(true)
           // Disconnect after first intersection
           observer.disconnect()
         }
@@ -100,8 +88,8 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
 }
 
 // Preload critical resources
-export function preloadResource(href: string, as: string = 'fetch') {
-  if (typeof document === 'undefined') return
+export function preloadResource(href: string, as = 'fetch') {
+  if (typeof document === 'undefined') {return}
 
   const link = document.createElement('link')
   link.rel = 'preload'
@@ -117,7 +105,7 @@ export function preloadResource(href: string, as: string = 'fetch') {
 }
 
 // Debounced performance logger
-export function usePerformanceLogger(eventName: string, delay: number = 1000) {
+export function usePerformanceLogger(eventName: string, delay = 1000) {
   const [logs, setLogs] = useState<Array<{ timestamp: number; data: any }>>([])
 
   const logPerformance = useCallback(
@@ -152,7 +140,7 @@ export function useMemoryMonitor() {
     if (typeof window !== 'undefined' && 'performance' in window) {
       const updateMemoryInfo = () => {
         if ('memory' in (performance as any)) {
-          const memory = (performance as any).memory
+          const {memory} = (performance as any)
           setMemoryInfo({
             usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
             totalJSHeapSize: Math.round(memory.totalJSHeapSize / 1024 / 1024), // MB
@@ -162,7 +150,7 @@ export function useMemoryMonitor() {
         }
       }
 
-      updateMemoryInfo()
+      void updateMemoryInfo()
       const interval = setInterval(updateMemoryInfo, 5000) // Update every 5 seconds
 
       return () => clearInterval(interval)
@@ -184,10 +172,7 @@ export function useRenderProfiler(componentName: string) {
       const renderTime = endTime - startTime
 
       setRenderTimes(prev => [...prev.slice(-9), renderTime]) // Keep last 10 renders
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🔄 ${componentName} rendered in ${renderTime.toFixed(2)}ms`)
-      }
+      // Render time tracked silently
     }
   })
 
@@ -217,7 +202,7 @@ export function useNetworkStatus() {
 
     // Monitor connection quality if available
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection
+      const {connection} = (navigator as any)
       setConnection({
         effectiveType: connection.effectiveType,
         downlink: connection.downlink,
@@ -296,7 +281,7 @@ export function useCriticalResourcePreloader(resources: Array<{ href: string; as
 
     resources.forEach(resource => {
       const cleanupFn = preloadResource(resource.href, resource.as)
-      if (cleanupFn) cleanup.push(cleanupFn)
+      if (cleanupFn) {cleanup.push(cleanupFn)}
     })
 
     return () => {

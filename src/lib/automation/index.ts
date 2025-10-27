@@ -5,7 +5,7 @@
 
 // Re-export all automation modules
 export * from './financial-automation'
-export * from './hpp-automation'
+// export * from './hpp-automation' // TODO: Implement HPP automation
 export * from './inventory-automation'
 export * from './notification-system'
 export * from './pricing-automation'

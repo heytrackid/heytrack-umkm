@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 
 // Database types
 export type Recipe = Database['public']['Tables']['recipes']['Row']

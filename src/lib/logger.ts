@@ -38,9 +38,7 @@ if (isTest) {
 /**
  * Create a child logger with context
  */
-export const createLogger = (context: string) => {
-  return logger.child({ context })
-}
+export const createLogger = (context: string) => logger.child({ context })
 
 // Context-specific loggers
 export const apiLogger = createLogger('API')

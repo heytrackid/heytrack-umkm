@@ -43,14 +43,14 @@ export function useFinancialAnalysis() {
 
       return result
 
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage
       }))
-      throw error
+      throw err
     }
   }, [])
 

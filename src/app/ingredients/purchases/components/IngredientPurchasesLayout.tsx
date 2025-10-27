@@ -55,8 +55,8 @@ export default function IngredientPurchasesLayout() {
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
-      fetchPurchases()
-      fetchIngredients()
+      void fetchPurchases()
+      void fetchIngredients()
     }
   }, [isAuthLoading, isAuthenticated])
 
@@ -65,9 +65,9 @@ export default function IngredientPurchasesLayout() {
       const response = await fetch('/api/ingredient-purchases')
       if (response.ok) {
         const data = await response.json()
-        setPurchases(data)
+        void setPurchases(data)
       }
-    } catch (error) {
+    } catch (err) {
       apiLogger.error({ error }, 'Error fetching purchases:')
     }
   }
@@ -77,9 +77,9 @@ export default function IngredientPurchasesLayout() {
       const response = await fetch('/api/ingredients')
       if (response.ok) {
         const data = await response.json()
-        setIngredients(data.ingredients || [])
+        void setIngredients(data.ingredients || [])
       }
-    } catch (error) {
+    } catch (err) {
       apiLogger.error({ error }, 'Error fetching ingredients:')
     }
   }

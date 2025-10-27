@@ -48,7 +48,7 @@ export interface ColumnDef<T> {
  */
 export interface DataTableProps<T> extends BaseComponentProps, LoadingProps {
     data: T[];
-    columns: ColumnDef<T>[];
+    columns: Array<ColumnDef<T>>;
     onRowClick?: (row: T) => void;
     emptyMessage?: string;
 }

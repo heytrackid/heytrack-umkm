@@ -11,7 +11,7 @@ export default function AIChatbotPage() {
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim()
-    if (!textToSend || isLoading) return
+    if (!textToSend || isLoading) {return}
 
     const userMessage = {
       id: Date.now().toString(),
@@ -21,8 +21,8 @@ export default function AIChatbotPage() {
     }
 
     addMessage(userMessage)
-    setInput('')
-    setLoading(true)
+    void setInput('')
+    void setLoading(true)
 
     try {
       const response = await processAIQuery(textToSend)
@@ -37,7 +37,7 @@ export default function AIChatbotPage() {
       }
 
       addMessage(assistantMessage)
-    } catch (error) {
+    } catch (err) {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,
@@ -46,12 +46,12 @@ export default function AIChatbotPage() {
       }
       addMessage(errorMessage)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const handleSuggestionClick = (suggestion: string) => {
-    handleSendMessage(suggestion)
+    void handleSendMessage(suggestion)
   }
 
   return (

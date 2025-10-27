@@ -2,10 +2,10 @@ import type { Json } from './common'
 import type { UserRole, BusinessUnit } from './index'
 
 // Database functions
-export type DatabaseFunctions = {
+export interface DatabaseFunctions {
   analyze_inventory_needs: {
     Args: Record<PropertyKey, never>
-    Returns: {
+    Returns: Array<{
       cost_impact: number
       current_stock: number
       days_until_stockout: number
@@ -14,11 +14,11 @@ export type DatabaseFunctions = {
       reorder_point: number
       suggested_order_quantity: number
       urgency_level: string
-    }[]
+    }>
   }
   calculate_recipe_hpp: {
     Args: { recipe_uuid: string }
-    Returns: {
+    Returns: Array<{
       can_produce: boolean
       cost_per_serving: number
       margin_at_current_price: number
@@ -26,7 +26,7 @@ export type DatabaseFunctions = {
       recipe_id: string
       suggested_selling_price: number
       total_ingredient_cost: number
-    }[]
+    }>
   }
   get_sync_dashboard_data: {
     Args: Record<PropertyKey, never>
@@ -38,7 +38,7 @@ export type DatabaseFunctions = {
   }
   optimize_production_schedule: {
     Args: { max_duration_hours?: number; target_date: string }
-    Returns: {
+    Returns: Array<{
       estimated_duration: number
       ingredient_availability: boolean
       priority_score: number
@@ -46,7 +46,7 @@ export type DatabaseFunctions = {
       recipe_id: string
       recipe_name: string
       suggested_quantity: number
-    }[]
+    }>
   }
   test_confirm_order: {
     Args: { p_order_id: string }

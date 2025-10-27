@@ -1,7 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import { HPPCalculationService } from '@/modules/recipes'
-import { ORDER_CONFIG } from '../constants'
+import { createClient } from '@/utils/supabase/client'
+import { ORDER_CONFIG } from '@/lib/constants'
 import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
 import type { Recipe, RecipeIngredient, Ingredient } from '@/types'
 
@@ -64,7 +63,7 @@ export class OrderPricingService {
       if (!recipes) {throw new Error('Recipes not found')}
 
       // Type assertion for Supabase query result
-      type RecipeQueryResult = {
+      interface RecipeQueryResult {
         id: string
         name: string
         selling_price: number | null
@@ -72,10 +71,10 @@ export class OrderPricingService {
         recipe_ingredients: Array<{
           quantity: number
           unit: string
-          ingredient: {
+          ingredient: Array<{
             price_per_unit: number
             unit: string
-          }[]
+          }>
         }>
       }
 
@@ -87,20 +86,14 @@ export class OrderPricingService {
             throw new Error(`Recipe with ID ${item.recipe_id} not found`)
           }
 
-          // Calculate HPP cost
-          const hppCalculation = await HPPCalculationService.calculateAdvancedHPP(
-            recipe.id,
-            {
-              overheadRate: 0.15,
-              laborCostPerHour: 25000,
-              targetMargin: 0.6
-            }
-          )
-
-          const unit_price = item.custom_price || recipe.selling_price || hppCalculation.suggestedPricing.standard.price
+          // Use recipe selling price as unit price (no HPP calculation)
+          const unit_price = item.custom_price || recipe.selling_price || 0
           const total_price = unit_price * item.quantity
-          const hpp_cost = hppCalculation.costPerServing
-          const total_cost = hpp_cost * item.quantity
+          
+          // For now, assume cost is 70% of selling price (rough estimate without detailed costing)
+          const estimated_cost_percentage = 0.7
+          const estimated_cost = unit_price * estimated_cost_percentage
+          const total_cost = estimated_cost * item.quantity
           const profit = total_price - total_cost
           const margin_percentage = total_price > 0 ? (profit / total_price) * 100 : 0
 
@@ -110,7 +103,7 @@ export class OrderPricingService {
             quantity: item.quantity,
             unit_price,
             total_price,
-            hpp_cost,
+            estimated_cost,
             total_cost,
             profit,
             margin_percentage
@@ -132,8 +125,8 @@ export class OrderPricingService {
       const tax_amount = final_subtotal * tax_rate
       const total_amount = final_subtotal + tax_amount
 
-      const total_hpp_cost = calculatedItems.reduce((sum, item) => sum + item.total_cost, 0)
-      const total_profit = final_subtotal - total_hpp_cost
+      const total_estimated_cost = calculatedItems.reduce((sum, item) => sum + item.total_cost, 0)
+      const total_profit = final_subtotal - total_estimated_cost
       const overall_margin = final_subtotal > 0 ? (total_profit / final_subtotal) * 100 : 0
 
       return {
@@ -145,12 +138,12 @@ export class OrderPricingService {
           ? subtotal * (discount_percentage / 100)
           : discount_amount,
         total_amount,
-        total_hpp_cost,
+        total_estimated_cost,
         total_profit,
         overall_margin
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error calculating order pricing')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error calculating order pricing')
       throw new Error('Failed to calculate order pricing')
     }
   }

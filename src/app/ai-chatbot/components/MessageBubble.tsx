@@ -2,16 +2,16 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Bot, User } from 'lucide-react'
-import type { Message } from '../types'
+import type { Message } from '@/app/ai-chatbot/types'
 
 interface MessageBubbleProps {
   message: Message
   onSuggestionClick?: (suggestion: string) => void
 }
 
-export function MessageBubble({ message, onSuggestionClick }: MessageBubbleProps) {
+export const MessageBubble = ({ message, onSuggestionClick }: MessageBubbleProps) => {
   const renderMessageData = (data: unknown) => {
-    if (!data) return null
+    if (!data) {return null}
     return (
       <div className="mt-3 p-3 bg-background/50 rounded border">
         <pre className="text-xs overflow-x-auto">

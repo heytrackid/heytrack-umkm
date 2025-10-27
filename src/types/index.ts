@@ -1,11 +1,10 @@
 import type { Json } from './common'
 
 // Import enums
-import type { BusinessUnit, OrderStatus, PaymentMethod, ProductionStatus, RecordType, TransactionType, UserRole } from './enums'
-import { DatabaseEnums } from './enums'
+import { type BusinessUnit, type OrderStatus, type PaymentMethod, type ProductionStatus, type RecordType, type TransactionType, type UserRole, DatabaseEnums } from './enums'
 
 // Import table types
-import type { UserProfilesTable } from './auth'
+import { type UserProfilesTable, type AuditFields, type SecurityContext, type UserProfile } from './auth'
 import type { CustomersTable } from './customers'
 import type { DailySalesSummaryTable, FinancialRecordsTable } from './finance'
 import type { IngredientPurchasesTable } from './ingredient-purchases'
@@ -35,21 +34,16 @@ import type {
   RecipesTable
 } from './recipes'
 import type { SuppliersTable } from './suppliers'
-import type { RecentSyncEventsView, SyncEventsTable, SystemMetricsTable } from './sync'
+import { type RecentSyncEventsView, type SyncEventsTable, type SystemMetricsTable, type SyncEvent, type SystemMetric } from './sync'
 
 // Import functions
 import type { DatabaseFunctions } from './functions'
 
 // Import additional types
-import type { AuditFields, SecurityContext, UserProfile } from './auth'
 import type { BahanBaku, BahanBakuFormData, InventoryStockLog } from './inventory'
-import type { SyncEvent, SystemMetric } from './sync'
-
-// Import HPP tracking types
-import type { CostBreakdown } from './hpp-tracking'
 
 // Main Database type
-export type Database = {
+export interface Database {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
@@ -85,139 +79,7 @@ export type Database = {
       user_profiles: UserProfilesTable
       daily_sales_summary: DailySalesSummaryTable
       financial_records: FinancialRecordsTable
-      hpp_snapshots: {
-        Row: {
-          id: string
-          recipe_id: string
-          snapshot_date: string
-          hpp_value: number
-          material_cost: number
-          operational_cost: number
-          cost_breakdown: CostBreakdown
-          selling_price: number | null
-          margin_percentage: number | null
-          created_at: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          recipe_id: string
-          snapshot_date?: string
-          hpp_value: number
-          material_cost: number
-          operational_cost: number
-          cost_breakdown: CostBreakdown
-          selling_price?: number | null
-          margin_percentage?: number | null
-          created_at?: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          recipe_id?: string
-          snapshot_date?: string
-          hpp_value?: number
-          material_cost?: number
-          operational_cost?: number
-          cost_breakdown?: CostBreakdown
-          selling_price?: number | null
-          margin_percentage?: number | null
-          created_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hpp_snapshots_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "recipes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hpp_snapshots_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      hpp_alerts: {
-        Row: {
-          id: string
-          recipe_id: string
-          alert_type: string
-          severity: string
-          title: string
-          message: string
-          old_value: number
-          new_value: number
-          change_percentage: number
-          affected_components: Json | null
-          is_read: boolean
-          is_dismissed: boolean
-          read_at: string | null
-          dismissed_at: string | null
-          created_at: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          recipe_id: string
-          alert_type: string
-          severity: string
-          title: string
-          message: string
-          old_value: number
-          new_value: number
-          change_percentage: number
-          affected_components?: Json | null
-          is_read?: boolean
-          is_dismissed?: boolean
-          read_at?: string | null
-          dismissed_at?: string | null
-          created_at?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          recipe_id?: string
-          alert_type?: string
-          severity?: string
-          title?: string
-          message?: string
-          old_value?: number
-          new_value?: number
-          change_percentage?: number
-          affected_components?: Json | null
-          is_read?: boolean
-          is_dismissed?: boolean
-          read_at?: string | null
-          dismissed_at?: string | null
-          created_at?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "hpp_alerts_recipe_id_fkey"
-            columns: ["recipe_id"]
-            isOneToOne: false
-            referencedRelation: "recipes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hpp_alerts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      whatsapp_templates: {
+            whatsapp_templates: {
         Row: {
           id: string
           name: string
@@ -471,8 +333,6 @@ export type Enums<
 export type ExpensesTable = Database['public']['Tables']['expenses']
 export type AppSettingsTable = Database['public']['Tables']['app_settings']
 export type WhatsAppTemplatesTable = Database['public']['Tables']['whatsapp_templates']
-export type HPPSnapshotsTable = Database['public']['Tables']['hpp_snapshots']
-export type HPPAlertsTable = Database['public']['Tables']['hpp_alerts']
 
 // Re-export all types
 export type {
@@ -483,7 +343,8 @@ export type {
   DatabaseEnums,
   DatabaseFunctions, FinancialRecordsTable, IngredientPurchasesTable, IngredientsTable,
   InventoryAlertsTable,
-  InventoryStatusView, InventoryStockLog, InventoryStockLogsTable, Json, NotificationsTable, OrderItemsTable, OrdersTable, OrderStatus, OrderSummaryView, PaymentMethod, PaymentsTable, ProductionSchedulesTable,
+  InventoryStatusView, InventoryStockLog, InventoryStockLogsTable, Json, NotificationsTable, OperationalCostsTable,
+  OrderItemsTable, OrdersTable, OrderStatus, OrderSummaryView, PaymentMethod, PaymentsTable, ProductionSchedulesTable,
   ProductionsTable, ProductionStatus, RecentSyncEventsView, RecipeAvailabilityView, RecipeIngredientsTable, RecipesTable, RecordType, SecurityContext, StockTransactionsTable,
   SupplierIngredientsTable, SuppliersTable, SyncEvent, SyncEventsTable, SystemMetric, SystemMetricsTable, TransactionType, UsageAnalyticsTable,
   // Additional types
@@ -491,22 +352,6 @@ export type {
   // Enum types
   UserRole
 }
-
-// Re-export HPP tracking types
-export type {
-  AffectedComponents,
-  ComponentChange,
-  CostBreakdown,
-  HPPAlert,
-  HPPComparison,
-  HPPExportData,
-  HPPRecommendation,
-  HPPSnapshot,
-  HPPTrendData,
-  IngredientCost,
-  OperationalCost,
-  TimePeriod
-} from './hpp-tracking'
 
 // Re-export form types
 export type {
@@ -640,7 +485,6 @@ export {
   isBoolean,
   isCustomer,
   isDateString,
-  isHppSnapshot,
   isIngredient,
   isIngredientPurchase,
   isNonNegativeNumber,

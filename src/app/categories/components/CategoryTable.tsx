@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,12 +11,12 @@ import { BulkActions } from './BulkActions'
 import type { Category, PageSize } from '../constants'
 
 // Lazy load table components for better performance
-const Table = React.lazy(() => import('@/components/ui/table').then(m => ({ default: m.Table })))
-const TableBody = React.lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableBody })))
-const TableCell = React.lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableCell })))
-const TableHead = React.lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableHead })))
-const TableHeader = React.lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableHeader })))
-const TableRow = React.lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableRow })))
+const Table = lazy(() => import('@/components/ui/table').then(m => ({ default: m.Table })))
+const TableBody = lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableBody })))
+const TableCell = lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableCell })))
+const TableHead = lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableHead })))
+const TableHeader = lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableHeader })))
+const TableRow = lazy(() => import('@/components/ui/table').then(m => ({ default: m.TableRow })))
 
 interface CategoryTableProps {
   // Data
@@ -54,7 +54,7 @@ interface CategoryTableProps {
   onClearSelection: () => void
 }
 
-export function CategoryTable({
+export const CategoryTable = ({
   categories,
   filteredCategories,
   paginatedCategories,
@@ -75,7 +75,7 @@ export function CategoryTable({
   onBulkEdit,
   onBulkDelete,
   onClearSelection
-}: CategoryTableProps) {
+}: CategoryTableProps) => {
   if (isLoading) {
     return (
       <Card>
@@ -228,7 +228,7 @@ export function CategoryTable({
               }
             </p>
             {!searchTerm && (
-              <Button onClick={() => {}}>
+              <Button onClick={() => { }}>
                 <Tags className="h-4 w-4 mr-2" />
                 Tambah Kategori Pertama
               </Button>

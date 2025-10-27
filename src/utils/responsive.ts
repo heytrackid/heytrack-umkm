@@ -2,11 +2,11 @@ import type {
   Breakpoint,
   ScreenSize,
   ResponsiveValue,
-  ColumnPriority} from '../types/responsive';
+  ColumnPriority} from '@/types/responsive';
 import {
   BREAKPOINTS,
   DEVICE_BREAKPOINTS
-} from '../types/responsive';
+} from '@/types/responsive';
 
 // Utility functions for responsive design
 
@@ -69,7 +69,7 @@ export function getResponsiveValue<T>(
   defaultValue: T
 ): T {
   if (typeof value !== 'object' || value === null) {
-    return value as T;
+    return value;
   }
 
   const responsiveValues = value as Partial<Record<Breakpoint, T>>;
@@ -91,14 +91,14 @@ export function getResponsiveValue<T>(
 /**
  * Convert pixel values to rem units
  */
-export function pxToRem(px: number, baseFontSize: number = 16): string {
+export function pxToRem(px: number, baseFontSize = 16): string {
   return `${px / baseFontSize}rem`;
 }
 
 /**
  * Convert rem values to pixel units
  */
-export function remToPx(rem: number, baseFontSize: number = 16): number {
+export function remToPx(rem: number, baseFontSize = 16): number {
   return rem * baseFontSize;
 }
 
@@ -108,8 +108,8 @@ export function remToPx(rem: number, baseFontSize: number = 16): number {
 export function getResponsiveFontSize(
   minSize: number,
   maxSize: number,
-  minViewport: number = 320,
-  maxViewport: number = 1200
+  minViewport = 320,
+  maxViewport = 1200
 ): string {
   const slope = (maxSize - minSize) / (maxViewport - minViewport);
   const yIntercept = minSize - slope * minViewport;
@@ -120,7 +120,7 @@ export function getResponsiveFontSize(
 /**
  * Generate media query strings
  */
-export function generateMediaQuery(breakpoint: Breakpoint, maxWidth: boolean = false): string {
+export function generateMediaQuery(breakpoint: Breakpoint, maxWidth = false): string {
   const width = BREAKPOINTS[breakpoint];
   return maxWidth
     ? `(max-width: ${width - 1}px)`
@@ -135,9 +135,7 @@ export function isTouchDevice(): boolean {
   
   return (
     'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0 ||
-
-    navigator.msMaxTouchPoints > 0
+    navigator.maxTouchPoints > 0
   );
 }
 
@@ -232,7 +230,7 @@ export function throttle<T extends (...args: unknown[]) => void>(
 export function calculateOptimalColumns(
   containerWidth: number,
   minItemWidth: number,
-  gap: number = 16
+  gap = 16
 ): number {
   if (containerWidth <= minItemWidth) {return 1;}
   
@@ -270,7 +268,7 @@ export function filterColumnsByPriority<T extends { priority: ColumnPriority; hi
  */
 export function getResponsiveGridColumns(
   screenSize: ScreenSize,
-  maxColumns: number = 4
+  maxColumns = 4
 ): number {
   switch (screenSize) {
     case 'desktop':
@@ -325,7 +323,7 @@ export function getResponsiveClasses(
 /**
  * Check if an element is in viewport
  */
-export function isInViewport(element: HTMLElement, offset: number = 0): boolean {
+export function isInViewport(element: HTMLElement, offset = 0): boolean {
   const rect = element.getBoundingClientRect();
   const windowHeight = window.innerHeight || document.documentElement.clientHeight;
   const windowWidth = window.innerWidth || document.documentElement.clientWidth;

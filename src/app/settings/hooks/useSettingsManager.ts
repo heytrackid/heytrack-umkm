@@ -8,7 +8,7 @@ import {
   normalizeSettings,
   type AppSettingsState,
   type SettingsUpdateHandler,
-} from '../types'
+} from '@/app/settings/types'
 
 const LOADING_KEYS = {
   LOAD_SETTINGS: 'loadSettings',
@@ -30,25 +30,25 @@ export function useSettingsManager() {
 
   // Sync defaults when context settings change
   useEffect(() => {
-    setSettings(mergedDefaults)
+    void setSettings(mergedDefaults)
   }, [mergedDefaults])
 
   // Load settings from database on component mount
   useEffect(() => {
-    loadSettings()
+    void loadSettings()
   }, [])
 
   const loadSettings = async () => {
     try {
-      startLoading(LOADING_KEYS.LOAD_SETTINGS)
+      void startLoading(LOADING_KEYS.LOAD_SETTINGS)
 
       // Simplified settings loading - in real implementation would use Supabase
       // For now, just use the merged defaults
-      setSettings(mergedDefaults)
+      void setSettings(mergedDefaults)
       apiLogger.info({ settings: mergedDefaults }, '✅ Settings loaded successfully')
 
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error loading settings:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error loading settings:')
       toast.error('Gagal memuat pengaturan')
     } finally {
       stopLoading(LOADING_KEYS.LOAD_SETTINGS)
@@ -68,30 +68,30 @@ export function useSettingsManager() {
         [category]: updatedCategory,
       }
     })
-    setIsUnsavedChanges(true)
+    void setIsUnsavedChanges(true)
   }
 
   const handleSave = async () => {
-    setIsSaving(true)
+    void setIsSaving(true)
 
     try {
       // Simplified save logic - in real implementation would save to Supabase
       apiLogger.info({ settings }, '✅ Settings saved successfully')
-      setIsUnsavedChanges(false)
+      void setIsUnsavedChanges(false)
       toast.success('Pengaturan berhasil disimpan')
 
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, '❌ Error saving settings:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, '❌ Error saving settings:')
       toast.error('Gagal menyimpan pengaturan')
     } finally {
-      setIsSaving(false)
+      void setIsSaving(false)
     }
   }
 
   const handleReset = () => {
     // Reset to default values
-    setSettings(mergedDefaults)
-    setIsUnsavedChanges(false)
+    void setSettings(mergedDefaults)
+    void setIsUnsavedChanges(false)
   }
 
   return {

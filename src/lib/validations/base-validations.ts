@@ -52,10 +52,10 @@ export const EnvSchema = z.object({
 
   // Optional: Cron Job Authentication
   CRON_SECRET: z.string().optional(),
-}).refine((env) => {
+}).refine((env) => 
   // At least one AI service must be configured
-  return env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY
-}, {
+   env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY
+, {
   message: 'At least one AI service (OpenAI or Anthropic) must be configured',
   path: ['OPENAI_API_KEY']
 })
@@ -71,7 +71,7 @@ export function validateEnvironment(): EnvConfig {
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
     NODE_ENV: process.env.NODE_ENV || 'development',
     CRON_SECRET: process.env.CRON_SECRET,
   }
@@ -98,11 +98,11 @@ export function validateFormData<T>(schema: z.ZodSchema<T>, data: any): {
   try {
     const result = schema.parse(data)
     return { success: true, data: result }
-  } catch (error: unknown) {
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.issues }
+  } catch (err: unknown) {
+    if (err instanceof z.ZodError) {
+      return { success: false, errors: err.issues }
     }
-    throw error
+    throw err
   }
 }
 

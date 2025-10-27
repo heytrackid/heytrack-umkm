@@ -1,9 +1,8 @@
 'use client'
-import * as React from 'react'
+import { React, type ComponentProps, type MouseEvent } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import type { ComponentProps, MouseEvent } from 'react'
 
 import { apiLogger } from '@/lib/logger'
 interface PrefetchLinkProps extends ComponentProps<typeof Link> {
@@ -17,19 +16,19 @@ interface PrefetchLinkProps extends ComponentProps<typeof Link> {
  * - Supports touch devices
  * - Compatible with all Next.js Link props
  */
-export function PrefetchLink({ 
+export const PrefetchLink = ({ 
   href, 
   prefetchOnHover = true,
   prefetchOnMount = false,
   onMouseEnter,
   children,
   ...props 
-}: PrefetchLinkProps) {
+}: PrefetchLinkProps) => {
   const router = useRouter()
   
   // Prefetch on mount if needed
   if (prefetchOnMount && typeof href === 'string') {
-    router.prefetch(href)
+    void router.prefetch(href)
   }
   
   const handleMouseEnter = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -41,8 +40,8 @@ export function PrefetchLink({
     // Prefetch on hover
     if (prefetchOnHover && typeof href === 'string') {
       try {
-        router.prefetch(href)
-      } catch (error) {
+        void router.prefetch(href)
+      } catch (err) {
         // Silently fail - prefetch is enhancement, not critical
         apiLogger.debug(`Prefetch failed for: ${href}`)
       }
@@ -52,7 +51,7 @@ export function PrefetchLink({
   return (
     <Link 
       href={href} 
-      prefetch={true} // Enable Next.js default prefetch
+      prefetch // Enable Next.js default prefetch
       onMouseEnter={handleMouseEnter}
       {...props}
     >

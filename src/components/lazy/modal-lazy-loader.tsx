@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { lazy, Suspense, useState, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -41,59 +40,43 @@ const FormLoadingSkeleton = ({ fields = 4 }: { fields?: number }) => (
 // Lazy loaded form components
 export const LazyIngredientForm = lazy(() => 
   import('@/components').then(m => ({ default: m.IngredientForm }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 export const LazyOrderForm = lazy(() => 
   import('@/components').then(m => ({ default: m.OrderForm }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 export const LazyCustomerForm = lazy(() => 
   import('@/components').then(m => ({ default: m.CustomerForm }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 export const LazyRecipeForm = lazy(() => 
   import('@/components').then(m => ({ default: m.RecipeForm }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 export const LazyFinanceForm = lazy(() => 
   import('@/components').then(m => ({ default: m.FinanceForm }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 // Lazy loaded detail/view components
 export const LazyOrderDetail = lazy(() => 
   import('@/components').then(m => ({ default: m.OrderDetail }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 export const LazyCustomerDetail = lazy(() => 
   import('@/components').then(m => ({ default: m.CustomerDetail }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 export const LazyInventoryDetail = lazy(() => 
   import('@/components').then(m => ({ default: m.InventoryDetail }))
-    .catch(() => ({ default: () => {
-      return <div>Informasi</div>;
-    }}))
+    .catch(() => ({ default: () => <div>Informasi</div>}))
 )
 
 // Lazy Modal Wrapper Component
@@ -290,12 +273,12 @@ export const useConfirmationModal = () => {
   })
 
   const showConfirmation = (newConfig: typeof config) => {
-    setConfig(newConfig)
-    setIsOpen(true)
+    void setConfig(newConfig)
+    void setIsOpen(true)
   }
 
   const hideConfirmation = () => {
-    setIsOpen(false)
+    void setIsOpen(false)
   }
 
   const ConfirmationModalRenderer = () => (

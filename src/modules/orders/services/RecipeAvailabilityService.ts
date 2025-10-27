@@ -1,6 +1,5 @@
 import { dbLogger } from '@/lib/logger'
 import supabase from '@/utils/supabase'
-import { HPPCalculationService } from '@/modules/recipes'
 import type { RecipeOption } from './OrderRecipeService'
 
 /**
@@ -19,7 +18,7 @@ export class RecipeAvailabilityService {
     } | null
   }>): boolean {
     return recipeIngredients.every(ri => {
-      if (!ri.ingredient || !ri.ingredient.is_active) {return false}
+      if (!ri.ingredient?.is_active) {return false}
 
       // Check if current stock is above reorder point
       const currentStock = ri.ingredient.current_stock ?? 0 || 0
@@ -70,15 +69,9 @@ export class RecipeAvailabilityService {
       // Process recipes and check availability
       const recipeOptions: RecipeOption[] = await Promise.all(
         recipes.map(async (recipe) => {
-          // Calculate HPP and check ingredient availability
-          const hppCalculation = await HPPCalculationService.calculateAdvancedHPP(
-            recipe.id,
-            {
-              overheadRate: 0.15,
-              laborCostPerHour: 25000,
-              targetMargin: 0.6
-            }
-          )
+          // Use recipe price directly (no HPP calculation)
+          const price = recipe.price || 0
+          const estimatedMargin = recipe.margin || 0.3 // Default 30% margin
 
           // Check ingredient availability
           const isAvailable = this.checkIngredientAvailability(recipe.recipe_ingredients)
@@ -89,9 +82,9 @@ export class RecipeAvailabilityService {
             category: recipe.category,
             servings: recipe.servings,
             description: recipe.description,
-            price: recipe.price || hppCalculation.suggestedPricing.standard.price,
-            hpp_cost: hppCalculation.costPerServing,
-            margin: recipe.margin || hppCalculation.suggestedPricing.standard.margin,
+            price,
+            hpp_cost: price * 0.7, // Estimate cost as 70% of price
+            margin: estimatedMargin,
             is_available: isAvailable,
             estimated_prep_time: (recipe.prep_time || 0) + (recipe.cook_time || 0)
           }
@@ -99,8 +92,8 @@ export class RecipeAvailabilityService {
       )
 
       return recipeOptions
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error fetching available recipes')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error fetching available recipes')
       throw new Error('Failed to fetch available recipes')
     }
   }

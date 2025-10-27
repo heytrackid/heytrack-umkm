@@ -3,7 +3,7 @@
  * Purchase history tracking for inventory management
  */
 
-export type IngredientPurchasesTable = {
+export interface IngredientPurchasesTable {
   Row: {
     id: string
     ingredient_id: string

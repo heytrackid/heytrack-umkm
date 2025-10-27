@@ -7,7 +7,7 @@ export interface ExportData {
   filename: string
   data: any[]
   headers?: string[]
-  sheets?: { name: string; data: any[]; headers?: string[] }[]
+  sheets?: Array<{ name: string; data: any[]; headers?: string[] }>
 }
 
 export interface ExcelExportOptions {

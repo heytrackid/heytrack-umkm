@@ -16,10 +16,8 @@ export const useIdleTimePreloading = () => {
       clearTimeout(idleTimer)
       idleTimer = setTimeout(() => {
         // User is idle, preload heavy components
-        console.log('🕒 User idle - preloading heavy components')
-
         preloadChartBundle().then(() => {
-          console.log('✅ Idle preloading completed')
+          // Idle preloading completed
         }).catch(() => {})
       }, 5000) // 5 seconds of inactivity
     }

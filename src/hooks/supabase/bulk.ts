@@ -12,7 +12,7 @@ type Tables = Database['public']['Tables']
 export class useSupabaseBulk {
   static async createMultiple<T extends keyof Tables>(
     table: T,
-    records: Tables[T]['Insert'][]
+    records: Array<Tables[T]['Insert']>
   ) {
     const supabase = createClient()
 
@@ -30,7 +30,7 @@ export class useSupabaseBulk {
 
   static async updateMultiple<T extends keyof Tables>(
     table: T,
-    updates: BulkUpdateItem<T>[]
+    updates: Array<BulkUpdateItem<T>>
   ) {
     const supabase = createClient()
     const results = []
@@ -73,7 +73,7 @@ export class useSupabaseBulk {
 
   static async upsertMultiple<T extends keyof Tables>(
     table: T,
-    records: Tables[T]['Insert'][],
+    records: Array<Tables[T]['Insert']>,
     conflictColumns: string[] = ['id']
   ) {
     const supabase = createClient()

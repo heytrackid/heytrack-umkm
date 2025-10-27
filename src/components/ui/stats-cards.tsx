@@ -3,6 +3,7 @@
  * Reusable statistics display components
  */
 
+import type { ComponentType } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
@@ -10,7 +11,7 @@ export interface StatCardData {
   title: string
   value: string | number
   description?: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
   trend?: {
     value: number
     isPositive: boolean
@@ -27,28 +28,25 @@ interface StatsCardsProps {
 /**
  * Standardized stats cards grid component
  */
-export function StatsCards({ stats, className, gridClassName = "grid gap-4 md:grid-cols-2 lg:grid-cols-4" }: StatsCardsProps) {
-  return (
+export const StatsCards = ({ stats, className, gridClassName = "grid gap-4 md:grid-cols-2 lg:grid-cols-4" }: StatsCardsProps) => (
     <div className={`${gridClassName} ${className || ''}`}>
       {stats.map((stat, index) => (
         <StatCard key={index} {...stat} />
       ))}
     </div>
   )
-}
 
 /**
  * Individual stat card component
  */
-export function StatCard({
+export const StatCard = ({
   title,
   value,
   description,
   icon: Icon,
   trend,
   variant = 'default'
-}: StatCardData) {
-  return (
+}: StatCardData) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">
@@ -76,7 +74,6 @@ export function StatCard({
       </CardContent>
     </Card>
   )
-}
 
 /**
  * Common stat card patterns for different entities
@@ -153,4 +150,4 @@ export const StatCardPatterns = {
 }
 
 // Import React for type checking
-import * as React from 'react'
+import type React from 'react'

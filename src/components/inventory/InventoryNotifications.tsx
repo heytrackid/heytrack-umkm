@@ -25,18 +25,18 @@ type InventoryNotification = NotificationsTable['Row'] & {
   }
 }
 
-export function InventoryNotifications() {
+export const InventoryNotifications = () => {
   const [notifications, setNotifications] = useState<InventoryNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchNotifications()
+    void fetchNotifications()
   }, [])
 
   const fetchNotifications = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/notifications?category=inventory&limit=10')
 
       if (!response.ok) {
@@ -44,13 +44,13 @@ export function InventoryNotifications() {
       }
 
       const data = await response.json()
-      setNotifications(data)
+      void setNotifications(data)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setError(errorMessage)
+      void setError(errorMessage)
       uiLogger.error({ err }, 'Failed to fetch inventory notifications')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -123,7 +123,7 @@ export function InventoryNotifications() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
           </div>
         </CardContent>
       </Card>

@@ -24,11 +24,11 @@ export function formatRelativeTime(date: Date | string): string {
   const diffMs = now.getTime() - past.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'Hari ini'
-  if (diffDays === 1) return 'Kemarin'
-  if (diffDays < 7) return `${diffDays} hari yang lalu`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu yang lalu`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} bulan yang lalu`
+  if (diffDays === 0) {return 'Hari ini'}
+  if (diffDays === 1) {return 'Kemarin'}
+  if (diffDays < 7) {return `${diffDays} hari yang lalu`}
+  if (diffDays < 30) {return `${Math.floor(diffDays / 7)} minggu yang lalu`}
+  if (diffDays < 365) {return `${Math.floor(diffDays / 30)} bulan yang lalu`}
   return `${Math.floor(diffDays / 365)} tahun yang lalu`
 }
 
@@ -171,7 +171,7 @@ export function isValidDate(date: any): date is Date {
 }
 
 export function parseDate(dateString: string): Date | null {
-  if (!dateString) return null
+  if (!dateString) {return null}
   const date = new Date(dateString)
   return isValidDate(date) ? date : null
 }
@@ -208,13 +208,13 @@ export function formatRelativeTimeIndonesian(date: Date | string): string {
   const diffMonths = Math.floor(diffDays / 30)
   const diffYears = Math.floor(diffDays / 365)
 
-  if (diffSeconds < 10) return RELATIVE_TIME_LABELS.now
-  if (diffSeconds < 60) return `${diffSeconds} ${RELATIVE_TIME_LABELS.seconds}`
-  if (diffMinutes < 60) return `${diffMinutes} ${RELATIVE_TIME_LABELS.minutes}`
-  if (diffHours < 24) return `${diffHours} ${RELATIVE_TIME_LABELS.hours}`
-  if (diffDays < 7) return `${diffDays} ${RELATIVE_TIME_LABELS.days}`
-  if (diffWeeks < 4) return `${diffWeeks} ${RELATIVE_TIME_LABELS.weeks}`
-  if (diffMonths < 12) return `${diffMonths} ${RELATIVE_TIME_LABELS.months}`
+  if (diffSeconds < 10) {return RELATIVE_TIME_LABELS.now}
+  if (diffSeconds < 60) {return `${diffSeconds} ${RELATIVE_TIME_LABELS.seconds}`}
+  if (diffMinutes < 60) {return `${diffMinutes} ${RELATIVE_TIME_LABELS.minutes}`}
+  if (diffHours < 24) {return `${diffHours} ${RELATIVE_TIME_LABELS.hours}`}
+  if (diffDays < 7) {return `${diffDays} ${RELATIVE_TIME_LABELS.days}`}
+  if (diffWeeks < 4) {return `${diffWeeks} ${RELATIVE_TIME_LABELS.weeks}`}
+  if (diffMonths < 12) {return `${diffMonths} ${RELATIVE_TIME_LABELS.months}`}
   return `${diffYears} ${RELATIVE_TIME_LABELS.years}`
 }
 

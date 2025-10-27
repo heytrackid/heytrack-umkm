@@ -1,9 +1,8 @@
 // Orders service hooks with multi-currency and optional VAT support
 'use client'
 
-import * as React from 'react'
 import { useMemo } from 'react'
-import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks';
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks'
 import type {
   Order,
   OrderItem,
@@ -14,17 +13,14 @@ import type {
   OrderSummary,
   OrderStatus,
   OrderTotalsBreakdown,
-  InvoiceData
-} from '../types/orders.types';
-import {
+  InvoiceData,
   OrderAnalytics
-} from '../types/orders.types'
+} from '@/app/orders/types/orders.types'
 import {
   DEFAULT_ORDERS_CONFIG,
   calculateOrderTotals,
   type OrdersModuleConfig
 } from '../config/orders.config'
-import { REGIONAL_DEFAULTS, RegionalDefaults } from '@/lib/shared/utils/currency'
 import { formatCurrency, parseCurrencyString } from '@/lib/currency'
 
 // Main orders hook
@@ -58,7 +54,7 @@ export function useOrders(filters?: OrderFilters) {
 
   // Memoized orders data
   const orders = useMemo(() => {
-    if (!ordersData) return []
+    if (!ordersData) {return []}
 
     // Apply filters if provided
     let filteredOrders = ordersData
@@ -74,10 +70,10 @@ export function useOrders(filters?: OrderFilters) {
         filteredOrders = filteredOrders.filter(order => order.priority === filters.priority)
       }
       if (filters.date_from) {
-        filteredOrders = filteredOrders.filter(order => new Date(order.created_at!) >= new Date(filters.date_from!))
+        filteredOrders = filteredOrders.filter(order => new Date(order.created_at) >= new Date(filters.date_from!))
       }
       if (filters.date_to) {
-        filteredOrders = filteredOrders.filter(order => new Date(order.created_at!) <= new Date(filters.date_to!))
+        filteredOrders = filteredOrders.filter(order => new Date(order.created_at) <= new Date(filters.date_to!))
       }
       if (filters.search) {
         const searchLower = filters.search.toLowerCase()
@@ -242,8 +238,10 @@ export function useOrderSummary(filters?: OrderFilters): {
             revenue: 0
           }
         }
-        topSellingItems[item.recipe_id].quantity_sold += item.quantity
-        topSellingItems[item.recipe_id].revenue += item.total_price
+        if (topSellingItems[item.recipe_id]) {
+          topSellingItems[item.recipe_id].quantity_sold += item.quantity
+          topSellingItems[item.recipe_id].revenue += item.total_price
+        }
       })
     })
 
@@ -274,8 +272,8 @@ export function useOrderStatus(orderId: string) {
         status: newStatus,
         notes: reason ? `Status changed to ${newStatus}: ${reason}` : undefined
       })
-    } catch (error: unknown) {
-      throw new Error(`Failed to update order status: ${error}`)
+    } catch (err: unknown) {
+      throw new Error(`Failed to update order status: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -306,13 +304,9 @@ export function useOrderCurrency(currency?: string) {
   const formatAmount = (amount: number, options?: {
     showSymbol?: boolean
     showCode?: boolean
-  }) => {
-    return formatCurrency(amount, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
-  }
+  }) => formatCurrency(amount, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
 
-  const parseAmount = (currencyString: string) => {
-    return parseCurrencyString(currencyString, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
-  }
+  const parseAmount = (currencyString: string) => parseCurrencyString(currencyString, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
 
   return {
     currency: currency || defaultCurrency,
@@ -346,7 +340,7 @@ export function useInvoiceGeneration() {
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
       due_date: dueDate.toISOString().split('T')[0],
-      invoice_number: order.order_number,
+      invoice_number: order.order_number || `INV-${order.id.slice(-8)}`,
       notes: order.notes
     }
   }

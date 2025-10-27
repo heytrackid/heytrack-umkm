@@ -3,7 +3,7 @@
 /**
  * Quick links component - Coming Soon sections removed
  */
-export function SettingsQuickLinks() {
+export const SettingsQuickLinks = () => 
   // Component removed - no longer showing coming soon placeholders
-  return null
-}
+   null
+

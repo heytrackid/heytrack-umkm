@@ -1,12 +1,11 @@
 'use client'
-import * as React from 'react'
 
+import { useState, useEffect, memo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 // import { automationEngine } from '@/lib/automation-engine'
 import { AlertTriangle, Bell, CheckCircle, Info, X, Zap } from 'lucide-react'
-import { memo, useEffect, useState } from 'react'
 
 import { apiLogger } from '@/lib/logger'
 import type { NotificationData, Order, OrderItem, Ingredient } from '@/types'
@@ -28,35 +27,33 @@ interface SmartNotificationsProps {
   className?: string
 }
 
-const SmartNotifications = memo(function SmartNotifications({ className }: SmartNotificationsProps) {
+const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
   const [notifications, setNotifications] = useState<SmartNotification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Fetch smart notifications
   useEffect(() => {
-    fetchSmartNotifications()
+    void fetchSmartNotifications()
     // Set up periodic refresh every 30 seconds
     const interval = setInterval(fetchSmartNotifications, 30000)
     return () => clearInterval(interval)
   }, [])
 
   const fetchSmartNotifications = async () => {
-    setLoading(true)
+    void setLoading(true)
     try {
       // Fetch data needed for automation engine analysis with timeout
-      const fetchWithTimeout = (url: string, timeout = 5000) => {
-        return Promise.race([
+      const fetchWithTimeout = (url: string, timeout = 5000) => Promise.race([
           fetch(url),
           new Promise<Response>((_, reject) => 
             setTimeout(() => reject(new Error('Timeout')), timeout)
           )
         ])
-      }
 
       const [ingredientsRes, ordersRes] = await Promise.allSettled([
         fetchWithTimeout('/api/ingredients'),
-        fetchWithTimeout('/api/orders')
+        void fetchWithTimeout('/api/orders')
       ])
 
       // Extract data with fallback to empty arrays
@@ -107,13 +104,13 @@ const SmartNotifications = memo(function SmartNotifications({ className }: Smart
         // Add additional custom notifications
         const additionalNotifications = await generateAdditionalNotifications(ingredients, orders)
         
-        setNotifications([...additionalNotifications])
+        void setNotifications([...additionalNotifications])
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       apiLogger.warn({ error }, 'Error fetching smart notifications (non-critical)')
       // Silently fail - notifications are not critical
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 

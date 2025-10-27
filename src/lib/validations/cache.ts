@@ -41,7 +41,7 @@ class ValidationCache {
       // Create a deterministic string representation of the data
       const dataString = JSON.stringify(data, Object.keys(data as any).sort())
       return `${schemaName}:${this.hashString(dataString)}`
-    } catch {
+    } catch (error) {
       // Fallback for non-serializable data
       return `${schemaName}:${Date.now()}:${Math.random()}`
     }
@@ -71,7 +71,7 @@ class ValidationCache {
    * Get cached validation result
    */
   get<T>(schemaName: string, data: unknown): ValidationCacheEntry<T> | null {
-    if (!this.config.enableCache) return null
+    if (!this.config.enableCache) {return null}
 
     const key = this.generateCacheKey(schemaName, data)
     const entry = this.cache.get(key)
@@ -92,7 +92,7 @@ class ValidationCache {
    * Set validation result in cache
    */
   set<T>(schemaName: string, data: unknown, result: { success: boolean; data?: T; errors?: string[] }, ttl?: number): void {
-    if (!this.config.enableCache) return
+    if (!this.config.enableCache) {return}
 
     const key = this.generateCacheKey(schemaName, data)
 
@@ -186,9 +186,9 @@ export function withValidationCache<T>(
     try {
       const validatedData = schema.parse(data)
       result = { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         result = { success: false, errors }
       } else {
         result = { success: false, errors: ['Validation failed'] }

@@ -1,5 +1,4 @@
-import type { OperationalCost } from './constants'
-import { costCategories } from './constants'
+import { type OperationalCost, costCategories } from './constants'
 
 /**
  * Generate quick setup template for operational costs

@@ -3,8 +3,7 @@
 
 'use client'
 
-import type { ErrorInfo, ReactNode } from 'react';
-import React, { Component } from 'react'
+import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react'
@@ -123,7 +122,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
 
 // Higher-order component for wrapping routes
 export function withRouteErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
+  Component: ComponentType<P>,
   routeName?: string
 ) {
   const WrappedComponent = (props: P) => (

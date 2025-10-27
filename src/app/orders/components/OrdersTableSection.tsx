@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -26,7 +26,7 @@ interface Order {
   total_amount: number
 }
 
-function OrdersTableSection({
+const OrdersTableSection = ({
   orders,
   formatCurrency,
   formatDate,
@@ -34,7 +34,7 @@ function OrdersTableSection({
   orders: Order[]
   formatCurrency: (n: number) => string
   formatDate: (d: string) => string
-}) {
+}) => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -67,7 +67,7 @@ function OrdersTableSection({
 
   // Reset to page 1 when orders change
   useMemo(() => {
-    setCurrentPage(1)
+    void setCurrentPage(1)
   }, [orders.length])
 
   return (

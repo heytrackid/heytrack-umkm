@@ -3,7 +3,7 @@
  * Generates production recommendations and optimizations
  */
 
-import type { AvailabilityCheck, ProductionPlanItem } from '../types'
+import type { AvailabilityCheck, ProductionPlanItem } from '@/lib/automation/types'
 
 export class ProductionRecommendations {
   /**

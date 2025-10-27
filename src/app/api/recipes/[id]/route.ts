@@ -1,6 +1,5 @@
 import { createServiceRoleClient } from '@/utils/supabase'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 // GET /api/recipes/[id] - Get single recipe with ingredients
@@ -37,7 +36,7 @@ export async function GET(
           { status: 404 }
         )
       }
-      apiLogger.error({ error: error }, 'Error fetching recipe:')
+      apiLogger.error({ error }, 'Error fetching recipe:')
       return NextResponse.json(
         { error: 'Failed to fetch recipe' },
         { status: 500 }
@@ -46,7 +45,7 @@ export async function GET(
 
     return NextResponse.json(recipe)
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/recipes/[id]:')
+    apiLogger.error({ error }, 'Error in GET /api/recipes/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -121,7 +120,7 @@ export async function PUT(
 
         const { error: insertError } = await supabase
           .from('recipe_ingredients')
-          .insert(recipeIngredientsToInsert as any)
+          .insert(recipeIngredientsToInsert)
 
         if (insertError) {
           apiLogger.error({ error: insertError }, 'Error adding new ingredients:')
@@ -160,7 +159,7 @@ export async function PUT(
 
     return NextResponse.json(completeRecipe)
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in PUT /api/recipes/[id]:')
+    apiLogger.error({ error }, 'Error in PUT /api/recipes/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -184,7 +183,7 @@ export async function DELETE(
       .eq('id', id)
       .single()
 
-    if (checkError && checkError.code === 'PGRST116') {
+    if (checkError?.code === 'PGRST116') {
       return NextResponse.json(
         { error: 'Recipe not found' },
         { status: 404 }
@@ -198,7 +197,7 @@ export async function DELETE(
       .eq('id', id)
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error deleting recipe:')
+      apiLogger.error({ error }, 'Error deleting recipe:')
       return NextResponse.json(
         { error: 'Failed to delete recipe' },
         { status: 500 }
@@ -207,7 +206,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in DELETE /api/recipes/[id]:')
+    apiLogger.error({ error }, 'Error in DELETE /api/recipes/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

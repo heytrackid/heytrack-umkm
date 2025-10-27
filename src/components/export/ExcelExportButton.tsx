@@ -1,28 +1,27 @@
 'use client'
-import * as React from 'react'
 
+import { useState, memo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { apiLogger } from '@/lib/logger'
 import {
-    AlertCircle,
-    BarChart3,
-    Building,
-    CheckCircle,
-    Download,
-    Factory,
-    FileSpreadsheet,
-    Loader2,
-    Package,
-    Receipt,
-    Sheet,
-    ShoppingCart,
-    Users,
-    Utensils
+  AlertCircle,
+  BarChart3,
+  Building,
+  CheckCircle,
+  Download,
+  Factory,
+  FileSpreadsheet,
+  Loader2,
+  Package,
+  Receipt,
+  Sheet,
+  ShoppingCart,
+  Users,
+  Utensils
 } from 'lucide-react'
-import { useState } from 'react'
 // Dynamic import of export service to reduce bundle size
 const loadExportService = () => import('@/services/excel-export-lazy.service').then(m => m.LazyExcelExportService)
 
@@ -44,37 +43,36 @@ const exportSheets = [
   { name: 'Batch Produksi', icon: Factory, description: 'Log produksi dan batch tracking', color: 'bg-cyan-100 text-cyan-800' }
 ]
 
-import { memo } from 'react'
 
-const ExcelExportButton = memo(function ExcelExportButton({ 
-  className = '', 
+const ExcelExportButton = memo(({
+  className = '',
   variant = 'default',
   size = 'md'
-}: ExcelExportButtonProps) {
+}: ExcelExportButtonProps) => {
   const [isExporting, setIsExporting] = useState(false)
   const [exportStatus, setExportStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const handleExport = async () => {
-    setIsExporting(true)
-    setExportStatus('idle')
+    void setIsExporting(true)
+    void setExportStatus('idle')
 
     try {
       // Dynamically load export service only when needed
       const ExcelExportService = await loadExportService()
       await ExcelExportService.exportAllData()
-      setExportStatus('success')
-      
+      void setExportStatus('success')
+
       // Auto close dialog after 2 seconds if successful
       setTimeout(() => {
-        setIsDialogOpen(false)
-        setExportStatus('idle')
+        void setIsDialogOpen(false)
+        void setExportStatus('idle')
       }, 2000)
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Export failed:')
-      setExportStatus('error')
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Export failed:')
+      void setExportStatus('error')
     } finally {
-      setIsExporting(false)
+      void setIsExporting(false)
     }
   }
 
@@ -89,8 +87,8 @@ const ExcelExportButton = memo(function ExcelExportButton({
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant={variant} 
+        <Button
+          variant={variant}
           className={`${getButtonSize()} ${className}`}
           disabled={isExporting}
         >
@@ -102,7 +100,7 @@ const ExcelExportButton = memo(function ExcelExportButton({
           {isExporting ? 'Exporting...' : 'Export Excel'}
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -114,11 +112,10 @@ const ExcelExportButton = memo(function ExcelExportButton({
         <div className="space-y-6">
           {/* Export Status */}
           {exportStatus !== 'idle' && (
-            <Card className={`border-2 ${
-              exportStatus === 'success' 
-                ? 'border-green-200 bg-green-50' 
+            <Card className={`border-2 ${exportStatus === 'success'
+                ? 'border-green-200 bg-green-50'
                 : 'border-red-200 bg-red-50'
-            }`}>
+              }`}>
               <CardContent className="pt-4">
                 <div className="flex items-center gap-3">
                   {exportStatus === 'success' ? (
@@ -207,17 +204,17 @@ const ExcelExportButton = memo(function ExcelExportButton({
             <div className="text-sm text-muted-foreground">
               File akan otomatis terunduh setelah proses selesai
             </div>
-            
+
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setIsDialogOpen(false)}
                 disabled={isExporting}
               >
                 Batal
               </Button>
-              
-              <Button 
+
+              <Button
                 onClick={handleExport}
                 disabled={isExporting}
                 className="min-w-32"

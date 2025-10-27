@@ -1,20 +1,21 @@
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { ErrorLogSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
 import { apiLogger } from '@/lib/logger'
-// Simple in-memory error store (in production, use a real database/service)
-const errorStore: Array<{
+interface ErrorRecord {
   id: string
   timestamp: string
   message: string
   url: string
   stack?: string
   level: string
-  context?: Record<string, any>
-}> = []
+  context?: Record<string, unknown>
+}
+
+// Simple in-memory error store (in production, use a real database/service)
+const errorStore: ErrorRecord[] = []
 
 const MAX_ERRORS = 1000 // Keep only last 1000 errors
 
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
     // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       apiLogger.error({ error: {
-        id: (errorRecord as any).id,
+        id: errorRecord.id,
         message: errorRecord.message,
         url: errorRecord.url,
         timestamp: errorRecord.timestamp
@@ -71,12 +72,12 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      errorId: (errorRecord as any).id,
+      errorId: errorRecord.id,
       message: 'Error logged successfully'
     })
     
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Failed to log error:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Failed to log _error:')
     
     return NextResponse.json(
       { error: 'Failed to log error' },
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
   })
 }
 
-function isCriticalError(error: typeof errorStore[0]): boolean {
+function isCriticalError(error: ErrorRecord): boolean {
   const criticalKeywords = [
     'network error',
     'database connection',
@@ -117,7 +118,7 @@ function isCriticalError(error: typeof errorStore[0]): boolean {
     'security violation'
   ]
   
-  const errorText = `${(error as any).message} ${error.stack}`.toLowerCase()
+  const errorText = `${error.message} ${error.stack || ''}`.toLowerCase()
   
   return criticalKeywords.some(keyword => errorText.includes(keyword))
 }

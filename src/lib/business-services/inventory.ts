@@ -88,8 +88,8 @@ export class InventoryServices {
         totalItems: reorderItems.length,
         criticalItems
       }
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in checkReorderNeeds')
+    } catch (err) {
+      inventoryLogger._error({ err }, 'Error in checkReorderNeeds')
       return { items: [], totalItems: 0, criticalItems: 0 }
     }
   }
@@ -126,9 +126,9 @@ export class InventoryServices {
         return []
       }
 
-      return (ingredients as Ingredient[]) || []
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in getLowStockItems')
+      return (ingredients) || []
+    } catch (err) {
+      inventoryLogger._error({ err }, 'Error in getLowStockItems')
       return []
     }
   }
@@ -150,14 +150,14 @@ export class InventoryServices {
 
         if (error) {
           inventoryLogger.error({ error, ingredientId: update.id }, 'Error updating stock level')
-          throw error
+          throw err
         }
       }
 
       inventoryLogger.info({ updatesCount: updates.length }, 'Successfully updated stock levels')
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in updateStockLevels')
-      throw error
+    } catch (err) {
+      inventoryLogger._error({ err }, 'Error in updateStockLevels')
+      throw err
     }
   }
 
@@ -230,8 +230,8 @@ export class InventoryServices {
         const priorityOrder = { out_of_stock: 3, critical: 2, low_stock: 1 }
         return priorityOrder[b.alert_type] - priorityOrder[a.alert_type]
       })
-    } catch (error) {
-      inventoryLogger.error({ error }, 'Error in getStockAlerts')
+    } catch (err) {
+      inventoryLogger._error({ err }, 'Error in getStockAlerts')
       return []
     }
   }

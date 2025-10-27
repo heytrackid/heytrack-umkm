@@ -4,7 +4,7 @@ import type { Json } from './common'
 export type TransactionType = "PURCHASE" | "USAGE" | "ADJUSTMENT" | "WASTE"
 
 // Inventory tables
-export type IngredientsTable = {
+export interface IngredientsTable {
   Row: {
     category: string | null
     cost_per_batch: number | null
@@ -80,7 +80,7 @@ export type IngredientsTable = {
   Relationships: []
 }
 
-export type InventoryAlertsTable = {
+export interface InventoryAlertsTable {
   Row: {
     acknowledged_at: string | null
     alert_type: string
@@ -138,7 +138,7 @@ export type InventoryAlertsTable = {
   ]
 }
 
-export type InventoryStockLogsTable = {
+export interface InventoryStockLogsTable {
   Row: {
     change_type: string
     created_at: string | null
@@ -199,7 +199,7 @@ export type InventoryStockLogsTable = {
   ]
 }
 
-export type StockTransactionsTable = {
+export interface StockTransactionsTable {
   Row: {
     created_at: string | null
     created_by: string | null
@@ -266,7 +266,7 @@ export type StockTransactionsTable = {
   ]
 }
 
-export type SupplierIngredientsTable = {
+export interface SupplierIngredientsTable {
   Row: {
     id: string
     ingredient_id: string | null
@@ -325,7 +325,7 @@ export type SupplierIngredientsTable = {
   ]
 }
 
-export type UsageAnalyticsTable = {
+export interface UsageAnalyticsTable {
   Row: {
     cost_impact: number | null
     created_at: string | null
@@ -384,7 +384,7 @@ export type UsageAnalyticsTable = {
 }
 
 // Inventory-related views
-export type InventoryStatusView = {
+export interface InventoryStatusView {
   Row: {
     alert_level: string | null
     category: string | null

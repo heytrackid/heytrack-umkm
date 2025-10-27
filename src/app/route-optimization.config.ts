@@ -10,7 +10,6 @@ export const HEAVY_ROUTES = [
   // Complex data pages
   '/cash-flow',
   '/hpp',
-  '/hpp-enhanced',
   '/reports',
   
   // Settings pages

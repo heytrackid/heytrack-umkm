@@ -157,17 +157,17 @@ export const sleep = (ms: number): Promise<void> =>
  */
 export const retryWithBackoff = async <T>(
   operation: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000,
-  maxDelay: number = 10000
+  maxRetries = 3,
+  baseDelay = 1000,
+  maxDelay = 10000
 ): Promise<T> => {
   let lastError: Error
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await operation()
-    } catch (error) {
-      lastError = error as Error
+    } catch (err) {
+      lastError = _error as Error
 
       if (attempt === maxRetries) {
         throw lastError
@@ -203,7 +203,7 @@ export const apiCache = {
 
   get: (key: string) => {
     const cached = apiCache.cache.get(key)
-    if (!cached) return null
+    if (!cached) {return null}
 
     if (Date.now() - cached.timestamp > cached.ttl) {
       apiCache.cache.delete(key)
@@ -300,11 +300,11 @@ export const apiRequest = async <T>(
       }
 
       return data
-    } catch (error) {
+    } catch (err) {
       clearTimeout(timeoutId)
 
-      if (error instanceof ApiError) {
-        throw error
+      if (err instanceof ApiError) {
+        throw err
       }
 
       if (error instanceof DOMException && error.name === 'AbortError') {
@@ -390,21 +390,17 @@ export const urlBuilder = {
   },
 
   // Build pagination URL
-  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, any> = {}): string => {
-    return urlBuilder.withParams(baseUrl, {
+  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, any> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       page,
       limit,
-    })
-  },
+    }),
 
   // Build search URL
-  withSearch: (baseUrl: string, search: string, params: Record<string, any> = {}): string => {
-    return urlBuilder.withParams(baseUrl, {
+  withSearch: (baseUrl: string, search: string, params: Record<string, any> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       search,
-    })
-  },
+    }),
 }
 
 /**
@@ -428,8 +424,8 @@ export const responseTransformers = {
   // Transform array response to paginated response
   arrayToPaginated: <T>(
     data: T[],
-    page: number = 1,
-    limit: number = 10,
+    page = 1,
+    limit = 10,
     total: number = data.length
   ): PaginatedResponse<T> => {
     const totalPages = Math.ceil(total / limit)
@@ -456,7 +452,7 @@ export const responseTransformers = {
 export const apiAnalytics = {
   requests: new Map<string, { count: number; totalTime: number; errors: number }>(),
 
-  trackRequest: (url: string, duration: number, error: boolean = false) => {
+  trackRequest: (url: string, duration: number, error = false) => {
     const key = url.split('?')[0] // Remove query params for grouping
     const existing = apiAnalytics.requests.get(key) || { count: 0, totalTime: 0, errors: 0 }
 

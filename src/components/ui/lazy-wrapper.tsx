@@ -3,12 +3,12 @@
  * Provides consistent lazy loading with skeletons and error boundaries
  */
 
-import React, { ComponentType, Suspense, lazy, Component, ReactNode } from 'react'
+import { Suspense, lazy, Component, type ComponentType, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
 
 // Lazy loading wrapper with consistent loading states
-export function LazyWrapper({
+export const LazyWrapper = ({
   children,
   fallback,
   errorFallback
@@ -16,7 +16,7 @@ export function LazyWrapper({
   children: ReactNode
   fallback?: ReactNode
   errorFallback?: ReactNode
-}) {
+}) => {
   const defaultFallback = (
     <div className="flex items-center justify-center p-8">
       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -61,7 +61,7 @@ class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    uiLogger.error({ error: error, errorInfo: errorInfo }, 'Lazy loading error:')
+    uiLogger.error({ error, errorInfo }, 'Lazy loading error:')
   }
 
   render() {
@@ -98,7 +98,7 @@ export function preloadComponent(importFunc: () => Promise<any>) {
 
 // Performance monitoring hook
 export function usePerformanceMonitor(componentName: string) {
-  React.useEffect(() => {
+  useEffect(() => {
     const startTime = performance.now()
 
     return () => {
@@ -106,11 +106,11 @@ export function usePerformanceMonitor(componentName: string) {
       const loadTime = endTime - startTime
 
       // Log component load time
-      uiLogger.info({ componentName: componentName, loadTime: loadTime }, `${componentName} loaded in ${loadTime.toFixed(2)}ms`)
+      uiLogger.info({ componentName, loadTime }, `${componentName} loaded in ${loadTime.toFixed(2)}ms`)
 
       // Could send to analytics service
       if (typeof window !== 'undefined' && (window as any).gtag) {
-        ;(window as any).gtag('event', 'component_load_time', {
+        ; (window as any).gtag('event', 'component_load_time', {
           component_name: componentName,
           load_time: loadTime,
           page_path: window.location.pathname
@@ -130,7 +130,7 @@ export function logBundleSize() {
       const loadTime = navigation.loadEventEnd - navigation.fetchStart
       const domContentLoaded = navigation.domContentLoadedEventEnd - navigation.fetchStart
 
-      uiLogger.info({ 
+      uiLogger.info({
         performanceData: {
           totalLoadTime: `${loadTime.toFixed(0)}ms`,
           domContentLoaded: `${domContentLoaded.toFixed(0)}ms`,

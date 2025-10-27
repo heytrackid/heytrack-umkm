@@ -35,7 +35,7 @@ export class ExcelExportService {
     // Handle multiple sheets if provided
     if (data.sheets) {
       data.sheets.forEach((sheet, index) => {
-        if (index === 0) return // Skip first sheet as it's already created
+        if (index === 0) {return} // Skip first sheet as it's already created
 
         const ws = workbook.addWorksheet(sheet.name)
 

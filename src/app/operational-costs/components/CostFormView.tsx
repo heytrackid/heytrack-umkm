@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ import { FormSkeleton } from '@/components/ui'
 interface CostFormViewProps {
   currentView: 'add' | 'edit'
   newCost: OperationalCost
-  setNewCost: React.Dispatch<React.SetStateAction<OperationalCost>>
+  setNewCost: Dispatch<SetStateAction<OperationalCost>>
   onSave: () => void
   onCancel: () => void
   isLoading: boolean
@@ -54,10 +54,10 @@ export default function CostFormView({
       <div className="space-y-6">
         {/* Header Skeleton */}
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+          <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
           <div className="space-y-2">
-            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+            <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
           </div>
         </div>
 
@@ -70,12 +70,12 @@ export default function CostFormView({
               ))}
             </div>
             <div className="space-y-2">
-              <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-              <div className="h-20 w-full bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+              <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+              <div className="h-20 w-full bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
             </div>
             <div className="flex gap-3 pt-4">
-              <div className="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-              <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+              <div className="h-10 flex-1 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+              <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
             </div>
           </CardContent>
         </Card>

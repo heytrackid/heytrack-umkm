@@ -3,8 +3,8 @@
  * API request validation utilities using Zod
  */
 
-import { NextResponse } from 'next/server'
-import { z } from 'zod'
+import type { NextResponse } from 'next/server'
+import type { z } from 'zod'
 import { formatValidationErrors } from '@/lib/validations'
 import { apiLogger } from '@/lib/logger'
 import type { ValidationResult } from './types'
@@ -20,8 +20,8 @@ export function validateRequestData<T>(
   try {
     const validatedData = schema.parse(data)
     return { success: true, data: validatedData }
-  } catch (error) {
-    const errors = formatValidationErrors(error)
+  } catch (err) {
+    const errors = formatValidationErrors(_error)
     return { success: false, errors }
   }
 }
@@ -42,8 +42,8 @@ export async function validateRequestOrRespond<T>(
     }
 
     return result.data!
-  } catch (error) {
-    apiLogger.error({ error }, 'Request validation error')
+  } catch (err) {
+    apiLogger.error({ err }, 'Request validation _error')
     return createErrorResponse('Invalid request body', 400)
   }
 }

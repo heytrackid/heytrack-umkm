@@ -59,8 +59,8 @@ export function useAuth() {
           isLoading: false,
           isAuthenticated: !!user,
         })
-      } catch (error) {
-        apiLogger.error({ error: error }, 'Auth initialization error:')
+      } catch (err) {
+        apiLogger.error({ err }, 'Auth initialization _error:')
         setAuthState({
           user: null,
           session: null,
@@ -70,7 +70,7 @@ export function useAuth() {
       }
     }
 
-    getSession()
+    void getSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -91,7 +91,7 @@ export function useAuth() {
 
         // Handle session expiry - redirect to login with reason
         if (event === 'SIGNED_OUT' && !session) {
-          router.push('/auth/login?reason=session_expired')
+          void router.push('/auth/login?reason=session_expired')
         }
       }
     )
@@ -114,9 +114,9 @@ export function useAuth() {
         isLoading: false,
         isAuthenticated: false,
       })
-      router.push('/auth/login')
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Sign out error:')
+      void router.push('/auth/login')
+    } catch (err) {
+      apiLogger.error({ err }, 'Sign out _error:')
     }
   }
 

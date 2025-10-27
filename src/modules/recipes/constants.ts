@@ -128,15 +128,6 @@ export const DEFAULT_RECIPE = {
   overhead_rate: 0.15 // 15% default overhead
 } as const
 
-// HPP calculation constants
-export const HPP_CONSTANTS = {
-  MIN_PACKAGING_COST: 1000, // Minimum Rp 1k packaging cost
-  PACKAGING_RATE: 0.05, // 5% of ingredient cost for packaging
-  DEFAULT_MARGIN: 0.60, // 60% default target margin
-  MIN_VIABLE_MARGIN: 0.25, // 25% minimum viable margin
-  BREAK_EVEN_FIXED_COST: 10000 // Rp 10k fixed cost for break-even calculation
-} as const
-
 // Time formatting constants
 export const TIME_FORMATS = {
   DISPLAY_HOURS_THRESHOLD: 60, // Show hours when >= 60 minutes

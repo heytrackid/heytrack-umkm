@@ -3,7 +3,7 @@
  * Utilities for creating standardized API route handlers
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { validateRequestData, validateRequestOrRespond } from './validation'
 import { extractPagination } from './pagination'
@@ -81,14 +81,14 @@ export function createRouteHandler<T>(
           if (responseData.success && responseData.data) {
             apiCache.set(config.caching.key, responseData.data, config.caching.ttl)
           }
-        } catch {
+        } catch (error) {
           // Ignore cache errors
         }
       }
 
       return response
-    } catch (error) {
-      const apiError = handleAPIError(error)
+    } catch (err) {
+      const apiError = handleAPIError(_error)
       return createAPIErrorResponse(apiError)
     }
   }

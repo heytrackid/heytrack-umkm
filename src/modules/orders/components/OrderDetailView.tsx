@@ -6,14 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { MapPin, Phone, Users } from 'lucide-react'
-import type { Order, OrderItem } from '../types'
+import { useMemo } from 'react'
+import type { Order, OrderItem } from '@/types'
 import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
 interface OrderDetailViewProps {
   order: Order
 }
 
-export function OrderDetailView({ order }: OrderDetailViewProps) {
+export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
   const { formatCurrency } = useCurrency()
   const statusInfo = getStatusInfo(order.status)
   const priorityInfo = getPriorityInfo(order.priority)
@@ -126,8 +127,8 @@ export function OrderDetailView({ order }: OrderDetailViewProps) {
         </div>
         <div className="pt-4 border-t">
           <div className="flex justify-between items-center font-medium">
-            <span>Total Item: {order.order_items?.reduce((sum: number, item: OrderItem) => sum + (item.quantity || 0), 0) || 0}</span>
-            <span>Subtotal: {formatCurrency((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0))}</span>
+            <span>Total Item: {useMemo(() => order.order_items?.reduce((sum: number, item: OrderItem) => sum + (item.quantity || 0), 0) || 0, [order.order_items])}</span>
+            <span>Subtotal: {useMemo(() => formatCurrency((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0)), [order.total_amount, order.tax_amount, order.discount, order.delivery_fee])}</span>
           </div>
         </div>
       </TabsContent>

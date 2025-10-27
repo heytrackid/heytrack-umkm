@@ -1,0 +1,211 @@
+/**
+ * API Response Caching Utilities
+ * Provides HTTP caching headers and in-memory cache
+ */
+
+import { NextResponse } from 'next/server'
+
+export interface CacheConfig {
+  maxAge?: number // seconds
+  staleWhileRevalidate?: number // seconds
+  public?: boolean
+  immutable?: boolean
+}
+
+/**
+ * Create response with cache headers
+ */
+export function createCachedResponse<T>(
+  data: T,
+  config: CacheConfig = {}
+): NextResponse<T> {
+  const {
+    maxAge = 60,
+    staleWhileRevalidate = 300,
+    public: isPublic = true,
+    immutable = false
+  } = config
+
+  const cacheControl = [
+    isPublic ? 'public' : 'private',
+    `s-maxage=${maxAge}`,
+    `stale-while-revalidate=${staleWhileRevalidate}`,
+    immutable ? 'immutable' : ''
+  ]
+    .filter(Boolean)
+    .join(', ')
+
+  return NextResponse.json(data, {
+    headers: {
+      'Cache-Control': cacheControl,
+      'CDN-Cache-Control': `max-age=${maxAge}`,
+      'Vercel-CDN-Cache-Control': `max-age=${maxAge}`
+    }
+  })
+}
+
+/**
+ * In-memory cache for API responses
+ */
+class MemoryCache {
+  private cache = new Map<string, { data: any; timestamp: number }>()
+  private maxSize = 100
+  private ttl = 5 * 60 * 1000 // 5 minutes
+
+  set(key: string, data: any): void {
+    // Limit cache size
+    if (this.cache.size >= this.maxSize) {
+      const firstKey = this.cache.keys().next().value
+      this.cache.delete(firstKey)
+    }
+
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now()
+    })
+  }
+
+  get(key: string): any | null {
+    const item = this.cache.get(key)
+
+    if (!item) {
+      return null
+    }
+
+    // Check if expired
+    if (Date.now() - item.timestamp > this.ttl) {
+      this.cache.delete(key)
+      return null
+    }
+
+    return item.data
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+
+  delete(key: string): void {
+    this.cache.delete(key)
+  }
+
+  has(key: string): boolean {
+    const item = this.cache.get(key)
+    if (!item) {return false}
+
+    // Check if expired
+    if (Date.now() - item.timestamp > this.ttl) {
+      this.cache.delete(key)
+      return false
+    }
+
+    return true
+  }
+}
+
+export const apiCache = new MemoryCache()
+
+/**
+ * Cache key generator
+ */
+export function generateCacheKey(
+  endpoint: string,
+  params?: Record<string, any>
+): string {
+  if (!params) {return endpoint}
+
+  const sortedParams = Object.keys(params)
+    .sort()
+    .map((key) => `${key}=${params[key]}`)
+    .join('&')
+
+  return `${endpoint}?${sortedParams}`
+}
+
+/**
+ * Cached fetch wrapper
+ */
+export async function cachedFetch<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttl?: number
+): Promise<T> {
+  // Check cache first
+  const cached = apiCache.get(key)
+  if (cached) {
+    return cached as T
+  }
+
+  // Fetch and cache
+  const data = await fetcher()
+  apiCache.set(key, data)
+
+  return data
+}
+
+/**
+ * Cache invalidation patterns
+ */
+export const cacheInvalidation = {
+  // Invalidate all caches for a resource
+  invalidateResource(resource: string): void {
+    const keys = Array.from((apiCache as any).cache.keys())
+    keys.forEach((key: string) => {
+      if (key.includes(resource)) {
+        apiCache.delete(key)
+      }
+    })
+  },
+
+  // Invalidate specific pattern
+  invalidatePattern(pattern: RegExp): void {
+    const keys = Array.from((apiCache as any).cache.keys())
+    keys.forEach((key: string) => {
+      if (pattern.test(key)) {
+        apiCache.delete(key)
+      }
+    })
+  },
+
+  // Clear all caches
+  clearAll(): void {
+    apiCache.clear()
+  }
+}
+
+/**
+ * Cache presets for common scenarios
+ */
+export const cachePresets = {
+  // Static data that rarely changes
+  static: {
+    maxAge: 3600, // 1 hour
+    staleWhileRevalidate: 86400, // 1 day
+    public: true,
+    immutable: true
+  },
+
+  // Dynamic data that changes frequently
+  dynamic: {
+    maxAge: 60, // 1 minute
+    staleWhileRevalidate: 300, // 5 minutes
+    public: true,
+    immutable: false
+  },
+
+  // User-specific data
+  private: {
+    maxAge: 30, // 30 seconds
+    staleWhileRevalidate: 60, // 1 minute
+    public: false,
+    immutable: false
+  },
+
+  // Real-time data
+  realtime: {
+    maxAge: 0,
+    staleWhileRevalidate: 0,
+    public: false,
+    immutable: false
+  }
+}

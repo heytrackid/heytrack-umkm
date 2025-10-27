@@ -36,7 +36,7 @@ export type UserRole = "admin" | "user"
 export type BusinessUnit = "all"
 
 // Database table types for auth
-export type UserProfilesTable = {
+export interface UserProfilesTable {
   Row: {
     business_unit: BusinessUnit | null
     created_at: string | null

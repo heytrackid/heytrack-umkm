@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
-interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
   label: string;
   name: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'date' | 'datetime-local' | 'tel' | 'url';
@@ -12,18 +12,18 @@ interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement
   success?: string;
   placeholder?: string;
   required?: boolean;
-  options?: { value: string | number; label: string }[];
+  options?: Array<{ value: string | number; label: string }>;
   disabled?: boolean;
   min?: number;
   max?: number;
   step?: number;
   rows?: number;
   hint?: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   fullWidth?: boolean;
 }
 
-export const FormField: React.FC<FormFieldProps> = (props) => {
+export const FormField = (props: FormFieldProps) => {
   const {
     label,
     name,
@@ -80,7 +80,7 @@ export const FormField: React.FC<FormFieldProps> = (props) => {
     return `${baseInputClasses} border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-indigo-500 focus:border-indigo-500 hover:border-gray-400`;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     let newValue: unknown = e.target.value;
     
     if (type === 'number') {
@@ -104,18 +104,6 @@ export const FormField: React.FC<FormFieldProps> = (props) => {
   };
 
   // Extract all props including react-hook-form props
-  const allProps = {
-    id: name,
-    name,
-    placeholder,
-    disabled,
-    className: getInputClasses(),
-    'aria-invalid': hasError,
-    'aria-describedby': error ? `${name}-error` : hint ? `${name}-hint` : undefined,
-    onFocus: handleFocus,
-    ...restProps
-  };
-
   // Prepare the basic props for the input element
   const basicInputProps = {
     id: name,
@@ -126,6 +114,9 @@ export const FormField: React.FC<FormFieldProps> = (props) => {
     'aria-invalid': hasError,
     'aria-describedby': error ? `${name}-error` : hint ? `${name}-hint` : undefined,
     onFocus: handleFocus,
+    onBlur: handleBlur,
+    onChange: handleChange,
+    ...restProps
   };
 
   return (
@@ -249,33 +240,31 @@ export const FormField: React.FC<FormFieldProps> = (props) => {
 };
 
 interface CrudFormProps {
-  onSubmit: (e: React.FormEvent) => void;
-  children: React.ReactNode;
+  onSubmit: (e: FormEvent) => void;
+  children: ReactNode;
   className?: string;
 }
 
-export const CrudForm: React.FC<CrudFormProps> = ({ onSubmit, children, className = '' }) => {
-  return (
+export const CrudForm = ({ onSubmit, children, className = '' }: CrudFormProps) => (
     <form onSubmit={onSubmit} className={className}>
       {children}
     </form>
   );
-};
 
 // Responsive Grid Component
 interface FormGridProps {
-  children: React.ReactNode;
+  children: ReactNode;
   cols?: 1 | 2 | 3 | 4;
   gap?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-export const FormGrid: React.FC<FormGridProps> = ({
+export const FormGrid = ({
   children,
   cols = 1,
   gap = 'md',
   className = '',
-}) => {
+}: FormGridProps) => {
   const gapClasses = {
     sm: 'gap-3 sm:gap-4',
     md: 'gap-4 sm:gap-6',
@@ -300,17 +289,16 @@ export const FormGrid: React.FC<FormGridProps> = ({
 interface FormSectionProps {
   title?: string;
   description?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const FormSection: React.FC<FormSectionProps> = ({
+export const FormSection = ({
   title,
   description,
   children,
   className = '',
-}) => {
-  return (
+}: FormSectionProps) => (
     <div className={`space-y-4 sm:space-y-6 ${className}`}>
       {(title || description) && (
         <div className="border-b border-gray-200 pb-4">
@@ -329,7 +317,6 @@ export const FormSection: React.FC<FormSectionProps> = ({
       {children}
     </div>
   );
-};
 
 interface FormActionsProps {
   onCancel?: () => void;
@@ -342,7 +329,7 @@ interface FormActionsProps {
   sticky?: boolean;
 }
 
-export const FormActions: React.FC<FormActionsProps> = ({
+export const FormActions = ({
   onCancel,
   onSubmit,
   submitText = 'Save',
@@ -351,7 +338,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
   disabled = false,
   fullWidthOnMobile = true,
   sticky = false,
-}) => {
+}: FormActionsProps) => {
   const containerClasses = `
     ${sticky ? 'sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 sm:relative sm:border-t-0 sm:p-0 z-10 shadow-lg sm:shadow-none' : ''}
     ${fullWidthOnMobile ? 'flex flex-col-reverse sm:flex-row sm:justify-end space-y-3 space-y-reverse sm:space-y-0 sm:space-x-3' : 'flex justify-end space-x-3'}
@@ -398,8 +385,8 @@ export const FormActions: React.FC<FormActionsProps> = ({
       >
         {loading && (
           <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
         )}
         {loading ? 'Saving...' : submitText}
@@ -420,7 +407,7 @@ interface ConfirmDialogProps {
   type?: 'danger' | 'warning' | 'info';
 }
 
-export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+export const ConfirmDialog = ({
   isOpen,
   onClose,
   onConfirm,
@@ -429,8 +416,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   type = 'danger',
-}) => {
-  if (!isOpen) return null;
+}: ConfirmDialogProps) => {
+  if (!isOpen) {return null;}
 
   const typeStyles = {
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',

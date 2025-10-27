@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { lazy, Suspense } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -50,7 +49,7 @@ const PageLoadingSkeleton = () => (
 const SimplePageLoading = ({ title }: { title: string }) => (
   <div className="space-y-6 p-6">
     <div className="flex items-center justify-center py-12">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       <div className="ml-4">
         <h3 className="font-medium">Loading {title}...</h3>
         <p className="text-sm text-muted-foreground">Please wait while we prepare your page</p>

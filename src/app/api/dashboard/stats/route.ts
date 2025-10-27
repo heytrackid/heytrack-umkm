@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { DateRangeQuerySchema } from '@/lib/validations/api-validations'
 import type { Database } from '@/types/supabase-generated'
-
+import { safeParseAmount, safeString, safeParseInt, safeTimestamp, isInArray } from '@/lib/api-helpers'
+import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 type Order = Database['public']['Tables']['orders']['Row']
 type Customer = Database['public']['Tables']['customers']['Row']
@@ -65,21 +66,22 @@ export async function GET(request: Request) {
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) || 0
 
     const todayRevenue = todayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) || 0
 
+    const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] as const
     const activeOrders = orders?.filter((order: Order) =>
-      ['PENDING', 'CONFIRMED', 'IN_PROGRESS'].includes(String(order.status || ''))).length || 0
+      isInArray(order.status, validStatuses)).length || 0
 
     const totalCustomers = customers?.length || 0
     const vipCustomers = customers?.filter((customer: Customer) =>
-      String(customer.customer_type || '') === 'vip').length || 0
+      safeString(customer.customer_type) === 'vip').length || 0
 
     const lowStockItems = ingredients?.filter((ingredient: Ingredient) => {
-      const currentStock = Number(ingredient.current_stock || 0)
-      const minStock = Number(ingredient.min_stock || 0)
+      const currentStock = safeParseAmount(ingredient.current_stock)
+      const minStock = safeParseAmount(ingredient.min_stock)
       return currentStock <= minStock
     }).length || 0
     
@@ -87,7 +89,7 @@ export async function GET(request: Request) {
     const totalRecipes = recipes?.length || 0
     
     const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: Expense) =>
-      sum + parseFloat(String(expense.amount || 0)), 0) || 0
+      sum + safeParseAmount(expense.amount), 0) || 0
 
     // Calculate yesterday for comparison
     const yesterdayDate = new Date()
@@ -100,11 +102,11 @@ export async function GET(request: Request) {
       .eq('order_date', yesterdayStr)
 
     const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String((order as any).total_amount || 0)), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) || 0
     
     // Category breakdown for ingredients
     const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: Ingredient) => {
-      const category = String(ingredient.category || 'General')
+      const category = safeString(ingredient.category, 'General')
       acc[category] = (acc[category] || 0) + 1
       return acc
     }, {} as Record<string, number>) || {}
@@ -112,8 +114,8 @@ export async function GET(request: Request) {
     // Recent orders for activity feed
     const recentOrders = orders
       ?.sort((a: Order, b: Order) => {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0
+        const aTime = safeTimestamp(a.created_at)
+        const bTime = safeTimestamp(b.created_at)
         return bTime - aTime
       })
       ?.slice(0, 5) || []
@@ -135,7 +137,7 @@ export async function GET(request: Request) {
         today: todayOrders?.length || 0,
         recent: recentOrders.map((order: Order) => ({
           id: order.id,
-          customer: String(order.customer_name || 'Walk-in customer'),
+          customer: safeString(order.customer_name, 'Walk-in customer'),
           amount: order.total_amount,
           status: order.status,
           time: order.created_at
@@ -156,8 +158,8 @@ export async function GET(request: Request) {
         total: totalRecipes,
         popular: recipes
           ?.sort((a: Recipe, b: Recipe) => {
-            const aUsage = Number(a.times_made || 0)
-            const bUsage = Number(b.times_made || 0)
+            const aUsage = safeParseInt(a.times_made)
+            const bUsage = safeParseInt(b.times_made)
             return bUsage - aUsage
           })
           ?.slice(0, 3) || []
@@ -173,9 +175,9 @@ export async function GET(request: Request) {
       lastUpdated: new Date().toISOString()
     })
     
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching dashboard stats:')
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching dashboard stats:')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
@@ -207,15 +209,15 @@ export async function POST() {
       todayOrderIds.includes(item.order_id)) || []
 
     const totalRevenue = todayOrders?.reduce((sum: number, order: Order) =>
-      sum + parseFloat(String(order.total_amount || 0)), 0) || 0
+      sum + safeParseAmount(order.total_amount), 0) || 0
 
     const totalItemsSold = todayItems.reduce((sum: number, item: OrderItem) =>
-      sum + parseInt(String(item.quantity || 0), 10), 0) || 0
+      sum + safeParseInt(item.quantity), 0) || 0
 
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
 
     const totalExpenses = todayExpenses?.reduce((sum: number, expense: Expense) =>
-      sum + parseFloat(String(expense.amount || 0)), 0) || 0
+      sum + safeParseAmount(expense.amount), 0) || 0
 
     const profitEstimate = totalRevenue - totalExpenses
 
@@ -241,8 +243,8 @@ export async function POST() {
     
     return NextResponse.json({ success: true, message: 'Daily summary updated' })
     
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error updating daily summary:')
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error updating daily summary:')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }

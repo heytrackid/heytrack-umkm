@@ -1,6 +1,6 @@
 'use client'
-import { memo, useCallback } from 'react'
-import * as React from 'react'
+
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,6 @@ import {
     Phone,
     Trash2
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
 import type { Order, OrderStatus } from './types'
 import { getPaymentInfo, getPriorityInfo, getStatusInfo } from './utils'
 
@@ -39,14 +38,14 @@ interface OrdersListProps {
  * - useCallback for event handlers
  * - useMemo for expensive calculations
  */
-const OrdersList = memo(function OrdersList({
+const OrdersList = memo(({
   orders,
   onViewOrder,
   onEditOrder, 
   onDeleteOrder,
   onUpdateStatus,
   loading = false
-}: OrdersListProps) {
+}: OrdersListProps) => {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
   const pageSizeOptions = useMemo(() => [10, 25, 50], [])
@@ -67,12 +66,12 @@ const OrdersList = memo(function OrdersList({
   }, [onUpdateStatus])
 
   useEffect(() => {
-    setCurrentPage(1)
+    void setCurrentPage(1)
   }, [orders, rowsPerPage])
 
   useEffect(() => {
     if (currentPage > totalPages) {
-      setCurrentPage(totalPages)
+      void setCurrentPage(totalPages)
     }
   }, [currentPage, totalPages])
 
@@ -82,8 +81,8 @@ const OrdersList = memo(function OrdersList({
         {[...Array(5)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardContent className="p-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
             </CardContent>
           </Card>
         ))}
@@ -188,8 +187,8 @@ const OrdersList = memo(function OrdersList({
           onPageChange={setCurrentPage}
           pageSize={rowsPerPage}
           onPageSizeChange={(size) => {
-            setRowsPerPage(size)
-            setCurrentPage(1)
+            void setRowsPerPage(size)
+            void setCurrentPage(1)
           }}
           totalItems={totalOrders}
           pageStart={pageStart}
@@ -309,8 +308,8 @@ const OrdersList = memo(function OrdersList({
             onPageChange={setCurrentPage}
             pageSize={rowsPerPage}
             onPageSizeChange={(size) => {
-              setRowsPerPage(size)
-              setCurrentPage(1)
+              void setRowsPerPage(size)
+              void setCurrentPage(1)
             }}
             totalItems={totalOrders}
             pageStart={pageStart}
@@ -322,12 +321,12 @@ const OrdersList = memo(function OrdersList({
       </CardContent>
     </Card>
   )
-}, (prevProps, nextProps) => {
+}, (prevProps, nextProps) => 
   // Custom comparison to prevent unnecessary re-renders
-  return (
+   (
     prevProps.orders === nextProps.orders &&
     prevProps.loading === nextProps.loading
   )
-})
+)
 
 export default OrdersList

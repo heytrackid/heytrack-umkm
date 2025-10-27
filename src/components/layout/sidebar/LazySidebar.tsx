@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -118,29 +117,31 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
 
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
+      {/* Mobile overlay with smooth fade */}
+      <div
+        className={cn(
+          "fixed inset-0 bg-black/50 z-40 lg:hidden",
+          "transition-opacity duration-300 ease-in-out",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onToggle}
+      />
 
-      {/* Sidebar */}
+      {/* Sidebar with smooth slide animation */}
       <aside className={cn(
         "fixed inset-y-0 left-0 z-50 flex flex-col",
-        "bg-white dark:bg-black",
-        "border-r border-gray-200 dark:border-gray-800",
-        "transform transition-transform duration-300 ease-in-out",
+        "bg-background",
+        "border-r border-border",
+        "transform transition-transform duration-300 ease-out",
         "lg:translate-x-0 lg:static lg:inset-0",
         "overflow-hidden",
         // Fixed width for consistency
         "w-80 lg:w-72",
-        // Animation
+        // Smooth animation
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
-        <Suspense fallback={<div className="h-16 border-b border-gray-200 dark:border-gray-800" />}>
+        <Suspense fallback={<div className="h-16 border-b border-border" />}>
           <SidebarHeader
             isMobile={Boolean(isOpen && onToggle)}
             onClose={onToggle}
@@ -159,24 +160,25 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
         </Suspense>
 
         {/* Footer */}
-        <Suspense fallback={<div className="flex-shrink-0 h-20 border-t border-gray-200 dark:border-gray-800" />}>
+        <Suspense fallback={<div className="flex-shrink-0 h-20 border-t border-border" />}>
           <SidebarFooter />
         </Suspense>
       </aside>
 
-      {/* Mobile toggle button - Only show if not using mobile header */}
+      {/* Mobile toggle button with smooth transitions */}
       {!isMobile && (
         <button
           onClick={onToggle}
           className={cn(
             "fixed top-4 left-4 z-50 lg:hidden",
-            "p-3 rounded-lg",
-            "bg-gray-800 dark:bg-gray-600",
-            "text-white",
-            "hover:bg-gray-700 dark:hover:bg-gray-500",
-            "transition-all duration-200",
-            "hover:scale-105"
+            "p-3 rounded-lg shadow-lg",
+            "bg-primary text-primary-foreground",
+            "hover:bg-primary/90",
+            "transition-all duration-200 ease-out",
+            "active:scale-95",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           )}
+          aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
         >
           {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>

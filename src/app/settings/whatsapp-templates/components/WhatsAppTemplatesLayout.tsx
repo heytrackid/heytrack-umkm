@@ -23,8 +23,7 @@ import { uiLogger } from '@/lib/logger'
 
 // Lazy load components
 import dynamic from 'next/dynamic'
-import { TEMPLATE_CATEGORIES } from './types'
-import type { WhatsAppTemplate } from './types'
+import { TEMPLATE_CATEGORIES, type WhatsAppTemplate } from './types'
 
 const TemplatesTable = dynamic(() => import('./TemplatesTable'), {
   loading: () => <div className="p-4">Loading templates...</div>
@@ -58,32 +57,32 @@ export default function WhatsAppTemplatesPage() {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      router.push('/auth/login')
+      void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
   useEffect(() => {
-    fetchTemplates()
+    void fetchTemplates()
   }, [])
 
   const fetchTemplates = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/whatsapp-templates')
       if (response.ok) {
         const data = await response.json()
-        setTemplates(data)
+        void setTemplates(data)
       }
     } catch (err) {
       uiLogger.error({ error: err }, 'Error fetching WhatsApp templates')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const handleEdit = (template: WhatsAppTemplate) => {
-    setEditingTemplate(template)
-    setShowDialog(true)
+    void setEditingTemplate(template)
+    void setShowDialog(true)
   }
 
   const handleDelete = async (id: string) => {
@@ -122,14 +121,14 @@ export default function WhatsAppTemplatesPage() {
   }
 
   const handlePreview = (template: WhatsAppTemplate) => {
-    setPreviewTemplate(template)
-    setShowPreview(true)
+    void setPreviewTemplate(template)
+    void setShowPreview(true)
   }
 
   const copyTemplate = (template: WhatsAppTemplate) => {
     // Reset form data for copying
-    setEditingTemplate(null)
-    setShowDialog(true)
+    void setEditingTemplate(null)
+    void setShowDialog(true)
     // The form component will handle the copying logic
   }
 

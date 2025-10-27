@@ -148,8 +148,8 @@ Kami tunggu orderan selanjutnya! 🙏
       automationLogger.info({ to, templateId, message }, 'WhatsApp message sent (simulated)');
 
       return true;
-    } catch (error) {
-      automationLogger.error({ error: error instanceof Error ? error.message : String(error), to, templateId }, 'Failed to send WhatsApp message');
+    } catch (err) {
+      automationLogger.error({ err: err instanceof Error ? err.message : String(err), to, templateId }, 'Failed to send WhatsApp message');
       return false;
     }
   }

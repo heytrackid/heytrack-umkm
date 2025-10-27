@@ -76,12 +76,12 @@ export interface NotificationRule {
   name: string
   category: SmartNotification['category']
   enabled: boolean
-  conditions: {
+  conditions: Array<{
     metric: string
     operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'contains'
     value: unknown
     timeWindow?: number // minutes
-  }[]
+  }>
   notification: {
     priority: SmartNotification['priority']
     title: string

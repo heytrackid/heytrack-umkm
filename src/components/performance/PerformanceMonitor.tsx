@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { useEffect, useState, memo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -101,7 +100,7 @@ const PerformanceMonitor = memo(() => {
 
           try {
             lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
-          } catch (error: unknown) {
+          } catch (err: unknown) {
             apiLogger.warn('LCP observation not supported')
           }
 
@@ -115,7 +114,7 @@ const PerformanceMonitor = memo(() => {
 
           try {
             fidObserver.observe({ entryTypes: ['first-input'] })
-          } catch (error: unknown) {
+          } catch (err: unknown) {
             apiLogger.warn('FID observation not supported')
           }
 
@@ -131,7 +130,7 @@ const PerformanceMonitor = memo(() => {
 
           try {
             fcpObserver.observe({ entryTypes: ['paint'] })
-          } catch (error: unknown) {
+          } catch (err: unknown) {
             apiLogger.warn('FCP observation not supported')
           }
         }
@@ -139,11 +138,11 @@ const PerformanceMonitor = memo(() => {
     }
 
     observeWebVitals()
-    updateCacheMetrics()
+    void updateCacheMetrics()
     
     // Update metrics every 30 seconds
     const interval = setInterval(() => {
-      updateCacheMetrics()
+      void updateCacheMetrics()
       calculatePerformanceScore()
     }, 30000)
 
@@ -163,7 +162,7 @@ const PerformanceMonitor = memo(() => {
       
       // Calculate cache hit rate (simplified)
       const totalRequests = cacheStats.size
-      const validEntries = cacheStats.validEntries
+      const {validEntries} = cacheStats
       const hitRate = totalRequests > 0 ? (validEntries / totalRequests) * 100 : 0
 
       setMetrics(prev => ({
@@ -171,7 +170,7 @@ const PerformanceMonitor = memo(() => {
         cacheHitRate: hitRate,
         memoryUsage: totalCacheSize
       }))
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       apiLogger.warn('Failed to update cache metrics:', error)
     }
   }
@@ -261,7 +260,7 @@ const PerformanceMonitor = memo(() => {
           cacheHitRate: 0,
           memoryUsage: 0
         }))
-      } catch (error: unknown) {
+      } catch (err: unknown) {
         apiLogger.warn('Failed to clear caches:', error)
       }
     }
@@ -299,7 +298,7 @@ const PerformanceMonitor = memo(() => {
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${getStatusColor(stats.status)}`}></div>
+            <div className={`w-2 h-2 rounded-full ${getStatusColor(stats.status)}`} />
             <span className="text-sm font-medium">Score: {stats.score.toFixed(0)}/100</span>
             <Badge variant={stats.status === 'excellent' ? 'default' : 'secondary'}>
               {stats.status.replace('-', ' ').toUpperCase()}

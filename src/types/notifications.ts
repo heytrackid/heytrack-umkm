@@ -78,7 +78,7 @@ export interface NotificationPreferences {
 }
 
 // Notification table
-export type NotificationsTable = {
+export interface NotificationsTable {
   Row: {
     action_url: string | null
     category: string

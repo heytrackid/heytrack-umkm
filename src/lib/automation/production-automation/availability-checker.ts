@@ -3,7 +3,7 @@
  * Handles ingredient availability checking for production
  */
 
-import type { Recipe, Ingredient, RecipeIngredient, AvailabilityCheck, IngredientRequirement } from '../types'
+import type { Recipe, Ingredient, RecipeIngredient, AvailabilityCheck, IngredientRequirement } from '@/lib/automation/types'
 
 export class AvailabilityChecker {
   /**

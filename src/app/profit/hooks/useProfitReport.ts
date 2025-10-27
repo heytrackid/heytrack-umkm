@@ -11,7 +11,7 @@ import {
   prepareProductChartData,
   validateProfitData,
   exportProfitReport
-} from '../utils'
+} from '@/utils'
 
 interface UseProfitReportReturn {
   // State
@@ -54,8 +54,8 @@ export function useProfitReport(): UseProfitReportReturn {
 
   // Fetch profit data
   const fetchProfitData = async () => {
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateProfitDateRange(
@@ -80,12 +80,12 @@ export function useProfitReport(): UseProfitReportReturn {
         throw new Error('Data laporan laba tidak valid')
       }
 
-      setProfitData(data)
+      void setProfitData(data)
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error fetching profit data:')
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
+      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -112,7 +112,7 @@ export function useProfitReport(): UseProfitReportReturn {
 
   // Load data on mount and when filters change
   useEffect(() => {
-    fetchProfitData()
+    void fetchProfitData()
   }, [selectedPeriod, startDate, endDate])
 
   return {

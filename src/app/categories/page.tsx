@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
@@ -24,7 +23,7 @@ import { useCategories } from './hooks/useCategories'
 // Breadcrumb helper
 const getBreadcrumbItems = (currentView: string) => [
   { label: "Home", href: '/' },
-  { label: "Resep", href: '/resep' },
+  { label: "Resep", href: '/recipes' },
   {
     label: "Kategori",
     href: currentView === 'list' ? undefined : '/categories'
@@ -73,7 +72,7 @@ export default function CategoriesPage() {
         <Breadcrumb>
           <BreadcrumbList>
             {getBreadcrumbItems(currentView).map((item, index) => (
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
@@ -86,7 +85,7 @@ export default function CategoriesPage() {
                   )}
                 </BreadcrumbItem>
                 {index < getBreadcrumbItems(currentView).length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
+              </Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
@@ -135,13 +134,13 @@ export default function CategoriesPage() {
           }>
             <CategoryForm
               category={formData}
-              currentView={currentView as 'add' | 'edit'}
+              currentView={currentView}
               isMobile={isMobile}
               onCategoryChange={setFormData}
               onSave={handleSaveCategory}
               onCancel={() => {
                 resetForm()
-                setCurrentView('list')
+                void setCurrentView('list')
               }}
             />
           </Suspense>

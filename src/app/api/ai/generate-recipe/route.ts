@@ -1,8 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
-import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
@@ -108,7 +106,7 @@ export async function POST(request: NextRequest) {
         if (existingRecipes && existingRecipes.length > 0) {
             apiLogger.warn({ recipeName: (recipe as Partial<Recipe>).name || 'Unknown', count: existingRecipes.length }, 'Duplicate recipe name detected')
             // Add version suffix to name
-            ;(recipe as any).name = `${(recipe as any).name} v${existingRecipes.length + 1}`
+            ;(recipe).name = `${(recipe).name} v${existingRecipes.length + 1}`
         }
 
         // Calculate HPP for the generated recipe
@@ -123,8 +121,8 @@ export async function POST(request: NextRequest) {
         })
 
     } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error generating recipe:')
-        const errorMessage = error instanceof Error ? (error as any).message : 'Failed to generate recipe'
+        apiLogger.error({ error }, 'Error generating recipe:')
+        const errorMessage = error instanceof Error ? error.message : 'Failed to generate recipe'
         return NextResponse.json(
             { error: errorMessage },
             { status: 500 }
@@ -340,7 +338,7 @@ Generate the professional UMKM recipe now:`
 /**
  * Call AI service with retry logic
  */
-async function callAIServiceWithRetry(prompt: string, maxRetries: number = 3): Promise<string> {
+async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<string> {
     let lastError: Error | null = null
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -371,7 +369,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries: number = 3): P
  * Call AI service to generate recipe
  */
 async function callAIService(prompt: string): Promise<string> {
-    const apiKey = process.env.OPENROUTER_API_KEY
+    const apiKey = process.env['OPENROUTER_API_KEY']
 
     if (!apiKey) {
         throw new Error('OpenRouter API key not configured')
@@ -383,7 +381,7 @@ async function callAIService(prompt: string): Promise<string> {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${apiKey}`,
-                'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
@@ -423,7 +421,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
         const data = await response.json()
         return data.choices[0].message.content
     } catch (error) {
-        apiLogger.error({ error: error }, 'OpenRouter API call failed, trying fallback model')
+        apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
         
         // Fallback to another free model if Minimax fails
         try {
@@ -432,7 +430,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+                    'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
@@ -492,17 +490,17 @@ function parseRecipeResponse(response: string) {
         const recipe = JSON.parse(cleanResponse)
 
         // Validate required fields
-        if (!(recipe as any).name || !recipe.ingredients || !recipe.instructions) {
+        if (!(recipe).name || !recipe.ingredients || !recipe.instructions) {
             throw new Error('Invalid recipe structure: missing required fields')
         }
 
         // Validate ingredients array
-        if (!Array.isArray((recipe as any).ingredients) || (recipe as any).ingredients.length === 0) {
+        if (!Array.isArray((recipe).ingredients) || (recipe).ingredients.length === 0) {
             throw new Error('Recipe must have at least one ingredient')
         }
 
         // Validate each ingredient
-        (recipe as any).ingredients.forEach((ing: RecipeIngredient, index: number) => {
+        (recipe).ingredients.forEach((ing: RecipeIngredient, index: number) => {
             if (!(ing as any).name || !ing.quantity || !ing.unit) {
                 throw new Error(`Invalid ingredient at index ${index}: missing required fields`)
             }
@@ -518,8 +516,8 @@ function parseRecipeResponse(response: string) {
 
         return recipe
     } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error parsing recipe response:')
-        const errorMessage = error instanceof Error ? (error as any).message : 'Unknown parsing error'
+        apiLogger.error({ error }, 'Error parsing recipe response:')
+        const errorMessage = error instanceof Error ? error.message : 'Unknown parsing error'
         throw new Error(`Failed to parse recipe: ${errorMessage}`)
     }
 }
@@ -572,10 +570,10 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
 
     for (const recipeIng of (recipe as any).ingredients) {
         // Find matching ingredient using fuzzy matching
-        const ingredient = findBestIngredientMatch((recipeIng as any).name, availableIngredients)
+        const ingredient = findBestIngredientMatch((recipeIng).name, availableIngredients)
 
         if (!ingredient) {
-            apiLogger.warn(`Ingredient not found in inventory: ${(recipeIng as any).name}`)
+            apiLogger.warn(`Ingredient not found in inventory: ${(recipeIng).name}`)
             continue
         }
 

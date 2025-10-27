@@ -17,8 +17,8 @@ export default async function HomePage() {
     } else {
       redirect('/auth/login')
     }
-  } catch (error) {
-    apiLogger.error({ error: error }, 'Error checking auth:')
+  } catch (err) {
+    apiLogger.error({ err }, 'Error checking auth:')
     redirect('/auth/login')
   }
 }

@@ -2,8 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { FormFieldSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
-export function SettingsLoadingSkeleton() {
-  return (
+export const SettingsLoadingSkeleton = () => (
     <div className="space-y-4">
       {/* Quick Links Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -19,7 +18,7 @@ export function SettingsLoadingSkeleton() {
             {/* Tab headers skeleton */}
             <div className="flex space-x-2">
               {Array.from({ length: 5 }, (_, i) => (
-                <div key={i} className="h-9 w-20 bg-gray-200 rounded-md animate-pulse"></div>
+                <div key={i} className="h-9 w-20 bg-gray-200 rounded-md animate-pulse" />
               ))}
             </div>
 
@@ -34,4 +33,3 @@ export function SettingsLoadingSkeleton() {
       </Card>
     </div>
   )
-}

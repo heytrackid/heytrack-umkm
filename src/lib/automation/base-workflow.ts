@@ -50,7 +50,7 @@ export abstract class BaseWorkflowAutomation {
    * Process event queue
    */
   private async processEventQueue() {
-    if (this.eventQueue.length === 0 || this.isProcessing) return
+    if (this.eventQueue.length === 0 || this.isProcessing) {return}
 
     this.isProcessing = true
 
@@ -87,10 +87,10 @@ export abstract class BaseWorkflowAutomation {
         }, 'Workflow event processing failed')
       }
 
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       automationLogger.error({
         event: event.event,
-        error: error instanceof Error ? error.message : String(error)
+        error: err instanceof Error ? err.message : String(err)
       }, 'Error processing workflow event')
     }
   }

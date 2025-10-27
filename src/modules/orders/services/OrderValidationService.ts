@@ -4,7 +4,7 @@ import supabase from '@/utils/supabase'
 /**
  * Recipe with ingredients for validation
  */
-type RecipeValidationQueryResult = {
+interface RecipeValidationQueryResult {
   id: string
   name: string
   recipe_ingredients: Array<{
@@ -76,7 +76,7 @@ export class OrderValidationService {
           // Supabase returns arrays for joined data, get first element
           const ingredient = ri.ingredient?.[0]
           
-          if (!ingredient || !ingredient.is_active) {
+          if (!ingredient?.is_active) {
             errors.push(`Ingredient ${ingredient?.name || 'unknown'} untuk ${typedRecipe.name} tidak tersedia`)
             continue
           }
@@ -102,8 +102,8 @@ export class OrderValidationService {
         warnings,
         errors
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error validating order against inventory')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error validating order against inventory')
       return {
         isValid: false,
         warnings,

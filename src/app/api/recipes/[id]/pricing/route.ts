@@ -1,5 +1,4 @@
-import { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
@@ -74,8 +73,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: pricingAnalysis
     })
 
-  } catch (error) {
-    apiLogger.error({ error }, 'Error calculating pricing')
+  } catch (err) {
+    apiLogger.error({ err }, 'Error calculating pricing')
     return NextResponse.json({ 
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'

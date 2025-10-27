@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
@@ -2002,11 +2002,11 @@ export type Database = {
     Functions: {
       analyze_inventory_needs: {
         Args: never
-        Returns: {
+        Returns: Array<{
           ingredient_id: string
           needed_quantity: number
           priority: string
-        }[]
+        }>
       }
       calculate_ingredient_wac: {
         Args: { p_ingredient_id: string }
@@ -2014,12 +2014,12 @@ export type Database = {
       }
       calculate_recipe_hpp: {
         Args: { recipe_uuid: string }
-        Returns: {
+        Returns: Array<{
           can_produce: boolean
           cost_per_serving: number
           max_possible_batches: number
           total_ingredient_cost: number
-        }[]
+        }>
       }
       consume_ingredients_for_order: {
         Args: { order_uuid: string }
@@ -2028,23 +2028,23 @@ export type Database = {
       get_dashboard_stats: { Args: never; Returns: Json }
       get_foreign_key_constraints: {
         Args: never
-        Returns: {
+        Returns: Array<{
           column_name: string
           constraint_name: string
           foreign_column: string
           foreign_table: string
           table_name: string
-        }[]
+        }>
       }
       get_sync_dashboard_data: { Args: never; Returns: Json }
       get_table_sizes: {
         Args: never
-        Returns: {
+        Returns: Array<{
           index_size: string
           row_count: number
           table_name: string
           table_size: string
-        }[]
+        }>
       }
       get_unread_alert_count: { Args: { p_user_id: string }; Returns: number }
       get_user_role: {
@@ -2062,7 +2062,7 @@ export type Database = {
       }
       optimize_production_schedule: {
         Args: { max_duration_hours?: number; target_date: string }
-        Returns: {
+        Returns: Array<{
           estimated_duration: number
           ingredient_availability: boolean
           priority_score: number
@@ -2070,7 +2070,7 @@ export type Database = {
           recipe_id: string
           recipe_name: string
           suggested_quantity: number
-        }[]
+        }>
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
@@ -2100,11 +2100,11 @@ export type Database = {
       }
       validate_data_integrity: {
         Args: never
-        Returns: {
+        Returns: Array<{
           check_name: string
           details: string
           status: string
-        }[]
+        }>
       }
     }
     Enums: {

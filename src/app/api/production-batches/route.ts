@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/type-guards'
-import { createClient as createSupabaseClient } from '@/utils/supabase';
+import { createClient } from '@/utils/supabase/server';
 
 export async function GET() {
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     
     const { data: batches, error } = await supabase
       .from('productions')
@@ -17,19 +17,19 @@ export async function GET() {
     if (error) {throw error;}
 
     return NextResponse.json(batches);
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const body = await request.json();
 
     const { data: batch, error } = await supabase
       .from('productions')
-      .insert([body] as any)
+      .insert([body])
       .select(`
         *,
         recipe:recipes(name)
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     if (error) {throw error;}
 
     return NextResponse.json(batch, { status: 201 });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
   }
 }

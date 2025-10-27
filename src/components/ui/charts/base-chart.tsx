@@ -3,17 +3,16 @@
  * Shared chart container with mobile optimizations
  */
 
-import * as React from 'react'
-import { useState } from 'react'
+import { type ReactNode, React, useState } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import { Maximize2, Minimize2, Download, Share2, TrendingDown, TrendingUp } from 'lucide-react'
 import { Badge } from '../badge'
 import { Button } from '../button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../card'
-import { BaseMobileChartProps } from './types'
+import type { BaseMobileChartProps } from './types'
 
-function BaseMobileChart({
+const BaseMobileChart = ({
   data,
   title,
   description,
@@ -24,21 +23,21 @@ function BaseMobileChart({
   actions,
   trend,
   children
-}: BaseMobileChartProps & { children: React.ReactNode }) {
+}: BaseMobileChartProps & { children: ReactNode }) => {
   const { isMobile } = useResponsive()
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const handleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
+    void setIsFullscreen(!isFullscreen)
   }
 
   const getTrendColor = () => {
-    if (!trend) return 'secondary'
+    if (!trend) {return 'secondary'}
     return trend.value > 0 ? 'default' : 'destructive'
   }
 
   const getTrendIcon = () => {
-    if (!trend) return null
+    if (!trend) {return null}
     return trend.value > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />
   }
 

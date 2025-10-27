@@ -1,12 +1,12 @@
 // Shared business logic components and utilities
 
-import * as React from 'react'
-import { useState, useMemo } from 'react'
+import { type ReactNode, useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/lib/utils'
 import {
   TrendingUp,
   TrendingDown,
@@ -48,12 +48,12 @@ interface InventoryAlertsProps {
   className?: string
 }
 
-export function InventoryAlerts({
+export const InventoryAlerts = ({
   alerts,
   onResolve,
   onViewItem,
   className = ""
-}: InventoryAlertsProps) {
+}: InventoryAlertsProps) => {
   const severityColors = {
     low: 'bg-yellow-100 text-yellow-800',
     medium: 'bg-orange-100 text-orange-800',
@@ -87,11 +87,10 @@ export function InventoryAlerts({
       {alerts.map((alert) => {
         const Icon = typeIcons[alert.type]
         return (
-          <Alert key={alert.id} className={`border-l-4 ${
-            alert.severity === 'critical' ? 'border-red-500' :
-            alert.severity === 'high' ? 'border-orange-500' :
-            'border-yellow-500'
-          }`}>
+          <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
+              alert.severity === 'high' ? 'border-orange-500' :
+                'border-yellow-500'
+            }`}>
             <Icon className="h-4 w-4" />
             <AlertDescription>
               <div className="flex items-start justify-between">
@@ -147,28 +146,28 @@ interface StockLevelIndicatorProps {
   className?: string
 }
 
-export function StockLevelIndicator({
+export const StockLevelIndicator = ({
   currentStock,
   minStock,
   maxStock,
   unit,
   showProgress = true,
   className = ""
-}: StockLevelIndicatorProps) {
+}: StockLevelIndicatorProps) => {
   const percentage = maxStock ? (currentStock / maxStock) * 100 : (currentStock / (minStock * 2)) * 100
   const clampedPercentage = Math.min(Math.max(percentage, 0), 100)
 
   const getStatusColor = () => {
-    if (currentStock <= 0) return 'bg-red-500'
-    if (currentStock <= minStock) return 'bg-orange-500'
-    if (maxStock && currentStock >= maxStock) return 'bg-blue-500'
+    if (currentStock <= 0) {return 'bg-red-500'}
+    if (currentStock <= minStock) {return 'bg-orange-500'}
+    if (maxStock && currentStock >= maxStock) {return 'bg-blue-500'}
     return 'bg-green-500'
   }
 
   const getStatusText = () => {
-    if (currentStock <= 0) return 'Out of Stock'
-    if (currentStock <= minStock) return 'Low Stock'
-    if (maxStock && currentStock >= maxStock) return 'Over Stock'
+    if (currentStock <= 0) {return 'Out of Stock'}
+    if (currentStock <= minStock) {return 'Low Stock'}
+    if (maxStock && currentStock >= maxStock) {return 'Over Stock'}
     return 'In Stock'
   }
 
@@ -211,18 +210,17 @@ interface MetricCardProps {
     label: string
     trend: 'up' | 'down' | 'neutral'
   }
-  icon?: React.ReactNode
+  icon?: ReactNode
   className?: string
 }
 
-export function MetricCard({
+export const MetricCard = ({
   title,
   value,
   change,
   icon,
   className = ""
-}: MetricCardProps) {
-  return (
+}: MetricCardProps) => (
     <Card className={className}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
@@ -237,11 +235,10 @@ export function MetricCard({
               <div className="flex items-center mt-2 text-sm">
                 {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500 mr-1" />}
                 {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
-                <span className={`${
-                  change.trend === 'up' ? 'text-green-600' :
-                  change.trend === 'down' ? 'text-red-600' :
-                  'text-muted-foreground'
-                }`}>
+                <span className={`${change.trend === 'up' ? 'text-green-600' :
+                    change.trend === 'down' ? 'text-red-600' :
+                      'text-muted-foreground'
+                  }`}>
                   {change.value > 0 && '+'}{change.value}% {change.label}
                 </span>
               </div>
@@ -256,7 +253,6 @@ export function MetricCard({
       </CardContent>
     </Card>
   )
-}
 
 // Profitability Calculator Component
 interface ProfitabilityData {
@@ -273,11 +269,11 @@ interface ProfitabilityCalculatorProps {
   className?: string
 }
 
-export function ProfitabilityCalculator({
+export const ProfitabilityCalculator = ({
   data,
   showBreakdown = true,
   className = ""
-}: ProfitabilityCalculatorProps) {
+}: ProfitabilityCalculatorProps) => {
   const calculations = useMemo(() => {
     const grossProfit = data.revenue - data.costOfGoodsSold
     const grossMargin = data.revenue > 0 ? (grossProfit / data.revenue) * 100 : 0
@@ -389,12 +385,12 @@ interface SalesPerformanceChartProps {
   className?: string
 }
 
-export function SalesPerformanceChart({
+export const SalesPerformanceChart = ({
   data,
   period,
   showTargets = false,
   className = ""
-}: SalesPerformanceChartProps) {
+}: SalesPerformanceChartProps) => {
   const maxSales = Math.max(...data.map(d => d.sales))
   const maxTarget = showTargets && data.some(d => d.target)
     ? Math.max(...data.map(d => d.target || 0))
@@ -503,11 +499,11 @@ interface CustomerInsightsProps {
   className?: string
 }
 
-export function CustomerInsights({
+export const CustomerInsights = ({
   insights,
   onViewCustomer,
   className = ""
-}: CustomerInsightsProps) {
+}: CustomerInsightsProps) => {
   const typeConfig = {
     high_value: { icon: DollarSign, color: 'text-green-600', bgColor: 'bg-green-100' },
     frequent: { icon: ShoppingCart, color: 'text-blue-600', bgColor: 'bg-blue-100' },

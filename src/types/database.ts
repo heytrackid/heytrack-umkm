@@ -14,8 +14,6 @@ export type {
     Enums, 
     ExpensesTable, 
     FinancialRecordsTable, 
-    HPPAlertsTable, 
-    HPPSnapshotsTable, 
     IngredientPurchasesTable, 
     IngredientsTable,
     InventoryAlertsTable,
@@ -51,22 +49,6 @@ export type {
     UserRole, 
     WhatsAppTemplatesTable
 } from './index'
-
-// Re-export HPP tracking types
-export type {
-    AffectedComponents,
-    ComponentChange,
-    CostBreakdown,
-    HPPAlert,
-    HPPComparison,
-    HPPExportData,
-    HPPRecommendation,
-    HPPSnapshot,
-    HPPTrendData,
-    IngredientCost,
-    OperationalCost,
-    TimePeriod
-} from './hpp-tracking'
 
 export type {
     Json

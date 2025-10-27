@@ -1,4 +1,4 @@
-import { ORDER_PRIORITIES, ORDER_STATUS_CONFIG } from '../constants'
+import { ORDER_PRIORITIES, ORDER_STATUS_CONFIG } from '@/lib/constants'
 
 /**
  * Get status information for an order
@@ -31,7 +31,7 @@ interface OrderItemWithPrice {
 /**
  * Calculate order totals
  */
-export function calculateOrderTotals(orderItems: OrderItemWithPrice[], discount: number = 0, taxRate: number = 0, deliveryFee: number = 0) {
+export function calculateOrderTotals(orderItems: OrderItemWithPrice[], discount = 0, taxRate = 0, deliveryFee = 0) {
   const subtotal = orderItems.reduce((sum, item) => sum + item.total_price, 0)
   const taxAmount = subtotal * (taxRate / 100)
   const totalAmount = subtotal - discount + taxAmount + deliveryFee

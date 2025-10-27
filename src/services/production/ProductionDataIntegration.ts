@@ -24,15 +24,15 @@ export class ProductionDataIntegration {
   ): Promise<ProductionMetrics> {
     try {
       const params = new URLSearchParams()
-      if (startDate) params.append('start_date', startDate)
-      if (endDate) params.append('end_date', endDate)
+      if (startDate) {params.append('start_date', startDate)}
+      if (endDate) {params.append('end_date', endDate)}
 
       const response = await fetch(`/api/production/metrics?${params}`)
-      if (!response.ok) throw new Error('Failed to fetch metrics')
+      if (!response.ok) {throw new Error('Failed to fetch metrics')}
       
       return await response.json()
-    } catch (error) {
-      apiLogger.error({ error }, 'Error fetching production metrics')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error fetching production metrics')
       return {
         total_batches: 0,
         completed_batches: 0,
@@ -52,8 +52,8 @@ export class ProductionDataIntegration {
         method: 'POST'
       })
       return response.ok
-    } catch (error) {
-      apiLogger.error({ error }, 'Error syncing with inventory')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error syncing with inventory')
       return false
     }
   }
@@ -69,8 +69,8 @@ export class ProductionDataIntegration {
         body: JSON.stringify({ order_id: orderId })
       })
       return response.ok
-    } catch (error) {
-      apiLogger.error({ error }, 'Error linking batch to order')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error linking batch to order')
       return false
     }
   }

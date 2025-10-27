@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Bell } from 'lucide-react'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 interface NotificationSettingsProps {
   settings: AppSettingsState
@@ -14,9 +14,7 @@ interface NotificationSettingsProps {
 /**
  * Notification settings component
  */
-export function NotificationSettings({ settings, onSettingChange }: NotificationSettingsProps) {
-  
-  return (
+export const NotificationSettings = ({ settings, onSettingChange }: NotificationSettingsProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -118,4 +116,3 @@ export function NotificationSettings({ settings, onSettingChange }: Notification
       </CardContent>
     </Card>
   )
-}

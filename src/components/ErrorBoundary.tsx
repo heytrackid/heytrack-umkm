@@ -1,8 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import type { ErrorInfo, ReactNode } from 'react';
-import { Component } from 'react'
+import { Component, type ComponentType, type ErrorInfo, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
@@ -38,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    apiLogger.error({ error: error, errorInfo }, 'Error caught by boundary:')
+    apiLogger.error({ error, errorInfo }, 'Error caught by boundary:')
     
     this.setState({
       error,
@@ -138,7 +136,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
 // HOC for wrapping components with error boundary
 export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
+  Component: ComponentType<P>,
   fallback?: ReactNode
 ) {
   return function WithErrorBoundaryComponent(props: P) {

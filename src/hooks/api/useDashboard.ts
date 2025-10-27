@@ -169,8 +169,8 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
       },
       lastUpdated: Date.now()
     }
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching dashboard stats:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching dashboard stats:')
     
     // Return default/empty data on error
     return {
@@ -217,8 +217,8 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
     }
     
     return weekData
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching weekly sales:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching weekly sales:')
     return []
   }
 }
@@ -229,34 +229,28 @@ const fetchTopProducts = async (): Promise<TopProductsData[]> => {
     // This would need to be implemented based on your order_items and recipes schema
     // For now, return empty array since we're removing mock data
     return []
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching top products:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching top products:')
     return []
   }
 }
 
 // Hooks
-export const useDashboardStats = () => {
-  return useQuery({
+export const useDashboardStats = () => useQuery({
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
     staleTime: 30 * 1000, // 30 seconds
     refetchInterval: 60 * 1000, // Refetch every minute
   })
-}
 
-export const useWeeklySales = () => {
-  return useQuery({
+export const useWeeklySales = () => useQuery({
     queryKey: ['dashboard', 'weekly-sales'],
     queryFn: fetchWeeklySales,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
-}
 
-export const useTopProducts = () => {
-  return useQuery({
+export const useTopProducts = () => useQuery({
     queryKey: ['dashboard', 'top-products'],
     queryFn: fetchTopProducts,
     staleTime: 10 * 60 * 1000, // 10 minutes
   })
-}

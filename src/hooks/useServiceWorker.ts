@@ -45,8 +45,6 @@ export function useServiceWorker() {
           scope: '/'
         })
 
-        console.log('[SW] Registered:', registration.scope)
-
         setState(prev => ({
           ...prev,
           isRegistered: true,
@@ -73,7 +71,6 @@ export function useServiceWorker() {
 
         // Handle controller change (new SW activated)
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('[SW] New service worker activated')
           setState(prev => ({
             ...prev,
             isActive: true,
@@ -82,7 +79,6 @@ export function useServiceWorker() {
         })
 
       } catch (error) {
-        console.error('[SW] Registration failed:', error)
         setState(prev => ({
           ...prev,
           error: error instanceof Error ? error.message : 'Service worker registration failed'
@@ -115,8 +111,7 @@ export function useServiceWorker() {
         // Timeout after 5 seconds
         setTimeout(() => resolve(null), 5000)
       })
-    } catch (error) {
-      console.error('[SW] Failed to get cache stats:', error)
+    } catch (err) {
       return null
     }
   }, [])
@@ -124,12 +119,12 @@ export function useServiceWorker() {
   // Update cache stats
   const updateCacheStats = useCallback(async () => {
     const stats = await getCacheStats()
-    setCacheStats(stats)
+    void setCacheStats(stats)
   }, [getCacheStats])
 
   // Update service worker
   const updateServiceWorker = useCallback(async () => {
-    if (!('serviceWorker' in navigator)) return
+    if (!('serviceWorker' in navigator)) {return}
 
     try {
       const registration = await navigator.serviceWorker.ready
@@ -138,7 +133,6 @@ export function useServiceWorker() {
       // Reload page to activate new SW
       window.location.reload()
     } catch (error) {
-      console.error('[SW] Update failed:', error)
       setState(prev => ({
         ...prev,
         error: 'Failed to update service worker'
@@ -148,31 +142,29 @@ export function useServiceWorker() {
 
   // Skip waiting for update
   const skipWaiting = useCallback(async () => {
-    if (!('serviceWorker' in navigator)) return
+    if (!('serviceWorker' in navigator)) {return}
 
     try {
       const registration = await navigator.serviceWorker.ready
       if (registration.waiting) {
         registration.waiting.postMessage({ type: 'SKIP_WAITING' })
       }
-    } catch (error) {
-      console.error('[SW] Skip waiting failed:', error)
+    } catch (err) {
+      // Skip waiting failed silently
     }
   }, [])
 
   // Clear all caches
   const clearAllCaches = useCallback(async () => {
-    if (!('caches' in window)) return
+    if (!('caches' in window)) {return}
 
     try {
       const cacheNames = await caches.keys()
       await Promise.all(
         cacheNames.map(cacheName => caches.delete(cacheName))
       )
-      console.log('[SW] All caches cleared')
       await updateCacheStats()
     } catch (error) {
-      console.error('[SW] Clear caches failed:', error)
       setState(prev => ({
         ...prev,
         error: 'Failed to clear caches'
@@ -182,7 +174,7 @@ export function useServiceWorker() {
 
   // Update cache stats on mount
   useEffect(() => {
-    updateCacheStats()
+    void updateCacheStats()
   }, [updateCacheStats])
 
   return {

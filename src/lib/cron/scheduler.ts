@@ -35,8 +35,8 @@ export class CronScheduler {
           job.lastRun = now
           cronLogger.info({}, `Completed job: ${name}`)
         }
-      } catch (error) {
-        cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, `Error running job: ${name}`)
+      } catch (err) {
+        cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, `Error running job: ${name}`)
       }
     }
   }
@@ -48,7 +48,7 @@ export class CronScheduler {
     // This is a simplified implementation
     // In production, use a library like node-cron for proper scheduling
 
-    if (!job.lastRun) return true
+    if (!job.lastRun) {return true}
 
     const minutesSinceLastRun = (now.getTime() - job.lastRun.getTime()) / (1000 * 60)
 

@@ -5,8 +5,8 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { dbLogger } from '@/lib/logger'
-import type { Ingredient, SyncEvent } from '../data-synchronization/types'
-import { syncEmitter } from '../data-synchronization/sync-events'
+import type { Ingredient, SyncEvent } from '@/lib/data-synchronization/types'
+import { syncEmitter } from '@/lib/data-synchronization/sync-events'
 
 interface IngredientsStore {
   // Data

@@ -167,7 +167,7 @@ export default function SmartNotificationCenter({
         if (soundEnabled && formattedNotifications.some(n => n.type === 'critical')) {
           playNotificationSound('critical')
         }
-      } catch (error: unknown) {
+      } catch (err: unknown) {
         uiLogger.error({ err: error }, 'Error generating notifications')
       }
     }
@@ -180,10 +180,10 @@ export default function SmartNotificationCenter({
 
     const interval = setInterval(() => {
       // Use a fresh timestamp for interval-based updates
-      setNotifications(prev => {
+      setNotifications(prev => 
         // Just update timestamps for existing notifications to show they're fresh
-        return prev.map(notif => ({ ...notif, timestamp: new Date() }))
-      })
+         prev.map(notif => ({ ...notif, timestamp: new Date() }))
+      )
     }, 30000) // Refresh every 30 seconds
 
     return () => clearInterval(interval)
@@ -349,8 +349,8 @@ export default function SmartNotificationCenter({
                     .sort((a, b) => {
                       // Sort by priority then timestamp
                       const priorityOrder = { high: 3, medium: 2, low: 1 }
-                      const aPriority = priorityOrder[a.priority as keyof typeof priorityOrder] || 0
-                      const bPriority = priorityOrder[b.priority as keyof typeof priorityOrder] || 0
+                      const aPriority = priorityOrder[a.priority] || 0
+                      const bPriority = priorityOrder[b.priority] || 0
 
                       if (aPriority !== bPriority) {
                         return bPriority - aPriority

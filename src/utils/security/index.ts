@@ -45,7 +45,7 @@ export class InputSanitizer {
         throw new Error('Invalid protocol')
       }
       return parsed.toString()
-    } catch {
+    } catch (error) {
       throw new Error('Invalid URL')
     }
   }
@@ -75,7 +75,7 @@ export class InputSanitizer {
 export class RateLimiter {
   private static requests = new Map<string, number[]>()
 
-  static checkLimit(identifier: string, maxRequests: number = 100, windowMs: number = 60000): boolean {
+  static checkLimit(identifier: string, maxRequests = 100, windowMs = 60000): boolean {
     const now = Date.now()
     const windowStart = now - windowMs
 
@@ -97,13 +97,13 @@ export class RateLimiter {
     return true
   }
 
-  static getRemainingRequests(identifier: string, maxRequests: number = 100): number {
+  static getRemainingRequests(identifier: string, maxRequests = 100): number {
     const requests = this.requests.get(identifier) || []
     return Math.max(0, maxRequests - requests.length)
   }
 
   // Clean up old entries (call this periodically)
-  static cleanup(maxAge: number = 3600000): void { // 1 hour default
+  static cleanup(maxAge = 3600000): void { // 1 hour default
     const cutoff = Date.now() - maxAge
     for (const [key, requests] of this.requests.entries()) {
       const validRequests = requests.filter(time => time > cutoff)

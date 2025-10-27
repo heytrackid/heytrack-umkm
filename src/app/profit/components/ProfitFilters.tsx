@@ -3,7 +3,6 @@
  * Filter controls for profit report (period selection, date range)
  */
 
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,8 +22,7 @@ interface ProfitFiltersProps {
   isMobile: boolean
 }
 
-export function ProfitFilters({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) {
-  return (
+export const ProfitFilters = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
@@ -85,4 +83,3 @@ export function ProfitFilters({ filters, onFiltersChange, onApplyFilters, isMobi
       </CardContent>
     </Card>
   )
-}

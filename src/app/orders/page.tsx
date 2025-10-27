@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useState } from 'react'
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb';
 import AppLayout from '@/components/layout/app-layout'
@@ -62,18 +61,18 @@ export default function OrdersPage() {
 
   // Handle order actions
   const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order)
-    setCurrentView('detail')
+    void setSelectedOrder(order)
+    void setCurrentView('detail')
   }
 
   const handleEditOrder = (order: Order) => {
-    setSelectedOrder(order)
-    setCurrentView('edit')
+    void setSelectedOrder(order)
+    void setCurrentView('edit')
   }
 
   const handleAddOrder = () => {
-    setSelectedOrder(null)
-    setCurrentView('add')
+    void setSelectedOrder(null)
+    void setCurrentView('add')
   }
 
   const handleDeleteOrder = async (orderId: string) => {
@@ -88,14 +87,14 @@ export default function OrdersPage() {
       : await createOrder(orderData)
     
     if (success) {
-      setCurrentView('list')
-      setSelectedOrder(null)
+      void setCurrentView('list')
+      void setSelectedOrder(null)
     }
   }
 
   const handleCancel = () => {
-    setCurrentView('list')
-    setSelectedOrder(null)
+    void setCurrentView('list')
+    void setSelectedOrder(null)
   }
 
   // Breadcrumb items
@@ -109,7 +108,7 @@ export default function OrdersPage() {
       items.push({
         label: currentView === 'add' ? 'Tambah Pesanan' :
                currentView === 'edit' ? 'Edit Pesanan' : 'Detail Pesanan',
-        href: currentView === 'add' ? '/orders/new' : undefined
+        href: currentView === 'add' ? '/orders/new' : ''
       })
     }
 

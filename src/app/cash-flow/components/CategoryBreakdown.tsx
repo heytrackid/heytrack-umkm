@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { CashFlowSummary } from '../constants'
 
@@ -9,7 +8,7 @@ interface CategoryBreakdownProps {
 }
 
 export default function CategoryBreakdown({ summary, formatCurrency, isMobile }: CategoryBreakdownProps) {
-  if (!summary) {return null}
+  if (!summary) { return null }
 
   const hasIncomeData = Object.keys(summary.income_by_category || {}).length > 0
   const hasExpenseData = Object.keys(summary.expenses_by_category || {}).length > 0

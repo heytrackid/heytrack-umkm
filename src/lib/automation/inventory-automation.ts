@@ -30,7 +30,7 @@ export class InventoryAutomation {
         status: this.getInventoryStatus(daysRemaining, ingredient.current_stock ?? 0, ingredient.min_stock ?? 0),
         daysRemaining: Math.floor(daysRemaining),
         reorderRecommendation: {
-          shouldReorder: ingredient.current_stock ?? 0 <= reorderPoint,
+          shouldReorder: ingredient.current_stock ?? reorderPoint >= 0,
           quantity: optimalOrderQuantity,
           urgency: this.getReorderUrgency(daysRemaining),
           estimatedCost: optimalOrderQuantity * ingredient.price_per_unit
@@ -125,7 +125,7 @@ export class InventoryAutomation {
   predictInventoryNeeds(
     ingredients: Ingredient[],
     historicalUsage: Record<string, Array<{ date: string; quantity: number }>>,
-    forecastDays: number = 30
+    forecastDays = 30
   ) {
     return ingredients.map(ingredient => {
       const usage = historicalUsage[ingredient.id] || []

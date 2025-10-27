@@ -1,7 +1,6 @@
 import { triggerWorkflow } from '@/lib/automation-engine'
 import { createServiceRoleClient } from '@/utils/supabase'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { apiLogger } from '@/lib/logger'
 // PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
@@ -31,7 +30,7 @@ export async function PATCH(
 
     if (!validStatuses.includes(status)) {
       return NextResponse.json(
-        { error: 'Invalid status. Must be one of: ' + validStatuses.join(', ') },
+        { error: `Invalid status. Must be one of: ${  validStatuses.join(', ')}` },
         { status: 400 }
       )
     }
@@ -65,7 +64,7 @@ export async function PATCH(
           category: 'Revenue',
           amount: (currentOrder as any).total_amount,
           date: (currentOrder as any).delivery_date || (currentOrder as any).order_date || new Date().toISOString().split('T')[0],
-          reference: `Order #${(currentOrder as any).order_no}${(currentOrder as any).customer_name ? ' - ' + (currentOrder as any).customer_name : ''}`,
+          reference: `Order #${(currentOrder as any).order_no}${(currentOrder as any).customer_name ? ` - ${  (currentOrder as any).customer_name}` : ''}`,
           description: `Income from order ${(currentOrder as any).order_no}`,
           user_id: (currentOrder as any).user_id
         })
@@ -88,11 +87,11 @@ export async function PATCH(
     const { data: updatedOrder, error: updateError } = await supabase
       .from('orders')
       .update({
-        status: status,
+        status,
         updated_at: new Date().toISOString(),
-        ...(notes && { notes: notes }),
+        ...(notes && { notes }),
         ...(incomeRecordId && { financial_record_id: incomeRecordId })
-      } as any)
+      })
       .eq('id', orderId)
       .select('*')
       .single()
@@ -171,8 +170,8 @@ export async function PATCH(
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in order status update:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in order status update:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -221,8 +220,8 @@ export async function GET(
       status_info: statusInfo
     })
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error getting order status:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error getting order status:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

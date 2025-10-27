@@ -5,12 +5,12 @@
  */
 export function formatCurrency(
   amount: number | string,
-  currency: string = 'IDR',
-  locale: string = 'id-ID'
+  currency = 'IDR',
+  locale = 'id-ID'
 ): string {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
 
-  if (isNaN(numAmount)) return 'Rp 0'
+  if (isNaN(numAmount)) {return 'Rp 0'}
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -72,7 +72,7 @@ export function formatDate(
 
 export function formatTime(
   date: string | Date | number,
-  locale: string = 'id-ID'
+  locale = 'id-ID'
 ): string {
   const dateObj = new Date(date)
   return new Intl.DateTimeFormat(locale, {
@@ -82,7 +82,7 @@ export function formatTime(
 
 export function formatRelativeTime(
   date: string | Date | number,
-  locale: string = 'id-ID'
+  locale = 'id-ID'
 ): string {
   const dateObj = new Date(date)
   const now = new Date()
@@ -93,11 +93,11 @@ export function formatRelativeTime(
 
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
 
-  if (diffInMinutes < 1) return 'Baru saja'
-  if (diffInMinutes < 60) return rtf.format(-diffInMinutes, 'minute')
-  if (diffInHours < 24) return rtf.format(-diffInHours, 'hour')
-  if (diffInDays < 7) return rtf.format(-diffInDays, 'day')
-  if (diffInDays < 30) return rtf.format(-Math.floor(diffInDays / 7), 'week')
+  if (diffInMinutes < 1) {return 'Baru saja'}
+  if (diffInMinutes < 60) {return rtf.format(-diffInMinutes, 'minute')}
+  if (diffInHours < 24) {return rtf.format(-diffInHours, 'hour')}
+  if (diffInDays < 7) {return rtf.format(-diffInDays, 'day')}
+  if (diffInDays < 30) {return rtf.format(-Math.floor(diffInDays / 7), 'week')}
 
   return formatDate(dateObj, { locale, format: 'medium' })
 }
@@ -169,12 +169,12 @@ export function getStatusText(status: string): string {
  * Calculation utilities
  */
 export function calculatePercentage(part: number, total: number): number {
-  if (total === 0) return 0
+  if (total === 0) {return 0}
   return Math.round((part / total) * 100)
 }
 
 export function calculateMargin(sellingPrice: number, costPrice: number): number {
-  if (sellingPrice === 0) return 0
+  if (sellingPrice === 0) {return 0}
   return ((sellingPrice - costPrice) / sellingPrice) * 100
 }
 
@@ -186,13 +186,13 @@ export function calculateProfit(sellingPrice: number, costPrice: number): number
  * String utilities
  */
 export function capitalizeFirst(str: string): string {
-  if (!str) return str
+  if (!str) {return str}
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 }
 
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength) + '...'
+  if (text.length <= maxLength) {return text}
+  return `${text.slice(0, maxLength)  }...`
 }
 
 export function slugify(text: string): string {
@@ -242,8 +242,8 @@ export function sortBy<T>(
     const aVal = keyFn(a)
     const bVal = keyFn(b)
 
-    if (aVal < bVal) return direction === 'asc' ? -1 : 1
-    if (aVal > bVal) return direction === 'asc' ? 1 : -1
+    if (aVal < bVal) {return direction === 'asc' ? -1 : 1}
+    if (aVal > bVal) {return direction === 'asc' ? 1 : -1}
     return 0
   })
 }
@@ -258,7 +258,7 @@ export function debounce<T extends (...args: any[]) => any>(
   let timeout: NodeJS.Timeout | null = null
 
   return (...args: Parameters<T>) => {
-    if (timeout) clearTimeout(timeout)
+    if (timeout) {clearTimeout(timeout)}
     timeout = setTimeout(() => func(...args), wait)
   }
 }
@@ -271,41 +271,41 @@ export function safeLocalStorage() {
 
   return {
     get: (key: string, defaultValue: any = null) => {
-      if (!isAvailable) return defaultValue
+      if (!isAvailable) {return defaultValue}
       try {
         const item = window.localStorage.getItem(key)
         return item ? JSON.parse(item) : defaultValue
-      } catch {
+      } catch (error) {
         return defaultValue
       }
     },
 
     set: (key: string, value: any) => {
-      if (!isAvailable) return false
+      if (!isAvailable) {return false}
       try {
         window.localStorage.setItem(key, JSON.stringify(value))
         return true
-      } catch {
+      } catch (error) {
         return false
       }
     },
 
     remove: (key: string) => {
-      if (!isAvailable) return false
+      if (!isAvailable) {return false}
       try {
         window.localStorage.removeItem(key)
         return true
-      } catch {
+      } catch (error) {
         return false
       }
     },
 
     clear: () => {
-      if (!isAvailable) return false
+      if (!isAvailable) {return false}
       try {
         window.localStorage.clear()
         return true
-      } catch {
+      } catch (error) {
         return false
       }
     }
@@ -316,13 +316,13 @@ export function safeLocalStorage() {
  * File utilities
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B'
+  if (bytes === 0) {return '0 B'}
 
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))  } ${  sizes[i]}`
 }
 
 export function getFileExtension(filename: string): string {

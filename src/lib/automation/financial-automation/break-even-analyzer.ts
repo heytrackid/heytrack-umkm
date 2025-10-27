@@ -100,12 +100,12 @@ export class BreakEvenAnalyzer {
     fixedCosts: number,
     variableCostPerUnit: number,
     pricePerUnit: number,
-    sensitivityRange: number = 0.1
+    sensitivityRange = 0.1
   ) {
     const scenarios = []
     const baseBreakEven = this.calculateBreakEven(fixedCosts, variableCostPerUnit, pricePerUnit)
 
-    if (baseBreakEven.error) return { error: baseBreakEven.error, scenarios: [] }
+    if (baseBreakEven.error) {return { error: baseBreakEven.error, scenarios: [] }}
 
     // Price sensitivity
     for (let change = -sensitivityRange; change <= sensitivityRange; change += sensitivityRange / 5) {

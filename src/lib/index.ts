@@ -21,7 +21,7 @@
 // UTILITIES
 // ============================================================================
 
-export { cn } from '../shared'
+export { cn } from '@/shared'
 export { logger, uiLogger } from './logger'
 
 // ============================================================================
@@ -110,7 +110,7 @@ export {
   PAYMENT_METHODS,
   CATEGORIES,
   UNITS,
-} from '../shared'
+} from '@/shared'
 
 export type {
   BusinessType,
@@ -121,7 +121,7 @@ export type {
   BusinessEntity,
   Address,
   Contact,
-} from '../shared'
+} from '@/shared'
 
 // ============================================================================
 // API CORE

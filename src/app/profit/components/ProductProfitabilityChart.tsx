@@ -3,7 +3,6 @@
  * Interactive chart showing product profitability analysis
  */
 
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import {
   Select,
@@ -15,7 +14,7 @@ import {
 import { BarChart3 } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { ProductChartData, ProfitFilters, PeriodType } from './types'
-import { formatCurrencyAmount } from '../utils/chartData'
+import { formatCurrencyAmount } from '@/app/profit/utils/chartData'
 
 interface ProductProfitabilityChartProps {
   chartData: ProductChartData[]
@@ -25,14 +24,13 @@ interface ProductProfitabilityChartProps {
   isMobile: boolean
 }
 
-export function ProductProfitabilityChart({
+export const ProductProfitabilityChart = ({
   chartData,
   filters,
   onFiltersChange,
   formatCurrency,
   isMobile
-}: ProductProfitabilityChartProps) {
-  return (
+}: ProductProfitabilityChartProps) => (
     <Card>
       {chartData.length === 0 ? (
         <CardContent className="py-12">
@@ -118,15 +116,15 @@ export function ProductProfitabilityChart({
                             <p className="font-medium mb-2">{payload[0].payload.name}</p>
                             <div className="space-y-1 text-sm">
                               <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-blue-500" />
                                 <span>Pendapatan: {formatCurrency(payload[0].value as number)}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-orange-500" />
                                 <span>HPP (COGS): {formatCurrency(payload[1].value as number)}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-green-500" />
                                 <span>Laba: {formatCurrency(payload[2].value as number)}</span>
                               </div>
                             </div>
@@ -170,4 +168,3 @@ export function ProductProfitabilityChart({
       )}
     </Card>
   )
-}

@@ -1,8 +1,7 @@
 // API Security Middleware
 // Rate limiting, input sanitization, and security checks for API routes
 
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { RateLimiter, APISecurity } from '@/utils/security'
 import { apiLogger } from '@/lib/logger'
 
@@ -72,8 +71,8 @@ export function createSecureApiHandler(
 
           // Replace request with sanitized version
           Object.setPrototypeOf(request, sanitizedRequest)
-        } catch (error) {
-          apiLogger.warn({ error }, 'Failed to sanitize request body')
+        } catch (err) {
+          apiLogger.warn({ err }, 'Failed to sanitize request body')
         }
       }
 
@@ -110,9 +109,7 @@ export function withSecurity(
 ) {
   return (
     handler: (request: NextRequest, context?: { params?: Promise<Record<string, string>> }) => Promise<NextResponse> | NextResponse
-  ) => {
-    return createSecureApiHandler(handler, config)
-  }
+  ) => createSecureApiHandler(handler, config)
 }
 
 // Common security configurations

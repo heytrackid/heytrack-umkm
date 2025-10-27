@@ -2,7 +2,7 @@
  * PATCH /api/notifications/[id] - Update notification (mark as read/dismiss)
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 
@@ -25,14 +25,22 @@ export async function PATCH(
       )
     }
 
-    const updateData: any = {}
+    interface NotificationUpdate {
+      is_read?: boolean
+      is_dismissed?: boolean
+      updated_at: string
+    }
+
+    const updateData: NotificationUpdate = {
+      updated_at: new Date().toISOString()
+    }
+    
     if (typeof is_read === 'boolean') {
       updateData.is_read = is_read
     }
     if (typeof is_dismissed === 'boolean') {
       updateData.is_dismissed = is_dismissed
     }
-    updateData.updated_at = new Date().toISOString()
 
     const { data: notification, error } = await supabase
       .from('notifications')
@@ -54,8 +62,8 @@ export async function PATCH(
 
     return NextResponse.json(notification)
 
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in notification update API')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in notification update API')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

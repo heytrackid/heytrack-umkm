@@ -22,7 +22,7 @@ export interface ApiRequestOptions extends RequestInit {
 export class ApiClient {
   private baseUrl: string
 
-  constructor(baseUrl: string = '/api') {
+  constructor(baseUrl = '/api') {
     this.baseUrl = baseUrl
   }
 
@@ -42,8 +42,8 @@ export class ApiClient {
       })
 
       return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+    } catch (err) {
+      return this.handleError(_error)
     }
   }
 
@@ -64,8 +64,8 @@ export class ApiClient {
       })
 
       return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+    } catch (err) {
+      return this.handleError(_error)
     }
   }
 
@@ -86,8 +86,8 @@ export class ApiClient {
       })
 
       return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+    } catch (err) {
+      return this.handleError(_error)
     }
   }
 
@@ -107,8 +107,8 @@ export class ApiClient {
       })
 
       return await this.handleResponse<T>(response)
-    } catch (error) {
-      return this.handleError(error)
+    } catch (err) {
+      return this.handleError(_error)
     }
   }
 
@@ -118,7 +118,7 @@ export class ApiClient {
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
     const url = `${this.baseUrl}${endpoint}`
     
-    if (!params) return url
+    if (!params) {return url}
 
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {

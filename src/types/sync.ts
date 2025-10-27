@@ -14,7 +14,7 @@ export interface SyncEvent {
 }
 
 // Sync tables
-export type SyncEventsTable = {
+export interface SyncEventsTable {
   Row: {
     created_at: string | null
     data: Json
@@ -51,7 +51,7 @@ export type SyncEventsTable = {
   Relationships: []
 }
 
-export type SystemMetricsTable = {
+export interface SystemMetricsTable {
   Row: {
     id: string
     metadata: Json | null
@@ -98,7 +98,7 @@ export interface SystemMetric {
 }
 
 // Sync-related views
-export type RecentSyncEventsView = {
+export interface RecentSyncEventsView {
   Row: {
     created_at: string | null
     data: Json | null

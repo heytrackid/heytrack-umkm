@@ -5,7 +5,7 @@ export type OrderStatus = "PENDING" | "CONFIRMED" | "IN_PROGRESS" | "READY" | "D
 export type PaymentMethod = "CASH" | "BANK_TRANSFER" | "CREDIT_CARD" | "DIGITAL_WALLET" | "OTHER"
 
 // Order tables
-export type OrdersTable = {
+export interface OrdersTable {
   Row: {
     created_at: string | null
     created_by: string | null
@@ -95,7 +95,7 @@ export type OrdersTable = {
   ]
 }
 
-export type OrderItemsTable = {
+export interface OrderItemsTable {
   Row: {
     id: string
     order_id: string
@@ -158,7 +158,7 @@ export type OrderItemsTable = {
   ]
 }
 
-export type PaymentsTable = {
+export interface PaymentsTable {
   Row: {
     amount: number
     created_at: string | null
@@ -205,7 +205,7 @@ export type PaymentsTable = {
 }
 
 // Order-related views
-export type OrderSummaryView = {
+export interface OrderSummaryView {
   Row: {
     created_at: string | null
     customer_address: string | null

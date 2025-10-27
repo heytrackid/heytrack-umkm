@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
 
 import { apiLogger } from '@/lib/logger'
@@ -111,8 +110,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(recipes)
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/recipes:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in GET /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -170,7 +169,7 @@ export async function POST(request: NextRequest) {
     // If ingredients are provided, add them to recipe_ingredients
     if (recipe_ingredients && recipe_ingredients.length > 0) {
       const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
-        recipe_id: (recipe as any).id,
+        recipe_id: (recipe).id,
         ingredient_id: ingredient.ingredient_id || ingredient.bahan_id,
         quantity: ingredient.quantity || ingredient.qty_per_batch,
         unit: ingredient.unit || 'g'
@@ -178,7 +177,7 @@ export async function POST(request: NextRequest) {
 
       const { error: ingredientsError } = await supabase
         .from('recipe_ingredients')
-        .insert(recipeIngredientsToInsert as any)
+        .insert(recipeIngredientsToInsert)
 
       if (ingredientsError) {
         apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
@@ -186,7 +185,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('recipes')
           .delete()
-          .eq('id', (recipe as any).id)
+          .eq('id', (recipe).id)
           .eq('created_by', (user as any).id)
         return NextResponse.json(
           { error: 'Failed to add recipe ingredients' },
@@ -212,7 +211,7 @@ export async function POST(request: NextRequest) {
           )
         )
       `)
-      .eq('id', (recipe as any).id)
+      .eq('id', (recipe).id)
       .eq('created_by', (user as any).id)
       .single()
 
@@ -225,8 +224,8 @@ export async function POST(request: NextRequest) {
     cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe, { status: 201 })
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in POST /api/recipes:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in POST /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -4,8 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { IngredientsCRUD } from '@/components/crud/ingredients-crud';
 import AppLayout from '@/components/layout/app-layout';
-import { StatsCards, StatCardPatterns } from '@/components/ui';
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui';
+import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui'
 import { useSettings } from '@/contexts/settings-context';
 import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
@@ -94,11 +93,17 @@ export default function IngredientsPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <button className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <button 
+              onClick={() => router.push('/ingredients/purchases')}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Pembelian
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+            <button 
+              onClick={() => router.push('/ingredients/new')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Tambah Bahan Baku
             </button>
@@ -111,7 +116,7 @@ export default function IngredientsPage() {
             total: totalIngredients,
             lowStock: lowStockCount,
             outOfStock: outOfStockCount,
-            totalValue: totalValue
+            totalValue
           })} />
         )}
 

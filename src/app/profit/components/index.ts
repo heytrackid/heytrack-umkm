@@ -14,10 +14,10 @@ export { ProfitBreakdown } from './ProfitBreakdown'
 export { ProfitInfoCard } from './ProfitInfoCard'
 
 // Hooks
-export { useProfitData } from '../hooks/useProfitData'
+export { useProfitData } from '@/app/profit/hooks/useProfitData'
 
 // Types
 export type * from './types'
 
 // Utils
-export { useProductChartData, formatCurrencyAmount } from '../utils/chartData'
+export { useProductChartData, formatCurrencyAmount } from '@/app/profit/utils/chartData'

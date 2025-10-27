@@ -3,11 +3,14 @@
  * Workflow automation handlers for inventory-related events
  */
 
-import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '../types'
+import {
+  type WorkflowEventData,
+  type WorkflowResult,
+  type WorkflowContext
+} from '@/lib/automation/types'
+import type { Database } from '@/types/supabase-generated'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/types'
 import type { NotificationsTable } from '@/types/notifications'
 
 export class InventoryWorkflowHandlers {
@@ -92,7 +95,7 @@ export class InventoryWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         ingredientName: ingredient.name,
-        error: getErrorMessage(error)
+        _error: getErrorMessage(error)
       }, 'Failed to process low stock alert')
 
       return {
@@ -132,7 +135,7 @@ export class InventoryWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         ingredientId: event.entityId,
-        error: getErrorMessage(error)
+        _error: getErrorMessage(error)
       }, 'Failed to process out of stock alert')
 
       return {
@@ -225,12 +228,12 @@ export class InventoryWorkflowHandlers {
 
       if (error) {
         automationLogger.error({ error }, 'Failed to create inventory notification')
-        throw error
+        throw err
       }
 
       automationLogger.info({ title: notificationData.title }, 'Inventory notification created successfully')
-    } catch (error: unknown) {
-      automationLogger.error({ error: getErrorMessage(error) }, 'Failed to create inventory notification')
+    } catch (err: unknown) {
+      automationLogger.error({ err: getErrorMessage(err) }, 'Failed to create inventory notification')
       // Don't throw - notification failure shouldn't break the workflow
     }
   }

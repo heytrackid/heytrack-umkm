@@ -3,11 +3,10 @@
  * Small charts for dashboard cards
  */
 
-import * as React from 'react'
-import { memo } from 'react'
+import { React, memo } from 'react'
 import { cn } from '@/lib/utils'
 import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
-import { CHART_COLORS, ChartDataPoint } from './types'
+import { type ChartDataPoint, CHART_COLORS } from './types'
 
 interface MiniChartProps {
   data: ChartDataPoint[]
@@ -22,14 +21,14 @@ interface MiniChartProps {
  * MiniChart - Optimized with React.memo
  * Prevents unnecessary re-renders for dashboard mini charts
  */
-export const MiniChart = memo(function MiniChart({
+export const MiniChart = memo(({
   data,
   type,
   dataKey,
   color = CHART_COLORS.primary[0],
   className,
   height = 60
-}: MiniChartProps) {
+}: MiniChartProps) => {
   const ChartComponent = type === 'line' ? LineChart : type === 'area' ? AreaChart : BarChart
 
   return (
@@ -70,6 +69,4 @@ export const MiniChart = memo(function MiniChart({
       </ResponsiveContainer>
     </div>
   )
-}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => {
-  return prevProps.data === nextProps.data && prevProps.type === nextProps.type
-})
+}, (prevProps: MiniChartProps, nextProps: MiniChartProps) => prevProps.data === nextProps.data && prevProps.type === nextProps.type)

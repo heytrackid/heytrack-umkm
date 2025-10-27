@@ -50,7 +50,7 @@ const variantConfig = {
   }
 }
 
-export function ConfirmationDialog({
+export const ConfirmationDialog = ({
   open,
   onOpenChange,
   title,
@@ -61,7 +61,7 @@ export function ConfirmationDialog({
   onConfirm,
   loading = false,
   icon
-}: ConfirmationDialogProps) {
+}: ConfirmationDialogProps) => {
   const config = variantConfig[variant]
   const IconComponent = icon || config.icon
 
@@ -103,7 +103,7 @@ export function ConfirmationDialog({
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                   Informasi
                 </>
               ) : (
@@ -119,14 +119,12 @@ export function ConfirmationDialog({
 
 // Hook for easy usage
 export function useConfirmationDialog() {
-  const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => {
-    return new Promise<boolean>((resolve) => {
+  const confirm = (options: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => new Promise<boolean>((resolve) => {
       // Implementation akan menggunakan state management untuk dialog
       // Untuk sekarang, kita akan return Promise yang resolve dengan hasil
       const result = window.confirm(`${options.title}\n\n${options.description}`)
       resolve(result)
     })
-  }
 
   return { confirm }
 }

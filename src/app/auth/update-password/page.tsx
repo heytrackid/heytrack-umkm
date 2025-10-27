@@ -12,7 +12,6 @@ import {
 } from '@/lib/auth-errors'
 import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
 import Link from 'next/link'
-import * as React from 'react'
 import { useState, useTransition } from 'react'
 import { updatePassword } from './actions'
 
@@ -50,10 +49,10 @@ export default function UpdatePasswordPage() {
     { label: 'Mengandung angka', met: /\d/.test(password) },
   ]
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError('')
-    setFieldErrors({})
+    void setError('')
+    void setFieldErrors({})
 
     const formData = new FormData(e.currentTarget)
     const pwd = formData.get('password') as string
@@ -72,7 +71,7 @@ export default function UpdatePasswordPage() {
     }
 
     if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors)
+      void setFieldErrors(errors)
       return
     }
 
@@ -80,9 +79,9 @@ export default function UpdatePasswordPage() {
       const result = await updatePassword(formData)
       if (result?.error) {
         const authError = getAuthErrorMessage(result.error)
-        setError(authError)
+        void setError(authError)
       } else if (result?.success) {
-        setSuccess(true)
+        void setSuccess(true)
       }
     })
   }
@@ -93,7 +92,7 @@ export default function UpdatePasswordPage() {
       delete newErrors[field]
       return newErrors
     })
-    setError('')
+    void setError('')
   }
 
   if (success) {
@@ -174,7 +173,7 @@ export default function UpdatePasswordPage() {
                     placeholder="Minimal 8 karakter"
                     value={password}
                     onChange={(e) => {
-                      setPassword(e.target.value)
+                      void setPassword(e.target.value)
                       clearFieldError('password')
                     }}
                     className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
@@ -259,7 +258,7 @@ export default function UpdatePasswordPage() {
                     placeholder="Ulangi password baru"
                     value={confirmPassword}
                     onChange={(e) => {
-                      setConfirmPassword(e.target.value)
+                      void setConfirmPassword(e.target.value)
                       clearFieldError('confirmPassword')
                     }}
                     className={`pl-10 pr-12 h-11 text-base transition-all duration-200 ${fieldErrors.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : ''}`}

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema, DateStringSchema } from '../base-validations'
+import { UUIDSchema, PositiveNumberSchema, NonNegativeNumberSchema, DateStringSchema } from '@/lib/validations/base-validations'
 
 // Order item schemas
 export const OrderItemInsertSchema = z.object({

@@ -94,7 +94,7 @@ export interface OrderItem {
   jumlah: number // maps to quantity
   hargaSatuan: number // maps to unit_price
   subtotal: number // maps to total_price
-  ingredientsUsed?: { ingredientId: string; quantityUsed: number }[] // custom tracking
+  ingredientsUsed?: Array<{ ingredientId: string; quantityUsed: number }> // custom tracking
 }
 
 /**
@@ -139,7 +139,7 @@ export interface Report {
   totalPengeluaran: number
   keuntungan: number
   totalPesanan: number
-  produkTerlaris: { nama: string; terjual: number }[]
+  produkTerlaris: Array<{ nama: string; terjual: number }>
   bahanKritis: string[]
   pelangganAktif: number
   marginRataRata: number
@@ -167,14 +167,14 @@ export interface SyncEvent {
 /**
  * Type mappers for converting between sync format and database format
  */
-export type SyncToDbMapper = {
+export interface SyncToDbMapper {
   ingredient: (sync: Ingredient) => Partial<DbIngredient>
   recipe: (sync: Recipe) => Partial<DbRecipe>
   order: (sync: Order) => Partial<DbOrder>
   customer: (sync: Customer) => Partial<DbCustomer>
 }
 
-export type DbToSyncMapper = {
+export interface DbToSyncMapper {
   ingredient: (db: DbIngredient) => Ingredient
   recipe: (db: DbRecipe) => Recipe
   order: (db: DbOrder) => Order

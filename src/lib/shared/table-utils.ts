@@ -3,8 +3,7 @@
  * Common patterns for data tables, grids, and data display components
  */
 
-import * as React from 'react'
-import { useMemo } from 'react'
+import { type ReactNode, createElement, useMemo, useState } from 'react'
 
 // Table column configuration types
 export interface TableColumn<T = any> {
@@ -14,12 +13,12 @@ export interface TableColumn<T = any> {
   filterable?: boolean
   width?: number | string
   align?: 'left' | 'center' | 'right'
-  render?: (value: any, row: T, index: number) => React.ReactNode
+  render?: (value: any, row: T, index: number) => ReactNode
   format?: (value: any) => string
 }
 
 export interface TableConfig<T = any> {
-  columns: TableColumn<T>[]
+  columns: Array<TableColumn<T>>
   data: T[]
   loading?: boolean
   emptyMessage?: string
@@ -45,8 +44,8 @@ export function sortData<T>(
     const aValue = getNestedValue(a, sortKey as string)
     const bValue = getNestedValue(b, sortKey as string)
 
-    if (aValue < bValue) return direction === 'asc' ? -1 : 1
-    if (aValue > bValue) return direction === 'asc' ? 1 : -1
+    if (aValue < bValue) {return direction === 'asc' ? -1 : 1}
+    if (aValue > bValue) {return direction === 'asc' ? 1 : -1}
     return 0
   })
 }
@@ -56,17 +55,15 @@ export function filterData<T>(
   data: T[],
   filters: Record<string, any>
 ): T[] {
-  return data.filter(item => {
-    return Object.entries(filters).every(([key, filterValue]) => {
-      if (!filterValue || filterValue === '') return true
+  return data.filter(item => Object.entries(filters).every(([key, filterValue]) => {
+      if (!filterValue || filterValue === '') {return true}
 
       const itemValue = getNestedValue(item, key)
       if (typeof itemValue === 'string') {
         return itemValue.toLowerCase().includes(filterValue.toLowerCase())
       }
       return itemValue === filterValue
-    })
-  })
+    }))
 }
 
 // Table pagination utilities
@@ -97,11 +94,11 @@ export function useTableData<T>(
     pageSize?: number
   }
 ) {
-  const [data, setData] = React.useState(initialData)
-  const [sorting, setSorting] = React.useState(config?.initialSort)
-  const [filters, setFilters] = React.useState(config?.initialFilters || {})
-  const [currentPage, setCurrentPage] = React.useState(config?.initialPage || 1)
-  const [pageSize] = React.useState(config?.pageSize || 10)
+  const [data, setData] = useState(initialData)
+  const [sorting, setSorting] = useState(config?.initialSort)
+  const [filters, setFilters] = useState(config?.initialFilters || {})
+  const [currentPage, setCurrentPage] = useState(config?.initialPage || 1)
+  const [pageSize] = useState(config?.pageSize || 10)
 
   // Apply operations in correct order: filter -> sort -> paginate
   const processedData = useMemo(() => {
@@ -119,9 +116,7 @@ export function useTableData<T>(
   }, [data, filters, sorting])
 
   // Apply pagination
-  const paginatedData = useMemo(() => {
-    return paginateData(processedData, currentPage, pageSize)
-  }, [processedData, currentPage, pageSize])
+  const paginatedData = useMemo(() => paginateData(processedData, currentPage, pageSize), [processedData, currentPage, pageSize])
 
   const handleSort = (key: string) => {
     setSorting(prev => {
@@ -147,7 +142,7 @@ export function useTableData<T>(
   }
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
+    void setCurrentPage(page)
   }
 
   return {
@@ -178,50 +173,36 @@ export function useTableData<T>(
 
 // Table cell formatters
 export const tableFormatters = {
-  currency: (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
+  currency: (value: number) => new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR'
-    }).format(value)
-  },
+    }).format(value),
 
-  number: (value: number, decimals: number = 0) => {
-    return value.toLocaleString('id-ID', {
+  number: (value: number, decimals = 0) => value.toLocaleString('id-ID', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
-    })
-  },
+    }),
 
-  percentage: (value: number) => {
-    return `${value.toFixed(1)}%`
-  },
+  percentage: (value: number) => `${value.toFixed(1)}%`,
 
-  date: (value: string | Date) => {
-    return new Intl.DateTimeFormat('id-ID').format(new Date(value))
-  },
+  date: (value: string | Date) => new Intl.DateTimeFormat('id-ID').format(new Date(value)),
 
-  dateTime: (value: string | Date) => {
-    return new Intl.DateTimeFormat('id-ID', {
+  dateTime: (value: string | Date) => new Intl.DateTimeFormat('id-ID', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    }).format(new Date(value))
-  },
+    }).format(new Date(value)),
 
-  boolean: (value: boolean) => {
-    return value ? 'Ya' : 'Tidak'
-  },
+  boolean: (value: boolean) => value ? 'Ya' : 'Tidak',
 
-  truncate: (value: string, length: number = 50) => {
-    return value.length > length ? `${value.slice(0, length)}...` : value
-  }
+  truncate: (value: string, length = 50) => value.length > length ? `${value.slice(0, length)}...` : value
 }
 
 // Common table column configurations
 export const commonColumns = {
-  actions: (render: (row: any) => React.ReactNode) => ({
+  actions: (render: (row: any) => ReactNode) => ({
     key: 'actions',
     header: 'Aksi',
     width: 120,
@@ -229,7 +210,7 @@ export const commonColumns = {
     render
   }),
 
-  status: (key: string = 'status', statusMap?: Record<string, string>) => ({
+  status: (key = 'status', statusMap?: Record<string, string>) => ({
     key,
     header: 'Status',
     width: 100,
@@ -250,7 +231,7 @@ export const commonColumns = {
         }
       }
 
-      return React.createElement('span', {
+      return createElement('span', {
         className: `px-2 py-1 text-xs rounded-full ${getStatusClasses(value)}`
       }, displayValue)
     }
@@ -275,8 +256,8 @@ export const commonColumns = {
 // Table export utilities
 export function exportToCSV<T>(
   data: T[],
-  columns: TableColumn<T>[],
-  filename: string = 'export.csv'
+  columns: Array<TableColumn<T>>,
+  filename = 'export.csv'
 ) {
   const headers = columns.map(col => col.header).join(',')
   const rows = data.map(row =>
@@ -309,7 +290,7 @@ function getNestedValue(obj: any, path: string): any {
 
 // Table selection utilities
 export function useTableSelection<T extends { id: string | number }>(data: T[]) {
-  const [selectedIds, setSelectedIds] = React.useState<Set<string | number>>(new Set())
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set())
 
   const toggleSelect = (id: string | number) => {
     setSelectedIds(prev => {
@@ -327,9 +308,9 @@ export function useTableSelection<T extends { id: string | number }>(data: T[]) 
     setSelectedIds(prev => {
       if (prev.size === data.length) {
         return new Set() // Deselect all
-      } else {
+      } 
         return new Set(data.map(item => item.id)) // Select all
-      }
+      
     })
   }
 
@@ -356,7 +337,7 @@ export function useVirtualScroll<T>(
   itemHeight: number,
   containerHeight: number
 ) {
-  const [scrollTop, setScrollTop] = React.useState(0)
+  const [scrollTop, setScrollTop] = useState(0)
 
   const startIndex = Math.floor(scrollTop / itemHeight)
   const endIndex = Math.min(
@@ -371,8 +352,8 @@ export function useVirtualScroll<T>(
     visibleItems,
     offsetY,
     totalHeight: items.length * itemHeight,
-    onScroll: (event: React.UIEvent<HTMLDivElement>) => {
-      setScrollTop(event.currentTarget.scrollTop)
+    onScroll: (event: UIEvent<HTMLDivElement>) => {
+      void setScrollTop(event.currentTarget.scrollTop)
     }
   }
 }

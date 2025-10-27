@@ -3,35 +3,34 @@
 import AppLayout from '@/components/layout/app-layout'
 import { Badge } from '@/components/ui/badge'
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import type { Database } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DeleteConfirmDialog } from '@/components/ui/confirm-dialog'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { ProfileSkeleton, CardSkeleton } from '@/components/ui'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import {
-    ArrowLeft,
-    Edit,
-    Mail,
-    MapPin,
-    Phone,
-    ShoppingCart,
-    Trash2,
-    TrendingUp,
-    User
+  ArrowLeft,
+  Edit,
+  Mail,
+  MapPin,
+  Phone,
+  ShoppingCart,
+  Trash2,
+  TrendingUp,
+  User
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import * as React from 'react'
 import { use, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
@@ -57,8 +56,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     try {
       await remove(id)
       toast.success('Pelanggan berhasil dihapus')
-      router.push('/customers')
-    } catch (error) {
+      void router.push('/customers')
+    } catch (err) {
       toast.error('Gagal menghapus pelanggan')
     }
   }
@@ -209,7 +208,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Pesanan Terakhir</p>
                   <p className="text-sm font-medium">
-                    {stats.lastOrder 
+                    {stats.lastOrder
                       ? new Date(stats.lastOrder).toLocaleDateString('id-ID')
                       : '-'
                     }
@@ -244,15 +243,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     <div>
                       <p className="font-medium">{order.order_no}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(order.created_at).toLocaleDateString('id-ID')}
+                        {new Date(order.created_at || '').toLocaleDateString('id-ID')}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">{formatCurrency(order.total_amount)}</p>
                       <Badge variant={
                         order.status === 'DELIVERED' ? 'default' :
-                        order.status === 'CANCELLED' ? 'destructive' :
-                        'secondary'
+                          order.status === 'CANCELLED' ? 'destructive' :
+                            'secondary'
                       }>
                         {order.status}
                       </Badge>
@@ -268,7 +267,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           </CardContent>
         </Card>
 
-        <DeleteConfirmDialog
+        <ConfirmDialog
           open={showDeleteConfirm}
           onOpenChange={setShowDeleteConfirm}
           onConfirm={handleDelete}

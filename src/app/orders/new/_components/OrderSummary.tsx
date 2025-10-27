@@ -1,12 +1,11 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { Calculator, Save } from 'lucide-react'
-import * as React from 'react'
-import type { OrderFormData, OrderItem } from '../hooks/useOrderLogic'
+import { Calculator } from 'lucide-react'
+import type { FormEvent } from 'react'
+import type { OrderFormData, OrderItem } from '@/app/orders/new/hooks/useOrderLogic'
 
 interface OrderSummaryProps {
   formData: OrderFormData
@@ -15,7 +14,7 @@ interface OrderSummaryProps {
   taxAmount: number
   totalAmount: number
   isSubmitting: boolean
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (e: FormEvent) => void
   onCancel: () => void
 }
 

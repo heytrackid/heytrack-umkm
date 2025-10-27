@@ -14,7 +14,7 @@ export class PricingOptimizer {
     currentPrice: number,
     currentVolume: number,
     costPerUnit: number,
-    priceElasticity: number = -1.2 // Default price elasticity for food products
+    priceElasticity = -1.2 // Default price elasticity for food products
   ): PricingOptimizationResult {
     const currentProfit = (currentPrice - costPerUnit) * currentVolume
     const priceOptions: PriceOption[] = []

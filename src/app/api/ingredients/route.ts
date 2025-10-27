@@ -13,8 +13,7 @@ import {
   IngredientUpdateSchema
 } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { apiLogger } from '@/lib/logger'

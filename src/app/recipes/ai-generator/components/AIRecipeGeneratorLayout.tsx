@@ -58,12 +58,12 @@ export default function AIRecipeGeneratorPage() {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      router.push('/auth/login')
+      void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
   useEffect(() => {
-    fetchIngredients()
+    void fetchIngredients()
   }, [])
 
   const fetchIngredients = async () => {
@@ -74,7 +74,7 @@ export default function AIRecipeGeneratorPage() {
       .order('name')
 
     if (!error && data) {
-      setAvailableIngredients(data)
+      void setAvailableIngredients(data)
     }
   }
 
@@ -88,8 +88,8 @@ export default function AIRecipeGeneratorPage() {
       return
     }
 
-    setLoading(true)
-    setGeneratedRecipe(null)
+    void setLoading(true)
+    void setGeneratedRecipe(null)
 
     try {
       const supabase = createSupabaseClient()
@@ -121,13 +121,13 @@ export default function AIRecipeGeneratorPage() {
       }
 
       const data = await response.json()
-      setGeneratedRecipe(data.recipe)
+      void setGeneratedRecipe(data.recipe)
       
       toast({
         title: '✨ Resep berhasil dibuat!',
         description: 'AI telah meracik resep profesional untuk Anda',
       })
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       apiLogger.error({ error }, 'Error generating recipe:')
       toast({
         title: 'Gagal generate resep',
@@ -135,7 +135,7 @@ export default function AIRecipeGeneratorPage() {
         variant: 'destructive',
       })
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -199,13 +199,13 @@ export default function AIRecipeGeneratorPage() {
       })
 
       // Reset form
-      setGeneratedRecipe(null)
-      setProductName('')
-      setServings(2)
-      setTargetPrice('')
-      setSelectedIngredients([])
+      void setGeneratedRecipe(null)
+      void setProductName('')
+      void setServings(2)
+      void setTargetPrice('')
+      void setSelectedIngredients([])
 
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       apiLogger.error({ error }, 'Error saving recipe:')
       toast({
         title: 'Gagal menyimpan resep',
@@ -216,7 +216,7 @@ export default function AIRecipeGeneratorPage() {
   }
 
   const handleGenerateAgain = () => {
-    setGeneratedRecipe(null)
+    void setGeneratedRecipe(null)
   }
 
   // Show loading state while auth is initializing

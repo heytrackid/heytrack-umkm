@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { DateRangeQuerySchema } from '@/lib/validations/api-validations'
 import type { Database } from '@/types'
 
@@ -145,8 +144,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error generating profit report:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error generating profit report:')
     return NextResponse.json(
       { error: 'Internal server error', details: (error as any).message },
       { status: 500 }
@@ -168,7 +167,7 @@ async function calculateProfitMetrics(
     const cogs = calculateRecipeCOGS(recipe)
     recipeCostMap.set(recipe.id, {
       name: recipe.name,
-      cogs: cogs,
+      cogs,
       ingredients: recipe.recipe_ingredients || []
     })
   })
@@ -241,7 +240,7 @@ async function calculateProfitMetrics(
 
   // Calculate final product profitability metrics
   Object.values(productProfitability).forEach((product: any) => {
-    const prod = product as any
+    const prod = product
     prod.gross_profit = prod.total_revenue - prod.total_cogs
     prod.gross_margin = prod.total_revenue > 0
       ? (prod.gross_profit / prod.total_revenue) * 100
@@ -260,23 +259,25 @@ async function calculateProfitMetrics(
     const category = exp.category || 'Other'
     if (!operatingExpensesBreakdown[category]) {
       operatingExpensesBreakdown[category] = {
-        category: category,
+        category,
         total: 0,
         count: 0,
         percentage: 0
       }
     }
     const currentTotal = (operatingExpensesBreakdown[category] as any).total || 0
-    ;(operatingExpensesBreakdown[category] as any).total = currentTotal + Number(exp.amount || 0)
+    ;(operatingExpensesBreakdown[category] as any).total = currentTotal + (Number(exp.amount) || 0)
     (operatingExpensesBreakdown[category] as any).count++
   })
 
   // Calculate percentages for operating expenses
-  Object.values(operatingExpensesBreakdown).forEach((cat: any) => {
-    const catTotal = Number(cat.total || 0)
-    cat.percentage = totalOperatingExpenses > 0
-      ? (catTotal / totalOperatingExpenses) * 100
-      : 0
+  Object.values(operatingExpensesBreakdown).forEach((cat) => {
+    if (cat && typeof cat === 'object') {
+      const catTotal = Number((cat as any).total || 0)
+      ;(cat as any).percentage = totalOperatingExpenses > 0
+        ? (catTotal / totalOperatingExpenses) * 100
+        : 0
+    }
   })
 
   // Calculate COGS breakdown by ingredient category
@@ -307,7 +308,7 @@ async function calculateProfitMetrics(
     productProfitability: sortedProducts,
     cogsBreakdown: Object.values(cogsBreakdown),
     operatingExpensesBreakdown: Object.values(operatingExpensesBreakdown).sort((a: any, b: any) =>
-      (b as any).total - (a as any).total
+      (b).total - (a).total
     ),
     topProfitableProducts: sortedProducts.slice(0, 5),
     leastProfitableProducts: sortedProducts.slice(-5).reverse()
@@ -339,7 +340,7 @@ function calculateCOGSBreakdown(orders: any[], recipeCostMap: Map<string, any>) 
   orders.forEach(order => {
     order.order_items?.forEach((item: any) => {
       const recipeData = recipeCostMap.get(item.recipe_id)
-      if (recipeData && recipeData.ingredients) {
+      if (recipeData?.ingredients) {
         recipeData.ingredients.forEach((ri: any) => {
           if (ri.ingredient) {
             const ingredientName = ri.ingredient.name

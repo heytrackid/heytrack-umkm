@@ -1,5 +1,4 @@
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getErrorMessage } from '@/lib/type-guards'
 import { InventoryCronJobs, GeneralCronJobs, getAutomationStatus } from '@/lib/cron'
 import { AutomationTaskSchema } from '@/lib/validations/api-schemas'
@@ -29,36 +28,36 @@ export async function POST(request: NextRequest) {
     switch (task) {
       case 'reorder':
         apiLogger.info('📋 Running auto reorder check...')
-        results.reorder = await InventoryCronJobs.checkInventoryReorder()
+        results['reorder'] = await InventoryCronJobs.checkInventoryReorder()
         break
 
       case 'notifications':
         apiLogger.info('🔔 Processing smart notifications...')
         // Note: processSmartNotifications not available, using runAutomationEngine instead
         await GeneralCronJobs.runAutomationEngine()
-        results.notifications = { status: 'completed' }
+        results['notifications'] = { status: 'completed' }
         break
 
       case 'engine':
         apiLogger.info('⚙️ Running automation engine...')
         await GeneralCronJobs.runAutomationEngine()
-        results.engine = { status: 'completed' }
+        results['engine'] = { status: 'completed' }
         break
 
       case 'cleanup':
         apiLogger.info('🧹 Cleaning up old notifications...')
         await GeneralCronJobs.cleanupOldNotifications()
-        results.cleanup = { status: 'completed' }
+        results['cleanup'] = { status: 'completed' }
         break
 
       case 'all':
         apiLogger.info('🚀 Running all automation tasks...')
-        results.reorder = await InventoryCronJobs.checkInventoryReorder()
+        results['reorder'] = await InventoryCronJobs.checkInventoryReorder()
         // Note: processSmartNotifications not available
         await GeneralCronJobs.runAutomationEngine()
-        results.notifications = { status: 'completed' }
+        results['notifications'] = { status: 'completed' }
         await GeneralCronJobs.runAutomationEngine()
-        results.engine = { status: 'completed' }
+        results['engine'] = { status: 'completed' }
         break
 
       default:
@@ -72,10 +71,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(results)
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, '❌ Error running automation:')
-    const errorMessage = error instanceof Error ? (error as any).message : 'Unknown error'
+    apiLogger.error({ error }, '❌ Error running automation:')
     return NextResponse.json(
-      { error: 'Failed to run automation', message: errorMessage },
+      { error: 'Failed to run automation', message: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -102,10 +100,9 @@ export async function GET() {
       ]
     })
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, '❌ Error getting automation status:')
-    const errorMessage = error instanceof Error ? (error as any).message : 'Unknown error'
+    apiLogger.error({ error }, '❌ Error getting automation status:')
     return NextResponse.json(
-      { error: 'Failed to get automation status', message: errorMessage },
+      { error: 'Failed to get automation status', message: getErrorMessage(error) },
       { status: 500 }
     )
   }

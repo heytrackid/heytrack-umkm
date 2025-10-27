@@ -1,20 +1,19 @@
 'use client'
-import * as React from 'react'
 
+import { type ComponentType, memo, useCallback, useEffect, useState } from 'react'
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
-import { useDebounce } from '@/lib/debounce'
+import { useDebounce } from '@/hooks/useDebounce'
 import {
-    BarChart3,
-    BookOpen,
-    Package,
-    Search,
-    Settings,
-    ShoppingCart,
-    Users
+  BarChart3,
+  BookOpen,
+  Package,
+  Search,
+  Settings,
+  ShoppingCart,
+  Users
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { memo, useCallback, useEffect, useState } from 'react'
 
 // Search data interfaces
 interface IngredientItem {
@@ -44,11 +43,11 @@ interface RecipeItem {
 
 interface QuickAction {
   label: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: ComponentType<{ className?: string }>
   action: () => void
 }
 
-export const GlobalSearch = memo(function GlobalSearch() {
+export const GlobalSearch = memo(() => {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 300)
@@ -98,13 +97,13 @@ export const GlobalSearch = memo(function GlobalSearch() {
     { label: 'Buat Pesanan Baru', icon: ShoppingCart, action: () => router.push('/orders/new') },
     { label: 'Tambah Bahan Baku', icon: Package, action: () => router.push('/ingredients/new') },
     { label: 'Tambah Pelanggan', icon: Users, action: () => router.push('/customers/new') },
-    { label: 'Buat Resep Baru', icon: BookOpen, action: () => router.push('/resep/new') },
+    { label: 'Buat Resep Baru', icon: BookOpen, action: () => router.push('/recipes') },
     { label: 'Lihat Laporan', icon: BarChart3, action: () => router.push('/reports') },
     { label: 'Pengaturan', icon: Settings, action: () => router.push('/settings') },
   ]
 
   const handleSelect = useCallback((callback: () => void) => {
-    setOpen(false)
+    void setOpen(false)
     callback()
   }, [])
 
@@ -124,8 +123,8 @@ export const GlobalSearch = memo(function GlobalSearch() {
 
       {/* Search Dialog */}
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="Cari pesanan, pelanggan, bahan baku..." 
+        <CommandInput
+          placeholder="Cari pesanan, pelanggan, bahan baku..."
           value={search}
           onValueChange={setSearch}
         />
@@ -209,7 +208,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
               {filteredRecipes.map((item: RecipeItem) => (
                 <CommandItem
                   key={item.id}
-                  onSelect={() => handleSelect(() => router.push(`/resep/${item.id}`))}
+                  onSelect={() => handleSelect(() => router.push(`/recipes`))}
                 >
                   <BookOpen className="mr-2 h-4 w-4" />
                   <span>{item.name}</span>

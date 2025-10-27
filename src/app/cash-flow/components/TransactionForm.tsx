@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -21,7 +20,7 @@ import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FinancialRecordSchema, type ExpenseForm } from '@/lib/validations/form-validations'
-import { incomeCategories, expenseCategories } from '../constants'
+import { incomeCategories, expenseCategories } from '@/app/cash-flow/constants'
 
 interface TransactionFormProps {
   isOpen: boolean

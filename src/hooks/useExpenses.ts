@@ -25,7 +25,7 @@ export function useExpenses() {
 
   const fetchExpenses = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/expenses')
 
       if (!response.ok) {
@@ -33,13 +33,13 @@ export function useExpenses() {
       }
 
       const data = await response.json()
-      setExpenses(data)
+      void setExpenses(data)
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage)
+      void setError(errorMessage)
       apiLogger.error({ error: err }, 'Error fetching expenses:')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -58,11 +58,11 @@ export function useExpenses() {
       }
 
       const newExpense = await response.json()
-      setExpenses(prev => [newExpense, ...prev])
+      void setExpenses(prev => [newExpense, ...prev])
       return newExpense
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage)
+      void setError(errorMessage)
       throw err
     }
   }
@@ -90,7 +90,7 @@ export function useExpenses() {
       return updatedExpense
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage)
+      void setError(errorMessage)
       throw err
     }
   }
@@ -108,13 +108,13 @@ export function useExpenses() {
       setExpenses(prev => prev.filter(expense => expense.id !== id))
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage)
+      void setError(errorMessage)
       throw err
     }
   }
 
   useEffect(() => {
-    fetchExpenses()
+    void fetchExpenses()
   }, [])
 
   return {

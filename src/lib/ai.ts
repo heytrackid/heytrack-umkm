@@ -16,9 +16,9 @@ export class AIClient {
   static async callOpenRouter(
     prompt: string,
     systemPrompt: string,
-    model: string = 'minimax/minimax-01'
+    model = 'minimax/minimax-01'
   ): Promise<string> {
-    const apiKey = process.env.OPENROUTER_API_KEY
+    const apiKey = process.env['OPENROUTER_API_KEY']
 
     if (!apiKey) {
       throw new Error('OpenRouter API key not configured')
@@ -30,7 +30,7 @@ export class AIClient {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+          'HTTP-Referer': process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
           'X-Title': 'HeyTrack AI Assistant'
         },
         body: JSON.stringify({
@@ -57,9 +57,9 @@ export class AIClient {
 
       const data = await response.json()
       return data.choices[0]?.message?.content || 'No response generated'
-    } catch (error) {
-      apiLogger.error({ err: error }, 'AI Client Error')
-      throw error
+    } catch (err) {
+      apiLogger.error({ error: err }, 'AI Client Error')
+      throw err
     }
   }
 
@@ -84,7 +84,7 @@ export class AISecurity {
    * Sanitize user input to prevent injection attacks
    */
   static sanitizeInput(input: string): string {
-    if (!input || typeof input !== 'string') return ''
+    if (!input || typeof input !== 'string') {return ''}
 
     return input
       .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
@@ -98,7 +98,7 @@ export class AISecurity {
    * Validate input for potential security issues
    */
   static validateInput(input: string): boolean {
-    if (!input || typeof input !== 'string') return false
+    if (!input || typeof input !== 'string') {return false}
 
     const dangerousPatterns = [
       /<script/i,
@@ -119,7 +119,7 @@ export class AISecurity {
    */
   private static requestCounts = new Map<string, { count: number; resetTime: number }>()
 
-  static checkRateLimit(identifier: string, maxRequests: number = 10, windowMs: number = 60000): boolean {
+  static checkRateLimit(identifier: string, maxRequests = 10, windowMs = 60000): boolean {
     const now = Date.now()
     const key = `ai_${identifier}`
 
@@ -300,12 +300,12 @@ Focus on Indonesian food business terminology.`
       try {
         const analysis = JSON.parse(response) as NLPAnalysis
         return analysis
-      } catch {
+      } catch (error) {
         // Fallback analysis
         return this.fallbackAnalysis(safeQuery)
       }
-    } catch (error) {
-      apiLogger.error({ err: error }, 'NLP Processing Error')
+    } catch (err) {
+      apiLogger.error({ error: err }, 'NLP Processing Error')
       return this.fallbackAnalysis(query)
     }
   }

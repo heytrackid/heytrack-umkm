@@ -21,13 +21,13 @@ interface CardListProps<T extends CardListItem> {
   emptyState?: ReactNode
 }
 
-export function CardList<T extends CardListItem>({
+export const CardList = <T extends CardListItem>({
   items,
   renderCard,
   onItemClick,
   className,
   emptyState
-}: CardListProps<T>) {
+}: CardListProps<T>) => {
   if (items.length === 0 && emptyState) {
     return <>{emptyState}</>
   }
@@ -68,15 +68,14 @@ interface DataCardProps {
   }>
 }
 
-export function DataCard({
+export const DataCard = ({
   title,
   subtitle,
   description,
   badge,
   actions,
   metadata
-}: DataCardProps) {
-  return (
+}: DataCardProps) => (
     <div className="space-y-3">
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
@@ -119,4 +118,3 @@ export function DataCard({
       )}
     </div>
   )
-}

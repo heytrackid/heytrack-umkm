@@ -6,7 +6,6 @@ import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { toast } from '@/hooks/use-toast'
-import * as React from 'react'
 import { lazy, Suspense } from 'react'
 
 // Lazy load extracted components for better performance and code splitting
@@ -91,7 +90,7 @@ export default function OperationalCostsPage() {
           <Breadcrumb>
             <BreadcrumbList>
               {getBreadcrumbItems().map((item, index: number) => (
-                <React.Fragment key={index}>
+                <Fragment key={index}>
                   <BreadcrumbItem>
                     {item.href ? (
                       <BreadcrumbLink asChild>
@@ -104,7 +103,7 @@ export default function OperationalCostsPage() {
                     )}
                   </BreadcrumbItem>
                   {index < getBreadcrumbItems().length - 1 && <BreadcrumbSeparator />}
-                </React.Fragment>
+                </Fragment>
               ))}
             </BreadcrumbList>
           </Breadcrumb>
@@ -113,12 +112,12 @@ export default function OperationalCostsPage() {
             {/* Header Skeleton */}
             <div className="flex justify-between items-center">
               <div className="space-y-2">
-                <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-                <div className="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                <div className="h-4 w-96 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
-                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
               </div>
             </div>
 
@@ -130,7 +129,7 @@ export default function OperationalCostsPage() {
             </div>
 
             {/* Info Card Skeleton */}
-            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
 
             {/* Search Form Skeleton */}
             <SearchFormSkeleton />
@@ -138,7 +137,7 @@ export default function OperationalCostsPage() {
             {/* Table Skeleton */}
             <div className="bg-white dark:bg-gray-800 border rounded-lg">
               <div className="p-6">
-                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse mb-4"></div>
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse mb-4" />
                 <DataGridSkeleton rows={6} />
               </div>
             </div>
@@ -154,7 +153,7 @@ export default function OperationalCostsPage() {
         <Breadcrumb>
           <BreadcrumbList>
             {getBreadcrumbItems().map((item, index: number) => (
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
@@ -167,7 +166,7 @@ export default function OperationalCostsPage() {
                   )}
                 </BreadcrumbItem>
                 {index < getBreadcrumbItems().length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
+              </Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
@@ -176,13 +175,13 @@ export default function OperationalCostsPage() {
         {currentView !== 'list' ? (
           <Suspense fallback={<div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />}>
             <CostFormView
-              currentView={currentView as 'add' | 'edit'}
+              currentView={currentView}
               newCost={newCost}
               setNewCost={setNewCost}
               onSave={handleSaveCost}
               onCancel={() => {
                 resetForm()
-                setCurrentView('list')
+                void setCurrentView('list')
               }}
               isLoading={isLoading}
               costCategories={costCategories}
@@ -247,7 +246,7 @@ export default function OperationalCostsPage() {
                       💡 Mengapa Biaya Operasional Penting?
                     </h3>
                     <p className="text-sm text-orange-800 dark:text-orange-200">
-                      Biaya operasional digunakan untuk menghitung HPP yang akurat. 
+                      Biaya operasional digunakan untuk menghitung harga jual yang akurat. 
                       Semakin lengkap data biaya, semakin tepat perhitungan harga jual produk Anda.
                     </p>
                   </div>

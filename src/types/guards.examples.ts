@@ -27,10 +27,8 @@ import {
 export function processRecipeData(data: unknown): Recipe | null {
   if (isRecipe(data)) {
     // TypeScript now knows data is Recipe
-    console.log(`Processing recipe: ${data.name}`)
     return data
   }
-  console.error('Invalid recipe data')
   return null
 }
 
@@ -70,7 +68,7 @@ export function calculateRecipeCost(data: unknown): number {
   const ingredients = data.recipe_ingredients || []
   
   return ingredients.reduce((total, ri) => {
-    const ingredient = ri.ingredient
+    const {ingredient} = ri
     if (ingredient && isIngredient(ingredient)) {
       return total + (ri.quantity * ingredient.price_per_unit)
     }
@@ -148,7 +146,7 @@ export function safeProcessRecipe(data: unknown): Recipe {
   try {
     assertRecipe(data)
     return data
-  } catch (error) {
+  } catch (err) {
     // Provide detailed validation errors
     const validation = validateRecipe(data)
     throw new Error(`Recipe validation failed: ${validation.errors.join(', ')}`)

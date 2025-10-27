@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,12 +26,12 @@ const ProfitFilters = dynamic(() => import('./components').then(mod => ({ defaul
     <Card>
       <CardContent className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="h-4 bg-muted rounded w-1/4" />
           <div className="grid gap-4 md:grid-cols-4">
-            <div className="h-10 bg-muted rounded"></div>
-            <div className="h-10 bg-muted rounded"></div>
-            <div className="h-10 bg-muted rounded"></div>
-            <div className="h-10 bg-muted rounded"></div>
+            <div className="h-10 bg-muted rounded" />
+            <div className="h-10 bg-muted rounded" />
+            <div className="h-10 bg-muted rounded" />
+            <div className="h-10 bg-muted rounded" />
           </div>
         </div>
       </CardContent>
@@ -61,10 +60,10 @@ const ProductProfitabilityTable = dynamic(() => import('./components').then(mod 
     <Card>
       <CardContent className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/3"></div>
+          <div className="h-4 bg-muted rounded w-1/3" />
           <div className="space-y-2">
             {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="h-12 bg-muted rounded"></div>
+              <div key={i} className="h-12 bg-muted rounded" />
             ))}
           </div>
         </div>
@@ -78,10 +77,10 @@ const IngredientCostsTable = dynamic(() => import('./components').then(mod => ({
     <Card>
       <CardContent className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="h-4 bg-muted rounded w-1/4" />
           <div className="space-y-2">
             {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="h-12 bg-muted rounded"></div>
+              <div key={i} className="h-12 bg-muted rounded" />
             ))}
           </div>
         </div>
@@ -95,10 +94,10 @@ const OperatingExpenses = dynamic(() => import('./components').then(mod => ({ de
     <Card>
       <CardContent className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/3"></div>
+          <div className="h-4 bg-muted rounded w-1/3" />
           <div className="space-y-2">
             {Array.from({ length: 4 }, (_, i) => (
-              <div key={i} className="h-10 bg-muted rounded"></div>
+              <div key={i} className="h-10 bg-muted rounded" />
             ))}
           </div>
         </div>
@@ -112,10 +111,10 @@ const ProfitBreakdown = dynamic(() => import('./components').then(mod => ({ defa
     <Card>
       <CardContent className="p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4"></div>
+          <div className="h-4 bg-muted rounded w-1/4" />
           <div className="space-y-2">
             {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="h-6 bg-muted rounded"></div>
+              <div key={i} className="h-6 bg-muted rounded" />
             ))}
           </div>
         </div>
@@ -129,10 +128,10 @@ const ProfitInfoCard = dynamic(() => import('./components').then(mod => ({ defau
     <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
       <CardContent className="pt-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/2"></div>
+          <div className="h-4 bg-muted rounded w-1/2" />
           <div className="space-y-2">
-            <div className="h-3 bg-muted rounded"></div>
-            <div className="h-3 bg-muted rounded w-3/4"></div>
+            <div className="h-3 bg-muted rounded" />
+            <div className="h-3 bg-muted rounded w-3/4" />
           </div>
         </div>
       </CardContent>
@@ -253,12 +252,12 @@ export default function ProfitReportPage() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/4"></div>
+                <div className="h-4 bg-muted rounded w-1/4" />
                 <div className="grid gap-4 md:grid-cols-4">
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
+                  <div className="h-10 bg-muted rounded" />
+                  <div className="h-10 bg-muted rounded" />
+                  <div className="h-10 bg-muted rounded" />
+                  <div className="h-10 bg-muted rounded" />
                 </div>
               </div>
             </CardContent>
@@ -306,10 +305,10 @@ export default function ProfitReportPage() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="h-4 bg-muted rounded w-1/3" />
                 <div className="space-y-2">
                   {Array.from({ length: 5 }, (_, i) => (
-                    <div key={i} className="h-12 bg-muted rounded"></div>
+                    <div key={i} className="h-12 bg-muted rounded" />
                   ))}
                 </div>
               </div>
@@ -327,10 +326,10 @@ export default function ProfitReportPage() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/4"></div>
+                <div className="h-4 bg-muted rounded w-1/4" />
                 <div className="space-y-2">
                   {Array.from({ length: 3 }, (_, i) => (
-                    <div key={i} className="h-12 bg-muted rounded"></div>
+                    <div key={i} className="h-12 bg-muted rounded" />
                   ))}
                 </div>
               </div>
@@ -348,10 +347,10 @@ export default function ProfitReportPage() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/3"></div>
+                <div className="h-4 bg-muted rounded w-1/3" />
                 <div className="space-y-2">
                   {Array.from({ length: 4 }, (_, i) => (
-                    <div key={i} className="h-10 bg-muted rounded"></div>
+                    <div key={i} className="h-10 bg-muted rounded" />
                   ))}
                 </div>
               </div>
@@ -370,10 +369,10 @@ export default function ProfitReportPage() {
           <Card>
             <CardContent className="p-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/4"></div>
+                <div className="h-4 bg-muted rounded w-1/4" />
                 <div className="space-y-2">
                   {Array.from({ length: 6 }, (_, i) => (
-                    <div key={i} className="h-6 bg-muted rounded"></div>
+                    <div key={i} className="h-6 bg-muted rounded" />
                   ))}
                 </div>
               </div>
@@ -391,10 +390,10 @@ export default function ProfitReportPage() {
           <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
             <CardContent className="pt-6">
               <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/2"></div>
+                <div className="h-4 bg-muted rounded w-1/2" />
                 <div className="space-y-2">
-                  <div className="h-3 bg-muted rounded"></div>
-                  <div className="h-3 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded" />
+                  <div className="h-3 bg-muted rounded w-3/4" />
                 </div>
               </div>
             </CardContent>

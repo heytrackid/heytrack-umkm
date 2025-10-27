@@ -1,8 +1,7 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import * as React from 'react'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 
 // Create a client
 const createQueryClient = () => new QueryClient({
@@ -26,7 +25,7 @@ const createQueryClient = () => new QueryClient({
   },
 })
 
-export default function QueryProvider({ children }: { children: React.ReactNode }) {
+export default function QueryProvider({ children }: { children: ReactNode }) {
   // Create a new QueryClient instance for each request to ensure data is not shared
   const [queryClient] = useState(() => createQueryClient())
 

@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import dynamic from 'next/dynamic'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'

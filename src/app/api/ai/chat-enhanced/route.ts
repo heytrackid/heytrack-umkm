@@ -2,8 +2,7 @@
  * Enhanced AI Chat API with Context Awareness
  */
 
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { ContextAwareAI } from '@/lib/ai-chatbot-enhanced'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'

@@ -66,7 +66,7 @@ export function useFinancialRecords(options?: {
   realtime?: boolean
 }) {
   const filter: Record<string, unknown> = {}
-  if (options?.type) filter.type = options.type
+  if (options?.type) {filter.type = options.type}
 
   return useSupabaseQuery('financial_records', {
     filter,

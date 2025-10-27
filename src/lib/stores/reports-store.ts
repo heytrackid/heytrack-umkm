@@ -5,8 +5,8 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { dbLogger } from '@/lib/logger'
-import type { Report, SyncEvent } from '../data-synchronization/types'
-import { syncEmitter } from '../data-synchronization/sync-events'
+import type { Report, SyncEvent } from '@/lib/data-synchronization/types'
+import { syncEmitter } from '@/lib/data-synchronization/sync-events'
 
 interface ReportsStore {
   // Data
@@ -97,17 +97,13 @@ export const useReportsStore = create<ReportsStore>()(
     },
 
     // Business logic
-    getReportByPeriod: (periode) => {
-      return get().reportHistory.find(report => report.periode === periode)
-    },
+    getReportByPeriod: (periode) => get().reportHistory.find(report => report.periode === periode),
 
-    getLatestReport: () => {
-      return get().currentReport
-    },
+    getLatestReport: () => get().currentReport,
 
     calculateProfitMargin: () => {
       const report = get().currentReport
-      if (!report || report.totalPendapatan === 0) return 0
+      if (!report || report.totalPendapatan === 0) {return 0}
 
       return (report.keuntungan / report.totalPendapatan) * 100
     },

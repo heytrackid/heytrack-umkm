@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
 
 import { apiLogger } from '@/lib/logger'
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Get query parameters
-        const searchParams = request.nextUrl.searchParams
+        const {searchParams} = request.nextUrl
         const ingredientId = searchParams.get('ingredient_id')
         const startDate = searchParams.get('start_date')
         const endDate = searchParams.get('end_date')
@@ -65,7 +64,7 @@ export async function GET(request: NextRequest) {
         const { data: purchases, error } = await query
 
         if (error) {
-            apiLogger.error({ error: error }, 'Error fetching purchases:')
+            apiLogger.error({ error }, 'Error fetching purchases:')
             return NextResponse.json(
                 { error: 'Failed to fetch purchases' },
                 { status: 500 }
@@ -73,8 +72,8 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json(purchases)
-    } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error in GET /api/ingredient-purchases:')
+    } catch (err: unknown) {
+        apiLogger.error({ err }, 'Error in GET /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -223,14 +222,14 @@ export async function POST(request: NextRequest) {
                 quantity_after: newStock,
                 quantity_changed: qtyBeli,
                 change_type: 'PURCHASE',
-                reference_id: (purchase as any).id,
+                reference_id: (purchase).id,
                 reference_type: 'ingredient_purchase',
                 transaction_date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
             })
 
         return NextResponse.json(purchase, { status: 201 })
-    } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error in POST /api/ingredient-purchases:')
+    } catch (err: unknown) {
+        apiLogger.error({ err }, 'Error in POST /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -256,7 +255,7 @@ export async function DELETE(request: NextRequest) {
             )
         }
 
-        const searchParams = request.nextUrl.searchParams
+        const {searchParams} = request.nextUrl
         const id = searchParams.get('id')
 
         if (!id) {
@@ -335,8 +334,8 @@ export async function DELETE(request: NextRequest) {
         // In a production system, you might want to add a reference field
 
         return NextResponse.json({ message: 'Purchase deleted successfully' })
-    } catch (error: unknown) {
-        apiLogger.error({ error: error }, 'Error in DELETE /api/ingredient-purchases:')
+    } catch (err: unknown) {
+        apiLogger.error({ err }, 'Error in DELETE /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

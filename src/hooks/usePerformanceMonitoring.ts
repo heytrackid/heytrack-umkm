@@ -60,11 +60,11 @@ export function usePerformanceMonitoring() {
   // Initialize performance monitoring
   useEffect(() => {
     if (typeof window === 'undefined' || !('PerformanceObserver' in window)) {
-      setIsSupported(false)
+      void setIsSupported(false)
       return
     }
 
-    setIsSupported(true)
+    void setIsSupported(true)
 
     // Observe Core Web Vitals
     observeCoreWebVitals()
@@ -78,7 +78,7 @@ export function usePerformanceMonitoring() {
     // Monitor memory usage (Chrome only)
     if ('memory' in performance) {
       const memoryInterval = setInterval(() => {
-        updateMemoryUsage()
+        void updateMemoryUsage()
       }, 5000) // Update every 5 seconds
 
       return () => {
@@ -105,7 +105,7 @@ export function usePerformanceMonitoring() {
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] })
       observersRef.current.push(lcpObserver)
     } catch (e) {
-      console.warn('LCP observation not supported')
+      // LCP observation not supported
     }
 
     // First Input Delay (FID)
@@ -122,7 +122,7 @@ export function usePerformanceMonitoring() {
       fidObserver.observe({ entryTypes: ['first-input'] })
       observersRef.current.push(fidObserver)
     } catch (e) {
-      console.warn('FID observation not supported')
+      // FID observation not supported
     }
 
     // Cumulative Layout Shift (CLS)
@@ -143,7 +143,7 @@ export function usePerformanceMonitoring() {
       clsObserver.observe({ entryTypes: ['layout-shift'] })
       observersRef.current.push(clsObserver)
     } catch (e) {
-      console.warn('CLS observation not supported')
+      // CLS observation not supported
     }
 
     // First Contentful Paint (FCP)
@@ -160,7 +160,7 @@ export function usePerformanceMonitoring() {
       fcpObserver.observe({ entryTypes: ['paint'] })
       observersRef.current.push(fcpObserver)
     } catch (e) {
-      console.warn('FCP observation not supported')
+      // FCP observation not supported
     }
   }
 
@@ -199,9 +199,8 @@ export function usePerformanceMonitoring() {
   const observeResourceTiming = () => {
     // Monitor resource loading performance
     const resourceObserver = new PerformanceObserver((list) => {
-      const entries = list.getEntries()
       // Could analyze resource loading times here
-      console.log('[Performance] Resource timing:', entries.length, 'resources loaded')
+      // Silently track resource timing
     })
     resourceObserver.observe({ entryTypes: ['resource'] })
     observersRef.current.push(resourceObserver)
@@ -209,7 +208,7 @@ export function usePerformanceMonitoring() {
 
   const updateMemoryUsage = () => {
     if ('memory' in performance) {
-      const memory = (performance as any).memory
+      const {memory} = (performance as any)
       setMetrics(prev => ({
         ...prev,
         memoryUsage: {
@@ -240,16 +239,16 @@ export function usePerformanceMonitoring() {
     let score = 100
 
     // LCP scoring
-    if (lcp > 4000) score -= 30 // Poor
-    else if (lcp > 2500) score -= 15 // Needs improvement
+    if (lcp > 4000) {score -= 30} // Poor
+    else if (lcp > 2500) {score -= 15} // Needs improvement
 
     // FID scoring
-    if (fid > 300) score -= 30 // Poor
-    else if (fid > 100) score -= 15 // Needs improvement
+    if (fid > 300) {score -= 30} // Poor
+    else if (fid > 100) {score -= 15} // Needs improvement
 
     // CLS scoring
-    if (cls > 0.25) score -= 30 // Poor
-    else if (cls > 0.1) score -= 15 // Needs improvement
+    if (cls > 0.25) {score -= 30} // Poor
+    else if (cls > 0.1) {score -= 15} // Needs improvement
 
     return Math.max(0, Math.min(100, score))
   }, [metrics])
@@ -257,24 +256,22 @@ export function usePerformanceMonitoring() {
   // Get performance rating
   const getPerformanceRating = useCallback(() => {
     const score = getPerformanceScore()
-    if (score === null) return 'unknown'
-    if (score >= 90) return 'excellent'
-    if (score >= 70) return 'good'
-    if (score >= 50) return 'needs-improvement'
+    if (score === null) {return 'unknown'}
+    if (score >= 90) {return 'excellent'}
+    if (score >= 70) {return 'good'}
+    if (score >= 50) {return 'needs-improvement'}
     return 'poor'
   }, [getPerformanceScore])
 
   // Export metrics for analytics
-  const exportMetrics = useCallback(() => {
-    return {
+  const exportMetrics = useCallback(() => ({
       ...metrics,
       timestamp: Date.now(),
       url: window.location.href,
       userAgent: navigator.userAgent,
       score: getPerformanceScore(),
       rating: getPerformanceRating()
-    }
-  }, [metrics, getPerformanceScore, getPerformanceRating])
+    }), [metrics, getPerformanceScore, getPerformanceRating])
 
   return {
     metrics,

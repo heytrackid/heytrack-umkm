@@ -17,10 +17,10 @@ export const customerUniquenessValidation = z.object({
   name: z.string().min(1),
   phone: z.string().optional(),
   email: z.string().email().optional(),
-}).refine((data) => {
+}).refine((data) => 
   // At least one contact method is required
-  return !!(data.phone || data.email)
-}, {
+   !!(data.phone || data.email)
+, {
   message: 'Either phone or email is required for customer identification',
   path: ['phone']
 })
@@ -29,7 +29,7 @@ export const customerUniquenessValidation = z.object({
 export const EnhancedCustomerInsertSchema = CustomerInsertSchema
   .extend({
     phone: z.string().optional().refine((phone) => {
-      if (!phone) return true // Optional field
+      if (!phone) {return true} // Optional field
       return indonesianPhoneValidation(phone)
     }, {
       message: 'Invalid Indonesian phone number format'
@@ -63,9 +63,9 @@ export class CustomerValidationHelpers {
     try {
       const validatedData = EnhancedCustomerInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -79,9 +79,9 @@ export class CustomerValidationHelpers {
     try {
       const validatedData = EnhancedCustomerUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -102,9 +102,9 @@ export class CustomerValidationHelpers {
    * Calculate recommended discount based on loyalty points
    */
   static calculateRecommendedDiscount(loyaltyPoints: number): number {
-    if (loyaltyPoints >= 5000) return 15
-    if (loyaltyPoints >= 2000) return 10
-    if (loyaltyPoints >= 1000) return 5
+    if (loyaltyPoints >= 5000) {return 15}
+    if (loyaltyPoints >= 2000) {return 10}
+    if (loyaltyPoints >= 1000) {return 5}
     return 0
   }
 

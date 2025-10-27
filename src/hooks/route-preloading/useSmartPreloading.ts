@@ -37,7 +37,7 @@ export const useSmartPreloading = () => {
       popularRoutes.forEach(route => {
         if (route !== currentRoute) {
           // Router prefetch would go here if needed
-          console.log('Popular route identified:', route)
+          // Popular route identified silently
         }
       })
     }, 2000)

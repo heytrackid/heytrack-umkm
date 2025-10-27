@@ -7,10 +7,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 // Loading spinner component
-export function LoadingSpinner({ size = 'md', className }: {
+export const LoadingSpinner = ({ size = 'md', className }: {
   size?: 'sm' | 'md' | 'lg'
   className?: string
-}) {
+}) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
@@ -23,8 +23,7 @@ export function LoadingSpinner({ size = 'md', className }: {
 }
 
 // Full page loading state
-export function PageLoading({ message = "Memuat..." }: { message?: string }) {
-  return (
+export const PageLoading = ({ message = "Memuat..." }: { message?: string }) => (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="text-center space-y-4">
         <LoadingSpinner size="lg" />
@@ -32,14 +31,12 @@ export function PageLoading({ message = "Memuat..." }: { message?: string }) {
       </div>
     </div>
   )
-}
 
 // Card skeleton for content loading
-export function CardSkeleton({ rows = 3, showHeader = true }: {
+export const CardSkeleton = ({ rows = 3, showHeader = true }: {
   rows?: number
   showHeader?: boolean
-}) {
-  return (
+}) => (
     <Card>
       {showHeader && (
         <CardHeader>
@@ -54,14 +51,12 @@ export function CardSkeleton({ rows = 3, showHeader = true }: {
       </CardContent>
     </Card>
   )
-}
 
 // List skeleton for table/data loading
-export function ListSkeleton({ items = 5, showHeader = true }: {
+export const ListSkeleton = ({ items = 5, showHeader = true }: {
   items?: number
   showHeader?: boolean
-}) {
-  return (
+}) => (
     <div className="space-y-3">
       {showHeader && (
         <div className="flex gap-4 mb-4">
@@ -81,11 +76,9 @@ export function ListSkeleton({ items = 5, showHeader = true }: {
       ))}
     </div>
   )
-}
 
 // Stats skeleton for dashboard loading
-export function StatsSkeleton({ count = 4 }: { count?: number }) {
-  return (
+export const StatsSkeleton = ({ count = 4 }: { count?: number }) => (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: count }, (_, i) => (
         <Card key={i}>
@@ -102,7 +95,3 @@ export function StatsSkeleton({ count = 4 }: { count?: number }) {
       ))}
     </div>
   )
-}
-
-// Import React for types
-import * as React from 'react'

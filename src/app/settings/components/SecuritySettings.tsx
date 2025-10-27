@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,7 +10,7 @@ import { Lock, Eye, EyeOff, Shield } from 'lucide-react'
 /**
  * Security settings component for password changes
  */
-export function SecuritySettings() {
+export const SecuritySettings = () => {
   const [showPassword, setShowPassword] = useState(false)
 
   return (

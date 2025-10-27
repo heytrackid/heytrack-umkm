@@ -5,13 +5,13 @@ import type { TablesInsert, TablesUpdate } from '@/types'
 /**
  * Recipe ingredients query result type
  */
-type RecipeIngredientsQueryResult = {
+interface RecipeIngredientsQueryResult {
   recipe_ingredients: Array<{
     quantity: number
-    ingredient: {
+    ingredient: Array<{
       id: string
       current_stock: number | null
-    }[]
+    }>
   }>
 }
 
@@ -89,8 +89,8 @@ export class InventoryUpdateService {
           }
         }
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error updating inventory for order')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error updating inventory for order')
       throw new Error('Failed to update inventory')
     }
   }

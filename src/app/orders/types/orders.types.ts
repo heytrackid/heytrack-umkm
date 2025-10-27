@@ -163,7 +163,7 @@ export interface OrderFilters {
   priority?: OrderPriority[]
   customer_id?: string
   currency?: string[]
-  payment_status?: ('unpaid' | 'partial' | 'paid' | 'refunded')[]
+  payment_status?: Array<'unpaid' | 'partial' | 'paid' | 'refunded'>
   payment_method?: PaymentMethod[]
   date_from?: string
   date_to?: string

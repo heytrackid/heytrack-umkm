@@ -20,8 +20,8 @@ export function useSupabaseQuery<T extends keyof Tables>(
 
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
 
       const supabase = createClient()
       let query = supabase.from(tableName as any).select(options.select || '*')
@@ -47,12 +47,12 @@ export function useSupabaseQuery<T extends keyof Tables>(
 
       const { data: result, error: queryError } = await query
 
-      if (queryError) throw queryError
-      setData(result || [])
+      if (queryError) {throw queryError}
+      void setData(result || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      void setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [tableName, JSON.stringify(options)])
 
@@ -62,7 +62,7 @@ export function useSupabaseQuery<T extends keyof Tables>(
       return
     }
 
-    fetchData()
+    void fetchData()
 
     // Setup realtime subscription if enabled
     if (options.realtime !== false) {
@@ -82,12 +82,12 @@ export function useSupabaseQuery<T extends keyof Tables>(
             } else if (payload.eventType === 'UPDATE') {
               setData((prev) =>
                 prev.map((item) =>
-                  (item as any).id === payload.new.id ? payload.new : item
+                  (item).id === payload.new.id ? payload.new : item
                 )
               )
             } else if (payload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item) => (item as any).id !== payload.old.id)
+                prev.filter((item) => (item).id !== payload.old.id)
               )
             }
           }

@@ -1,12 +1,10 @@
 'use client';
 
-import * as React from 'react'
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/layout/app-layout';
-import { Button } from '@/components/ui/button';
 import { useSupabaseCRUD } from '@/hooks/supabase';
-import { IngredientSchema, type IngredientFormData } from '@/lib/validations/form-validations';
+import { IngredientSchema, type IngredientFormData, IngredientFormSchema } from '@/lib/validations/form-validations';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -17,7 +15,6 @@ import { IngredientFormFields } from '@/components/forms/shared/IngredientFormFi
 import { CrudForm, FormActions } from '@/components/ui/crud-form';
 
 import { apiLogger } from '@/lib/logger'
-import { Save } from 'lucide-react';
 
 export default function NewIngredientPage() {
   const router = useRouter();
@@ -26,7 +23,7 @@ export default function NewIngredientPage() {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<IngredientFormData>({
-    resolver: zodResolver(IngredientSchema),
+    resolver: zodResolver(IngredientFormSchema),
     defaultValues: {
       name: '',
       unit: 'kg',
@@ -42,8 +39,8 @@ export default function NewIngredientPage() {
       setLoading(true);
       await createIngredient(data);
       router.push('/ingredients');
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to create ingredient:')
+    } catch (err: unknown) {
+      apiLogger.error({ error: err }, 'Failed to create ingredient:')
     } finally {
       setLoading(false);
     }

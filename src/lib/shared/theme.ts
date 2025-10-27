@@ -120,22 +120,22 @@ export const themeUtils = {
   getColor: (path: string, shade: keyof typeof colors.primary = 500) => {
     const [colorName] = path.split('.')
     const colorGroup = colors[colorName as keyof typeof colors]
-    if (!colorGroup) return colors.gray[500]
+    if (!colorGroup) {return colors.gray[500]}
     return colorGroup[shade] || colorGroup[500]
   },
 
   // Get status color
   getStatusColor: (status: string, shade: keyof typeof colors.primary = 500) => {
     const statusColor = statusColors[status as keyof typeof statusColors]
-    if (!statusColor) return colors.gray[shade]
+    if (!statusColor) {return colors.gray[shade]}
     return statusColor[shade] || statusColor[500]
   },
 
   // Generate color variants
-  generateVariants: (baseColor: string) => {
+  generateVariants: (baseColor: string) => 
     // This would generate lighter/darker variants
     // For now, return the base color
-    return {
+     ({
       50: baseColor,
       100: baseColor,
       200: baseColor,
@@ -146,8 +146,8 @@ export const themeUtils = {
       700: baseColor,
       800: baseColor,
       900: baseColor,
-    }
-  },
+    })
+  ,
 }
 
 // Spacing utilities
@@ -263,7 +263,7 @@ export const cssVariables = {
 export const themeAware = {
   // Get theme-aware color
   color: (lightColor: string, darkColor?: string) => {
-    if (!darkColor) return lightColor
+    if (!darkColor) {return lightColor}
     return `hsl(var(--${lightColor.replace('hsl(var(--', '').replace('))', '')}))`
   },
 
@@ -283,16 +283,16 @@ export const themeAware = {
 // Color manipulation utilities
 export const colorUtils = {
   // Lighten color by percentage
-  lighten: (color: string, percent: number): string => {
+  lighten: (color: string, percent: number): string => 
     // Simple implementation - in real app, use a proper color library
-    return color
-  },
+     color
+  ,
 
   // Darken color by percentage
-  darken: (color: string, percent: number): string => {
+  darken: (color: string, percent: number): string => 
     // Simple implementation - in real app, use a proper color library
-    return color
-  },
+     color
+  ,
 
   // Convert hex to RGB
   hexToRgb: (hex: string): { r: number; g: number; b: number } | null => {
@@ -305,14 +305,12 @@ export const colorUtils = {
   },
 
   // Convert RGB to hex
-  rgbToHex: (r: number, g: number, b: number): string => {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
-  },
+  rgbToHex: (r: number, g: number, b: number): string => `#${  ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`,
 
   // Get contrast color (black or white) for background
   getContrastColor: (hexColor: string): string => {
     const rgb = colorUtils.hexToRgb(hexColor)
-    if (!rgb) return '#000000'
+    if (!rgb) {return '#000000'}
 
     // Calculate luminance
     const { r, g, b } = rgb

@@ -33,9 +33,9 @@ export interface RecipeIngredient {
  */
 export function calculateRecipeHPP(
   ingredients: RecipeIngredient[],
-  overheadRate: number = 0.15,
-  laborCost: number = 0,
-  packagingCost: number = 0
+  overheadRate = 0.15,
+  laborCost = 0,
+  packagingCost = 0
 ) {
   const ingredientCost = ingredients.reduce((total, recipeIngredient) => {
     if (!recipeIngredient.ingredient) {return total}

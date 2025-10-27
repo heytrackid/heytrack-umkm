@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { onCLS, onINP, onLCP, onTTFB } from 'web-vitals'
 
 import { apiLogger } from '@/lib/logger'
@@ -12,7 +12,7 @@ function sendToAnalytics(metric: any) {
     }
     // Example POST (disabled):
     // fetch('/api/web-vitals', { method: 'POST', body: JSON.stringify(metric) })
-  } catch {}
+  } catch (error) {}
 }
 
 export default function WebVitalsReporter() {

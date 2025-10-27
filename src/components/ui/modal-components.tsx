@@ -1,7 +1,7 @@
 'use client'
 
-import * as React from 'react'
-import { UseFormReturn } from 'react-hook-form'
+import type { ReactNode } from 'react'
+import type { UseFormReturn } from 'react-hook-form'
 import { Modal } from '@/components/ui/modal'
 import { CrudForm, FormActions } from '@/components/ui/crud-form'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -17,13 +17,13 @@ interface BaseModalProps {
 interface CreateModalProps<T extends Record<string, unknown>> extends BaseModalProps {
   form: UseFormReturn<T>
   onSubmit: (data: T) => Promise<void> | void
-  children: React.ReactNode
+  children: ReactNode
 }
 
 interface EditModalProps<T extends Record<string, unknown>> extends BaseModalProps {
   form: UseFormReturn<T>
   onSubmit: (data: T) => Promise<void> | void
-  children: React.ReactNode
+  children: ReactNode
 }
 
 interface DeleteModalProps extends BaseModalProps {
@@ -35,7 +35,7 @@ interface DeleteModalProps extends BaseModalProps {
  * Create Modal Component
  * Reusable modal for creating new entities
  */
-export function CreateModal<T extends Record<string, unknown>>({
+export const CreateModal = <T extends Record<string, unknown>>({
   isOpen,
   onClose,
   entityName,
@@ -43,12 +43,12 @@ export function CreateModal<T extends Record<string, unknown>>({
   onSubmit,
   isLoading = false,
   children
-}: CreateModalProps<T>) {
+}: CreateModalProps<T>) => {
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
     } catch (error) {
-      uiLogger.error({ error: error }, 'Create error:')
+      uiLogger.error({ error }, 'Create error:')
     }
   }
 
@@ -58,7 +58,7 @@ export function CreateModal<T extends Record<string, unknown>>({
       onClose={onClose}
       title={`Tambah ${entityName} Baru`}
       size="lg"
-      fullScreenOnMobile={true}
+      fullScreenOnMobile
     >
       <CrudForm onSubmit={form.handleSubmit(handleSubmit)}>
         {children}
@@ -66,7 +66,7 @@ export function CreateModal<T extends Record<string, unknown>>({
           onCancel={onClose}
           submitText={`Simpan ${entityName}`}
           loading={isLoading}
-          sticky={true}
+          sticky
         />
       </CrudForm>
     </Modal>
@@ -77,7 +77,7 @@ export function CreateModal<T extends Record<string, unknown>>({
  * Edit Modal Component
  * Reusable modal for editing existing entities
  */
-export function EditModal<T extends Record<string, unknown>>({
+export const EditModal = <T extends Record<string, unknown>>({
   isOpen,
   onClose,
   entityName,
@@ -85,12 +85,12 @@ export function EditModal<T extends Record<string, unknown>>({
   onSubmit,
   isLoading = false,
   children
-}: EditModalProps<T>) {
+}: EditModalProps<T>) => {
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
     } catch (error) {
-      uiLogger.error({ error: error }, 'Edit error:')
+      uiLogger.error({ error }, 'Edit error:')
     }
   }
 
@@ -100,15 +100,15 @@ export function EditModal<T extends Record<string, unknown>>({
       onClose={onClose}
       title={`Edit ${entityName}`}
       size="lg"
-      fullScreenOnMobile={true}
+      fullScreenOnMobile
     >
       <CrudForm onSubmit={form.handleSubmit(handleSubmit)}>
         {children}
         <FormActions
           onCancel={onClose}
-          submitText={`Simpan Perubahan`}
+          submitText="Simpan Perubahan"
           loading={isLoading}
-          sticky={true}
+          sticky
         />
       </CrudForm>
     </Modal>
@@ -119,19 +119,19 @@ export function EditModal<T extends Record<string, unknown>>({
  * Delete Modal Component
  * Reusable modal for confirming deletions
  */
-export function DeleteModal({
+export const DeleteModal = ({
   isOpen,
   onClose,
   onConfirm,
   entityName,
   itemName,
   isLoading = false
-}: DeleteModalProps) {
+}: DeleteModalProps) => {
   const handleConfirm = async () => {
     try {
       await onConfirm()
     } catch (error) {
-      uiLogger.error({ error: error }, 'Delete error:')
+      uiLogger.error({ error }, 'Delete error:')
     }
   }
 

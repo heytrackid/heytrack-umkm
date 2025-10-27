@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -41,11 +40,10 @@ export default function TransactionList({
                 className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                    transaction.type === 'income'
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${transaction.type === 'income'
                       ? 'bg-green-100 dark:bg-green-900'
                       : 'bg-red-100 dark:bg-red-900'
-                  }`}>
+                    }`}>
                     {transaction.type === 'income' ? (
                       <ArrowUpCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                     ) : (
@@ -64,9 +62,8 @@ export default function TransactionList({
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <p className={`text-lg font-semibold ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <p className={`text-lg font-semibold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {transaction.type === 'income' ? '+' : '-'}
                     {formatCurrency(Math.abs(transaction.amount))}
                   </p>

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   TrendingUp,
@@ -16,8 +15,7 @@ interface ProfitSummaryCardsProps {
   isMobile: boolean
 }
 
-export function ProfitSummaryCards({ summary, trends, formatCurrency, isMobile }: ProfitSummaryCardsProps) {
-  return (
+export const ProfitSummaryCards = ({ summary, trends, formatCurrency, isMobile }: ProfitSummaryCardsProps) => (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
       {/* Total Revenue */}
       <Card>
@@ -125,4 +123,3 @@ export function ProfitSummaryCards({ summary, trends, formatCurrency, isMobile }
       </Card>
     </div>
   )
-}

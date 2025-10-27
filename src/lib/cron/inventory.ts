@@ -7,7 +7,7 @@ import { createServiceRoleClient } from '@/utils/supabase'
 import { cronLogger } from '@/lib/logger'
 import { inventoryServices } from '@/lib/business-services/utils'
 import type { ReorderSummary } from '@/lib/business-services/types'
-import { SmartNotificationSystem } from '../communications/notifications'
+import { SmartNotificationSystem } from '@/lib/communications/notifications'
 import type { InventoryReorderSummary, NotificationAlert } from './types'
 
 export class InventoryCronJobs {
@@ -46,9 +46,9 @@ export class InventoryCronJobs {
       }
 
       return summary
-    } catch (error) {
-      cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error checking inventory reorder')
-      throw error
+    } catch (err) {
+      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error checking inventory reorder')
+      throw err
     }
   }
 
@@ -69,7 +69,7 @@ export class InventoryCronJobs {
         .eq('is_active', true)
 
       if (error) {
-        throw error
+        throw err
       }
 
       const lowStockItems = (ingredientData ?? []).filter(item => {
@@ -100,9 +100,9 @@ export class InventoryCronJobs {
       }
 
       return { alertsGenerated: alerts.length }
-    } catch (error) {
-      cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error checking inventory alerts')
-      throw error
+    } catch (err) {
+      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error checking inventory alerts')
+      throw err
     }
   }
 }

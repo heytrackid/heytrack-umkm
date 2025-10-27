@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from"react"
+import { useEffect, useRef, type ComponentProps } from 'react'
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -12,7 +12,7 @@ import { DayPicker, getDefaultClassNames } from"react-day-picker"
 import { cn } from"@/lib/utils"
 import { Button, buttonVariants } from"@/components/ui/button"
 
-function Calendar({
+const Calendar = ({
   className,
   classNames,
   showOutsideDays = true,
@@ -21,9 +21,9 @@ function Calendar({
   formatters,
   components,
   ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
+}: ComponentProps<typeof DayPicker> & {
+  buttonVariant?: ComponentProps<typeof Button>["variant"]
+}) => {
   const defaultClassNames = getDefaultClassNames()
 
   return (
@@ -126,16 +126,14 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Root: ({ className, rootRef, ...props }) => {
-          return (
+        Root: ({ className, rootRef, ...props }) => (
             <div
               data-slot="calendar"
               ref={rootRef}
               className={cn(className)}
               {...props}
             />
-          )
-        },
+          ),
         Chevron: ({ className, orientation, ...props }) => {
           if (orientation ==="left") {
             return (
@@ -157,15 +155,13 @@ function Calendar({
           )
         },
         DayButton: CalendarDayButton,
-        WeekNumber: ({ children, ...props }) => {
-          return (
+        WeekNumber: ({ children, ...props }) => (
             <td {...props}>
               <div className="flex size-(--cell-size) items-center justify-center text-center">
                 {children}
               </div>
             </td>
-          )
-        },
+          ),
         ...components,
       }}
       {...props}
@@ -173,16 +169,16 @@ function Calendar({
   )
 }
 
-function CalendarDayButton({
+const CalendarDayButton = ({
   className,
   day,
   modifiers,
   ...props
-}: React.ComponentProps<typeof DayButton>) {
+}: ComponentProps<typeof DayButton>) => {
   const defaultClassNames = getDefaultClassNames()
 
-  const ref = React.useRef<HTMLButtonElement>(null)
-  React.useEffect(() => {
+  const ref = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
     if (modifiers.focused) {ref.current?.focus()}
   }, [modifiers.focused])
 

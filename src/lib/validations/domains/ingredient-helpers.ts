@@ -23,7 +23,7 @@ export const EnhancedIngredientInsertSchema = IngredientInsertSchema
 
     // Category validation
     category: z.string().max(100).optional().refine((category) => {
-      if (!category) return true
+      if (!category) {return true}
       const validCategories = ['dairy', 'meat', 'vegetables', 'fruits', 'grains', 'spices', 'oils', 'beverages', 'bakery', 'other']
       return validCategories.includes(category.toLowerCase())
     }, {
@@ -68,9 +68,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientInsertSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }
@@ -84,9 +84,9 @@ export class IngredientValidationHelpers {
     try {
       const validatedData = EnhancedIngredientUpdateSchema.parse(data)
       return { success: true, data: validatedData }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const errors = error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const errors = err.issues.map(err => `${err.path.join('.')}: ${err.message}`)
         return { success: false, errors }
       }
       return { success: false, errors: ['Validation failed'] }

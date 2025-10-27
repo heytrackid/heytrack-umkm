@@ -4,7 +4,7 @@ import type { Json } from './common'
 export type ProductionStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
 
 // Recipe tables
-export type RecipesTable = {
+export interface RecipesTable {
   Row: {
     batch_size: number | null
     category: string | null
@@ -86,7 +86,7 @@ export type RecipesTable = {
   Relationships: []
 }
 
-export type RecipeIngredientsTable = {
+export interface RecipeIngredientsTable {
   Row: {
     id: string
     ingredient_id: string
@@ -140,7 +140,7 @@ export type RecipeIngredientsTable = {
   ]
 }
 
-export type ProductionSchedulesTable = {
+export interface ProductionSchedulesTable {
   Row: {
     actual_duration: number | null
     actual_quantity: number | null
@@ -216,7 +216,7 @@ export type ProductionSchedulesTable = {
   ]
 }
 
-export type ProductionsTable = {
+export interface ProductionsTable {
   Row: {
     completed_at: string | null
     cost_per_unit: number
@@ -281,7 +281,7 @@ export type ProductionsTable = {
 }
 
 // Recipe-related views
-export type RecipeAvailabilityView = {
+export interface RecipeAvailabilityView {
   Row: {
     category: string | null
     cost_per_unit: number | null

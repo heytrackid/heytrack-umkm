@@ -3,8 +3,8 @@
  * Cross-Origin Resource Sharing protection
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { createErrorResponse } from '../responses'
+import type { NextRequest, NextResponse } from 'next/server'
+import { createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * Create CORS middleware
@@ -12,7 +12,7 @@ import { createErrorResponse } from '../responses'
 export function withCors(allowedOrigins: string[] = ['*']) {
   return (request: NextRequest): NextResponse | null => {
     const origin = request.headers.get('origin')
-    if (!origin) return null
+    if (!origin) {return null}
 
     const isAllowed = allowedOrigins.includes('*') || allowedOrigins.includes(origin)
     if (!isAllowed) {

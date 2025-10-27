@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types'
@@ -55,7 +54,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error fetching operational costs:')
+      apiLogger.error({ error }, 'Error fetching operational costs:')
       return NextResponse.json(
         { error: 'Failed to fetch operational costs' },
         { status: 500 }
@@ -112,8 +111,8 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/operational-costs:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in GET /api/operational-costs:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }
@@ -179,7 +178,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error creating operational cost:')
+      apiLogger.error({ error }, 'Error creating operational cost:')
       return NextResponse.json(
         { error: 'Failed to create operational cost' },
         { status: 500 }
@@ -188,8 +187,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 })
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in POST /api/operational-costs:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in POST /api/operational-costs:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }
@@ -235,7 +234,7 @@ export async function PUT(request: NextRequest) {
     const validatedData = updateValidation.data
 
     // Validate required fields
-    if (!(body as any).id) {
+    if (!(body).id) {
       return NextResponse.json(
         { error: 'ID is required' },
         { status: 400 }
@@ -264,7 +263,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error updating operational cost:')
+      apiLogger.error({ error }, 'Error updating operational cost:')
       return NextResponse.json(
         { error: 'Failed to update operational cost' },
         { status: 500 }
@@ -280,8 +279,8 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(data)
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in PUT /api/operational-costs:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in PUT /api/operational-costs:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }
@@ -331,7 +330,7 @@ export async function DELETE(request: NextRequest) {
       .single()
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error deleting operational cost:')
+      apiLogger.error({ error }, 'Error deleting operational cost:')
       return NextResponse.json(
         { error: 'Failed to delete operational cost' },
         { status: 500 }
@@ -347,8 +346,8 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
 
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in DELETE /api/operational-costs:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in DELETE /api/operational-costs:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }

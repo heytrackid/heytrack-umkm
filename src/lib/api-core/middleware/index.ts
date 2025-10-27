@@ -3,7 +3,7 @@
  * Combined middleware utilities for API routes
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest, NextResponse } from 'next/server'
 import { withValidation, withQueryValidation } from './validation'
 import { withRateLimit } from './rate-limit'
 import { withCors } from './cors'

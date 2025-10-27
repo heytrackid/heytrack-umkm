@@ -19,21 +19,21 @@ export const validationPatterns = {
 export const validationFunctions = {
   // Phone number validation
   phone: (value: string) => {
-    if (!value) return true // Optional field
+    if (!value) {return true} // Optional field
     return validationPatterns.phone.test(value.replace(/\s/g, ''))
   },
 
   // Email validation
   email: (value: string) => {
-    if (!value) return true // Optional field
+    if (!value) {return true} // Optional field
     return validationPatterns.email.test(value)
   },
 
   // Indonesian name validation (no numbers, reasonable length)
   indonesianName: (value: string) => {
-    if (!value || value.length < 2) return false
-    if (value.length > 50) return false
-    if (/\d/.test(value)) return false // No numbers in names
+    if (!value || value.length < 2) {return false}
+    if (value.length > 50) {return false}
+    if (/\d/.test(value)) {return false} // No numbers in names
     return true
   },
 
@@ -78,7 +78,7 @@ export const validationFunctions = {
 
   // Stock validation (min_stock <= current_stock)
   validStockLevels: (data: { min_stock?: number; current_stock: number }) => {
-    if (!data.min_stock) return true
+    if (!data.min_stock) {return true}
     return data.min_stock <= data.current_stock
   },
 
@@ -89,22 +89,18 @@ export const validationFunctions = {
   },
 
   // File size validation
-  fileSize: (file: File, maxSize: number) => {
-    return file.size <= maxSize
-  },
+  fileSize: (file: File, maxSize: number) => file.size <= maxSize,
 
   // File type validation
-  fileType: (file: File, allowedTypes: string[]) => {
-    return allowedTypes.includes(file.type)
-  },
+  fileType: (file: File, allowedTypes: string[]) => allowedTypes.includes(file.type),
 
   // URL validation
   url: (value: string) => {
-    if (!value) return true // Optional field
+    if (!value) {return true} // Optional field
     try {
       new URL(value)
       return validationPatterns.url.test(value)
-    } catch {
+    } catch (error) {
       return false
     }
   }
@@ -272,30 +268,26 @@ export const validationHelpers = {
     try {
       const result = schema.parse(data)
       return { success: true, data: result }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return { success: false, errors: error }
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return { success: false, errors: _error }
       }
       return { success: false, errors: new z.ZodError([]) }
     }
   },
 
   // Get validation errors as string array
-  getValidationErrors: (errors: z.ZodError): string[] => {
-    return errors.issues.map(error => {
+  getValidationErrors: (errors: z.ZodError): string[] => errors.issues.map(error => {
       const path = error.path.join('.')
       return path ? `${path}: ${error.message}` : error.message
-    })
-  },
+    }),
 
   // Get validation errors as object
-  getValidationErrorsObject: (errors: z.ZodError): Record<string, string> => {
-    return errors.issues.reduce((acc, error) => {
+  getValidationErrorsObject: (errors: z.ZodError): Record<string, string> => errors.issues.reduce((acc, error) => {
       const path = error.path.join('.')
       acc[path] = error.message
       return acc
-    }, {} as Record<string, string>)
-  },
+    }, {} as Record<string, string>),
 
   // Validate single field
   validateField: <T>(schema: z.ZodSchema<T>, field: keyof T, value: unknown): string | null => {
@@ -306,9 +298,9 @@ export const validationHelpers = {
         return null
       }
       return 'Field not found in schema'
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return error.issues[0]?.message || 'Validation failed'
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return err.issues[0]?.message || 'Validation failed'
       }
       return 'Validation failed'
     }
@@ -319,7 +311,7 @@ export const validationHelpers = {
     try {
       schema.parse(data)
       return true
-    } catch {
+    } catch (error) {
       return false
     }
   }

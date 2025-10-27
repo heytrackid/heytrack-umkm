@@ -8,7 +8,7 @@ import { AlertTriangle, Activity, HardDrive, Zap, RefreshCw, Download } from 'lu
 import { usePerformanceMonitoring, useServiceWorker } from '@/hooks'
 import { formatBytes } from '@/lib/utils'
 
-export function PerformanceDashboard() {
+export const PerformanceDashboard = () => {
   const {
     metrics,
     isSupported: perfSupported,

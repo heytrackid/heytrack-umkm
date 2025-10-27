@@ -25,7 +25,7 @@ export function createSuccessResponse<T>(
  */
 export function createErrorResponse(
   error: string,
-  statusCode: number = 400,
+  statusCode = 400,
   errors?: string[]
 ): NextResponse<ApiErrorResponse> {
   return NextResponse.json(

@@ -12,8 +12,7 @@ interface StepSkeletonProps {
   currentStep?: number
 }
 
-export function StepSkeleton({ className, steps = 3, currentStep = 1 }: StepSkeletonProps) {
-  return (
+export const StepSkeleton = ({ className, steps = 3, currentStep = 1 }: StepSkeletonProps) => (
     <div className={cn("space-y-6", className)}>
       {/* Step Indicator */}
       <div className="flex items-center justify-center space-x-4">
@@ -60,4 +59,3 @@ export function StepSkeleton({ className, steps = 3, currentStep = 1 }: StepSkel
       </div>
     </div>
   )
-}

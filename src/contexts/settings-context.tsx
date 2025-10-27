@@ -1,7 +1,6 @@
 'use client'
 
-import * as React from 'react'
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import { uiLogger } from '@/lib/logger'
 
 export interface Currency {
@@ -63,7 +62,7 @@ const defaultSettings: Settings = {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined)
 
-export function SettingsProvider({ children }: { children: React.ReactNode }) {
+export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
 
   useEffect(() => {
@@ -78,28 +77,28 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           currency: parsedCurrency,
           language: parsedLanguage
         }
-        setSettings(newSettings)
+        void setSettings(newSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-      } catch (error: unknown) {
+      } catch (err: unknown) {
         uiLogger.error({ error }, 'Failed to parse saved settings from localStorage')
-        setSettings(defaultSettings)
+        void setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }
     } else {
-      setSettings(defaultSettings)
+      void setSettings(defaultSettings)
       localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
     }
   }, [])
 
   const updateCurrency = (currency: Currency) => {
     const newSettings = { ...settings, currency }
-    setSettings(newSettings)
+    void setSettings(newSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
   const updateLanguage = (language: Language) => {
     const newSettings = { ...settings, language }
-    setSettings(newSettings)
+    void setSettings(newSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
   }
 
@@ -114,7 +113,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   }
 
   const resetToDefault = () => {
-    setSettings(defaultSettings)
+    void setSettings(defaultSettings)
     localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
   }
 

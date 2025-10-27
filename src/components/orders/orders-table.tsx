@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -116,13 +115,13 @@ const OrdersTable = ({
     if (checked) {
       setSelectedOrders(orders.map(order => order.id))
     } else {
-      setSelectedOrders([])
+      void setSelectedOrders([])
     }
   }
 
   const handleSelectOrder = (orderId: string, checked: boolean) => {
     if (checked) {
-      setSelectedOrders(prev => [...prev, orderId])
+      void setSelectedOrders(prev => [...prev, orderId])
     } else {
       setSelectedOrders(prev => prev.filter(id => id !== orderId))
     }
@@ -141,16 +140,16 @@ const OrdersTable = ({
 
   // Delete handler
   const handleDeleteOrder = (order: Order) => {
-    setOrderToDelete(order)
-    setShowDeleteDialog(true)
+    void setOrderToDelete(order)
+    void setShowDeleteDialog(true)
   }
 
   const confirmDelete = () => {
     if (orderToDelete && onDeleteOrder) {
       onDeleteOrder(orderToDelete)
     }
-    setShowDeleteDialog(false)
-    setOrderToDelete(null)
+    void setShowDeleteDialog(false)
+    void setOrderToDelete(null)
   }
 
   const getStatusBadge = (status: string) => {
@@ -180,13 +179,11 @@ const OrdersTable = ({
     )
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
     })
-  }
 
   // Using formatCurrency from useCurrency hook
 
@@ -196,13 +193,13 @@ const OrdersTable = ({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-12" />
               <TableHead>No. Pesanan</TableHead>
               <TableHead>Pelanggan</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Tanggal</TableHead>
               <TableHead>Pembayaran</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
           <TableBody>

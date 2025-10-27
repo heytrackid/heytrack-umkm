@@ -1,8 +1,8 @@
 'use client'
-import * as React from 'react'
+import type { ReactNode } from 'react'
 
+import Suspense from 'react'
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -95,7 +95,7 @@ export const EnhancedForms = {
 // Form wrapper with preloading
 interface LazyFormWrapperProps {
   type: 'ingredient' | 'recipe' | 'customer' | 'financial'
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export const LazyFormWrapper = ({ type, children }: LazyFormWrapperProps) => {
@@ -103,16 +103,16 @@ export const LazyFormWrapper = ({ type, children }: LazyFormWrapperProps) => {
   const handlePreload = () => {
     switch (type) {
       case 'ingredient':
-        preloadIngredientForm()
+        void preloadIngredientForm()
         break
       case 'recipe':
-        preloadRecipeForm()
+        void preloadRecipeForm()
         break
       case 'customer':
-        preloadCustomerForm()
+        void preloadCustomerForm()
         break
       case 'financial':
-        preloadFinancialRecordForm()
+        void preloadFinancialRecordForm()
         break
     }
   }

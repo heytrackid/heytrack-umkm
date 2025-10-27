@@ -43,7 +43,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
   }, [recipe])
 
   const analyzePricing = async () => {
-    setLoading(true)
+    void setLoading(true)
     try {
       // Call API endpoint to calculate smart pricing
       const response = await fetch(`/api/recipes/${recipe.id}/pricing`, {
@@ -59,9 +59,9 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       }
       
       const pricingAnalysis = await response.json() as SmartPricingAnalysis
-      setAnalysis(pricingAnalysis)
-      setCustomPrice(pricingAnalysis.pricing.standard.price)
-    } catch (error: unknown) {
+      void setAnalysis(pricingAnalysis)
+      void setCustomPrice(pricingAnalysis.pricing.standard.price)
+    } catch (err: unknown) {
       uiLogger.error({ err: error }, 'Error analyzing pricing')
       // Set fallback analysis to prevent UI breaks
       // Calculate basic analysis as fallback for now
@@ -93,11 +93,11 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
           },
           recommendations: ['Gagal memuat analisis harga otomatis. Silakan coba lagi nanti.']
         }
-        setAnalysis(fallbackAnalysis)
-        setCustomPrice(fallbackAnalysis.pricing.standard.price)
+        void setAnalysis(fallbackAnalysis)
+        void setCustomPrice(fallbackAnalysis.pricing.standard.price)
       }
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -123,7 +123,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             <span className="ml-3">Menganalisis harga optimal...</span>
           </div>
         </CardContent>
@@ -194,7 +194,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
         {/* Pricing Options Tab */}
         <TabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            {(Object.entries(analysis.pricing) as [PricingTierKey, typeof analysis.pricing.economy][]).map(([tier, data]) => (
+            {(Object.entries(analysis.pricing) as Array<[PricingTierKey, typeof analysis.pricing.economy]>).map(([tier, data]) => (
               <Card
                 key={tier}
                 className={`cursor-pointer transition-all hover: ${selectedTier === tier ? 'ring-2 ring-primary' : ''
@@ -235,7 +235,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                     className="w-full mt-3"
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleApplyPrice(tier)
+                      void handleApplyPrice(tier)
                     }}
                   >
                     Gunakan Harga Ini

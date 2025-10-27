@@ -4,7 +4,7 @@
  * Shows production batches, resource allocation, and dependencies
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -96,8 +96,8 @@ export default function ProductionTimeline({
     }
 
     const scheduledBatches = schedulingResult.schedule.filter(b => b.scheduled_start)
-    const startTimes = scheduledBatches.map(b => new Date(b.scheduled_start!))
-    const endTimes = scheduledBatches.map(b => new Date(b.scheduled_end!))
+    const startTimes = scheduledBatches.map(b => new Date(b.scheduled_start))
+    const endTimes = scheduledBatches.map(b => new Date(b.scheduled_end))
 
     const startDate = startOfDay(new Date(Math.min(...startTimes.map(d => d.getTime()))))
     const endDate = endOfDay(new Date(Math.max(...endTimes.map(d => d.getTime()))))
@@ -166,7 +166,7 @@ export default function ProductionTimeline({
   }, [schedulingResult])
 
   const handleBatchClick = (batch: ProductionBatch) => {
-    setSelectedBatch(batch.id)
+    void setSelectedBatch(batch.id)
     onBatchSelect?.(batch)
   }
 
@@ -202,9 +202,7 @@ export default function ProductionTimeline({
                 variant="outline"
                 size="sm"
                 onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
-              >
-               
-              </Button>
+               />
               
               <Separator orientation="vertical" className="h-6" />
               
@@ -389,8 +387,8 @@ export default function ProductionTimeline({
                                     <div>Priority: {batch.priority}/10</div>
                                     <div>Duration: {batch.estimated_duration} min</div>
                                     <div>Status: <Badge variant="outline" className="text-xs">{batch.status}</Badge></div>
-                                    <div>Start: {format(new Date(batch.scheduled_start!), 'HH:mm')}</div>
-                                    <div>End: {format(new Date(batch.scheduled_end!), 'HH:mm')}</div>
+                                    <div>Start: {format(new Date(batch.scheduled_start), 'HH:mm')}</div>
+                                    <div>End: {format(new Date(batch.scheduled_end), 'HH:mm')}</div>
                                   </div>
                                   
                                   {/* Quick actions */}
@@ -401,7 +399,7 @@ export default function ProductionTimeline({
                                       className="h-6 text-xs"
                                       onClick={(e) => {
                                         e.stopPropagation()
-                                        handleStatusToggle(batch)
+                                        void handleStatusToggle(batch)
                                       }}
                                     >
                                       {batch.status === 'scheduled' ? 'Start' : 

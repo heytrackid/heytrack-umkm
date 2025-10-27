@@ -1,12 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types'
 
 import { apiLogger } from '@/lib/logger'
-import { createApiResponse } from '@/lib/shared/api'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {

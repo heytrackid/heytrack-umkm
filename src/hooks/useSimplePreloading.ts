@@ -14,7 +14,7 @@ export function useLinkPreloading() {
 
   const handleMouseEnter = useCallback((href: string) => {
     // Prefetch the route
-    router.prefetch(href)
+    void router.prefetch(href)
   }, [router])
 
   return { handleMouseEnter }
@@ -27,7 +27,7 @@ export function useButtonPreloading() {
   const router = useRouter()
 
   const preload = useCallback((href: string) => {
-    router.prefetch(href)
+    void router.prefetch(href)
   }, [router])
 
   return { preload }
@@ -40,7 +40,7 @@ export function usePreload() {
   const router = useRouter()
 
   const preloadRoute = useCallback((href: string) => {
-    router.prefetch(href)
+    void router.prefetch(href)
   }, [router])
 
   return { preloadRoute }

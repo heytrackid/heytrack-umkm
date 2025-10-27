@@ -1,7 +1,6 @@
-'use client';
-import * as React from 'react'
+'use client'
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
 import { Send, Bot, User, BarChart3, Package, DollarSign, Users, MessageCircle, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,12 +19,12 @@ interface ChatbotInterfaceProps {
   onToggleMinimize?: () => void;
 }
 
-const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({ 
+const ChatbotInterface = ({ 
   userId, 
   className = '', 
   isMinimized = false, 
   onToggleMinimize 
-}) => {
+}: ChatbotInterfaceProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -102,8 +101,8 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         throw new Error(result.error || 'Unknown API error');
       }
 
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error sending message:');
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Error sending message:');
       setMessages(prev => [...prev, {
         id: `error_${Date.now()}`,
         type: 'assistant',
@@ -141,7 +140,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
       const apiResult = await response.json();
       
       if (apiResult.success) {
-        const result = apiResult.result;
+        const {result} = apiResult;
         
         // Create system message with enhanced content
         let content = result.message || `Aksi"${action.label}" berhasil dijalankan.`;
@@ -169,8 +168,8 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
         throw new Error(apiResult.error || 'Unknown action error');
       }
       
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error executing action:');
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Error executing action:');
       setMessages(prev => [...prev, {
         id: `error_${Date.now()}`,
         type: 'assistant',
@@ -183,7 +182,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   };
 
   // Handle Enter key press
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -203,7 +202,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   };
 
   // Message bubble component
-  const MessageBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
+  const MessageBubble = ({ message }: { message: ChatMessage }) => {
     const isUser = message.type === 'user';
     const isSystem = message.type === 'system';
 
@@ -262,13 +261,13 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
                     // Determine visualization type based on message data structure
                     if (message.data.profitMargin !== undefined) {
                       return <DataVisualization type="financial" data={message.data} compact />;
-                    } else if (message.data.criticalItems) {
+                    } if (message.data.criticalItems) {
                       return <DataVisualization type="inventory" data={message.data} compact />;
-                    } else if (message.data.topCustomers) {
+                    } if (message.data.topCustomers) {
                       return <DataVisualization type="customers" data={message.data} compact />;
-                    } else if (message.data.topRecipes) {
+                    } if (message.data.topRecipes) {
                       return <DataVisualization type="products" data={message.data} compact />;
-                    } else if (message.data.analysis) {
+                    } if (message.data.analysis) {
                       return <DataVisualization type="analysis" data={message.data} compact />;
                     }
                     return null;

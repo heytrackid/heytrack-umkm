@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -166,7 +165,7 @@ export default function CashFlowPage() {
         <Suspense fallback={
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
             {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg"></div>
+              <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
             ))}
           </div>
         }>

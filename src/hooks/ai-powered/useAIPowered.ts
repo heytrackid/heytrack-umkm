@@ -53,7 +53,7 @@ export function useAIPowered() {
     try {
       const response = await fetch('/api/ai/health')
       return response.ok
-    } catch {
+    } catch (error) {
       return false
     }
   }, [])
@@ -80,8 +80,8 @@ export function useAIPowered() {
 
     // Helper functions
     getConfidenceLevel: (confidence: number) => {
-      if (confidence >= 0.8) return 'high'
-      if (confidence >= 0.6) return 'medium'
+      if (confidence >= 0.8) {return 'high'}
+      if (confidence >= 0.6) {return 'medium'}
       return 'low'
     },
 

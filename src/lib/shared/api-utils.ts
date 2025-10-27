@@ -3,7 +3,7 @@
  * Common API response patterns and utilities
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getErrorMessage } from '@/shared'
 import { apiLogger } from '@/lib/logger'
 
@@ -11,7 +11,7 @@ import { apiLogger } from '@/lib/logger'
 export function createSuccessResponse<T>(
   data: T,
   message?: string,
-  status: number = 200
+  status = 200
 ) {
   const response: any = {
     success: true,
@@ -28,7 +28,7 @@ export function createSuccessResponse<T>(
 
 export function createErrorResponse(
   message: string,
-  status: number = 500,
+  status = 500,
   details?: any
 ) {
   const errorResponse: any = {
@@ -79,8 +79,8 @@ export async function validateRequestData<T>(
     }
 
     return result.data as T
-  } catch (error) {
-    throw new Error(`Request validation failed: ${getErrorMessage(error)}`)
+  } catch (err) {
+    throw new Error(`Request validation failed: ${getErrorMessage(err)}`)
   }
 }
 
@@ -89,7 +89,7 @@ export function extractPagination(request: NextRequest): {
   limit: number
   offset: number
 } {
-  const searchParams = request.nextUrl.searchParams
+  const {searchParams} = request.nextUrl
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'))
   const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')))
 
@@ -131,7 +131,7 @@ export function extractSearchParams(request: NextRequest): {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 } {
-  const searchParams = request.nextUrl.searchParams
+  const {searchParams} = request.nextUrl
 
   const search = searchParams.get('search') || undefined
   const sortBy = searchParams.get('sortBy') || undefined
@@ -230,10 +230,10 @@ export function withTiming<T extends any[]>(
       const duration = Date.now() - start
       logger(duration, ...args)
       return result
-    } catch (error) {
+    } catch (err) {
       const duration = Date.now() - start
       logger(duration, ...args)
-      throw error
+      throw err
     }
   }
 }

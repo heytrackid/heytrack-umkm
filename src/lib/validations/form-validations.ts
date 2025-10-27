@@ -105,10 +105,10 @@ export const CustomerSchema = z.object({
   }).optional().default("REGULAR"),
   notes: optionalString,
   is_active: z.boolean().default(true)
-}).refine(data => {
+}).refine(data => 
   // At least one contact method should be provided
-  return data.email || data.phone
-}, {
+   data.email || data.phone
+, {
   message: 'validation.contactRequired',
   path: ['email']
 })

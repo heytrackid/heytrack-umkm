@@ -23,7 +23,6 @@ import { useEffect, useState } from 'react'
 
 // Lazy loaded components
 import {
-  LazyAdvancedHPPCalculator,
   RecipeDashboardWithProgressiveLoading,
   SmartRecipeLoader,
   preloadRecipeComponents
@@ -57,31 +56,31 @@ export default function RecipesPage({
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [loading, setLoading] = useState(true)
-  const [activeView, setActiveView] = useState<'list' | 'hpp' | 'pricing' | 'analytics'>('list')
-  
-  type ActiveView = 'list' | 'hpp' | 'pricing' | 'analytics'
+  const [activeView, setActiveView] = useState<'list' | 'pricing' | 'analytics'>('list')
+
+  type ActiveView = 'list' | 'pricing' | 'analytics'
 
   useEffect(() => {
     // Preload recipe components for better performance
-    preloadRecipeComponents()
-    fetchRecipes()
+    void preloadRecipeComponents()
+    void fetchRecipes()
   }, [])
 
   const fetchRecipes = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       // Fetch recipes from API
       const response = await fetch('/api/recipes')
-      if (!response.ok) {throw new Error('Failed to fetch recipes')}
+      if (!response.ok) { throw new Error('Failed to fetch recipes') }
       const fetchedRecipes: Recipe[] = await response.json()
-      setRecipes(fetchedRecipes)
+      void setRecipes(fetchedRecipes)
       if (fetchedRecipes.length > 0) {
-        setSelectedRecipe(fetchedRecipes[0])
+        void setSelectedRecipe(fetchedRecipes[0])
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       uiLogger.error({ err: error }, 'Error fetching recipes')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -124,7 +123,7 @@ export default function RecipesPage({
           <div className="space-y-2">
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <ChefHat className="h-8 w-8" />
-              Recipe Management
+              Kelola Resep
             </h1>
             <p className="text-muted-foreground">
               Kelola resep dan hitung HPP dengan sistem otomatis
@@ -134,10 +133,10 @@ export default function RecipesPage({
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-1 space-y-4">
-            <div className="h-96 bg-gray-100 animate-pulse rounded-lg"></div>
+            <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
           </div>
           <div className="lg:col-span-2 space-y-4">
-            <div className="h-96 bg-gray-100 animate-pulse rounded-lg"></div>
+            <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
           </div>
         </div>
       </div>
@@ -180,7 +179,7 @@ export default function RecipesPage({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Margin</p>
+                <p className="text-sm font-medium text-muted-foreground">Rata-rata Margin</p>
                 <p className="text-2xl font-bold">67%</p>
               </div>
               <TrendingUp className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -191,7 +190,7 @@ export default function RecipesPage({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg HPP</p>
+                <p className="text-sm font-medium text-muted-foreground">Rata-rata HPP</p>
                 <p className="text-2xl font-bold">Rp 8.5K</p>
               </div>
               <Calculator className="h-8 w-8 text-orange-600" />
@@ -202,7 +201,7 @@ export default function RecipesPage({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Best Seller</p>
+                <p className="text-sm font-medium text-muted-foreground">Terlaris</p>
                 <p className="text-2xl font-bold">Roti Tawar</p>
               </div>
               <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -326,9 +325,8 @@ export default function RecipesPage({
 
               {/* Navigation Tabs */}
               <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="list">📋 Detail</TabsTrigger>
-                  <TabsTrigger value="hpp">💰 HPP</TabsTrigger>
                   <TabsTrigger value="pricing">💡 Pricing</TabsTrigger>
                   <TabsTrigger value="analytics">📊 Analytics</TabsTrigger>
                 </TabsList>
@@ -338,21 +336,13 @@ export default function RecipesPage({
                     <CardContent className="pt-6">
                       <div className="text-center py-8">
                         <ChefHat className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="font-medium mb-2">Recipe Details</h3>
+                        <h3 className="font-medium mb-2">Detail Resep</h3>
                         <p className="text-sm text-muted-foreground">
-                          Detail ingredients dan langkah-langkah akan ditampilkan di sini
+                          Detail bahan dan langkah-langkah akan ditampilkan di sini
                         </p>
                       </div>
                     </CardContent>
                   </Card>
-                </TabsContent>
-
-                <TabsContent value="hpp" className="mt-6">
-                  <LazyAdvancedHPPCalculator
-                    recipeId={selectedRecipe.id}
-                    recipeName={selectedRecipe.name}
-                    onPriceUpdate={handlePriceUpdate}
-                  />
                 </TabsContent>
 
                 <TabsContent value="pricing" className="mt-6">
@@ -368,9 +358,9 @@ export default function RecipesPage({
                       <CardContent className="pt-6">
                         <div className="text-center py-8">
                           <DollarSign className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                          <h3 className="font-medium mb-2">Smart Pricing Assistant</h3>
+                          <h3 className="font-medium mb-2">Asisten Harga Pintar</h3>
                           <p className="text-sm text-muted-foreground mb-4">
-                            Fitur ini hanya tersedia untuk Admin dan Manager
+                            Fitur ini hanya tersedia untuk Admin dan Manajer
                           </p>
                           <Badge variant="outline">Akses Terbatas</Badge>
                         </div>

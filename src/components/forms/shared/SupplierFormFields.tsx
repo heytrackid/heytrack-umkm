@@ -14,12 +14,11 @@ interface SupplierFormFieldsProps {
 /**
  * Supplier form fields
  */
-export function SupplierFormFields({
+export const SupplierFormFields = ({
   register,
   errors,
   showNotes = true
-}: SupplierFormFieldsProps) {
-  return (
+}: SupplierFormFieldsProps) => (
     <>
       <FormSection
         title="Informasi Dasar"
@@ -97,4 +96,3 @@ export function SupplierFormFields({
       )}
     </>
   )
-}

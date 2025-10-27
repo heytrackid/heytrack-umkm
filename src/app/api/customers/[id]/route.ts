@@ -1,5 +1,4 @@
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/utils/supabase'
 import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -25,7 +24,7 @@ export async function GET(
           { status: 404 }
         )
       }
-      apiLogger.error({ error: error }, 'Error fetching customer:')
+      apiLogger.error({ error }, 'Error fetching customer:')
       return NextResponse.json(
         { error: 'Failed to fetch customer' },
         { status: 500 }
@@ -34,7 +33,7 @@ export async function GET(
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/customers/[id]:')
+    apiLogger.error({ error }, 'Error in GET /api/customers/[id]:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }
@@ -91,7 +90,7 @@ export async function PUT(
           { status: 409 }
         )
       }
-      apiLogger.error({ error: error }, 'Error updating customer:')
+      apiLogger.error({ error }, 'Error updating customer:')
       return NextResponse.json(
         { error: 'Failed to update customer' },
         { status: 500 }
@@ -100,7 +99,7 @@ export async function PUT(
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in PUT /api/customers/[id]:')
+    apiLogger.error({ error }, 'Error in PUT /api/customers/[id]:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }
@@ -137,7 +136,7 @@ export async function DELETE(
       .eq('id', id)
     
     if (error) {
-      apiLogger.error({ error: error }, 'Error deleting customer:')
+      apiLogger.error({ error }, 'Error deleting customer:')
       return NextResponse.json(
         { error: 'Failed to delete customer' },
         { status: 500 }
@@ -146,7 +145,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Customer deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in DELETE /api/customers/[id]:')
+    apiLogger.error({ error }, 'Error in DELETE /api/customers/[id]:')
     return NextResponse.json(
       { error: getErrorMessage(error) },
       { status: 500 }

@@ -1,8 +1,6 @@
 'use client'
 
-import * as React from 'react'
-import type { ComponentType } from 'react';
-import { lazy, Suspense } from 'react'
+import { type ReactNode, type ComponentType, lazy, Suspense } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 
 /**
@@ -12,25 +10,22 @@ import { Card, CardContent } from '@/components/ui/card'
 
 interface RouteLoaderProps<T = Record<string, unknown>> {
   loader: () => Promise<{ default: ComponentType<T> }>
-  fallback?: React.ReactNode
+  fallback?: ReactNode
   props?: T
 }
 
-const DefaultFallback = () => {
-  
-  return (
+const DefaultFallback = () => (
     <div className="flex items-center justify-center min-h-[400px]">
       <Card className="w-full max-w-md">
         <CardContent className="p-8">
           <div className="flex items-center justify-center space-x-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100" />
             <span className="text-lg text-muted-foreground">Informasi</span>
           </div>
         </CardContent>
       </Card>
     </div>
   )
-}
 
 /**
  * Lazy load route component with fallback
@@ -50,7 +45,7 @@ export function RouteLoader<T = Record<string, unknown>>({ loader, fallback, pro
  */
 export function createLazyRoute<T extends Record<string, unknown>>(
   loader: () => Promise<{ default: ComponentType<T> }>,
-  fallback?: React.ReactNode
+  fallback?: ReactNode
 ) {
   const LazyComponent = lazy(loader)
   

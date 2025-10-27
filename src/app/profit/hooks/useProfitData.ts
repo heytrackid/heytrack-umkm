@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { apiLogger } from '@/lib/logger'
-import type { ProfitData, ProfitFilters, ExportFormat, PeriodType } from '../components/types'
+import type { ProfitData, ProfitFilters, ExportFormat, PeriodType } from '@/app/profit/components/types'
 
 export function useProfitData() {
   const [loading, setLoading] = useState(true)
@@ -23,12 +23,12 @@ export function useProfitData() {
   }
 
   useEffect(() => {
-    fetchProfitData()
+    void fetchProfitData()
   }, [filters.selectedPeriod, filters.startDate, filters.endDate])
 
   const fetchProfitData = async () => {
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       // Calculate date range based on period
@@ -46,12 +46,15 @@ export function useProfitData() {
           calculatedStartDate = new Date(today.getFullYear(), quarter * 3, 1).toISOString().split('T')[0]
         } else if (filters.selectedPeriod === 'year') {
           calculatedStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
+        } else {
+          // Default fallback for any other period
+          calculatedStartDate = new Date(today.setDate(today.getDate() - 30)).toISOString().split('T')[0]
         }
       }
 
       const params = new URLSearchParams()
-      if (calculatedStartDate) params.append('start_date', calculatedStartDate)
-      if (calculatedEndDate) params.append('end_date', calculatedEndDate)
+      if (calculatedStartDate) {params.append('start_date', calculatedStartDate)}
+      if (calculatedEndDate) {params.append('end_date', calculatedEndDate)}
 
       const response = await fetch(`/api/reports/profit?${params.toString()}`)
 
@@ -60,20 +63,20 @@ export function useProfitData() {
       }
 
       const data = await response.json()
-      setProfitData(data)
+      void setProfitData(data)
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error fetching profit data:')
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
+      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const exportReport = async (format: ExportFormat) => {
     try {
       const params = new URLSearchParams()
-      if (filters.startDate) params.append('start_date', filters.startDate)
-      if (filters.endDate) params.append('end_date', filters.endDate)
+      if (filters.startDate) {params.append('start_date', filters.startDate)}
+      if (filters.endDate) {params.append('end_date', filters.endDate)}
       params.append('export', format)
 
       const response = await fetch(`/api/reports/profit?${params.toString()}`)

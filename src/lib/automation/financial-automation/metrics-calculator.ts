@@ -3,7 +3,7 @@
  * Handles core financial metrics calculation
  */
 
-import type { SaleData, ExpenseData, Ingredient, FinancialMetrics } from '../types'
+import type { SaleData, ExpenseData, Ingredient, FinancialMetrics } from '@/lib/automation/types'
 
 export class MetricsCalculator {
   /**
@@ -38,7 +38,7 @@ export class MetricsCalculator {
    */
   static filterRecentData<T extends { date: string }>(
     data: T[],
-    days: number = 30
+    days = 30
   ): T[] {
     const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
     return data.filter(item => new Date(item.date) >= cutoffDate)

@@ -84,7 +84,7 @@ export default function TemplateForm({
     return Array.from(variables)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault
 
     try {

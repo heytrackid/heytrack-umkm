@@ -5,8 +5,8 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { dbLogger } from '@/lib/logger'
-import type { Order, OrderItem, SyncEvent } from '../data-synchronization/types'
-import { syncEmitter } from '../data-synchronization/sync-events'
+import type { Order, OrderItem, SyncEvent } from '@/lib/data-synchronization/types'
+import { syncEmitter } from '@/lib/data-synchronization/sync-events'
 
 interface OrdersStore {
   // Data
@@ -90,17 +90,11 @@ export const useOrdersStore = create<OrdersStore>()(
     },
 
     // Business logic
-    getPendingOrders: () => {
-      return get().orders.filter(order => order.status === 'pending')
-    },
+    getPendingOrders: () => get().orders.filter(order => order.status === 'pending'),
 
-    getOrdersByStatus: (status) => {
-      return get().orders.filter(order => order.status === status)
-    },
+    getOrdersByStatus: (status) => get().orders.filter(order => order.status === status),
 
-    calculateTotalRevenue: () => {
-      return get().orders.reduce((total, order) => total + order.totalHarga, 0)
-    },
+    calculateTotalRevenue: () => get().orders.reduce((total, order) => total + order.totalHarga, 0),
 
     // Stock consumption tracking
     consumeStockForOrder: async (orderId) => {

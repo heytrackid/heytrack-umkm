@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@/utils/supabase';
+import { createClient } from '@/utils/supabase/server';
 import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     
     const { data: expense, error } = await supabase
       .from('expenses')
@@ -33,7 +33,7 @@ export async function PUT(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
     const body = await request.json();
 
     const updatePayload = {
@@ -65,7 +65,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   try {
-    const supabase = createSupabaseClient();
+    const supabase = await createClient();
 
     const { error } = await supabase
       .from('expenses')

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
+import { logger } from '@/lib/logger'
 import type { SmartInsightsRequest, AIInsight, PricingAnalysisRequest, InventoryOptimizationRequest } from './types'
 
 interface UseSmartInsightsProps {
@@ -45,8 +46,8 @@ export function useSmartInsights({
                 analysis: pricingAnalysis,
                 priority: 'high'
               })
-            } catch (error: unknown) {
-              console.warn(`Pricing analysis failed for ${recipeData.name}:`, error)
+            } catch (err: unknown) {
+              logger.warn(`Pricing analysis failed for ${recipe.name}`, { err })
             }
           }
         }
@@ -71,15 +72,15 @@ export function useSmartInsights({
             analysis: inventoryOptimization,
             priority: 'medium'
           })
-        } catch (error: unknown) {
-          console.warn('Inventory optimization failed:', error)
+        } catch (err: unknown) {
+          logger.warn('Inventory optimization failed', { err })
         }
       }
 
       return insights
 
-    } catch (error: unknown) {
-      console.error('Smart insights generation failed:', error)
+    } catch (err: unknown) {
+      logger.error('Smart insights generation failed', { err })
       return []
     }
   }, [analyzePricing, optimizeInventory])

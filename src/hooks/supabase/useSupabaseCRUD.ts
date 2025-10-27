@@ -11,6 +11,9 @@ interface UseSupabaseCRUDReturn<T> {
   loading: boolean
   error: Error | null
   refetch: () => Promise<void>
+  remove: (id: string) => Promise<void>
+  create: (data: Partial<T>) => Promise<T | null>
+  update: (id: string, data: Partial<T>) => Promise<T | null>
 }
 
 export function useSupabaseCRUD<T = any>(
@@ -27,8 +30,8 @@ export function useSupabaseCRUD<T = any>(
 
   const fetchData = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
 
       const supabase = createClient()
       let query = supabase.from(table).select(options?.select || '*')
@@ -49,24 +52,86 @@ export function useSupabaseCRUD<T = any>(
 
       const { data: result, error: queryError } = await query
 
-      if (queryError) throw queryError
+      if (queryError) {throw queryError}
 
-      setData(result as T[])
+      void setData(result as T[])
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
-      setLoading(false)
+      void setLoading(false)
+    }
+  }
+
+  const remove = async (id: string) => {
+    try {
+      const supabase = createClient()
+      const { error: deleteError } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', id)
+
+      if (deleteError) {throw deleteError}
+
+      // Refresh data after delete
+      await fetchData()
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Delete failed'))
+      throw err
+    }
+  }
+
+  const create = async (newData: Partial<T>): Promise<T | null> => {
+    try {
+      const supabase = createClient()
+      const { data: result, error: createError } = await supabase
+        .from(table)
+        .insert(newData as any)
+        .select()
+        .single()
+
+      if (createError) {throw createError}
+
+      // Refresh data after create
+      await fetchData()
+      return result as T
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Create failed'))
+      throw err
+    }
+  }
+
+  const update = async (id: string, updateData: Partial<T>): Promise<T | null> => {
+    try {
+      const supabase = createClient()
+      const { data: result, error: updateError } = await supabase
+        .from(table)
+        .update(updateData as any)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (updateError) {throw updateError}
+
+      // Refresh data after update
+      await fetchData()
+      return result as T
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Update failed'))
+      throw err
     }
   }
 
   useEffect(() => {
-    fetchData()
+    void fetchData()
   }, [table, JSON.stringify(options)])
 
   return {
     data,
     loading,
     error,
-    refetch: fetchData
+    refetch: fetchData,
+    remove,
+    create,
+    update
   }
 }

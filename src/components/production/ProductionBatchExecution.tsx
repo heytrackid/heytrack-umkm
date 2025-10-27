@@ -4,9 +4,8 @@
  * Provides real-time status updates and batch control functionality
  */
 
-import React, { useState, useEffect } from 'react'
-import { differenceInMinutes } from 'date-fns'
-import { format } from 'date-fns'
+import { useEffect, useState } from 'react'
+import { differenceInMinutes, format } from 'date-fns'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { productionDataIntegration } from '@/services/production/ProductionDataIntegration'
@@ -53,9 +52,9 @@ export default function ProductionBatchExecution({
   // Auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      updateBatchProgress()
+      void updateBatchProgress()
     }, 30000)
-    setRefreshInterval(interval)
+    void setRefreshInterval(interval)
 
     return () => {
       if (interval) {clearInterval(interval)}
@@ -79,7 +78,7 @@ export default function ProductionBatchExecution({
       }
     }
 
-    setExecutionStates(newStates)
+    void setExecutionStates(newStates)
   }, [batches])
 
   const updateBatchProgress = () => {
@@ -127,7 +126,7 @@ export default function ProductionBatchExecution({
 
     const newStates = new Map(executionStates)
     newStates.set(batch.id, newState)
-    setExecutionStates(newStates)
+    void setExecutionStates(newStates)
 
     onBatchUpdate?.(batch.id, 'in_progress', `Batch started at ${format(now, 'HH:mm')}`)
     toast({
@@ -149,7 +148,7 @@ export default function ProductionBatchExecution({
 
     const newStates = new Map(executionStates)
     newStates.set(batchId, newState)
-    setExecutionStates(newStates)
+    void setExecutionStates(newStates)
 
     onBatchUpdate?.(batchId, 'scheduled', `Batch paused at ${format(new Date(), 'HH:mm')}`)
     toast({
@@ -191,7 +190,7 @@ export default function ProductionBatchExecution({
 
       const newStates = new Map(executionStates)
       newStates.set(batchId, newState)
-      setExecutionStates(newStates)
+      void setExecutionStates(newStates)
 
       // Update production progress in the system
       await productionDataIntegration.updateProductionProgress(batchId, 'completed')
@@ -201,7 +200,7 @@ export default function ProductionBatchExecution({
         title: 'Batch Completed',
         description: `Completed production of ${state.batch.recipe_name}`,
       })
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       apiLogger.error({ error }, 'Error completing batch:')
       toast({
         title: 'Error',
@@ -238,7 +237,7 @@ export default function ProductionBatchExecution({
 
     const newStates = new Map(executionStates)
     newStates.set(batchId, newState)
-    setExecutionStates(newStates)
+    void setExecutionStates(newStates)
   }
 
   const addNote = (batchId: string) => {
@@ -254,9 +253,9 @@ export default function ProductionBatchExecution({
 
     const newStates = new Map(executionStates)
     newStates.set(batchId, newState)
-    setExecutionStates(newStates)
+    void setExecutionStates(newStates)
 
-    setCurrentNotes('')
+    void setCurrentNotes('')
     toast({
       title: 'Note Added',
       description: 'Production note has been added',
@@ -275,8 +274,8 @@ export default function ProductionBatchExecution({
           executionStates={executionStates}
           selectedBatch={selectedBatch}
           onBatchSelect={(batchId) => {
-            setSelectedBatch(batchId)
-            onBatchSelect?.(batches.find(b => b.id === batchId)!)
+            void setSelectedBatch(batchId)
+            onBatchSelect?.(batches.find(b => b.id === batchId))
           }}
           onBatchUpdate={onBatchUpdate}
           onStartBatch={handleStartBatch}

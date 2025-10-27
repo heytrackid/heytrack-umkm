@@ -52,7 +52,7 @@ export const ROUTE_PRELOADING_PATTERNS: RoutePreloadingPatterns = {
   },
 
   // Recipes -> likely next routes
-  '/resep': {
+  '/recipes': {
     immediate: ['/ingredients', '/hpp'],
     onHover: ['/orders', '/production'],
     components: ['recipe-table', 'cost-calculator'],

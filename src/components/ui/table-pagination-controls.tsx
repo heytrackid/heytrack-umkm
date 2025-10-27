@@ -31,7 +31,7 @@ interface TablePaginationControlsProps {
   className?: string
 }
 
-export function TablePaginationControls({
+export const TablePaginationControls = ({
   currentPage,
   totalPages,
   onPageChange,
@@ -42,7 +42,7 @@ export function TablePaginationControls({
   pageEnd,
   pageSizeOptions = [10, 25, 50],
   className,
-}: TablePaginationControlsProps) {
+}: TablePaginationControlsProps) => {
   const pages = buildPageList
 
   const safeStart = totalItems === 0 ? 0 : pageStart
@@ -136,7 +136,7 @@ export function TablePaginationControls({
   )
 }
 
-function buildPageList(currentPage: number, totalPages: number): (number | string)[] {
+function buildPageList(currentPage: number, totalPages: number): Array<number | string> {
   if (totalPages <= 5) {
     return Array.from({ length: totalPages }, (_, index) => index + 1)
   }

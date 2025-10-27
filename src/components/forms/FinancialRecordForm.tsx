@@ -1,6 +1,6 @@
 'use client'
-import * as React from 'react'
 
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -24,7 +24,7 @@ interface FinancialRecordFormProps {
   isLoading?: boolean
 }
 
-export function FinancialRecordForm({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) {
+export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: FinancialRecordFormProps) => {
   const { toast } = useToast()
   
   const form = useForm<FinancialRecordFormData>({
@@ -52,7 +52,7 @@ export function FinancialRecordForm({ initialData, onSubmit, isLoading }: Financ
       if (!initialData) {
         form.reset()
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan catatan keuangan',

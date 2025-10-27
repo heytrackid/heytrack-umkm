@@ -12,14 +12,14 @@ export class LazyExcelExportService {
    * @param options - Export options for customization
    * @returns Promise resolving to a Blob containing the exported data
    */
-  static async exportToExcel<T = Record<string, unknown>>(
+  static exportToExcel<T = Record<string, unknown>>(
     data: ExportData<T>,
-    options?: ExportOptions
+    _options?: ExportOptions
   ): Promise<Blob> {
     // Simplified export for client-side use
     const jsonData = JSON.stringify(data, null, 2)
     const blob = new Blob([jsonData], { type: 'application/json' })
-    return blob
+    return Promise.resolve(blob)
   }
 
   /**
@@ -33,7 +33,7 @@ export class LazyExcelExportService {
     options?: ExportOptions
   ): string {
     // Simplified CSV export
-    if (!data || !data.data || !Array.isArray(data.data)) {
+    if (!data?.data || !Array.isArray(data.data)) {
       return 'No data available'
     }
     

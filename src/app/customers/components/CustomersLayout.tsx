@@ -3,11 +3,10 @@
 
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
@@ -21,10 +20,8 @@ import { apiLogger } from '@/lib/logger'
 
 // Shared components
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
-import { PageHeader } from '@/components/ui/page-patterns'
-import { PageActions } from '@/components/ui/page-patterns'
+import { PageHeader, PageActions } from '@/components/ui/page-patterns'
 import { Plus, RefreshCw, Users } from 'lucide-react'
-import * as React from 'react'
 
 // Lazy load components
 import dynamic from 'next/dynamic'
@@ -57,7 +54,7 @@ export default function CustomersLayout() {
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  const [customers, setCustomers] = useState<CustomersTable['Row'][]>([])
+  const [customers, setCustomers] = useState<Array<CustomersTable['Row']>>([])
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
 
@@ -69,13 +66,13 @@ export default function CustomersLayout() {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      router.push('/auth/login')
+      void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
-      fetchCustomers()
+      void fetchCustomers()
     }
   }, [isAuthLoading, isAuthenticated])
 
@@ -89,22 +86,22 @@ export default function CustomersLayout() {
           description: 'Sesi Anda telah berakhir. Silakan login kembali.',
           variant: 'destructive',
         })
-        router.push('/auth/login')
+        void router.push('/auth/login')
         return
       }
 
       if (!response.ok) {throw new Error('Failed to fetch customers')}
       const data = await response.json()
-      setCustomers(data)
-    } catch (error: unknown) {
-      apiLogger.error({ error }, 'Error fetching customers:')
+      void setCustomers(data)
+    } catch (err: unknown) {
+      apiLogger.error({ error: err }, 'Error fetching customers:')
       toast({
         title: 'Terjadi kesalahan',
         description: 'Gagal memuat data pelanggan. Silakan coba lagi.',
         variant: 'destructive',
       })
     } finally {
-      setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
+      void setLoading(LOADING_KEYS.FETCH_CUSTOMERS, false)
     }
   }
 
@@ -119,7 +116,7 @@ export default function CustomersLayout() {
   // Bulk action handlers
   const handleSelectAll = () => {
     if (selectedItems.length === filteredCustomers.length) {
-      setSelectedItems([])
+      void setSelectedItems([])
     } else {
       setSelectedItems(filteredCustomers.map(customer => customer.id.toString()))
     }
@@ -136,8 +133,10 @@ export default function CustomersLayout() {
   const handleBulkDelete = async () => {
     if (selectedItems.length === 0) {return}
 
-    const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
-    const customerNames = selectedCustomers.map(customer => customer.name).join(', ')
+    const customerNames = filteredCustomers
+      .filter(customer => selectedItems.includes(customer.id.toString()))
+      .map(customer => customer.name)
+      .join(', ')
 
     const confirmed = window.confirm(
       `⚠️ Yakin ingin menghapus ${selectedItems.length} pelanggan berikut?\n\n${customerNames}\n\n❗ Tindakan ini tidak bisa dibatalkan!`
@@ -154,10 +153,10 @@ export default function CustomersLayout() {
           description: `Berhasil menghapus ${selectedItems.length} pelanggan`,
           variant: 'default',
         })
-        setSelectedItems([])
-        fetchCustomers()
-      } catch (error: unknown) {
-        apiLogger.error({ error }, 'Error:')
+        void setSelectedItems([])
+        void fetchCustomers()
+      } catch (err: unknown) {
+        apiLogger.error({ error: err }, 'Error:')
         toast({
           title: 'Gagal',
           description: 'Gagal menghapus pelanggan',
@@ -182,7 +181,7 @@ export default function CustomersLayout() {
   // Individual action handlers
   const handleEditCustomer = (customer: Customer) => {
     apiLogger.info({ customer }, 'Edit customer')
-    setCurrentView('edit')
+    void setCurrentView('edit')
   }
 
   const handleDeleteCustomer = async (customer: Customer) => {
@@ -199,9 +198,9 @@ export default function CustomersLayout() {
           description: 'Pelanggan berhasil dihapus',
           variant: 'default',
         })
-        fetchCustomers()
-      } catch (error: unknown) {
-        apiLogger.error({ error }, 'Error:')
+        void fetchCustomers()
+      } catch (err: unknown) {
+        apiLogger.error({ error: err }, 'Error:')
         toast({
           title: 'Gagal',
           description: 'Gagal menghapus pelanggan',
@@ -212,24 +211,7 @@ export default function CustomersLayout() {
   }
 
   const handleViewCustomer = (customer: Customer) => {
-    router.push(`/customers/${customer.id}`)
-  }
-
-  // Breadcrumb component
-  const getBreadcrumbItems = () => {
-    const items = [
-      { label: 'Dashboard', href: '/' },
-      { label: 'Data Pelanggan', href: currentView === 'list' ? undefined : '/customers' }
-    ]
-
-    if (currentView !== 'list') {
-      items.push({
-        label: currentView === 'add' ? 'Tambah Pelanggan' : 'Edit Pelanggan',
-        href: undefined
-      })
-    }
-
-    return items
+    void router.push(`/customers/${customer.id}`)
   }
 
   // Show loading state while auth is initializing

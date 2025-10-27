@@ -1,14 +1,11 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types'
 
 import { apiLogger } from '@/lib/logger';
 import { getErrorMessage } from '@/lib/type-guards'
-import { typedInsert, typedUpdate, castRow, castRows } from '@/lib/supabase-client-typed'
-import { createTypedClient, hasData, hasArrayData, isQueryError } from '@/lib/supabase-typed-client'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -72,8 +69,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit)
       }
     });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
   }
 }
 
@@ -98,14 +95,14 @@ export async function POST(request: Request) {
 
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .insert([validatedData] as any)
+      .insert([validatedData])
       .select('*')
       .single();
 
     if (error) {throw error;}
 
     return NextResponse.json(supplier, { status: 201 });
-  } catch (error: unknown) {
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
   }
 }

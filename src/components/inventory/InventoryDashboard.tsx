@@ -9,7 +9,7 @@ import { useInventoryAlerts, useReorderManagement } from '@/hooks'
 import { InventoryAlertsList } from '@/hooks/useInventoryAlerts'
 import { useSettings } from '@/contexts/settings-context'
 
-export function InventoryDashboard() {
+export const InventoryDashboard = () => {
   const { formatCurrency } = useSettings()
   const { inventoryStatus, loading: alertsLoading, refetch: refetchAlerts } = useInventoryAlerts()
   const { reorderData, loading: reorderLoading, refetch: refetchReorder } = useReorderManagement()
@@ -36,8 +36,8 @@ export function InventoryDashboard() {
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-muted rounded w-1/2"></div>
+                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+                <div className="h-8 bg-muted rounded w-1/2" />
               </CardContent>
             </Card>
           ))}

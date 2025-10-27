@@ -4,7 +4,7 @@
  * Context-Aware AI Chatbot Component
  */
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { useContextAwareChat } from '@/hooks/useContextAwareChat'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,7 +21,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 
-export function ContextAwareChatbot() {
+export const ContextAwareChatbot = () => {
   const {
     messages,
     isLoading,
@@ -45,17 +45,17 @@ export function ContextAwareChatbot() {
     }
   }, [messages])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     
     if (!input.trim() || isLoading) {return}
 
     await sendMessage(input)
-    setInput('')
+    void setInput('')
   }
 
   const handleSuggestionClick = (suggestion: string) => {
-    setInput(suggestion)
+    void setInput(suggestion)
   }
 
   return (
@@ -110,8 +110,8 @@ export function ContextAwareChatbot() {
                     size="sm"
                     className="w-full justify-start"
                     onClick={() => {
-                      loadSession(session.id)
-                      setShowSessions(false)
+                      void loadSession(session.id)
+                      void setShowSessions(false)
                     }}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />

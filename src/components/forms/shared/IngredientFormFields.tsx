@@ -17,7 +17,7 @@ interface IngredientFormFieldsProps {
 /**
  * Basic ingredient information fields (name, unit)
  */
-export function IngredientBasicFields({
+export const IngredientBasicFields = ({
   register,
   errors,
   unitOptions = [
@@ -28,8 +28,7 @@ export function IngredientBasicFields({
     { value: 'pcs', label: 'Pieces (pcs)' },
     { value: 'dozen', label: 'Lusin (dozen)' },
   ]
-}: IngredientFormFieldsProps) {
-  return (
+}: IngredientFormFieldsProps) => (
     <FormSection
       title="Informasi Dasar"
       description="Masukkan informasi dasar bahan baku"
@@ -58,16 +57,14 @@ export function IngredientBasicFields({
       </FormGrid>
     </FormSection>
   )
-}
 
 /**
  * Price and stock fields (price, current stock, min stock)
  */
-export function IngredientPriceStockFields({
+export const IngredientPriceStockFields = ({
   register,
   errors
-}: IngredientFormFieldsProps) {
-  return (
+}: IngredientFormFieldsProps) => (
     <FormSection
       title="Harga & Stok"
       description="Atur harga dan stok bahan baku"
@@ -111,18 +108,17 @@ export function IngredientPriceStockFields({
       </FormGrid>
     </FormSection>
   )
-}
 
 /**
  * Optional fields (description, category, supplier)
  */
-export function IngredientOptionalFields({
+export const IngredientOptionalFields = ({
   register,
   errors,
   showDescription = true,
   showCategory = false,
   showSupplier = false
-}: IngredientFormFieldsProps) {
+}: IngredientFormFieldsProps) => {
   const fields = []
 
   if (showDescription) {
@@ -164,7 +160,7 @@ export function IngredientOptionalFields({
     )
   }
 
-  if (fields.length === 0) return null
+  if (fields.length === 0) {return null}
 
   return (
     <FormSection title="Informasi Tambahan">
@@ -176,12 +172,10 @@ export function IngredientOptionalFields({
 /**
  * Complete ingredient form fields (combines all sections)
  */
-export function IngredientFormFields(props: IngredientFormFieldsProps) {
-  return (
+export const IngredientFormFields = (props: IngredientFormFieldsProps) => (
     <>
       <IngredientBasicFields {...props} />
       <IngredientPriceStockFields {...props} />
       <IngredientOptionalFields {...props} />
     </>
   )
-}

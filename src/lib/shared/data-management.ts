@@ -1,6 +1,7 @@
 // Shared data management and caching utilities
 
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '@/lib/logger'
 
 // Cache implementation
 class MemoryCache {
@@ -16,7 +17,7 @@ class MemoryCache {
 
   get(key: string) {
     const item = this.cache.get(key)
-    if (!item) return null
+    if (!item) {return null}
 
     if (Date.now() - item.timestamp > item.ttl) {
       this.cache.delete(key)
@@ -79,41 +80,41 @@ export function useCachedData<T>(
   const [error, setError] = useState<Error | null>(null)
 
   const fetchData = useCallback(async (force = false) => {
-    if (!enabled) return
+    if (!enabled) {return}
 
     // Check cache first unless forcing refresh
     if (!force) {
       const cached = globalCache.get(key)
       if (cached) {
-        setData(cached)
+        void setData(cached)
         return
       }
     }
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const result = await fetcher()
-      setData(result)
+      void setData(result)
       globalCache.set(key, result, ttl)
     } catch (err) {
-      setError(err as Error)
+      void setError(err as Error)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [key, fetcher, ttl, enabled])
 
   useEffect(() => {
     if (refetchOnMount) {
-      fetchData()
+      void fetchData()
     } else {
       // Try to get from cache first
       const cached = globalCache.get(key)
       if (cached) {
-        setData(cached)
+        void setData(cached)
       } else {
-        fetchData()
+        void fetchData()
       }
     }
   }, [fetchData, refetchOnMount, key])
@@ -141,17 +142,17 @@ export function useDataSync<T>(
   const [lastSynced, setLastSynced] = useState<Date | null>(null)
 
   const sync = useCallback(async () => {
-    setSyncing(true)
+    void setSyncing(true)
     try {
       const syncedData = await syncFunction(data)
-      setData(syncedData)
+      void setData(syncedData)
       setLastSynced(new Date())
       globalCache.set(`${key}_synced`, syncedData)
-    } catch (error) {
-      console.error('Sync failed:', error)
-      throw error
+    } catch (err) {
+      logger.error('Sync failed', { _error, key })
+      throw err
     } finally {
-      setSyncing(false)
+      void setSyncing(false)
     }
   }, [data, key, syncFunction])
 
@@ -186,9 +187,9 @@ export function useOptimisticUpdate<T>(
     const previousData = data
 
     // Optimistically update UI
-    setData(newData)
-    setUpdating(true)
-    setError(null)
+    void setData(newData)
+    void setUpdating(true)
+    void setError(null)
 
     try {
       // Attempt to persist the change
@@ -196,11 +197,11 @@ export function useOptimisticUpdate<T>(
       setData(result) // Use server response
     } catch (err) {
       // Revert on error
-      setData(previousData)
-      setError(err as Error)
+      void setData(previousData)
+      void setError(err as Error)
       throw err
     } finally {
-      setUpdating(false)
+      void setUpdating(false)
     }
   }, [data, updateFunction])
 
@@ -233,7 +234,7 @@ export function usePagination(
 
   const goToPage = useCallback((newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage)
+      void setPage(newPage)
     }
   }, [totalPages])
 
@@ -246,12 +247,12 @@ export function usePagination(
   }, [page, goToPage])
 
   const changeLimit = useCallback((newLimit: number) => {
-    setLimit(newLimit)
+    void setLimit(newLimit)
     setPage(1) // Reset to first page when changing limit
   }, [])
 
   const updateTotal = useCallback((newTotal: number) => {
-    setTotal(newTotal)
+    void setTotal(newTotal)
   }, [])
 
   const pagination: PaginationState = {
@@ -287,28 +288,28 @@ export function useInfiniteScroll<T>(
   const [error, setError] = useState<Error | null>(null)
 
   const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return
+    if (loading || !hasMore) {return}
 
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const result = await fetchFunction(page, limit)
-      setData(prev => [...prev, ...result.data])
-      setHasMore(result.hasMore)
-      setPage(prev => prev + 1)
+      void setData(prev => [...prev, ...result.data])
+      void setHasMore(result.hasMore)
+      void setPage(prev => prev + 1)
     } catch (err) {
-      setError(err as Error)
+      void setError(err as Error)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [fetchFunction, page, limit, loading, hasMore])
 
   const reset = useCallback(() => {
-    setData([])
-    setPage(1)
-    setHasMore(true)
-    setError(null)
+    void setData([])
+    void setPage(1)
+    void setHasMore(true)
+    void setError(null)
   }, [])
 
   const refresh = useCallback(async () => {
@@ -330,12 +331,12 @@ export function useInfiniteScroll<T>(
 // Search and filter hook
 export function useSearchAndFilter<T>(
   data: T[],
-  searchFields: (keyof T)[] = [],
-  filterOptions: {
+  searchFields: Array<keyof T> = [],
+  filterOptions: Array<{
     field: keyof T
     value: any
     operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan'
-  }[] = []
+  }> = []
 ) {
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, any>>({})
@@ -402,8 +403,8 @@ export function useSearchAndFilter<T>(
   }, [])
 
   const clearAllFilters = useCallback(() => {
-    setFilters({})
-    setSearchTerm('')
+    void setFilters({})
+    void setSearchTerm('')
   }, [])
 
   return {

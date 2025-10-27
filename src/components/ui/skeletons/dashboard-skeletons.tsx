@@ -1,10 +1,12 @@
+'use client'
+
 import { cn } from "@/lib/utils"
-import { 
-  Skeleton, 
-  SkeletonCard, 
-  SkeletonText, 
+import {
+  Skeleton,
+  SkeletonCard,
+  SkeletonText,
   SkeletonButton,
-  SkeletonChart 
+  SkeletonChart
 } from "@/components/ui/skeleton"
 
 interface SkeletonProps {
@@ -12,8 +14,7 @@ interface SkeletonProps {
 }
 
 // Skeleton untuk Stats Cards di Dashboard
-export function StatsCardSkeleton({ className }: SkeletonProps) {
-  return (
+export const StatsCardSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("rounded-lg border border-gray-200 dark:border-gray-800 p-6 space-y-3", className)}>
       <div className="flex items-center justify-between">
         <SkeletonText className="h-4 w-32" />
@@ -28,11 +29,9 @@ export function StatsCardSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Quick Actions
-export function QuickActionsSkeleton({ className }: SkeletonProps) {
-  return (
+export const QuickActionsSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("", className)}>
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-6">
         <div className="flex items-center gap-2 mb-6">
@@ -50,11 +49,9 @@ export function QuickActionsSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Recent Orders Card
-export function RecentOrdersSkeleton({ className }: SkeletonProps) {
-  return (
+export const RecentOrdersSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("rounded-lg border border-gray-200 dark:border-gray-800 p-6", className)}>
       <div className="flex items-center gap-2 mb-6">
         <Skeleton className="h-5 w-5" />
@@ -77,11 +74,9 @@ export function RecentOrdersSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Stock Alert Card
-export function StockAlertSkeleton({ className }: SkeletonProps) {
-  return (
+export const StockAlertSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("rounded-lg border border-gray-200 dark:border-gray-800 p-6", className)}>
       <div className="flex items-center gap-2 mb-6">
         <Skeleton className="h-5 w-5" />
@@ -105,11 +100,9 @@ export function StockAlertSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk HPP Results Card
-export function HPPResultsSkeleton({ className }: SkeletonProps) {
-  return (
+export const HPPResultsSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("rounded-lg border border-gray-200 dark:border-gray-800 p-6", className)}>
       <div className="flex items-center gap-2 mb-6">
         <Skeleton className="h-5 w-5" />
@@ -127,11 +120,9 @@ export function HPPResultsSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Dashboard Header
-export function DashboardHeaderSkeleton({ className }: SkeletonProps) {
-  return (
+export const DashboardHeaderSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4", className)}>
       <div>
         <SkeletonText className="h-8 w-48 mb-2" />
@@ -142,11 +133,9 @@ export function DashboardHeaderSkeleton({ className }: SkeletonProps) {
       </div>
     </div>
   )
-}
 
 // Skeleton untuk Chart Card
-export function ChartCardSkeleton({ className }: SkeletonProps) {
-  return (
+export const ChartCardSkeleton = ({ className }: SkeletonProps) => (
     <div className={cn("rounded-lg border border-gray-200 dark:border-gray-800 p-6", className)}>
       <div className="flex items-center justify-between mb-6">
         <SkeletonText className="h-5 w-32" />
@@ -158,4 +147,3 @@ export function ChartCardSkeleton({ className }: SkeletonProps) {
       <SkeletonChart />
     </div>
   )
-}

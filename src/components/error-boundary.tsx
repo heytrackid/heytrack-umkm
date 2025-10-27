@@ -1,7 +1,6 @@
 'use client'
 
-import type { ReactNode, ErrorInfo } from 'react';
-import React from 'react'
+import { Component, type ReactNode, type ErrorInfo } from 'react'
 import { captureError } from '@/lib/error-handler'
 
 interface Props {
@@ -25,7 +24,7 @@ interface State {
  *   <YourComponent />
  * </ErrorBoundary>
  */
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
     this.state = {

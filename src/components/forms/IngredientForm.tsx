@@ -1,6 +1,6 @@
 'use client'
-import * as React from 'react'
 
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -24,7 +24,7 @@ interface IngredientFormProps {
   isLoading?: boolean
 }
 
-export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientFormProps) {
+export const IngredientForm = ({ initialData, onSubmit, isLoading }: IngredientFormProps) => {
   const { toast } = useToast()
   
   const form = useForm<IngredientForm>({
@@ -55,7 +55,7 @@ export function IngredientForm({ initialData, onSubmit, isLoading }: IngredientF
       if (!initialData) {
         form.reset()
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan data bahan',

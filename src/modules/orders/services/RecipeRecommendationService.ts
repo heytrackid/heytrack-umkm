@@ -11,7 +11,7 @@ export class RecipeRecommendationService {
    */
   static async getRecipeRecommendations(
     customer_name?: string,
-    limit: number = 5
+    limit = 5
   ): Promise<RecipeOption[]> {
     try {
       let query = supabase
@@ -88,8 +88,8 @@ export class RecipeRecommendationService {
         }))
 
       return recommendations
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error getting recipe recommendations')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error getting recipe recommendations')
       return []
     }
   }

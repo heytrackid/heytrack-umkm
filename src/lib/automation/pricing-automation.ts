@@ -21,9 +21,7 @@ export class PricingAutomation {
     recipe: Recipe & { recipe_ingredients: Array<RecipeIngredient & { ingredient: Ingredient }> }
   ): SmartPricingResult {
     // 1. Calculate exact HPP from ingredients
-    const ingredientCost = recipe.recipe_ingredients.reduce((total, ri) => {
-      return total + (ri.ingredient.price_per_unit * ri.quantity)
-    }, 0)
+    const ingredientCost = recipe.recipe_ingredients.reduce((total, ri) => total + (ri.ingredient.price_per_unit * ri.quantity), 0)
 
     // 2. Add overhead costs (utilities, labor, packaging, etc.)
     const overheadPercentage = 15 // 15% overhead
@@ -117,7 +115,7 @@ export class PricingAutomation {
     basePricing: CompetitivePricing,
     demandFactor: number, // 0.5 = low demand, 1.0 = normal, 1.5 = high demand
     competitionFactor: number, // 0.8 = high competition, 1.0 = normal, 1.2 = low competition
-    seasonFactor: number = 1.0 // seasonal adjustment
+    seasonFactor = 1.0 // seasonal adjustment
   ): CompetitivePricing {
     const adjustmentMultiplier = demandFactor * competitionFactor * seasonFactor
 

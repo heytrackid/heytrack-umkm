@@ -37,7 +37,7 @@ export interface QueryArrayResult<T> {
 export async function typedInsert<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
-  data: TableInsert<T> | TableInsert<T>[]
+  data: TableInsert<T> | Array<TableInsert<T>>
 ) {
   const isArray = Array.isArray(data)
   const result = await (supabase as any)
@@ -46,7 +46,7 @@ export async function typedInsert<T extends TableName>(
     .select()
 
   return result as {
-    data: TableRow<T>[] | null
+    data: Array<TableRow<T>> | null
     error: any
   }
 }
@@ -67,7 +67,7 @@ export async function typedUpdate<T extends TableName>(
     .select()
 
   return result as {
-    data: TableRow<T>[] | null
+    data: Array<TableRow<T>> | null
     error: any
   }
 }
@@ -87,7 +87,7 @@ export async function typedDelete<T extends TableName>(
     .select()
 
   return result as {
-    data: TableRow<T>[] | null
+    data: Array<TableRow<T>> | null
     error: any
   }
 }
@@ -132,7 +132,7 @@ export async function typedSelect<T extends TableName>(
     : await queryBuilder
 
   return result as {
-    data: TableRow<T> | TableRow<T>[] | null
+    data: TableRow<T> | Array<TableRow<T>> | null
     error: any
   }
 }
@@ -165,7 +165,7 @@ export async function isAuthenticated() {
     const supabase = getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return !!user
-  } catch {
+  } catch (error) {
     return false
   }
 }
@@ -177,10 +177,9 @@ export async function getCurrentUser() {
   try {
     const supabase = getSupabaseClient()
     const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
+    if (error) {throw error}
     return user
-  } catch (error) {
-    console.error('Failed to get current user:', error)
+  } catch (err) {
     return null
   }
 }
@@ -192,10 +191,9 @@ export async function signOut() {
   try {
     const supabase = getSupabaseClient()
     const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    if (error) {throw error}
     return { success: true }
   } catch (error) {
-    console.error('Failed to sign out:', error)
     return { success: false, error }
   }
 }

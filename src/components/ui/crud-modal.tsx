@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 /**
  * Shared CRUD Modal Components
  * Reusable modal components for CRUD operations
@@ -15,21 +16,20 @@ interface CrudModalProps {
   title: string
   size?: 'sm' | 'md' | 'lg' | 'xl'
   fullScreenOnMobile?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Base modal wrapper for CRUD operations
  */
-export function CrudModal({
+export const CrudModal = ({
   isOpen,
   onClose,
   title,
   size = 'lg',
   fullScreenOnMobile = true,
   children
-}: CrudModalProps) {
-  return (
+}: CrudModalProps) => (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
@@ -40,28 +40,26 @@ export function CrudModal({
       {children}
     </Modal>
   )
-}
 
 interface CreateModalProps extends Omit<CrudModalProps, 'title'> {
   entityName: string
   form: any
   onSubmit: (data: any) => Promise<void>
   isLoading?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Create modal with form
  */
-export function CreateModal({
+export const CreateModal = ({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: CreateModalProps) {
-  return (
+}: CreateModalProps) => (
     <CrudModal
       {...modalProps}
       title={`Tambah ${entityName} Baru`}
@@ -72,33 +70,31 @@ export function CreateModal({
           onCancel={modalProps.onClose}
           submitText={`Simpan ${entityName}`}
           loading={isLoading}
-          sticky={true}
+          sticky
         />
       </CrudForm>
     </CrudModal>
   )
-}
 
 interface EditModalProps extends Omit<CrudModalProps, 'title'> {
   entityName: string
   form: any
   onSubmit: (data: any) => Promise<void>
   isLoading?: boolean
-  children: React.ReactNode
+  children: ReactNode
 }
 
 /**
  * Edit modal with form
  */
-export function EditModal({
+export const EditModal = ({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: EditModalProps) {
-  return (
+}: EditModalProps) => (
     <CrudModal
       {...modalProps}
       title={`Edit ${entityName}`}
@@ -109,12 +105,11 @@ export function EditModal({
           onCancel={modalProps.onClose}
           submitText="Simpan Perubahan"
           loading={isLoading}
-          sticky={true}
+          sticky
         />
       </CrudForm>
     </CrudModal>
   )
-}
 
 interface DeleteModalProps {
   isOpen: boolean
@@ -128,15 +123,14 @@ interface DeleteModalProps {
 /**
  * Delete confirmation modal
  */
-export function DeleteModal({
+export const DeleteModal = ({
   isOpen,
   onClose,
   onConfirm,
   entityName,
   itemName,
   isLoading
-}: DeleteModalProps) {
-  return (
+}: DeleteModalProps) => (
     <ConfirmDialog
       open={isOpen}
       onOpenChange={(open) => !open && onClose()}
@@ -148,7 +142,6 @@ export function DeleteModal({
       loading={isLoading}
     />
   )
-}
 
 interface CrudActionButtonsProps {
   onEdit?: () => void
@@ -160,13 +153,12 @@ interface CrudActionButtonsProps {
 /**
  * Standardized CRUD action buttons
  */
-export function CrudActionButtons({
+export const CrudActionButtons = ({
   onEdit,
   onDelete,
   size = 'sm',
   variant = 'ghost'
-}: CrudActionButtonsProps) {
-  return (
+}: CrudActionButtonsProps) => (
     <div className="flex gap-1">
       {onEdit && (
         <Button
@@ -188,7 +180,6 @@ export function CrudActionButtons({
       )}
     </div>
   )
-}
 
 // Import React for types
-import * as React from 'react'
+import type React from 'react'

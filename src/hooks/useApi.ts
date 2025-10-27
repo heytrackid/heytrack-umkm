@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { ApiResponse, RequestConfig } from '@/lib/api/client';
-import { apiClient } from '@/lib/api/client'
+import { type ApiResponse, type RequestConfig, apiClient } from '@/lib/api/client'
 
 interface UseApiOptions<T> {
   onSuccess?: (data: T) => void
@@ -58,8 +57,8 @@ export function useApi<T = unknown >(
         })
         onError?.(error)
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState({
         data: null,
         error: errorMessage,
@@ -96,8 +95,8 @@ export function useApi<T = unknown >(
         }))
         onError?.(error)
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState((prev) => ({
         ...prev,
         error: errorMessage,
@@ -110,7 +109,7 @@ export function useApi<T = unknown >(
   /**
    * Auto-load data on mount
    */
-  React.useEffect(() => {
+  useEffect(() => {
     if (autoLoad) {
       fetch()
     }
@@ -147,7 +146,7 @@ export function useMutationApi<T = unknown , R = unknown >(
    */
   const mutate = useCallback(
     async (body?: T, config?: RequestConfig) => {
-      setState({ data: null, error: null, isLoading: true })
+      void setState({ data: null, error: null, isLoading: true })
 
       try {
         let response: ApiResponse<R>
@@ -186,15 +185,15 @@ export function useMutationApi<T = unknown , R = unknown >(
           onError?.(error)
           throw new Error(error)
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
         setState({
           data: null,
           error: errorMessage,
           isLoading: false,
         })
         onError?.(errorMessage)
-        throw error
+        throw err
       }
     },
     [endpoint, method, onSuccess, onError]

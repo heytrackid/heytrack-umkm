@@ -1,6 +1,6 @@
 'use client'
-import * as React from 'react'
 
+import { useState, useEffect, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -15,7 +15,6 @@ import {
 } from '@/lib/validations'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
-import { memo } from 'react'
 import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
 
@@ -25,7 +24,7 @@ interface RecipeFormProps {
   isLoading?: boolean
 }
 
-export const RecipeForm = memo(function RecipeForm({ initialData, onSubmit, isLoading }: RecipeFormProps) {
+export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeFormProps) => {
   const { toast } = useToast()
   
   const form = useForm<RecipeFormData>({
@@ -66,7 +65,7 @@ export const RecipeForm = memo(function RecipeForm({ initialData, onSubmit, isLo
       if (!initialData) {
         form.reset()
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       toast({
         title: 'Error',
         description: 'Gagal menyimpan resep',

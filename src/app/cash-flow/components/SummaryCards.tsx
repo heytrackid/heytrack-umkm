@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import type { CashFlowSummary } from '../constants'
@@ -10,7 +9,7 @@ interface SummaryCardsProps {
 }
 
 export default function SummaryCards({ summary, formatCurrency, isMobile }: SummaryCardsProps) {
-  if (!summary) {return null}
+  if (!summary) { return null }
 
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
@@ -53,9 +52,8 @@ export default function SummaryCards({ summary, formatCurrency, isMobile }: Summ
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className={`text-2xl font-bold ${
-            summary.net_cash_flow >= 0 ? 'text-green-600' : 'text-red-600'
-          }`}>
+          <p className={`text-2xl font-bold ${summary.net_cash_flow >= 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
             {formatCurrency(summary.net_cash_flow)}
           </p>
         </CardContent>

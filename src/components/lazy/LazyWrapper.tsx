@@ -1,8 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import type { ComponentType } from 'react';
-import { Suspense, lazy } from 'react'
+import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -71,7 +69,7 @@ export const createLazyComponent = <T extends ComponentType<Record<string, unkno
 ) => {
   const LazyComponent = lazy(importFunc)
   
-  return (props: React.ComponentProps<T>) => (
+  return (props: ComponentProps<T>) => (
     <LazyWrapper 
       component={LazyComponent} 
       loadingComponent={loadingComponent}

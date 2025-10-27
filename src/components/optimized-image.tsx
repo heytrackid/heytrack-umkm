@@ -1,14 +1,15 @@
 'use client'
 
 import Image from 'next/image'
-import React, { useState } from 'react'
+import { forwardRef, useState } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-interface OptimizedImageProps extends React.ComponentProps<typeof Image> {
+interface OptimizedImageProps extends ComponentProps<typeof Image> {
   /** Show skeleton loader while loading */
   showLoading?: boolean
   /** Custom loading component */
-  loadingComponent?: React.ReactNode
+  loadingComponent?: ReactNode
   /** Image priority for LCP optimization */
   priority?: boolean
   /** Container aspect ratio (for responsive sizing) */
@@ -29,7 +30,7 @@ const aspectRatioClasses = {
  * OptimizedImage - Wrapper around Next.js Image with loading states
  * Handles lazy loading, responsive sizes, and loading indicators
  */
-export const OptimizedImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
+export const OptimizedImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
   (
     {
       showLoading = true,
@@ -45,17 +46,17 @@ export const OptimizedImage = React.forwardRef<HTMLImageElement, OptimizedImageP
     },
     ref
   ) => {
-    const [isLoading, setIsLoading] = React.useState(true)
-    const [hasError, setHasError] = React.useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [hasError, setHasError] = useState(false)
 
     const handleLoadingComplete = (result: any) => {
-      setIsLoading(false)
+      void setIsLoading(false)
       onLoadingComplete?.(result)
     }
 
     const handleError = () => {
-      setIsLoading(false)
-      setHasError(true)
+      void setIsLoading(false)
+      void setHasError(true)
     }
 
     const containerClasses = cn(
@@ -99,7 +100,7 @@ OptimizedImage.displayName = 'OptimizedImage'
 /**
  * ProfileImage - Optimized image for user profiles/avatars
  */
-export const ProfileImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
+export const ProfileImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
   ({ containerClassName, ...props }, ref) => (
     <OptimizedImage
       ref={ref}
@@ -115,7 +116,7 @@ ProfileImage.displayName = 'ProfileImage'
 /**
  * CardImage - Optimized image for card components
  */
-export const CardImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
+export const CardImage = forwardRef<HTMLImageElement, OptimizedImageProps>(
   ({ containerClassName, ...props }, ref) => (
     <OptimizedImage
       ref={ref}

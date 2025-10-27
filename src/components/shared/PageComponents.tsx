@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import { Fragment, type ReactNode, useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -32,7 +32,7 @@ interface BreadcrumbItem {
 interface PageHeaderProps {
   title: string
   description?: string
-  actions?: React.ReactNode
+  actions?: ReactNode
   breadcrumbs?: BreadcrumbItem[]
   className?: string
 }
@@ -41,7 +41,7 @@ interface StatsCard {
   title: string
   value: string | number
   subtitle?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   trend?: {
     value: number
     label: string
@@ -66,8 +66,8 @@ interface DetailViewProps {
   backHref?: string
   backLabel?: string
   onBack?: () => void
-  actions?: React.ReactNode
-  children: React.ReactNode
+  actions?: ReactNode
+  children: ReactNode
   className?: string
 }
 
@@ -90,21 +90,20 @@ interface ActionButtonsProps {
 /**
  * Shared Page Header Component
  */
-export function PageHeader({
+export const PageHeader = ({
   title,
   description,
   actions,
   breadcrumbs,
   className = ""
-}: PageHeaderProps) {
-  return (
+}: PageHeaderProps) => (
     <div className={`space-y-6 ${className}`}>
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((item, index) => (
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
@@ -117,7 +116,7 @@ export function PageHeader({
                   )}
                 </BreadcrumbItem>
                 {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
+              </Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
@@ -143,16 +142,14 @@ export function PageHeader({
       </div>
     </div>
   )
-}
 
 /**
  * Shared Stats Cards Component
  */
-export function SharedStatsCards({
+export const SharedStatsCards = ({
   stats,
   className = ""
-}: StatsCardsProps) {
-  return (
+}: StatsCardsProps) => (
     <div className={`grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${className}`}>
       {stats.map((stat, index) => (
         <Card key={index}>
@@ -196,16 +193,15 @@ export function SharedStatsCards({
       ))}
     </div>
   )
-}
 
 /**
  * Shared Error Card Component
  */
-export function ErrorCard({
+export const ErrorCard = ({
   error,
   onRetry,
   className = ""
-}: ErrorCardProps) {
+}: ErrorCardProps) => {
   const errorMessage = error instanceof Error ? error.message : String(error)
 
   return (
@@ -241,7 +237,7 @@ export function ErrorCard({
 /**
  * Shared Detail View Component
  */
-export function DetailView({
+export const DetailView = ({
   title,
   subtitle,
   backHref,
@@ -250,7 +246,7 @@ export function DetailView({
   actions,
   children,
   className = ""
-}: DetailViewProps) {
+}: DetailViewProps) => {
   const handleBack = () => {
     if (onBack) {
       onBack()
@@ -298,7 +294,7 @@ export function DetailView({
 /**
  * Shared Action Buttons Component
  */
-export function ActionButtons({
+export const ActionButtons = ({
   onView,
   onEdit,
   onDelete,
@@ -312,7 +308,7 @@ export function ActionButtons({
   className = "",
   size = "sm",
   variant = "horizontal"
-}: ActionButtonsProps) {
+}: ActionButtonsProps) => {
   const buttonSize = size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'default'
   const iconSize = size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'
 
@@ -372,12 +368,12 @@ interface StatusBadgeProps {
   className?: string
 }
 
-export function StatusBadge({
+export const StatusBadge = ({
   status,
   variant = 'filled',
   size = 'md',
   className = ""
-}: StatusBadgeProps) {
+}: StatusBadgeProps) => {
   const colorClass = getStatusColor(status)
   const text = getStatusText(status)
 

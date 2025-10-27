@@ -70,9 +70,9 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
         catatan: ''
       })
 
-      setIsDialogOpen(false)
+      void setIsDialogOpen(false)
       onSuccess()
-    } catch (error) {
+    } catch (err) {
       uiLogger.error({ error }, 'Error creating purchase')
       alert('Gagal menambahkan pembelian')
     }

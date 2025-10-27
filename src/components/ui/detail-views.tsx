@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from 'react'
 /**
  * Shared Detail View Components
  * Reusable detail view layouts and patterns
@@ -15,19 +16,18 @@ interface DetailHeaderProps {
   subtitle?: string
   onBack?: () => void
   backLabel?: string
-  actions?: React.ReactNode
-  status?: React.ReactNode
+  actions?: ReactNode
+  status?: ReactNode
 }
 
-export function DetailHeader({
+export const DetailHeader = ({
   title,
   subtitle,
   onBack,
   backLabel = "Kembali",
   actions,
   status
-}: DetailHeaderProps) {
-  return (
+}: DetailHeaderProps) => (
     <div className="flex items-start justify-between mb-6">
       <div className="flex items-start gap-4">
         {onBack && (
@@ -55,18 +55,16 @@ export function DetailHeader({
       )}
     </div>
   )
-}
 
 // Detail section with title and content
 interface DetailSectionProps {
   title: string
-  children: React.ReactNode
+  children: ReactNode
   className?: string
-  actions?: React.ReactNode
+  actions?: ReactNode
 }
 
-export function DetailSection({ title, children, className, actions }: DetailSectionProps) {
-  return (
+export const DetailSection = ({ title, children, className, actions }: DetailSectionProps) => (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg">{title}</CardTitle>
@@ -77,18 +75,16 @@ export function DetailSection({ title, children, className, actions }: DetailSec
       </CardContent>
     </Card>
   )
-}
 
 // Detail field for displaying key-value pairs
 interface DetailFieldProps {
   label: string
-  value: React.ReactNode
+  value: ReactNode
   className?: string
   copyable?: boolean
 }
 
-export function DetailField({ label, value, className, copyable }: DetailFieldProps) {
-  return (
+export const DetailField = ({ label, value, className, copyable }: DetailFieldProps) => (
     <div className={`flex justify-between items-start py-2 ${className || ''}`}>
       <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
         {label}
@@ -98,19 +94,18 @@ export function DetailField({ label, value, className, copyable }: DetailFieldPr
       </span>
     </div>
   )
-}
 
 // Detail grid for multiple fields
 interface DetailGridProps {
   fields: Array<{
     label: string
-    value: React.ReactNode
+    value: ReactNode
     span?: number // 1-4 columns
   }>
   columns?: 1 | 2 | 3 | 4
 }
 
-export function DetailGrid({ fields, columns = 2 }: DetailGridProps) {
+export const DetailGrid = ({ fields, columns = 2 }: DetailGridProps) => {
   const gridClasses = {
     1: 'grid-cols-1',
     2: 'grid-cols-1 md:grid-cols-2',
@@ -144,18 +139,17 @@ interface DetailActionsProps {
   onDuplicate?: () => void
   onShare?: () => void
   onDownload?: () => void
-  customActions?: React.ReactNode
+  customActions?: ReactNode
 }
 
-export function DetailActions({
+export const DetailActions = ({
   onEdit,
   onDelete,
   onDuplicate,
   onShare,
   onDownload,
   customActions
-}: DetailActionsProps) {
-  return (
+}: DetailActionsProps) => (
     <div className="flex flex-wrap gap-2 pt-4 border-t">
       {onEdit && (
         <Button variant="outline" onClick={onEdit}>
@@ -197,22 +191,20 @@ export function DetailActions({
       {customActions}
     </div>
   )
-}
 
 // Detail tabs layout
 interface DetailTabsProps {
   tabs: Array<{
     id: string
     label: string
-    content: React.ReactNode
+    content: ReactNode
     badge?: string | number
   }>
   activeTab: string
   onTabChange: (tabId: string) => void
 }
 
-export function DetailTabs({ tabs, activeTab, onTabChange }: DetailTabsProps) {
-  return (
+export const DetailTabs = ({ tabs, activeTab, onTabChange }: DetailTabsProps) => (
     <div className="space-y-6">
       {/* Tab Navigation */}
       <div className="border-b">
@@ -244,7 +236,6 @@ export function DetailTabs({ tabs, activeTab, onTabChange }: DetailTabsProps) {
       </div>
     </div>
   )
-}
 
 // Timeline component for activity/history
 interface TimelineItem {
@@ -254,7 +245,7 @@ interface TimelineItem {
   description?: string
   user?: string
   type?: 'create' | 'update' | 'delete' | 'status_change' | 'note'
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
 }
 
 interface DetailTimelineProps {
@@ -262,7 +253,7 @@ interface DetailTimelineProps {
   title?: string
 }
 
-export function DetailTimeline({ items, title = "Riwayat Aktivitas" }: DetailTimelineProps) {
+export const DetailTimeline = ({ items, title = "Riwayat Aktivitas" }: DetailTimelineProps) => {
   const getIcon = (type?: string) => {
     const icons = {
       create: Plus,
@@ -327,4 +318,4 @@ export function DetailTimeline({ items, title = "Riwayat Aktivitas" }: DetailTim
 }
 
 // Import React for types
-import * as React from 'react'
+import type React from 'react'

@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod'
-import { UUIDSchema, EmailSchema, PhoneSchema, NonNegativeNumberSchema } from '../base-validations'
+import { UUIDSchema, EmailSchema, PhoneSchema, NonNegativeNumberSchema } from '@/lib/validations/base-validations'
 
 // Customer database schemas
 export const CustomerInsertSchema = z.object({

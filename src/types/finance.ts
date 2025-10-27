@@ -4,7 +4,7 @@ import type { Json } from './common'
 export type RecordType = "INCOME" | "EXPENSE" | "INVESTMENT" | "WITHDRAWAL"
 
 // Finance tables
-export type FinancialRecordsTable = {
+export interface FinancialRecordsTable {
   Row: {
     amount: number
     category: string
@@ -41,7 +41,7 @@ export type FinancialRecordsTable = {
   Relationships: []
 }
 
-export type DailySalesSummaryTable = {
+export interface DailySalesSummaryTable {
   Row: {
     average_order_value: number | null
     created_at: string | null

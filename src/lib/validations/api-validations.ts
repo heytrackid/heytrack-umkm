@@ -202,9 +202,7 @@ export type ImageUpload = z.infer<typeof ImageUploadSchema>
 export const DateRangeSchema = z.object({
   start: DateStringSchema,
   end: DateStringSchema,
-}).refine((data) => {
-  return new Date(data.start) <= new Date(data.end)
-}, 'Start date must be before or equal to end date')
+}).refine((data) => new Date(data.start) <= new Date(data.end), 'Start date must be before or equal to end date')
 
 export const PaginationParamsSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

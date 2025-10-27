@@ -3,9 +3,8 @@
  * Comprehensive production planning and automation system
  */
 
-// Export all types
-export * from '../types' // Main automation types
-export * from './types' // Local production types
+// Export all types relevant to production automation
+export * from './types'
 
 // Export all modules
 export { ProductionPlanner } from './production-planner'

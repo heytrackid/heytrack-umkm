@@ -1,6 +1,6 @@
 'use client'
-import * as React from 'react'
 
+import { useState, useEffect, memo, type ReactNode } from 'react'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,8 +9,6 @@ import { useMobile } from '@/hooks/useResponsive'
 import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
-import type { ReactNode} from 'react';
-import { memo, useEffect, useState } from 'react'
 import MobileHeader from './mobile-header'
 import SimpleSidebar from './sidebar'
 // Supabase auth
@@ -30,11 +28,11 @@ interface AppLayoutProps {
   showMobileHeader?: boolean
 }
 
-const AppLayout = memo(function AppLayout({
+const AppLayout = memo(({
   children,
   pageTitle,
   showMobileHeader = true
-}: AppLayoutProps) {
+}: AppLayoutProps) => {
   const { isMobile } = useMobile()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -48,21 +46,21 @@ const AppLayout = memo(function AppLayout({
     const getUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
-      } catch (error) {
-        uiLogger.error({ error: error }, 'Error getting user:')
+        void setUser(user)
+      } catch (err) {
+        uiLogger.error({ error }, 'Error getting user:')
       } finally {
-        setLoading(false)
+        void setLoading(false)
       }
     }
 
-    getUser()
+    void getUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
+        void setUser(session?.user ?? null)
+        void setLoading(false)
       }
     )
 
@@ -135,7 +133,7 @@ const AppLayout = memo(function AppLayout({
                     <DropdownMenuItem
                       onClick={async () => {
                         await supabase.auth.signOut()
-                        router.push('/auth/login')
+                        void router.push('/auth/login')
                       }}
                       className="text-red-600 focus:text-red-600"
                     >

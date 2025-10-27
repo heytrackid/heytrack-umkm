@@ -3,7 +3,7 @@
  * Consistent toast notification patterns across the application
  */
 
-import { useToast } from '@/hooks/use-toast'
+import type { useToast } from '@/hooks/use-toast'
 
 // Toast presets for common actions
 export const TOAST_PRESETS = {
@@ -244,15 +244,15 @@ export async function withToastFeedback<T>(
 
     onSuccess?.(result)
     return result
-  } catch (error) {
+  } catch (err) {
     // Dismiss loading toast
     loadingToast.dismiss()
 
-    // Show error toast
-    const errorMsg = error instanceof Error ? error.message : errorMessage
+    // Show _error toast
+    const errorMsg = err instanceof Error ? err.message : errorMessage
     showErrorToast(toast, 'Error', errorMsg)
 
-    onError?.(error as Error)
+    onError?.(_error as Error)
     return null
   }
 }

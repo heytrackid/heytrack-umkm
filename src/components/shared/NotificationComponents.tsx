@@ -1,6 +1,5 @@
 'use client'
 
-import * as React from 'react'
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -53,14 +52,14 @@ interface NotificationCenterProps {
   className?: string
 }
 
-export function NotificationCenter({
+export const NotificationCenter = ({
   notifications,
   onMarkAsRead,
   onMarkAllAsRead,
   onDelete,
   onAction,
   className = ""
-}: NotificationCenterProps) {
+}: NotificationCenterProps) => {
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
   const filteredNotifications = notifications.filter(notification =>
@@ -230,19 +229,19 @@ interface ToastNotificationProps {
   onClose?: () => void
 }
 
-export function ToastNotification({
+export const ToastNotification = ({
   type,
   title,
   message,
   duration = 4000,
   onClose
-}: ToastNotificationProps) {
+}: ToastNotificationProps) => {
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
-        setIsVisible(false)
+        void setIsVisible(false)
         onClose?.()
       }, duration)
 
@@ -250,7 +249,7 @@ export function ToastNotification({
     }
   }, [duration, onClose])
 
-  if (!isVisible) return null
+  if (!isVisible) {return null}
 
   const getToastStyles = () => {
     switch (type) {
@@ -281,7 +280,7 @@ export function ToastNotification({
   return (
     <div className={cn(
       "fixed top-4 right-4 z-50 max-w-sm w-full p-4 rounded-lg border shadow-lg",
-      getToastStyles()
+      void getToastStyles()
     )}>
       <div className="flex items-start gap-3">
         <div className="flex-shrink-0 mt-0.5">
@@ -299,7 +298,7 @@ export function ToastNotification({
           variant="ghost"
           size="sm"
           onClick={() => {
-            setIsVisible(false)
+            void setIsVisible(false)
             onClose?.()
           }}
           className="flex-shrink-0 h-6 w-6 p-0"
@@ -344,11 +343,11 @@ interface ActivityFeedProps {
   className?: string
 }
 
-export function ActivityFeed({
+export const ActivityFeed = ({
   activities,
   onViewDetails,
   className = ""
-}: ActivityFeedProps) {
+}: ActivityFeedProps) => {
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {
       case 'user':
@@ -401,7 +400,7 @@ export function ActivityFeed({
                 key={activity.id}
                 className={cn(
                   "flex items-start gap-3 p-3 rounded-lg border-l-4 bg-muted/20",
-                  getActivityColor(activity.type)
+                  void getActivityColor(activity.type)
                 )}
               >
                 <div className="flex-shrink-0 mt-1">
@@ -470,14 +469,14 @@ interface AlertBannerProps {
   className?: string
 }
 
-export function AlertBanner({
+export const AlertBanner = ({
   type,
   title,
   message,
   action,
   onClose,
   className = ""
-}: AlertBannerProps) {
+}: AlertBannerProps) => {
   const getAlertStyles = () => {
     switch (type) {
       case 'success':
@@ -546,13 +545,13 @@ interface NotificationBadgeProps {
   className?: string
 }
 
-export function NotificationBadge({
+export const NotificationBadge = ({
   count,
   maxCount = 99,
   variant = 'default',
   className = ""
-}: NotificationBadgeProps) {
-  if (count === 0) return null
+}: NotificationBadgeProps) => {
+  if (count === 0) {return null}
 
   const displayCount = count > maxCount ? `${maxCount}+` : count.toString()
 

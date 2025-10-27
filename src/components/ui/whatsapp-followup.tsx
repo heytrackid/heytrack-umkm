@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -84,34 +83,32 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
   // Fetch templates on component mount
   useEffect(() => {
-    fetchTemplates()
+    void fetchTemplates()
   }, [])
 
   const fetchTemplates = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/whatsapp-templates?active=true')
       if (response.ok) {
         const data = await response.json()
-        setTemplates(data)
+        void setTemplates(data)
         // Set default template if available
         const defaultTemplate = data.find((t: WhatsAppTemplate) => t.is_default)
         if (defaultTemplate && !selectedTemplateId) {
-          setSelectedTemplateId(defaultTemplate.id)
+          void setSelectedTemplateId(defaultTemplate.id)
         } else if (data.length > 0 && !selectedTemplateId) {
-          setSelectedTemplateId(data[0].id)
+          void setSelectedTemplateId(data[0].id)
         }
       }
     } catch (err) {
       apiLogger.error({ error: err }, 'Error fetching templates:')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
-  const getCurrentTemplate = () => {
-    return templates.find(t => t.id === selectedTemplateId)
-  }
+  const getCurrentTemplate = () => templates.find(t => t.id === selectedTemplateId)
 
   const processTemplate = (templateContent: string, orderData: Order): string => {
     let processed = templateContent
@@ -135,13 +132,9 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     
     // Handle order_items array
     const itemsRegex = /\{\{#each order_items\}\}([\s\S]*?)\{\{\/each\}\}/g
-    processed = processed.replace(itemsRegex, (match, itemTemplate) => {
-      return orderData.items.map(item => {
-        return itemTemplate
+    processed = processed.replace(itemsRegex, (match, itemTemplate) => orderData.items.map(item => itemTemplate
           .replace(/\{\{product_name\}\}/g, item.recipe?.name || item.product_name || 'Unknown Product')
-          .replace(/\{\{quantity\}\}/g, item.quantity.toString())
-      }).join('')
-    })
+          .replace(/\{\{quantity\}\}/g, item.quantity.toString())).join(''))
     
     // Handle conditional blocks
     const ifRegex = /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g
@@ -172,15 +165,15 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     
     // If starts with 08, replace with 628
     if (cleaned.startsWith('08')) {
-      cleaned = '62' + cleaned.substring(1)
+      cleaned = `62${  cleaned.substring(1)}`
     }
     // If starts with 8, add 62
     else if (cleaned.startsWith('8')) {
-      cleaned = '62' + cleaned
+      cleaned = `62${  cleaned}`
     }
     // If doesn't start with 62, add it
     else if (!cleaned.startsWith('62')) {
-      cleaned = '62' + cleaned
+      cleaned = `62${  cleaned}`
     }
     
     return cleaned
@@ -207,7 +200,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     onSent?.(type, message, formattedPhone)
     
     // Close dialog
-    setIsDialogOpen(false)
+    void setIsDialogOpen(false)
   }
 
   const handleCopyMessage = () => {
@@ -321,10 +314,10 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     [1, 2, 3].map((i) => (
                       <div key={i} className="p-4 border-2 rounded-lg animate-pulse">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                          <div className="w-8 h-8 bg-gray-200 rounded-full" />
                           <div className="flex-1">
-                            <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
-                            <div className="h-3 bg-gray-200 rounded w-32"></div>
+                            <div className="h-4 bg-gray-200 rounded w-24 mb-1" />
+                            <div className="h-3 bg-gray-200 rounded w-32" />
                           </div>
                         </div>
                       </div>

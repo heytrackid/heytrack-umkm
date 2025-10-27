@@ -87,7 +87,7 @@ export default function RecipeGeneratorFormEnhanced({
     if (dietaryRestrictions.includes(value)) {
       setDietaryRestrictions(dietaryRestrictions.filter(d => d !== value))
     } else {
-      setDietaryRestrictions([...dietaryRestrictions, value])
+      void setDietaryRestrictions([...dietaryRestrictions, value])
     }
   }
 
@@ -95,7 +95,7 @@ export default function RecipeGeneratorFormEnhanced({
     if (selectedIngredients.includes(ingredientName)) {
       setSelectedIngredients(selectedIngredients.filter(i => i !== ingredientName))
     } else {
-      setSelectedIngredients([...selectedIngredients, ingredientName])
+      void setSelectedIngredients([...selectedIngredients, ingredientName])
     }
   }
 

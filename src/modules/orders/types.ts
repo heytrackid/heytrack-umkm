@@ -162,7 +162,7 @@ export interface OrderFilters {
   status?: OrderStatus[]
   payment_status?: PaymentStatus[]
   delivery_method?: DeliveryMethod[]
-  priority?: ('low' | 'normal' | 'high' | 'urgent')[]
+  priority?: Array<'low' | 'normal' | 'high' | 'urgent'>
   date_from?: string
   date_to?: string
   customer_search?: string

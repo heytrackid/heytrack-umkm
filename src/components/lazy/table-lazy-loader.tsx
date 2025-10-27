@@ -1,19 +1,17 @@
 'use client'
-import * as React from 'react'
 
+import { lazy, Suspense, type ComponentType } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { ComponentType} from 'react';
-import { lazy, Suspense } from 'react'
 import { uiLogger } from '@/lib/logger'
 
 // Table Loading Skeleton Component
-const TableLoadingSkeleton = ({ 
-  columns = 6, 
-  rows = 10, 
+const TableLoadingSkeleton = ({
+  columns = 6,
+  rows = 10,
   showHeader = true,
-  showPagination = true 
-}: { 
+  showPagination = true
+}: {
   columns?: number
   rows?: number
   showHeader?: boolean
@@ -36,7 +34,7 @@ const TableLoadingSkeleton = ({
           <Skeleton className="h-10 w-32" />
           <Skeleton className="h-10 w-32" />
         </div>
-        
+
         {/* Table skeleton */}
         <div className="border rounded-lg">
           {/* Table header */}
@@ -47,7 +45,7 @@ const TableLoadingSkeleton = ({
               ))}
             </div>
           </div>
-          
+
           {/* Table rows */}
           {Array.from({ length: rows }, (_, i) => (
             <div key={i} className="p-4 border-b last:border-b-0">
@@ -59,7 +57,7 @@ const TableLoadingSkeleton = ({
             </div>
           ))}
         </div>
-        
+
         {/* Pagination skeleton */}
         {showPagination && (
           <div className="flex justify-between items-center">
@@ -78,7 +76,7 @@ const TableLoadingSkeleton = ({
 )
 
 // Lazy loaded table components
-export const LazyDataTable = lazy(() => 
+export const LazyDataTable = lazy(() =>
   import('@/components').then(async (m) => {
     // Also preload the table UI components
     await import('@/components')
@@ -87,33 +85,33 @@ export const LazyDataTable = lazy(() =>
 )
 
 // CRUD Table Components
-export const LazyCRUDTable = lazy(() => 
+export const LazyCRUDTable = lazy(() =>
   import('@/components').then(m => ({ default: m.IngredientsCRUD }))
 )
 
-export const LazyOrdersTable = lazy(() => 
+export const LazyOrdersTable = lazy(() =>
   import('@/components').then(m => ({ default: m.OrdersTable }))
     .catch(() => ({ default: () => <div>Orders table not found</div> }))
 )
 
-export const LazyInventoryTable = lazy(() => 
+export const LazyInventoryTable = lazy(() =>
   import('@/components').then(m => ({ default: m.InventoryTable }))
     .catch(() => ({ default: () => <div>Inventory table not found</div> }))
 )
 
-export const LazyFinanceTable = lazy(() => 
+export const LazyFinanceTable = lazy(() =>
   import('@/components').then(m => ({ default: m.FinanceTable }))
     .catch(() => ({ default: () => <div>Finance table not found</div> }))
 )
 
 // Table Wrapper Components with Suspense
-export const DataTableWithSuspense = ({ 
-  columns = 6, 
-  rows = 10, 
-  showHeader = true, 
+export const DataTableWithSuspense = ({
+  columns = 6,
+  rows = 10,
+  showHeader = true,
   showPagination = true,
   Component,
-  ...props 
+  ...props
 }: {
   columns?: number
   rows?: number
@@ -123,11 +121,11 @@ export const DataTableWithSuspense = ({
   [key: string]: unknown
 }) => (
   <Suspense fallback={
-    <TableLoadingSkeleton 
-      columns={columns} 
-      rows={rows} 
-      showHeader={showHeader} 
-      showPagination={showPagination} 
+    <TableLoadingSkeleton
+      columns={columns}
+      rows={rows}
+      showHeader={showHeader}
+      showPagination={showPagination}
     />
   }>
     <Component {...props} />
@@ -140,62 +138,62 @@ interface TableProps {
 }
 
 export const CRUDTableWithSuspense = (props: TableProps) => (
-  <DataTableWithSuspense 
-    columns={6} 
-    rows={10} 
-    Component={LazyCRUDTable} 
-    {...props} 
+  <DataTableWithSuspense
+    columns={6}
+    rows={10}
+    Component={LazyCRUDTable}
+    {...props}
   />
 )
 
 export const OrdersTableWithSuspense = (props: TableProps) => (
-  <DataTableWithSuspense 
-    columns={6} 
-    rows={8} 
-    Component={LazyOrdersTable} 
-    {...props} 
+  <DataTableWithSuspense
+    columns={6}
+    rows={8}
+    Component={LazyOrdersTable}
+    {...props}
   />
 )
 
 export const InventoryTableWithSuspense = (props: TableProps) => (
-  <DataTableWithSuspense 
-    columns={7} 
-    rows={12} 
-    Component={LazyInventoryTable} 
-    {...props} 
+  <DataTableWithSuspense
+    columns={7}
+    rows={12}
+    Component={LazyInventoryTable}
+    {...props}
   />
 )
 
 export const FinanceTableWithSuspense = (props: TableProps) => (
-  <DataTableWithSuspense 
-    columns={5} 
-    rows={15} 
-    Component={LazyFinanceTable} 
-    {...props} 
+  <DataTableWithSuspense
+    columns={5}
+    rows={15}
+    Component={LazyFinanceTable}
+    {...props}
   />
 )
 
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
   Promise.resolve({
-    default: ({ data, height, ...props }: { data?: unknown[]; height?: number; [key: string]: unknown }) => {
+    default: ({ data, height, ...props }: { data?: unknown[]; height?: number;[key: string]: unknown }) => 
       // This would be a virtualized table implementation
       // For now, return a placeholder
-      return <div style={{ height: height }}>Virtualized table with {data?.length || 0} items</div>
-    }
+       <div style={{ height }}>Virtualized table with {data?.length || 0} items</div>
+    
   })
 )
 
-export const VirtualizedTableWithSuspense = ({ 
-  data = [], 
-  columns = [], 
+export const VirtualizedTableWithSuspense = ({
+  data = [],
+  columns = [],
   height = 400,
-  ...props 
-}: { 
-  data?: any[]; 
-  columns?: unknown[]; 
-  height?: number; 
-  [key: string]: unknown 
+  ...props
+}: {
+  data?: any[];
+  columns?: unknown[];
+  height?: number;
+  [key: string]: unknown
 }) => (
   <Suspense fallback={
     <TableLoadingSkeleton columns={columns?.length || 6} rows={Math.floor(height / 50)} />
@@ -220,12 +218,12 @@ export const useTablePerformance = () => {
         `table-${tableName}-start`,
         `table-${tableName}-end`
       )
-      
+
       const measure = performance.getEntriesByName(`table-${tableName}-duration`)[0]
       if (measure && measure.duration > 2000) {
-        uiLogger.warn('Slow table rendering', { 
-          tableName, 
-          duration: measure.duration.toFixed(2) 
+        uiLogger.warn('Slow table rendering', {
+          tableName,
+          duration: measure.duration.toFixed(2)
         })
       }
     }
@@ -235,23 +233,21 @@ export const useTablePerformance = () => {
 }
 
 // Table Bundle Preloader
-export const preloadTableBundle = () => {
-  return Promise.all([
+export const preloadTableBundle = () => Promise.all([
     import('@/components'),
     import('@/components'),
     import('@/components'),
   ])
-}
 
 // Table Type Detection for Dynamic Loading
 export type TableType = 'crud' | 'orders' | 'inventory' | 'finance' | 'virtualized'
 
-export const TableContainer = ({ 
-  type, 
-  data, 
-  columns, 
+export const TableContainer = ({
+  type,
+  data,
+  columns,
   loading = false,
-  ...props 
+  ...props
 }: {
   type: TableType
   data?: unknown[]
@@ -272,7 +268,7 @@ export const TableContainer = ({
   }
 
   const TableComponent = TableComponents[type]
-  
+
   return <TableComponent data={data} columns={columns} {...props} />
 }
 
@@ -294,7 +290,7 @@ export const useRowVirtualization = (totalRows: number, rowHeight = 50) => {
     const start = Math.floor(scrollTop / rowHeight)
     const visibleCount = Math.ceil(containerHeight / rowHeight)
     const end = Math.min(start + visibleCount + 5, totalRows) // +5 for buffer
-    
+
     return { start: Math.max(0, start - 2), end } // -2 for buffer
   }
 

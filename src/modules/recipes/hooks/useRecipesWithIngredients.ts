@@ -1,7 +1,7 @@
 'use client'
 
 import { useSupabaseQuery } from '@/hooks/supabase'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']

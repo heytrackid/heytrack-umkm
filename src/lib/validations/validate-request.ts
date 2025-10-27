@@ -5,10 +5,8 @@
  * Provides consistent error handling and type safety
  */
 
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
-import type { z} from 'zod';
-import { ZodError } from 'zod'
+import { type NextRequest, NextResponse } from 'next/server'
+import { type z, ZodError } from 'zod'
 
 /**
  * Validation result type
@@ -52,13 +50,13 @@ export async function validateRequest<T>(
     const body = await request.json()
     const data = schema.parse(body)
     return { success: true, data }
-  } catch (error) {
-    if (error instanceof ZodError) {
+  } catch (err) {
+    if (err instanceof ZodError) {
       return {
         success: false,
-        error: {
+        _error: {
           message: 'Validation failed',
-          errors: error.errors.map((err) => ({
+          errors: err.issues.map((err) => ({
             field: err.path.join('.'),
             message: err.message,
           })),
@@ -141,13 +139,13 @@ export function validateQueryParams<T>(
     const params = Object.fromEntries(searchParams.entries())
     const data = schema.parse(params)
     return { success: true, data }
-  } catch (error) {
-    if (error instanceof ZodError) {
+  } catch (err) {
+    if (err instanceof ZodError) {
       return {
         success: false,
-        error: {
+        _error: {
           message: 'Invalid query parameters',
-          errors: error.errors.map((err) => ({
+          errors: err.issues.map((err) => ({
             field: err.path.join('.'),
             message: err.message,
           })),
@@ -191,13 +189,13 @@ export function validatePathParams<T>(
   try {
     const data = schema.parse(params)
     return { success: true, data }
-  } catch (error) {
-    if (error instanceof ZodError) {
+  } catch (err) {
+    if (err instanceof ZodError) {
       return {
         success: false,
-        error: {
+        _error: {
           message: 'Invalid path parameters',
-          errors: error.errors.map((err) => ({
+          errors: err.issues.map((err) => ({
             field: err.path.join('.'),
             message: err.message,
           })),

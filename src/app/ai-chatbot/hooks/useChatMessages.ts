@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import type { Message } from '../types'
-import { SUGGESTIONS } from '../types'
+import { useRef, useState, useEffect } from 'react'
+import { type Message, SUGGESTIONS } from '@/app/ai-chatbot/types'
 
 export function useChatMessages() {
   const [messages, setMessages] = useState<Message[]>([
@@ -27,11 +26,11 @@ export function useChatMessages() {
   }, [messages])
 
   const addMessage = (message: Message) => {
-    setMessages(prev => [...prev, message])
+    void setMessages(prev => [...prev, message])
   }
 
   const setLoading = (loading: boolean) => {
-    setIsLoading(loading)
+    void setIsLoading(loading)
   }
 
   return {

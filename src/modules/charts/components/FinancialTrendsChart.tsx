@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
@@ -8,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from"@/components/ui/chart"
-import { formatCurrency } from '@/shared/utils/currency'
+import { formatCurrency } from '@/lib/currency'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import recharts components to reduce bundle size

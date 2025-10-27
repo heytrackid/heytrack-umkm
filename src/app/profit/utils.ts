@@ -34,7 +34,7 @@ export function prepareProductChartData(products: ProfitData['products']): Chart
     .slice(0, 10) // Top 10 products
     .map(product => ({
       name: product.product_name.length > 15
-        ? product.product_name.substring(0, 15) + '...'
+        ? `${product.product_name.substring(0, 15)  }...`
         : product.product_name,
       revenue: product.revenue,
       cogs: product.cogs,

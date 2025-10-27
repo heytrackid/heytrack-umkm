@@ -5,8 +5,8 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
 import { dbLogger } from '@/lib/logger'
-import type { Recipe, SyncEvent } from '../data-synchronization/types'
-import { syncEmitter } from '../data-synchronization/sync-events'
+import type { Recipe, SyncEvent } from '@/lib/data-synchronization/types'
+import { syncEmitter } from '@/lib/data-synchronization/sync-events'
 
 interface RecipesStore {
   // Data
@@ -104,15 +104,15 @@ export const useRecipesStore = create<RecipesStore>()(
     },
 
     // Business logic
-    getAvailableRecipes: () => {
+    getAvailableRecipes: () => 
       // For now, return all recipes (availability logic would need ingredient stock checking)
-      return get().recipes
-    },
+       get().recipes
+    ,
 
-    checkRecipeAvailability: (recipeId) => {
+    checkRecipeAvailability: (recipeId) => 
       // For now, assume all recipes are available (would need ingredient stock checking)
-      return true
-    },
+       true
+    ,
 
     // Sync functions
     emitSyncEvent: (event) => {

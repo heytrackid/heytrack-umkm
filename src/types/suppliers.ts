@@ -1,7 +1,7 @@
 import type { Json } from './common'
 
 // Supplier-related types
-export type SuppliersTable = {
+export interface SuppliersTable {
   Row: {
     address: string | null
     contact_person: string | null

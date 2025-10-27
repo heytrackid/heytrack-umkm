@@ -113,10 +113,10 @@ export class SmartNotificationSystem {
    * Evaluate rules against data
    */
   evaluateRules(data: Record<string, any>, category: SmartNotification['category']): void {
-    if (!this.config.enableSmartRules) return;
+    if (!this.config.enableSmartRules) {return;}
 
     for (const rule of this.rules) {
-      if (!rule.enabled || rule.category !== category) continue;
+      if (!rule.enabled || rule.category !== category) {continue;}
 
       let shouldTrigger = true;
 
@@ -181,8 +181,8 @@ export class SmartNotificationSystem {
     this.subscribers.forEach(callback => {
       try {
         callback([...this.notifications]);
-      } catch (error) {
-        automationLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error notifying subscriber');
+      } catch (err) {
+        automationLogger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error notifying subscriber');
       }
     });
   }
@@ -193,7 +193,7 @@ export class SmartNotificationSystem {
   cleanup(): void {
     const now = new Date();
     this.notifications = this.notifications.filter(notification => {
-      if (!notification.expiresAt) return true;
+      if (!notification.expiresAt) {return true;}
       return new Date(notification.expiresAt) > now;
     });
     this.notifySubscribers();

@@ -145,10 +145,10 @@ export const normalizeSettings = (
   const ui: UISettings = {
     ...DEFAULT_APP_SETTINGS.ui,
     ...uiSource,
-    language: (uiSource.language as LanguageOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.language,
-    theme: (uiSource.theme as ThemeOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.theme,
-    dateFormat: (uiSource.dateFormat as DateFormatOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.dateFormat,
-    timeFormat: (uiSource.timeFormat as TimeFormatOption | undefined) ?? DEFAULT_APP_SETTINGS.ui.timeFormat,
+    language: (uiSource.language) ?? DEFAULT_APP_SETTINGS.ui.language,
+    theme: (uiSource.theme) ?? DEFAULT_APP_SETTINGS.ui.theme,
+    dateFormat: (uiSource.dateFormat) ?? DEFAULT_APP_SETTINGS.ui.dateFormat,
+    timeFormat: (uiSource.timeFormat) ?? DEFAULT_APP_SETTINGS.ui.timeFormat,
   }
 
   if (contextSettings) {

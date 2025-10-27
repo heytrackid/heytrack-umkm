@@ -180,7 +180,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
   // Fetch costs from API
   const fetchCosts = async () => {
-    startLoading(LOADING_KEYS.LOAD_COSTS)
+    void startLoading(LOADING_KEYS.LOAD_COSTS)
     try {
       const response = await fetch('/api/operational-costs')
       if (!response.ok) {throw new Error('Failed to fetch costs')}
@@ -196,9 +196,9 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
         isFixed: cost.isFixed,
         icon: cost.icon || '📦'
       }))
-      setCosts(transformedCosts)
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Error fetching costs:')
+      void setCosts(transformedCosts)
+    } catch (err) {
+      apiLogger.error({ err }, 'Error fetching costs:')
       toast.error('Gagal memuat data biaya operasional')
     } finally {
       stopLoading(LOADING_KEYS.LOAD_COSTS)
@@ -207,8 +207,8 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
   // Reset form to initial state
   const resetForm = () => {
-    setNewCost(initialCostState)
-    setEditingCost(null)
+    void setNewCost(initialCostState)
+    void setEditingCost(null)
   }
 
   // Handle save (create/update)
@@ -220,7 +220,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       return
     }
 
-    setIsLoading(true)
+    void setIsLoading(true)
     try {
       if (currentView === 'add') {
         // Create new cost
@@ -249,27 +249,27 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       // Refresh the list and reset form
       await fetchCosts()
       resetForm()
-      setCurrentView('list')
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Error saving cost:')
+      void setCurrentView('list')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error saving cost:')
       toast.error('Gagal menyimpan biaya operasional')
     } finally {
-      setIsLoading(false)
+      void setIsLoading(false)
     }
   }
 
   // Handle edit
   const handleEditCost = (cost: OperationalCost) => {
-    setEditingCost(cost)
-    setNewCost({ ...cost })
-    setCurrentView('edit')
+    void setEditingCost(cost)
+    void setNewCost({ ...cost })
+    void setCurrentView('edit')
   }
 
   // Handle delete single cost
   const handleDeleteCost = async (costId: string) => {
     if (!confirm('Yakin ingin menghapus biaya operasional ini?')) {return}
 
-    setIsLoading(true)
+    void setIsLoading(true)
     try {
       const response = await fetch('/api/operational-costs', {
         method: 'DELETE',
@@ -282,11 +282,11 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       // Refresh the list
       await fetchCosts()
       toast.success('Biaya operasional berhasil dihapus!')
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Error deleting cost:')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error deleting cost:')
       toast.error('Gagal menghapus biaya operasional')
     } finally {
-      setIsLoading(false)
+      void setIsLoading(false)
     }
   }
 
@@ -300,7 +300,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
     if (!confirmed) {return}
 
-    setIsLoading(true)
+    void setIsLoading(true)
     try {
       const response = await fetch('/api/operational-costs', {
         method: 'DELETE',
@@ -312,13 +312,13 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
 
       // Refresh the list and clear selection
       await fetchCosts()
-      setSelectedItems([])
+      void setSelectedItems([])
       toast.success(`${selectedItems.length} biaya operasional berhasil dihapus!`)
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Error deleting costs:')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error deleting costs:')
       toast.error('Gagal menghapus biaya operasional')
     } finally {
-      setIsLoading(false)
+      void setIsLoading(false)
     }
   }
 
@@ -334,7 +334,7 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
     const confirmed = window.confirm("Tambahkan template biaya operasional?")
     if (!confirmed) {return}
 
-    setIsLoading(true)
+    void setIsLoading(true)
     try {
       // Create all template costs in database
       const promises = template.map(cost =>
@@ -349,18 +349,18 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       // Refresh the list
       await fetchCosts()
       toast.success('Template berhasil ditambahkan!')
-    } catch (error) {
-      apiLogger.error({ error: error }, 'Error adding template:')
+    } catch (err) {
+      apiLogger.error({ err }, 'Error adding template:')
       toast.error('Gagal menambahkan template')
     } finally {
-      setIsLoading(false)
+      void setIsLoading(false)
     }
   }
 
   // Selection handlers
   const handleSelectAll = () => {
     if (selectedItems.length === filteredCosts.length) {
-      setSelectedItems([])
+      void setSelectedItems([])
     } else {
       setSelectedItems(filteredCosts.map(cost => cost.id))
     }
@@ -378,12 +378,12 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
   const filteredCosts = costs.filter(cost =>
     cost.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cost.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (cost.description && cost.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    (cost.description?.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   // Load costs on mount
   useEffect(() => {
-    fetchCosts()
+    void fetchCosts()
   }, [])
 
   return {

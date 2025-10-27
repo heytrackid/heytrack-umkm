@@ -6,7 +6,7 @@ import QueryProvider from '@/providers/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import React from 'react';
+import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import "./globals.css";
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="id" suppressHydrationWarning className="h-full">
@@ -46,15 +46,15 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
-          enableSystem={true}
+          enableSystem
           disableTransitionOnChange
         >
           <QueryProvider>
             <SettingsProvider>
               <PreloadingProvider
-                enableSmartPreloading={true}
-                enableIdlePreloading={true}
-                enableNetworkAware={true}
+                enableSmartPreloading
+                enableIdlePreloading
+                enableNetworkAware
                 debug={process.env.NODE_ENV === 'development'}
               >
                 <ErrorBoundary>

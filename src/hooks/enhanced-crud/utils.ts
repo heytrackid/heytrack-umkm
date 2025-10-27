@@ -24,7 +24,7 @@ export const getOperationLabel = (operation: 'create' | 'update' | 'delete'): st
 export const handleCRUDError = (
   error: Error,
   operation: 'create' | 'update' | 'delete',
-  showErrorToast: boolean = true,
+  showErrorToast = true,
   customErrorHandler?: (error: Error, operation: 'create' | 'update' | 'delete') => void
 ): void => {
   const errorMessage = error.message || 'Terjadi kesalahan tak terduga'

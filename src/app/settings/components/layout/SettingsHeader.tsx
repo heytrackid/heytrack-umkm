@@ -25,8 +25,7 @@ interface SettingsHeaderProps {
   onReset: () => void
 }
 
-export function SettingsHeader({ isUnsavedChanges, isSaving, onSave, onReset }: SettingsHeaderProps) {
-  return (
+export const SettingsHeader = ({ isUnsavedChanges, isSaving, onSave, onReset }: SettingsHeaderProps) => (
     <>
       {/* Breadcrumb */}
       <Breadcrumb>
@@ -69,4 +68,3 @@ export function SettingsHeader({ isUnsavedChanges, isSaving, onSave, onReset }: 
       </div>
     </>
   )
-}

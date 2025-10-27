@@ -64,8 +64,8 @@ export class ProductionTimeService {
         estimated_completion,
         parallel_processing_time
       }
-    } catch (error: unknown) {
-      dbLogger.error({ err: error }, 'Error calculating production time')
+    } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Error calculating production time')
       return {
         total_prep_time: 0,
         total_cook_time: 0,

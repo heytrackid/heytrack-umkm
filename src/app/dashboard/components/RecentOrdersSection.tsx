@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShoppingCart } from 'lucide-react'
 
-function RecentOrdersSection() {
-  return (
+const RecentOrdersSection = () => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -26,6 +25,5 @@ function RecentOrdersSection() {
       </CardContent>
     </Card>
   )
-}
 
 export default RecentOrdersSection

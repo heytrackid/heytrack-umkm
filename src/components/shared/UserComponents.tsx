@@ -1,7 +1,6 @@
 'use client'
 
-import * as React from 'react'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -62,14 +61,14 @@ interface UserProfileCardProps {
   className?: string
 }
 
-export function UserProfileCard({
+export const UserProfileCard = ({
   user,
   isCurrentUser = false,
   onEdit,
   onChangePassword,
   onLogout,
   className = ""
-}: UserProfileCardProps) {
+}: UserProfileCardProps) => {
   const getStatusColor = (status: UserProfile['status']) => {
     switch (status) {
       case 'active':
@@ -81,9 +80,7 @@ export function UserProfileCard({
     }
   }
 
-  const getRoleLabel = (role: string) => {
-    return USER_ROLES.find(r => r.value === role)?.label || role
-  }
+  const getRoleLabel = (role: string) => USER_ROLES.find(r => r.value === role)?.label || role
 
   return (
     <Card className={className}>
@@ -213,15 +210,14 @@ interface UserManagementTableProps {
   className?: string
 }
 
-export function UserManagementTable({
+export const UserManagementTable = ({
   users,
   onEditUser,
   onDeleteUser,
   onToggleStatus,
   currentUserId,
   className = ""
-}: UserManagementTableProps) {
-  return (
+}: UserManagementTableProps) => (
     <div className={cn("space-y-4", className)}>
       {users.map((user) => (
         <Card key={user.id}>
@@ -306,7 +302,6 @@ export function UserManagementTable({
       ))}
     </div>
   )
-}
 
 // Password Change Component
 interface PasswordChangeProps {
@@ -315,11 +310,11 @@ interface PasswordChangeProps {
   className?: string
 }
 
-export function PasswordChange({
+export const PasswordChange = ({
   onSubmit,
   isLoading = false,
   className = ""
-}: PasswordChangeProps) {
+}: PasswordChangeProps) => {
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -332,7 +327,7 @@ export function PasswordChange({
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
 
     // Validation
@@ -355,15 +350,15 @@ export function PasswordChange({
     }
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
+      void setErrors(newErrors)
       return
     }
 
     try {
       await onSubmit(formData)
-      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })
-      setErrors({})
-    } catch (error) {
+      void setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      void setErrors({})
+    } catch (err) {
       // Error is handled by parent
     }
   }
@@ -502,13 +497,13 @@ interface UserPermissionsProps {
   className?: string
 }
 
-export function UserPermissions({
+export const UserPermissions = ({
   userPermissions,
   allPermissions,
   onPermissionChange,
   readOnly = false,
   className = ""
-}: UserPermissionsProps) {
+}: UserPermissionsProps) => {
   const permissionsByCategory = allPermissions.reduce((acc, permission) => {
     if (!acc[permission.category]) {
       acc[permission.category] = []
@@ -565,13 +560,13 @@ interface RoleManagementProps {
   className?: string
 }
 
-export function RoleManagement({
+export const RoleManagement = ({
   currentRole,
   onRoleChange,
   availableRoles = USER_ROLES,
   canChangeRole = false,
   className = ""
-}: RoleManagementProps) {
+}: RoleManagementProps) => {
   const currentRoleData = availableRoles.find(role => role.value === currentRole)
 
   return (

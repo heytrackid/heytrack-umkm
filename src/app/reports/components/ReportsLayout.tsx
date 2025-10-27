@@ -21,7 +21,7 @@ import {
   Download
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 
 // Lazy load heavy components
 const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
@@ -41,10 +41,10 @@ const FinancialReport = dynamic(() => import('./FinancialReport'), {
 })
 
 interface ReportsLayoutProps {
-  children?: React.ReactNode
+  children?: ReactNode
 }
 
-export function ReportsLayout({ children }: ReportsLayoutProps) {
+export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
   const [dateRange, setDateRange] = useState({
     start: new Date(new Date().setDate(1)).toISOString().split('T')[0], // First day of month
     end: new Date().toISOString().split('T')[0] // Today
@@ -89,29 +89,93 @@ export function ReportsLayout({ children }: ReportsLayoutProps) {
         {/* Date Range Picker */}
         <Card>
           <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
-                <input
-                  type="date"
-                  value={dateRange.start}
-                  onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded-md"
-                />
+            <div className="space-y-4">
+              {/* Quick Presets */}
+              <div>
+                <label className="text-sm font-medium mb-2 block">Periode Cepat:</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const today = new Date().toISOString().split('T')[0]
+                      void setDateRange({ start: today, end: today })
+                    }}
+                  >
+                    Hari Ini
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const end = new Date()
+                      const start = new Date(end)
+                      start.setDate(start.getDate() - 6)
+                      setDateRange({
+                        start: start.toISOString().split('T')[0],
+                        end: end.toISOString().split('T')[0]
+                      })
+                    }}
+                  >
+                    7 Hari Terakhir
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const end = new Date()
+                      const start = new Date(end)
+                      start.setDate(start.getDate() - 29)
+                      setDateRange({
+                        start: start.toISOString().split('T')[0],
+                        end: end.toISOString().split('T')[0]
+                      })
+                    }}
+                  >
+                    30 Hari Terakhir
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date()
+                      const start = new Date(now.getFullYear(), now.getMonth(), 1)
+                      setDateRange({
+                        start: start.toISOString().split('T')[0],
+                        end: now.toISOString().split('T')[0]
+                      })
+                    }}
+                  >
+                    Bulan Ini
+                  </Button>
+                </div>
               </div>
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
-                <input
-                  type="date"
-                  value={dateRange.end}
-                  onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded-md"
-                />
+
+              {/* Custom Date Range */}
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange((prev) => ({ ...prev, start: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-sm font-medium mb-2 block">Tanggal Akhir</label>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange((prev) => ({ ...prev, end: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+                  />
+                </div>
+                <Button>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Terapkan
+                </Button>
               </div>
-              <Button>
-                <Calendar className="h-4 w-4 mr-2" />
-                Terapkan
-              </Button>
             </div>
           </CardContent>
         </Card>

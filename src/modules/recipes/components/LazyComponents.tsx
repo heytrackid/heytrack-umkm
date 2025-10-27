@@ -1,19 +1,9 @@
 'use client'
-import * as React from 'react'
 
-import { createLazyComponent, ComponentSkeletons } from '@/shared/components/utility/LazyWrapper'
+import { createLazyComponent, ComponentSkeletons, useProgressiveLoading } from '@/components/lazy/LazyWrapper'
 import { Suspense } from 'react'
 
 // Lazy load recipe components with optimized loading
-export const LazyAdvancedHPPCalculator = createLazyComponent(
-  () => import('@/components'),
-  {
-    name: 'Advanced HPP Calculator',
-    fallback: <ComponentSkeletons.Dashboard />,
-    minLoadingTime: 700, // Longer for complex HPP calculation features
-  }
-)
-
 export const LazySmartPricingAssistant = createLazyComponent(
   () => import('@/components'),
   {
@@ -27,18 +17,16 @@ export const LazySmartPricingAssistant = createLazyComponent(
 export const preloadRecipeComponents = () => {
   // Preload most commonly used components
   import('@/components')
-  import('@/components')
 }
 
 // Progressive loading for recipe dashboard
-export function RecipeDashboardWithProgressiveLoading({
+export const RecipeDashboardWithProgressiveLoading = ({
   recipeId,
   recipeName
 }: {
   recipeId: string
   recipeName: string
-}) {
-  return (
+}) => (
     <div className="space-y-6">
       {/* Critical above-the-fold content loads first */}
       <div className="space-y-4">
@@ -55,13 +43,6 @@ export function RecipeDashboardWithProgressiveLoading({
       {/* Heavy components load progressively */}
       <div className="space-y-6">
         <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-          <LazyAdvancedHPPCalculator 
-            recipeId={recipeId}
-            recipeName={recipeName}
-          />
-        </Suspense>
-        
-        <Suspense fallback={<ComponentSkeletons.Dashboard />}>
           <LazySmartPricingAssistant 
             recipeId={recipeId}
             recipeName={recipeName}
@@ -70,7 +51,6 @@ export function RecipeDashboardWithProgressiveLoading({
       </div>
     </div>
   )
-}
 
 // Hook for progressive recipe component loading with metrics
 export function useRecipeProgressiveLoading() {
@@ -99,18 +79,9 @@ export const SmartRecipeLoader = ({
 
   return (
     <div className="space-y-6">
-      {/* Basic HPP calculator for all users */}
-      <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-        <LazyAdvancedHPPCalculator 
-          recipeId={recipeId}
-          recipeName={recipeName}
-          {...props}
-        />
-      </Suspense>
-      
       {/* Advanced pricing only for admin/manager */}
       {showAdvancedFeatures && (
-        <Suspense fallback={<ComponentSkeletons.Dashboard />}>
+        <Suspense fallback={<div>Loading...</div>}>
           <LazySmartPricingAssistant 
             recipeId={recipeId}
             recipeName={recipeName}
@@ -121,5 +92,3 @@ export const SmartRecipeLoader = ({
     </div>
   )
 }
-
-import { useProgressiveLoading } from '@/shared/components/utility/LazyWrapper'

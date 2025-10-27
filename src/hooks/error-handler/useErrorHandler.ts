@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { getErrorMessage } from '@/lib/type-guards'
-import { apiLogger } from '@/lib/logger'
+import { logger } from '@/lib/logger'
 import type { AppError, ErrorState } from './types'
 
 /**
@@ -39,7 +39,7 @@ export function useErrorHandler() {
 
   const handle = useCallback((error: any, context?: string) => {
     const appError = error instanceof Error ? error : new Error(String(error))
-    console.error({ error, context }, `Error in ${context || 'component'}`)
+    logger.error(`Error in ${context || 'component'}`, { error, context })
 
     setErrorState({
       error: appError as AppError,
@@ -59,13 +59,13 @@ export function useErrorHandler() {
   }, [])
 
   const throwError = useCallback((error: AppError) => {
-    console.error({ error }, 'Throwing error')
+    logger.error('Throwing error', { error })
     setErrorState({
       error,
       isError: true,
       message: (error instanceof Error ? error.message : String(error)),
     })
-    throw error
+    throw err
   }, [])
 
   return {

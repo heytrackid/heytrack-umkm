@@ -1,3 +1,4 @@
+import type { ComponentType, ReactNode } from 'react'
 /**
  * Shared Page Patterns
  * Common page layout patterns used across the application
@@ -12,13 +13,13 @@ interface PageHeaderProps {
   title: string
   description?: string
   backHref?: string
-  actions?: React.ReactNode
+  actions?: ReactNode
 }
 
 /**
  * Standard page header with back button, title, description, and actions
  */
-export function PageHeader({ title, description, backHref, actions }: PageHeaderProps) {
+export const PageHeader = ({ title, description, backHref, actions }: PageHeaderProps) => {
   const router = useRouter()
 
   return (
@@ -48,20 +49,19 @@ export function PageHeader({ title, description, backHref, actions }: PageHeader
 interface PageActionsProps {
   onAdd?: () => void
   addText?: string
-  addIcon?: React.ComponentType<{ className?: string }>
-  children?: React.ReactNode
+  addIcon?: ComponentType<{ className?: string }>
+  children?: ReactNode
 }
 
 /**
  * Standard page action buttons
  */
-export function PageActions({
+export const PageActions = ({
   onAdd,
   addText = "Tambah",
   addIcon: Icon = Plus,
   children
-}: PageActionsProps) {
-  return (
+}: PageActionsProps) => (
     <div className="flex gap-2">
       {onAdd && (
         <Button onClick={onAdd}>
@@ -72,24 +72,23 @@ export function PageActions({
       {children}
     </div>
   )
-}
 
 interface AlertBannerProps {
   type?: 'info' | 'warning' | 'error' | 'success'
   title?: string
   message: string
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
 }
 
 /**
  * Standardized alert banners for pages
  */
-export function AlertBanner({
+export const AlertBanner = ({
   type = 'info',
   title,
   message,
   icon: Icon
-}: AlertBannerProps) {
+}: AlertBannerProps) => {
   const styles = {
     info: 'bg-blue-50 border-blue-200 text-blue-800',
     warning: 'bg-orange-50 border-orange-200 text-orange-800',
@@ -149,39 +148,36 @@ interface LoadingStateProps {
 /**
  * Standardized loading state component
  */
-export function LoadingState({
+export const LoadingState = ({
   message = "Memuat...",
   className
-}: LoadingStateProps) {
-  return (
+}: LoadingStateProps) => (
     <div className={`flex items-center justify-center p-8 ${className || ''}`}>
       <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
         <span className="text-gray-600">{message}</span>
       </div>
     </div>
   )
-}
 
 interface EmptyStateProps {
-  icon?: React.ComponentType<{ className?: string }>
+  icon?: ComponentType<{ className?: string }>
   title: string
   description: string
-  action?: React.ReactNode
+  action?: ReactNode
   className?: string
 }
 
 /**
  * Standardized empty state component
  */
-export function EmptyState({
+export const EmptyState = ({
   icon: Icon,
   title,
   description,
   action,
   className
-}: EmptyStateProps) {
-  return (
+}: EmptyStateProps) => (
     <div className={`text-center p-8 ${className || ''}`}>
       {Icon && (
         <Icon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -195,7 +191,6 @@ export function EmptyState({
       {action}
     </div>
   )
-}
 
 // Import React for types
-import * as React from 'react'
+import type React from 'react'

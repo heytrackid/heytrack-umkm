@@ -1,5 +1,4 @@
 'use client'
-import * as React from 'react'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -75,7 +74,7 @@ export default function OrderForm({
 
   // Fetch recipes for order items
   useEffect(() => {
-    fetchRecipes()
+    void fetchRecipes()
   }, [])
 
   const fetchRecipes = async () => {
@@ -83,10 +82,10 @@ export default function OrderForm({
       const response = await fetch('/api/recipes')
       if (response.ok) {
         const data = await response.json()
-        setRecipes(data)
+        void setRecipes(data)
       }
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error fetching recipes:')
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Error fetching recipes:')
     }
   }
 
@@ -138,10 +137,10 @@ export default function OrderForm({
     
     const recipe = recipes.find(r => r.id === recipeId)
     if (recipe) {
-      updateOrderItem(index, 'recipe_id', recipeId)
-      updateOrderItem(index, 'product_name', recipe.name)
+      void updateOrderItem(index, 'recipe_id', recipeId)
+      void updateOrderItem(index, 'product_name', recipe.name)
       if (recipe.price) {
-        updateOrderItem(index, 'price', recipe.price)
+        void updateOrderItem(index, 'price', recipe.price)
       }
     }
   }
@@ -149,7 +148,7 @@ export default function OrderForm({
   const handleSubmit = () => {
     const validationErrors = validateOrderData(formData)
     if (validationErrors.length > 0) {
-      setErrors(validationErrors)
+      void setErrors(validationErrors)
       return
     }
 

@@ -10,7 +10,7 @@ export class TypedError extends Error {
     constructor(
         message: string,
         public readonly code: string,
-        public readonly statusCode: number = 500,
+        public readonly statusCode = 500,
         public readonly details?: Record<string, unknown>
     ) {
         super(message);

@@ -2,7 +2,6 @@
 
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
-import * as React from 'react'
 import type { NavigationItem } from './useSidebarLogic'
 
 interface SidebarItemProps {
@@ -12,54 +11,30 @@ interface SidebarItemProps {
   variant?: 'default' | 'mobile'
 }
 
-function SidebarItem({
+const SidebarItem = ({
   item,
   isActive,
   onMouseEnter,
   variant = 'default'
-}: SidebarItemProps) {
+}: SidebarItemProps) => {
   if (variant === 'mobile') {
     return (
       <Link
         href={item.href || '#'}
         onMouseEnter={onMouseEnter}
         className={cn(
-          "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
-          "hover:scale-[1.02]",
+          "group flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors",
           isActive
-            ? "bg-primary/10 text-primary border border-primary/20"
+            ? "bg-primary text-primary-foreground"
             : "text-muted-foreground hover:bg-muted hover:text-foreground"
         )}
       >
-        <div className="flex items-center justify-center mr-3 mt-0.5">
-          <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <span className="font-medium truncate">{item.name}</span>
-
-            {/* Badges */}
-            <div className="flex items-center gap-1 ml-2">
-              {item.badge && (
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-secondary text-secondary-foreground">
-                  {item.badge}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Description */}
-          {item.description && (
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              {item.description}
-            </p>
-          )}
-        </div>
-
-        {/* Active indicator */}
-        {isActive && (
-          <div className="w-1 bg-primary rounded-full self-stretch ml-2" />
+        <item.icon className="h-5 w-5 flex-shrink-0" />
+        <span className="font-medium truncate">{item.name}</span>
+        {item.badge && (
+          <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-secondary text-secondary-foreground ml-auto">
+            {item.badge}
+          </span>
         )}
       </Link>
     )
@@ -70,47 +45,24 @@ function SidebarItem({
       href={item.href || '#'}
       onMouseEnter={onMouseEnter}
       className={cn(
-        "group flex items-start px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200",
-        "hover:scale-[1.02]",
+        "group flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors relative",
         isActive
-          ? "bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700"
-          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white"
+          ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium"
+          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
       )}
     >
-      <div className="flex items-center justify-center mr-3 mt-0.5">
-        <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-medium truncate flex-1">{item.name}</span>
-
-          {/* Badges */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            {item.badge && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                {item.badge}
-              </span>
-            )}
-            {item.isSimple && !item.badge && (
-              <span className="text-xs px-2 py-0.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full font-medium whitespace-nowrap">
-                SIMPLE
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Description */}
-        {item.description && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed break-words">
-            {item.description}
-          </p>
-        )}
-      </div>
-
       {/* Active indicator */}
       {isActive && (
-        <div className="w-1 bg-gray-700 dark:bg-gray-300 rounded-full self-stretch ml-2" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gray-900 dark:bg-white rounded-r" />
+      )}
+
+      <item.icon className="h-5 w-5 flex-shrink-0" />
+      <span className="font-medium truncate flex-1">{item.name}</span>
+
+      {item.badge && (
+        <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+          {item.badge}
+        </span>
       )}
     </Link>
   )

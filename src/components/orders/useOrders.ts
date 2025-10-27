@@ -18,8 +18,8 @@ export function useOrders() {
   // Fetch orders from API
   const fetchOrders = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
+      void setLoading(true)
+      void setError(null)
       
       const response = await fetch('/api/orders?limit=50')
       if (!response.ok) {
@@ -27,18 +27,18 @@ export function useOrders() {
       }
       
       const data = await response.json()
-      setOrders(data)
+      void setOrders(data)
     } catch (err) {
       apiLogger.error({ error: err }, 'Error fetching orders:')
-      setError(err instanceof Error ? err.message : 'Failed to fetch orders')
+      void setError(err instanceof Error ? err.message : 'Failed to fetch orders')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [])
 
   // Initial fetch
   useEffect(() => {
-    fetchOrders()
+    void fetchOrders()
   }, [fetchOrders])
 
   // Filter orders
@@ -47,7 +47,7 @@ export function useOrders() {
     const searchMatch = !filters.searchTerm || 
       (order.order_no && order.order_no.toLowerCase().includes(filters.searchTerm.toLowerCase())) ||
       (order.customer_name && order.customer_name.toLowerCase().includes(filters.searchTerm.toLowerCase())) ||
-      (order.customer_phone && order.customer_phone.toLowerCase().includes(filters.searchTerm.toLowerCase()))
+      (order.customer_phone?.toLowerCase().includes(filters.searchTerm.toLowerCase()))
 
     // Status filter
     const statusMatch = filters.status === 'all' || order.status === filters.status
@@ -103,12 +103,12 @@ export function useOrders() {
       }
 
       const createdOrder = await response.json()
-      setOrders(prev => [createdOrder, ...prev])
+      void setOrders(prev => [createdOrder, ...prev])
       
       return true
     } catch (err) {
       apiLogger.error({ error: err }, 'Error creating order:')
-      setError(err instanceof Error ? err.message : 'Failed to create order')
+      void setError(err instanceof Error ? err.message : 'Failed to create order')
       return false
     }
   }
@@ -141,7 +141,7 @@ export function useOrders() {
       return true
     } catch (err) {
       apiLogger.error({ error: err }, 'Error updating order:')
-      setError(err instanceof Error ? err.message : 'Failed to update order')
+      void setError(err instanceof Error ? err.message : 'Failed to update order')
       return false
     }
   }
@@ -195,7 +195,7 @@ export function useOrders() {
       return true
     } catch (err) {
       apiLogger.error({ error: err }, 'Error updating order status:')
-      setError(err instanceof Error ? err.message : 'Failed to update order status')
+      void setError(err instanceof Error ? err.message : 'Failed to update order status')
       return false
     }
   }
@@ -215,7 +215,7 @@ export function useOrders() {
       return true
     } catch (err) {
       apiLogger.error({ error: err }, 'Error deleting order:')
-      setError(err instanceof Error ? err.message : 'Failed to delete order')
+      void setError(err instanceof Error ? err.message : 'Failed to delete order')
       return false
     }
   }

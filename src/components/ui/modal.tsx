@@ -1,18 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, type MouseEvent, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
   fullScreenOnMobile?: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({ 
+export const Modal = ({ 
   isOpen, 
   onClose, 
   title, 
@@ -21,7 +21,7 @@ export const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   closeOnBackdropClick = true,
   fullScreenOnMobile = false,
-}) => {
+}: ModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
 
@@ -65,7 +65,7 @@ export const Modal: React.FC<ModalProps> = ({
     full: 'max-w-full',
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
+  const handleBackdropClick = (e: MouseEvent) => {
     if (closeOnBackdropClick && e.target === e.currentTarget) {
       onClose();
     }
@@ -145,7 +145,7 @@ export const Modal: React.FC<ModalProps> = ({
 };
 
 // Drawer variant for mobile-first design
-export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = ({
+export const Drawer = ({
   isOpen,
   onClose,
   title,
@@ -153,7 +153,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
   showCloseButton = true,
   closeOnBackdropClick = true,
   position = 'bottom',
-}) => {
+}: ModalProps & { position?: 'bottom' | 'right' }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -193,7 +193,7 @@ export const Drawer: React.FC<ModalProps & { position?: 'bottom' | 'right' }> = 
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
+  const handleBackdropClick = (e: MouseEvent) => {
     if (closeOnBackdropClick && e.target === e.currentTarget) {
       onClose();
     }

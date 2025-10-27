@@ -1,6 +1,7 @@
 // Performance monitoring and optimization utilities
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { logger } from '@/lib/logger'
 
 // Performance monitoring types
 export interface PerformanceMetric {
@@ -67,10 +68,10 @@ export function usePerformanceMonitor() {
             }
           ]
 
-          setMetrics(prev => [...prev, ...navMetrics])
+          void setMetrics(prev => [...prev, ...navMetrics])
         }
-      } catch (error) {
-        console.warn('Navigation timing not available:', error)
+      } catch (err) {
+        // Navigation timing not available
       }
 
       // Monitor paint timing
@@ -83,10 +84,10 @@ export function usePerformanceMonitor() {
             timestamp: Date.now(),
             type: 'paint'
           }
-          setMetrics(prev => [...prev, paintMetric])
+          void setMetrics(prev => [...prev, paintMetric])
         })
-      } catch (error) {
-        console.warn('Paint timing not available:', error)
+      } catch (err) {
+        // Paint timing not available
       }
 
       // Create performance observer for ongoing monitoring
@@ -101,13 +102,13 @@ export function usePerformanceMonitor() {
               type: entry.entryType as any
             }))
 
-            setMetrics(prev => [...prev, ...newMetrics])
+            void setMetrics(prev => [...prev, ...newMetrics])
           })
 
           // Observe different performance entry types
           observerRef.current.observe({ entryTypes: ['measure', 'mark', 'resource', 'navigation', 'paint'] })
-        } catch (error) {
-          console.warn('Performance monitoring not fully supported:', error)
+        } catch (err) {
+          // Performance monitoring not fully supported
         }
       }
     }
@@ -138,11 +139,11 @@ export function usePerformanceMonitor() {
             type: entry.entryType as any
           }
 
-          setMetrics(prev => [...prev, metric])
+          void setMetrics(prev => [...prev, metric])
           return metric
         }
-      } catch (error) {
-        console.warn('Performance measurement failed:', error)
+      } catch (err) {
+        // Performance measurement failed
       }
     }
     return null
@@ -158,10 +159,10 @@ export function usePerformanceMonitor() {
           timestamp: Date.now(),
           type: 'mark'
         }
-        setMetrics(prev => [...prev, metric])
+        void setMetrics(prev => [...prev, metric])
         return metric
-      } catch (error) {
-        console.warn('Performance mark failed:', error)
+      } catch (err) {
+        // Performance mark failed
       }
     }
     return null
@@ -248,7 +249,6 @@ export function useWebVitals() {
   useEffect(() => {
     // Web Vitals monitoring disabled to avoid import issues
     // In a real implementation, you would conditionally import web-vitals
-    console.log('Web Vitals monitoring is disabled')
   }, [])
 
   return metrics
@@ -266,7 +266,7 @@ export function useMemoryMonitor() {
   useEffect(() => {
     const updateMemoryInfo = () => {
       if (typeof window !== 'undefined' && 'performance' in window) {
-        const memory = (performance as any).memory
+        const {memory} = (performance as any)
         if (memory) {
           const used = memory.usedJSHeapSize
           const total = memory.totalJSHeapSize
@@ -283,7 +283,7 @@ export function useMemoryMonitor() {
     }
 
     // Update immediately and then every 5 seconds
-    updateMemoryInfo()
+    void updateMemoryInfo()
     const interval = setInterval(updateMemoryInfo, 5000)
 
     return () => clearInterval(interval)
@@ -319,7 +319,7 @@ export function useNetworkMonitor() {
       })
     }
 
-    updateNetworkInfo()
+    void updateNetworkInfo()
 
     const handleOnline = () => setNetworkInfo(prev => ({ ...prev, isOnline: true }))
     const handleOffline = () => setNetworkInfo(prev => ({ ...prev, isOnline: false }))
@@ -358,7 +358,7 @@ export function useBundleAnalyzer() {
 
   useEffect(() => {
     // Simplified bundle analysis - in real app, load from build artifacts
-    setBundleInfo(null)
+    void setBundleInfo(null)
   }, [])
 
   return bundleInfo
@@ -377,15 +377,15 @@ export const perfUtils = {
     return (...args: Parameters<T>) => {
       const later = () => {
         timeout = null
-        if (!immediate) func(...args)
+        if (!immediate) {func(...args)}
       }
 
       const callNow = immediate && !timeout
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) {clearTimeout(timeout)}
       timeout = setTimeout(later, wait)
 
-      if (callNow) func(...args)
+      if (callNow) {func(...args)}
     }
   },
 
@@ -430,7 +430,7 @@ export const perfUtils = {
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       ;(window as any).requestIdleCallback(callback, { timeout })
     } else {
-      setTimeout(callback, 0)
+      void setTimeout(callback, 0)
     }
   }
 }

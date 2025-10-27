@@ -3,7 +3,7 @@
  * Auto-reorder configuration for ingredients
  */
 
-export type InventoryReorderRulesTable = {
+export interface InventoryReorderRulesTable {
   Row: {
     id: string
     ingredient_id: string

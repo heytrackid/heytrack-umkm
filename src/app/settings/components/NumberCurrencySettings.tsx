@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { DollarSign } from 'lucide-react'
 import { useSettings, currencies } from '@/contexts/settings-context'
-import type { AppSettingsState, SettingsUpdateHandler } from '../types'
+import type { AppSettingsState, SettingsUpdateHandler } from '@/app/settings/types'
 
 interface NumberCurrencySettingsProps {
   settings: AppSettingsState
@@ -14,7 +14,7 @@ interface NumberCurrencySettingsProps {
 /**
  * Pengaturan format angka dan mata uang
  */
-export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurrencySettingsProps) {
+export const NumberCurrencySettings = ({ settings, onSettingChange }: NumberCurrencySettingsProps) => {
   const { settings: currentSettings, updateCurrency, formatCurrency } = useSettings()
 
   return (
@@ -48,7 +48,7 @@ export function NumberCurrencySettings({ settings, onSettingChange }: NumberCurr
             onChange={(e) => {
               const selectedCurrency = currencies.find(c => c.code === e.target.value)
               if (selectedCurrency) {
-                updateCurrency(selectedCurrency)
+                void updateCurrency(selectedCurrency)
                 onSettingChange('ui', 'currency', selectedCurrency.code)
               }
             }}

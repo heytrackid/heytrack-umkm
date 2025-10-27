@@ -1,6 +1,6 @@
 'use client'
-import * as React from 'react'
 
+import { type ReactNode, type FormEvent, useState, useEffect } from 'react'
 import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,6 @@ import {
   X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
 // Supabase auth components
 import {
   DropdownMenu,
@@ -40,7 +39,7 @@ interface MobileHeaderProps {
   title?: string
   showBackButton?: boolean
   onBackClick?: () => void
-  actions?: React.ReactNode[]
+  actions?: ReactNode[]
   showSearch?: boolean
   searchPlaceholder?: string
   onSearch?: (query: string) => void
@@ -53,7 +52,7 @@ interface MobileHeaderProps {
   sidebarOpen?: boolean
 }
 
-function MobileHeader({
+const MobileHeader = ({
   title,
   showBackButton,
   onBackClick,
@@ -65,7 +64,7 @@ function MobileHeader({
   className,
   onMenuToggle,
   sidebarOpen
-}: MobileHeaderProps) {
+}: MobileHeaderProps) => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [user, setUser] = useState<SupabaseUser | null>(null)
@@ -79,28 +78,28 @@ function MobileHeader({
     const getUser = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
-        setUser(user)
-      } catch (error) {
-        uiLogger.error({ error: error }, 'Error getting user:')
+        void setUser(user)
+      } catch (err) {
+        uiLogger.error({ error }, 'Error getting user:')
       } finally {
-        setLoading(false)
+        void setLoading(false)
       }
     }
 
-    getUser()
+    void getUser()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: string, session: any) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
+        void setUser(session?.user ?? null)
+        void setLoading(false)
       }
     )
 
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (onSearch) {
       onSearch(searchQuery)
@@ -108,21 +107,21 @@ function MobileHeader({
   }
 
   const handleSearchToggle = () => {
-    setIsSearchExpanded(!isSearchExpanded)
+    void setIsSearchExpanded(!isSearchExpanded)
     if (isSearchExpanded) {
-      setSearchQuery('')
+      void setSearchQuery('')
     }
   }
 
   // Auto-collapse search on outside click
   useEffect(() => {
-    if (!isSearchExpanded) {return}
+    if (!isSearchExpanded) { return }
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
       if (!target.closest('.search-container')) {
-        setIsSearchExpanded(false)
-        setSearchQuery('')
+        void setIsSearchExpanded(false)
+        void setSearchQuery('')
       }
     }
 
@@ -169,7 +168,7 @@ function MobileHeader({
                   <SheetTitle>Menu Navigasi</SheetTitle>
                 </SheetHeader>
                 <div className="h-full">
-                  <SimpleSidebar isMobile={true} />
+                  <SimpleSidebar isMobile />
                 </div>
               </SheetContent>
             </Sheet>
@@ -280,7 +279,7 @@ function MobileHeader({
                 <DropdownMenuItem
                   onClick={async () => {
                     await supabase.auth.signOut()
-                    router.push('/auth/login')
+                    void router.push('/auth/login')
                   }}
                   className="text-red-600 focus:text-red-600"
                 >
@@ -314,8 +313,7 @@ function MobileHeader({
 export default MobileHeader
 
 // Pre-built header variants for common use cases
-export function DashboardHeader() {
-  return (
+export const DashboardHeader = () => (
     <MobileHeader
       title="Dashboard"
       notification={{
@@ -324,18 +322,16 @@ export function DashboardHeader() {
       }}
     />
   )
-}
 
-export function PageHeader({
+export const PageHeader = ({
   title,
   showBackButton = true,
   actions
 }: {
   title: string
   showBackButton?: boolean
-  actions?: React.ReactNode[]
-}) {
-  return (
+  actions?: ReactNode[]
+}) => (
     <MobileHeader
       title={title}
       showBackButton={showBackButton}
@@ -344,4 +340,3 @@ export function PageHeader({
       showSearch={false}
     />
   )
-}

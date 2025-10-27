@@ -1,6 +1,7 @@
 import { apiLogger } from '@/lib/logger'
-import { processChatbotQuery, parseNaturalLanguage, generateAIInsights, BusinessAI } from '@/lib/ai'
-import supabase from '@/utils/supabase'
+import { processChatbotQuery, generateAIInsights } from '@/lib/ai'
+import { createClient } from '@/utils/supabase/client'
+const supabase = createClient()
 
 export function useAIService() {
   const processAIQuery = async (query: string) => {
@@ -37,7 +38,7 @@ export function useAIService() {
         data: nlpResult
       }
     } catch (error) {
-      apiLogger.error({ error: error }, 'Error processing AI query:')
+      apiLogger.error({ error }, 'Error processing AI query:')
 
       // Fallback to basic responses
       const lowerQuery = query.toLowerCase()

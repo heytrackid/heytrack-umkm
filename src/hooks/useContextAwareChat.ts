@@ -40,7 +40,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
   // Load available sessions on mount
   useEffect(() => {
-    loadSessions()
+    void loadSessions()
   }, [])
 
   const loadSessions = useCallback(async () => {
@@ -52,7 +52,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
       }
 
       const data = await response.json()
-      setSessions(data.data || [])
+      void setSessions(data.data || [])
     } catch (err) {
       apiLogger.error({ error: err }, 'Failed to load sessions')
     }
@@ -61,8 +61,8 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
   const sendMessage = useCallback(async (query: string) => {
     if (!query.trim()) {return}
 
-    setIsLoading(true)
-    setError(null)
+    void setIsLoading(true)
+    void setError(null)
 
     // Add user message immediately
     const userMessage: Message = {
@@ -72,7 +72,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
       timestamp: new Date().toISOString(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    void setMessages(prev => [...prev, userMessage])
 
     try {
       const response = await fetch('/api/ai/chat-enhanced', {
@@ -95,7 +95,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
       // Update session ID if new
       if (data.sessionId && data.sessionId !== sessionId) {
-        setSessionId(data.sessionId)
+        void setSessionId(data.sessionId)
       }
 
       // Add AI response
@@ -107,40 +107,40 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
         suggestions: data.data.suggestions,
       }
 
-      setMessages(prev => [...prev, aiMessage])
+      void setMessages(prev => [...prev, aiMessage])
 
       // Reload sessions to update list
       await loadSessions()
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan'
-      setError(errorMessage)
+      void setError(errorMessage)
       apiLogger.error({ error: err }, 'Failed to send message')
 
       // Remove user message on error
       setMessages(prev => prev.filter(m => m.id !== userMessage.id))
     } finally {
-      setIsLoading(false)
+      void setIsLoading(false)
     }
   }, [sessionId, loadSessions])
 
   const loadSession = useCallback(async (newSessionId: string) => {
-    setSessionId(newSessionId)
-    setMessages([])
-    setError(null)
+    void setSessionId(newSessionId)
+    void setMessages([])
+    void setError(null)
     
     // Messages will be loaded automatically by the AI service
     // when the first query is sent
   }, [])
 
   const createNewSession = useCallback(async () => {
-    setSessionId(null)
-    setMessages([])
-    setError(null)
+    void setSessionId(null)
+    void setMessages([])
+    void setError(null)
   }, [])
 
   const clearError = useCallback(() => {
-    setError(null)
+    void setError(null)
   }, [])
 
   return {

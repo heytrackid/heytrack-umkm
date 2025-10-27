@@ -7,9 +7,9 @@ import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
 import { uiLogger } from '@/lib/logger'
-import type { Order, OrderStatus } from '../types'
+import type { Order, OrderStatus } from '@/types'
 
-export function OrdersTableView() {
+export const OrdersTableView = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
@@ -18,32 +18,32 @@ export function OrdersTableView() {
   const [showOrderForm, setShowOrderForm] = useState(false)
 
   useEffect(() => {
-    fetchOrders()
+    void fetchOrders()
   }, [])
 
   const fetchOrders = async () => {
     try {
-      setLoading(true)
+      void setLoading(true)
       const response = await fetch('/api/orders')
       if (response.ok) {
         const data = await response.json()
-        setOrders(data)
+        void setOrders(data)
       }
     } catch (err) {
       uiLogger.error('Error fetching orders', { error: err instanceof Error ? err.message : 'Unknown error' })
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
   const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order)
-    setShowOrderDetail(true)
+    void setSelectedOrder(order)
+    void setShowOrderDetail(true)
   }
 
   const handleEditOrder = (order: Order) => {
-    setEditingOrder(order)
-    setShowOrderForm(true)
+    void setEditingOrder(order)
+    void setShowOrderForm(true)
   }
 
   const handleDeleteOrder = async (order: Order) => {
@@ -156,12 +156,12 @@ export function OrdersTableView() {
               // Handle form submission
               uiLogger.info('Order submitted', { orderId: data.id })
               await fetchOrders()
-              setShowOrderForm(false)
-              setEditingOrder(null)
+              void setShowOrderForm(false)
+              void setEditingOrder(null)
             }}
             onCancel={() => {
-              setShowOrderForm(false)
-              setEditingOrder(null)
+              void setShowOrderForm(false)
+              void setEditingOrder(null)
             }}
           />
         </DialogContent>

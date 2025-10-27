@@ -52,9 +52,9 @@ export class ContextAwareAI {
       // Optionally fetch user preferences and business context here
       // For now, we'll just log the initialization
       apiLogger.info({ userId: this.userId, sessionId: this.sessionId }, 'AI session initialized')
-    } catch (error) {
-      apiLogger.error({ error }, 'Error initializing AI session')
-      throw error
+    } catch (err) {
+      apiLogger.error({ err }, 'Error initializing AI session')
+      throw err
     }
   }
 
@@ -116,9 +116,9 @@ export class ContextAwareAI {
       // In a real implementation, this would fetch conversation history
       // For now, returning an empty array as placeholder
       return []
-    } catch (error) {
-      apiLogger.error({ error }, 'Error getting conversation sessions')
-      throw error
+    } catch (err) {
+      apiLogger.error({ err }, 'Error getting conversation sessions')
+      throw err
     }
   }
 }

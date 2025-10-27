@@ -8,7 +8,7 @@ import { UserPlus, Users } from 'lucide-react'
 import type { CustomersTable } from '@/types/customers'
 
 interface CustomerStatsProps {
-  customers: CustomersTable['Row'][]
+  customers: Array<CustomersTable['Row']>
   isLoading: boolean
   isMobile: boolean
 }

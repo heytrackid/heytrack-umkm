@@ -1,12 +1,11 @@
-import { formatCurrency } from '@/shared'
-import { getErrorMessage } from '@/lib/type-guards'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/api-validations'
 import { FinancialRecordInsertSchema } from '@/lib/validations/domains/finance'
-
+import { safeParseAmount, safeString } from '@/lib/api-helpers'
 import { apiLogger } from '@/lib/logger'
+import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/api-validations'
+import { Database } from '@/types'
+import { formatCurrency } from '@/lib/shared/currency-utils'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -116,17 +115,19 @@ export async function GET(request: NextRequest) {
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
-    const todayTotal = todayExpenses?.reduce((sum: number, exp: { amount?: string | number }) =>
-      sum + parseFloat(String((exp as any).amount || '0')), 0) || 0
-    const monthTotal = monthExpenses?.reduce((sum: number, exp: { amount?: string | number }) =>
-      sum + parseFloat(String((exp as any).amount || '0')), 0) || 0
+    type ExpenseRow = Database['public']['Tables']['expenses']['Row']
+    
+    const todayTotal = todayExpenses?.reduce((sum: number, exp: ExpenseRow) =>
+      sum + safeParseAmount(exp.amount), 0) || 0
+    const monthTotal = monthExpenses?.reduce((sum: number, exp: ExpenseRow) =>
+      sum + safeParseAmount(exp.amount), 0) || 0
 
     // Category breakdown
-    const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: { category?: string; amount?: string | number }) => {
-      const category = (exp as any).category || 'Uncategorized'
-      acc[category] = (acc[category] || 0) + parseFloat(String((exp as any).amount || '0'))
+    const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: ExpenseRow) => {
+      const category = safeString(exp.category, 'Uncategorized')
+      acc[category] = (acc[category] || 0) + safeParseAmount(exp.amount)
       return acc
-    }, {}) || {}
+    }, {} as Record<string, number>) || {}
 
     return NextResponse.json({ 
       data: expenses, 
@@ -142,9 +143,9 @@ export async function GET(request: NextRequest) {
         categoryBreakdown
       }
     })
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error fetching expenses:')
-    const message = error instanceof Error ? (error as any).message : 'Failed to fetch expenses'
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error fetching expenses:')
+    const message = err instanceof Error ? err.message : 'Failed to fetch expenses'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -183,23 +184,24 @@ export async function POST(request: Request) {
     if (error) {throw error}
 
     // Create notification for large expenses
-    if ((validatedData as any).amount > 1000000) { // More than 1M IDR
+    const expenseAmount = safeParseAmount(validatedData.amount)
+    if (expenseAmount > 1000000 && expense) { // More than 1M IDR
       const notificationPayload = {
-        type: 'warning',
+        type: 'warning' as const,
         category: 'finance',
         title: 'Large Expense Recorded',
-        message: `A large expense of ${formatCurrency((validatedData as any).amount, { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${(validatedData as any).category}`,
-        entity_type: 'expense',
-        entity_id: (expense as any).id,
-        priority: 'high'
+        message: `A large expense of ${formatCurrency(expenseAmount, { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${safeString(validatedData.category)}`,
+        entity_type: 'expense' as const,
+        entity_id: expense.id,
+        priority: 'high' as const
       }
-      await supabase.from('notifications').insert([notificationPayload] as any)
+      await supabase.from('notifications').insert([notificationPayload])
     }
 
     return NextResponse.json(expense, { status: 201 })
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error creating expense:')
-    const message = error instanceof Error ? (error as any).message : 'Failed to create expense'
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error creating expense:')
+    const message = err instanceof Error ? err.message : 'Failed to create expense'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

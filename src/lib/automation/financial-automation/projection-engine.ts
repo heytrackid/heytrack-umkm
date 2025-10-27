@@ -12,7 +12,7 @@ export class ProjectionEngine {
    */
   static projectFinancialPerformance(
     historicalData: HistoricalData[],
-    projectionMonths: number = 12
+    projectionMonths = 12
   ): ProjectionResult | { error: string } {
     if (historicalData.length < 3) {
       return {
@@ -59,7 +59,7 @@ export class ProjectionEngine {
    */
   static projectWithSeasonalAdjustments(
     historicalData: HistoricalData[],
-    projectionMonths: number = 12
+    projectionMonths = 12
   ): ProjectionResult & {
     seasonalFactors: Record<number, number> // month -> seasonal factor
   } {
@@ -95,7 +95,7 @@ export class ProjectionEngine {
     // Group data by month
     historicalData.forEach(data => {
       const month = new Date(data.date).getMonth()
-      if (!monthlyData[month]) monthlyData[month] = []
+      if (!monthlyData[month]) {monthlyData[month] = []}
       monthlyData[month].push(data.revenue)
     })
 
@@ -127,7 +127,7 @@ export class ProjectionEngine {
       revenueMultiplier: number
       expenseMultiplier: number
     }>,
-    projectionMonths: number = 12
+    projectionMonths = 12
   ): Array<{
     scenarioName: string
     projection: ProjectionResult
@@ -174,7 +174,7 @@ export class ProjectionEngine {
       insights.push(`✅ ${profitabilityRate.toFixed(0)}% of projected months show profitability`)
     }
 
-    const confidence = projection.confidence
+    const {confidence} = projection
     if (confidence === 'Low') {
       insights.push(`🎲 Projection confidence is low - consider gathering more historical data`)
     } else if (confidence === 'High') {

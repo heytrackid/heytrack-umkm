@@ -3,17 +3,17 @@
  * Responsive form container with mobile optimizations
  */
 
-import * as React from 'react'
+import { type FormEvent, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 
 interface MobileFormProps {
-  children: React.ReactNode
+  children: ReactNode
   className?: string
-  onSubmit?: (e: React.FormEvent) => void
+  onSubmit?: (e: FormEvent) => void
 }
 
-export function MobileForm({ children, className, onSubmit }: MobileFormProps) {
+export const MobileForm = ({ children, className, onSubmit }: MobileFormProps) => {
   const { isMobile } = useResponsive()
 
   return (

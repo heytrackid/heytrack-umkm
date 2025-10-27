@@ -3,13 +3,12 @@
  * Optimized bar chart for mobile devices
  */
 
-import * as React from 'react'
-import { memo } from 'react'
+import { React, memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
-import { CHART_COLORS, BaseMobileChartProps } from './types'
+import { type BaseMobileChartProps, CHART_COLORS } from './types'
 
 interface MobileBarChartProps extends BaseMobileChartProps {
   xKey: string
@@ -26,14 +25,14 @@ interface MobileBarChartProps extends BaseMobileChartProps {
  * MobileBarChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileBarChart = memo(function MobileBarChart({
+export const MobileBarChart = memo(({
   data,
   xKey,
   bars,
   showGrid = true,
   horizontal = false,
   ...baseProps
-}: MobileBarChartProps) {
+}: MobileBarChartProps) => {
   const { isMobile } = useResponsive()
 
   return (
@@ -81,6 +80,4 @@ export const MobileBarChart = memo(function MobileBarChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}, (prevProps: MobileBarChartProps, nextProps: MobileBarChartProps) => {
-  return prevProps.data === nextProps.data && prevProps.bars === nextProps.bars
-})
+}, (prevProps: MobileBarChartProps, nextProps: MobileBarChartProps) => prevProps.data === nextProps.data && prevProps.bars === nextProps.bars)

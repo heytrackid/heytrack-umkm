@@ -175,6 +175,76 @@ CREATE TABLE IF NOT EXISTS financial_records (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- HPP Calculations Table
+CREATE TABLE IF NOT EXISTS hpp_calculations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  recipe_id UUID REFERENCES recipes(id) ON DELETE CASCADE,
+  calculation_date DATE DEFAULT CURRENT_DATE,
+  material_cost DECIMAL(12,2) NOT NULL DEFAULT 0,
+  labor_cost DECIMAL(12,2) NOT NULL DEFAULT 0,
+  overhead_cost DECIMAL(12,2) NOT NULL DEFAULT 0,
+  total_hpp DECIMAL(12,2) NOT NULL DEFAULT 0,
+  cost_per_unit DECIMAL(10,2) NOT NULL DEFAULT 0,
+  wac_adjustment DECIMAL(10,2) DEFAULT 0, -- Weighted Average Cost adjustment
+  production_quantity INTEGER DEFAULT 1,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- HPP Daily Snapshots Table
+CREATE TABLE IF NOT EXISTS hpp_snapshots (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  snapshot_date DATE DEFAULT CURRENT_DATE,
+  recipe_id UUID REFERENCES recipes(id) ON DELETE CASCADE,
+  hpp_value DECIMAL(12,2) NOT NULL,
+  previous_hpp DECIMAL(12,2),
+  change_percentage DECIMAL(5,2), -- percentage change from previous snapshot
+  material_cost_breakdown JSONB, -- detailed breakdown of material costs
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(snapshot_date, recipe_id)
+);
+
+-- HPP Alerts Table
+CREATE TABLE IF NOT EXISTS hpp_alerts (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  recipe_id UUID REFERENCES recipes(id) ON DELETE CASCADE,
+  alert_type VARCHAR(50) NOT NULL, -- COST_INCREASE, COST_DECREASE, THRESHOLD_EXCEEDED
+  threshold DECIMAL(5,2), -- percentage threshold for alert
+  current_value DECIMAL(12,2) NOT NULL,
+  previous_value DECIMAL(12,2),
+  change_percentage DECIMAL(5,2),
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Operational Costs Table
+CREATE TABLE IF NOT EXISTS operational_costs (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  cost_type VARCHAR(100) NOT NULL, -- RENT, UTILITIES, EQUIPMENT, LABOR, etc
+  description TEXT,
+  amount DECIMAL(12,2) NOT NULL,
+  allocation_method VARCHAR(50) DEFAULT 'EQUAL', -- EQUAL, PRODUCTION_VOLUME, REVENUE_SHARE
+  allocated_recipes JSONB, -- array of recipe_ids with allocated amounts
+  period_start DATE,
+  period_end DATE,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- HPP Recommendations Table
+CREATE TABLE IF NOT EXISTS hpp_recommendations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  recipe_id UUID REFERENCES recipes(id) ON DELETE CASCADE,
+  recommendation_type VARCHAR(50) NOT NULL, -- COST_OPTIMIZATION, SUPPLIER_CHANGE, RECIPE_ADJUSTMENT
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+  potential_savings DECIMAL(12,2),
+  priority VARCHAR(20) DEFAULT 'MEDIUM', -- LOW, MEDIUM, HIGH
+  is_implemented BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_ingredients_name ON ingredients(name);
 CREATE INDEX IF NOT EXISTS idx_ingredients_category ON ingredients(category);
@@ -192,20 +262,18 @@ CREATE INDEX IF NOT EXISTS idx_stock_transactions_date ON stock_transactions(tra
 CREATE INDEX IF NOT EXISTS idx_financial_records_date ON financial_records(date);
 CREATE INDEX IF NOT EXISTS idx_financial_records_type ON financial_records(type);
 
--- Create updated_at triggers
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- HPP specific indexes
+CREATE INDEX IF NOT EXISTS idx_hpp_calculations_recipe_date ON hpp_calculations(recipe_id, calculation_date);
+CREATE INDEX IF NOT EXISTS idx_hpp_snapshots_date ON hpp_snapshots(snapshot_date);
+CREATE INDEX IF NOT EXISTS idx_hpp_snapshots_recipe ON hpp_snapshots(recipe_id);
+CREATE INDEX IF NOT EXISTS idx_hpp_alerts_recipe ON hpp_alerts(recipe_id);
+CREATE INDEX IF NOT EXISTS idx_hpp_alerts_read ON hpp_alerts(is_read);
+CREATE INDEX IF NOT EXISTS idx_operational_costs_active ON operational_costs(is_active);
+CREATE INDEX IF NOT EXISTS idx_hpp_recommendations_recipe ON hpp_recommendations(recipe_id);
+CREATE INDEX IF NOT EXISTS idx_hpp_recommendations_priority ON hpp_recommendations(priority);
 
-CREATE TRIGGER update_ingredients_updated_at BEFORE UPDATE ON ingredients FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_recipes_updated_at BEFORE UPDATE ON recipes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON customers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_productions_updated_at BEFORE UPDATE ON productions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_hpp_calculations_updated_at BEFORE UPDATE ON hpp_calculations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_operational_costs_updated_at BEFORE UPDATE ON operational_costs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Row Level Security policies (basic setup)
 ALTER TABLE ingredients ENABLE ROW LEVEL SECURITY;
@@ -218,6 +286,13 @@ ALTER TABLE productions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stock_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE financial_records ENABLE ROW LEVEL SECURITY;
 
+-- HPP tables RLS
+ALTER TABLE hpp_calculations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hpp_snapshots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hpp_alerts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE operational_costs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hpp_recommendations ENABLE ROW LEVEL SECURITY;
+
 -- For now, allow all operations (you can restrict this later with auth)
 CREATE POLICY "Allow all operations" ON ingredients FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON recipes FOR ALL USING (true);
@@ -228,3 +303,10 @@ CREATE POLICY "Allow all operations" ON order_items FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON productions FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON stock_transactions FOR ALL USING (true);
 CREATE POLICY "Allow all operations" ON financial_records FOR ALL USING (true);
+
+-- HPP policies
+CREATE POLICY "Allow all operations" ON hpp_calculations FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON hpp_snapshots FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON hpp_alerts FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON operational_costs FOR ALL USING (true);
+CREATE POLICY "Allow all operations" ON hpp_recommendations FOR ALL USING (true);

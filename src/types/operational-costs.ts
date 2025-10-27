@@ -3,7 +3,7 @@
  * Tracking for recurring and one-time operational expenses
  */
 
-export type OperationalCostsTable = {
+export interface OperationalCostsTable {
   Row: {
     id: string
     category: string

@@ -37,9 +37,9 @@ export class GeneralCronJobs {
       cronLogger.info({}, 'Automation engine completed', summary)
       return summary
 
-    } catch (error) {
-      cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error running automation engine')
-      throw error
+    } catch (err) {
+      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error running automation engine')
+      throw err
     }
   }
 
@@ -62,7 +62,7 @@ export class GeneralCronJobs {
         .select('id')
 
       if (error) {
-        throw error
+        throw err
       }
 
       const deletedCount = data?.length || 0
@@ -70,9 +70,9 @@ export class GeneralCronJobs {
 
       return { notificationsDeleted: deletedCount }
 
-    } catch (error) {
-      cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error cleaning up notifications')
-      throw error
+    } catch (err) {
+      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error cleaning up notifications')
+      throw err
     }
   }
 
@@ -130,9 +130,9 @@ export class GeneralCronJobs {
 
       return metrics
 
-    } catch (error) {
-      cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error getting automation status')
-      throw error
+    } catch (err) {
+      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error getting automation status')
+      throw err
     }
   }
 }

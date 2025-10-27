@@ -2,13 +2,22 @@ import type { NextConfig } from "next";
 
 // Bundle Analyzer Configuration
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env['ANALYZE'] === 'true',
 });
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   // TypeScript configuration
   typescript: {
     ignoreBuildErrors: true,
+  },
+
+
+
+  // Remove console logs in production
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error'], // Keep console.error for critical issues
+    } : false,
   },
 
   // Performance Optimizations
@@ -21,13 +30,9 @@ const nextConfig: NextConfig = {
     return 'build-' + Date.now()
   },
 
-  // Experimental features for performance
+  // Experimental features
   experimental: {
-    // Enable faster CSS processing - disabled due to critters dependency issue
-    // optimizeCss: true,
-    // Enable faster package imports
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'react', 'react-dom'],
-    // Server Actions configuration for development
     serverActions: {
       allowedOrigins: ['localhost:3000', '127.0.0.1:64869'],
     },
@@ -134,6 +139,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-};
+} satisfies NextConfig;
 
 export default withBundleAnalyzer(nextConfig);

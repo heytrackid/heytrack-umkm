@@ -1,5 +1,4 @@
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/utils/supabase'
 import { apiLogger } from '@/lib/logger'
 // GET /api/orders/[id] - Get single order
@@ -36,7 +35,7 @@ export async function GET(
           { status: 404 }
         )
       }
-      apiLogger.error({ error: error }, 'Error fetching order:')
+      apiLogger.error({ error }, 'Error fetching order:')
       return NextResponse.json(
         { error: 'Failed to fetch order' },
         { status: 500 }
@@ -44,8 +43,8 @@ export async function GET(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/orders/[id]:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in GET /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -87,7 +86,7 @@ export async function PUT(
           { status: 404 }
         )
       }
-      apiLogger.error({ error: error }, 'Error updating order:')
+      apiLogger.error({ error }, 'Error updating order:')
       return NextResponse.json(
         { error: 'Failed to update order' },
         { status: 500 }
@@ -124,8 +123,8 @@ export async function PUT(
     }
 
     return NextResponse.json(data)
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in PUT /api/orders/[id]:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in PUT /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -155,7 +154,7 @@ export async function DELETE(
       .eq('id', id)
     
     if (error) {
-      apiLogger.error({ error: error }, 'Error deleting order:')
+      apiLogger.error({ error }, 'Error deleting order:')
       return NextResponse.json(
         { error: 'Failed to delete order' },
         { status: 500 }
@@ -163,8 +162,8 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: 'Order deleted successfully' })
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in DELETE /api/orders/[id]:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in DELETE /api/orders/[id]:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

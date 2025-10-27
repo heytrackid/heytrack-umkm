@@ -7,11 +7,11 @@
 
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import { BaseWorkflowAutomation } from '../base-workflow'
+import { BaseWorkflowAutomation } from '@/lib/automation/base-workflow'
 import { OrderWorkflowHandlers } from './order-workflows'
 import { InventoryWorkflowHandlers } from './inventory-workflows'
 import { FinancialWorkflowHandlers } from './financial-workflows'
-import type { WorkflowEventData, WorkflowResult, AutomationConfig } from '../types'
+import type { WorkflowEventData, WorkflowResult, AutomationConfig } from '@/lib/automation/types'
 
 export class WorkflowAutomation extends BaseWorkflowAutomation {
   constructor(config?: Partial<AutomationConfig>) {

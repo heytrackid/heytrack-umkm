@@ -3,7 +3,7 @@
  * General utility functions for API operations
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 /**
  * Parse search parameters from request URL

@@ -1,7 +1,6 @@
 'use client'
 
-import * as React from 'react'
-import { useState } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -53,7 +52,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 interface BreadcrumbItem {
   label: string
   href?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
 }
 
 interface PageHeaderProps {
@@ -61,28 +60,28 @@ interface PageHeaderProps {
   subtitle?: string
   description?: string
   breadcrumbs?: BreadcrumbItem[]
-  actions?: React.ReactNode
+  actions?: ReactNode
   className?: string
 }
 
 interface PageLayoutProps {
-  header?: React.ReactNode
-  sidebar?: React.ReactNode
-  footer?: React.ReactNode
-  children: React.ReactNode
+  header?: ReactNode
+  sidebar?: ReactNode
+  footer?: ReactNode
+  children: ReactNode
   className?: string
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
 }
 
 interface ContentGridProps {
-  children: React.ReactNode
+  children: ReactNode
   columns?: 1 | 2 | 3 | 4 | 6 | 12
   gap?: 'sm' | 'md' | 'lg' | 'xl'
   className?: string
 }
 
 interface CardGridProps {
-  children: React.ReactNode
+  children: ReactNode
   columns?: {
     default: number
     sm?: number
@@ -98,8 +97,8 @@ interface SectionProps {
   title?: string
   subtitle?: string
   description?: string
-  actions?: React.ReactNode
-  children: React.ReactNode
+  actions?: ReactNode
+  children: ReactNode
   className?: string
   variant?: 'default' | 'card' | 'bordered'
 }
@@ -108,34 +107,33 @@ interface DataViewProps {
   title?: string
   viewMode?: 'grid' | 'list' | 'table'
   onViewModeChange?: (mode: 'grid' | 'list' | 'table') => void
-  filterComponent?: React.ReactNode
-  searchComponent?: React.ReactNode
-  actions?: React.ReactNode
-  children: React.ReactNode
+  filterComponent?: ReactNode
+  searchComponent?: ReactNode
+  actions?: ReactNode
+  children: ReactNode
   loading?: boolean
-  emptyState?: React.ReactNode
+  emptyState?: ReactNode
   className?: string
 }
 
 /**
  * Shared Page Header Component
  */
-export function PageHeader({
+export const PageHeader = ({
   title,
   subtitle,
   description,
   breadcrumbs,
   actions,
   className = ""
-}: PageHeaderProps) {
-  return (
+}: PageHeaderProps) => (
     <div className={cn("space-y-4", className)}>
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((item, index) => (
-              <React.Fragment key={index}>
+              <Fragment key={index}>
                 <BreadcrumbItem>
                   {item.href ? (
                     <BreadcrumbLink asChild>
@@ -152,7 +150,7 @@ export function PageHeader({
                   )}
                 </BreadcrumbItem>
                 {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-              </React.Fragment>
+              </Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
@@ -184,19 +182,18 @@ export function PageHeader({
       </div>
     </div>
   )
-}
 
 /**
  * Shared Page Layout Component
  */
-export function PageLayout({
+export const PageLayout = ({
   header,
   sidebar,
   footer,
   children,
   className = "",
   maxWidth = 'full'
-}: PageLayoutProps) {
+}: PageLayoutProps) => {
   const maxWidthClasses = {
     sm: 'max-w-2xl',
     md: 'max-w-4xl',
@@ -245,12 +242,12 @@ export function PageLayout({
 /**
  * Content Grid Layout Component
  */
-export function ContentGrid({
+export const ContentGrid = ({
   children,
   columns = 1,
   gap = 'md',
   className = ""
-}: ContentGridProps) {
+}: ContentGridProps) => {
   const gapClasses = {
     sm: 'gap-2',
     md: 'gap-4',
@@ -273,12 +270,12 @@ export function ContentGrid({
 /**
  * Card Grid Layout Component
  */
-export function CardGrid({
+export const CardGrid = ({
   children,
   columns = { default: 1, sm: 2, md: 3, lg: 4 },
   gap = 'md',
   className = ""
-}: CardGridProps) {
+}: CardGridProps) => {
   const gapClasses = {
     sm: 'gap-2',
     md: 'gap-4',
@@ -308,7 +305,7 @@ export function CardGrid({
 /**
  * Section Component with Header
  */
-export function Section({
+export const Section = ({
   title,
   subtitle,
   description,
@@ -316,7 +313,7 @@ export function Section({
   children,
   className = "",
   variant = 'default'
-}: SectionProps) {
+}: SectionProps) => {
   const variantClasses = {
     default: '',
     card: 'bg-card border rounded-lg p-6',
@@ -365,7 +362,7 @@ export function Section({
 /**
  * Data View Component with View Mode Toggle
  */
-export function DataView({
+export const DataView = ({
   title,
   viewMode = 'grid',
   onViewModeChange,
@@ -376,7 +373,7 @@ export function DataView({
   loading = false,
   emptyState,
   className = ""
-}: DataViewProps) {
+}: DataViewProps) => {
   const viewModeOptions = [
     { value: 'grid', icon: Grid, label: 'Grid' },
     { value: 'list', icon: List, label: 'List' },
@@ -441,7 +438,7 @@ export function DataView({
       <div className="relative">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : children ? (
           children
@@ -461,18 +458,18 @@ export function DataView({
  * Responsive Container Component
  */
 interface ContainerProps {
-  children: React.ReactNode
+  children: ReactNode
   size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
   padding?: 'none' | 'sm' | 'md' | 'lg'
   className?: string
 }
 
-export function Container({
+export const Container = ({
   children,
   size = 'lg',
   padding = 'md',
   className = ""
-}: ContainerProps) {
+}: ContainerProps) => {
   const sizeClasses = {
     sm: 'max-w-2xl',
     md: 'max-w-4xl',
@@ -506,7 +503,7 @@ export function Container({
 interface SidebarItem {
   label: string
   href?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   badge?: string | number
   children?: SidebarItem[]
 }
@@ -518,12 +515,12 @@ interface SidebarProps {
   className?: string
 }
 
-export function Sidebar({
+export const Sidebar = ({
   items,
   currentPath,
   onItemClick,
   className = ""
-}: SidebarProps) {
+}: SidebarProps) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
 
   const toggleExpanded = (itemId: string) => {
@@ -533,7 +530,7 @@ export function Sidebar({
     } else {
       newExpanded.add(itemId)
     }
-    setExpandedItems(newExpanded)
+    void setExpandedItems(newExpanded)
   }
 
   const renderItem = (item: SidebarItem, depth = 0) => {
@@ -596,16 +593,16 @@ export function Sidebar({
  * Mobile Navigation Component
  */
 interface MobileNavProps {
-  children: React.ReactNode
-  trigger?: React.ReactNode
+  children: ReactNode
+  trigger?: ReactNode
   className?: string
 }
 
-export function MobileNav({
+export const MobileNav = ({
   children,
   trigger,
   className = ""
-}: MobileNavProps) {
+}: MobileNavProps) => {
   const [open, setOpen] = useState(false)
 
   return (

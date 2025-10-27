@@ -28,19 +28,15 @@ export {
 export type { Currency } from '@/lib/currency'
 
 // Date utilities
-export const formatDate = (date: Date | string): string => {
-  return new Intl.DateTimeFormat('id-ID').format(new Date(date))
-}
+export const formatDate = (date: Date | string): string => new Intl.DateTimeFormat('id-ID').format(new Date(date))
 
-export const formatDateTime = (date: Date | string): string => {
-  return new Intl.DateTimeFormat('id-ID', {
+export const formatDateTime = (date: Date | string): string => new Intl.DateTimeFormat('id-ID', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   }).format(new Date(date))
-}
 
 export const formatRelativeTime = (date: Date | string): string => {
   const now = new Date()
@@ -48,11 +44,11 @@ export const formatRelativeTime = (date: Date | string): string => {
   const diffMs = now.getTime() - past.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'Hari ini'
-  if (diffDays === 1) return 'Kemarin'
-  if (diffDays < 7) return `${diffDays} hari yang lalu`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} minggu yang lalu`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} bulan yang lalu`
+  if (diffDays === 0) {return 'Hari ini'}
+  if (diffDays === 1) {return 'Kemarin'}
+  if (diffDays < 7) {return `${diffDays} hari yang lalu`}
+  if (diffDays < 30) {return `${Math.floor(diffDays / 7)} minggu yang lalu`}
+  if (diffDays < 365) {return `${Math.floor(diffDays / 30)} bulan yang lalu`}
   return `${Math.floor(diffDays / 365)} tahun yang lalu`
 }
 
@@ -154,8 +150,7 @@ export function getErrorMessage(error: unknown): string {
 export const groupBy = <T, K extends keyof T>(
   array: T[],
   key: K
-): Record<string, T[]> => {
-  return array.reduce((groups, item) => {
+): Record<string, T[]> => array.reduce((groups, item) => {
     const groupKey = String(item[key])
     if (!groups[groupKey]) {
       groups[groupKey] = []
@@ -163,54 +158,41 @@ export const groupBy = <T, K extends keyof T>(
     groups[groupKey].push(item)
     return groups
   }, {} as Record<string, T[]>)
-}
 
-export const sortBy = <T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] => {
-  return [...array].sort((a, b) => {
+export const sortBy = <T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] => [...array].sort((a, b) => {
     const aVal = a[key]
     const bVal = b[key]
 
-    if (aVal < bVal) return direction === 'asc' ? -1 : 1
-    if (aVal > bVal) return direction === 'asc' ? 1 : -1
+    if (aVal < bVal) {return direction === 'asc' ? -1 : 1}
+    if (aVal > bVal) {return direction === 'asc' ? 1 : -1}
     return 0
   })
-}
 
-export const unique = <T>(array: T[]): T[] => {
-  return [...new Set(array)]
-}
+export const unique = <T>(array: T[]): T[] => [...new Set(array)]
 
 export const uniqueBy = <T>(array: T[], key: keyof T): T[] => {
   const seen = new Set()
   return array.filter(item => {
     const value = item[key]
-    if (seen.has(value)) return false
+    if (seen.has(value)) {return false}
     seen.add(value)
     return true
   })
 }
 
 // String utilities
-export const capitalize = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-}
+export const capitalize = (str: string): string => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
 
-export const slugify = (str: string): string => {
-  return str
+export const slugify = (str: string): string => str
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
     .replace(/^-+|-+$/g, '')
-}
 
-export const truncate = (str: string, length: number, suffix: string = '...'): string => {
-  return str.length <= length ? str : str.slice(0, length - suffix.length) + suffix
-}
+export const truncate = (str: string, length: number, suffix = '...'): string => str.length <= length ? str : str.slice(0, length - suffix.length) + suffix
 
-export const formatNumber = (num: number, locale: string = 'id-ID'): string => {
-  return new Intl.NumberFormat(locale).format(num)
-}
+export const formatNumber = (num: number, locale = 'id-ID'): string => new Intl.NumberFormat(locale).format(num)
 
 // Validation utilities
 export const isEmail = (email: string): boolean => {
@@ -267,12 +249,10 @@ export const getStatusColor = (status: string): string => {
   return colorMap[status] || 'bg-gray-100 text-gray-800'
 }
 
-export const calculatePercentage = (value: number, total: number): number => {
-  return total === 0 ? 0 : Math.round((value / total) * 100)
-}
+export const calculatePercentage = (value: number, total: number): number => total === 0 ? 0 : Math.round((value / total) * 100)
 
 export const calculateTrend = (current: number, previous: number): { value: number; isPositive: boolean } => {
-  if (previous === 0) return { value: 0, isPositive: true }
+  if (previous === 0) {return { value: 0, isPositive: true }}
   const change = ((current - previous) / previous) * 100
   return { value: Math.abs(change), isPositive: change >= 0 }
 }

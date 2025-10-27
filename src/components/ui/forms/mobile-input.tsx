@@ -3,8 +3,7 @@
  * Optimized input field for mobile devices with password toggle
  */
 
-import * as React from 'react'
-import { useState } from 'react'
+import { React, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Input } from '../input'
@@ -27,7 +26,7 @@ interface MobileInputProps {
   showPasswordToggle?: boolean
 }
 
-export function MobileInput({
+export const MobileInput = ({
   label,
   placeholder,
   value,
@@ -41,7 +40,7 @@ export function MobileInput({
   hint,
   className,
   showPasswordToggle = false
-}: MobileInputProps) {
+}: MobileInputProps) => {
   const [showPassword, setShowPassword] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
@@ -83,7 +82,7 @@ export function MobileInput({
           onChange={(e) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setIsFocused(false)
+            void setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}

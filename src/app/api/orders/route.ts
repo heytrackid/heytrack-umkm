@@ -1,6 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types'
@@ -84,7 +83,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      apiLogger.error({ error: error }, 'Error fetching orders:')
+      apiLogger.error({ error }, 'Error fetching orders:')
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -98,8 +97,8 @@ export async function GET(request: NextRequest) {
     }))
 
     return NextResponse.json(mappedData)
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in GET /api/orders:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in GET /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -153,7 +152,7 @@ export async function POST(request: NextRequest) {
           category: 'Revenue',
           amount: (validatedData as any).total_amount,
           date: validatedData.delivery_date || (validatedData as any).order_date || new Date().toISOString().split('T')[0],
-          reference: `Order #${(validatedData as any).order_no}${validatedData.customer_name ? ' - ' + (validatedData as any).customer_name : ''}`,
+          reference: `Order #${(validatedData as any).order_no}${validatedData.customer_name ? ` - ${  (validatedData as any).customer_name}` : ''}`,
           description: `Income from order ${(validatedData as any).order_no}`
         })
         .select()
@@ -167,7 +166,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      incomeRecordId = (incomeRecord as any).id
+      incomeRecordId = (incomeRecord).id
     }
 
     // Create order with financial_record_id if income was created
@@ -214,7 +213,7 @@ export async function POST(request: NextRequest) {
     if (incomeRecordId) {
       await supabase
         .from('financial_records')
-        .update({ reference: `Order ${(orderData as any).id} - ${(validatedData as any).customer_name || 'Customer'}` } as any)
+        .update({ reference: `Order ${(orderData).id} - ${(validatedData as any).customer_name || 'Customer'}` } as any)
         .eq('id', incomeRecordId)
         .eq('user_id', (user as any).id)
     }
@@ -222,7 +221,7 @@ export async function POST(request: NextRequest) {
     // If order items provided, create them
     if (validatedData.items && validatedData.items.length > 0) {
       const orderItems = validatedData.items.map((item) => ({
-        order_id: (orderData as any).id,
+        order_id: (orderData).id,
         recipe_id: (item as any).recipe_id,
         product_name: item.product_name,
         quantity: item.quantity,
@@ -241,7 +240,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('orders')
           .delete()
-          .eq('id', (orderData as any).id)
+          .eq('id', (orderData).id)
           .eq('user_id', (user as any).id)
 
         return NextResponse.json(
@@ -256,8 +255,8 @@ export async function POST(request: NextRequest) {
       ...orderData,
       income_recorded: !!incomeRecordId
     }, { status: 201 })
-  } catch (error: unknown) {
-    apiLogger.error({ error: error }, 'Error in POST /api/orders:')
+  } catch (err: unknown) {
+    apiLogger.error({ err }, 'Error in POST /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

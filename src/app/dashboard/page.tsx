@@ -21,7 +21,8 @@ import {
   ChefHat,
   Package,
   ShoppingCart,
-  Target
+  Target,
+  Calculator
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -44,9 +45,26 @@ const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection')
 })
 const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
 const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
-const HPPAlertsWidget = dynamic(() => import('./components/HPPAlertsWidget'), {
-  ssr: false,
-  loading: () => <StockAlertSkeleton />
+const HppDashboardWidget = dynamic(() => import('./components/HppDashboardWidget'), {
+  loading: () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calculator className="h-5 w-5" />
+          HPP & Costing Overview
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="animate-pulse space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-16 bg-gray-200 rounded" />
+            <div className="h-16 bg-gray-200 rounded" />
+          </div>
+          <div className="h-32 bg-gray-200 rounded" />
+        </div>
+      </CardContent>
+    </Card>
+  )
 })
 
 // Sample data removed - now using real data from API
@@ -102,7 +120,7 @@ export default function Dashboard() {
         description: 'Sesi Anda telah berakhir. Silakan login kembali.',
         variant: 'destructive',
       })
-      router.push('/auth/login')
+      void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
 
@@ -115,17 +133,17 @@ export default function Dashboard() {
   useEffect(() => {
     // Simulate dashboard stats loading
     const statsTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
+      void setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
     }, 1500)
 
     // Simulate recent orders loading
     const ordersTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.RECENT_ORDERS, false)
+      void setLoading(LOADING_KEYS.RECENT_ORDERS, false)
     }, 2000)
 
     // Simulate stock alerts loading  
     const stockTimer = setTimeout(() => {
-      setLoading(LOADING_KEYS.STOCK_ALERTS, false)
+      void setLoading(LOADING_KEYS.STOCK_ALERTS, false)
     }, 1800)
 
     return () => {
@@ -236,9 +254,27 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* HPP Alerts Widget */}
-        <Suspense fallback={<StockAlertSkeleton />}>
-          <HPPAlertsWidget />
+        {/* HPP Dashboard Widget */}
+        <Suspense fallback={
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5" />
+                HPP & Costing Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="animate-pulse space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-16 bg-gray-200 rounded" />
+                  <div className="h-16 bg-gray-200 rounded" />
+                </div>
+                <div className="h-32 bg-gray-200 rounded" />
+              </div>
+            </CardContent>
+          </Card>
+        }>
+          <HppDashboardWidget />
         </Suspense>
 
         {/* Quick Actions */}
@@ -250,11 +286,17 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/resep">
+                <a href="/recipes">
                   <ChefHat className="h-6 w-6" />
-                  <span>Resep & HPP</span>
+                  <span>Resep</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/hpp/calculator">
+                  <Calculator className="h-6 w-6" />
+                  <span>HPP</span>
                 </a>
               </Button>
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>

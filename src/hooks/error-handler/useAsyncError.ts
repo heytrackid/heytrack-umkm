@@ -36,13 +36,13 @@ export function useAsyncError() {
   const executeAsync = useCallback(
     async (asyncFn: () => Promise<void>) => {
       try {
-        setIsLoading(true)
+        void setIsLoading(true)
         resetError()
         await asyncFn()
       } catch (err) {
-        handleErr(err, 'useAsyncError')
+        void handleErr(err, 'useAsyncError')
       } finally {
-        setIsLoading(false)
+        void setIsLoading(false)
       }
     },
     [handleErr, resetError]

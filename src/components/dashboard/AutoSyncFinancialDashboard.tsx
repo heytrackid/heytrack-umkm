@@ -1,7 +1,6 @@
 'use client'
-import * as React from 'react'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -79,37 +78,35 @@ export default function AutoSyncFinancialDashboard() {
 
   const fetchAutoSyncData = async () => {
     try {
-      setRefreshing(true)
+      void setRefreshing(true)
       const response = await fetch('/api/financial/auto-sync')
       const result = await response.json()
       
       if (result.success) {
-        setData(result.data)
-        setError(null)
+        void setData(result.data)
+        void setError(null)
       } else {
-        setError(result.error || 'Failed to fetch auto-sync data')
+        void setError(result.error || 'Failed to fetch auto-sync data')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      void setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
-      setLoading(false)
-      setRefreshing(false)
+      void setLoading(false)
+      void setRefreshing(false)
     }
   }
 
   useEffect(() => {
-    fetchAutoSyncData()
+    void fetchAutoSyncData()
   }, [])
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     })
-  }
 
   const getHealthBadge = (health: string) => {
     switch (health) {
@@ -124,7 +121,7 @@ export default function AutoSyncFinancialDashboard() {
     }
   }
 
-  const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: React.ReactNode }) => (
+  const UMKMTooltip = ({ title, content, children }: { title: string, content: string, children: ReactNode }) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -154,8 +151,8 @@ export default function AutoSyncFinancialDashboard() {
           <Card key={i}>
             <CardContent className="pt-6">
               <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
               </div>
             </CardContent>
           </Card>

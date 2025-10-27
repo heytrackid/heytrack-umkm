@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import { useState } from 'react'
 import type {
   ColumnDef,
   SortingState,
@@ -33,7 +33,7 @@ import {
 import { cn } from '@/lib/utils'
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
+  columns: Array<ColumnDef<TData, TValue>>
   data: TData[]
   isLoading?: boolean
   searchPlaceholder?: string
@@ -49,7 +49,7 @@ interface DataTableProps<TData, TValue> {
 /**
  * DataTable - Reusable table component with sorting, filtering, pagination
  */
-export function DataTable<TData, TValue>({
+export const DataTable = <TData, TValue>({
   columns,
   data,
   isLoading = false,
@@ -61,10 +61,10 @@ export function DataTable<TData, TValue>({
   showColumnToggle = true,
   onRowClick,
   className,
-}: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [globalFilter, setGlobalFilter] = React.useState('')
+}: DataTableProps<TData, TValue>) => {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [globalFilter, setGlobalFilter] = useState('')
 
   const table = useReactTable({
     data,

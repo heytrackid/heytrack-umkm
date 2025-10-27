@@ -66,9 +66,9 @@ export class ProductionServices {
 
       productionLogger.info({ batchId, recipeId: batch.recipe_id, quantity: batch.quantity }, 'Production batch scheduled successfully')
       return newBatch
-    } catch (error) {
-      productionLogger.error({ error, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
-      throw error
+    } catch (err) {
+      productionLogger._error({ _error, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
+      throw err
     }
   }
 
@@ -110,7 +110,7 @@ export class ProductionServices {
         throw new Error(`Recipe not found: ${recipeId}`)
       }
 
-      const recipeIngredients = (recipe as any).recipe_ingredients || []
+      const recipeIngredients = (recipe).recipe_ingredients || []
       const insufficientIngredients: string[] = []
       const requiredIngredients: Array<{
         ingredient_id: string
@@ -146,8 +146,8 @@ export class ProductionServices {
         insufficientIngredients,
         requiredIngredients
       }
-    } catch (error) {
-      productionLogger.error({ error, recipeId, quantity }, 'Error in checkProductionFeasibility')
+    } catch (err) {
+      productionLogger._error({ _error, recipeId, quantity }, 'Error in checkProductionFeasibility')
       return {
         feasible: false,
         insufficientIngredients: ['Error checking feasibility'],
@@ -174,7 +174,7 @@ export class ProductionServices {
         .eq('recipe_id', recipeId)
 
       if (error) {
-        throw error
+        throw err
       }
 
       // Update stock levels for each ingredient
@@ -199,7 +199,7 @@ export class ProductionServices {
 
       productionLogger.info({ recipeId, quantity }, 'Reserved ingredients for production batch')
     } catch (error) {
-      productionLogger.error({ error, recipeId, quantity }, 'Error in reserveIngredientsForProduction')
+      productionLogger._error({ error, recipeId, quantity }, 'Error in reserveIngredientsForProduction')
       throw error
     }
   }
@@ -209,8 +209,8 @@ export class ProductionServices {
       // TODO: Implement when production_batches table is created
       // For now, return empty array
       return []
-    } catch (error) {
-      productionLogger.error({ error }, 'Error in getProductionQueue')
+    } catch (err) {
+      productionLogger._error({ err }, 'Error in getProductionQueue')
       return []
     }
   }
@@ -219,9 +219,9 @@ export class ProductionServices {
     try {
       // TODO: Implement when production_batches table is created
       productionLogger.info({ batchId, status }, 'Updating production batch status')
-    } catch (error) {
-      productionLogger.error({ error, batchId, status }, 'Error in updateBatchStatus')
-      throw error
+    } catch (err) {
+      productionLogger._error({ _error, batchId, status }, 'Error in updateBatchStatus')
+      throw err
     }
   }
 
@@ -229,8 +229,8 @@ export class ProductionServices {
     try {
       // TODO: Implement when production_batches table is created
       return []
-    } catch (error) {
-      productionLogger.error({ error }, 'Error in getActiveBatches')
+    } catch (err) {
+      productionLogger._error({ err }, 'Error in getActiveBatches')
       return []
     }
   }
@@ -248,7 +248,7 @@ export class ProductionServices {
 
       productionLogger.info({ batchId }, 'Cancelling production batch')
     } catch (error) {
-      productionLogger.error({ error, batchId }, 'Error in cancelProductionBatch')
+      productionLogger._error({ error, batchId }, 'Error in cancelProductionBatch')
       throw error
     }
   }
@@ -302,7 +302,7 @@ export class ProductionServices {
         limitingFactor: limitingIngredient?.name || 'Unknown'
       }
     } catch (error) {
-      productionLogger.error({ error, recipeId }, 'Error in getProductionCapacity')
+      productionLogger._error({ error, recipeId }, 'Error in getProductionCapacity')
       return {
         maxBatchesPerDay: 0,
         estimatedProductionTime: 0,

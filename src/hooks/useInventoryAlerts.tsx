@@ -153,10 +153,10 @@ export function useIngredientStockStatus(ingredientId: string) {
   const { data: ingredients } = useIngredients()
 
   const stockStatus = useMemo(() => {
-    if (!ingredients || ingredients.length === 0) return null
+    if (!ingredients || ingredients.length === 0) {return null}
 
     const ingredient = ingredients.find((ing: Ingredient) => ing.id === ingredientId)
-    if (!ingredient) return null
+    if (!ingredient) {return null}
 
     const currentStock = ingredient.current_stock || 0
     const minStock = ingredient.min_stock || 0
@@ -203,7 +203,7 @@ export function useIngredientStockStatus(ingredientId: string) {
 /**
  * Component for displaying inventory alerts
  */
-export function InventoryAlertsList({ alerts, maxItems = 5 }: { alerts: InventoryAlert[], maxItems?: number }) {
+export const InventoryAlertsList = ({ alerts, maxItems = 5 }: { alerts: InventoryAlert[], maxItems?: number }) => {
   if (alerts.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">

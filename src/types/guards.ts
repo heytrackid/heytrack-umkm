@@ -17,13 +17,11 @@
 import type { ApiError, ApiResponse } from './api';
 import type {
     CustomersTable,
-    HPPSnapshotsTable,
     IngredientsTable,
     IngredientPurchasesTable,
     OrdersTable,
     OrderItemsTable,
     OrderStatus,
-    PaymentMethod,
     RecipesTable,
     RecipeIngredientsTable,
     SuppliersTable,
@@ -32,7 +30,6 @@ import type {
 
 // Type aliases for easier use in guards
 type Customer = CustomersTable['Row'];
-type HppSnapshot = HPPSnapshotsTable['Row'];
 type Ingredient = IngredientsTable['Row'];
 type IngredientPurchase = IngredientPurchasesTable['Row'];
 type Order = OrdersTable['Row'];
@@ -86,13 +83,12 @@ export function isPaymentStatus(value: unknown): value is PaymentStatus {
 export function isIngredient(value: unknown): value is Ingredient {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.name === 'string' &&
-        typeof value.unit === 'string' &&
-        typeof value.current_stock === 'number' &&
-        typeof value.min_stock === 'number' &&
-        typeof value.price_per_unit === 'number' &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['name'] === 'string' &&
+        typeof value['unit'] === 'string' &&
+        (typeof value['current_stock'] === 'number' || value['current_stock'] === null) &&
+        (typeof value['min_stock'] === 'number' || value['min_stock'] === null) &&
+        typeof value['price_per_unit'] === 'number'
     );
 }
 
@@ -111,10 +107,9 @@ export function assertIngredient(value: unknown): asserts value is Ingredient {
 export function isRecipe(value: unknown): value is Recipe {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.name === 'string' &&
-        typeof value.selling_price === 'number' &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['name'] === 'string' &&
+        (typeof value['selling_price'] === 'number' || value['selling_price'] === null)
     );
 }
 
@@ -133,12 +128,11 @@ export function assertRecipe(value: unknown): asserts value is Recipe {
 export function isOrder(value: unknown): value is Order {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.order_date === 'string' &&
-        typeof value.total_amount === 'number' &&
-        isOrderStatus(value.status) &&
-        isPaymentStatus(value.payment_status) &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        (typeof value['order_date'] === 'string' || value['order_date'] === null) &&
+        (typeof value['total_amount'] === 'number' || value['total_amount'] === null) &&
+        (isOrderStatus(value['status']) || value['status'] === null) &&
+        (isPaymentStatus(value['payment_status']) || value['payment_status'] === null)
     );
 }
 
@@ -157,9 +151,8 @@ export function assertOrder(value: unknown): asserts value is Order {
 export function isCustomer(value: unknown): value is Customer {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.name === 'string' &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['name'] === 'string'
     );
 }
 
@@ -178,9 +171,8 @@ export function assertCustomer(value: unknown): asserts value is Customer {
 export function isSupplier(value: unknown): value is Supplier {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.name === 'string' &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['name'] === 'string'
     );
 }
 
@@ -199,12 +191,12 @@ export function assertSupplier(value: unknown): asserts value is Supplier {
 export function isOrderItem(value: unknown): value is OrderItem {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.order_id === 'string' &&
-        typeof value.recipe_id === 'string' &&
-        typeof value.quantity === 'number' &&
-        typeof value.unit_price === 'number' &&
-        typeof value.subtotal === 'number'
+        typeof value['id'] === 'string' &&
+        typeof value['order_id'] === 'string' &&
+        typeof value['recipe_id'] === 'string' &&
+        typeof value['quantity'] === 'number' &&
+        typeof value['unit_price'] === 'number' &&
+        typeof value['total_price'] === 'number'
     );
 }
 
@@ -214,11 +206,11 @@ export function isOrderItem(value: unknown): value is OrderItem {
 export function isRecipeIngredient(value: unknown): value is RecipeIngredient {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.recipe_id === 'string' &&
-        typeof value.ingredient_id === 'string' &&
-        typeof value.quantity === 'number' &&
-        typeof value.unit === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['recipe_id'] === 'string' &&
+        typeof value['ingredient_id'] === 'string' &&
+        typeof value['quantity'] === 'number' &&
+        typeof value['unit'] === 'string'
     );
 }
 
@@ -246,28 +238,13 @@ export function assertRecipeIngredient(value: unknown): asserts value is RecipeI
 export function isIngredientPurchase(value: unknown): value is IngredientPurchase {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.ingredient_id === 'string' &&
-        typeof value.quantity === 'number' &&
-        typeof value.unit_price === 'number' &&
-        typeof value.total_cost === 'number' &&
-        typeof value.purchase_date === 'string' &&
-        typeof value.user_id === 'string'
-    );
-}
-
-/**
- * Type guard for HppSnapshot
- */
-export function isHppSnapshot(value: unknown): value is HppSnapshot {
-    return (
-        isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.recipe_id === 'string' &&
-        typeof value.snapshot_date === 'string' &&
-        typeof value.hpp_value === 'number' &&
-        isObject(value.cost_breakdown) &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['ingredient_id'] === 'string' &&
+        typeof value['quantity'] === 'number' &&
+        typeof value['unit_price'] === 'number' &&
+        typeof value['total_cost'] === 'number' &&
+        typeof value['purchase_date'] === 'string' &&
+        typeof value['user_id'] === 'string'
     );
 }
 
@@ -277,8 +254,8 @@ export function isHppSnapshot(value: unknown): value is HppSnapshot {
 export function isUserProfile(value: unknown): value is UserProfile {
     return (
         isObject(value) &&
-        typeof value.id === 'string' &&
-        typeof value.user_id === 'string'
+        typeof value['id'] === 'string' &&
+        typeof value['user_id'] === 'string'
     );
 }
 
@@ -288,8 +265,8 @@ export function isUserProfile(value: unknown): value is UserProfile {
 export function isApiError(value: unknown): value is ApiError {
     return (
         isObject(value) &&
-        typeof value.code === 'string' &&
-        typeof value.message === 'string'
+        typeof value['code'] === 'string' &&
+        typeof value['message'] === 'string'
     );
 }
 
@@ -300,15 +277,15 @@ export function isApiResponse<T>(
     value: unknown,
     dataGuard?: (data: unknown) => data is T
 ): value is ApiResponse<T> {
-    if (!isObject(value) || typeof value.success !== 'boolean') {
+    if (!isObject(value) || typeof value['success'] !== 'boolean') {
         return false;
     }
 
-    if (value.error !== null && !isApiError(value.error)) {
+    if (value['error'] !== null && !isApiError(value['error'])) {
         return false;
     }
 
-    if (dataGuard && value.data !== null && !dataGuard(value.data)) {
+    if (dataGuard && value['data'] !== null && !dataGuard(value['data'])) {
         return false;
     }
 
@@ -441,23 +418,23 @@ export function validateOrderItem(value: unknown): { valid: boolean; errors: str
         return { valid: false, errors };
     }
 
-    if (typeof value.id !== 'string') {
+    if (typeof value['id'] !== 'string') {
         errors.push('id must be a string');
     }
-    if (typeof value.order_id !== 'string') {
+    if (typeof value['order_id'] !== 'string') {
         errors.push('order_id must be a string');
     }
-    if (typeof value.recipe_id !== 'string') {
+    if (typeof value['recipe_id'] !== 'string') {
         errors.push('recipe_id must be a string');
     }
-    if (typeof value.quantity !== 'number' || value.quantity <= 0) {
+    if (typeof value['quantity'] !== 'number' || value['quantity'] <= 0) {
         errors.push('quantity must be a positive number');
     }
-    if (typeof value.unit_price !== 'number' || value.unit_price < 0) {
+    if (typeof value['unit_price'] !== 'number' || value['unit_price'] < 0) {
         errors.push('unit_price must be a non-negative number');
     }
-    if (typeof value.subtotal !== 'number' || value.subtotal < 0) {
-        errors.push('subtotal must be a non-negative number');
+    if (typeof value['total_price'] !== 'number' || value['total_price'] < 0) {
+        errors.push('total_price must be a non-negative number');
     }
 
     return { valid: errors.length === 0, errors };
@@ -474,17 +451,17 @@ export function validateRecipe(value: unknown): { valid: boolean; errors: string
         return { valid: false, errors };
     }
 
-    if (typeof value.id !== 'string') {
+    if (typeof value['id'] !== 'string') {
         errors.push('id must be a string');
     }
-    if (typeof value.name !== 'string' || value.name.trim() === '') {
+    if (typeof value['name'] !== 'string' || value['name'].trim() === '') {
         errors.push('name must be a non-empty string');
     }
-    if (typeof value.selling_price !== 'number' || value.selling_price < 0) {
-        errors.push('selling_price must be a non-negative number');
+    if (typeof value['selling_price'] !== 'number' && value['selling_price'] !== null && value['selling_price'] !== undefined) {
+        errors.push('selling_price must be a number or null');
     }
-    if (typeof value.user_id !== 'string') {
-        errors.push('user_id must be a string');
+    if (typeof value['selling_price'] === 'number' && value['selling_price'] < 0) {
+        errors.push('selling_price must be a non-negative number');
     }
 
     return { valid: errors.length === 0, errors };
@@ -501,26 +478,29 @@ export function validateIngredient(value: unknown): { valid: boolean; errors: st
         return { valid: false, errors };
     }
 
-    if (typeof value.id !== 'string') {
+    if (typeof value['id'] !== 'string') {
         errors.push('id must be a string');
     }
-    if (typeof value.name !== 'string' || value.name.trim() === '') {
+    if (typeof value['name'] !== 'string' || value['name'].trim() === '') {
         errors.push('name must be a non-empty string');
     }
-    if (typeof value.unit !== 'string' || value.unit.trim() === '') {
+    if (typeof value['unit'] !== 'string' || value['unit'].trim() === '') {
         errors.push('unit must be a non-empty string');
     }
-    if (typeof value.current_stock !== 'number' || value.current_stock < 0) {
+    if (typeof value['current_stock'] !== 'number' && value['current_stock'] !== null && value['current_stock'] !== undefined) {
+        errors.push('current_stock must be a number or null');
+    }
+    if (typeof value['current_stock'] === 'number' && value['current_stock'] < 0) {
         errors.push('current_stock must be a non-negative number');
     }
-    if (typeof value.min_stock !== 'number' || value.min_stock < 0) {
+    if (typeof value['min_stock'] !== 'number' && value['min_stock'] !== null && value['min_stock'] !== undefined) {
+        errors.push('min_stock must be a number or null');
+    }
+    if (typeof value['min_stock'] === 'number' && value['min_stock'] < 0) {
         errors.push('min_stock must be a non-negative number');
     }
-    if (typeof value.price_per_unit !== 'number' || value.price_per_unit < 0) {
+    if (typeof value['price_per_unit'] !== 'number' || value['price_per_unit'] < 0) {
         errors.push('price_per_unit must be a non-negative number');
-    }
-    if (typeof value.user_id !== 'string') {
-        errors.push('user_id must be a string');
     }
 
     return { valid: errors.length === 0, errors };
@@ -537,23 +517,23 @@ export function validateOrder(value: unknown): { valid: boolean; errors: string[
         return { valid: false, errors };
     }
 
-    if (typeof value.id !== 'string') {
+    if (typeof value['id'] !== 'string') {
         errors.push('id must be a string');
     }
-    if (typeof value.order_date !== 'string') {
-        errors.push('order_date must be a string');
+    if (typeof value['order_date'] !== 'string' && value['order_date'] !== null && value['order_date'] !== undefined) {
+        errors.push('order_date must be a string or null');
     }
-    if (typeof value.total_amount !== 'number' || value.total_amount < 0) {
+    if (typeof value['total_amount'] !== 'number' && value['total_amount'] !== null && value['total_amount'] !== undefined) {
+        errors.push('total_amount must be a number or null');
+    }
+    if (typeof value['total_amount'] === 'number' && value['total_amount'] < 0) {
         errors.push('total_amount must be a non-negative number');
     }
-    if (!isOrderStatus(value.status)) {
-        errors.push('status must be a valid OrderStatus');
+    if (value['status'] !== null && value['status'] !== undefined && !isOrderStatus(value['status'])) {
+        errors.push('status must be a valid OrderStatus or null');
     }
-    if (!isPaymentStatus(value.payment_status)) {
-        errors.push('payment_status must be a valid PaymentStatus');
-    }
-    if (typeof value.user_id !== 'string') {
-        errors.push('user_id must be a string');
+    if (value['payment_status'] !== null && value['payment_status'] !== undefined && !isPaymentStatus(value['payment_status'])) {
+        errors.push('payment_status must be a valid PaymentStatus or null');
     }
 
     return { valid: errors.length === 0, errors };
@@ -564,7 +544,7 @@ export function validateOrder(value: unknown): { valid: boolean; errors: string[
  */
 export function isPartialOf<T extends Record<string, unknown>>(
     value: unknown,
-    fullGuard: (val: unknown) => val is T
+    _fullGuard: (val: unknown) => val is T
 ): value is Partial<T> {
     if (!isObject(value)) {
         return false;

@@ -110,9 +110,7 @@ function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
     dataByDate[date].net = dataByDate[date].income - dataByDate[date].expense
   })
 
-  return Object.values(dataByDate).sort((a, b) => {
-    return a.date.localeCompare(b.date)
-  }).slice(-14)
+  return Object.values(dataByDate).sort((a, b) => a.date.localeCompare(b.date)).slice(-14)
 }
 
 function validateTransactionForm(formData: TransactionFormData): { isValid: boolean; errors: string[] } {
@@ -228,8 +226,8 @@ export function useCashFlow(): UseCashFlowReturn {
 
   // Fetch cash flow data
   const fetchCashFlowData = async () => {
-    setLoading(true)
-    setError(null)
+    void setLoading(true)
+    void setError(null)
 
     try {
       const { startDate: calculatedStartDate, endDate: calculatedEndDate } = calculateDateRange(
@@ -249,12 +247,12 @@ export function useCashFlow(): UseCashFlowReturn {
       }
 
       const data = await response.json()
-      setCashFlowData(data)
+      void setCashFlowData(data)
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error fetching cash flow data:')
-      setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
+      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan saat mengambil data')
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -273,7 +271,7 @@ export function useCashFlow(): UseCashFlowReturn {
     }
 
     try {
-      setLoading(true)
+      void setLoading(true)
 
       if (transactionType === 'expense') {
         // Save to expenses table
@@ -283,7 +281,7 @@ export function useCashFlow(): UseCashFlowReturn {
           body: JSON.stringify({
             description: formData.description,
             category: formData.category,
-            amount: amount,
+            amount,
             expense_date: formData.date,
           })
         })
@@ -298,7 +296,7 @@ export function useCashFlow(): UseCashFlowReturn {
           body: JSON.stringify({
             description: formData.description,
             category: formData.category,
-            amount: amount,
+            amount,
             sale_date: formData.date,
           })
         })
@@ -313,16 +311,16 @@ export function useCashFlow(): UseCashFlowReturn {
         amount: '',
         date: new Date().toISOString().split('T')[0]
       })
-      setIsAddDialogOpen(false)
+      void setIsAddDialogOpen(false)
 
       // Refresh data
       await fetchCashFlowData()
 
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error adding transaction:')
-      alert('Gagal menambah transaksi: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      alert(`Gagal menambah transaksi: ${  err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -331,7 +329,7 @@ export function useCashFlow(): UseCashFlowReturn {
     if (!confirm(`Hapus transaksi "${transaction.description}"?`)) {return}
 
     try {
-      setLoading(true)
+      void setLoading(true)
 
       if (transaction.type === 'expense' && transaction.reference_id) {
         const response = await fetch(`/api/expenses/${transaction.reference_id}`, {
@@ -344,9 +342,9 @@ export function useCashFlow(): UseCashFlowReturn {
       await fetchCashFlowData()
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Error deleting transaction:')
-      alert('Gagal menghapus transaksi: ' + (err instanceof Error ? err.message : 'Unknown error'))
+      alert(`Gagal menghapus transaksi: ${  err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }
 
@@ -370,7 +368,7 @@ export function useCashFlow(): UseCashFlowReturn {
 
   // Load data on mount and when filters change
   useEffect(() => {
-    fetchCashFlowData()
+    void fetchCashFlowData()
   }, [selectedPeriod, startDate, endDate])
 
   return {

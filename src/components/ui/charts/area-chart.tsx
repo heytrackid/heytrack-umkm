@@ -3,13 +3,12 @@
  * Optimized area chart for mobile devices
  */
 
-import * as React from 'react'
-import { memo } from 'react'
+import { React, memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
-import { CHART_COLORS, BaseMobileChartProps } from './types'
+import { type BaseMobileChartProps, CHART_COLORS } from './types'
 
 interface MobileAreaChartProps extends BaseMobileChartProps {
   xKey: string
@@ -26,14 +25,14 @@ interface MobileAreaChartProps extends BaseMobileChartProps {
  * MobileAreaChart - Optimized with React.memo
  * Prevents unnecessary re-renders when data hasn't changed
  */
-export const MobileAreaChart = memo(function MobileAreaChart({
+export const MobileAreaChart = memo(({
   data,
   xKey,
   areas,
   showGrid = true,
   stacked = false,
   ...baseProps
-}: MobileAreaChartProps) {
+}: MobileAreaChartProps) => {
   const { isMobile } = useResponsive()
 
   return (
@@ -104,6 +103,4 @@ export const MobileAreaChart = memo(function MobileAreaChart({
       </ResponsiveContainer>
     </BaseMobileChart>
   )
-}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => {
-  return prevProps.data === nextProps.data && prevProps.areas === nextProps.areas
-})
+}, (prevProps: MobileAreaChartProps, nextProps: MobileAreaChartProps) => prevProps.data === nextProps.data && prevProps.areas === nextProps.areas)

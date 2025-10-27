@@ -1,6 +1,6 @@
 'use client'
-import * as React from 'react'
 
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ interface CustomerFormProps {
   isLoading?: boolean
 }
 
-export function CustomerForm({ initialData, onSubmit, isLoading }: CustomerFormProps) {
+export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormProps) => {
   const form = useFormWithValidation(CustomerFormSchema, {
     defaultValues: {
       name: initialData?.name || '',

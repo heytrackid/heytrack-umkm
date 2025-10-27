@@ -9,7 +9,7 @@ import type {
   Ingredient,
   ProductionPlan,
   AutomationConfig
-} from '../types'
+} from '@/lib/automation/types'
 import type {
   OrderForProduction,
   Equipment,

@@ -3,8 +3,7 @@
  * Optimized textarea for mobile devices with character count
  */
 
-import * as React from 'react'
-import { useState } from 'react'
+import { React, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Textarea } from '../textarea'
@@ -26,7 +25,7 @@ interface MobileTextareaProps {
   className?: string
 }
 
-export function MobileTextarea({
+export const MobileTextarea = ({
   label,
   placeholder,
   value,
@@ -40,7 +39,7 @@ export function MobileTextarea({
   rows = 4,
   maxLength,
   className
-}: MobileTextareaProps) {
+}: MobileTextareaProps) => {
   const [isFocused, setIsFocused] = useState(false)
   const { isMobile } = useResponsive()
   const currentLength = value?.length || defaultValue?.length || 0
@@ -68,7 +67,7 @@ export function MobileTextarea({
           onChange={(e) => onChange?.(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
-            setIsFocused(false)
+            void setIsFocused(false)
             onBlur?.()
           }}
           disabled={disabled}

@@ -23,14 +23,14 @@ interface CategoryFormProps {
   onCancel: () => void
 }
 
-export function CategoryForm({
+export const CategoryForm = ({
   category,
   currentView,
   isMobile,
   onCategoryChange,
   onSave,
   onCancel
-}: CategoryFormProps) {
+}: CategoryFormProps) => {
   const handleAddIngredient = () => {
     onCategoryChange({
       ...category,

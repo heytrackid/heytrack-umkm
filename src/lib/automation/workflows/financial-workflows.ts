@@ -5,7 +5,7 @@
 
 import { automationLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
-import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '../types'
+import type { WorkflowEventData, WorkflowResult, WorkflowContext } from '@/lib/automation/types'
 
 export class FinancialWorkflowHandlers {
   /**
@@ -46,35 +46,20 @@ export class FinancialWorkflowHandlers {
         await this.sendPriceChangeNotification(data)
       }
 
-      // Schedule HPP recalculation for significant changes
-      if (Math.abs(priceChange) > 15 && affectedRecipes?.length) {
-        logger.warn({
-          priceChange,
-          affectedRecipesCount: affectedRecipes.length
-        }, 'Significant price change detected - scheduling HPP recalculation')
-
-        // TODO: Trigger HPP recalculation workflow
-        setTimeout(async () => {
-          // This would trigger the HPP recalculation event
-          logger.info({ ingredientId }, 'HPP recalculation triggered for price change')
-        }, 5000)
-      }
-
       return {
         success: true,
         message: `Price change processed for ingredient ${ingredientId}`,
         data: {
           ingredientId,
           priceChange,
-          notificationsSent: Math.abs(priceChange) > 10,
-          hppRecalculationTriggered: Math.abs(priceChange) > 15
+          notificationsSent: Math.abs(priceChange) > 10
         }
       }
 
     } catch (error: unknown) {
       logger.error({
         ingredientId,
-        error: getErrorMessage(error)
+        _error: getErrorMessage(error)
       }, 'Failed to process ingredient price change')
 
       return {
@@ -149,75 +134,12 @@ export class FinancialWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         costId,
-        error: getErrorMessage(error)
+        _error: getErrorMessage(error)
       }, 'Failed to process operational cost change')
 
       return {
         success: false,
         message: 'Failed to process operational cost change',
-        error: getErrorMessage(error)
-      }
-    }
-  }
-
-  /**
-   * Handle HPP recalculation needed event
-   */
-  static async handleHPPRecalculationNeeded(context: WorkflowContext): Promise<WorkflowResult> {
-    const { event, logger } = context
-
-    if (!event.data || typeof event.data !== 'object') {
-      return {
-        success: false,
-        message: 'Invalid HPP recalculation event data',
-        error: 'Missing or invalid event data'
-      }
-    }
-
-    const data = event.data as {
-      reason: string
-      affectedRecipes?: unknown[]
-      triggerIngredient?: string
-      priceChange?: number
-    }
-
-    const { reason, affectedRecipes } = data
-
-    logger.info({
-      reason,
-      affectedRecipesCount: affectedRecipes?.length || 0
-    }, 'Processing HPP recalculation request')
-
-    try {
-      // Send progress notification
-      await this.sendHPPRecalculationNotification('started', data)
-
-      // Simulate recalculation process
-      setTimeout(async () => {
-        // Send completion notification with insights
-        await this.sendHPPRecalculationNotification('completed', data)
-        await this.generateBusinessInsights(affectedRecipes || [])
-      }, 10000)
-
-      return {
-        success: true,
-        message: `HPP recalculation initiated for ${affectedRecipes?.length || 'all'} recipes`,
-        data: {
-          reason,
-          affectedRecipesCount: affectedRecipes?.length || 0,
-          status: 'processing'
-        }
-      }
-
-    } catch (error: unknown) {
-      logger.error({
-        reason,
-        error: getErrorMessage(error)
-      }, 'Failed to process HPP recalculation request')
-
-      return {
-        success: false,
-        message: 'Failed to process HPP recalculation request',
         error: getErrorMessage(error)
       }
     }
@@ -242,14 +164,14 @@ export class FinancialWorkflowHandlers {
         category: 'financial',
         priority: Math.abs(priceChange) > 20 ? 'critical' : 'high',
         title: `Harga Bahan Baku ${priceChange > 0 ? 'NAIK' : 'TURUN'} Signifikan`,
-        message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length || 0} resep. HPP otomatis diperbarui.`,
-        actionUrl: '/hpp-simple?tab=price_impact',
-        actionLabel: 'Review HPP'
+        message: `Perubahan ${Math.abs(priceChange).toFixed(1)}% mempengaruhi ${affectedRecipes?.length || 0} resep.`,
+        actionUrl: '/ingredients',
+        actionLabel: 'Review Bahan Baku'
       }
 
       automationLogger.info({ notificationData }, 'Price change notification sent')
-    } catch (error: unknown) {
-      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
+    } catch (err: unknown) {
+      automationLogger.debug({ err: getErrorMessage(err) }, 'Notification system not available')
     }
   }
 
@@ -269,9 +191,9 @@ export class FinancialWorkflowHandlers {
         category: 'financial',
         priority: 'medium',
         title: 'Biaya Operasional Diperbarui',
-        message: `${costName} berubah dari Rp${oldAmount.toLocaleString()} ke Rp${newAmount.toLocaleString()}. Semua HPP otomatis diperbarui.`,
-        actionUrl: '/hpp-simple?tab=operational_costs',
-        actionLabel: 'Lihat HPP'
+        message: `${costName} berubah dari Rp${oldAmount.toLocaleString()} ke Rp${newAmount.toLocaleString()}.`,
+        actionUrl: '/operational-costs',
+        actionLabel: 'Lihat Biaya Operasional'
       }
 
       // Send review notification for significant changes
@@ -290,81 +212,8 @@ export class FinancialWorkflowHandlers {
       }
 
       automationLogger.info({ generalNotification }, 'Cost change notification sent')
-    } catch (error: unknown) {
-      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
-    }
-  }
-
-  /**
-   * Send HPP recalculation notification
-   */
-  private static async sendHPPRecalculationNotification(
-    status: 'started' | 'completed',
-    data: { reason: string; affectedRecipes?: unknown[] }
-  ): Promise<void> {
-    const { reason, affectedRecipes } = data
-
-    try {
-      const notification = status === 'started' ? {
-        type: 'info',
-        category: 'financial',
-        priority: 'low',
-        title: 'HPP Recalculation Started',
-        message: `Memproses ulang HPP untuk ${affectedRecipes?.length || 'semua'} resep karena ${reason}`,
-        actionUrl: '/hpp-simple?tab=recalculation_progress',
-        actionLabel: 'Monitor Progress'
-      } : {
-        type: 'success',
-        category: 'financial',
-        priority: 'medium',
-        title: 'HPP Recalculation Selesai',
-        message: `HPP telah diperbarui. Review pricing suggestions untuk optimasi profit margin.`,
-        actionUrl: '/hpp-simple?tab=pricing_suggestions',
-        actionLabel: 'Lihat Suggestions'
-      }
-
-      automationLogger.info({ notification }, `HPP ${status} notification sent`)
-    } catch (error: unknown) {
-      automationLogger.debug({ error: getErrorMessage(error) }, 'Notification system not available')
-    }
-  }
-
-  /**
-   * Generate business insights from HPP changes
-   */
-  private static async generateBusinessInsights(affectedRecipes: unknown[]): Promise<void> {
-    try {
-      const insights = [
-        {
-          type: 'ingredient_alternatives',
-          message: 'HPP meningkat 15% bulan ini. Pertimbangkan alternatif bahan.',
-          action: 'Analisis ingredient alternatives'
-        },
-        {
-          type: 'pricing_strategy',
-          message: 'Margin rata-rata industri F&B: 60%. Current average: 45%',
-          action: 'Pertimbangkan penyesuaian harga untuk target margin optimal'
-        }
-      ]
-
-      // Send insights notifications with delay
-      insights.forEach((insight, index) => {
-        setTimeout(async () => {
-          const notification = {
-            type: 'info',
-            category: 'financial',
-            priority: 'medium',
-            title: 'Business Insight: HPP Analysis',
-            message: insight.message,
-            actionUrl: '/hpp-simple?tab=insights&insight=' + insight.type,
-            actionLabel: insight.action
-          }
-
-          automationLogger.info({ notification }, `Business insight ${index + 1} sent`)
-        }, (index + 1) * 2000)
-      })
-    } catch (error: unknown) {
-      automationLogger.debug({ error: getErrorMessage(error) }, 'Failed to generate business insights')
+    } catch (err: unknown) {
+      automationLogger.debug({ err: getErrorMessage(err) }, 'Notification system not available')
     }
   }
 }

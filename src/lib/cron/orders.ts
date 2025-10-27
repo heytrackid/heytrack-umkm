@@ -5,7 +5,7 @@
 
 import { createServiceRoleClient } from '@/utils/supabase'
 import { cronLogger } from '@/lib/logger'
-import { SmartNotificationSystem } from '../communications/notifications'
+import { SmartNotificationSystem } from '@/lib/communications/notifications'
 import type { NotificationAlert } from './types'
 
 export class OrderCronJobs {
@@ -49,9 +49,9 @@ export class OrderCronJobs {
       }
 
       return { alertsGenerated: alerts.length }
-    } catch (error) {
-      cronLogger.error({ error: error instanceof Error ? error.message : String(error) }, 'Error checking order deadlines')
-      throw error
+    } catch (err) {
+      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error checking order deadlines')
+      throw err
     }
   }
 }

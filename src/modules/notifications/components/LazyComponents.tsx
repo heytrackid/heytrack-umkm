@@ -1,6 +1,6 @@
 'use client'
 
-import { ComponentSkeletons, createLazyComponent } from '@/shared/components/utility/LazyWrapper'
+import { ComponentSkeletons, createLazyComponent, useProgressiveLoading } from '@/components/lazy/LazyWrapper'
 import { Suspense } from 'react'
 
 // Define FinancialMetrics type for notification components
@@ -29,16 +29,15 @@ export const preloadNotificationComponents = () => {
 }
 
 // Progressive loading for notification center
-export function NotificationCenterWithProgressiveLoading({
+export const NotificationCenterWithProgressiveLoading = ({
   ingredients,
   orders,
   financialMetrics
 }: {
   ingredients?: Ingredient[]
-  orders?: OrdersTable['Row'][]
+  orders?: Array<OrdersTable['Row']>
   financialMetrics?: FinancialMetrics
-}) {
-  return (
+}) => (
     <div className="space-y-6">
       {/* Critical above-the-fold content loads first */}
       <div className="space-y-4">
@@ -64,7 +63,6 @@ export function NotificationCenterWithProgressiveLoading({
       </div>
     </div>
   )
-}
 
 // Hook for progressive notification component loading with metrics
 export function useNotificationProgressiveLoading() {
@@ -86,7 +84,7 @@ export const SmartNotificationLoader = ({
   realTimeEnabled?: boolean
   soundEnabled?: boolean
   ingredients?: Ingredient[]
-  orders?: OrdersTable['Row'][]
+  orders?: Array<OrdersTable['Row']>
   financialMetrics?: FinancialMetrics
   level?: string
   realTime?: boolean
@@ -118,4 +116,3 @@ export const LazyNotificationBell = createLazyComponent(
   }
 )
 
-import { useProgressiveLoading } from '@/shared/components/utility/LazyWrapper'

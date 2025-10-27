@@ -1,7 +1,6 @@
-'use client';
-import * as React from 'react'
+'use client'
 
-import { Suspense } from 'react';
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -85,7 +84,7 @@ interface DataVisualizationProps {
   compact?: boolean;
 }
 
-const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compact = false }) => {
+const DataVisualization = ({ type, data, compact = false }: DataVisualizationProps) => {
   const { formatCurrency } = useCurrency();
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
@@ -187,8 +186,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   };
 
   // Inventory Status Visualization
-  const InventoryChart = ({ data }: { data: InventoryData }) => {
-    return (
+  const InventoryChart = ({ data }: { data: InventoryData }) => (
       <Card className="w-full">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center space-x-2">
@@ -250,7 +248,6 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
         </CardContent>
       </Card>
     );
-  };
 
   // Customer Analysis Visualization
   const CustomerChart = ({ data }: { data: CustomerData }) => {
@@ -333,7 +330,7 @@ const DataVisualization: React.FC<DataVisualizationProps> = ({ type, data, compa
   // Product Analysis Visualization
   const ProductChart = ({ data }: { data: ProductData }) => {
     const chartData = data.topRecipes.slice(0, 5).map((recipe: Recipe) => ({
-      name: recipe.name.length > 10 ? recipe.name.substring(0, 10) + '...' : recipe.name,
+      name: recipe.name.length > 10 ? `${recipe.name.substring(0, 10)  }...` : recipe.name,
       revenue: recipe.total_revenue || 0,
       count: recipe.times_made || 0
     }));

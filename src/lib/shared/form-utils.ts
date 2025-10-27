@@ -3,8 +3,8 @@
  * Common patterns and utilities for forms across the application
  */
 
-import * as React from 'react'
-import { useForm, UseFormProps, UseFormReturn } from 'react-hook-form'
+import { useState } from 'react'
+import { type UseFormProps, type UseFormReturn, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useToast } from '@/hooks/use-toast'
@@ -27,9 +27,9 @@ export function createFormSubmitHandler<T>(
   onSubmit: (data: T) => Promise<void>,
   successMessage: string,
   errorMessage: string,
-  resetOnSuccess: boolean = true,
-  successTitle: string = 'Berhasil',
-  errorTitle: string = 'Error'
+  resetOnSuccess = true,
+  successTitle = 'Berhasil',
+  errorTitle = 'Error'
 ) {
   const { toast } = useToast()
 
@@ -43,7 +43,7 @@ export function createFormSubmitHandler<T>(
       if (resetOnSuccess && !form.formState.defaultValues) {
         form.reset()
       }
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       toast({
         title: errorTitle,
         description: errorMessage,
@@ -79,9 +79,9 @@ export function getFormFieldClasses(error?: string, className?: string) {
 }
 
 // Form validation helpers
-export function createRequiredString(min: number = 1, max?: number) {
+export function createRequiredString(min = 1, max?: number) {
   let schema = z.string().min(min, `Minimal ${min} karakter`)
-  if (max) schema = schema.max(max, `Maksimal ${max} karakter`)
+  if (max) {schema = schema.max(max, `Maksimal ${max} karakter`)}
   return schema
 }
 
@@ -161,7 +161,7 @@ export interface FormSubmissionState {
 }
 
 export function useFormSubmission() {
-  const [state, setState] = React.useState<FormSubmissionState>({
+  const [state, setState] = useState<FormSubmissionState>({
     isSubmitting: false,
     isSuccess: false,
     isError: false
@@ -172,21 +172,21 @@ export function useFormSubmission() {
     onSuccess?: (result: T) => void,
     onError?: (error: Error) => void
   ) => {
-    setState({ isSubmitting: true, isSuccess: false, isError: false })
+    void setState({ isSubmitting: true, isSuccess: false, isError: false, error: undefined })
 
     try {
       const result = await submitFn()
-      setState({ isSubmitting: false, isSuccess: true, isError: false })
+      void setState({ isSubmitting: false, isSuccess: true, isError: false, error: undefined })
       onSuccess?.(result)
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Terjadi kesalahan'
-      setState({ isSubmitting: false, isSuccess: false, isError: true, error: errorMessage })
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Terjadi kesalahan'
+      void setState({ isSubmitting: false, isSuccess: false, isError: true, error: errorMessage })
       onError?.(error as Error)
     }
   }
 
   const reset = () => {
-    setState({ isSubmitting: false, isSuccess: false, isError: false })
+    void setState({ isSubmitting: false, isSuccess: false, isError: false, error: undefined })
   }
 
   return { ...state, submit, reset }

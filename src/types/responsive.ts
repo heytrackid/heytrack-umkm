@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type * as React from 'react'
 // Responsive design types and utilities for mobile-first development
 
@@ -52,7 +53,7 @@ export interface ResponsiveColumn {
   priority: ColumnPriority;
   hideOnMobile?: boolean;
   minWidth?: string;
-  render?: (value: unknown, item: unknown) => React.ReactNode;
+  render?: (value: unknown, item: unknown) => ReactNode;
 }
 
 // Form field responsive configuration

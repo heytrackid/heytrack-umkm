@@ -3,8 +3,8 @@
  * API rate limiting protection
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { createErrorResponse } from '../responses'
+import type { NextRequest, NextResponse } from 'next/server'
+import { createErrorResponse } from '@/lib/api-core/responses'
 
 /**
  * Create rate limiting middleware

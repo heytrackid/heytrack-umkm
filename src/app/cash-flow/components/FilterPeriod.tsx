@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar } from 'lucide-react'
@@ -9,8 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { PeriodType } from '../constants'
-import { filterPeriodOptions } from '../constants'
+import { type PeriodType, filterPeriodOptions } from '@/app/cash-flow/constants'
 
 interface FilterPeriodProps {
   selectedPeriod: PeriodType

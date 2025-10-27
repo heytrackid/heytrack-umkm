@@ -1,7 +1,6 @@
-'use client';
-import * as React from 'react'
+'use client'
 
-import { useState } from 'react';
+import { useState } from 'react'
 import { MessageCircle, Send, Edit, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -40,11 +39,11 @@ interface WhatsAppFollowUpProps {
   onSent?: (type: 'whatsapp' | 'business', message: string) => void;
 }
 
-const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({ 
-  order, 
+const WhatsAppFollowUp = ({
+  order,
   businessName = 'UMKM UMKM',
-  onSent 
-}) => {
+  onSent
+}: WhatsAppFollowUpProps) => {
   const { formatCurrency } = useSettings();
   const [selectedTemplate, setSelectedTemplate] = useState<string>('order_confirmation');
   const [customMessage, setCustomMessage] = useState('');
@@ -120,8 +119,8 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       });
 
       setGeneratedMessage(message);
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Error generating message:');
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };
@@ -146,7 +145,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
       setCopied(type);
       toast.success('Berhasil disalin!');
       setTimeout(() => setCopied(null), 2000);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
       toast.error('Gagal menyalin text');
     }
   };
@@ -168,7 +167,7 @@ const WhatsAppFollowUp: React.FC<WhatsAppFollowUpProps> = ({
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isCustomTemplate) {
       generateMessage();
     }

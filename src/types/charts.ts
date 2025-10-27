@@ -172,7 +172,7 @@ export interface PieChartData {
   labels: string[]
   values: number[]
   colors?: string[]
-  metadata?: Record<string, unknown>[]
+  metadata?: Array<Record<string, unknown>>
 }
 
 /**

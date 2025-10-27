@@ -46,10 +46,10 @@ export function prepareChartData(transactions: Transaction[]): ChartDataPoint[] 
     dataByDate[date].net = dataByDate[date].income - dataByDate[date].expense
   })
 
-  return Object.values(dataByDate).sort((a, b) => {
+  return Object.values(dataByDate).sort((a, b) => 
     // Sort by date
-    return a.date.localeCompare(b.date)
-  }).slice(-14) // Last 14 days
+     a.date.localeCompare(b.date)
+  ).slice(-14) // Last 14 days
 }
 
 /**

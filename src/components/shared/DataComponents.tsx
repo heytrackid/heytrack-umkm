@@ -1,7 +1,6 @@
 'use client'
 
-import * as React from 'react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,18 +35,18 @@ interface SearchInputProps {
   showClear?: boolean
 }
 
-export function SearchInput({
+export const SearchInput = ({
   value,
   onChange,
   placeholder = "Search...",
   className = "",
   debounceMs = 300,
   showClear = true
-}: SearchInputProps) {
+}: SearchInputProps) => {
   const [localValue, setLocalValue] = useState(value)
 
   useEffect(() => {
-    setLocalValue(value)
+    void setLocalValue(value)
   }, [value])
 
   useEffect(() => {
@@ -61,7 +60,7 @@ export function SearchInput({
   }, [localValue, value, onChange, debounceMs])
 
   const handleClear = () => {
-    setLocalValue('')
+    void setLocalValue('')
     onChange('')
   }
 
@@ -92,7 +91,7 @@ export function SearchInput({
 interface FilterOption {
   value: string
   label: string
-  icon?: React.ReactNode
+  icon?: ReactNode
 }
 
 interface AdvancedFiltersProps {
@@ -103,13 +102,13 @@ interface AdvancedFiltersProps {
   className?: string
 }
 
-export function AdvancedFilters({
+export const AdvancedFilters = ({
   filters,
   onFilterChange,
   onReset,
   filterOptions,
   className = ""
-}: AdvancedFiltersProps) {
+}: AdvancedFiltersProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
   const activeFiltersCount = Object.values(filters).filter(Boolean).length
 
@@ -192,18 +191,18 @@ interface DateRangePickerProps {
   className?: string
 }
 
-export function DateRangePicker({
+export const DateRangePicker = ({
   value,
   onChange,
   placeholder = "Pick a date range",
   className = ""
-}: DateRangePickerProps) {
+}: DateRangePickerProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const formatRange = () => {
-    if (!value.from && !value.to) return placeholder
-    if (value.from && !value.to) return value.from.toLocaleDateString()
-    if (!value.from && value.to) return `Until ${value.to.toLocaleDateString()}`
+    if (!value.from && !value.to) {return placeholder}
+    if (value.from && !value.to) {return value.from.toLocaleDateString()}
+    if (!value.from && value.to) {return `Until ${value.to.toLocaleDateString()}`}
     return `${value.from?.toLocaleDateString()} - ${value.to?.toLocaleDateString()}`
   }
 
@@ -249,13 +248,13 @@ interface SortableColumnProps {
   className?: string
 }
 
-export function SortableColumn({
+export const SortableColumn = ({
   title,
   sortKey,
   currentSort,
   onSort,
   className = ""
-}: SortableColumnProps) {
+}: SortableColumnProps) => {
   const isActive = currentSort?.key === sortKey
   const direction = isActive ? currentSort.direction : null
 
@@ -285,11 +284,10 @@ interface ExportActionsProps {
   className?: string
 }
 
-export function ExportActions({
+export const ExportActions = ({
   actions,
   className = ""
-}: ExportActionsProps) {
-  return (
+}: ExportActionsProps) => (
     <div className={cn("flex items-center gap-2", className)}>
       <Download className="h-4 w-4 text-muted-foreground" />
       <Select>
@@ -310,12 +308,11 @@ export function ExportActions({
       </Select>
     </div>
   )
-}
 
 // Bulk Actions Component
 interface BulkAction {
   label: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   onClick: (selectedIds: string[]) => void
   variant?: 'default' | 'destructive'
 }
@@ -327,13 +324,13 @@ interface BulkActionsProps {
   className?: string
 }
 
-export function BulkActions({
+export const BulkActions = ({
   selectedIds,
   actions,
   onClearSelection,
   className = ""
-}: BulkActionsProps) {
-  if (selectedIds.length === 0) return null
+}: BulkActionsProps) => {
+  if (selectedIds.length === 0) {return null}
 
   return (
     <Card className={cn("border-blue-200 bg-blue-50", className)}>
@@ -368,8 +365,7 @@ export function BulkActions({
 }
 
 // Loading Skeletons
-export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) {
-  return (
+export const TableSkeleton = ({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) => (
     <div className="space-y-4">
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex items-center space-x-4">
@@ -380,10 +376,8 @@ export function TableSkeleton({ rows = 5, columns = 4 }: { rows?: number; column
       ))}
     </div>
   )
-}
 
-export function CardSkeleton({ count = 4 }: { count?: number }) {
-  return (
+export const CardSkeleton = ({ count = 4 }: { count?: number }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: count }).map((_, i) => (
         <Card key={i}>
@@ -395,10 +389,8 @@ export function CardSkeleton({ count = 4 }: { count?: number }) {
       ))}
     </div>
   )
-}
 
-export function FormSkeleton({ fields = 4 }: { fields?: number }) {
-  return (
+export const FormSkeleton = ({ fields = 4 }: { fields?: number }) => (
     <div className="space-y-6">
       {Array.from({ length: fields }).map((_, i) => (
         <div key={i} className="space-y-2">
@@ -412,11 +404,10 @@ export function FormSkeleton({ fields = 4 }: { fields?: number }) {
       </div>
     </div>
   )
-}
 
 // Empty States
 interface EmptyStateProps {
-  icon?: React.ReactNode
+  icon?: ReactNode
   title: string
   description?: string
   action?: {
@@ -426,14 +417,13 @@ interface EmptyStateProps {
   className?: string
 }
 
-export function EmptyState({
+export const EmptyState = ({
   icon,
   title,
   description,
   action,
   className = ""
-}: EmptyStateProps) {
-  return (
+}: EmptyStateProps) => (
     <div className={cn("text-center py-12", className)}>
       {icon && (
         <div className="mx-auto h-12 w-12 text-muted-foreground mb-4">
@@ -453,28 +443,26 @@ export function EmptyState({
       )}
     </div>
   )
-}
 
 // Quick Actions Menu
 interface QuickAction {
   label: string
-  icon?: React.ReactNode
+  icon?: ReactNode
   onClick: () => void
   shortcut?: string
 }
 
 interface QuickActionsProps {
   actions: QuickAction[]
-  trigger?: React.ReactNode
+  trigger?: ReactNode
   className?: string
 }
 
-export function QuickActions({
+export const QuickActions = ({
   actions,
   trigger,
   className = ""
-}: QuickActionsProps) {
-  return (
+}: QuickActionsProps) => (
     <Select>
       <SelectTrigger className={cn("w-48", className)}>
         {trigger || (
@@ -507,4 +495,3 @@ export function QuickActions({
       </SelectContent>
     </Select>
   )
-}

@@ -15,7 +15,7 @@ export class InventoryNotifications {
 
     inventory.forEach(ingredient => {
       // Critical stock level
-      if (ingredient.current_stock ?? 0 <= ingredient.min_stock ?? 0 * 0.5) {
+      if (ingredient.current_stock ?? ingredient.min_stock >= 0 ?? 0 * 0.5) {
         notifications.push({
           type: 'critical',
           category: 'inventory',
@@ -33,7 +33,7 @@ export class InventoryNotifications {
         })
       }
       // Low stock level
-      else if (ingredient.current_stock ?? 0 <= ingredient.min_stock) {
+      else if (ingredient.current_stock ?? ingredient.min_stock >= 0) {
         notifications.push({
           type: 'warning',
           category: 'inventory',
@@ -51,7 +51,7 @@ export class InventoryNotifications {
         })
       }
       // Overstocked
-      else if (ingredient.current_stock ?? 0 > ingredient.min_stock ?? 0 * 4) {
+      else if (ingredient.current_stock ?? ingredient.min_stock < 0 ?? 0 * 4) {
         notifications.push({
           type: 'info',
           category: 'inventory',

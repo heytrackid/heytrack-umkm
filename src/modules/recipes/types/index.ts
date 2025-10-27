@@ -33,18 +33,18 @@ export interface RecipeIngredient {
 }
 
 export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at'> {
-  recipe_ingredients?: Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>[]
+  recipe_ingredients?: Array<Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>>
 }
 
 export interface RecipeWithIngredients extends Recipe {
-  recipe_ingredients: (RecipeIngredient & {
+  recipe_ingredients: Array<RecipeIngredient & {
     ingredient: {
       id: string
       name: string
       unit: string
       price_per_unit: number
     }
-  })[]
+  }>
 }
 
 // HPP Calculation types
@@ -145,6 +145,18 @@ export interface RecipeHppResult {
   marginAnalysis: RecipeMarginAnalysis
   suggestions: RecipePricingSuggestions
   availability: RecipeAvailability
+  pricingAlternatives: RecipePricingAlternative[]
+  recommendations: string[]
+}
+
+export interface HPPCalculationResult {
+  servings: number
+  calculations: {
+    hppPerUnit: number
+    suggestedSellingPrice: number
+    profitMarginPercent: number
+    totalHPP: number
+  }
   pricingAlternatives: RecipePricingAlternative[]
   recommendations: string[]
 }

@@ -64,8 +64,7 @@ interface SidebarProps {
   isMobile?: boolean
 }
 
-function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
-  return (
+const Sidebar = ({ isOpen, onToggle, isMobile }: SidebarProps) => (
     <Suspense fallback={<SidebarSkeleton />}>
       <LazySidebar
         isOpen={isOpen}
@@ -74,6 +73,5 @@ function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
       />
     </Suspense>
   )
-}
 
 export default Sidebar

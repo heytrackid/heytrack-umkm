@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DollarSign } from 'lucide-react'
-import type { HPPCalculationResult } from '../services/EnhancedHPPCalculationService'
+import type { HPPCalculationResult } from '@/modules/recipes/types'
 import { UMKMTooltip } from './UMKMTooltip'
 
 interface MainResultsCardProps {
@@ -14,8 +14,7 @@ interface MainResultsCardProps {
 /**
  * Main calculation results card component
  */
-export function MainResultsCard({ calculationResult, formatCurrency }: MainResultsCardProps) {
-  return (
+export const MainResultsCard = ({ calculationResult, formatCurrency }: MainResultsCardProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -85,4 +84,3 @@ export function MainResultsCard({ calculationResult, formatCurrency }: MainResul
       </CardContent>
     </Card>
   )
-}

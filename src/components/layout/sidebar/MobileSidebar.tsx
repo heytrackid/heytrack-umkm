@@ -1,12 +1,11 @@
 'use client'
 
-import * as React from 'react'
 import SidebarFooter from './SidebarFooter'
 import SidebarHeader from './SidebarHeader'
 import SidebarNavigation from './SidebarNavigation'
 import { useSidebarLogic } from './useSidebarLogic'
 
-function MobileSidebar() {
+const MobileSidebar = () => {
   const {
     navigationSections,
     isItemActive,

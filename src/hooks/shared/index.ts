@@ -14,7 +14,7 @@ export function useGenericCRUD<T extends { id: string }>(tableName: string) {
   const [loading, setLoading] = useState(false)
 
   const create = useCallback(async (data: Omit<T, 'id'>) => {
-    setLoading(true)
+    void setLoading(true)
     try {
       const result = await createRecord(data)
       toast({
@@ -22,20 +22,20 @@ export function useGenericCRUD<T extends { id: string }>(tableName: string) {
         description: "Data berhasil ditambahkan",
       })
       return result
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal menambahkan data",
         variant: "destructive",
       })
-      throw error
+      throw err
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [createRecord, toast])
 
   const update = useCallback(async (id: string, data: Partial<T>) => {
-    setLoading(true)
+    void setLoading(true)
     try {
       const result = await updateRecord(id, data)
       toast({
@@ -43,20 +43,20 @@ export function useGenericCRUD<T extends { id: string }>(tableName: string) {
         description: "Data berhasil diperbarui",
       })
       return result
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal memperbarui data",
         variant: "destructive",
       })
-      throw error
+      throw err
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [updateRecord, toast])
 
   const remove = useCallback(async (id: string) => {
-    setLoading(true)
+    void setLoading(true)
     try {
       const result = await deleteRecord(id)
       toast({
@@ -64,15 +64,15 @@ export function useGenericCRUD<T extends { id: string }>(tableName: string) {
         description: "Data berhasil dihapus",
       })
       return result
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal menghapus data",
         variant: "destructive",
       })
-      throw error
+      throw err
     } finally {
-      setLoading(false)
+      void setLoading(false)
     }
   }, [deleteRecord, toast])
 
@@ -99,13 +99,13 @@ export function useConfirmDialog() {
   } | null>(null)
 
   const openDialog = useCallback((config: typeof config) => {
-    setConfig(config)
-    setIsOpen(true)
+    void setConfig(config)
+    void setIsOpen(true)
   }, [])
 
   const closeDialog = useCallback(() => {
-    setIsOpen(false)
-    setConfig(null)
+    void setIsOpen(false)
+    void setConfig(null)
   }, [])
 
   const handleConfirm = useCallback(async () => {
@@ -152,22 +152,22 @@ export function useFormState<T extends Record<string, unknown>>(initialValues: T
 
   const updateValue = useCallback((key: keyof T, value: any) => {
     setValues(prev => ({ ...prev, [key]: value }))
-    setIsDirty(true)
+    void setIsDirty(true)
   }, [])
 
   const updateValues = useCallback((updates: Partial<T>) => {
     setValues(prev => ({ ...prev, ...updates }))
-    setIsDirty(true)
+    void setIsDirty(true)
   }, [])
 
   const reset = useCallback(() => {
-    setValues(initialValues)
-    setIsDirty(false)
+    void setValues(initialValues)
+    void setIsDirty(false)
   }, [initialValues])
 
   const resetTo = useCallback((newValues: T) => {
-    setValues(newValues)
-    setIsDirty(false)
+    void setValues(newValues)
+    void setIsDirty(false)
   }, [])
 
   return {
@@ -189,11 +189,11 @@ export function useDataExport() {
   const { toast } = useToast()
 
   const exportToCSV = useCallback(async (
-    data: Record<string, unknown>[],
+    data: Array<Record<string, unknown>>,
     filename: string,
     columns?: string[]
   ) => {
-    setExporting(true)
+    void setExporting(true)
     try {
       const headers = columns || (data.length > 0 ? Object.keys(data[0]) : [])
       const csvContent = [
@@ -220,22 +220,22 @@ export function useDataExport() {
         title: "Berhasil",
         description: "Data berhasil diekspor",
       })
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal mengekspor data",
         variant: "destructive",
       })
     } finally {
-      setExporting(false)
+      void setExporting(false)
     }
   }, [toast])
 
   const exportToJSON = useCallback(async (
-    data: Record<string, unknown>[],
+    data: Array<Record<string, unknown>>,
     filename: string
   ) => {
-    setExporting(true)
+    void setExporting(true)
     try {
       const jsonContent = JSON.stringify(data, null, 2)
       const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' })
@@ -252,14 +252,14 @@ export function useDataExport() {
         title: "Berhasil",
         description: "Data berhasil diekspor",
       })
-    } catch (error) {
+    } catch (err) {
       toast({
         title: "Error",
         description: "Gagal mengekspor data",
         variant: "destructive",
       })
     } finally {
-      setExporting(false)
+      void setExporting(false)
     }
   }, [toast])
 
@@ -275,12 +275,12 @@ export function useDataExport() {
  */
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   const [value, setValue] = useState<T>(() => {
-    if (typeof window === 'undefined') return defaultValue
+    if (typeof window === 'undefined') {return defaultValue}
 
     try {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : defaultValue
-    } catch {
+    } catch (error) {
       return defaultValue
     }
   })
@@ -288,24 +288,24 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
   const setStoredValue = useCallback((newValue: T | ((prev: T) => T)) => {
     try {
       const valueToStore = newValue instanceof Function ? newValue(value) : newValue
-      setValue(valueToStore)
+      void setValue(valueToStore)
 
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (error) {
-      console.error(`Error storing value for key "${key}":`, error)
+    } catch (err) {
+      // Storage _error handled silently
     }
   }, [key, value])
 
   const removeValue = useCallback(() => {
     try {
-      setValue(defaultValue)
+      void setValue(defaultValue)
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (error) {
-      console.error(`Error removing value for key "${key}":`, error)
+    } catch (err) {
+      // Storage _error handled silently
     }
   }, [key, defaultValue])
 

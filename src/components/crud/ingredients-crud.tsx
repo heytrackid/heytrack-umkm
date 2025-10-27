@@ -1,14 +1,14 @@
-'use client';
-import * as React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+'use client'
 
-import { useSettings } from '@/contexts/settings-context';
-import { useIngredients } from '@/hooks';
-import { useSupabaseCRUD } from '@/hooks/supabase';
-import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations';
-import { useState } from 'react';
-import type { Database } from '@/types';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+import { useSettings } from '@/contexts/settings-context'
+import { useIngredients } from '@/hooks'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
+import type { Database } from '@/types'
 
 import { apiLogger } from '@/lib/logger'
 
@@ -19,7 +19,7 @@ import { SimpleDataTable } from '@/components/ui/simple-data-table';
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row'];
 
-export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredients?: unknown[] }) {
+export const IngredientsCRUD = ({ initialIngredients = [] }: { initialIngredients?: unknown[] }) => {
   const { formatCurrency } = useSettings();
   const { data: ingredients, loading, error } = useIngredients();
   const { create: createIngredient, update: updateIngredient, delete: deleteIngredient } = useSupabaseCRUD('ingredients');
@@ -86,11 +86,11 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
 
   const handleCreate = () => {
     createForm.reset()
-    setIsCreateModalOpen(true)
+    void setIsCreateModalOpen(true)
   }
 
   const handleEdit = (ingredient: Ingredient) => {
-    setSelectedIngredient(ingredient)
+    void setSelectedIngredient(ingredient)
     const ing = ingredient as any
     editForm.reset({
       name: ing.name || ing.nama_bahan,
@@ -100,54 +100,54 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
       min_stock: ing.min_stock || ing.minimum_stock || ing.stok_minimum,
       description: ing.description || ing.jenis_kemasan || '',
     })
-    setIsEditModalOpen(true)
+    void setIsEditModalOpen(true)
   }
 
   const handleDelete = (ingredient: Ingredient) => {
-    setSelectedIngredient(ingredient)
-    setIsDeleteDialogOpen(true)
+    void setSelectedIngredient(ingredient)
+    void setIsDeleteDialogOpen(true)
   }
 
   const handleSubmitCreate = async (data: SimpleIngredientFormData) => {
     try {
       await createIngredient(data)
-      setIsCreateModalOpen(false)
+      void setIsCreateModalOpen(false)
       createForm.reset()
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to create ingredient:')
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Failed to create ingredient:')
     }
   }
 
   const handleSubmitEdit = async (data: SimpleIngredientFormData) => {
-    if (!selectedIngredient) {return}
+    if (!selectedIngredient) { return }
 
     try {
       await updateIngredient(selectedIngredient.id, data)
-      setIsEditModalOpen(false)
-      setSelectedIngredient(null)
+      void setIsEditModalOpen(false)
+      void setSelectedIngredient(null)
       editForm.reset()
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to update ingredient:')
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Failed to update ingredient:')
     }
   }
 
   const handleConfirmDelete = async () => {
-    if (!selectedIngredient) {return;}
+    if (!selectedIngredient) { return; }
 
     try {
       await deleteIngredient(selectedIngredient.id);
       setIsDeleteDialogOpen(false);
       setSelectedIngredient(null);
-    } catch (error: unknown) {
-      apiLogger.error({ error: error }, 'Failed to delete ingredient:');
+    } catch (err: unknown) {
+      apiLogger.error({ error }, 'Failed to delete ingredient:');
     }
   };
 
   const closeModals = () => {
-    setIsCreateModalOpen(false)
-    setIsEditModalOpen(false)
-    setIsDeleteDialogOpen(false)
-    setSelectedIngredient(null)
+    void setIsCreateModalOpen(false)
+    void setIsEditModalOpen(false)
+    void setIsDeleteDialogOpen(false)
+    void setSelectedIngredient(null)
     createForm.reset()
     editForm.reset()
   }
@@ -171,7 +171,7 @@ export function IngredientsCRUD({ initialIngredients = [] }: { initialIngredient
         onDelete={handleDelete}
         addButtonText="Tambah Bahan Baku"
         emptyMessage="Belum ada bahan baku. Klik tombol Tambah untuk menambahkan bahan baku pertama."
-        exportData={true}
+        exportData
       />
 
       {/* Create Modal */}

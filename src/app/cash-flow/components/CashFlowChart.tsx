@@ -1,4 +1,3 @@
-import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import {
   Select,
@@ -9,8 +8,7 @@ import {
 } from '@/components/ui/select'
 import { TrendingUp } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import type { PeriodType, ChartDataPoint } from '../constants'
-import { periodOptions } from '../constants'
+import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
 
 interface CashFlowChartProps {
   chartData: ChartDataPoint[]
@@ -104,8 +102,8 @@ export default function CashFlowChart({
                     className="text-xs"
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                     tickFormatter={(value) => {
-                      if (value >= 1000000) {return `${(value / 1000000).toFixed(1)}jt`}
-                      if (value >= 1000) {return `${(value / 1000).toFixed(0)}rb`}
+                      if (value >= 1000000) { return `${(value / 1000000).toFixed(1)}jt` }
+                      if (value >= 1000) { return `${(value / 1000).toFixed(0)}rb` }
                       return value.toString()
                     }}
                   />
@@ -117,15 +115,15 @@ export default function CashFlowChart({
                             <p className="font-medium mb-2">{payload[0].payload.date}</p>
                             <div className="space-y-1 text-sm">
                               <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-green-500" />
                                 <span>Pemasukan: {payload[0].value ? payload[0].value.toLocaleString('id-ID') : 0}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-red-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-red-500" />
                                 <span>Pengeluaran: {payload[1].value ? payload[1].value.toLocaleString('id-ID') : 0}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
+                                <div className="h-3 w-3 rounded-full bg-blue-500" />
                                 <span>Arus Kas Bersih: {payload[2].value ? payload[2].value.toLocaleString('id-ID') : 0}</span>
                               </div>
                             </div>

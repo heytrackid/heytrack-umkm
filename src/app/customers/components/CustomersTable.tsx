@@ -33,7 +33,7 @@ import type { CustomersTable } from '@/types/customers'
 import { useMemo, useState } from 'react'
 
 interface CustomersTableProps {
-  customers: CustomersTable['Row'][]
+  customers: Array<CustomersTable['Row']>
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
@@ -79,7 +79,7 @@ export default function CustomersTable({
 
   // Reset to page 1 when customers change
   useMemo(() => {
-    setCurrentPage(1)
+    void setCurrentPage(1)
   }, [customers.length])
 
   if (customers.length === 0) {
@@ -227,7 +227,7 @@ export default function CustomersTable({
                   <span className="text-sm text-muted-foreground">Show</span>
                   <Select value={pageSize.toString()} onValueChange={(value: string) => {
                     setPageSize(Number(value))
-                    setCurrentPage(1)
+                    void setCurrentPage(1)
                   }}>
                     <SelectTrigger className="w-20 h-8">
                       <SelectValue />
