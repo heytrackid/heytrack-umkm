@@ -1,7 +1,7 @@
 'use client'
 
 import SidebarFooter from './SidebarFooter'
-import SidebarHeader from './SidebarHeader'
+import ApplicationSidebarHeader from './ApplicationSidebarHeader'
 import SidebarNavigation from './SidebarNavigation'
 import { useSidebarLogic } from './useSidebarLogic'
 
@@ -16,7 +16,7 @@ const MobileSidebar = () => {
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <SidebarHeader variant="mobile" />
+      <ApplicationSidebarHeader variant="mobile" />
 
       <SidebarNavigation
         sections={navigationSections}

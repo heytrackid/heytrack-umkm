@@ -5,7 +5,7 @@ import { safeParseAmount, safeString } from '@/lib/api-helpers'
 import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/api-validations'
 import { Database } from '@/types'
-import { formatCurrency } from '@/lib/shared/currency-utils'
+import { formatCurrency } from '@/lib/currency'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 

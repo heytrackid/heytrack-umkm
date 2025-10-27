@@ -3,17 +3,17 @@
 import { Package, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface SidebarHeaderProps {
+interface ApplicationSidebarHeaderProps {
   isMobile?: boolean
   onClose?: () => void
   variant?: 'default' | 'mobile'
 }
 
-const SidebarHeader = ({
+const ApplicationSidebarHeader = ({
   isMobile = false,
   onClose,
   variant = 'default'
-}: SidebarHeaderProps) => {
+}: ApplicationSidebarHeaderProps) => {
   const showCloseButton = (variant === 'mobile' || isMobile) && onClose
 
   return (
@@ -55,6 +55,6 @@ const SidebarHeader = ({
   )
 }
 
-SidebarHeader.displayName = 'SidebarHeader'
+ApplicationSidebarHeader.displayName = 'ApplicationSidebarHeader'
 
-export default SidebarHeader
+export default ApplicationSidebarHeader

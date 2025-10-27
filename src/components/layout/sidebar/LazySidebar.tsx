@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 
 // Lazy imports for sidebar components
-const SidebarHeader = dynamic(() => import('./SidebarHeader').then(mod => ({ default: mod.default })), {
+const ApplicationSidebarHeader = dynamic(() => import('./ApplicationSidebarHeader').then(mod => ({ default: mod.default })), {
   ssr: false,
   loading: () => (
     <div className="h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -142,7 +142,7 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
       )}>
         {/* Header */}
         <Suspense fallback={<div className="h-16 border-b border-border" />}>
-          <SidebarHeader
+          <ApplicationSidebarHeader
             isMobile={Boolean(isOpen && onToggle)}
             onClose={onToggle}
           />

@@ -372,8 +372,8 @@ export function useBatchStatus(batchId: string) {
       }
 
       await updateBatch(batchId, updateData)
-    } catch (err: unknown) {
-      throw new Error(`Failed to update batch status: ${_error}`)
+    } catch (error: unknown) {
+      throw new Error(`Failed to update batch status: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
