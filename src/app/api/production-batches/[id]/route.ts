@@ -1,82 +1,88 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/supabase-generated';
-import { NextResponse } from 'next/server';
-import { getErrorMessage } from '@/lib/type-guards';
+import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
+    
+    // ✅ Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+    }
 
+    const body = await request.json()
+    const { id } = params
+
+    // ✅ Update with RLS (user_id filter)
     const { data: batch, error } = await supabase
       .from('productions')
+      .update(body)
+      .eq('id', id)
+      .eq('user_id', user.id)
       .select(`
         *,
-        recipe:recipes(name)
+        recipe:recipes(name, unit)
       `)
-      .eq('id', id)
-      .single();
+      .single()
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        throw new APIError('Production batch not found', 404, 'NOT_FOUND')
+      }
+      apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to update production batch')
+      throw error
+    }
 
-    return NextResponse.json(batch);
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
-  }
-}
+    // ✅ Map database columns to expected format
+    const mappedBatch = {
+      ...batch,
+      batch_number: batch.id.slice(0, 8).toUpperCase(),
+      planned_date: batch.created_at,
+      actual_cost: batch.total_cost,
+      unit: Array.isArray(batch.recipe) ? batch.recipe[0]?.unit : batch.recipe?.unit || 'pcs'
+    }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  try {
-    const supabase = await createClient();
-    const body = await request.json();
-
-    const updatePayload = {
-      ...body,
-      updated_at: new Date().toISOString()
-    };
-
-    const { data: batch, error } = await supabase
-      .from('productions')
-      .update(updatePayload)
-      .eq('id', id)
-      .select(`
-        *,
-        recipe:recipes(name)
-      `)
-      .single();
-
-    if (error) {throw error;}
-
-    return NextResponse.json(batch);
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    return NextResponse.json(mappedBatch)
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
+    
+    // ✅ Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
+    }
 
+    const { id } = params
+
+    // ✅ Delete with RLS (user_id filter)
     const { error } = await supabase
       .from('productions')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id)
 
-    if (error) {throw error;}
+    if (error) {
+      apiLogger.error({ error, userId: user.id, batchId: id }, 'Failed to delete production batch')
+      throw error
+    }
 
-    return NextResponse.json({ message: 'Production log deleted successfully' });
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    return NextResponse.json({ message: 'Production batch deleted successfully' })
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
 }

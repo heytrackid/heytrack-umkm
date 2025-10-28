@@ -45,7 +45,7 @@ export const OrderUpdateSchema = OrderInsertSchema.partial().omit({ items: true 
 
 // Order form schemas
 export const OrderFormSchema = z.object({
-  order_no: z.string().min(1, 'validation.orderNumberRequired').optional(),
+  order_no: z.string().min(1, 'validation.OrderNoRequired').optional(),
   customer_id: UUIDSchema.optional(),
   customer_name: z.string().min(1, 'validation.customerNameRequired'),
   customer_phone: z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number').optional().or(z.literal('')),

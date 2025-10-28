@@ -41,7 +41,7 @@ export interface OrderFormProps {
 
 // Form data for creating/updating orders
 export interface OrderFormData {
-  order_number: string
+  order_no: string
   customer_name: string
   customer_phone?: string
   customer_address?: string

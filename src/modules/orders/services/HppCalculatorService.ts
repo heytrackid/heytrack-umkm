@@ -9,7 +9,8 @@ type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row'
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Production = Database['public']['Tables']['productions']['Row']
 
-interface HppCalculationResult {
+// Use type instead of interface for consistency
+type HppCalculationResult = {
   recipeId: string;
   materialCost: number;
   laborCost: number;

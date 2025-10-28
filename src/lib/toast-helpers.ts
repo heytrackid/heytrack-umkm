@@ -85,9 +85,9 @@ export const showUpdateSuccess = (itemName?: string, action?: ToastAction) => {
   )
 }
 
-export const showOrderSuccess = (orderNumber: string, action?: ToastAction) => {
+export const showOrderSuccess = (orderNo: string, action?: ToastAction) => {
   showSuccess(
-    `Pesanan ${orderNumber} berhasil dibuat! 🎊`,
+    `Pesanan ${orderNo} berhasil dibuat! 🎊`,
     'Pesanan Berhasil',
     action
   )

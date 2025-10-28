@@ -3,16 +3,27 @@
  * Offloads heavy calculations from main thread
  */
 
-interface HppCalculationInput {
+import type { Database } from '@/types/supabase-generated'
+
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+
+/**
+ * Worker input type based on generated types
+ */
+type HppCalculationInput = {
   ingredients: Array<{
-    quantity: number
-    price_per_unit: number
+    quantity: RecipeIngredient['quantity']
+    price_per_unit: Ingredient['price_per_unit']
   }>
   operationalCost: number
   batchSize: number
 }
 
-interface HppCalculationResult {
+/**
+ * Worker output type
+ */
+type HppCalculationResult = {
   materialCost: number
   operationalCostPerUnit: number
   totalCost: number

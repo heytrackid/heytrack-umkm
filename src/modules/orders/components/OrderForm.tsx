@@ -1,6 +1,4 @@
 'use client'
-
-import { uiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 type Customer = Database['public']['Tables']['customers']['Row']
 import { Button } from '@/components/ui/button'
@@ -13,8 +11,8 @@ import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import { memo, useEffect, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
-import type { Order, OrderFormProps, OrderItem, PaymentMethod } from '@/app/orders/types/orders-db.types'
-import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
+import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
+import { calculateOrderTotals, generateOrderNo } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
 import type { RecipesTable } from '@/types/recipes'
 
@@ -46,7 +44,6 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   const [availableCustomers, setAvailableCustomers] = useState<Customer[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
   const [showNewCustomer, setShowNewCustomer] = useState(false)
-  const [hppCalculations, setHppCalculations] = useState<Record<string, unknown>>({})
 
   const [formData, setFormData] = useState<FormState>({
     customer_name: order?.customer_name ?? '',
@@ -58,16 +55,16 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       ? order.delivery_date.split('T')[1]?.slice(0, 5) ?? ''
       : '',
     delivery_fee: order?.delivery_fee ?? ORDER_CONFIG.DEFAULT_DELIVERY_FEE,
-    discount: order?.discount_amount ?? 0,
-    tax_amount: order?.tax_rate ?? ORDER_CONFIG.DEFAULT_TAX_RATE,
+    discount: order?.discount ?? 0,
+    tax_amount: order?.tax_amount ?? ORDER_CONFIG.DEFAULT_TAX_RATE,
     payment_method: 'cash',
     paid_amount: order?.paid_amount ?? 0,
     priority: order?.priority ?? ORDER_CONFIG.DEFAULT_PRIORITY,
     notes: order?.notes ?? '',
-    special_instructions: order?.special_requirements ?? ''
+    special_instructions: order?.special_instructions ?? ''
   })
 
-  const [orderItems, setOrderItems] = useState<OrderItem[]>(order?.items || [])
+  const [orderItems, setOrderItems] = useState<OrderItemWithRecipe[]>(order?.items || [])
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const { subtotal, taxAmount, totalAmount } = calculateOrderTotals(
@@ -134,7 +131,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     const firstRecipe = availableRecipes[0]
     if (!firstRecipe) { return }
 
-    const newItem: OrderItem = {
+    const newItem: OrderItemWithRecipe = {
       id: `temp-${Date.now()}`,
       order_id: '',
       recipe_id: firstRecipe.id,
@@ -143,6 +140,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       unit_price: firstRecipe.selling_price ?? 0,
       total_price: firstRecipe.selling_price ?? 0,
       special_requests: null,
+      updated_at: null,
       user_id: '',
       recipe: {
         id: firstRecipe.id,
@@ -156,10 +154,10 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     void setOrderItems(prev => [...prev, newItem])
   }
 
-  const updateOrderItem = <K extends keyof OrderItem>(
+  const updateOrderItem = <K extends keyof OrderItemWithRecipe>(
     index: number,
     field: K,
-    value: OrderItem[K] | string
+    value: OrderItemWithRecipe[K] | string
   ) => {
     setOrderItems(prev => {
       const updated = [...prev]
@@ -237,7 +235,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     setFieldErrors({})
 
     const orderData = {
-      order_number: order?.order_number ?? generateOrderNumber(),
+      order_no: order?.order_no ?? generateOrderNo(),
       customer_name: formData.customer_name,
       customer_phone: formData.customer_phone,
       customer_address: formData.customer_address,
@@ -264,7 +262,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       }))
     }
 
-    await onSubmit(orderData as Partial<Order>)
+    await onSubmit(orderData)
   }
 
   return (

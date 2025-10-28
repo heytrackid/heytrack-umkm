@@ -52,6 +52,44 @@ export interface OrderWithRelations extends Order {
   payments?: Payment[]
 }
 
+// Service types for order-recipe operations
+export interface RecipeOption {
+  id: string
+  name: string
+  category: string
+  servings: number
+  description?: string | null
+  price: number
+  hpp_cost: number
+  margin: number
+  is_available: boolean
+  estimated_prep_time: number
+}
+
+export interface OrderItemCalculation {
+  recipe_id: string
+  recipe_name: string
+  quantity: number
+  unit_price: number
+  total_price: number
+  estimated_cost: number
+  total_cost: number
+  profit: number
+  margin_percentage: number
+}
+
+export interface OrderPricing {
+  items: OrderItemCalculation[]
+  subtotal: number
+  tax_amount: number
+  tax_rate: number
+  discount_amount: number
+  total_amount: number
+  total_estimated_cost: number
+  total_profit: number
+  overall_margin: number
+}
+
 // API Response types
 export interface CreateOrderRequest {
   customer_name: string
@@ -94,7 +132,7 @@ export interface OrderFilters {
   date_from?: string
   date_to?: string
   customer_search?: string
-  order_number_search?: string
+  order_no_search?: string
   min_amount?: number
   max_amount?: number
 }

@@ -9,15 +9,15 @@ import { OrderForm } from './OrderForm'
 
 import { uiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
+import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 
 type Order = Database['public']['Tables']['orders']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
 
 export const OrdersTableView = () => {
   const queryClient = useQueryClient()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
-  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [editingOrder, setEditingOrder] = useState<OrderWithItems | undefined>(undefined)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
   // ✅ Use TanStack Query for orders
@@ -37,7 +37,12 @@ export const OrdersTableView = () => {
   }
 
   const handleEditOrder = (order: Order) => {
-    void setEditingOrder(order)
+    // Convert Order to OrderWithItems
+    const orderWithItems: OrderWithItems = {
+      ...order,
+      items: [] // Will be loaded by the form if needed
+    }
+    void setEditingOrder(orderWithItems)
     void setShowOrderForm(true)
   }
 
@@ -145,7 +150,7 @@ export const OrdersTableView = () => {
       <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
         <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_number || selectedOrder?.id}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl">Detail Pesanan {selectedOrder?.order_no || selectedOrder?.id}</DialogTitle>
           </DialogHeader>
           {selectedOrder && <OrderDetailView order={selectedOrder} />}
         </DialogContent>
@@ -156,21 +161,21 @@ export const OrdersTableView = () => {
         <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-lg sm:text-xl">
-              {editingOrder ? `Edit Pesanan ${editingOrder.order_number || editingOrder.id}` : 'Buat Pesanan Baru'}
+              {editingOrder ? `Edit Pesanan ${editingOrder.order_no || editingOrder.id}` : 'Buat Pesanan Baru'}
             </DialogTitle>
           </DialogHeader>
           <OrderForm
             order={editingOrder}
             onSubmit={async (data) => {
               // Handle form submission
-              uiLogger.info({ orderId: data.id }, 'Order submitted')
-              await fetchOrders()
+              uiLogger.info({ orderNo: data.order_no }, 'Order submitted')
+              await queryClient.invalidateQueries({ queryKey: ['orders'] })
               void setShowOrderForm(false)
-              void setEditingOrder(null)
+              void setEditingOrder(undefined)
             }}
             onCancel={() => {
               void setShowOrderForm(false)
-              void setEditingOrder(null)
+              void setEditingOrder(undefined)
             }}
           />
         </DialogContent>

@@ -375,7 +375,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                   {orders.slice(0, 5).map((order) => (
                     <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex-1">
-                        <div className="font-medium">{order.order_number}</div>
+                        <div className="font-medium">{order.order_no}</div>
                         <div className="text-sm text-muted-foreground">{order.customer_name}</div>
                         <div className="text-xs text-muted-foreground">{formatDate(order.order_date)}</div>
                       </div>
@@ -537,7 +537,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="space-y-1">
-                          <div className="font-semibold text-lg">{order.order_number}</div>
+                          <div className="font-semibold text-lg">{order.order_no}</div>
                           <div className="text-sm text-muted-foreground">
                             {order.customer_name} • {formatDate(order.order_date)}
                           </div>

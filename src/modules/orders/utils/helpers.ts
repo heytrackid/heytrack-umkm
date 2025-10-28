@@ -17,7 +17,7 @@ export function getPriorityInfo(priority: string) {
 /**
  * Generate order number with timestamp
  */
-export function generateOrderNumber(): string {
+export function generateOrderNo(): string {
   const today = new Date()
   const dateStr = today.toISOString().split('T')[0].replace(/-/g, '')
   const timeStr = Math.floor(Date.now() / 1000).toString().slice(-3)

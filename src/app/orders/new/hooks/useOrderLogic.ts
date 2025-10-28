@@ -192,7 +192,7 @@ export const useOrderLogic = () => {
     }))
   }
 
-  const generateOrderNumber = () => {
+  const generateOrderNo = () => {
     const today = new Date()
     const dateStr = today.toISOString().substring(0, 10).replace(/-/g, '')
     const timeStr = String(Math.floor(Date.now() / 1000)).slice(-4)
@@ -211,10 +211,10 @@ export const useOrderLogic = () => {
     void setError('')
     
     try {
-      const orderNumber = generateOrderNumber()
+      const orderNo = generateOrderNo()
       
       const orderData = {
-        order_no: orderNumber,
+        order_no: orderNo,
         customer_name: formData.customer_name,
         customer_phone: formData.customer_phone,
         customer_email: formData.customer_email,

@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
-import type { RecipeOption } from './OrderRecipeService'
+import type { RecipeOption } from '../types'
 
 /**
  * Service for handling recipe availability and ingredient checking

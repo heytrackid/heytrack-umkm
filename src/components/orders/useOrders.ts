@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
-import { generateOrderNumber } from './utils'
+import { generateOrderNo } from './utils'
 import { apiLogger } from '@/lib/logger'
 
 // Query keys for cache management
@@ -83,7 +83,7 @@ export function useOrders() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: OrderFormData) => {
       const newOrder = {
-        order_no: generateOrderNumber(),
+        order_no: generateOrderNo(),
         ...orderData,
         status: 'PENDING' as OrderStatus,
         payment_status: 'UNPAID' as const,

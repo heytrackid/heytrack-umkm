@@ -1,20 +1,33 @@
 import { dbLogger } from '@/lib/logger'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { extractFirst, ensureArray } from '@/lib/type-guards'
-import type { TablesInsert, TablesUpdate } from '@/types/supabase-generated'
+import type { Database, TablesInsert, TablesUpdate } from '@/types/supabase-generated'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 /**
  * Recipe ingredients query result type
+ * Uses generated types as base
  */
-interface RecipeIngredientsQueryResult {
-  recipe_ingredients: Array<{
-    quantity: number
-    ingredient: Array<{
-      id: string
-      current_stock: number | null
-    }>
+type RecipeIngredientsQueryResult = Recipe & {
+  recipe_ingredients: Array<RecipeIngredient & {
+    ingredient: Pick<Ingredient, 'id' | 'current_stock'>[]  // Supabase returns arrays
   }>
+}
+
+/**
+ * Type guard for recipe ingredients query result
+ */
+function isRecipeIngredientsResult(data: unknown): data is RecipeIngredientsQueryResult {
+  if (!data || typeof data !== 'object') return false
+  const recipe = data as RecipeIngredientsQueryResult
+  return (
+    typeof recipe.id === 'string' &&
+    Array.isArray(recipe.recipe_ingredients)
+  )
 }
 
 /**
@@ -53,7 +66,12 @@ export class InventoryUpdateService {
 
         if (error || !recipe) {continue}
 
-        const typedRecipe = recipe as unknown as RecipeIngredientsQueryResult
+        if (!isRecipeIngredientsResult(recipe)) {
+          dbLogger.error({ recipe }, 'Invalid recipe data structure')
+          continue
+        }
+
+        const typedRecipe = recipe
 
         // Update ingredient stock
         for (const ri of typedRecipe.recipe_ingredients || []) {

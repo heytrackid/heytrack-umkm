@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 
-type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
 
 /**
  * DELETE /api/financial/records/[id]
@@ -117,7 +117,7 @@ export async function PATCH(
     // TODO: Re-implement source tracking if needed for auto-sync prevention
 
     // Build update object with proper typing
-    const updates: Partial<FinancialRecord> = {}
+    const updates: FinancialRecordUpdate = {}
     if (description !== undefined) updates.description = description
     if (category !== undefined) updates.category = category
     if (amount !== undefined) {
@@ -131,10 +131,10 @@ export async function PATCH(
     }
     if (date !== undefined) updates.date = date
 
-    // Update the record - Workaround: Supabase SSR type inference issue
+    // Update the record
     const { data: updatedRecord, error: updateError } = await supabase
       .from('financial_records')
-      .update(updates as any)
+      .update(updates as never)
       .eq('id', id)
       .eq('user_id', user.id)
       .select()

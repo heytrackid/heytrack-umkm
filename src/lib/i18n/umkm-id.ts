@@ -98,7 +98,7 @@ export const UMKM_ID = {
   orders: {
     title: "Kelola Pesanan",
     addNew: "Tambah Pesanan Baru",
-    orderNumber: "No. Pesanan",
+    orderNo: "No. Pesanan",
     customerName: "Nama Pelanggan",
     customerPhone: "No. HP Pelanggan",
     customerEmail: "Email Pelanggan",

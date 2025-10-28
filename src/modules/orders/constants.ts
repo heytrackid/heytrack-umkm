@@ -4,8 +4,8 @@ import { formatCurrentCurrency } from '@/lib/currency'
 // Order Configuration Constants
 export const ORDER_CONFIG = {
   // Order numbering
-  ORDER_NUMBER_PREFIX: 'ORD',
-  ORDER_NUMBER_LENGTH: 8, // ORD00001234
+  ORDER_NO_PREFIX: 'ORD',
+  ORDER_NO_LENGTH: 8, // ORD00001234
   
   // Default values
   DEFAULT_TAX_RATE: 0.11, // PPN 11% Indonesia
@@ -306,27 +306,27 @@ export const INDONESIAN_CONFIG = {
 export const NOTIFICATION_TEMPLATES = {
   ORDER_CREATED: {
     title: 'Pesanan Baru Dibuat',
-    message: 'Pesanan #{order_number} telah dibuat untuk {customer_name}',
+    message: 'Pesanan #{order_no} telah dibuat untuk {customer_name}',
     type: 'info'
   },
   ORDER_CONFIRMED: {
     title: 'Pesanan Dikonfirmasi',
-    message: 'Pesanan #{order_number} telah dikonfirmasi dan akan segera diproduksi',
+    message: 'Pesanan #{order_no} telah dikonfirmasi dan akan segera diproduksi',
     type: 'success'
   },
   ORDER_READY: {
     title: 'Pesanan Siap Diambil',
-    message: 'Pesanan #{order_number} sudah siap. Silakan diambil atau akan dikirim sesuai jadwal',
+    message: 'Pesanan #{order_no} sudah siap. Silakan diambil atau akan dikirim sesuai jadwal',
     type: 'success'
   },
   PAYMENT_RECEIVED: {
     title: 'Pembayaran Diterima',
-    message: 'Pembayaran sebesar {amount} untuk pesanan #{order_number} telah diterima',
+    message: 'Pembayaran sebesar {amount} untuk pesanan #{order_no} telah diterima',
     type: 'success'
   },
   ORDER_CANCELLED: {
     title: 'Pesanan Dibatalkan',
-    message: 'Pesanan #{order_number} telah dibatalkan',
+    message: 'Pesanan #{order_no} telah dibatalkan',
     type: 'warning'
   }
 } as const

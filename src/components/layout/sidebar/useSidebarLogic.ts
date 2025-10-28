@@ -83,31 +83,29 @@ export const useSidebarLogic = () => {
       } catch (error) {
         // Ignore localStorage errors
       }
-    }, 100) // Debounce to avoid excessive writes
+    }, 300) // Increased debounce to reduce writes
 
     return () => clearTimeout(timeoutId)
   }, [collapsedSections, isHydrated])
 
-  // Prefetch next likely routes - staggered to avoid blocking
+  // Prefetch only critical routes on idle
   useEffect(() => {
-    // Only prefetch after component is mounted and idle
+    // Only prefetch after component is mounted and browser is idle
     const timeoutId = setTimeout(() => {
-      const routesToPrefetch = [
-        '/', '/orders', '/ingredients', '/recipes', '/customers', 
-        '/cash-flow', '/profit', '/reports'
-      ]
-      
-      // Stagger prefetch requests to avoid blocking
-      routesToPrefetch.forEach((route, index) => {
-        setTimeout(() => {
-          try { 
-            router.prefetch(route) 
-          } catch (error) { 
-            // Ignore prefetch errors
-          }
-        }, index * 50) // 50ms delay between each prefetch
-      })
-    }, 500) // Wait 500ms after mount before starting prefetch
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          const criticalRoutes = ['/', '/orders', '/ingredients']
+          
+          criticalRoutes.forEach((route) => {
+            try { 
+              router.prefetch(route) 
+            } catch (error) { 
+              // Ignore prefetch errors
+            }
+          })
+        })
+      }
+    }, 2000) // Wait 2s after mount before prefetching
 
     return () => clearTimeout(timeoutId)
   }, [router])

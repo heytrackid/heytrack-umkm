@@ -5,7 +5,8 @@ import type { Database } from '@/types/supabase-generated'
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type StockTransaction = Database['public']['Tables']['stock_transactions']['Row']
 
-interface WacCalculation {
+// Use type instead of interface for consistency
+type WacCalculation = {
   ingredientId: string
   currentWac: number
   totalQuantity: number
@@ -13,7 +14,7 @@ interface WacCalculation {
   lastUpdated: string
 }
 
-interface WacUpdateResult {
+type WacUpdateResult = {
   ingredientId: string
   oldWac: number
   newWac: number

@@ -43,12 +43,12 @@ export const selectFields = {
   `,
 
   // Minimal order fields
-  orderMinimal: 'id, order_number, customer_id, status, total_amount, created_at',
+  orderMinimal: 'id, order_no, customer_id, status, total_amount, created_at',
 
   // Order with details
   orderWithDetails: `
     id,
-    order_number,
+    order_no,
     customer_id,
     status,
     payment_status,

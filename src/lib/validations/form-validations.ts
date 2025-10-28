@@ -117,7 +117,7 @@ export type CustomerFormData = z.infer<typeof CustomerSchema>
 
 // Order validation schema
 export const OrderSchema = z.object({
-  order_no: z.string().min(1, 'validation.orderNumberRequired'),
+  order_no: z.string().min(1, 'validation.OrderNoRequired'),
   customer_id: UUIDSchema.optional(),
   customer_name: optionalString,
   customer_phone: PhoneSchema.optional(),

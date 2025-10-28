@@ -2,7 +2,6 @@ import { memo, useMemo, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ChevronLeft, ChevronRight, Eye, Edit, Trash2, MoreVertical } from 'lucide-react'
 import {
   DropdownMenu,
@@ -13,14 +12,10 @@ import {
 import type { Database } from '@/types/supabase-generated'
 
 type Order = Database['public']['Tables']['orders']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
-type PaymentStatus = Database['public']['Enums']['payment_status']
 
 // Extended type for table display
 interface OrderForTable extends Order {
-  order_number: string
-  customer_phone: string
-  due_date: string
+  // All fields are already in Order type
 }
 
 const OrdersTableSection = ({
@@ -85,27 +80,29 @@ const OrdersTableSection = ({
         <TableBody>
           {paginatedOrders.map((order: OrderForTable) => (
             <TableRow key={order.id}>
-              <TableCell className="font-medium">{order.order_number}</TableCell>
+              <TableCell className="font-medium">{order.order_no}</TableCell>
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium">{order.customer_name}</span>
-                  <span className="text-xs text-muted-foreground">{order.customer_phone}</span>
+                  <span className="font-medium">{order.customer_name ?? '-'}</span>
+                  {order.customer_phone && (
+                    <span className="text-xs text-muted-foreground">{order.customer_phone}</span>
+                  )}
                 </div>
               </TableCell>
-              <TableCell>{formatDate(order.order_date)}</TableCell>
-              <TableCell>{formatDate(order.due_date)}</TableCell>
+              <TableCell>{order.order_date ? formatDate(order.order_date) : '-'}</TableCell>
+              <TableCell>{order.delivery_date ? formatDate(order.delivery_date) : '-'}</TableCell>
               <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${ORDER_STATUS_CONFIG[order.status]?.color}`}>
-                  {ORDER_STATUS_CONFIG[order.status]?.label || order.status}
+                <span className={`text-xs px-2 py-1 rounded ${order.status ? ORDER_STATUS_CONFIG[order.status]?.color : 'bg-gray-100 text-gray-800'}`}>
+                  {order.status ? (ORDER_STATUS_CONFIG[order.status]?.label || order.status) : 'Unknown'}
                 </span>
               </TableCell>
               <TableCell>
-                <span className={`text-xs px-2 py-1 rounded ${PAYMENT_STATUS_CONFIG[order.payment_status]?.color}`}>
-                  {PAYMENT_STATUS_CONFIG[order.payment_status]?.label || order.payment_status}
+                <span className={`text-xs px-2 py-1 rounded ${order.payment_status ? PAYMENT_STATUS_CONFIG[order.payment_status]?.color : 'bg-gray-100 text-gray-800'}`}>
+                  {order.payment_status ? (PAYMENT_STATUS_CONFIG[order.payment_status]?.label || order.payment_status) : 'Unknown'}
                 </span>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {formatCurrency(order.total_amount)}
+                {formatCurrency(order.total_amount ?? 0)}
               </TableCell>
               <TableCell className="text-center">
                 <DropdownMenu>

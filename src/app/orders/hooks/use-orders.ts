@@ -324,7 +324,7 @@ export function useInvoiceGeneration() {
       totals_breakdown: totalsBreakdown,
       payment_terms: paymentTerms,
       due_date: dueDate.toISOString().split('T')[0],
-      invoice_number: order.order_number || `INV-${order.id.slice(-8)}`,
+      invoice_number: order.order_no || `INV-${order.id.slice(-8)}`,
       notes: order.notes
     }
   }

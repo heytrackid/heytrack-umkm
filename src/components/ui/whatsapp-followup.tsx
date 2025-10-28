@@ -32,7 +32,7 @@ import {
 
 // Extended type for WhatsApp follow-up
 interface OrderForWhatsApp extends Order {
-  order_number: string
+  order_no: string
   due_date?: string
   items: Array<OrderItem & {
     recipe?: Pick<Recipe, 'name'>
@@ -112,7 +112,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     // Replace common variables
     const replacements = {
       'customer_name': orderData.customer_name,
-      'order_number': orderData.order_number,
+      'order_no': orderData.order_no,
       'order_date': new Date(orderData.order_date).toLocaleDateString('id-ID'),
       'due_date': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : '',
       'total_amount': orderData.total_amount.toLocaleString('id-ID'),
@@ -145,11 +145,11 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
   const getCurrentMessage = () => {
     const template = getCurrentTemplate()
     if (!template) {
-      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Silakan pilih template atau tulis pesan custom]`
+      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Silakan pilih template atau tulis pesan custom]`
     }
 
     if (selectedTemplateId === 'custom') {
-      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Tulis pesan Anda di sini]`
+      return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Tulis pesan Anda di sini]`
     }
 
     return processTemplate(template.template_content, order)
@@ -228,7 +228,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
-            WhatsApp Follow-up - {order.order_number}
+            WhatsApp Follow-up - {order.order_no}
           </DialogTitle>
           <DialogDescription>
             Kirim pesan follow-up kepada pelanggan melalui WhatsApp
@@ -253,7 +253,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">No. Pesanan:</span>
-                  <span className="font-mono">{order.order_number}</span>
+                  <span className="font-mono">{order.order_no}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Status:</span>
@@ -393,7 +393,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     <Textarea
                       value={customMessage}
                       onChange={(e) => setCustomMessage(e.target.value)}
-                      placeholder={`Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Tulis pesan Anda di sini]`}
+                      placeholder={`Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_no}...\n\n[Tulis pesan Anda di sini]`}
                       rows={12}
                       className="font-mono text-sm"
                     />

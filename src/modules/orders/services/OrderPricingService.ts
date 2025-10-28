@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 import { ORDER_CONFIG } from '@/lib/constants'
 import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
-import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
+import type { OrderItemCalculation, OrderPricing } from '../types'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
@@ -59,20 +59,30 @@ export class OrderPricingService {
       if (error) {throw error}
       if (!recipes) {throw new Error('Recipes not found')}
 
-      // Type assertion for Supabase query result
-      interface RecipeQueryResult {
-        id: string
-        name: string
-        selling_price: number | null
-        servings: number | null
-        recipe_ingredients: Array<{
-          quantity: number
-          unit: string
-          ingredient: Array<{
-            price_per_unit: number
-            unit: string
-          }>
+      // Define query result type using generated types
+      type RecipeQueryResult = Recipe & {
+        recipe_ingredients: Array<RecipeIngredient & {
+          ingredient: Pick<Ingredient, 'price_per_unit' | 'unit'>[]  // Supabase returns arrays
         }>
+      }
+
+      /**
+       * Type guard for recipe query result
+       */
+      function isRecipeQueryResult(data: unknown): data is RecipeQueryResult {
+        if (!data || typeof data !== 'object') return false
+        const recipe = data as RecipeQueryResult
+        return (
+          typeof recipe.id === 'string' &&
+          typeof recipe.name === 'string' &&
+          Array.isArray(recipe.recipe_ingredients)
+        )
+      }
+
+      // Validate data structure
+      if (!Array.isArray(recipes) || !recipes.every(isRecipeQueryResult)) {
+        dbLogger.error({ recipes }, 'Invalid recipes data structure')
+        throw new Error('Invalid recipes data structure')
       }
 
       // Calculate each item with real HPP

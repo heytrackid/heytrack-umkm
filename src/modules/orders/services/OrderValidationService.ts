@@ -3,19 +3,30 @@ import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 /**
  * Recipe with ingredients for validation (query result structure)
+ * Uses generated types as base
  */
-interface RecipeValidationQueryResult {
-  id: string
-  name: string
-  recipe_ingredients: Array<{
-    quantity: number
-    unit: string
-    ingredient: Ingredient[]
+type RecipeValidationQueryResult = Recipe & {
+  recipe_ingredients: Array<RecipeIngredient & {
+    ingredient: Ingredient[]  // Supabase returns arrays for joins
   }>
+}
+
+/**
+ * Type guard for recipe validation query result
+ */
+function isRecipeValidationResult(data: unknown): data is RecipeValidationQueryResult {
+  if (!data || typeof data !== 'object') return false
+  const recipe = data as RecipeValidationQueryResult
+  return (
+    typeof recipe.id === 'string' &&
+    typeof recipe.name === 'string' &&
+    Array.isArray(recipe.recipe_ingredients)
+  )
 }
 
 /**
@@ -68,7 +79,13 @@ export class OrderValidationService {
           continue
         }
 
-        const typedRecipe = recipe as RecipeValidationQueryResult
+        if (!isRecipeValidationResult(recipe)) {
+          dbLogger.error({ recipe }, 'Invalid recipe data structure')
+          errors.push(`Data recipe ${item.recipe_id} tidak valid`)
+          continue
+        }
+
+        const typedRecipe = recipe
 
         // Check each ingredient
         for (const ri of typedRecipe.recipe_ingredients || []) {

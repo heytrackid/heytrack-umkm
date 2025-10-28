@@ -4,44 +4,7 @@ import { OrderValidationService } from './OrderValidationService'
 import { RecipeRecommendationService } from './RecipeRecommendationService'
 import { ProductionTimeService } from './ProductionTimeService'
 import { InventoryUpdateService } from './InventoryUpdateService'
-
-// Extended types for service operations
-export interface RecipeOption {
-  id: string
-  name: string
-  category: string
-  servings: number
-  description?: string | null
-  price: number
-  hpp_cost: number
-  margin: number
-  is_available: boolean
-  estimated_prep_time: number
-}
-
-export interface OrderItemCalculation {
-  recipe_id: string
-  recipe_name: string
-  quantity: number
-  unit_price: number
-  total_price: number
-  estimated_cost: number
-  total_cost: number
-  profit: number
-  margin_percentage: number
-}
-
-export interface OrderPricing {
-  items: OrderItemCalculation[]
-  subtotal: number
-  tax_amount: number
-  tax_rate: number
-  discount_amount: number
-  total_amount: number
-  total_estimated_cost: number
-  total_profit: number
-  overall_margin: number
-}
+import type { RecipeOption, OrderPricing } from '../types'
 
 /**
  * Main service class for order-recipe operations

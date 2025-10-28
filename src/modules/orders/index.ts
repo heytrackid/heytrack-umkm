@@ -64,7 +64,7 @@ export {
 export {
   getStatusInfo,
   getPriorityInfo,
-  generateOrderNumber,
+  generateOrderNo,
   calculateOrderTotals,
   getPaymentStatus
 } from './utils/helpers'

@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
-import type { RecipeOption } from './OrderRecipeService'
+import type { RecipeOption } from '../types'
 
 /**
  * Service for handling recipe recommendations based on order history
@@ -45,8 +45,19 @@ export class RecipeRecommendationService {
       if (error) {throw error}
       if (!orders) {return []}
 
-      // Analyze order patterns
-      interface RecipeFrequencyData {
+      // Define types for order query result using generated types
+      type Order = Database['public']['Tables']['orders']['Row']
+      type OrderItem = Database['public']['Tables']['order_items']['Row']
+      type Recipe = Database['public']['Tables']['recipes']['Row']
+
+      type OrderQueryResult = Order & {
+        order_items: Array<OrderItem & {
+          recipe: Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price'>[] | null
+        }> | null
+      }
+
+      // Analyze order patterns - use type instead of interface
+      type RecipeFrequencyData = {
         count: number
         recipe: {
           id: string
@@ -57,16 +68,23 @@ export class RecipeRecommendationService {
       }
       const recipeFrequency = new Map<string, RecipeFrequencyData>()
 
-      orders.forEach(order => {
-        order.order_items?.forEach((item: { recipe_id: string; quantity: number; recipe: RecipeFrequencyData['recipe'] | null }) => {
-          if (item.recipe) {
-            const existing = recipeFrequency.get(item.recipe.id)
+      orders.forEach((order: OrderQueryResult) => {
+        order.order_items?.forEach((item) => {
+          // Supabase returns arrays for joins, get first element
+          const recipe = item.recipe?.[0]
+          if (recipe) {
+            const existing = recipeFrequency.get(recipe.id)
             if (existing) {
               existing.count += item.quantity
             } else {
-              recipeFrequency.set(item.recipe.id, {
+              recipeFrequency.set(recipe.id, {
                 count: item.quantity,
-                recipe: item.recipe
+                recipe: {
+                  id: recipe.id,
+                  name: recipe.name,
+                  category: recipe.category,
+                  price: recipe.selling_price
+                }
               })
             }
           }

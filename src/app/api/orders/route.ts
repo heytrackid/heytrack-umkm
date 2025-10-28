@@ -6,6 +6,11 @@ import type { Database } from '@/types/supabase-generated'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 
+type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
+type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
+type OrderInsert = Database['public']['Tables']['orders']['Insert']
+type OrderItemInsert = Database['public']['Tables']['order_items']['Insert']
+
 type OrdersTable = Database['public']['Tables']['orders']
 // GET /api/orders - Get all orders
 export async function GET(request: NextRequest) {
@@ -133,9 +138,7 @@ export async function POST(request: NextRequest) {
 
     // If order is DELIVERED, create income record first
     if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {
-    const { data: incomeRecord, error: incomeError } = await supabase
-        .from('financial_records')
-        .insert({
+    const incomeData: FinancialRecordInsert = {
           user_id: user.id,
           type: 'INCOME',
           category: 'Revenue',
@@ -143,7 +146,11 @@ export async function POST(request: NextRequest) {
           date: validatedData.delivery_date || validatedData.order_date || new Date().toISOString().split('T')[0],
           reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${  validatedData.customer_name}` : ''}`,
           description: `Income from order ${validatedData.order_no}`
-        } as any)
+        }
+    
+    const { data: incomeRecord, error: incomeError } = await supabase
+        .from('financial_records')
+        .insert(incomeData as never)
         .select()
         .single()
 
@@ -159,9 +166,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create order with financial_record_id if income was created
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert({
+    const orderInsertData: OrderInsert = {
         user_id: user.id,
         order_no: validatedData.order_no,
         customer_id: validatedData.customer_id,
@@ -178,7 +183,11 @@ export async function POST(request: NextRequest) {
         notes: validatedData.notes,
         special_instructions: validatedData.special_instructions,
         financial_record_id: incomeRecordId
-      } as any)
+      }
+    
+    const { data: orderData, error: orderError } = await supabase
+      .from('orders')
+      .insert(orderInsertData as never)
       .select('id, order_no, customer_name, status, total_amount, created_at')
       .single()
 
@@ -202,28 +211,32 @@ export async function POST(request: NextRequest) {
 
     // Update income record with order reference
     if (incomeRecordId) {
+      const updateData: FinancialRecordUpdate = { 
+          reference: `Order ${createdOrder.id} - ${validatedData.customer_name || 'Customer'}` 
+        }
       await supabase
         .from('financial_records')
-        .update({ reference: `Order ${createdOrder.id} - ${validatedData.customer_name || 'Customer'}` } as any)
+        .update(updateData as never)
         .eq('id', incomeRecordId)
         .eq('user_id', user.id)
     }
 
     // If order items provided, create them
     if (validatedData.items && validatedData.items.length > 0) {
-      const orderItems = validatedData.items.map((item) => ({
+      const orderItems: OrderItemInsert[] = validatedData.items.map((item) => ({
         order_id: createdOrder.id,
         recipe_id: (item as any).recipe_id,
         product_name: item.product_name,
         quantity: item.quantity,
         unit_price: item.unit_price,
         total_price: item.total_price || (item.quantity * item.unit_price),
-        special_requests: item.special_requests
+        special_requests: item.special_requests,
+        user_id: user.id
       }))
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems as any)
+        .insert(orderItems as never)
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Error creating order items:')

@@ -28,7 +28,7 @@ export {
   getStatusInfo,
   getPaymentInfo,
   getPriorityInfo,
-  generateOrderNumber,
+  generateOrderNo,
   calculateOrderTotal,
   formatCurrency,
   formatTime,

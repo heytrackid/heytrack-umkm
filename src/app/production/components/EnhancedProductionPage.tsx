@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import type { Database } from '@/types/supabase-generated'
-type Production = Database['public']['Tables']['productions']['Row']
+
+// Use production_batches table (not productions)
+type ProductionBatch = Database['public']['Tables']['production_batches']['Row']
 type ProductionStatus = Database['public']['Enums']['production_status']
 type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,7 +24,6 @@ import {
     TrendingUp,
     Package,
     Play,
-    Pause,
     BarChart3,
     Filter,
     Download,
@@ -35,8 +36,10 @@ import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
 
 // Extended type for production page display
-interface ProductionWithRecipe extends Production {
+interface ProductionWithRecipe extends ProductionBatch {
     recipe?: Pick<Recipe, 'name'> | null
+    // Override status to use the enum type
+    status: ProductionStatus
 }
 
 const STATUS_CONFIG = {
@@ -70,7 +73,6 @@ export const EnhancedProductionPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [dateFilter, setDateFilter] = useState<string>('all')
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
     useEffect(() => {
         void fetchProductions()
