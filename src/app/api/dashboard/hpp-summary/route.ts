@@ -47,7 +47,6 @@ export async function GET(__request: NextRequest) {
       } | null
     }
 
-    // @ts-expect-error - Supabase join types are complex, runtime types are correct
     const { data: hppCalculations, error: hppError } = await supabase
       .from('hpp_calculations')
       .select(`
@@ -107,7 +106,6 @@ export async function GET(__request: NextRequest) {
       is_read: boolean | null
     }
 
-    // @ts-expect-error - Supabase types
     const { data: alerts, error: alertsError} = await supabase
       .from('hpp_alerts')
       .select('id, is_read')
@@ -161,7 +159,6 @@ export async function GET(__request: NextRequest) {
     }> = []
 
     for (const recipeId of Array.from(uniqueRecipeIds).slice(0, 5)) {
-      // @ts-expect-error - Supabase join types
       const { data: calcs } = await supabase
         .from('hpp_calculations')
         .select(`
