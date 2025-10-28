@@ -7,97 +7,44 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      hpp_calculations: {
+      customers: {
         Row: {
-          calculation_date: string | null
-          cost_per_unit: number
-          created_at: string | null
-          id: string
-          labor_cost: number
-          material_cost: number
-          notes: string | null
-          overhead_cost: number
-          production_quantity: number | null
-          recipe_id: string | null
-          total_hpp: number
-          user_id: string | null
-          wac_adjustment: number | null
-        }
-        Insert: {
-          calculation_date?: string | null
-          cost_per_unit?: number
-          created_at?: string | null
-          id?: string
-          labor_cost?: number
-          material_cost?: number
-          notes?: string | null
-          overhead_cost?: number
-          production_quantity?: number | null
-          recipe_id?: string | null
-          total_hpp?: number
-          user_id?: string | null
-          wac_adjustment?: number | null
-        }
-        Update: {
-          calculation_date?: string | null
-          cost_per_unit?: number
-          created_at?: string | null
-          id?: string
-          labor_cost?: number
-          material_cost?: number
-          notes?: string | null
-          overhead_cost?: number
-          production_quantity?: number | null
-          recipe_id?: string | null
-          total_hpp?: number
-          user_id?: string | null
-          wac_adjustment?: number | null
-        }
-      }
-      recipes: {
-        Row: {
-          id: string
+          address: string | null
           name: string
-          selling_price: number | null
           user_id: string
-          servings: number | null
-          cost_per_unit: number | null
+          email: string | null
+          phone: string | null
+          customer_type: string | null
+          discount_percentage: number | null
+          notes: string | null
           is_active: boolean | null
-          category: string | null
-          last_made_at: string | null
-          times_made: number | null
+          loyalty_points: number | null
+          id: string
           created_at: string | null
           updated_at: string | null
         }
-      }
-      hpp_alerts: {
-        Row: {
-          id: string
-          recipe_id: string
-          user_id: string | null
-          alert_type: string
-          message: string
-          is_read: boolean | null
-          created_at: string | null
-        }
-        Update: {
-          is_read?: boolean | null
-        }
-      }
-      customers: {
         Insert: {
-          user_id: string
+          address?: string | null
           name: string
+          user_id: string
           email?: string | null
           phone?: string | null
+          customer_type?: string | null
+          discount_percentage?: number | null
+          notes?: string | null
+          is_active?: boolean | null
+          loyalty_points?: number | null
+        }
+        Update: {
           address?: string | null
+          name?: string
+          email?: string | null
+          phone?: string | null
           customer_type?: string | null
           discount_percentage?: number | null
           notes?: string | null
@@ -109,30 +56,58 @@ export type Database = {
         Row: {
           id: string
           amount: number
-        }
-      }
-      notifications: {
-        Insert: {
-          type: string
           category: string
-          title: string
-          message: string
-          entity_type?: string | null
-          entity_id?: string | null
-          priority?: string | null
+          description: string
+          user_id: string
+          subcategory: string | null
+          expense_date: string | null
+          is_recurring: boolean | null
+          recurring_frequency: string | null
+          supplier: string | null
+          payment_method: string | null
+          status: string | null
+          receipt_number: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          description?: string
+          subcategory?: string | null
+          expense_date?: string | null
+          is_recurring?: boolean | null
+          recurring_frequency?: string | null
+          supplier?: string | null
+          payment_method?: string | null
+          status?: string | null
+          receipt_number?: string | null
         }
       }
-      daily_sales_summary: {
+      orders: {
+        Row: {
+          id: string
+          order_no: string
+          user_id: string
+          status: string | null
+          total_amount: number | null
+        }
+      }
+      order_items: {
         Insert: {
-          sales_date: string
-          total_revenue?: number | null
-          total_orders?: number | null
-          total_items_sold?: number | null
-          average_order_value?: number | null
-          expenses_total?: number | null
-          profit_estimate?: number | null
-          new_customers?: number | null
-          metadata?: Json | null
+          order_id: string
+          recipe_id: string
+          quantity: number
+          unit_price: number
+          total_price: number
+          user_id: string
+        }
+      }
+      ingredients: {
+        Row: {
+          id: string
+          name: string
+          user_id: string
         }
       }
       financial_records: {
@@ -146,17 +121,10 @@ export type Database = {
           type: 'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'WITHDRAWAL'
         }
       }
-      hpp_snapshots: {
-        Insert: {
-          recipe_id: string
-          user_id?: string | null
-          snapshot_date?: string
-          hpp_value: number
-          material_cost: number
-          operational_cost: number
-          cost_breakdown: Json
-        }
-      }
     }
   }
 }
+
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
+export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
