@@ -20,7 +20,7 @@ import { uiLogger } from '@/lib/logger'
 
 export const ReportsModule = {
   generateReport: (config: ReportConfig) => {
-    uiLogger.debug('Report generation not implemented yet', { config })
+    uiLogger.debug({ config }, 'Report generation not implemented yet')
     return null
   }
 }

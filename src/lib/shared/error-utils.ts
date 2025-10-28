@@ -52,7 +52,7 @@ export function useErrorHandler() {
     const message = getErrorMessage(error)
     const title = context ? `${context} Error` : 'Error'
 
-    logger.error(`${context || 'App'} Error`, { error })
+    logger.error({ error }, `${context || 'App'} Error`)
 
     toast({
       title,
@@ -119,14 +119,14 @@ export function formatFormErrors(errors: Record<string, any>): string[] {
 // Error boundary helpers
 export function logErrorToService(error: Error, context?: any) {
   // In a real app, send to error monitoring service like Sentry
-  logger.error('Error logged to service', {
+  logger.error({
     error: error.message,
     stack: error.stack,
     context,
     timestamp: new Date().toISOString(),
     userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'server',
     url: typeof window !== 'undefined' ? window.location.href : 'server'
-  })
+  }, 'Error logged to service')
 }
 
 // Retry utilities

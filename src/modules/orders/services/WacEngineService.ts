@@ -30,7 +30,7 @@ export class WacEngineService {
    */
   async calculateIngredientWac(ingredientId: string): Promise<WacCalculation | null> {
     try {
-      this.logger.info(`Calculating WAC for ingredient ${ingredientId}`)
+      this.logger.info({ ingredientId }, 'Calculating WAC for ingredient')
 
       // Get all purchase transactions for this ingredient, ordered by date
       const { data: transactions, error } = await this.supabase
@@ -45,7 +45,7 @@ export class WacEngineService {
       }
 
       if (!transactions || transactions.length === 0) {
-        this.logger.info(`No purchase transactions found for ingredient ${ingredientId}`)
+        this.logger.info({ ingredientId }, 'No purchase transactions found for ingredient')
         return null
       }
 
@@ -73,7 +73,7 @@ export class WacEngineService {
         lastUpdated: new Date().toISOString()
       }
 
-      this.logger.info(`WAC calculated for ingredient ${ingredientId}: ${currentWac}`)
+      this.logger.info({ ingredientId, currentWac }, 'WAC calculated for ingredient')
       return result
 
     } catch (err: unknown) {
@@ -87,7 +87,7 @@ export class WacEngineService {
    */
   async updateWacOnPurchase(ingredientId: string, newQuantity: number, unitPrice: number): Promise<WacUpdateResult | null> {
     try {
-      this.logger.info(`Updating WAC for ingredient ${ingredientId} with new purchase`)
+      this.logger.info({ ingredientId }, 'Updating WAC for ingredient with new purchase')
 
       // Get current WAC
       const currentWac = await this.calculateIngredientWac(ingredientId)
@@ -110,7 +110,7 @@ export class WacEngineService {
       // Update ingredient's price_per_unit with new WAC if it differs significantly
       await this.updateIngredientPriceIfNeeded(ingredientId, oldWac, newWac)
 
-      this.logger.info(`WAC updated for ingredient ${ingredientId}: ${oldWac} -> ${newWac}`)
+      this.logger.info({ ingredientId, oldWac, newWac }, 'WAC updated for ingredient')
       return result
 
     } catch (err: unknown) {
@@ -160,7 +160,7 @@ export class WacEngineService {
         .single()
 
       if (error || !ingredient) {
-        this.logger.warn(`Could not fetch ingredient ${ingredientId} for price update`)
+        this.logger.warn({ ingredientId }, 'Could not fetch ingredient for price update')
         return
       }
 

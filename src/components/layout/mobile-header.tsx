@@ -175,7 +175,7 @@ const MobileHeader = ({
 
           {/* Title - Hidden when search is expanded */}
           {!isSearchExpanded && title && (
-            <h1 className="font-semibold text-lg truncate">
+            <h1 className="font-semibold text-lg text-wrap-mobile">
               {title}
             </h1>
           )}

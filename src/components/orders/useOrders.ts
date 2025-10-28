@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
 import { generateOrderNumber } from './utils'
-
 import { apiLogger } from '@/lib/logger'
 
+// Query keys for cache management
+const orderKeys = {
+  all: ['orders'] as const,
+  list: (limit?: number) => [...orderKeys.all, 'list', limit] as const,
+}
+
 export function useOrders() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient()
   
   const [filters, setFilters] = useState<OrderFilters>({
     status: 'all',
@@ -16,34 +20,29 @@ export function useOrders() {
     searchTerm: ''
   })
 
-  // Fetch orders from API
-  const fetchOrders = useCallback(async () => {
-    try {
-      void setLoading(true)
-      void setError(null)
-      
+  // ✅ Use TanStack Query for automatic caching and refetching
+  const { data: orders = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: orderKeys.list(50),
+    queryFn: async () => {
       const response = await fetch('/api/orders?limit=50')
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
-      
-      const data = await response.json()
-      void setOrders(data)
-    } catch (err) {
-      apiLogger.error({ error: err }, 'Error fetching orders:')
-      void setError(err instanceof Error ? err.message : 'Failed to fetch orders')
-    } finally {
-      void setLoading(false)
-    }
-  }, [])
+      return response.json() as Promise<Order[]>
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  })
 
-  // Initial fetch
-  useEffect(() => {
-    void fetchOrders()
-  }, [fetchOrders])
+  const error = queryError ? (queryError as Error).message : null
 
-  // Filter orders
-  const filteredOrders = orders.filter(order => {
+  // Manual refetch function
+  const fetchOrders = () => {
+    queryClient.invalidateQueries({ queryKey: orderKeys.all })
+  }
+
+  // Filter orders (memoized for performance)
+  const filteredOrders = useMemo(() => orders.filter(order => {
     // Search filter
     const searchMatch = !filters.searchTerm || 
       (order.order_no && order.order_no.toLowerCase().includes(filters.searchTerm.toLowerCase())) ||
@@ -65,10 +64,10 @@ export function useOrders() {
     const dateToMatch = !filters.dateTo || orderDate <= new Date(filters.dateTo)
 
     return searchMatch && statusMatch && paymentMatch && priorityMatch && dateFromMatch && dateToMatch
-  })
+  }), [orders, filters])
 
-  // Calculate stats
-  const stats: OrderStats = {
+  // Calculate stats (memoized for performance)
+  const stats: OrderStats = useMemo(() => ({
     totalOrders: orders.length,
     pendingOrders: orders.filter(o => o.status === 'PENDING').length,
     completedOrders: orders.filter(o => o.status === 'DELIVERED').length,
@@ -78,11 +77,11 @@ export function useOrders() {
     averageOrderValue: orders.length > 0 
       ? orders.reduce((sum, o) => sum + (o.total_amount || 0), 0) / orders.length 
       : 0
-  }
+  }), [orders])
 
-  // Create new order
-  const createOrder = async (orderData: OrderFormData): Promise<boolean> => {
-    try {
+  // ✅ Create new order with TanStack Query mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: OrderFormData) => {
       const newOrder = {
         order_no: generateOrderNumber(),
         ...orderData,
@@ -103,20 +102,29 @@ export function useOrders() {
         throw new Error('Failed to create order')
       }
 
-      const createdOrder = await response.json()
-      void setOrders(prev => [createdOrder, ...prev])
-      
-      return true
-    } catch (err) {
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      apiLogger.info('Order created successfully')
+    },
+    onError: (err) => {
       apiLogger.error({ error: err }, 'Error creating order:')
-      void setError(err instanceof Error ? err.message : 'Failed to create order')
+    }
+  })
+
+  const createOrder = async (orderData: OrderFormData): Promise<boolean> => {
+    try {
+      await createOrderMutation.mutateAsync(orderData)
+      return true
+    } catch {
       return false
     }
   }
 
-  // Update existing order
-  const updateOrder = async (orderId: string, orderData: OrderFormData): Promise<boolean> => {
-    try {
+  // ✅ Update existing order with TanStack Query mutation
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ orderId, orderData }: { orderId: string; orderData: OrderFormData }) => {
       const updatedData = {
         ...orderData,
         total_amount: orderData.order_items.reduce((sum, item) => 
@@ -134,22 +142,29 @@ export function useOrders() {
         throw new Error('Failed to update order')
       }
 
-      const updatedOrder = await response.json()
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? updatedOrder : order
-      ))
-      
-      return true
-    } catch (err) {
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      apiLogger.info('Order updated successfully')
+    },
+    onError: (err) => {
       apiLogger.error({ error: err }, 'Error updating order:')
-      void setError(err instanceof Error ? err.message : 'Failed to update order')
+    }
+  })
+
+  const updateOrder = async (orderId: string, orderData: OrderFormData): Promise<boolean> => {
+    try {
+      await updateOrderMutation.mutateAsync({ orderId, orderData })
+      return true
+    } catch {
       return false
     }
   }
 
-  // Update order status
-  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus): Promise<boolean> => {
-    try {
+  // ✅ Update order status with TanStack Query mutation (optimistic update)
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: OrderStatus }) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -160,16 +175,16 @@ export function useOrders() {
         throw new Error('Failed to update order status')
       }
 
-      const updatedOrder = await response.json()
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, status: newStatus } : order
-      ))
-
+      return response.json()
+    },
+    onSuccess: async (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      
       // Auto-update inventory for status changes that affect stock
-      if (newStatus === 'DELIVERED' || newStatus === 'CANCELLED') {
+      if (variables.newStatus === 'DELIVERED' || variables.newStatus === 'CANCELLED') {
         try {
-          const inventoryAction = newStatus === 'DELIVERED' ? 'order_completed' : 'order_cancelled'
-          const order = orders.find(o => o.id === orderId)
+          const inventoryAction = variables.newStatus === 'DELIVERED' ? 'order_completed' : 'order_cancelled'
+          const order = orders.find(o => o.id === variables.orderId)
           const orderItems = order?.order_items || []
 
           if (orderItems.length > 0) {
@@ -177,7 +192,7 @@ export function useOrders() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                order_id: orderId,
+                order_id: variables.orderId,
                 action: inventoryAction,
                 order_items: orderItems.map(item => ({
                   recipe_id: item.recipe_id,
@@ -193,17 +208,25 @@ export function useOrders() {
         }
       }
       
-      return true
-    } catch (err) {
+      apiLogger.info({ orderId: variables.orderId, status: variables.newStatus }, 'Order status updated')
+    },
+    onError: (err) => {
       apiLogger.error({ error: err }, 'Error updating order status:')
-      void setError(err instanceof Error ? err.message : 'Failed to update order status')
+    }
+  })
+
+  const updateOrderStatus = async (orderId: string, newStatus: OrderStatus): Promise<boolean> => {
+    try {
+      await updateOrderStatusMutation.mutateAsync({ orderId, newStatus })
+      return true
+    } catch {
       return false
     }
   }
 
-  // Delete order
-  const deleteOrder = async (orderId: string): Promise<boolean> => {
-    try {
+  // ✅ Delete order with TanStack Query mutation
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'DELETE'
       })
@@ -212,11 +235,22 @@ export function useOrders() {
         throw new Error('Failed to delete order')
       }
 
-      setOrders(prev => prev.filter(order => order.id !== orderId))
-      return true
-    } catch (err) {
+      return orderId
+    },
+    onSuccess: (orderId) => {
+      queryClient.invalidateQueries({ queryKey: orderKeys.all })
+      apiLogger.info({ orderId }, 'Order deleted successfully')
+    },
+    onError: (err) => {
       apiLogger.error({ error: err }, 'Error deleting order:')
-      void setError(err instanceof Error ? err.message : 'Failed to delete order')
+    }
+  })
+
+  const deleteOrder = async (orderId: string): Promise<boolean> => {
+    try {
+      await deleteOrderMutation.mutateAsync(orderId)
+      return true
+    } catch {
       return false
     }
   }

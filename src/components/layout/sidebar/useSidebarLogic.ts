@@ -20,7 +20,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 
 export interface NavigationItem {
   name: string
@@ -45,45 +45,75 @@ export const useSidebarLogic = () => {
   const pathname = usePathname()
   const router = useRouter()
 
-  // Collapsible sections state - initialize from localStorage if available
-  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== 'undefined') {
+  // Default collapsed state
+  const defaultCollapsed = {
+    'Kelola Data': false,
+    'Perhitungan': false,
+    'Operasional': false,
+    'Monitoring': false,
+    'Asisten AI': false,
+    'Analytics & Laporan': false,
+    'Pengaturan': false,
+  }
+
+  // Collapsible sections state - start with default, load from localStorage after mount
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(defaultCollapsed)
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Load from localStorage after component mounts (client-side only)
+  useEffect(() => {
+    try {
       const saved = localStorage.getItem('sidebar-collapsed-sections')
       if (saved) {
-        return JSON.parse(saved)
+        setCollapsedSections(JSON.parse(saved))
       }
+    } catch (error) {
+      // Ignore localStorage errors
     }
-    return {
-      'Kelola Data': false,
-      'Perhitungan': false,
-      'Operasional': false,
-      'Monitoring': false,
-      'Asisten AI': false,
-      'Analytics & Laporan': false,
-      'Pengaturan': false,
-    }
-  })
+    setIsHydrated(true)
+  }, [])
 
-  // Save to localStorage when state changes
+  // Save to localStorage when state changes (debounced)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebar-collapsed-sections', JSON.stringify(collapsedSections))
-    }
-  }, [collapsedSections])
+    if (!isHydrated) return // Don't save during initial hydration
+    
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('sidebar-collapsed-sections', JSON.stringify(collapsedSections))
+      } catch (error) {
+        // Ignore localStorage errors
+      }
+    }, 100) // Debounce to avoid excessive writes
 
-  // Prefetch next likely routes to reduce navigation latency
+    return () => clearTimeout(timeoutId)
+  }, [collapsedSections, isHydrated])
+
+  // Prefetch next likely routes - staggered to avoid blocking
   useEffect(() => {
-    const routesToPrefetch = [
-      '/', '/orders', '/ingredients', '/recipes', '/customers', 
-      '/cash-flow', '/profit', '/ai-chatbot', '/reports', '/settings', 
-      '/recipes/ai-generator'
-    ]
-    routesToPrefetch.forEach((r) => {
-      try { router.prefetch(r) } catch (error) { }
-    })
+    // Only prefetch after component is mounted and idle
+    const timeoutId = setTimeout(() => {
+      const routesToPrefetch = [
+        '/', '/orders', '/ingredients', '/recipes', '/customers', 
+        '/cash-flow', '/profit', '/reports'
+      ]
+      
+      // Stagger prefetch requests to avoid blocking
+      routesToPrefetch.forEach((route, index) => {
+        setTimeout(() => {
+          try { 
+            router.prefetch(route) 
+          } catch (error) { 
+            // Ignore prefetch errors
+          }
+        }, index * 50) // 50ms delay between each prefetch
+      })
+    }, 500) // Wait 500ms after mount before starting prefetch
+
+    return () => clearTimeout(timeoutId)
   }, [router])
 
-  const navigationSections: NavigationSection[] = [
+  // Memoize navigation sections to avoid recreating on every render
+  const navigationSections: NavigationSection[] = useMemo(() => [
     {
       title: "Dashboard",
       items: [
@@ -237,25 +267,33 @@ export const useSidebarLogic = () => {
         }
       ]
     },
-  ]
+  ], []) // Empty deps - navigation structure is static
 
-  const isItemActive = (item: NavigationItem): boolean => pathname === item.href ||
-      (item.href.includes('#') && pathname === item.href.split('#')[0])
+  // Memoize callbacks to prevent unnecessary re-renders
+  const isItemActive = useCallback((item: NavigationItem): boolean => 
+    pathname === item.href || (item.href.includes('#') && pathname === item.href.split('#')[0]),
+    [pathname]
+  )
 
-  const prefetchRoute = (href: string) => {
+  const prefetchRoute = useCallback((href: string) => {
     try {
       void router.prefetch(href)
-    } catch (error) { }
-  }
+    } catch (error) { 
+      // Ignore prefetch errors
+    }
+  }, [router])
 
-  const toggleSection = (sectionTitle: string) => {
+  const toggleSection = useCallback((sectionTitle: string) => {
     setCollapsedSections(prev => ({
       ...prev,
       [sectionTitle]: !prev[sectionTitle]
     }))
-  }
+  }, [])
 
-  const isSectionCollapsed = (sectionTitle: string): boolean => collapsedSections[sectionTitle] || false
+  const isSectionCollapsed = useCallback((sectionTitle: string): boolean => 
+    collapsedSections[sectionTitle] || false,
+    [collapsedSections]
+  )
 
   return {
     navigationSections,

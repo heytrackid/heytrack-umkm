@@ -240,6 +240,59 @@
     overflow-wrap: break-word;
   }
   
+  /* Mobile-friendly text wrapping utilities */
+  .text-wrap-mobile {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    white-space: normal;
+  }
+  
+  /* For long text that should wrap nicely */
+  .text-wrap-balance {
+    text-wrap: balance;
+    word-break: break-word;
+  }
+  
+  /* For very long words or URLs */
+  .text-break-all {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+  
+  /* Limit lines with ellipsis (use sparingly) */
+  .line-clamp-2-mobile {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3-mobile {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Mobile: show full text, Desktop: can truncate */
+  @media (max-width: 768px) {
+    .truncate-desktop-only {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      word-break: break-word;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .truncate-desktop-only {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  
   /* Enhanced border visibility for dark mode */
   .border-subtle {
     border-color: oklch(0.3 0 0);

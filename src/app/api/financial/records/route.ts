@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
       .from('financial_records')
       .insert({
         user_id: user.id,
+        type: type.toUpperCase() as 'INCOME' | 'EXPENSE',
         description,
         category: type === 'income' ? 'Revenue' : category,
         amount,

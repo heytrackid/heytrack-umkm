@@ -33,11 +33,11 @@ export class ChatSessionService {
       .single();
 
     if (error) {
-      logger.error('Failed to create chat session', { error, userId });
+      logger.error({ error, userId }, 'Failed to create chat session');
       throw new Error('Failed to create chat session');
     }
 
-    logger.info('Chat session created', { sessionId: data.id, userId });
+    logger.info({ sessionId: data.id, userId }, 'Chat session created');
     return data;
   }
 
@@ -83,7 +83,7 @@ export class ChatSessionService {
       .limit(limit);
 
     if (error) {
-      logger.error('Failed to list sessions', { error, userId });
+      logger.error({ error, userId }, 'Failed to list sessions');
       throw new Error('Failed to list sessions');
     }
 
@@ -134,11 +134,11 @@ export class ChatSessionService {
       .eq('user_id', userId);
 
     if (error) {
-      logger.error('Failed to update session title', { error, sessionId });
+      logger.error({ error, sessionId }, 'Failed to update session title');
       throw new Error('Failed to update session title');
     }
 
-    logger.info('Session title updated', { sessionId, title });
+    logger.info({ sessionId, title }, 'Session title updated');
   }
 
   /**
@@ -157,11 +157,11 @@ export class ChatSessionService {
       .eq('user_id', userId);
 
     if (error) {
-      logger.error('Failed to delete session', { error, sessionId });
+      logger.error({ error, sessionId }, 'Failed to delete session');
       throw new Error('Failed to delete session');
     }
 
-    logger.info('Session deleted', { sessionId, userId });
+    logger.info({ sessionId, userId }, 'Session deleted');
   }
 
   /**
@@ -187,7 +187,7 @@ export class ChatSessionService {
       .single();
 
     if (error) {
-      logger.error('Failed to add message', { error, sessionId });
+      logger.error({ error, sessionId }, 'Failed to add message');
       throw new Error('Failed to add message');
     }
 
@@ -221,7 +221,7 @@ export class ChatSessionService {
       .limit(limit);
 
     if (error) {
-      logger.error('Failed to get messages', { error, sessionId });
+      logger.error({ error, sessionId }, 'Failed to get messages');
       throw new Error('Failed to get messages');
     }
 

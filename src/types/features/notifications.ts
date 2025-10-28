@@ -77,58 +77,10 @@ export interface NotificationPreferences {
   }
 }
 
-// Notification table
-export interface NotificationsTable {
-  Row: {
-    action_url: string | null
-    category: string
-    created_at: string | null
-    entity_id: string | null
-    entity_type: string | null
-    expires_at: string | null
-    id: string
-    is_dismissed: boolean | null
-    is_read: boolean | null
-    message: string
-    metadata: Json | null
-    priority: string | null
-    title: string
-    type: string
-    updated_at: string | null
-  }
-  Insert: {
-    action_url?: string | null
-    category: string
-    created_at?: string | null
-    entity_id?: string | null
-    entity_type?: string | null
-    expires_at?: string | null
-    id?: string
-    is_dismissed?: boolean | null
-    is_read?: boolean | null
-    message: string
-    metadata?: Json | null
-    priority?: string | null
-    title: string
-    type: string
-    updated_at?: string | null
-  }
-  Update: {
-    action_url?: string | null
-    category?: string
-    created_at?: string | null
-    entity_id?: string | null
-    entity_type?: string | null
-    expires_at?: string | null
-    id?: string
-    is_dismissed?: boolean | null
-    is_read?: boolean | null
-    message?: string
-    metadata?: Json | null
-    priority?: string | null
-    title?: string
-    type?: string
-    updated_at?: string | null
-  }
-  Relationships: []
-}
+// Re-export table types from generated
+import type { Database } from '@/types/supabase-generated'
+
+export type NotificationsTable = Database['public']['Tables']['notifications']
+export type Notification = NotificationsTable['Row']
+export type NotificationInsert = NotificationsTable['Insert']
+export type NotificationUpdate = NotificationsTable['Update']

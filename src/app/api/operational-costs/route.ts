@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
-
+import { safeInsert, safeUpdate } from '@/lib/supabase/type-helpers'
 import { apiLogger } from '@/lib/logger'
 
 type ExpensesTable = Database['public']['Tables']['expenses']
@@ -156,23 +156,23 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert({
-        user_id: user.id,
-        category: validatedData.category,
-        subcategory: validatedData.subcategory,
-        amount: validatedData.amount,
-        description: validatedData.description,
-        expense_date: validatedData.date,
-        supplier: validatedData.vendor_name,
-        payment_method: 'CASH',
-        status: validatedData.is_paid ? 'paid' : 'pending',
-        receipt_number: validatedData.invoice_number,
-        is_recurring: validatedData.is_recurring,
-        recurring_frequency: validatedData.recurring_frequency,
-        tags: []
-      } as any)
+    const insertPayload: Database['public']['Tables']['expenses']['Insert'] = {
+      user_id: user.id,
+      category: validatedData.category,
+      subcategory: validatedData.subcategory,
+      amount: validatedData.amount,
+      description: validatedData.description || '',
+      expense_date: validatedData.date,
+      supplier: validatedData.vendor_name,
+      payment_method: 'CASH',
+      status: validatedData.is_paid ? 'paid' : 'pending',
+      receipt_number: validatedData.invoice_number,
+      is_recurring: validatedData.is_recurring,
+      recurring_frequency: validatedData.recurring_frequency,
+      tags: []
+    }
+
+    const { data, error } = await safeInsert(supabase as any, 'expenses', insertPayload)
       .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
       .single()
 
@@ -241,21 +241,20 @@ export async function PUT(request: NextRequest) {
     }
 
     // Build update object from validated data
-    const updateData: ExpensesTable['Update'] = {}
-    if (validatedData.category !== undefined) {updateData.category = validatedData.category}
-    if (validatedData.subcategory !== undefined) {updateData.subcategory = validatedData.subcategory}
-    if (validatedData.amount !== undefined) {updateData.amount = validatedData.amount}
-    if (validatedData.description !== undefined) {updateData.description = validatedData.description}
-    if (validatedData.date !== undefined) {updateData.expense_date = validatedData.date}
-    if (validatedData.is_recurring !== undefined) {updateData.is_recurring = validatedData.is_recurring}
-    if (validatedData.recurring_frequency !== undefined) {updateData.recurring_frequency = validatedData.recurring_frequency ?? null}
-    if (validatedData.vendor_name !== undefined) {updateData.supplier = validatedData.vendor_name}
-    if (validatedData.invoice_number !== undefined) {updateData.receipt_number = validatedData.invoice_number}
-    if (validatedData.is_paid !== undefined) {updateData.status = validatedData.is_paid ? 'paid' : 'pending'}
+    const updatePayload: Database['public']['Tables']['expenses']['Update'] = {
+      category: validatedData.category,
+      subcategory: validatedData.subcategory,
+      amount: validatedData.amount,
+      description: validatedData.description || undefined,
+      expense_date: validatedData.date,
+      is_recurring: validatedData.is_recurring,
+      recurring_frequency: validatedData.recurring_frequency ?? null,
+      supplier: validatedData.vendor_name,
+      receipt_number: validatedData.invoice_number,
+      status: validatedData.is_paid ? 'paid' : 'pending'
+    }
 
-    const { data, error } = await supabase
-      .from('expenses')
-      .update(updateData as any)
+    const { data, error } = await safeUpdate(supabase as any, 'expenses', updatePayload)
       .eq('id', body.id)
       .eq('user_id', user.id)
       .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, updated_at')

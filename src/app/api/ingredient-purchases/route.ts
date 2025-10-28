@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
-import { typedInsert, type TablesInsert } from '@/lib/supabase/typed-insert'
+import { safeInsert, safeUpdate } from '@/lib/supabase/type-helpers'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
 /**
  * GET /api/ingredient-purchases
  * List all ingredient purchases with optional filters
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest) {
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
-        const financialRecord: TablesInsert<'financial_records'> = {
+        const financialRecord: Database['public']['Tables']['financial_records']['Insert'] = {
             user_id: user.id,
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
@@ -148,9 +149,7 @@ export async function POST(request: NextRequest) {
             date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
         }
         
-        const { data: transaction, error: transactionError } = await supabase
-            .from('financial_records')
-            .insert(financialRecord as any)
+        const { data: transaction, error: transactionError } = await safeInsert(supabase as any, 'financial_records', financialRecord)
             .select('id')
             .single()
 
@@ -162,7 +161,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Create purchase record
-        const purchaseRecord: TablesInsert<'ingredient_purchases'> = {
+        const purchaseRecord: Database['public']['Tables']['ingredient_purchases']['Insert'] = {
             user_id: user.id,
             ingredient_id: validatedData.ingredient_id,
             supplier: validatedData.supplier,
@@ -173,9 +172,7 @@ export async function POST(request: NextRequest) {
             notes: validatedData.notes
         }
         
-        const { data: purchase, error: purchaseError } = await supabase
-            .from('ingredient_purchases')
-            .insert(purchaseRecord as any)
+        const { data: purchase, error: purchaseError } = await safeInsert(supabase as any, 'ingredient_purchases', purchaseRecord)
             .select(`
         *,
         ingredient:ingredients (
@@ -208,9 +205,11 @@ export async function POST(request: NextRequest) {
         // 3. Update ingredient stock
         const newStock = (ingredientData.current_stock || 0) + qtyBeli
 
-        const { error: stockError } = await supabase
-            .from('ingredients')
-            .update({ current_stock: newStock } as any)
+        const stockUpdate: Database['public']['Tables']['ingredients']['Update'] = {
+            current_stock: newStock
+        }
+
+        const { error: stockError } = await safeUpdate(supabase as any, 'ingredients', stockUpdate)
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', user.id)
 
@@ -221,7 +220,7 @@ export async function POST(request: NextRequest) {
 
         // 4. Create stock ledger entry
         const purchaseData = purchase as any
-        const stockLog = typedInsert<'inventory_stock_logs'>({
+        const stockLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
             ingredient_id: validatedData.ingredient_id,
             quantity_before: ingredientData.current_stock || 0,
             quantity_after: newStock,
@@ -229,12 +228,9 @@ export async function POST(request: NextRequest) {
             change_type: 'increase',
             reference_id: purchaseData?.id || null,
             reference_type: 'ingredient_purchase'
-        })
+        }
         
-        // Workaround: Supabase SSR type inference issue
-        await supabase
-            .from('inventory_stock_logs')
-            .insert(stockLog as any)
+        await safeInsert(supabase as any, 'inventory_stock_logs', stockLog).select()
 
         return NextResponse.json(purchase, { status: 201 })
     } catch (err: unknown) {
@@ -303,15 +299,17 @@ export async function DELETE(request: NextRequest) {
         if (ingredientDeleteData) {
             const newStock = Math.max(0, (ingredientDeleteData.current_stock || 0) - purchaseData.quantity)
 
-            await supabase
-                .from('ingredients')
-                .update({ current_stock: newStock } as any)
+            const stockUpdate: Database['public']['Tables']['ingredients']['Update'] = {
+                current_stock: newStock
+            }
+
+            await safeUpdate(supabase as any, 'ingredients', stockUpdate)
                 .eq('id', purchaseData.ingredient_id)
                 .eq('user_id', user.id)
         }
 
         // 2. Create stock ledger entry for reversal
-        const reversalLog = typedInsert<'inventory_stock_logs'>({
+        const reversalLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
             ingredient_id: purchaseData.ingredient_id,
             quantity_before: ingredientDeleteData?.current_stock || 0,
             quantity_after: ingredientDeleteData ? Math.max(0, (ingredientDeleteData.current_stock || 0) - purchaseData.quantity) : 0,
@@ -320,12 +318,9 @@ export async function DELETE(request: NextRequest) {
             reason: 'Purchase deletion',
             reference_id: purchaseData.id,
             reference_type: 'ingredient_purchase'
-        })
+        }
         
-        // Workaround: Supabase SSR type inference issue
-        await supabase
-            .from('inventory_stock_logs')
-            .insert(reversalLog as any)
+        await safeInsert(supabase as any, 'inventory_stock_logs', reversalLog).select()
 
         // 3. Delete purchase
         const { error: deleteError } = await supabase

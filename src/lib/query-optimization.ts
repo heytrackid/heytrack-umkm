@@ -320,7 +320,7 @@ export class QueryMonitor {
       })
 
       if (process.env.NODE_ENV === 'development') {
-        dbLogger.info(`Query: ${queryName}`, { duration: `${duration.toFixed(2)}ms` })
+        dbLogger.info({ queryName, duration: `${duration.toFixed(2)}ms` }, 'Query executed')
       }
     }
   }

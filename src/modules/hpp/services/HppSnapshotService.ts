@@ -20,7 +20,7 @@ export class HppSnapshotService {
    */
   async createSnapshot(recipeId: string): Promise<HppSnapshot> {
     try {
-      this.logger.info(`Creating HPP snapshot for recipe ${recipeId}`)
+      this.logger.info({ recipeId }, 'Creating HPP snapshot for recipe')
 
       const supabase = createServiceRoleClient()
 
@@ -71,7 +71,7 @@ export class HppSnapshotService {
         throw new Error(`Failed to create snapshot: ${snapshotError.message}`)
       }
 
-      this.logger.info(`HPP snapshot created for recipe ${recipeId}`)
+      this.logger.info({ recipeId }, 'HPP snapshot created for recipe')
       return snapshot as HppSnapshot
 
     } catch (err: unknown) {

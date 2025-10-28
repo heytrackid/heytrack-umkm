@@ -4,6 +4,7 @@ import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
+import { prepareInsert } from '@/lib/supabase/insert-helpers'
 
 type Supplier = Database['public']['Tables']['suppliers']['Row']
 type SupplierInsert = Database['public']['Tables']['suppliers']['Insert']
@@ -94,9 +95,11 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
+    const insertPayload = prepareInsert('suppliers', validatedData)
+
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .insert([validatedData])
+      .insert(insertPayload)
       .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .single();
 

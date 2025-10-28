@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated';
 import { getErrorMessage } from '@/lib/type-guards';
+import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 
 export async function GET(
   _request: Request,
@@ -37,10 +38,7 @@ export async function PUT(
     const supabase = await createClient();
     const body = await request.json();
 
-    const updatePayload = {
-      ...body,
-      updated_at: new Date().toISOString()
-    };
+    const updatePayload = prepareUpdate('financial_records', body)
 
     const { data: sale, error } = await supabase
       .from('financial_records')

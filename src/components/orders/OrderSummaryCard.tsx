@@ -99,8 +99,8 @@ const OrderSummaryCard = memo(({
 
                 {order.customer_address && (
                     <div className="flex items-start gap-2 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                        <span className="line-clamp-2">{order.customer_address}</span>
+                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                        <span className="text-wrap-mobile">{order.customer_address}</span>
                     </div>
                 )}
 

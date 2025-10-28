@@ -262,11 +262,12 @@ export function usePerformanceMonitor(componentName: string, enabled = false) {
 
       if (renderCount.current % 10 === 0) {
         const avg = renderTimes.current.reduce((a, b) => a + b, 0) / renderTimes.current.length
-        perfLogger.info(`Performance: ${componentName}`, {
+        perfLogger.info({
+          componentName,
           renders: renderCount.current,
           avgTime: `${avg.toFixed(2)}ms`,
           lastTime: `${renderTime.toFixed(2)}ms`
-        })
+        }, 'Component performance metrics')
       }
     }
   })

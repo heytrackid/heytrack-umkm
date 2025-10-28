@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest) {
     // Update all unread alerts
     const { data, error } = await supabase
       .from('hpp_alerts')
-      .update({ is_read: true })
+      .update({ is_read: true } as any)
       .eq('user_id', user.id)
       .eq('is_read', false)
       .select('id')

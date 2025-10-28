@@ -154,12 +154,12 @@ export default function CustomersTable({
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1 text-sm">
-                        <Mail className="h-3 w-3 text-gray-400" />
-                        <span className="truncate max-w-32">{customer.email}</span>
+                        <Mail className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <span className="truncate-desktop-only">{customer.email}</span>
                       </div>
                       <div className="flex items-center gap-1 text-sm">
-                        <Phone className="h-3 w-3 text-gray-400" />
-                        <span>{customer.phone}</span>
+                        <Phone className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                        <span className="text-wrap-mobile">{customer.phone}</span>
                       </div>
                     </div>
                   </TableCell>

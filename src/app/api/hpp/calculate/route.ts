@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
+import { prepareInsert, prepareUpdate } from '@/lib/supabase/insert-helpers'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
@@ -98,19 +99,21 @@ export async function POST(request: NextRequest) {
     const costPerUnit = servings > 0 ? totalHpp / servings : totalHpp
 
     // Save calculation
+    const calculationPayload = prepareInsert('hpp_calculations', {
+      recipe_id: recipeId,
+      user_id: user.id,
+      material_cost: materialCost,
+      overhead_cost: operationalCost,
+      labor_cost: 0,
+      total_hpp: totalHpp,
+      cost_per_unit: costPerUnit,
+      production_quantity: servings,
+      calculation_date: new Date().toISOString().split('T')[0]
+    })
+
     const { data: calculation, error: calcError } = await supabase
       .from('hpp_calculations')
-      .insert({
-        recipe_id: recipeId,
-        user_id: user.id,
-        material_cost: materialCost,
-        overhead_cost: operationalCost,
-        labor_cost: 0,
-        total_hpp: totalHpp,
-        cost_per_unit: costPerUnit,
-        production_quantity: servings,
-        calculation_date: new Date().toISOString().split('T')[0]
-      })
+      .insert(calculationPayload)
       .select()
       .single()
 
@@ -119,40 +122,43 @@ export async function POST(request: NextRequest) {
     }
 
     // Update recipe with cost
+    const recipeUpdate = prepareUpdate('recipes', {
+      cost_per_unit: costPerUnit
+    })
+
     await supabase
       .from('recipes')
-      .update({
-        cost_per_unit: costPerUnit,
-        updated_at: new Date().toISOString()
-      })
+      .update(recipeUpdate)
       .eq('id', recipeId)
       .eq('user_id', user.id)
 
     // Create snapshot
+    const snapshotPayload = prepareInsert('hpp_snapshots', {
+      recipe_id: recipeId,
+      user_id: user.id,
+      snapshot_date: new Date().toISOString(),
+      hpp_value: costPerUnit,
+      material_cost: materialCost,
+      operational_cost: operationalCost,
+      cost_breakdown: {
+        ingredients: ingredients.map(ri => {
+          const ingredient = ri.ingredients
+          const unitPrice = Number(ingredient?.weighted_average_cost || ingredient?.price_per_unit || 0)
+          return {
+            name: ingredient?.name || 'Unknown',
+            quantity: ri.quantity,
+            unit: ri.unit,
+            unit_price: unitPrice,
+            total: ri.quantity * unitPrice
+          }
+        }),
+        operational: operationalCost
+      }
+    })
+
     await supabase
       .from('hpp_snapshots')
-      .insert({
-        recipe_id: recipeId,
-        user_id: user.id,
-        snapshot_date: new Date().toISOString(),
-        hpp_value: costPerUnit,
-        material_cost: materialCost,
-        operational_cost: operationalCost,
-        cost_breakdown: {
-          ingredients: ingredients.map(ri => {
-            const ingredient = ri.ingredients
-            const unitPrice = Number(ingredient?.weighted_average_cost || ingredient?.price_per_unit || 0)
-            return {
-              name: ingredient?.name || 'Unknown',
-              quantity: ri.quantity,
-              unit: ri.unit,
-              unit_price: unitPrice,
-              total: ri.quantity * unitPrice
-            }
-          }),
-          operational: operationalCost
-        }
-      })
+      .insert(snapshotPayload)
 
     // Invalidate cache
     await cacheInvalidation.hpp()

@@ -38,7 +38,7 @@ export class HppCalculatorService {
    */
   async calculateRecipeHpp(recipeId: string, userId?: string): Promise<HppCalculationResult> {
     try {
-      this.logger.info(`Calculating HPP for recipe ${recipeId}`);
+      this.logger.info({ recipeId }, 'Calculating HPP for recipe');
 
       const supabase = createServiceRoleClient()
 
@@ -123,7 +123,7 @@ export class HppCalculatorService {
       // Save calculation to database
       await this.saveHppCalculation(result);
 
-      this.logger.info(`HPP calculated for recipe ${recipeId}: ${totalHpp}`);
+      this.logger.info({ recipeId, totalHpp }, 'HPP calculated for recipe');
       return result;
 
     } catch (err: unknown) {
@@ -149,7 +149,7 @@ export class HppCalculatorService {
         .limit(10);
 
       if (error) {
-        this.logger.warn(`Failed to fetch productions for labor cost: ${error.message}`);
+        this.logger.warn({ error: error.message }, 'Failed to fetch productions for labor cost');
         return 0;
       }
 
@@ -184,7 +184,7 @@ export class HppCalculatorService {
         .eq('is_active', true);
 
       if (error) {
-        this.logger.warn(`Failed to fetch operational costs: ${error.message}`);
+        this.logger.warn({ error: error.message }, 'Failed to fetch operational costs');
         return 0;
       }
 
@@ -310,7 +310,7 @@ export class HppCalculatorService {
         throw new Error(`Failed to save HPP calculation: ${error.message}`);
       }
 
-      this.logger.info(`HPP calculation saved for recipe ${result.recipeId}`);
+      this.logger.info({ recipeId: result.recipeId }, 'HPP calculation saved for recipe');
 
     } catch (err: unknown) {
       this.logger.error({ error: err }, 'Failed to save HPP calculation');

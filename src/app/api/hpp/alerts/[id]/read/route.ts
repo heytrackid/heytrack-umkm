@@ -34,7 +34,7 @@ export async function PATCH(
     // Mark alert as read
     const { error } = await supabase
       .from('hpp_alerts')
-      .update({ is_read: true })
+      .update({ is_read: true } as any)
       .eq('id', alertId)
       .eq('user_id', user.id)
 

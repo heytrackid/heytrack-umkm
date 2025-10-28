@@ -1,148 +1,22 @@
 /**
  * Recipes Table Types
- * Recipe management and related tables
+ * Re-exported from Supabase generated types
+ * 
+ * ⚠️ DO NOT manually define table types here!
+ * Always use generated types from @/types/supabase-generated
  */
 
-import type { Json } from '../common'
+import type { Database } from '@/types/supabase-generated'
 
-export interface RecipesTable {
-  Row: {
-    batch_size: number | null
-    category: string | null
-    cook_time: number | null
-    cost_per_unit: number | null
-    created_at: string | null
-    created_by: string | null
-    description: string | null
-    difficulty: string | null
-    id: string
-    image_url: string | null
-    instructions: string | null
-    is_active: boolean | null
-    last_made_at: string | null
-    margin_percentage: number | null
-    name: string
-    prep_time: number | null
-    rating: number | null
-    seasonal: boolean | null
-    selling_price: number | null
-    servings: number | null
-    times_made: number | null
-    total_revenue: number | null
-    updated_at: string | null
-    updated_by: string | null
-    user_id: string
-  }
-  Insert: {
-    batch_size?: number | null
-    category?: string | null
-    cook_time?: number | null
-    cost_per_unit?: number | null
-    created_at?: string | null
-    created_by?: string | null
-    description?: string | null
-    difficulty?: string | null
-    id?: string
-    image_url?: string | null
-    instructions?: string | null
-    is_active?: boolean | null
-    last_made_at?: string | null
-    margin_percentage?: number | null
-    name: string
-    prep_time?: number | null
-    rating?: number | null
-    seasonal?: boolean | null
-    selling_price?: number | null
-    servings?: number | null
-    times_made?: number | null
-    total_revenue?: number | null
-    updated_at?: string | null
-    updated_by?: string | null
-    user_id: string
-  }
-  Update: {
-    batch_size?: number | null
-    category?: string | null
-    cook_time?: number | null
-    cost_per_unit?: number | null
-    created_at?: string | null
-    created_by?: string | null
-    description?: string | null
-    difficulty?: string | null
-    id?: string
-    image_url?: string | null
-    instructions?: string | null
-    is_active?: boolean | null
-    last_made_at?: string | null
-    margin_percentage?: number | null
-    name?: string
-    prep_time?: number | null
-    rating?: number | null
-    seasonal?: boolean | null
-    selling_price?: number | null
-    servings?: number | null
-    times_made?: number | null
-    total_revenue?: number | null
-    updated_at?: string | null
-    updated_by?: string | null
-    user_id?: string
-  }
-  Relationships: []
-}
+// Re-export from generated types
+export type RecipesTable = Database['public']['Tables']['recipes']
+export type RecipeIngredientsTable = Database['public']['Tables']['recipe_ingredients']
 
-export interface RecipeIngredientsTable {
-  Row: {
-    id: string
-    ingredient_id: string
-    quantity: number
-    recipe_id: string
-    unit: string
-    user_id: string
-  }
-  Insert: {
-    id?: string
-    ingredient_id: string
-    quantity: number
-    recipe_id: string
-    unit: string
-    user_id: string
-  }
-  Update: {
-    id?: string
-    ingredient_id?: string
-    quantity?: number
-    recipe_id?: string
-    unit?: string
-    user_id?: string
-  }
-  Relationships: [
-    {
-      foreignKeyName: "recipe_ingredients_ingredient_id_fkey"
-      columns: ["ingredient_id"]
-      isOneToOne: false
-      referencedRelation: "ingredients"
-      referencedColumns: ["id"]
-    },
-    {
-      foreignKeyName: "recipe_ingredients_ingredient_id_fkey"
-      columns: ["ingredient_id"]
-      isOneToOne: false
-      referencedRelation: "inventory_status"
-      referencedColumns: ["id"]
-    },
-    {
-      foreignKeyName: "recipe_ingredients_recipe_id_fkey"
-      columns: ["recipe_id"]
-      isOneToOne: false
-      referencedRelation: "recipe_availability"
-      referencedColumns: ["id"]
-    },
-    {
-      foreignKeyName: "recipe_ingredients_recipe_id_fkey"
-      columns: ["recipe_id"]
-      isOneToOne: false
-      referencedRelation: "recipes"
-      referencedColumns: ["id"]
-    },
-  ]
-}
+// Convenience type aliases
+export type Recipe = RecipesTable['Row']
+export type RecipeInsert = RecipesTable['Insert']
+export type RecipeUpdate = RecipesTable['Update']
+
+export type RecipeIngredient = RecipeIngredientsTable['Row']
+export type RecipeIngredientInsert = RecipeIngredientsTable['Insert']
+export type RecipeIngredientUpdate = RecipeIngredientsTable['Update']

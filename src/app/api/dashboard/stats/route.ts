@@ -223,19 +223,21 @@ export async function POST() {
 
     // Upsert daily summary
     type DailySalesSummary = Database['public']['Tables']['daily_sales_summary']['Insert']
+    const summaryData: DailySalesSummary = {
+      user_id: user.id,
+      sales_date: today,
+      total_orders: todayOrders?.length || 0,
+      total_revenue: totalRevenue,
+      total_items_sold: totalItemsSold,
+      average_order_value: averageOrderValue,
+      expenses_total: totalExpenses,
+      profit_estimate: profitEstimate,
+      updated_at: new Date().toISOString()
+    }
     const { error } = await supabase
       .from('daily_sales_summary')
-      .upsert([{
-        sales_date: today,
-        total_orders: todayOrders?.length || 0,
-        total_revenue: totalRevenue,
-        total_items_sold: totalItemsSold,
-        average_order_value: averageOrderValue,
-        expenses_total: totalExpenses,
-        profit_estimate: profitEstimate,
-        updated_at: new Date().toISOString()
-      } as DailySalesSummary], {
-        onConflict: 'sales_date'
+      .upsert([summaryData], {
+        onConflict: 'sales_date,user_id'
       })
     
     if (error) {throw error}

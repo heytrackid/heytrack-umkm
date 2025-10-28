@@ -19,7 +19,7 @@ export default function Error({
 }) {
     useEffect(() => {
         // Log error for debugging
-        uiLogger.error({ error, digest: error.digest, msg: 'Application error occurred' })
+        uiLogger.error({ error, digest: error.digest }, 'Application error occurred')
 
         // TODO: Send to error tracking service (e.g., Sentry)
         // logErrorToService(error)

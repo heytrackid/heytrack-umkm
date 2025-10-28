@@ -6,6 +6,7 @@ import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/api-validations'
 import type { Database } from '@/types/supabase-generated'
 import { formatCurrency } from '@/lib/currency'
+import { safeInsert } from '@/lib/supabase/type-helpers'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -153,6 +154,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
+    
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
 
     // Validate request body
@@ -169,16 +177,15 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    const insertPayload = {
+    const insertPayload: Database['public']['Tables']['financial_records']['Insert'] = {
       ...validatedData,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      user_id: user.id,
+      description: validatedData.description || '',
     }
 
-    const { data: expense, error } = await supabase
-      .from('expenses')
-      .insert([insertPayload] as any)
-      .select('id, description, category, amount, expense_date, created_at')
+    // ✅ Use financial_records table (expenses table doesn't exist)
+    const { data: expense, error } = await safeInsert(supabase as any, 'financial_records', insertPayload)
+      .select('id, description, category, amount, date, created_at, user_id')
       .single()
 
     if (error) {throw error}
@@ -186,16 +193,17 @@ export async function POST(request: Request) {
     // Create notification for large expenses
     const expenseAmount = safeParseAmount(validatedData.amount)
     if (expenseAmount > 1000000 && expense) { // More than 1M IDR
-      const notificationPayload = {
-        type: 'warning' as const,
+      const notificationPayload: Database['public']['Tables']['notifications']['Insert'] = {
+        user_id: expense.user_id,
+        type: 'warning',
         category: 'finance',
         title: 'Large Expense Recorded',
         message: `A large expense of ${formatCurrency(expenseAmount, { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', decimals: 0 })} has been recorded for ${safeString(validatedData.category)}`,
-        entity_type: 'expense' as const,
+        entity_type: 'expense',
         entity_id: expense.id,
-        priority: 'high' as const
+        priority: 'high'
       }
-      await supabase.from('notifications').insert([notificationPayload])
+      await safeInsert(supabase as any, 'notifications', notificationPayload).select()
     }
 
     return NextResponse.json(expense, { status: 201 })

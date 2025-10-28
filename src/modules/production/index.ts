@@ -26,7 +26,7 @@ import { uiLogger } from '@/lib/logger'
 
 export const ProductionModule = {
   scheduleBatch: (batchData: Partial<ProductionBatch>) => {
-    uiLogger.debug('Batch scheduling not implemented yet', { batchData })
+    uiLogger.debug({ batchData }, 'Batch scheduling not implemented yet')
     return null
   }
 }

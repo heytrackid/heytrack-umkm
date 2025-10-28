@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import { memo, useEffect, useState, type FormEvent } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
 import type { Order, OrderFormProps, OrderItem, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
@@ -77,34 +78,37 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
   )
 
   // Fetch data
-  useEffect(() => {
-    void fetchRecipes()
-    void fetchCustomers()
-  }, [])
-
-  const fetchRecipes = async () => {
-    try {
+  // ✅ Use TanStack Query for recipes
+  const { data: recipesData = [] } = useQuery({
+    queryKey: ['recipes', 'active'],
+    queryFn: async () => {
       const response = await fetch('/api/recipes')
-      if (response.ok) {
-        const data: Array<RecipesTable['Row']> = await response.json()
-        setAvailableRecipes(data.filter(recipe => recipe.is_active))
-      }
-    } catch (err) {
-      uiLogger.error({ err }, 'Error fetching recipes')
-    }
-  }
+      if (!response.ok) throw new Error('Failed to fetch recipes')
+      const data: Array<RecipesTable['Row']> = await response.json()
+      return data.filter(recipe => recipe.is_active)
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
 
-  const fetchCustomers = async () => {
-    try {
+  // ✅ Use TanStack Query for customers
+  const { data: customersData = [] } = useQuery({
+    queryKey: ['customers', 'all'],
+    queryFn: async () => {
       const response = await fetch('/api/customers')
-      if (response.ok) {
-        const data: Customer[] = await response.json()
-        void setAvailableCustomers(data)
-      }
-    } catch (err) {
-      uiLogger.error({ err }, 'Error fetching customers')
-    }
-  }
+      if (!response.ok) throw new Error('Failed to fetch customers')
+      return response.json() as Promise<Customer[]>
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  // Update local state when data changes
+  useEffect(() => {
+    setAvailableRecipes(recipesData)
+  }, [recipesData])
+
+  useEffect(() => {
+    setAvailableCustomers(customersData)
+  }, [customersData])
 
   const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))

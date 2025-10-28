@@ -19,7 +19,7 @@ export class HppAlertService {
    */
   async detectAlertsForRecipe(recipeId: string): Promise<HppAlert[]> {
     try {
-      this.logger.info(`Detecting HPP alerts for recipe ${recipeId}`)
+      this.logger.info({ recipeId }, 'Detecting HPP alerts for recipe')
 
       const supabase = createServiceRoleClient()
       const alerts: HppAlert[] = []

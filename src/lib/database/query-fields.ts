@@ -72,7 +72,10 @@ export const ORDER_FIELDS = {
       id,
       quantity,
       unit_price,
-      subtotal,
+      total_price,
+      product_name,
+      special_requests,
+      recipe_id,
       recipe:recipes (
         id,
         name,

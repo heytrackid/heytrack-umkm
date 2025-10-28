@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated';
 import { getErrorMessage } from '@/lib/type-guards';
+import { safeUpdate } from '@/lib/supabase/type-helpers';
 
 export async function GET(
   _request: Request,
@@ -34,14 +35,9 @@ export async function PUT(
     const supabase = await createClient();
     const body = await request.json();
 
-    const updatePayload = {
-      ...body,
-      updated_at: new Date().toISOString()
-    };
+    const updatePayload: Database['public']['Tables']['suppliers']['Update'] = body
 
-    const { data: supplier, error } = await supabase
-      .from('suppliers')
-      .update(updatePayload)
+    const { data: supplier, error } = await safeUpdate(supabase, 'suppliers', updatePayload)
       .eq('id', id)
       .select('id, name, contact_person, email, phone, address, notes, is_active, updated_at')
       .single();

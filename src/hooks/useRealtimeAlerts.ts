@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
+import { isRealtimeAvailable } from '@/lib/supabase/realtime-config'
 import type { Database } from '@/types/supabase-generated'
 
 type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
@@ -60,10 +61,13 @@ export function useRealtimeAlerts({
 
     void setIsConnected(true)
 
-    // Subscribe to new alerts
-    const alertsSubscription = supabase
-      .channel('hpp_alerts_realtime')
-      .on(
+    // Subscribe to new alerts with error handling
+    let alertsSubscription: ReturnType<typeof supabase.channel> | null = null
+    
+    try {
+      alertsSubscription = supabase
+        .channel('hpp_alerts_realtime')
+        .on(
         'postgres_changes',
         {
           event: 'INSERT',
@@ -88,7 +92,7 @@ export function useRealtimeAlerts({
             })
           }
 
-          dbLogger.info(`New HPP alert received: ${newAlert.title}`)
+          dbLogger.info({ title: newAlert.title }, 'New HPP alert received')
         }
       )
       .on(
@@ -125,12 +129,18 @@ export function useRealtimeAlerts({
         if (status === 'SUBSCRIBED') {
           void setIsConnected(true)
           void setError(null)
+          dbLogger.info('Realtime alerts connected')
         } else if (status === 'CHANNEL_ERROR') {
           void setIsConnected(false)
           void setError('Connection lost')
+          dbLogger.warn('Realtime alerts connection error')
         } else if (status === 'TIMED_OUT') {
           void setIsConnected(false)
           void setError('Connection timed out')
+          dbLogger.warn('Realtime alerts connection timeout')
+        } else if (status === 'CLOSED') {
+          void setIsConnected(false)
+          dbLogger.info('Realtime alerts connection closed')
         }
       })
 
@@ -139,8 +149,20 @@ export function useRealtimeAlerts({
       Notification.requestPermission()
     }
 
+    } catch (error) {
+      dbLogger.error({ error }, 'Failed to setup realtime subscription')
+      void setError('Failed to connect to realtime updates')
+      void setIsConnected(false)
+    }
+
     return () => {
-      alertsSubscription.unsubscribe()
+      try {
+        if (alertsSubscription) {
+          alertsSubscription.unsubscribe()
+        }
+      } catch (error) {
+        dbLogger.error({ error }, 'Error unsubscribing from realtime')
+      }
       void setIsConnected(false)
     }
   }, [userId, enabled, onNewAlert, onAlertRead])

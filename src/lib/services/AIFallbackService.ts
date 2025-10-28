@@ -30,7 +30,7 @@ export class AIFallbackService {
       
       return { response, fallbackUsed: false };
     } catch (error) {
-      logger.warn('Primary AI service failed, trying fallback', { error });
+      logger.warn({ error }, 'Primary AI service failed, trying fallback');
 
       // Try cached response
       const cached = this.getCachedResponse(query);

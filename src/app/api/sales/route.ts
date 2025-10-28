@@ -3,6 +3,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated';
 import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations';
+import { prepareInsert } from '@/lib/supabase/insert-helpers';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -134,9 +135,14 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
+    const insertPayload = prepareInsert('financial_records', {
+      ...validatedData,
+      type: 'INCOME'
+    })
+
     const { data: sale, error } = await supabase
       .from('financial_records')
-      .insert([{ ...validatedData, record_type: 'INCOME' }])
+      .insert(insertPayload)
       .select(`
         *
       `)

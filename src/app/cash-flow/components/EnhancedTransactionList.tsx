@@ -268,7 +268,7 @@ export default function EnhancedTransactionList({
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium truncate">{transaction.description}</p>
+                                                <p className="font-medium text-wrap-mobile">{transaction.description}</p>
                                                 <div className="flex gap-2 items-center text-xs text-muted-foreground flex-wrap mt-1">
                                                     <span>
                                                         {new Date(transaction.date).toLocaleDateString('id-ID', {

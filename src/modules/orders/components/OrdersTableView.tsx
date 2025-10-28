@@ -2,7 +2,8 @@
 
 import OrdersTable from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
@@ -13,31 +14,22 @@ type Order = Database['public']['Tables']['orders']['Row']
 type OrderStatus = Database['public']['Enums']['order_status']
 
 export const OrdersTableView = () => {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showOrderDetail, setShowOrderDetail] = useState(false)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
-  useEffect(() => {
-    void fetchOrders()
-  }, [])
-
-  const fetchOrders = async () => {
-    try {
-      void setLoading(true)
+  // ✅ Use TanStack Query for orders
+  const { data: orders = [], isLoading: loading } = useQuery({
+    queryKey: ['orders', 'table'],
+    queryFn: async () => {
       const response = await fetch('/api/orders')
-      if (response.ok) {
-        const data = await response.json()
-        void setOrders(data)
-      }
-    } catch (err) {
-      uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error fetching orders')
-    } finally {
-      void setLoading(false)
-    }
-  }
+      if (!response.ok) throw new Error('Failed to fetch orders')
+      return response.json() as Promise<Order[]>
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  })
 
   const handleViewOrder = (order: Order) => {
     void setSelectedOrder(order)
@@ -49,36 +41,50 @@ export const OrdersTableView = () => {
     void setShowOrderForm(true)
   }
 
-  const handleDeleteOrder = async (order: Order) => {
-    try {
-      const response = await fetch(`/api/orders/${order.id}`, {
+  // ✅ Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const response = await fetch(`/api/orders/${orderId}`, {
         method: 'DELETE'
       })
-
-      if (response.ok) {
-        setOrders(prev => prev.filter(o => o.id !== order.id))
-      }
-    } catch (err) {
+      if (!response.ok) throw new Error('Failed to delete order')
+      return orderId
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      uiLogger.info('Order deleted successfully')
+    },
+    onError: (err) => {
       uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error deleting order')
     }
+  })
+
+  const handleDeleteOrder = async (order: Order) => {
+    await deleteMutation.mutateAsync(order.id)
   }
 
-  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
-    try {
+  // ✅ Update status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ orderId, newStatus }: { orderId: string; newStatus: string }) => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       })
-
-      if (response.ok) {
-        setOrders(prev => prev.map(order =>
-          order.id === orderId ? { ...order, status: newStatus as OrderStatus } : order
-        ))
-      }
-    } catch (err) {
-      uiLogger.error('Error updating status', { error: err instanceof Error ? err.message : 'Unknown error' })
+      if (!response.ok) throw new Error('Failed to update status')
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      uiLogger.info('Order status updated')
+    },
+    onError: (err) => {
+      uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error updating status')
     }
+  })
+
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    await updateStatusMutation.mutateAsync({ orderId, newStatus })
   }
 
   const handleBulkAction = async (action: string, orderIds: string[]) => {
@@ -97,11 +103,11 @@ export const OrdersTableView = () => {
         break
       case 'print':
         // Print selected orders
-        uiLogger.debug('Printing orders', { orderIds })
+        uiLogger.debug({ orderIds }, 'Printing orders')
         break
       case 'archive':
         // Archive selected orders
-        uiLogger.debug('Archiving orders', { orderIds })
+        uiLogger.debug({ orderIds }, 'Archiving orders')
         break
       case 'cancel':
         // Cancel selected orders
@@ -119,7 +125,7 @@ export const OrdersTableView = () => {
         }
         break
       default:
-        uiLogger.warn('Unknown bulk action', { action })
+        uiLogger.warn({ action }, 'Unknown bulk action')
     }
   }
 
@@ -157,7 +163,7 @@ export const OrdersTableView = () => {
             order={editingOrder}
             onSubmit={async (data) => {
               // Handle form submission
-              uiLogger.info('Order submitted', { orderId: data.id })
+              uiLogger.info({ orderId: data.id }, 'Order submitted')
               await fetchOrders()
               void setShowOrderForm(false)
               void setEditingOrder(null)

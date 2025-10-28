@@ -12,11 +12,11 @@ interface ModalProps {
   fullScreenOnMobile?: boolean;
 }
 
-export const Modal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
+export const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
   size = 'md',
   showCloseButton = true,
   closeOnBackdropClick = true,
@@ -37,7 +37,7 @@ export const Modal = ({
       previousFocus.current = document.activeElement as HTMLElement;
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
-      
+
       // Focus management
       setTimeout(() => {
         modalRef.current?.focus();
@@ -55,7 +55,7 @@ export const Modal = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) {return null;}
+  if (!isOpen) { return null; }
 
   const sizeClasses = {
     sm: 'max-w-sm',
@@ -72,35 +72,35 @@ export const Modal = ({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
       {/* Backdrop */}
-      <div 
+      <div
         className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0"
         onClick={handleBackdropClick}
       >
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
           aria-hidden="true"
         />
-        
+
         {/* Center positioning trick for desktop */}
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
           &#8203;
         </span>
-        
+
         {/* Modal Panel */}
-        <div 
+        <div
           ref={modalRef}
           tabIndex={-1}
           className={`
             relative inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-bottom  transition-all sm:my-8 sm:align-middle
-            ${fullScreenOnMobile 
-              ? 'h-full sm:h-auto sm:max-h-[90vh]' 
+            ${fullScreenOnMobile
+              ? 'h-full sm:h-auto sm:max-h-[90vh]'
               : 'max-h-[90vh] sm:max-h-[85vh]'
             }
             ${sizeClasses[size]}
@@ -109,9 +109,9 @@ export const Modal = ({
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200 bg-gray-50">
-            <h2 
+            <h2
               id="modal-title"
-              className="text-base sm:text-lg font-semibold text-gray-900 pr-8 truncate"
+              className="text-base sm:text-lg font-semibold text-gray-900 pr-8 text-wrap-mobile"
             >
               {title}
             </h2>
@@ -125,13 +125,13 @@ export const Modal = ({
               </button>
             )}
           </div>
-          
+
           {/* Content */}
-          <div 
+          <div
             className={`
               px-4 py-4 sm:px-6 sm:py-5 overflow-y-auto
-              ${fullScreenOnMobile 
-                ? 'flex-1 h-full' 
+              ${fullScreenOnMobile
+                ? 'flex-1 h-full'
                 : 'max-h-[calc(90vh-8rem)] sm:max-h-[calc(85vh-8rem)]'
               }
             `}
@@ -176,7 +176,7 @@ export const Drawer = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) {return null;}
+  if (!isOpen) { return null; }
 
   const positionClasses = {
     bottom: {
@@ -200,19 +200,19 @@ export const Drawer = ({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby="drawer-title"
     >
-      <div 
+      <div
         className={`flex min-h-screen ${positionClasses[position].container} sm:items-center sm:justify-center sm:p-4`}
         onClick={handleBackdropClick}
       >
         <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" aria-hidden="true" />
-        
-        <div 
+
+        <div
           ref={drawerRef}
           className={`
             relative bg-white  transform transition-all
@@ -222,9 +222,9 @@ export const Drawer = ({
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200">
-            <h2 
+            <h2
               id="drawer-title"
-              className="text-lg font-semibold text-gray-900 truncate pr-8"
+              className="text-lg font-semibold text-gray-900 text-wrap-mobile pr-8"
             >
               {title}
             </h2>
@@ -238,7 +238,7 @@ export const Drawer = ({
               </button>
             )}
           </div>
-          
+
           {/* Content */}
           <div className="px-4 py-4 sm:px-6 sm:py-5 overflow-y-auto flex-1">
             {children}

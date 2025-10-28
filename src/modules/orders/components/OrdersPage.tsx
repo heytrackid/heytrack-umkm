@@ -23,7 +23,8 @@ import {
   TrendingUp,
   XCircle
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { arrayCalculations } from '@/lib/performance-optimized'
 
 // Types and constants
@@ -77,10 +78,6 @@ interface OrdersPageProps {
 export default function OrdersPage({ }: OrdersPageProps) {
   const { formatCurrency } = useCurrency()
 
-  // State management
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   type ActiveView = 'dashboard' | 'list' | 'calendar' | 'analytics'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
 
@@ -93,80 +90,51 @@ export default function OrdersPage({ }: OrdersPageProps) {
     customer_search: ''
   })
 
-  // Stats
-  const [stats, setStats] = useState<OrderStats>({
-    total_orders: 0,
-    pending_orders: 0,
-    confirmed_orders: 0,
-    in_production_orders: 0,
-    completed_orders: 0,
-    cancelled_orders: 0,
-    total_revenue: 0,
-    pending_revenue: 0,
-    paid_revenue: 0,
-    average_order_value: 0,
-    total_customers: 0,
+  // ✅ Use TanStack Query for automatic caching
+  const { data: orders = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: ['orders', 'all'],
+    queryFn: async () => {
+      const response = await fetch('/api/orders')
+      if (!response.ok) { throw new Error('Failed to fetch orders') }
+      return response.json() as Promise<Order[]>
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const error = queryError ? (queryError as Error).message : null
+
+  // ✅ Calculate stats with useMemo for performance
+  const stats = useMemo<OrderStats>(() => ({
+    total_orders: orders.length,
+    pending_orders: orders.filter(o => o.status === 'PENDING').length,
+    confirmed_orders: orders.filter(o => o.status === 'CONFIRMED').length,
+    in_production_orders: orders.filter(o => o.status === 'IN_PROGRESS').length,
+    completed_orders: orders.filter(o => o.status === 'DELIVERED').length,
+    cancelled_orders: orders.filter(o => o.status === 'CANCELLED').length,
+    total_revenue: arrayCalculations.sum(orders, 'total_amount'),
+    pending_revenue: arrayCalculations.sum(
+      orders.filter(o => o.payment_status === 'UNPAID'),
+      'total_amount'
+    ),
+    paid_revenue: orders.reduce((sum, o) => sum + (o.paid_amount || 0), 0),
+    average_order_value: arrayCalculations.average(orders, 'total_amount'),
+    total_customers: new Set(orders.filter(o => o.customer_id).map(o => o.customer_id)).size,
     repeat_customers: 0,
     period_growth: 0,
     revenue_growth: 0,
     order_growth: 0
-  })
-
-  useEffect(() => {
-    void fetchOrders()
-  }, [filters])
-
-  const fetchOrders = async () => {
-    try {
-      void setLoading(true)
-      void setError(null)
-
-      // Fetch orders from API
-      const response = await fetch('/api/orders')
-      if (!response.ok) { throw new Error('Failed to fetch orders') }
-      const fetchedOrders: Order[] = await response.json()
-
-      void setOrders(fetchedOrders)
-
-      // Calculate stats with optimized array operations
-      const newStats: OrderStats = {
-        total_orders: fetchedOrders.length,
-        pending_orders: fetchedOrders.filter(o => o.status === 'PENDING').length,
-        confirmed_orders: fetchedOrders.filter(o => o.status === 'CONFIRMED').length,
-        in_production_orders: fetchedOrders.filter(o => o.status === 'IN_PROGRESS').length,
-        completed_orders: fetchedOrders.filter(o => o.status === 'DELIVERED').length,
-        cancelled_orders: fetchedOrders.filter(o => o.status === 'CANCELLED').length,
-        total_revenue: arrayCalculations.sum(fetchedOrders, 'total_amount'),
-        pending_revenue: arrayCalculations.sum(
-          fetchedOrders.filter(o => o.payment_status === 'UNPAID'),
-          'total_amount'
-        ),
-        paid_revenue: fetchedOrders.reduce((sum, o) => sum + (o.paid_amount || 0), 0),
-        average_order_value: arrayCalculations.average(fetchedOrders, 'total_amount'),
-        total_customers: new Set(fetchedOrders.filter(o => o.customer_id).map(o => o.customer_id)).size,
-        repeat_customers: 0,
-        period_growth: 0,
-        revenue_growth: 0,
-        order_growth: 0
-      }
-
-      void setStats(newStats)
-    } catch (err) {
-      void setError(err instanceof Error ? err.message : 'Gagal memuat data pesanan')
-    } finally {
-      void setLoading(false)
-    }
-  }
+  }), [orders])
 
   const getStatusColor = (status: OrderStatus) => {
     const config = ORDER_STATUSES[status]
-    if (!config) {return 'bg-gray-100 text-gray-800'}
+    if (!config) { return 'bg-gray-100 text-gray-800' }
     return config.color
   }
 
   const getPaymentStatusColor = (status: string) => {
     const config = PAYMENT_STATUSES[status as keyof typeof PAYMENT_STATUSES]
-    if (!config) {return 'bg-gray-100 text-gray-800'}
+    if (!config) { return 'bg-gray-100 text-gray-800' }
     return config.color
   }
 
@@ -237,7 +205,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
             <XCircle className="h-12 w-12 text-gray-600 dark:text-gray-400 mx-auto mb-4" />
             <h3 className="font-medium mb-2">Gagal Memuat Data</h3>
             <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <Button onClick={fetchOrders}>Coba Lagi</Button>
+            <Button onClick={() => window.location.reload()}>Coba Lagi</Button>
           </div>
         </CardContent>
       </Card>

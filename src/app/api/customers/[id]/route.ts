@@ -4,6 +4,7 @@ import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
+import { prepareUpdate } from '@/lib/supabase/insert-helpers'
 
 type Customer = Database['public']['Tables']['customers']['Row']
 // GET /api/customers/[id] - Get single customer
@@ -68,10 +69,7 @@ export async function PUT(
 
     const validatedData = validation.data
 
-    const updatePayload = {
-      ...validatedData,
-      updated_at: new Date().toISOString()
-    }
+    const updatePayload = prepareUpdate('customers', validatedData)
 
     const { data, error } = await supabase
       .from('customers')

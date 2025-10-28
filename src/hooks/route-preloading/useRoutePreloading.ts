@@ -76,7 +76,7 @@ export const useRoutePreloading = () => {
 
       const endTime = performance.now()
       if (preloadPromises.length > 0) {
-        apiLogger.info(`✅ Preloaded ${priority} resources for ${currentRoute} in ${(endTime - startTime).toFixed(2)}ms`)
+        apiLogger.info({ priority, currentRoute, duration: (endTime - startTime).toFixed(2) }, 'Preloaded resources')
       }
 
     } catch (err: unknown) {

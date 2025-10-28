@@ -178,7 +178,7 @@ export const retryWithBackoff = async <T>(
       const jitter = Math.random() * 0.1 * exponentialDelay
       const delay = exponentialDelay + jitter
 
-      apiLogger.warn(`API call failed (attempt ${attempt + 1}/${maxRetries + 1}), retrying in ${delay}ms:`, { error })
+      apiLogger.warn({ error, attempt: attempt + 1, maxRetries: maxRetries + 1, delay }, 'API call failed, retrying')
       await sleep(delay)
     }
   }
@@ -247,7 +247,7 @@ export const apiRequest = async <T>(
     const cacheKey = `${options.method || 'GET'}-${url}`
     const cached = apiCache.get(cacheKey)
     if (cached) {
-      apiLogger.debug(`Cache hit for ${url}`)
+      apiLogger.debug({ url }, 'Cache hit')
       return cached
     }
   }
@@ -291,7 +291,7 @@ export const apiRequest = async <T>(
       const data = await response.json()
       const duration = Date.now() - startTime
 
-      apiLogger.debug(`API call to ${url} completed in ${duration}ms`)
+      apiLogger.debug({ url, duration }, 'API call completed')
 
       // Cache response if enabled
       if (finalConfig.cache) {

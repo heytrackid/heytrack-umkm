@@ -151,7 +151,7 @@ export function useDataSync<T>(
       setLastSynced(new Date())
       globalCache.set(`${key}_synced`, syncedData)
     } catch (err) {
-      logger.error('Sync failed', { err, key })
+      logger.error({ err, key }, 'Sync failed')
       throw err
     } finally {
       void setSyncing(false)

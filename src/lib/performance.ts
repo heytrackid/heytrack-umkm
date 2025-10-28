@@ -110,10 +110,11 @@ export function useRenderTime(componentName: string) {
     const renderTime = endTime - startTime.current
 
     if (process.env.NODE_ENV === 'development') {
-      perfLogger.info(`Performance: ${componentName}`, {
+      perfLogger.info({
+        componentName,
         render: renderCount.current,
         time: `${renderTime.toFixed(2)}ms`
-      })
+      }, 'Component render performance')
     }
 
     startTime.current = performance.now()
@@ -185,6 +186,6 @@ export function useAdaptiveLoading() {
 export function reportWebVitals(metric: { name: string; value: number; id: string }) {
   if (process.env.NODE_ENV === 'production') {
     // Send to analytics
-    perfLogger.info('Web vital metric', { metric })
+    perfLogger.info({ metric }, 'Web vital metric')
   }
 }

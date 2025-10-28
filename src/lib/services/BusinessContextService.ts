@@ -30,7 +30,7 @@ export class BusinessContextService {
       // Try to get from cache first
       const cached = await this.getCachedContext(userId);
       if (cached) {
-        logger.info('Using cached business context', { userId });
+        logger.info({ userId }, 'Using cached business context');
         return { ...cached, currentPage };
       }
 
@@ -41,11 +41,11 @@ export class BusinessContextService {
       await this.cacheContext(userId, context);
 
       const duration = Date.now() - startTime;
-      logger.info('Business context loaded', { userId, duration });
+      logger.info({ userId, duration }, 'Business context loaded');
 
       return context;
     } catch (error) {
-      logger.error('Failed to load business context', { error, userId });
+      logger.error({ error, userId }, 'Failed to load business context');
       // Return minimal context on error
       return { currentPage, timestamp: new Date().toISOString() };
     }
@@ -286,7 +286,7 @@ export class BusinessContextService {
       .eq('user_id', userId)
       .eq('context_type', 'full_context');
 
-    logger.info('Context cache invalidated', { userId });
+    logger.info({ userId }, 'Context cache invalidated');
   }
 
   /**

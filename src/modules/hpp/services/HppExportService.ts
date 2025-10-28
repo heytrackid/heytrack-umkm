@@ -21,7 +21,7 @@ export class HppExportService {
    */
   async exportHppData(options: HppExportOptions): Promise<HppExportResult> {
     try {
-      this.logger.info(`Exporting HPP data in ${options.format} format`)
+      this.logger.info({ format: options.format }, 'Exporting HPP data')
 
       // Get data based on options
       const data = await this.getExportData(options)
