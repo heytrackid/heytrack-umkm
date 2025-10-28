@@ -3,7 +3,7 @@
  * Optimized pie chart for mobile devices
  */
 
-import { React, memo } from 'react'
+import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'

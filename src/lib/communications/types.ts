@@ -64,7 +64,7 @@ export interface SmartNotification extends Omit<BaseMessage, 'type'> {
   category: 'inventory' | 'orders' | 'financial' | 'production' | 'customer' | 'system'
   title: string
   message: string
-  data?: any
+  data?: Record<string, unknown>
   actionUrl?: string
   actionLabel?: string
   isRead: boolean

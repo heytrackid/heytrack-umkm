@@ -42,6 +42,39 @@ const nextConfig = {
   // Empty config to silence webpack warning - Turbopack handles HMR automatically
   turbopack: {},
 
+  // Webpack configuration for better HMR and dynamic imports
+  webpack: (config, { dev, isServer }) => {
+    // Development optimizations for better HMR
+    if (dev) {
+      // Ensure module IDs are stable across HMR updates
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'named',
+        chunkIds: 'named'
+      }
+    }
+
+    // Production optimizations
+    if (!dev && !isServer) {
+      // Split chunks for better caching
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        cacheGroups: {
+          ...config.optimization.splitChunks?.cacheGroups,
+          // Sidebar components chunk (for better HMR)
+          sidebar: {
+            name: 'sidebar',
+            test: /[\\/]components[\\/]layout[\\/]sidebar[\\/]/,
+            chunks: 'all',
+            priority: 35
+          }
+        }
+      }
+    }
+
+    return config
+  },
+
   // Image Optimization
   images: {
     formats: ['image/webp', 'image/avif'],

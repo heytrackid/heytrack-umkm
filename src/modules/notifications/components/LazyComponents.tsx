@@ -1,7 +1,9 @@
 'use client'
 
-import { ComponentSkeletons, createLazyComponent, useProgressiveLoading } from '@/components/lazy/LazyWrapper'
+import { createLazyComponent } from '@/components/lazy/LazyWrapper'
 import { Suspense } from 'react'
+import type { Ingredient } from '@/types/domain/inventory'
+import type { OrdersTable } from '@/types/domain/orders'
 
 // Define FinancialMetrics type for notification components
 export interface FinancialMetrics {
@@ -14,10 +16,10 @@ export interface FinancialMetrics {
 
 // Lazy load notification components with optimized loading
 export const LazySmartNotificationCenter = createLazyComponent(
-  () => import('@/components'),
+  () => import('@/components/automation/smart-notifications').then(m => ({ default: m.SmartNotificationCenter })),
   {
     name: 'Smart Notification Center',
-    fallback: <ComponentSkeletons.Dashboard />,
+    fallback: <div className="animate-pulse h-64 bg-gray-200 rounded-lg" />,
     minLoadingTime: 400,
   }
 )
@@ -38,31 +40,31 @@ export const NotificationCenterWithProgressiveLoading = ({
   orders?: Array<OrdersTable['Row']>
   financialMetrics?: FinancialMetrics
 }) => (
-    <div className="space-y-6">
-      {/* Critical above-the-fold content loads first */}
-      <div className="space-y-4">
-        <h1 className="text-3xl font-bold">Notification Center</h1>
+  <div className="space-y-6">
+    {/* Critical above-the-fold content loads first */}
+    <div className="space-y-4">
+      <h1 className="text-3xl font-bold">Notification Center</h1>
 
-        {/* Quick stats load immediately (lightweight) */}
-        <Suspense fallback={<ComponentSkeletons.Card />}>
-          <div className="grid gap-4 md:grid-cols-4">
-            {/* Basic stats - not lazy loaded as they're lightweight */}
-          </div>
-        </Suspense>
-      </div>
-
-      {/* Heavy notification center loads progressively */}
-      <div className="space-y-6">
-        <Suspense fallback={<ComponentSkeletons.Dashboard />}>
-          <LazySmartNotificationCenter
-            ingredients={ingredients}
-            orders={orders}
-            financialMetrics={financialMetrics}
-          />
-        </Suspense>
-      </div>
+      {/* Quick stats load immediately (lightweight) */}
+      <Suspense fallback={<div className="animate-pulse h-32 bg-gray-200 rounded-lg" />}>
+        <div className="grid gap-4 md:grid-cols-4">
+          {/* Basic stats - not lazy loaded as they're lightweight */}
+        </div>
+      </Suspense>
     </div>
-  )
+
+    {/* Heavy notification center loads progressively */}
+    <div className="space-y-6">
+      <Suspense fallback={<div className="animate-pulse h-96 bg-gray-200 rounded-lg" />}>
+        <LazySmartNotificationCenter
+          ingredients={ingredients}
+          orders={orders}
+          financialMetrics={financialMetrics}
+        />
+      </Suspense>
+    </div>
+  </div>
+)
 
 // Hook for progressive notification component loading with metrics
 export function useNotificationProgressiveLoading() {

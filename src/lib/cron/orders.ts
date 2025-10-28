@@ -50,7 +50,7 @@ export class OrderCronJobs {
 
       return { alertsGenerated: alerts.length }
     } catch (err) {
-      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error checking order deadlines')
+      cronLogger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error checking order deadlines')
       throw err
     }
   }

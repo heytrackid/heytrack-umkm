@@ -3,7 +3,7 @@
  * Shared chart container with mobile optimizations
  */
 
-import { type ReactNode, React, useState } from 'react'
+import { type ReactNode,  useState } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import { Maximize2, Minimize2, Download, Share2, TrendingDown, TrendingUp } from 'lucide-react'

@@ -55,7 +55,6 @@ interface CategoryTableProps {
 }
 
 export const CategoryTable = ({
-  categories,
   filteredCategories,
   paginatedCategories,
   selectedItems,

@@ -3,7 +3,7 @@
 import { apiLogger } from '@/lib/logger'
 
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T> {
   success: boolean
   data?: T
   error?: string
@@ -26,7 +26,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 export interface ApiError {
   readonly code: string
   readonly message: string
-  readonly details?: Record<string, any>
+  readonly details?: Record<string, unknown>
   readonly statusCode: number
 }
 
@@ -70,7 +70,7 @@ export class ApiError extends Error {
     message: string,
     code: string = API_ERROR_CODES.UNKNOWN_ERROR,
     statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'ApiError'
@@ -91,12 +91,12 @@ export const createApiResponse = {
     timestamp: new Date().toISOString(),
   }),
 
-  error: (
+  error: <T = unknown>(
     message: string,
     statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
     code: string = API_ERROR_CODES.UNKNOWN_ERROR,
-    details?: Record<string, any>
-  ): ApiResponse => ({
+    details?: Record<string, unknown>
+  ): ApiResponse<T> => ({
     success: false,
     error: message,
     statusCode,
@@ -167,7 +167,7 @@ export const retryWithBackoff = async <T>(
     try {
       return await operation()
     } catch (err) {
-      lastError = _error as Error
+      lastError = err as Error
 
       if (attempt === maxRetries) {
         throw lastError
@@ -191,9 +191,9 @@ export const retryWithBackoff = async <T>(
  */
 export const apiCache = {
   // Simple in-memory cache
-  cache: new Map<string, { data: any; timestamp: number; ttl: number }>(),
+  cache: new Map<string, { data: unknown; timestamp: number; ttl: number }>(),
 
-  set: (key: string, data: any, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
+  set: (key: string, data: unknown, ttl: number = DEFAULT_API_CONFIG.cacheTimeout) => {
     apiCache.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -346,19 +346,19 @@ export const apiMethods = {
   get: <T>(url: string, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, { method: 'GET' }, config),
 
-  post: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  post: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }, config),
 
-  put: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  put: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }, config),
 
-  patch: <T>(url: string, data?: any, config?: Partial<ApiRequestConfig>) =>
+  patch: <T, D = unknown>(url: string, data?: D, config?: Partial<ApiRequestConfig>) =>
     apiRequest<T>(url, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
@@ -373,7 +373,7 @@ export const apiMethods = {
  */
 export const urlBuilder = {
   // Build URL with query parameters
-  withParams: (baseUrl: string, params: Record<string, any> = {}): string => {
+  withParams: (baseUrl: string, params: Record<string, unknown> = {}): string => {
     const url = new URL(baseUrl, typeof window !== 'undefined' ? window.location.origin : 'http://localhost')
 
     Object.entries(params).forEach(([key, value]) => {
@@ -390,14 +390,14 @@ export const urlBuilder = {
   },
 
   // Build pagination URL
-  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, any> = {}): string => urlBuilder.withParams(baseUrl, {
+  withPagination: (baseUrl: string, page: number, limit: number, params: Record<string, unknown> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       page,
       limit,
     }),
 
   // Build search URL
-  withSearch: (baseUrl: string, search: string, params: Record<string, any> = {}): string => urlBuilder.withParams(baseUrl, {
+  withSearch: (baseUrl: string, search: string, params: Record<string, unknown> = {}): string => urlBuilder.withParams(baseUrl, {
       ...params,
       search,
     }),
@@ -408,7 +408,7 @@ export const urlBuilder = {
  */
 export const responseTransformers = {
   // Transform Supabase response to standardized format
-  supabaseToStandard: <T>(response: any): ApiResponse<T> => {
+  supabaseToStandard: <T>(response: { data?: T; error?: { message: string } }): ApiResponse<T> => {
     if (response.error) {
       return createApiResponse.error(
         response.error.message,
@@ -418,7 +418,7 @@ export const responseTransformers = {
       )
     }
 
-    return createApiResponse.success(response.data)
+    return createApiResponse.success(response.data!)
   },
 
   // Transform array response to paginated response

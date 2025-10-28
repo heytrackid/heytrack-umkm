@@ -6,7 +6,7 @@
 
 
 import type { ReorderSummary } from './types'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import { inventoryLogger } from '@/lib/logger'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -89,7 +89,7 @@ export class InventoryServices {
         criticalItems
       }
     } catch (err) {
-      inventoryLogger._error({ err }, 'Error in checkReorderNeeds')
+      inventoryLogger.error({ err }, 'Error in checkReorderNeeds')
       return { items: [], totalItems: 0, criticalItems: 0 }
     }
   }
@@ -128,7 +128,7 @@ export class InventoryServices {
 
       return (ingredients) || []
     } catch (err) {
-      inventoryLogger._error({ err }, 'Error in getLowStockItems')
+      inventoryLogger.error({ err }, 'Error in getLowStockItems')
       return []
     }
   }
@@ -156,7 +156,7 @@ export class InventoryServices {
 
       inventoryLogger.info({ updatesCount: updates.length }, 'Successfully updated stock levels')
     } catch (err) {
-      inventoryLogger._error({ err }, 'Error in updateStockLevels')
+      inventoryLogger.error({ err }, 'Error in updateStockLevels')
       throw err
     }
   }
@@ -231,7 +231,7 @@ export class InventoryServices {
         return priorityOrder[b.alert_type] - priorityOrder[a.alert_type]
       })
     } catch (err) {
-      inventoryLogger._error({ err }, 'Error in getStockAlerts')
+      inventoryLogger.error({ err }, 'Error in getStockAlerts')
       return []
     }
   }

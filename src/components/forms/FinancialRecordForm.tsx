@@ -76,7 +76,11 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             >
               <Select 
                 value={form.watch('type')} 
-                onValueChange={(value) => form.setValue('type', value as any)}
+                onValueChange={(value) => {
+                  if (value === 'INCOME' || value === 'EXPENSE') {
+                    form.setValue('type', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -130,7 +134,16 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             >
               <Select 
                 value={form.watch('payment_method')} 
-                onValueChange={(value) => form.setValue('payment_method', value as any)}
+                onValueChange={(value) => {
+                  if (
+                    value === 'CASH' ||
+                    value === 'TRANSFER' ||
+                    value === 'CREDIT_CARD' ||
+                    value === 'E_WALLET'
+                  ) {
+                    form.setValue('payment_method', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -193,7 +206,16 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             >
               <Select 
                 value={form.watch('recurring_period')} 
-                onValueChange={(value) => form.setValue('recurring_period', value as any)}
+                onValueChange={(value) => {
+                  if (
+                    value === 'DAILY' ||
+                    value === 'WEEKLY' ||
+                    value === 'MONTHLY' ||
+                    value === 'YEARLY'
+                  ) {
+                    form.setValue('recurring_period', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />

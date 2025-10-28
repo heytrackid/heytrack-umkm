@@ -13,8 +13,8 @@ export interface ChatContext {
     content: string
     timestamp: Date
   }>
-  businessData?: any
-  preferences?: Record<string, any>
+  businessData?: Record<string, unknown>
+  preferences?: Record<string, unknown>
 }
 
 export interface AIResponse {

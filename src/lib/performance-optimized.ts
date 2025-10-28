@@ -3,7 +3,7 @@
  * Extends base performance.ts with more advanced features
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, DependencyList } from 'react'
 import { perfLogger } from '@/lib/logger'
 
 /**
@@ -44,7 +44,7 @@ export function useMemoizedArrayOps<T>(
 export function useExpensiveCalculation<T, R>(
   data: T,
   calculator: (data: T) => R,
-  deps: any[] = []
+  deps: React.DependencyList = []
 ): R {
   return useMemo(() => calculator(data), [data, ...deps])
 }
@@ -107,7 +107,7 @@ export function useVirtualScroll<T>(
 export function useStableCallback<T extends (...args: any[]) => any>(
   callback: T
 ): T {
-  const callbackRef = useRef(callback)
+  const callbackRef = useRef<T>(callback)
 
   useEffect(() => {
     callbackRef.current = callback

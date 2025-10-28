@@ -9,12 +9,10 @@ import {
   StatsCardSkeleton,
   StockAlertSkeleton
 } from '@/components/ui/skeletons/dashboard-skeletons'
-import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
 import { LOADING_KEYS, useLoading } from '@/hooks/loading'
-import { useResponsive } from '@/hooks/useResponsive'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import {
   BarChart3,
@@ -29,43 +27,64 @@ import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
 // Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
-  ssr: false,
-  loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
-})
+const ExcelExportButton = dynamic(
+  () => import(/* webpackChunkName: "excel-export-button" */ '@/components/export/ExcelExportButton'),
+  {
+    ssr: false,
+    loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
+  }
+)
 
-const StatsCardsSection = dynamic(() => import('./components/StatsCardsSection'), {
-  loading: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {Array.from({ length: 4 }, (_, i) => (
-        <StatsCardSkeleton key={i} />
-      ))}
-    </div>
-  ),
-})
-const RecentOrdersSection = dynamic(() => import('./components/RecentOrdersSection'), { loading: () => <RecentOrdersSkeleton /> })
-const StockAlertsSection = dynamic(() => import('./components/StockAlertsSection'), { loading: () => <StockAlertSkeleton /> })
-const HppDashboardWidget = dynamic(() => import('./components/HppDashboardWidget'), {
-  loading: () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-5 w-5" />
-          HPP & Costing Overview
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="animate-pulse space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-16 bg-gray-200 rounded" />
-            <div className="h-16 bg-gray-200 rounded" />
+const StatsCardsSection = dynamic(
+  () => import(/* webpackChunkName: "dashboard-stats-cards" */ './components/StatsCardsSection'),
+  {
+    loading: () => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <StatsCardSkeleton key={i} />
+        ))}
+      </div>
+    ),
+  }
+)
+
+const RecentOrdersSection = dynamic(
+  () => import(/* webpackChunkName: "dashboard-recent-orders" */ './components/RecentOrdersSection'),
+  {
+    loading: () => <RecentOrdersSkeleton />
+  }
+)
+
+const StockAlertsSection = dynamic(
+  () => import(/* webpackChunkName: "dashboard-stock-alerts" */ './components/StockAlertsSection'),
+  {
+    loading: () => <StockAlertSkeleton />
+  }
+)
+
+const HppDashboardWidget = dynamic(
+  () => import(/* webpackChunkName: "dashboard-hpp-widget" */ './components/HppDashboardWidget'),
+  {
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="h-5 w-5" />
+            HPP & Costing Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-16 bg-gray-200 rounded" />
+              <div className="h-16 bg-gray-200 rounded" />
+            </div>
+            <div className="h-32 bg-gray-200 rounded" />
           </div>
-          <div className="h-32 bg-gray-200 rounded" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
+        </CardContent>
+      </Card>
+    )
+  })
 
 // Sample data removed - now using real data from API
 // const sampleStats = {
@@ -91,16 +110,10 @@ const placeholderStats = {
   ingredientsLow: 0
 }
 
-const recentOrders: unknown[] = []
-
-const lowStockItems: unknown[] = []
-
 export default function Dashboard() {
-  const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
-  const { settings } = useSettings()
   const [currentTime, setCurrentTime] = useState(new Date())
-  const { loading, setLoading, isLoading } = useLoading({
+  const { setLoading, isLoading } = useLoading({
     [LOADING_KEYS.DASHBOARD_STATS]: true,
     [LOADING_KEYS.RECENT_ORDERS]: true,
     [LOADING_KEYS.STOCK_ALERTS]: true
@@ -152,15 +165,6 @@ export default function Dashboard() {
       clearTimeout(stockTimer)
     }
   }, [])
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-      case 'processing': return 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-      case 'pending': return 'bg-gray-50 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
-    }
-  }
 
   // Show loading state while auth is initializing
   if (isAuthLoading) {

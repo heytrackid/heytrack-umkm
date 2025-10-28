@@ -2,26 +2,22 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { IngredientsCRUD } from '@/components/crud/ingredients-crud';
+import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
 import AppLayout from '@/components/layout/app-layout';
 import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui'
-import { useSettings } from '@/contexts/settings-context';
 import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle,
-  DollarSign,
   Package,
   Plus,
-  ShoppingCart,
-  TrendingDown
+  ShoppingCart
 } from 'lucide-react';
 
 export default function IngredientsPage() {
-  const { formatCurrency } = useSettings();
   const { data: ingredients, loading, error } = useIngredients({ realtime: true });
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth();
+  const { isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -46,12 +42,12 @@ export default function IngredientsPage() {
   // Calculate stats
   const totalIngredients = ingredients?.length || 0;
   const lowStockCount = ingredients?.filter(i =>
-    i.stok_tersedia <= (i.stok_minimum || 0)
+    (i.current_stock || 0) <= (i.min_stock || 0)
   ).length || 0;
   const totalValue = ingredients?.reduce((sum, i) =>
-    sum + (i.stok_tersedia * i.harga_per_satuan), 0
+    sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
   ) || 0;
-  const outOfStockCount = ingredients?.filter(i => i.stok_tersedia <= 0).length || 0;
+  const outOfStockCount = ingredients?.filter(i => (i.current_stock || 0) <= 0).length || 0;
 
   // Show loading state while auth is initializing
   if (isAuthLoading) {
@@ -93,14 +89,14 @@ export default function IngredientsPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={() => router.push('/ingredients/purchases')}
               className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Pembelian
             </button>
-            <button 
+            <button
               onClick={() => router.push('/ingredients/new')}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
             >

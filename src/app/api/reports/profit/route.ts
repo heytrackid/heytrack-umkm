@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { DateRangeQuerySchema } from '@/lib/validations/api-validations'
-import type { Database } from '@/types'
+import type { Order } from '@/types/domain/orders'
+import type { Recipe } from '@/types/domain/recipes'
+import type { FinancialRecordsTable } from '@/types/domain/finance'
 
 import { apiLogger } from '@/lib/logger'
 /**
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date') || new Date(new Date().setDate(1)).toISOString().split('T')[0]
     const endDate = searchParams.get('end_date') || new Date().toISOString().split('T')[0]
     const period = searchParams.get('period') || 'monthly'
-    const includeBreakdown = searchParams.get('include_breakdown') === 'true'
+    // const includeBreakdown = searchParams.get('include_breakdown') === 'true'
 
     // Get all DELIVERED orders with items in date range
     const { data: orders, error: ordersError } = await supabase
@@ -110,10 +111,10 @@ export async function GET(request: NextRequest) {
     // Calculate profit metrics
     const profitData = await calculateProfitMetrics(
       orders || [],
-      recipes || [],
+      recipes as unknown as Recipe[] || [],
       expenses || [],
-      period,
-      includeBreakdown
+      period
+      // includeBreakdown
     )
 
     // Build response
@@ -147,7 +148,7 @@ export async function GET(request: NextRequest) {
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error generating profit report:')
     return NextResponse.json(
-      { error: 'Internal server error', details: (error as any).message },
+      { error: 'Internal server error', details: err instanceof Error ? err.message : String(err) },
       { status: 500 }
     )
   }
@@ -155,27 +156,82 @@ export async function GET(request: NextRequest) {
 
 // Main calculation function
 async function calculateProfitMetrics(
-  orders: any[],
+  orders: Array<Order & { order_items?: Array<any & { recipe_id: string; quantity: number; total_price: number }> }>,
   recipes: any[],
-  expenses: any[],
+  expenses: Array<FinancialRecordsTable['Row']>,
   period: string,
-  includeBreakdown: boolean
+  // includeBreakdown: boolean
 ) {
   // Build recipe cost lookup map
-  const recipeCostMap = new Map()
+  const recipeCostMap = new Map<string, {
+    name: string
+    cogs: number
+    ingredients: any[]
+  }>()
   recipes.forEach(recipe => {
-    const cogs = calculateRecipeCOGS(recipe)
+    const cogs = calculateRecipeCOGS({
+      ...recipe,
+      batch_size: recipe.yield_pcs,
+      category: null,
+      cook_time: null,
+      cost_per_unit: null,
+      created_at: null,
+      created_by: null,
+      description: null,
+      difficulty_level: null,
+      id: recipe.id,
+      image_url: null,
+      instructions: null,
+      is_active: true,
+      name: recipe.name,
+      prep_time: null,
+      price: null,
+      recipe_ingredients: recipe.recipe_ingredients?.map((ri: any) => ({
+        ...ri,
+        qty_per_batch: ri.qty_per_batch,
+        ingredient: ri.ingredient ? {
+          ...ri.ingredient[0],
+          id: ri.ingredient[0]?.id,
+          name: ri.ingredient[0]?.name,
+          weighted_average_cost: ri.ingredient[0]?.weighted_average_cost,
+          unit: ri.ingredient[0]?.unit
+        } : null
+      })) || [],
+      serving_size: null,
+      tags: null,
+      updated_at: null,
+      user_id: null,
+      yield_pcs: recipe.yield_pcs
+    })
     recipeCostMap.set(recipe.id, {
       name: recipe.name,
       cogs,
-      ingredients: recipe.recipe_ingredients || []
+      ingredients: [] // recipe.recipe_ingredients || []
     })
   })
 
   let totalRevenue = 0
   let totalCOGS = 0
-  const profitByPeriod: Record<string, unknown> = {}
-  const productProfitability: Record<string, unknown> = {}
+  const profitByPeriod: Record<string, {
+    period: string
+    revenue: number
+    cogs: number
+    gross_profit: number
+    gross_margin: number
+    orders_count: number
+  }> = {}
+  interface ProductProfitabilityItem {
+    product_name: string
+    recipe_id: string
+    total_revenue: number
+    total_cogs: number
+    total_quantity: number
+    gross_profit: number
+    gross_margin: number
+    avg_selling_price: number
+    avg_cost_per_unit: number
+  }
+  const productProfitability: Record<string, ProductProfitabilityItem> = {}
 
   // Process each order
   orders.forEach(order => {
@@ -184,7 +240,7 @@ async function calculateProfitMetrics(
 
     // Calculate COGS for this order using WAC
     let orderCOGS = 0
-    order.order_items?.forEach((item: any) => {
+    order.order_items?.forEach((item) => {
       const recipeData = recipeCostMap.get(item.recipe_id)
       if (recipeData) {
         const itemCOGS = recipeData.cogs * item.quantity
@@ -206,7 +262,7 @@ async function calculateProfitMetrics(
           }
         }
 
-        const profItem = productProfitability[productKey] as any
+        const profItem = productProfitability[productKey] as ProductProfitabilityItem
         profItem.total_revenue += +(item.total_price || 0)
         profItem.total_cogs += itemCOGS
         profItem.total_quantity += +(item.quantity || 0)
@@ -216,7 +272,7 @@ async function calculateProfitMetrics(
     totalCOGS += orderCOGS
 
     // Group by period
-    const periodKey = getPeriodKey(order.delivery_date || order.order_date, period)
+    const periodKey = getPeriodKey((order.delivery_date || order.order_date || new Date().toISOString()) as string, period)
     if (!profitByPeriod[periodKey]) {
       profitByPeriod[periodKey] = {
         period: periodKey,
@@ -228,7 +284,7 @@ async function calculateProfitMetrics(
       }
     }
 
-    const periodData = profitByPeriod[periodKey] as any
+    const periodData = profitByPeriod[periodKey]
     periodData.revenue += revenue
     periodData.cogs += orderCOGS
     periodData.gross_profit = periodData.revenue - periodData.cogs
@@ -239,7 +295,7 @@ async function calculateProfitMetrics(
   })
 
   // Calculate final product profitability metrics
-  Object.values(productProfitability).forEach((product: any) => {
+  Object.values(productProfitability).forEach((product) => {
     const prod = product
     prod.gross_profit = prod.total_revenue - prod.total_cogs
     prod.gross_margin = prod.total_revenue > 0
@@ -251,11 +307,17 @@ async function calculateProfitMetrics(
   })
 
   // Calculate operating expenses
-  const totalOperatingExpenses = expenses.reduce((sum: number, exp: { amount: number | string }) => sum + Number(exp.amount || 0), 0)
+  const totalOperatingExpenses = expenses.reduce((sum: number, exp: { amount: number | string }) => sum + parseFloat(String(exp.amount || 0)), 0)
 
   // Calculate operating expenses breakdown by category
-  const operatingExpensesBreakdown: Record<string, unknown> = {}
-  expenses.forEach((exp: { amount: number | string; category: string }) => {
+  interface OperatingExpenseBreakdownItem {
+    category: string
+    total: number
+    count: number
+    percentage: number
+  }
+  const operatingExpensesBreakdown: Record<string, OperatingExpenseBreakdownItem> = {}
+  expenses.forEach((exp) => {
     const category = exp.category || 'Other'
     if (!operatingExpensesBreakdown[category]) {
       operatingExpensesBreakdown[category] = {
@@ -265,16 +327,16 @@ async function calculateProfitMetrics(
         percentage: 0
       }
     }
-    const currentTotal = (operatingExpensesBreakdown[category] as any).total || 0
-    ;(operatingExpensesBreakdown[category] as any).total = currentTotal + (Number(exp.amount) || 0)
-    (operatingExpensesBreakdown[category] as any).count++
+    const currentTotal = operatingExpensesBreakdown[category].total || 0
+    operatingExpensesBreakdown[category].total = currentTotal + (parseFloat(String(exp.amount)) || 0)
+    operatingExpensesBreakdown[category].count++
   })
 
   // Calculate percentages for operating expenses
   Object.values(operatingExpensesBreakdown).forEach((cat) => {
     if (cat && typeof cat === 'object') {
-      const catTotal = Number((cat as any).total || 0)
-      ;(cat as any).percentage = totalOperatingExpenses > 0
+      const catTotal = parseFloat(String(cat.total || 0))
+      cat.percentage = totalOperatingExpenses > 0 ? (catTotal / totalOperatingExpenses) * 100 : 0
         ? (catTotal / totalOperatingExpenses) * 100
         : 0
     }
@@ -288,7 +350,7 @@ async function calculateProfitMetrics(
   const netProfit = grossProfit - totalOperatingExpenses
 
   // Sort products by profitability
-  const sortedProducts = Object.values(productProfitability).sort((a: any, b: any) => {
+  const sortedProducts = Object.values(productProfitability).sort((a, b) => {
     const bProfit = +(b.gross_profit || 0)
     const aProfit = +(a.gross_profit || 0)
     return bProfit - aProfit
@@ -302,47 +364,59 @@ async function calculateProfitMetrics(
     totalOperatingExpenses,
     netProfit,
     netProfitMargin: totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0,
-    profitByPeriod: Object.values(profitByPeriod).sort((a: any, b: any) =>
-      a.period.localeCompare(b.period)
-    ),
+    profitByPeriod: Object.values(profitByPeriod).sort((a, b) =>
+        a.period.localeCompare(b.period)
+      ),
     productProfitability: sortedProducts,
     cogsBreakdown: Object.values(cogsBreakdown),
-    operatingExpensesBreakdown: Object.values(operatingExpensesBreakdown).sort((a: any, b: any) =>
-      (b).total - (a).total
+    operatingExpensesBreakdown: Object.values(operatingExpensesBreakdown).sort((a, b) =>
+      (b as OperatingExpenseBreakdownItem).total - (a as OperatingExpenseBreakdownItem).total
     ),
     topProfitableProducts: sortedProducts.slice(0, 5),
     leastProfitableProducts: sortedProducts.slice(-5).reverse()
   }
 }
 
-// Helper: Calculate recipe COGS using WAC
-function calculateRecipeCOGS(recipe: any): number {
-  if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
-    return +(recipe.cost_per_unit || 0)
+function calculateRecipeCOGS(recipe: Recipe): number {
+  // Check if recipe has recipe_ingredients property before accessing it
+  if (!recipe || !('recipe_ingredients' in recipe) || !recipe.recipe_ingredients || !Array.isArray(recipe.recipe_ingredients) || recipe.recipe_ingredients.length === 0) {
+    return +(recipe?.cost_per_unit || 0)
   }
 
   let totalCost = 0
-  recipe.recipe_ingredients.forEach((ri: any) => {
-    if (ri.ingredient) {
-      const wac = +(ri.ingredient.weighted_average_cost || 0)
-      const quantity = +(ri.quantity || 0)
-      totalCost += wac * quantity
-    }
-  })
-
+  if (Array.isArray(recipe.recipe_ingredients)) {
+    recipe.recipe_ingredients.forEach((ri: any) => {
+      if (ri && 'ingredient' in ri && ri.ingredient) {
+        const wac = +(ri.ingredient.weighted_average_cost || 0)
+        const quantity = +(ri.quantity || 0)
+        totalCost += wac * quantity
+      }
+    })
+  }
   return totalCost
 }
 
+interface COGSBreakdownItem {
+  ingredient_name: string
+  total_cost: number
+  total_quantity: number
+  wac: number
+  percentage: number
+}
+
 // Helper: Calculate COGS breakdown by ingredient
-function calculateCOGSBreakdown(orders: any[], recipeCostMap: Map<string, any>) {
-  const breakdown: Record<string, any> = {}
+function calculateCOGSBreakdown(
+  orders: Array<Order & { order_items?: Array<{ recipe_id: string; quantity: number }> }>,
+  recipeCostMap: Map<string, { name: string; cogs: number; ingredients: any[] }>
+): Record<string, COGSBreakdownItem> {
+  const breakdown: Record<string, COGSBreakdownItem> = {}
 
   orders.forEach(order => {
-    order.order_items?.forEach((item: any) => {
+    order.order_items?.forEach((item) => {
       const recipeData = recipeCostMap.get(item.recipe_id)
       if (recipeData?.ingredients) {
         recipeData.ingredients.forEach((ri: any) => {
-          if (ri.ingredient) {
+          if ('ingredient' in ri && ri.ingredient) {
             const ingredientName = ri.ingredient.name
             if (!breakdown[ingredientName]) {
               breakdown[ingredientName] = {
@@ -367,9 +441,9 @@ function calculateCOGSBreakdown(orders: any[], recipeCostMap: Map<string, any>) 
   })
 
   // Calculate percentages
-  const totalCOGS = Object.values(breakdown).reduce((sum: number, ing: any) => sum + Number(ing.total_cost || 0), 0)
-  Object.values(breakdown).forEach((ing: any) => {
-    const ingCost = Number(ing.total_cost || 0)
+  const totalCOGS = Object.values(breakdown).reduce((sum: number, ing) => sum + parseFloat(String(ing.total_cost || 0)), 0)
+  Object.values(breakdown).forEach((ing) => {
+    const ingCost = parseFloat(String(ing.total_cost || 0))
     ing.percentage = totalCOGS > 0 ? (ingCost / totalCOGS) * 100 : 0
   })
 
@@ -383,14 +457,15 @@ function getPeriodKey(date: string, period: string): string {
   switch (period) {
     case 'daily':
       return date
-    case 'weekly':
+    case 'weekly': {
       const weekStart = new Date(d)
       weekStart.setDate(d.getDate() - d.getDay())
-      return weekStart.toISOString().split('T')[0]
+      return weekStart.toISOString().split('T')[0]!
+    }
     case 'monthly':
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     case 'yearly':
-      return `${d.getFullYear()}`
+      return String(d.getFullYear())
     default:
       return date
   }

@@ -21,5 +21,5 @@ import { getWorkflowAutomation } from './automation/workflows'
 export const automationEngine = getWorkflowAutomation()
 
 // Legacy exports for backward compatibility
-export const WorkflowAutomation = getWorkflowAutomation().constructor as any
+export const WorkflowAutomation = getWorkflowAutomation().constructor
 export const workflowAutomation = getWorkflowAutomation()

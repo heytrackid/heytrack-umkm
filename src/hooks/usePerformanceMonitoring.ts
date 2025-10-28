@@ -27,11 +27,10 @@ interface PerformanceMetrics {
   }
 }
 
-interface PerformanceObserverEntry {
-  name: string
+// PerformanceLayoutShift interface for CLS tracking
+interface PerformanceLayoutShift extends PerformanceEntry {
   value: number
-  rating?: 'good' | 'needs-improvement' | 'poor'
-  timestamp: number
+  hadRecentInput: boolean
 }
 
 export function usePerformanceMonitoring() {
@@ -112,10 +111,11 @@ export function usePerformanceMonitoring() {
     try {
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries()
-        entries.forEach((entry: any) => {
+        entries.forEach((entry: PerformanceEntry) => {
+          const firstInputEntry = entry as PerformanceEventTiming
           setMetrics(prev => ({
             ...prev,
-            fid: entry.processingStart - entry.startTime
+            fid: firstInputEntry.processingStart - firstInputEntry.startTime
           }))
         })
       })
@@ -130,9 +130,10 @@ export function usePerformanceMonitoring() {
       let clsValue = 0
       const clsObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries()
-        entries.forEach((entry: any) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value
+        entries.forEach((entry: PerformanceEntry) => {
+          const layoutShiftEntry = entry as PerformanceLayoutShift
+          if (!layoutShiftEntry.hadRecentInput) {
+            clsValue += layoutShiftEntry.value
           }
         })
         setMetrics(prev => ({
@@ -198,7 +199,7 @@ export function usePerformanceMonitoring() {
 
   const observeResourceTiming = () => {
     // Monitor resource loading performance
-    const resourceObserver = new PerformanceObserver((list) => {
+    const resourceObserver = new PerformanceObserver(() => {
       // Could analyze resource loading times here
       // Silently track resource timing
     })

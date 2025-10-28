@@ -22,19 +22,28 @@ import { useToast } from '@/hooks/use-toast'
 // Lazy load components
 import dynamic from 'next/dynamic'
 
-const PurchaseStats = dynamic(() => import('./PurchaseStats'), {
-  loading: () => <div>Loading stats...</div>
-})
+const PurchaseStats = dynamic(
+  () => import(/* webpackChunkName: "purchase-stats" */ './PurchaseStats'),
+  {
+    loading: () => <div>Loading stats...</div>
+  }
+)
 
-const PurchaseForm = dynamic(() => import('./PurchaseForm'), {
-  loading: () => <div>Loading form...</div>
-})
+const PurchaseForm = dynamic(
+  () => import(/* webpackChunkName: "purchase-form" */ './PurchaseForm'),
+  {
+    loading: () => <div>Loading form...</div>
+  }
+)
 
-const PurchasesTable = dynamic(() => import('./PurchasesTable'), {
-  loading: () => <div>Loading table...</div>
-})
+const PurchasesTable = dynamic(
+  () => import(/* webpackChunkName: "purchases-table" */ './PurchasesTable'),
+  {
+    loading: () => <div>Loading table...</div>
+  }
+)
 
-import type { IngredientPurchase, PurchaseFormData, AvailableIngredient } from './types'
+import type { IngredientPurchase, AvailableIngredient } from './types'
 
 export default function IngredientPurchasesLayout() {
   const [purchases, setPurchases] = useState<IngredientPurchase[]>([])
@@ -67,8 +76,8 @@ export default function IngredientPurchasesLayout() {
         const data = await response.json()
         void setPurchases(data)
       }
-    } catch (err) {
-      apiLogger.error({ error }, 'Error fetching purchases:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error fetching purchases:')
     }
   }
 
@@ -79,8 +88,8 @@ export default function IngredientPurchasesLayout() {
         const data = await response.json()
         void setIngredients(data.ingredients || [])
       }
-    } catch (err) {
-      apiLogger.error({ error }, 'Error fetching ingredients:')
+    } catch (err: unknown) {
+      apiLogger.error({ err }, 'Error fetching ingredients:')
     }
   }
 
@@ -173,7 +182,7 @@ export default function IngredientPurchasesLayout() {
           <PurchaseForm
             ingredients={ingredients}
             onSubmit={handlePurchaseSubmit}
-            onSuccess={() => {}}
+            onSuccess={() => { }}
           />
         </div>
 

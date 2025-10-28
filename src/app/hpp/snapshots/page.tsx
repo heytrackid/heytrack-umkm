@@ -5,14 +5,11 @@ import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Target, RefreshCw, Calendar, TrendingUp, TrendingDown } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { HppTrendChart } from '@/modules/orders/components/hpp/HppTrendChart'
-import { RecentSnapshotsTable } from '@/components/hpp/RecentSnapshotsTable'
-import { useRouter } from 'next/navigation'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -29,14 +26,12 @@ export default function HppSnapshotsPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
   const [summary, setSummary] = useState<SnapshotSummary | null>(null)
-  const [loading, setLoading] = useState(false)
   const [triggering, setTriggering] = useState(false)
 
   // Load recipes
   useEffect(() => {
     const loadRecipes = async () => {
       try {
-        void setLoading(true)
         const response = await fetch('/api/recipes?limit=1000')
         if (response.ok) {
           const data = await response.json()
@@ -47,14 +42,12 @@ export default function HppSnapshotsPage() {
           }
         }
       } catch (err: unknown) {
-        dbLogger.error({ err: error }, 'Failed to load recipes')
+        dbLogger.error({ err }, 'Failed to load recipes')
         toast({
           title: 'Error',
           description: 'Failed to load recipes',
           variant: 'destructive'
         })
-      } finally {
-        void setLoading(false)
       }
     }
 
@@ -69,7 +62,7 @@ export default function HppSnapshotsPage() {
   }, [selectedRecipe])
 
   const loadSummary = async () => {
-    if (!selectedRecipe) {return}
+    if (!selectedRecipe) { return }
 
     try {
       const response = await fetch(`/api/hpp/snapshots?recipe_id=${selectedRecipe}&limit=50`)
@@ -78,7 +71,7 @@ export default function HppSnapshotsPage() {
         calculateSummary(data.snapshots || [])
       }
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to load snapshots summary')
+      dbLogger.error({ err }, 'Failed to load snapshots summary')
     }
   }
 
@@ -143,7 +136,7 @@ export default function HppSnapshotsPage() {
         throw new Error('Failed to trigger snapshots')
       }
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to trigger snapshots')
+      dbLogger.error({ err }, 'Failed to trigger snapshots')
       toast({
         title: 'Error',
         description: 'Failed to trigger daily snapshots',
@@ -171,6 +164,38 @@ export default function HppSnapshotsPage() {
             </Button>
           }
         />
+
+        {/* Stats Cards */}
+        {summary && (
+          <SharedStatsCards
+            stats={[
+              {
+                title: "Total Snapshots",
+                value: summary.total.toString(),
+                subtitle: "Jumlah snapshot yang diambil",
+                icon: <Target className="h-4 w-4" />
+              },
+              {
+                title: "This Week",
+                value: summary.thisWeek.toString(),
+                subtitle: "Snapshot minggu ini",
+                icon: <Calendar className="h-4 w-4" />
+              },
+              {
+                title: "Avg. Change",
+                value: `${summary.averageChange.toFixed(2)}%`,
+                subtitle: "Perubahan rata-rata",
+                icon: <TrendingUp className="h-4 w-4" />
+              },
+              {
+                title: "Last Week",
+                value: summary.lastWeek.toString(),
+                subtitle: "Snapshot minggu lalu",
+                icon: <TrendingDown className="h-4 w-4" />
+              }
+            ]}
+          />
+        )}
 
         {/* Recipe Selector */}
         <Card>
@@ -262,9 +287,8 @@ export default function HppSnapshotsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${
-                  summary.averageChange >= 0 ? 'text-red-600' : 'text-green-600'
-                }`}>
+                <div className={`text-3xl font-bold ${summary.averageChange >= 0 ? 'text-red-600' : 'text-green-600'
+                  }`}>
                   {summary.averageChange >= 0 ? '+' : ''}{summary.averageChange.toFixed(1)}%
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
@@ -292,9 +316,9 @@ export default function HppSnapshotsPage() {
         )}
 
         {/* Recent Snapshots Table */}
-        {selectedRecipe && (
+        {/* {selectedRecipe && (
           <RecentSnapshotsTable recipeId={selectedRecipe} />
-        )}
+        )} */}
       </div>
     </AppLayout>
   )

@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
             )
           )
         `)
-        .eq('created_by', (user as any).id)
+        .eq('created_by', user.id)
 
       // Add search filter
       if (search) {
@@ -152,9 +152,9 @@ export async function POST(request: NextRequest) {
       .from('recipes')
       .insert([{
         ...recipeData,
-        created_by: (user as any).id,
+        created_by: user.id,
         name: recipeData.name || recipeData.nama
-      }] as any)
+      }])
       .select('*')
       .single()
 
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
     // If ingredients are provided, add them to recipe_ingredients
     if (recipe_ingredients && recipe_ingredients.length > 0) {
       const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
-        recipe_id: (recipe).id,
+        recipe_id: recipe.id,
         ingredient_id: ingredient.ingredient_id || ingredient.bahan_id,
         quantity: ingredient.quantity || ingredient.qty_per_batch,
         unit: ingredient.unit || 'g'
@@ -185,8 +185,8 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('recipes')
           .delete()
-          .eq('id', (recipe).id)
-          .eq('created_by', (user as any).id)
+          .eq('id', recipe.id)
+          .eq('created_by', user.id)
         return NextResponse.json(
           { error: 'Failed to add recipe ingredients' },
           { status: 500 }
@@ -211,8 +211,8 @@ export async function POST(request: NextRequest) {
           )
         )
       `)
-      .eq('id', (recipe).id)
-      .eq('created_by', (user as any).id)
+      .eq('id', recipe.id)
+      .eq('created_by', user.id)
       .single()
 
     if (fetchError) {

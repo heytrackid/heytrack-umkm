@@ -54,7 +54,7 @@ export async function validateRequest<T>(
     if (err instanceof ZodError) {
       return {
         success: false,
-        _error: {
+        error: {
           message: 'Validation failed',
           errors: err.issues.map((err) => ({
             field: err.path.join('.'),
@@ -143,7 +143,7 @@ export function validateQueryParams<T>(
     if (err instanceof ZodError) {
       return {
         success: false,
-        _error: {
+        error: {
           message: 'Invalid query parameters',
           errors: err.issues.map((err) => ({
             field: err.path.join('.'),
@@ -193,7 +193,7 @@ export function validatePathParams<T>(
     if (err instanceof ZodError) {
       return {
         success: false,
-        _error: {
+        error: {
           message: 'Invalid path parameters',
           errors: err.issues.map((err) => ({
             field: err.path.join('.'),

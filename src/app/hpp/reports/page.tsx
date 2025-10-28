@@ -16,20 +16,22 @@ import {
   FileSpreadsheet,
   FileImage,
   Calendar,
-  Filter,
-  TrendingUp,
   BarChart3,
-  PieChart,
   LineChart,
-  Table
+  Table,
+  TrendingUp
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
 import { useResponsive } from '@/hooks/useResponsive'
-import { PageHeader } from '@/components/shared'
-import { HppCostTrendsChart } from '@/components/hpp/HppCostTrendsChart'
-import { HppExportService } from '@/modules/orders/services/HppExportService'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { HppCostTrendsChart, HppExportService } from '@/modules/hpp'
+import type { HppExportFormat, HppExportMetric } from '@/modules/hpp'
+
+type ExportFormat = HppExportFormat
+type ExportMetric = HppExportMetric
 
 interface ReportConfig {
   dateRange: {
@@ -37,8 +39,8 @@ interface ReportConfig {
     end: string
   }
   recipeIds: string[]
-  metrics: string[]
-  format: 'pdf' | 'excel' | 'csv' | 'json'
+  metrics: ExportMetric[]
+  format: ExportFormat
   includeCharts: boolean
 }
 
@@ -67,6 +69,12 @@ interface HppAnalytics {
   }>
 }
 
+const reportsBreadcrumbs = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'HPP & Pricing', href: '/hpp' },
+  { label: 'Reports' }
+]
+
 export default function HppReportsPage() {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
@@ -74,8 +82,8 @@ export default function HppReportsPage() {
 
   const [config, setConfig] = useState<ReportConfig>({
     dateRange: {
-      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      end: new Date().toISOString().split('T')[0]
+      start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || '',
+      end: new Date().toISOString().split('T')[0] || ''
     },
     recipeIds: [],
     metrics: ['hpp', 'margin', 'cost_breakdown'],
@@ -110,7 +118,7 @@ export default function HppReportsPage() {
           low: 2
         },
         costTrends: Array.from({ length: 30 }, (_, i) => ({
-          date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0] || '',
           averageHpp: 28000 + Math.random() * 4000,
           totalRecipes: 12 + Math.floor(Math.random() * 6)
         })).reverse(),
@@ -127,7 +135,7 @@ export default function HppReportsPage() {
       void setAnalytics(mockAnalytics)
 
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to load HPP analytics')
+      dbLogger.error({ err }, 'Failed to load HPP analytics')
       toast({
         title: 'Error',
         description: 'Failed to load analytics data',
@@ -151,7 +159,7 @@ export default function HppReportsPage() {
       })
 
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to generate report')
+      dbLogger.error({ err }, 'Failed to generate report')
       toast({
         title: 'Error',
         description: 'Failed to generate report',
@@ -162,7 +170,7 @@ export default function HppReportsPage() {
     }
   }
 
-  const exportData = async (format: string) => {
+  const exportData = async (format: ExportFormat) => {
     try {
       void setGenerating(true)
       toast({
@@ -172,7 +180,7 @@ export default function HppReportsPage() {
 
       const exportService = new HppExportService()
       const result = await exportService.exportHppData({
-        format: format as any,
+        format,
         dateRange: config.dateRange,
         metrics: config.metrics
       })
@@ -186,7 +194,7 @@ export default function HppReportsPage() {
       })
 
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, `Failed to export ${format}`)
+      dbLogger.error({ err }, `Failed to export ${format}`)
       toast({
         title: 'Export Failed',
         description: `Failed to export ${format.toUpperCase()} file`,
@@ -197,14 +205,14 @@ export default function HppReportsPage() {
     }
   }
 
-  const formatOptions = [
+  const formatOptions: Array<{ value: ExportFormat; label: string; icon: LucideIcon }> = [
     { value: 'pdf', label: 'PDF Report', icon: FileText },
     { value: 'excel', label: 'Excel Spreadsheet', icon: FileSpreadsheet },
     { value: 'csv', label: 'CSV Data', icon: FileText },
     { value: 'json', label: 'JSON Data', icon: FileText }
   ]
 
-  const metricOptions = [
+  const metricOptions: Array<{ value: ExportMetric; label: string }> = [
     { value: 'hpp', label: 'HPP Values' },
     { value: 'margin', label: 'Profit Margins' },
     { value: 'cost_breakdown', label: 'Cost Breakdown' },
@@ -213,12 +221,46 @@ export default function HppReportsPage() {
     { value: 'recommendations', label: 'AI Recommendations' }
   ]
 
+  const isExportFormat = (value: string): value is ExportFormat =>
+    formatOptions.some((option) => option.value === value)
+
   return (
     <AppLayout pageTitle="HPP Reports & Analytics">
       <div className="container mx-auto p-6 space-y-6">
         <PageHeader
-          title="HPP Reports & Analytics"
-          description="Advanced reporting dan data export untuk analisis biaya produksi"
+          title="HPP Reports"
+          description="Generate laporan mendalam mengenai biaya produksi, tren HPP, dan performa resep"
+          breadcrumbs={reportsBreadcrumbs}
+        />
+        
+        {/* Stats Cards */}
+        <SharedStatsCards 
+          stats={[
+            {
+              title: "Total Reports",
+              value: "0",
+              subtitle: "Jumlah laporan yang dibuat",
+              icon: <FileImage className="h-4 w-4" />
+            },
+            {
+              title: "Reports Generated",
+              value: "0",
+              subtitle: "Laporan yang telah dihasilkan",
+              icon: <BarChart3 className="h-4 w-4" />
+            },
+            {
+              title: "Data Points",
+              value: "0",
+              subtitle: "Titik data yang dianalisis",
+              icon: <Table className="h-4 w-4" />
+            },
+            {
+              title: "Scheduled Reports",
+              value: "0",
+              subtitle: "Laporan terjadwal aktif",
+              icon: <Calendar className="h-4 w-4" />
+            }
+          ]}
         />
 
         <Tabs defaultValue="analytics" className="space-y-6">
@@ -382,7 +424,14 @@ export default function HppReportsPage() {
                 {/* Format */}
                 <div className="space-y-2">
                   <Label>Export Format</Label>
-                  <Select value={config.format} onValueChange={(value: any) => setConfig(prev => ({ ...prev, format: value }))}>
+                  <Select
+                    value={config.format}
+                    onValueChange={(value) => {
+                      if (isExportFormat(value)) {
+                        setConfig(prev => ({ ...prev, format: value }))
+                      }
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -410,11 +459,13 @@ export default function HppReportsPage() {
                           id={metric.value}
                           checked={config.metrics.includes(metric.value)}
                           onChange={(e) => {
-                            const {checked} = e.target
+                            const { checked } = e.target
                             setConfig(prev => ({
                               ...prev,
                               metrics: checked
-                                ? [...prev.metrics, metric.value]
+                                ? prev.metrics.includes(metric.value)
+                                  ? prev.metrics
+                                  : [...prev.metrics, metric.value]
                                 : prev.metrics.filter(m => m !== metric.value)
                             }))
                           }}

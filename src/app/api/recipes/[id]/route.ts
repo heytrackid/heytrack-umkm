@@ -1,7 +1,6 @@
 import { createServiceRoleClient } from '@/utils/supabase'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import { getErrorMessage } from '@/lib/type-guards'
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
   _request: NextRequest,
@@ -55,13 +54,13 @@ export async function GET(
 
 // PUT /api/recipes/[id] - Update recipe and its ingredients
 export async function PUT(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
   try {
     const supabase = createServiceRoleClient()
-    const body = await request.json()
+    const body = await _request.json()
     const { recipe_ingredients, ...recipeData } = body
 
     // Update the recipe
@@ -112,9 +111,9 @@ export async function PUT(
           const ing = ingredient as Record<string, unknown>
           return {
             recipe_id: id,
-            ingredient_id: ing.ingredient_id || ing.bahan_id,
-            quantity: ing.quantity || ing.qty_per_batch,
-            unit: ing.unit || 'g'
+            ingredient_id: ing['ingredient_id'] || ing['bahan_id'],
+            quantity: ing['quantity'] || ing['qty_per_batch'],
+            unit: ing['unit'] || 'g'
           }
         })
 
@@ -169,7 +168,7 @@ export async function PUT(
 
 // DELETE /api/recipes/[id] - Delete recipe (cascade will delete resep_item)
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
@@ -177,7 +176,8 @@ export async function DELETE(
     const supabase = createServiceRoleClient()
 
     // Check if recipe exists first
-    const { data: existingRecipe, error: checkError } = await supabase
+    // const { data: existingRecipe, error: checkError } = await supabase
+    const { error: checkError } = await supabase
       .from('recipes')
       .select('*')
       .eq('id', id)

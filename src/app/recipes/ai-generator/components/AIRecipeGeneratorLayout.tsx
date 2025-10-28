@@ -17,17 +17,26 @@ import type { GeneratedRecipe, AvailableIngredient } from './types'
 // Lazy load heavy components
 import dynamic from 'next/dynamic'
 
-const RecipeGeneratorForm = dynamic(() => import('./RecipeGeneratorFormEnhanced'), {
-  loading: () => <div className="p-4">Loading form...</div>
-})
+const RecipeGeneratorForm = dynamic(
+  () => import(/* webpackChunkName: "ai-recipe-generator-form" */ './RecipeGeneratorFormEnhanced'),
+  {
+    loading: () => <div className="p-4">Loading form...</div>
+  }
+)
 
-const GeneratedRecipeDisplay = dynamic(() => import('./GeneratedRecipeDisplay'), {
-  loading: () => <div className="p-4">Loading recipe display...</div>
-})
+const GeneratedRecipeDisplay = dynamic(
+  () => import(/* webpackChunkName: "ai-recipe-display" */ './GeneratedRecipeDisplay'),
+  {
+    loading: () => <div className="p-4">Loading recipe display...</div>
+  }
+)
 
-const RecipePreviewCard = dynamic(() => import('./RecipePreviewCard'), {
-  loading: () => <div className="p-4">Loading preview...</div>
-})
+const RecipePreviewCard = dynamic(
+  () => import(/* webpackChunkName: "ai-recipe-preview" */ './RecipePreviewCard'),
+  {
+    loading: () => <div className="p-4">Loading preview...</div>
+  }
+)
 
 export default function AIRecipeGeneratorPage() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -46,7 +55,7 @@ export default function AIRecipeGeneratorPage() {
   // Generation state
   const [loading, setLoading] = useState(false)
   const [generatedRecipe, setGeneratedRecipe] = useState<GeneratedRecipe | null>(null)
-  
+
   // Mode state (quick vs complete)
   const [mode, setMode] = useState<'quick' | 'complete'>('quick')
 
@@ -122,7 +131,7 @@ export default function AIRecipeGeneratorPage() {
 
       const data = await response.json()
       void setGeneratedRecipe(data.recipe)
-      
+
       toast({
         title: '✨ Resep berhasil dibuat!',
         description: 'AI telah meracik resep profesional untuk Anda',
@@ -140,7 +149,7 @@ export default function AIRecipeGeneratorPage() {
   }
 
   const handleSaveRecipe = async () => {
-    if (!generatedRecipe) {return}
+    if (!generatedRecipe) { return }
 
     try {
       const supabase = createSupabaseClient()
@@ -170,7 +179,7 @@ export default function AIRecipeGeneratorPage() {
         .select()
         .single()
 
-      if (recipeError) {throw recipeError}
+      if (recipeError) { throw recipeError }
 
       // Save recipe ingredients
       const recipeIngredients = generatedRecipe.ingredients.map((ing) => {
@@ -191,7 +200,7 @@ export default function AIRecipeGeneratorPage() {
         .from('recipe_ingredients')
         .insert(recipeIngredients)
 
-      if (ingredientsError) {throw ingredientsError}
+      if (ingredientsError) { throw ingredientsError }
 
       toast({
         title: '✅ Resep berhasil disimpan!',
@@ -254,27 +263,25 @@ export default function AIRecipeGeneratorPage() {
               </p>
             </div>
           </div>
-          
+
           {/* Mode Toggle */}
           <div className="flex gap-2 bg-muted p-1 rounded-lg">
             <button
               onClick={() => setMode('quick')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                mode === 'quick'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${mode === 'quick'
                   ? 'bg-background shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <Zap className="h-4 w-4" />
               Mode Cepat
             </button>
             <button
               onClick={() => setMode('complete')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                mode === 'complete'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${mode === 'complete'
                   ? 'bg-background shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               <ChefHat className="h-4 w-4" />
               Mode Lengkap

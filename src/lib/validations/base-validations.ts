@@ -90,7 +90,7 @@ export function validateEnvironment(): EnvConfig {
 }
 
 // Validation utility functions
-export function validateFormData<T>(schema: z.ZodSchema<T>, data: any): {
+export function validateFormData<T>(schema: z.ZodSchema<T>, data: unknown): {
   success: boolean
   data?: T
   errors?: z.ZodIssue[]
@@ -129,40 +129,57 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
 }
 
 // Legacy validation function (still used in supabase.ts)
-export function validateInput(data: any, rules?: Record<string, any>): { isValid: boolean; errors: string[] } {
+export function validateInput(data: unknown, rules?: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = []
 
+  if (typeof data !== 'object' || data === null) {
+    return { isValid: false, errors: ['Data must be an object'] }
+  }
+
+  const objData = data as Record<string, unknown>
+
   for (const [field, rule] of Object.entries(rules || {})) {
-    const value = data[field]
+    const value = objData[field]
 
-    if (rule?.required && (!value || value === '')) {
-      errors.push(`validation.fieldRequired`)
-      continue
-    }
-
-    if (value) {
-      if (rule?.type && typeof value !== rule?.type) {
-        errors.push(`validation.invalidType`)
+    if (rule && typeof rule === 'object') {
+      const ruleObj = rule as {
+        required?: boolean
+        type?: string
+        minLength?: number
+        maxLength?: number
+        pattern?: RegExp
+        isEmail?: boolean
       }
 
-      if (rule?.minLength && value.length < rule?.minLength) {
-        errors.push(`validation.minLength`)
+      if (ruleObj?.required && (!value || value === '')) {
+        errors.push(`validation.fieldRequired`)
+        continue
       }
 
-      if (rule?.maxLength && value.length > rule?.maxLength) {
-        errors.push(`validation.maxLength`)
-      }
+      if (value !== undefined && value !== null) {
+        if (ruleObj?.type && typeof value !== ruleObj?.type) {
+          errors.push(`validation.invalidType`)
+        }
 
-      if (rule?.pattern && !rule?.pattern?.test(value)) {
-        errors.push(`validation.invalidFormat`)
-      }
+        if (ruleObj?.minLength && typeof value === 'string' && value.length < ruleObj?.minLength) {
+          errors.push(`validation.minLength`)
+        }
 
-      if (rule?.isEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-        errors.push(`validation.invalidEmail`)
-      }
+        if (ruleObj?.maxLength && typeof value === 'string' && value.length > ruleObj?.maxLength) {
+          errors.push(`validation.maxLength`)
+        }
 
-      if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
-        errors.push(`validation.dangerousContent`)
+        if (ruleObj?.pattern && typeof value === 'string' && !ruleObj?.pattern?.test(value)) {
+          errors.push(`validation.invalidFormat`)
+        }
+
+        if (ruleObj?.isEmail && typeof value === 'string' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.push(`validation.invalidEmail`)
+        }
+
+        if (typeof value === 'string' && /<script|javascript:|on\w+=/i.test(value)) {
+          errors.push(`validation.dangerousContent`)
+        }
       }
     }
   }

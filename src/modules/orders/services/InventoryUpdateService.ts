@@ -1,6 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 import supabase from '@/utils/supabase'
-import type { TablesInsert, TablesUpdate } from '@/types'
+import type { TablesInsert, TablesUpdate } from '@/types/supabase-generated'
 
 /**
  * Recipe ingredients query result type

@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 
 import { apiLogger } from '@/lib/logger'
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
           special_requests
         )
       `)
-      .eq('user_id', (user as any).id)
+      .eq('user_id', user.id)
 
     // Add search filter
     if (search) {
@@ -138,22 +138,21 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = validation.data
-    const orderStatus = (validatedData as any).status || 'PENDING'
+    const orderStatus = validatedData.status || 'PENDING'
     let incomeRecordId = null
 
     // If order is DELIVERED, create income record first
-    if (orderStatus === 'DELIVERED' && (validatedData as any).total_amount && (validatedData as any).total_amount > 0) {
-      // @ts-ignore
+    if (orderStatus === 'DELIVERED' && validatedData.total_amount && validatedData.total_amount > 0) {
     const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_records')
         .insert({
-          user_id: (user as any).id,
+          user_id: user.id,
           type: 'INCOME',
           category: 'Revenue',
-          amount: (validatedData as any).total_amount,
-          date: validatedData.delivery_date || (validatedData as any).order_date || new Date().toISOString().split('T')[0],
-          reference: `Order #${(validatedData as any).order_no}${validatedData.customer_name ? ` - ${  (validatedData as any).customer_name}` : ''}`,
-          description: `Income from order ${(validatedData as any).order_no}`
+          amount: validatedData.total_amount,
+          date: validatedData.delivery_date || validatedData.order_date || new Date().toISOString().split('T')[0],
+          reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${  validatedData.customer_name}` : ''}`,
+          description: `Income from order ${validatedData.order_no}`
         })
         .select()
         .single()
@@ -173,16 +172,16 @@ export async function POST(request: NextRequest) {
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
       .insert({
-        user_id: (user as any).id,
+        user_id: user.id,
         order_no: validatedData.order_no,
         customer_id: validatedData.customer_id,
-        customer_name: (validatedData as any).customer_name,
+        customer_name: validatedData.customer_name,
         customer_phone: validatedData.customer_phone,
         status: orderStatus,
-        order_date: (validatedData as any).order_date || new Date().toISOString().split('T')[0],
-        delivery_date: (validatedData as any).delivery_date,
+        order_date: validatedData.order_date || new Date().toISOString().split('T')[0],
+        delivery_date: validatedData.delivery_date,
         delivery_time: validatedData.delivery_time,
-        total_amount: (validatedData as any).total_amount,
+        total_amount: validatedData.total_amount,
         tax_amount: validatedData.tax_amount || 0,
         payment_status: validatedData.payment_status || 'UNPAID',
         payment_method: validatedData.payment_method,
@@ -201,7 +200,7 @@ export async function POST(request: NextRequest) {
           .from('financial_records')
           .delete()
           .eq('id', incomeRecordId)
-          .eq('user_id', (user as any).id)
+          .eq('user_id', user.id)
       }
       return NextResponse.json(
         { error: 'Failed to create order' },
@@ -213,9 +212,9 @@ export async function POST(request: NextRequest) {
     if (incomeRecordId) {
       await supabase
         .from('financial_records')
-        .update({ reference: `Order ${(orderData).id} - ${(validatedData as any).customer_name || 'Customer'}` } as any)
+        .update({ reference: `Order ${orderData.id} - ${validatedData.customer_name || 'Customer'}` })
         .eq('id', incomeRecordId)
-        .eq('user_id', (user as any).id)
+        .eq('user_id', user.id)
     }
 
     // If order items provided, create them
@@ -232,7 +231,7 @@ export async function POST(request: NextRequest) {
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems as any)
+        .insert(orderItems)
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Error creating order items:')
@@ -240,8 +239,8 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('orders')
           .delete()
-          .eq('id', (orderData).id)
-          .eq('user_id', (user as any).id)
+          .eq('id', orderData.id)
+          .eq('user_id', user.id)
 
         return NextResponse.json(
           { error: 'Failed to create order items' },

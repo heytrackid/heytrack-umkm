@@ -65,7 +65,7 @@ const STATUS_CONFIG = {
     }
 }
 
-export function ProductionPage() {
+export const ProductionPage = () => {
     const { formatCurrency } = useCurrency()
     const [productions, setProductions] = useState<Production[]>([])
     const [loading, setLoading] = useState(true)

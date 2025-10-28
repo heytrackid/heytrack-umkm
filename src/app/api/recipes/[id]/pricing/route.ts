@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { RecipeWithIngredients } from '@/types'
+import type { RecipeWithIngredients } from '@/types/domain/recipes'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       }
 
       // Cast to RecipeWithIngredients
-      recipeData = data as any as RecipeWithIngredients
+      recipeData = data as RecipeWithIngredients
     }
 
     // Create a pricing automation instance and calculate pricing
@@ -60,13 +60,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const recipeForPricing = {
       ...recipeData,
       servings: recipeData?.servings || 1,
-      recipe_ingredients: (recipeData?.recipe_ingredients || []).map((ri: any) => ({
+      recipe_ingredients: (recipeData?.recipe_ingredients || []).map((ri) => ({
         ...ri,
         ingredient: ri.ingredient || {}
       }))
     }
     
-    const pricingAnalysis = pricingAutomation.calculateSmartPricing(recipeForPricing as any)
+    const pricingAnalysis = pricingAutomation.calculateSmartPricing(recipeForPricing)
 
     return NextResponse.json({
       success: true,
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     apiLogger.error({ err }, 'Error calculating pricing')
     return NextResponse.json({ 
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: err instanceof Error ? err.message : 'Unknown error'
     }, { status: 500 })
   }
 }

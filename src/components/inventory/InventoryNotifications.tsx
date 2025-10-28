@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { AlertTriangle, Package, ShoppingCart, X } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
-import type { NotificationsTable } from '@/types/notifications'
+import type { NotificationsTable } from '@/types/features/notifications'
 
 type InventoryNotification = NotificationsTable['Row'] & {
   metadata?: {

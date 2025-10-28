@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useResponsive } from '@/hooks/useResponsive'
-import { FormSkeleton } from '@/components/ui'
 
 interface CostFormViewProps {
   currentView: 'add' | 'edit'
@@ -19,7 +18,7 @@ interface CostFormViewProps {
   onCancel: () => void
   isLoading: boolean
   costCategories: Array<{ id: string; name: string; icon: string; description: string }>
-  frequencies: Array<{ value: string; label: string }>
+  frequencies: Array<{ value: 'daily' | 'weekly' | 'monthly' | 'yearly'; label: string }>
 }
 
 export interface OperationalCost {
@@ -66,7 +65,10 @@ export default function CostFormView({
           <CardContent className="p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Array.from({ length: 4 }, (_, i) => (
-                <FormFieldSkeleton key={i} />
+                <div key={i} className="space-y-2">
+                  <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                  <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse" />
+                </div>
               ))}
             </div>
             <div className="space-y-2">
@@ -111,16 +113,16 @@ export default function CostFormView({
               <Label>Nama Biaya</Label>
               <Input
                 value={newCost.name}
-                onChange={(e) => setNewCost({...newCost, name: e.target.value})}
+                onChange={(e) => setNewCost({ ...newCost, name: e.target.value })}
 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Kategori</Label>
               <Select
-                value={newCost.category} 
-                onValueChange={(value) => setNewCost({...newCost, category: value})}
+                value={newCost.category}
+                onValueChange={(value) => setNewCost({ ...newCost, category: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -142,23 +144,23 @@ export default function CostFormView({
               <Input
                 type="number"
                 value={newCost.amount}
-                onChange={(e) => setNewCost({...newCost, amount: parseFloat(e.target.value) || 0})}
+                onChange={(e) => setNewCost({ ...newCost, amount: parseFloat(e.target.value) || 0 })}
 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Frekuensi</Label>
               <Select
-                value={newCost.frequency} 
-                onValueChange={(value: string) => setNewCost({...newCost, frequency: value})}
+                value={newCost.frequency}
+                onValueChange={(value) => setNewCost({ ...newCost, frequency: value as 'daily' | 'weekly' | 'monthly' | 'yearly' })}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {frequencies.map(freq => (
-                    <SelectItem key={freq.value} value={freq.value}>
+                    <SelectItem key={freq.value} value={freq.value as string}>
                       {freq.label}
                     </SelectItem>
                   ))}
@@ -171,8 +173,7 @@ export default function CostFormView({
             <Label>Deskripsi (Opsional)</Label>
             <Textarea
               value={newCost.description}
-              onChange={(e) => setNewCost({...newCost, name: e.target.value})}
-
+              onChange={(e) => setNewCost({ ...newCost, description: e.target.value })}
               rows={2}
             />
           </div>
@@ -182,7 +183,7 @@ export default function CostFormView({
               type="checkbox"
               id="isFixed"
               checked={newCost.isFixed}
-              onChange={(e) => setNewCost({...newCost, name: e.target.value})}
+              onChange={(e) => setNewCost({ ...newCost, isFixed: e.target.checked })}
               className="rounded border-gray-300"
             />
             <Label htmlFor="isFixed" className="text-sm">

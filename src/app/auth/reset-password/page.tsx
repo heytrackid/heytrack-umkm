@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { CheckCircle, Loader2, Mail } from 'lucide-react'
 import Link from 'next/link'
+import type { FormEvent} from 'react';
 import { useState, useTransition } from 'react'
 import { resetPassword } from './actions'
 

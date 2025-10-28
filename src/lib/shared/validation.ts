@@ -270,7 +270,7 @@ export const validationHelpers = {
       return { success: true, data: result }
     } catch (err) {
       if (err instanceof z.ZodError) {
-        return { success: false, errors: _error }
+        return { success: false, errors: err }
       }
       return { success: false, errors: new z.ZodError([]) }
     }

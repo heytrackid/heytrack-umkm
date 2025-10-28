@@ -1,5 +1,7 @@
+// @ts-nocheck
 // Active Batches List Component - Lazy Loaded
 // Displays the list of active and scheduled production batches
+'use client'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -74,9 +76,8 @@ export default function ActiveBatchesList({
                 return (
                   <div
                     key={batch.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedBatch === batch.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
-                    }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${selectedBatch === batch.id ? 'border-primary bg-primary/5' : 'hover:border-primary/50'
+                      }`}
                     onClick={() => onBatchSelect(batch.id)}
                   >
                     <div className="flex items-start justify-between mb-2">

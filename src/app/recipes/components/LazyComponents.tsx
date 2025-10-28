@@ -94,7 +94,7 @@ const RecipeFormSkeleton = () => (
 
 // Lazy loaded components
 export const LazyRecipeList = dynamic(
-  () => import('./RecipeList').then(mod => ({ default: mod.RecipeList })),
+  () => import(/* webpackChunkName: "recipe-list" */ './RecipeList').then(mod => ({ default: mod.RecipeList })),
   {
     ssr: false,
     loading: () => <RecipeListSkeleton />
@@ -102,7 +102,7 @@ export const LazyRecipeList = dynamic(
 )
 
 export const LazyRecipeForm = dynamic(
-  () => import('./RecipeForm').then(mod => ({ default: mod.RecipeForm })),
+  () => import(/* webpackChunkName: "recipe-form" */ './RecipeForm').then(mod => ({ default: mod.RecipeForm })),
   {
     ssr: false,
     loading: () => <RecipeFormSkeleton />
@@ -111,12 +111,12 @@ export const LazyRecipeForm = dynamic(
 
 // Preloading functions
 export const preloadRecipeList = () => {
-  const componentImport = () => import('./RecipeList')
+  const componentImport = () => import(/* webpackChunkName: "recipe-list" */ './RecipeList')
   componentImport()
 }
 
 export const preloadRecipeForm = () => {
-  const componentImport = () => import('./RecipeForm')
+  const componentImport = () => import(/* webpackChunkName: "recipe-form" */ './RecipeForm')
   componentImport()
 }
 

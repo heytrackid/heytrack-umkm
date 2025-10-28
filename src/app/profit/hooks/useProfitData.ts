@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { apiLogger } from '@/lib/logger'
-import type { ProfitData, ProfitFilters, ExportFormat, PeriodType } from '@/app/profit/components/types'
+import type { ProfitData, ProfitFilters, ExportFormat } from '@/app/profit/components/types'
 
 export function useProfitData() {
   const [loading, setLoading] = useState(true)
@@ -19,7 +19,9 @@ export function useProfitData() {
   })
 
   const updateFilters = (newFilters: Partial<ProfitFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }))
+    const sanitizedEntries = Object.entries(newFilters).filter(([, value]) => value !== undefined)
+    const sanitizedFilters = Object.fromEntries(sanitizedEntries) as Partial<ProfitFilters>
+    setFilters(prev => ({ ...prev, ...sanitizedFilters }))
   }
 
   useEffect(() => {
@@ -33,22 +35,34 @@ export function useProfitData() {
     try {
       // Calculate date range based on period
       const today = new Date()
-      let calculatedStartDate = filters.startDate
-      const calculatedEndDate = filters.endDate || today.toISOString().split('T')[0]
+      const toISODate = (date: Date): string => date.toISOString().split('T')[0]
+      const subtractDays = (date: Date, days: number) => {
+        const clone = new Date(date.getTime())
+        clone.setDate(clone.getDate() - days)
+        return clone
+      }
+
+      let calculatedStartDate: string = filters.startDate || ''
+      const calculatedEndDate: string = filters.endDate || toISODate(today)
 
       if (!filters.startDate) {
-        if (filters.selectedPeriod === 'week') {
-          calculatedStartDate = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0]
-        } else if (filters.selectedPeriod === 'month') {
-          calculatedStartDate = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
-        } else if (filters.selectedPeriod === 'quarter') {
-          const quarter = Math.floor(today.getMonth() / 3)
-          calculatedStartDate = new Date(today.getFullYear(), quarter * 3, 1).toISOString().split('T')[0]
-        } else if (filters.selectedPeriod === 'year') {
-          calculatedStartDate = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
-        } else {
-          // Default fallback for any other period
-          calculatedStartDate = new Date(today.setDate(today.getDate() - 30)).toISOString().split('T')[0]
+        switch (filters.selectedPeriod) {
+          case 'week':
+            calculatedStartDate = toISODate(subtractDays(today, 7))
+            break
+          case 'month':
+            calculatedStartDate = toISODate(new Date(today.getFullYear(), today.getMonth(), 1))
+            break
+          case 'quarter': {
+            const quarter = Math.floor(today.getMonth() / 3)
+            calculatedStartDate = toISODate(new Date(today.getFullYear(), quarter * 3, 1))
+            break
+          }
+          case 'year':
+            calculatedStartDate = toISODate(new Date(today.getFullYear(), 0, 1))
+            break
+          default:
+            calculatedStartDate = toISODate(subtractDays(today, 30))
         }
       }
 

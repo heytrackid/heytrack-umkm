@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 

@@ -303,7 +303,7 @@ export type SupplierForm = z.infer<typeof SupplierFormSchema>
 export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 
 // Order validation helper function (moved from components/orders/utils.ts)
-export function validateOrderData(data: any): string[] {
+export function validateOrderData(data: Record<string, unknown>): string[] {
   const errors: string[] = []
 
   if (!data.customer_name?.trim()) {

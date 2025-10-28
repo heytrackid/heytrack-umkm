@@ -60,7 +60,7 @@ export function useAuth() {
           isAuthenticated: !!user,
         })
       } catch (err) {
-        apiLogger.error({ err }, 'Auth initialization _error:')
+        apiLogger.error({ err }, 'Auth initialization error:')
         setAuthState({
           user: null,
           session: null,
@@ -74,7 +74,7 @@ export function useAuth() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: string, session: Session | null) => {
+      async (event, session) => {
         apiLogger.info('Auth state changed:', event)
 
         setAuthState({
@@ -116,7 +116,7 @@ export function useAuth() {
       })
       void router.push('/auth/login')
     } catch (err) {
-      apiLogger.error({ err }, 'Sign out _error:')
+      apiLogger.error({ err }, 'Sign out error:')
     }
   }
 

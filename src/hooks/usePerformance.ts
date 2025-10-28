@@ -17,7 +17,7 @@ export function usePerformanceMonitor(componentName: string) {
       // Performance monitoring in development is handled by Next.js compiler
 
       // Send to analytics in production
-      if (typeof window !== 'undefined' && (window as any).gtag) {
+      if (typeof window !== 'undefined' && 'gtag' in window && typeof (window as any).gtag === 'function') {
         ;(window as any).gtag('event', 'component_load_time', {
           component_name: componentName,
           load_time: loadTime,
@@ -35,13 +35,14 @@ export function logBundleMetrics() {
     const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
 
     if (navigation) {
-      const loadTime = navigation.loadEventEnd - navigation.fetchStart
       // Performance metrics tracked silently
+      void navigation.loadEventEnd
+      void navigation.fetchStart
     }
 
     // Monitor largest contentful paint
     if ('PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(() => {
         // LCP tracked silently
       })
 
@@ -50,6 +51,8 @@ export function logBundleMetrics() {
       return () => observer.disconnect()
     }
   }
+  
+  return undefined
 }
 
 // Lazy loading with intersection observer
@@ -57,7 +60,7 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
   const [isIntersecting, setIsIntersecting] = useState(false)
   const [element, setElement] = useState<Element | null>(null)
 
-  const observer = useCallback((node: Element | null) => {
+  const observerRef = useCallback((node: Element | null) => {
     void setElement(node)
   }, [])
 
@@ -84,7 +87,7 @@ export function useLazyLoad(options?: IntersectionObserverInit) {
     return () => observer.disconnect()
   }, [element, options])
 
-  return { observer, isIntersecting }
+  return { observer: observerRef, isIntersecting }
 }
 
 // Preload critical resources
@@ -106,16 +109,16 @@ export function preloadResource(href: string, as = 'fetch') {
 
 // Debounced performance logger
 export function usePerformanceLogger(eventName: string, delay = 1000) {
-  const [logs, setLogs] = useState<Array<{ timestamp: number; data: any }>>([])
+  const [logs, setLogs] = useState<Array<{ timestamp: number; data: unknown }>>([])
 
   const logPerformance = useCallback(
-    (data: any) => {
+    (data: unknown) => {
       const timestamp = Date.now()
       setLogs(prev => [...prev.slice(-9), { timestamp, data }]) // Keep last 10 logs
 
       // Debounced analytics call
       const timeoutId = setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).gtag) {
+        if (typeof window !== 'undefined' && 'gtag' in window && typeof (window as any).gtag === 'function') {
           ;(window as any).gtag('event', eventName, {
             ...data,
             timestamp,
@@ -133,14 +136,21 @@ export function usePerformanceLogger(eventName: string, delay = 1000) {
 }
 
 // Memory usage monitor
+export interface MemoryInfo {
+  usedJSHeapSize: number
+  totalJSHeapSize: number
+  jsHeapSizeLimit: number
+  timestamp: number
+}
+
 export function useMemoryMonitor() {
-  const [memoryInfo, setMemoryInfo] = useState<any>(null)
+  const [memoryInfo, setMemoryInfo] = useState<MemoryInfo | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'performance' in window) {
       const updateMemoryInfo = () => {
-        if ('memory' in (performance as any)) {
-          const {memory} = (performance as any)
+        if ('memory' in performance) {
+          const memory = (performance as any).memory
           setMemoryInfo({
             usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
             totalJSHeapSize: Math.round(memory.totalJSHeapSize / 1024 / 1024), // MB
@@ -161,7 +171,7 @@ export function useMemoryMonitor() {
 }
 
 // Component render time profiler
-export function useRenderProfiler(componentName: string) {
+export function useRenderProfiler(_componentName: string) {
   const [renderTimes, setRenderTimes] = useState<number[]>([])
 
   useEffect(() => {
@@ -188,11 +198,17 @@ export function useRenderProfiler(componentName: string) {
 }
 
 // Network status monitor
+export interface NetworkConnection {
+  effectiveType: string
+  downlink: number
+  rtt: number
+}
+
 export function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   )
-  const [connection, setConnection] = useState<any>(null)
+  const [connection, setConnection] = useState<NetworkConnection | null>(null)
 
   useEffect(() => {
     const updateOnlineStatus = () => setIsOnline(navigator.onLine)
@@ -202,25 +218,27 @@ export function useNetworkStatus() {
 
     // Monitor connection quality if available
     if ('connection' in navigator) {
-      const {connection} = (navigator as any)
-      setConnection({
-        effectiveType: connection.effectiveType,
-        downlink: connection.downlink,
-        rtt: connection.rtt
-      })
-
-      const updateConnection = () => {
+      const connection = (navigator as any).connection
+      if (connection) {
         setConnection({
           effectiveType: connection.effectiveType,
           downlink: connection.downlink,
           rtt: connection.rtt
         })
-      }
 
-      connection.addEventListener('change', updateConnection)
+        const updateConnection = () => {
+          setConnection({
+            effectiveType: connection.effectiveType,
+            downlink: connection.downlink,
+            rtt: connection.rtt
+          })
+        }
 
-      return () => {
-        connection.removeEventListener('change', updateConnection)
+        connection.addEventListener('change', updateConnection)
+
+        return () => {
+          connection.removeEventListener('change', updateConnection)
+        }
       }
     }
 

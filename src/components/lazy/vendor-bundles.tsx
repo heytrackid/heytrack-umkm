@@ -1,7 +1,6 @@
 'use client'
 
 import { lazy, Suspense, useState, useEffect, type ComponentType } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 
 // Loading fallbacks for different vendor libraries
@@ -16,49 +15,49 @@ const VendorLoadingSkeleton = ({ name }: { name: string }) => (
 
 // Recharts Bundle (Heavy charting library)
 export const LazyRechartsBundle = {
-  LineChart: lazy(() => import('recharts').then(m => ({ default: m.LineChart }))),
-  BarChart: lazy(() => import('recharts').then(m => ({ default: m.BarChart }))),
-  AreaChart: lazy(() => import('recharts').then(m => ({ default: m.AreaChart }))),
-  PieChart: lazy(() => import('recharts').then(m => ({ default: m.PieChart }))),
-  RadarChart: lazy(() => import('recharts').then(m => ({ default: m.RadarChart }))),
-  ComposedChart: lazy(() => import('recharts').then(m => ({ default: m.ComposedChart }))),
+  LineChart: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.LineChart }))),
+  BarChart: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.BarChart }))),
+  AreaChart: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.AreaChart }))),
+  PieChart: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.PieChart }))),
+  RadarChart: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.RadarChart }))),
+  ComposedChart: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.ComposedChart }))),
 
   // Recharts components
-  XAxis: lazy(() => import('recharts').then(m => ({ default: m.XAxis }))),
-  YAxis: lazy(() => import('recharts').then(m => ({ default: m.YAxis }))),
-  CartesianGrid: lazy(() => import('recharts').then(m => ({ default: m.CartesianGrid }))),
-  Tooltip: lazy(() => import('recharts').then(m => ({ default: m.Tooltip }))),
-  Legend: lazy(() => import('recharts').then(m => ({ default: m.Legend }))),
-  ResponsiveContainer: lazy(() => import('recharts').then(m => ({ default: m.ResponsiveContainer }))),
+  XAxis: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.XAxis }))),
+  YAxis: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.YAxis }))),
+  CartesianGrid: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.CartesianGrid }))),
+  Tooltip: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.Tooltip }))),
+  Legend: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.Legend }))),
+  ResponsiveContainer: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.ResponsiveContainer }))),
 
   // Chart elements
-  Line: lazy(() => import('recharts').then(m => ({ default: m.Line }))),
-  Bar: lazy(() => import('recharts').then(m => ({ default: m.Bar }))),
-  Area: lazy(() => import('recharts').then(m => ({ default: m.Area }))),
-  Cell: lazy(() => import('recharts').then(m => ({ default: m.Cell }))),
+  Line: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.Line }))),
+  Bar: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.Bar }))),
+  Area: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.Area }))),
+  Cell: lazy(() => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.Cell }))),
 }
 
 // Radix UI Complex Components Bundle (yang tidak semua pages butuh)
 export const LazyRadixBundle = {
   // Navigation & Menu
-  NavigationMenu: lazy(() => import('@radix-ui/react-navigation-menu').then(m => ({ default: m.Root }))),
-  Menubar: lazy(() => import('@radix-ui/react-menubar').then(m => ({ default: m.Root }))),
-  ContextMenu: lazy(() => import('@radix-ui/react-context-menu').then(m => ({ default: m.Root }))),
+  NavigationMenu: lazy(() => import(/* webpackChunkName: "radix-navigation-menu" */ '@radix-ui/react-navigation-menu').then(m => ({ default: m.Root }))),
+  Menubar: lazy(() => import(/* webpackChunkName: "radix-menubar" */ '@radix-ui/react-menubar').then(m => ({ default: m.Root }))),
+  ContextMenu: lazy(() => import(/* webpackChunkName: "radix-context-menu" */ '@radix-ui/react-context-menu').then(m => ({ default: m.Root }))),
 
   // Layout & Container
-  ScrollArea: lazy(() => import('@radix-ui/react-scroll-area').then(m => ({ default: m.Root }))),
-  Separator: lazy(() => import('@radix-ui/react-separator').then(m => ({ default: m.Root }))),
-  AspectRatio: lazy(() => import('@radix-ui/react-aspect-ratio').then(m => ({ default: m.Root }))),
+  ScrollArea: lazy(() => import(/* webpackChunkName: "radix-scroll-area" */ '@radix-ui/react-scroll-area').then(m => ({ default: m.Root }))),
+  Separator: lazy(() => import(/* webpackChunkName: "radix-separator" */ '@radix-ui/react-separator').then(m => ({ default: m.Root }))),
+  AspectRatio: lazy(() => import(/* webpackChunkName: "radix-aspect-ratio" */ '@radix-ui/react-aspect-ratio').then(m => ({ default: m.Root }))),
 
   // Advanced Inputs
-  Slider: lazy(() => import('@radix-ui/react-slider').then(m => ({ default: m.Root }))),
-  RadioGroup: lazy(() => import('@radix-ui/react-radio-group').then(m => ({ default: m.Root }))),
-  ToggleGroup: lazy(() => import('@radix-ui/react-toggle-group').then(m => ({ default: m.Root }))),
+  Slider: lazy(() => import(/* webpackChunkName: "radix-slider" */ '@radix-ui/react-slider').then(m => ({ default: m.Root }))),
+  RadioGroup: lazy(() => import(/* webpackChunkName: "radix-radio-group" */ '@radix-ui/react-radio-group').then(m => ({ default: m.Root }))),
+  ToggleGroup: lazy(() => import(/* webpackChunkName: "radix-toggle-group" */ '@radix-ui/react-toggle-group').then(m => ({ default: m.Root }))),
 
   // Overlay & Modal
-  HoverCard: lazy(() => import('@radix-ui/react-hover-card').then(m => ({ default: m.Root }))),
-  Popover: lazy(() => import('@radix-ui/react-popover').then(m => ({ default: m.Root }))),
-  Toast: lazy(() => import('@radix-ui/react-toast').then(m => ({ default: m.Root }))),
+  HoverCard: lazy(() => import(/* webpackChunkName: "radix-hover-card" */ '@radix-ui/react-hover-card').then(m => ({ default: m.Root }))),
+  Popover: lazy(() => import(/* webpackChunkName: "radix-popover" */ '@radix-ui/react-popover').then(m => ({ default: m.Root }))),
+  Toast: lazy(() => import(/* webpackChunkName: "radix-toast" */ '@radix-ui/react-toast').then(m => ({ default: m.Root }))),
 }
 
 // React Hook Form Bundle (Form libraries) - Commented out due to TypeScript issues
@@ -72,7 +71,7 @@ export const LazyRadixBundle = {
 // Date & Time Libraries Bundle - Fixed to only include React components
 export const LazyDateBundle = {
   // DateFns: lazy(() => import('date-fns')), // Utility library, not a component
-  ReactDayPicker: lazy(() => import('react-day-picker').then(m => ({ default: m.DayPicker }))),
+  ReactDayPicker: lazy(() => import(/* webpackChunkName: "react-day-picker" */ 'react-day-picker').then(m => ({ default: m.DayPicker }))),
 }
 
 // Table Libraries Bundle - Commented out as it exports utilities not components
@@ -81,51 +80,84 @@ export const LazyDateBundle = {
 // }
 
 // Wrapper components untuk vendor libraries
-export const RechartsWithLoading = <T extends ComponentType<unknown>>(
-  ChartComponent: T,
+export const RechartsWithLoading = (
+  ChartComponent: ComponentType<any>,
   chartName: string
 ) => (props: any) => (
-    <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
-      <ChartComponent {...props} />
-    </Suspense>
-  )
+  <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
+    <ChartComponent {...props} />
+  </Suspense>
+)
 
-export const RadixWithLoading = <T extends ComponentType<unknown>>(
-  RadixComponent: T,
-  componentName: string
+export const RadixWithLoading = (
+  RadixComponent: ComponentType<any>,
+  _componentName: string
 ) => (props: any) => (
-    <Suspense fallback={<VendorLoadingSkeleton name={`${componentName} Component`} />}>
-      <RadixComponent {...props} />
-    </Suspense>
-  )
+  <Suspense fallback={<VendorLoadingSkeleton name={`${_componentName} Component`} />}>
+    <RadixComponent {...props} />
+  </Suspense>
+)
 
 // Pre-wrapped common components
-export const LineChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.LineChart, 'Line')
-export const BarChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.BarChart, 'Bar')
-export const AreaChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.AreaChart, 'Area')
-export const PieChartWithSuspense = RechartsWithLoading(LazyRechartsBundle.PieChart, 'Pie')
+export const LineChartWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Line Chart" />}>
+    <LazyRechartsBundle.LineChart {...props} />
+  </Suspense>
+)
 
-export const NavigationMenuWithSuspense = RadixWithLoading(LazyRadixBundle.NavigationMenu, 'Navigation Menu')
-export const ScrollAreaWithSuspense = RadixWithLoading(LazyRadixBundle.ScrollArea, 'Scroll Area')
-export const HoverCardWithSuspense = RadixWithLoading(LazyRadixBundle.HoverCard, 'Hover Card')
+export const BarChartWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Bar Chart" />}>
+    <LazyRechartsBundle.BarChart {...props} />
+  </Suspense>
+)
+
+export const AreaChartWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Area Chart" />}>
+    <LazyRechartsBundle.AreaChart {...props} />
+  </Suspense>
+)
+
+export const PieChartWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Pie Chart" />}>
+    <LazyRechartsBundle.PieChart {...props} />
+  </Suspense>
+)
+
+export const NavigationMenuWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Navigation Menu" />}>
+    <LazyRadixBundle.NavigationMenu {...props} />
+  </Suspense>
+)
+
+export const ScrollAreaWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Scroll Area" />}>
+    <LazyRadixBundle.ScrollArea {...props} />
+  </Suspense>
+)
+
+export const HoverCardWithSuspense = (props: any) => (
+  <Suspense fallback={<VendorLoadingSkeleton name="Hover Card" />}>
+    <LazyRadixBundle.HoverCard {...props} />
+  </Suspense>
+)
 
 // Utility untuk conditional vendor loading
-export const loadVendorWhenNeeded = async (vendorName: string, componentName?: string) => {
+export const loadVendorWhenNeeded = async (vendorName: string) => {
   switch (vendorName) {
     case 'recharts':
-      return import('recharts')
+      return import(/* webpackChunkName: "recharts" */ 'recharts')
     case 'radix-navigation':
-      return import('@radix-ui/react-navigation-menu')
+      return import(/* webpackChunkName: "radix-navigation-menu" */ '@radix-ui/react-navigation-menu')
     case 'radix-scroll':
-      return import('@radix-ui/react-scroll-area')
+      return import(/* webpackChunkName: "radix-scroll-area" */ '@radix-ui/react-scroll-area')
     case 'react-hook-form':
-      return import('react-hook-form')
+      return import(/* webpackChunkName: "react-hook-form" */ 'react-hook-form')
     case 'zod':
-      return import('zod')
+      return import(/* webpackChunkName: "zod" */ 'zod')
     case 'date-fns':
-      return import('date-fns')
+      return import(/* webpackChunkName: "date-fns" */ 'date-fns')
     case 'react-table':
-      return import('@tanstack/react-table')
+      return import(/* webpackChunkName: "react-table" */ '@tanstack/react-table')
     default:
       throw new Error(`Unknown vendor: ${vendorName}`)
   }

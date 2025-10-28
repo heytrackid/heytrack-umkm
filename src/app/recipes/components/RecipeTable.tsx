@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  Plus, 
-  ChefHat, 
+import {
+  Plus,
+  ChefHat,
   Edit2,
   Trash2,
   Eye,
@@ -34,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useSettings } from '@/contexts/settings-context'
-import type { RecipeWithIngredients } from '@/types'
+import type { RecipeWithIngredients } from '@/types/domain/recipes'
 
 type RecipeIngredientEntry = NonNullable<RecipeWithIngredients['recipe_ingredients']>[number]
 
@@ -78,7 +78,7 @@ export default function RecipeTable({
   isMobile = false
 }: RecipeTableProps) {
   const { formatCurrency } = useSettings()
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
@@ -88,18 +88,18 @@ export default function RecipeTable({
     recipe.name?.toLowerCase().includes(normalizedSearchTerm) ||
     recipe.category?.toLowerCase().includes(normalizedSearchTerm)
   )
-  
+
   // Calculate pagination
   const totalItems = filteredRecipes.length
   const totalPages = Math.ceil(totalItems / pageSize)
-  
+
   // Get paginated data
   const paginatedRecipes = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     const endIndex = startIndex + pageSize
     return filteredRecipes.slice(startIndex, endIndex)
   }, [filteredRecipes, currentPage, pageSize])
-  
+
   // Reset to page 1 when filters change
   useMemo(() => {
     void setCurrentPage(1)
@@ -176,7 +176,7 @@ export default function RecipeTable({
                           <Checkbox
                             checked={recipe.id ? selectedItems.includes(String(recipe.id)) : false}
                             onCheckedChange={() => {
-                              if (!recipe.id) {return}
+                              if (!recipe.id) { return }
                               onSelectItem(recipe.id.toString())
                             }}
                           />
@@ -233,14 +233,14 @@ export default function RecipeTable({
                                 <Edit2 className="h-4 w-4 mr-2" />
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => window.location.href = '/hpp'}
                                 disabled={ingredientCount === 0}
                               >
                                 <Calculator className="h-4 w-4 mr-2" />
                                 Hitung HPP
                               </DropdownMenuItem>
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="text-red-600"
                                 onClick={() => onDelete(recipe)}
                               >
@@ -256,7 +256,7 @@ export default function RecipeTable({
                 })}
               </TableBody>
             </Table>
-            
+
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
@@ -265,7 +265,7 @@ export default function RecipeTable({
                     Menampilkan {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalItems)} dari {totalItems} resep
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-6">
                   {/* Page Size Selector */}
                   <div className="flex items-center gap-2">
@@ -285,7 +285,7 @@ export default function RecipeTable({
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   {/* Page Navigation */}
                   <div className="flex items-center gap-2">
                     <Button
@@ -296,11 +296,11 @@ export default function RecipeTable({
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    
+
                     <span className="text-sm font-medium">
                       {currentPage} dari {totalPages}
                     </span>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -321,7 +321,7 @@ export default function RecipeTable({
               {searchTerm ? 'Tidak ada resep ditemukan' : 'Belum ada resep'}
             </h3>
             <p className="text-muted-foreground mb-4">
-              {searchTerm 
+              {searchTerm
                 ? 'Coba ubah kata kunci pencarian Anda'
                 : 'Mulai buat resep pertama Anda'
               }

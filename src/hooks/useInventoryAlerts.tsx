@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useIngredients } from '@/hooks'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import { Badge } from '@/components/ui/badge'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']

@@ -9,7 +9,6 @@ export async function GET(
   const { id } = await params
   try {
     const supabase = createServiceRoleClient()
-    // @ts-ignore
     const { data, error } = await supabase
       .from('orders')
       .select(`
@@ -71,7 +70,6 @@ export async function PUT(
       updated_at: new Date().toISOString()
     }
     
-    // @ts-ignore - Supabase table type mismatch with generated schema
     const { data, error } = await supabase
       .from('orders')
       .update(updatePayload)
@@ -110,7 +108,7 @@ export async function PUT(
         
         const { error: itemsError } = await supabase
           .from('order_items')
-          .insert(data as any)
+          .insert(itemsToInsert)
         
         if (itemsError) {
           apiLogger.error({ error: itemsError }, 'Error updating order items:')

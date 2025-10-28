@@ -13,33 +13,19 @@ import { PageHeader } from '@/components/shared'
 import { useRealtimeAlerts } from '@/hooks/useRealtimeAlerts'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
-import type { Database } from '@/types/supabase-generated'
 
-interface HppAlert {
-  id: string
-  recipe_id: string
-  alert_type: string
-  severity: string
-  title: string
-  message: string
-  old_value: number | null
-  new_value: number | null
-  change_percentage: number | null
-  affected_components: any
-  is_read: boolean
-  is_dismissed: boolean
-  created_at: string
-  recipes: {
-    id: string
-    name: string
-    category: string
-  } | null
-}
+const alertsBreadcrumbs = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'HPP & Pricing', href: '/hpp' },
+  { label: 'Cost Alerts' }
+]
 
 export default function HppAlertsPage() {
   const { toast: showToast } = useToast()
   const { user } = useAuth()
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('unread')
+  type AlertFilter = 'all' | 'unread' | 'read'
+
+  const [filter, setFilter] = useState<AlertFilter>('unread')
   const [triggering, setTriggering] = useState(false)
 
   // Use real-time alerts hook
@@ -70,6 +56,23 @@ export default function HppAlertsPage() {
     }
   })
 
+  // Load recent alerts on mount
+  useEffect(() => {
+    void getRecentAlerts()
+  }, [getRecentAlerts])
+
+  // Show error toast when there's a realtime error
+  useEffect(() => {
+    if (realtimeError) {
+      dbLogger.error({ error: realtimeError }, 'Real-time alerts error:')
+      showToast({
+        title: 'Error',
+        description: 'Failed to load real-time alerts',
+        variant: 'destructive'
+      })
+    }
+  }, [realtimeError, showToast])
+
   // Filter alerts based on current filter
   const filteredAlerts = realtimeAlerts.filter(alert => {
     if (filter === 'unread') {return !alert.is_read}
@@ -86,6 +89,7 @@ export default function HppAlertsPage() {
         description: 'Alert marked as read',
       })
     } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Failed to mark alert as read:')
       showToast({
         title: 'Error',
         description: 'Failed to mark alert as read',
@@ -103,6 +107,7 @@ export default function HppAlertsPage() {
         description: 'All alerts marked as read',
       })
     } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Failed to mark all alerts as read:')
       showToast({
         title: 'Error',
         description: 'Failed to mark all alerts as read',
@@ -133,6 +138,7 @@ export default function HppAlertsPage() {
         throw new Error('Failed to trigger alert detection')
       }
     } catch (err: unknown) {
+      dbLogger.error({ error: err }, 'Failed to trigger alert detection:')
       showToast({
         title: 'Error',
         description: 'Failed to trigger alert detection',
@@ -175,6 +181,7 @@ export default function HppAlertsPage() {
         <PageHeader
           title="Cost Alerts"
           description="Notifikasi otomatis saat terjadi perubahan biaya signifikan"
+          breadcrumbs={alertsBreadcrumbs}
           actions={
             <div className="flex gap-2">
               {unreadCount > 0 && (
@@ -215,10 +222,20 @@ export default function HppAlertsPage() {
 
         {/* Filter */}
         <Card>
-          <CardContent className="pt-6">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">Alert Filters</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="flex items-center gap-4">
               <label className="text-sm font-medium">Filter:</label>
-              <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+              <Select
+                value={filter}
+                onValueChange={(value) => {
+                  if (value === 'all' || value === 'unread' || value === 'read') {
+                    setFilter(value)
+                  }
+                }}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>
@@ -315,38 +332,50 @@ export default function HppAlertsPage() {
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Total Alerts</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold text-blue-600">
                 {realtimeAlerts.length}
               </div>
-              <p className="text-sm text-muted-foreground">Total Alerts</p>
+              <p className="text-sm text-muted-foreground">All system alerts</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Unread Alerts</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold text-red-600">
                 {unreadCount}
               </div>
-              <p className="text-sm text-muted-foreground">Unread</p>
+              <p className="text-sm text-muted-foreground">Require attention</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">High Priority</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold text-orange-600">
                 {getAlertsBySeverity('high').length + getAlertsBySeverity('critical').length}
               </div>
-              <p className="text-sm text-muted-foreground">High Priority</p>
+              <p className="text-sm text-muted-foreground">Critical issues</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Cost Reductions</CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold text-green-600">
                 {getAlertsByType('COST_DECREASE').length}
               </div>
-              <p className="text-sm text-muted-foreground">Cost Reductions</p>
+              <p className="text-sm text-muted-foreground">Savings opportunities</p>
             </CardContent>
           </Card>
         </div>

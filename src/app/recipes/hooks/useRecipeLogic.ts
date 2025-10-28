@@ -1,28 +1,18 @@
 'use client'
 import { useState, useCallback } from 'react'
+import type { Recipe, RecipeWithIngredients } from '@/types/domain/recipes'
 
 import { useIngredients } from '@/hooks'
 import { useRecipesWithIngredients } from '@/modules/recipes/hooks/useRecipesWithIngredients'
 
 import { apiLogger } from '@/lib/logger'
-export interface Recipe {
-  id?: string
-  name: string
-  description: string
-  category: string
-  ingredients: Array<{
-    ingredient_id: string
-    quantity: number
-    unit: string
-  }>
-}
 
 export function useRecipeLogic() {
   const { data: recipes = [], loading, refetch } = useRecipesWithIngredients()
   const { data: ingredients } = useIngredients()
   
   const [currentView, setCurrentView] = useState<'list' | 'add' | 'edit'>('list')
-  const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   
@@ -56,13 +46,13 @@ export function useRecipeLogic() {
     }
   }, [newRecipe, resetForm, refetch])
 
-  const handleEditRecipe = useCallback((recipe: any) => {
+  const handleEditRecipe = useCallback((recipe: RecipeWithIngredients) => {
     void setSelectedRecipe(recipe)
     setNewRecipe({
       name: recipe.name || '',
       description: recipe.description || '',
       category: recipe.category || 'makanan-utama',
-      ingredients: recipe.recipe_ingredients?.map((ri: any) => ({
+      ingredients: recipe.recipe_ingredients?.map((ri) => ({
         ingredient_id: ri.ingredient_id,
         quantity: ri.quantity,
         unit: ri.unit
@@ -71,12 +61,12 @@ export function useRecipeLogic() {
     void setCurrentView('edit')
   }, [])
 
-  const handleViewRecipe = useCallback((recipe: any) => {
+  const handleViewRecipe = useCallback((recipe: RecipeWithIngredients) => {
     // Implement recipe view logic
     apiLogger.info({ recipe }, 'Viewing recipe')
   }, [])
 
-  const handleDeleteRecipe = useCallback(async (recipe: any) => {
+  const handleDeleteRecipe = useCallback(async (recipe: RecipeWithIngredients) => {
     if (window.confirm('Are you sure you want to delete this recipe?')) {
       try {
         // API call to delete recipe would go here

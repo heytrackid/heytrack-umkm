@@ -14,7 +14,7 @@ function validateServerEnvironment() {
     throw new Error('createServerClient should only be called server-side')
   }
 
-  const runtime = process.env.NEXT_RUNTIME
+  const runtime = process.env['NEXT_RUNTIME']
   if (runtime && runtime !== 'nodejs') {
     throw new Error(`createServerClient requires NEXT_RUNTIME to be "nodejs", received "${runtime}"`)
   }

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import { Download, AlertCircle, Loader2 } from 'lucide-react'
+import { Download, AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -42,7 +42,6 @@ export default function CashFlowPage() {
     endDate,
     isAddDialogOpen,
     transactionType,
-    formData,
     chartData,
     transactions,
     summary,
@@ -51,7 +50,6 @@ export default function CashFlowPage() {
     setEndDate,
     setIsAddDialogOpen,
     setTransactionType,
-    setFormData,
     fetchCashFlowData,
     handleAddTransaction,
     handleDeleteTransaction,
@@ -79,7 +77,10 @@ export default function CashFlowPage() {
             <div className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">Terjadi Kesalahan</h3>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <p className="text-muted-foreground mb-2">{error}</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Periksa koneksi internet Anda atau coba lagi dalam beberapa saat
+              </p>
               <Button onClick={fetchCashFlowData}>Coba Lagi</Button>
             </div>
           </CardContent>
@@ -118,8 +119,12 @@ export default function CashFlowPage() {
           </div>
 
           <div className={`flex gap-2 ${isMobile ? 'flex-col w-full' : ''}`}>
-            <Button className={isMobile ? 'w-full' : ''} onClick={() => setIsAddDialogOpen(true)}>
-              <Download className="h-4 w-4 mr-2" />
+            <Button
+              className={isMobile ? 'w-full' : ''}
+              onClick={() => setIsAddDialogOpen(true)}
+              disabled={loading}
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
               Tambah Transaksi
             </Button>
 
@@ -132,6 +137,11 @@ export default function CashFlowPage() {
               Ekspor
             </Button>
           </div>
+          {isMobile && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Format CSV – bisa dibuka di Excel
+            </p>
+          )}
         </div>
 
         {/* Transaction Form Dialog */}
@@ -145,6 +155,38 @@ export default function CashFlowPage() {
             loading={loading}
           />
         </Suspense>
+
+        {/* Quick Actions for Mobile */}
+        {isMobile && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col gap-2"
+                  onClick={() => {
+                    setTransactionType('income')
+                    setIsAddDialogOpen(true)
+                  }}
+                >
+                  <ArrowUpCircle className="h-6 w-6 text-green-600" />
+                  <span className="text-sm">Pemasukan</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-20 flex-col gap-2"
+                  onClick={() => {
+                    setTransactionType('expense')
+                    setIsAddDialogOpen(true)
+                  }}
+                >
+                  <ArrowDownCircle className="h-6 w-6 text-red-600" />
+                  <span className="text-sm">Pengeluaran</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Filters */}
         <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse rounded-lg" />}>

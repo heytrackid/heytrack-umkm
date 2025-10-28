@@ -51,14 +51,21 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
       supplier: '',
       quantity: 0,
       unit_price: 0,
-      tanggal_beli: new Date().toISOString().split('T')[0],
-      catatan: ''
+      purchase_date: new Date().toISOString().split('T')[0],
+      notes: ''
     }
   })
 
   const handleSubmit = async (data: IngredientPurchaseInsert) => {
     try {
-      await onSubmit(data)
+      await onSubmit({
+        ingredient_id: data.ingredient_id,
+        quantity: data.quantity,
+        unit_price: data.unit_price,
+        supplier: data.supplier || undefined,
+        purchase_date: data.purchase_date,
+        notes: data.notes || undefined
+      })
 
       // Reset form
       form.reset({
@@ -66,14 +73,14 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
         supplier: '',
         quantity: 0,
         unit_price: 0,
-        tanggal_beli: new Date().toISOString().split('T')[0],
-        catatan: ''
+        purchase_date: new Date().toISOString().split('T')[0],
+        notes: ''
       })
 
       void setIsDialogOpen(false)
       onSuccess()
     } catch (err) {
-      uiLogger.error({ error }, 'Error creating purchase')
+      uiLogger.error({ err }, 'Error creating purchase')
       alert('Gagal menambahkan pembelian')
     }
   }
@@ -154,7 +161,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
               <Label htmlFor="supplier">Supplier</Label>
               <Input
                 id="supplier"
-                {...form.register('supplier')}
+                {...form.register('supplier', { value: '' })}
               />
               {form.formState.errors.supplier && (
                 <p className="text-sm text-red-600">{form.formState.errors.supplier.message}</p>

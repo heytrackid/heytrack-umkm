@@ -57,11 +57,11 @@ export function useSettingsManager() {
 
   const handleSettingChange: SettingsUpdateHandler = (category, key, value) => {
     setSettings(prev => {
-      const currentCategory = prev[category] as any
+      const currentCategory = prev[category]
       const updatedCategory = {
         ...currentCategory,
         [key]: value,
-      }
+      } as AppSettingsState[typeof category]
 
       return {
         ...prev,

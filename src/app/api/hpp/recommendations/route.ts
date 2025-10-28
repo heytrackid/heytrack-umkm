@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
       const { data, error, count } = await query
 
       if (error) {
-        throw err
+        throw error
       }
 
       return {

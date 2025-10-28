@@ -16,6 +16,9 @@ export interface ApiRequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean>
 }
 
+// Alias for backward compatibility
+export type RequestConfig = ApiRequestOptions
+
 /**
  * Base API client
  */
@@ -43,7 +46,7 @@ export class ApiClient {
 
       return await this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(_error)
+      return this.handleError(err)
     }
   }
 
@@ -65,7 +68,7 @@ export class ApiClient {
 
       return await this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(_error)
+      return this.handleError(err)
     }
   }
 
@@ -87,7 +90,29 @@ export class ApiClient {
 
       return await this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(_error)
+      return this.handleError(err)
+    }
+  }
+
+  /**
+   * Make a PATCH request
+   */
+  async patch<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<ApiResponse<T>> {
+    try {
+      const url = this.buildUrl(endpoint, options?.params)
+      const response = await fetch(url, {
+        ...options,
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers
+        },
+        body: data ? JSON.stringify(data) : undefined
+      })
+
+      return await this.handleResponse<T>(response)
+    } catch (err) {
+      return this.handleError(err)
     }
   }
 
@@ -108,7 +133,7 @@ export class ApiClient {
 
       return await this.handleResponse<T>(response)
     } catch (err) {
-      return this.handleError(_error)
+      return this.handleError(err)
     }
   }
 

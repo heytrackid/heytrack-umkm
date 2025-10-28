@@ -1,28 +1,30 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import AppLayout from '@/components/layout/app-layout';
-import { useSupabaseCRUD } from '@/hooks/supabase';
-import { IngredientSchema, type IngredientFormData, IngredientFormSchema } from '@/lib/validations/form-validations';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-// Shared components
-import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb';
-import { PageHeader } from '@/components/ui/page-patterns';
-import { IngredientFormFields } from '@/components/forms/shared/IngredientFormFields';
-import { CrudForm, FormActions } from '@/components/ui/crud-form';
-
+import AppLayout from '@/components/layout/app-layout'
+import { useSupabaseCRUD } from '@/hooks/supabase'
+import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
+import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
+import { PageHeader } from '@/components/ui/page-patterns'
+import { CrudForm, FormActions } from '@/components/ui/crud-form'
+import { EnhancedIngredientForm } from '@/components/ingredients'
 import { apiLogger } from '@/lib/logger'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
+
+type IngredientInsert = Database['public']['Tables']['ingredients']['Insert']
 
 export default function NewIngredientPage() {
-  const router = useRouter();
-  const { create: createIngredient } = useSupabaseCRUD('ingredients');
+  const router = useRouter()
+  const { create: createIngredient } = useSupabaseCRUD('ingredients')
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
 
-  const form = useForm<IngredientFormData>({
+  const form = useForm<SimpleIngredientFormData>({
     resolver: zodResolver(IngredientFormSchema),
     defaultValues: {
       name: '',
@@ -30,21 +32,44 @@ export default function NewIngredientPage() {
       price_per_unit: 0,
       current_stock: 0,
       min_stock: 0,
-      description: '',
+      description: ''
     }
-  });
+  })
 
-  const handleSubmit = async (data: IngredientFormData) => {
+  const handleSubmit = async (data: SimpleIngredientFormData) => {
     try {
-      setLoading(true);
-      await createIngredient(data);
-      router.push('/ingredients');
+      void setLoading(true)
+
+      const supabase = createClient()
+      const {
+        data: { user },
+        error: authError
+      } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        throw authError ?? new Error('User not authenticated')
+      }
+
+      const payload: IngredientInsert = {
+        name: data.name,
+        unit: data.unit,
+        price_per_unit: data.price_per_unit,
+        current_stock: data.current_stock,
+        min_stock: data.min_stock ?? 0,
+        description: data.description || null,
+        user_id: user.id,
+        is_active: true,
+        weighted_average_cost: 0
+      }
+
+      await createIngredient(payload)
+      router.push('/ingredients')
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Failed to create ingredient:')
     } finally {
-      setLoading(false);
+      void setLoading(false)
     }
-  };
+  }
 
   return (
     <AppLayout>
@@ -57,13 +82,9 @@ export default function NewIngredientPage() {
           backHref="/ingredients"
         />
 
-        {/* Form */}
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
           <CrudForm onSubmit={form.handleSubmit(handleSubmit)}>
-            <IngredientFormFields
-              register={form.register}
-              errors={form.formState.errors}
-            />
+            <EnhancedIngredientForm form={form} mode="create" />
 
             <FormActions
               onCancel={() => router.back()}
@@ -74,5 +95,5 @@ export default function NewIngredientPage() {
         </div>
       </div>
     </AppLayout>
-  );
+  )
 }

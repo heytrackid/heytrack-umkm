@@ -7,25 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   BarChart3,
   TrendingUp,
   TrendingDown,
   Target,
-  DollarSign,
   Package,
-  Users,
-  Calendar
+  Users
 } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
-import { useResponsive } from '@/hooks/useResponsive'
-import { PageHeader, SharedStatsCards, SharedDataTable } from '@/components/shared'
-import type { Database } from '@/types/supabase-generated'
-
-type Recipe = Database['public']['Tables']['recipes']['Row']
+import { PageHeader, SharedStatsCards } from '@/components/shared'
+// No imports needed for now
 
 interface RecipeComparison {
   id: string
@@ -82,7 +76,7 @@ export default function ComparisonAnalyticsPage() {
         void setBenchmark(data.benchmark || null)
       }
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to load comparison data')
+      dbLogger.error({ err }, 'Failed to load comparison data')
       toast({
         title: 'Error',
         description: 'Failed to load comparison data',
@@ -134,6 +128,36 @@ export default function ComparisonAnalyticsPage() {
         <PageHeader
           title="Recipe Comparison"
           description="Benchmarking dan analisis komparatif antar resep"
+        />
+        
+        {/* Stats Cards */}
+        <SharedStatsCards 
+          stats={[
+            {
+              title: "Total Recipes",
+              value: recipes.length.toString(),
+              subtitle: "Jumlah resep yang tersedia",
+              icon: <Package className="h-4 w-4" />
+            },
+            {
+              title: "Avg. Margin",
+              value: `${Math.round(recipes.reduce((sum, r) => sum + (r.marginPercentage || 0), 0) / (recipes.length || 1))}%`,
+              subtitle: "Margin keuntungan rata-rata",
+              icon: <Target className="h-4 w-4" />
+            },
+            {
+              title: "Best Performer",
+              value: recipes.length > 0 ? recipes.reduce((best, r) => (r.marginPercentage || 0) > (best.marginPercentage || 0) ? r : best).name : "-",
+              subtitle: "Resep dengan margin tertinggi",
+              icon: <TrendingUp className="h-4 w-4" />
+            },
+            {
+              title: "Active Users",
+              value: "0",
+              subtitle: "Pengguna aktif bulan ini",
+              icon: <Users className="h-4 w-4" />
+            }
+          ]}
         />
 
         {/* Filters */}

@@ -149,7 +149,11 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
             >
               <Select 
                 value={form.watch('difficulty_level')} 
-                onValueChange={(value) => form.setValue('difficulty_level', value as any)}
+                onValueChange={(value) => {
+                  if (value === 'EASY' || value === 'MEDIUM' || value === 'HARD') {
+                    form.setValue('difficulty_level', value)
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />

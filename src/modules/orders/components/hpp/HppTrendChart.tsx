@@ -10,7 +10,7 @@ interface HppSnapshot {
   hpp_value: number
   previous_hpp: number | null
   change_percentage: number | null
-  material_cost_breakdown: any
+  material_cost_breakdown: Record<string, number> | null
 }
 
 interface HppTrendChartProps {
@@ -190,9 +190,8 @@ export const HppTrendChart = ({ recipeId, days = 30, height = 300 }: HppTrendCha
           <div className="text-sm text-gray-600">Current HPP</div>
         </div>
         <div>
-          <div className={`text-2xl font-bold ${
-            (snapshots[snapshots.length - 1]?.change_percentage || 0) >= 0 ? 'text-red-600' : 'text-green-600'
-          }`}>
+          <div className={`text-2xl font-bold ${(snapshots[snapshots.length - 1]?.change_percentage || 0) >= 0 ? 'text-red-600' : 'text-green-600'
+            }`}>
             {snapshots[snapshots.length - 1]?.change_percentage ?
               `${snapshots[snapshots.length - 1]?.change_percentage! > 0 ? '+' : ''}${snapshots[snapshots.length - 1]?.change_percentage?.toFixed(1)}%` :
               'N/A'

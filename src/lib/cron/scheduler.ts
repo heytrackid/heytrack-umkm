@@ -36,7 +36,7 @@ export class CronScheduler {
           cronLogger.info({}, `Completed job: ${name}`)
         }
       } catch (err) {
-        cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, `Error running job: ${name}`)
+        cronLogger.error({ err: err instanceof Error ? err.message : String(err) }, `Error running job: ${name}`)
       }
     }
   }

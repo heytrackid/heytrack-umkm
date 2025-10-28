@@ -55,7 +55,7 @@ export class TimeCalculator {
    * Schedule production orders with optimal timing
    */
   static scheduleOptimalProduction(
-    plan: any[], // ProductionPlanItem[]
+    plan: Array<{ recipeId: string; quantity: number; priority: number }>, // ProductionPlanItem[]
     workingHours: { start: number; end: number }
   ) {
     // Sort by delivery date priority

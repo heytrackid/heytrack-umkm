@@ -11,7 +11,7 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import { memo, useEffect, useState, type FormEvent } from 'react'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
-import type { Customer } from '@/types'
+import type { Customer } from '@/types/domain/customers'
 import type { Order, OrderFormProps, OrderItem, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
@@ -90,7 +90,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         setAvailableRecipes(data.filter(recipe => recipe.is_active))
       }
     } catch (err) {
-      uiLogger.error({ err: _err }, 'Error fetching recipes')
+      uiLogger.error({ err }, 'Error fetching recipes')
     }
   }
 
@@ -102,7 +102,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         void setAvailableCustomers(data)
       }
     } catch (err) {
-      uiLogger.error({ err: _err }, 'Error fetching customers')
+      uiLogger.error({ err }, 'Error fetching customers')
     }
   }
 
@@ -128,7 +128,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     }
 
     const firstRecipe = availableRecipes[0]
-    if (!firstRecipe) return
+    if (!firstRecipe) { return }
 
     const newItem: OrderItem = {
       id: `temp-${Date.now()}`,
@@ -160,7 +160,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     setOrderItems(prev => {
       const updated = [...prev]
       const currentItem = updated[index]
-      if (!currentItem) return updated
+      if (!currentItem) { return updated }
 
       if (field === 'recipe_id') {
         const selectedRecipe = availableRecipes.find(recipe => recipe.id === value)
@@ -260,7 +260,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       }))
     }
 
-    await onSubmit(orderData as any)
+    await onSubmit(orderData as Partial<Order>)
   }
 
   return (

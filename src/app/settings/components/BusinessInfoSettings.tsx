@@ -42,9 +42,9 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
       onSettingChange('general', field, validatedData[field] ?? value)
     } catch (err) {
       // Don't update parent if validation fails, but allow user to continue typing
-      if (error instanceof Error) {
+      if (err instanceof Error) {
         // Extract field-specific errors if possible
-        const errorMessage = error.message
+        const errorMessage = err.message
         if (errorMessage.includes(field)) {
           void setErrors({ [field]: errorMessage })
         }
@@ -58,10 +58,10 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
       validateBusinessInfoSettings(localSettings)
       void setErrors({})
     } catch (err) {
-      if (error instanceof Error) {
+      if (err instanceof Error) {
         toast({
           title: 'Pengaturan Tidak Valid',
-          description: error.message,
+          description: err.message,
           variant: 'destructive',
         })
       }
@@ -82,7 +82,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             <Label htmlFor="businessName">Nama Bisnis *</Label>
             <Input
               id="businessName"
-              value={localSettings.businessName || ''}
+              value={localSettings['businessName'] || ''}
               onChange={(e) => handleChange('businessName', e.target.value)}
               onBlur={() => handleBlur('businessName')}
               className={errors.businessName ? 'border-red-500' : ''}
@@ -95,7 +95,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             <Label htmlFor="businessType">Jenis Bisnis *</Label>
             <select
               className="w-full p-2 border border-input rounded-md bg-background"
-              value={localSettings.businessType || 'UMKM'}
+              value={localSettings['businessType'] || 'UMKM'}
               onChange={(e) => handleChange('businessType', e.target.value)}
               onBlur={() => handleBlur('businessType')}
             >
@@ -116,7 +116,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
           <Label htmlFor="businessAddress">Alamat Bisnis</Label>
           <Textarea
             id="businessAddress"
-            value={localSettings.address || ''}
+            value={localSettings['address'] || ''}
             onChange={(e) => handleChange('address', e.target.value)}
             onBlur={() => handleBlur('address')}
             placeholder="Alamat lengkap bisnis"
@@ -133,7 +133,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             <Label htmlFor="businessPhone">Nomor Telepon</Label>
             <Input
               id="businessPhone"
-              value={localSettings.phone || ''}
+              value={localSettings['phone'] || ''}
               onChange={(e) => handleChange('phone', e.target.value)}
               onBlur={() => handleBlur('phone')}
               placeholder="Contoh: +6281234567890"
@@ -148,7 +148,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
             <Input
               id="businessEmail"
               type="email"
-              value={localSettings.email || ''}
+              value={localSettings['email'] || ''}
               onChange={(e) => handleChange('email', e.target.value)}
               onBlur={() => handleBlur('email')}
               placeholder="business@email.com"
@@ -164,7 +164,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
           <Label htmlFor="website">Website</Label>
           <Input
             id="website"
-            value={localSettings.website || ''}
+            value={localSettings['website'] || ''}
             onChange={(e) => handleChange('website', e.target.value)}
             onBlur={() => handleBlur('website')}
             placeholder="https://www.bisnisanda.com"
@@ -179,7 +179,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
           <Label htmlFor="description">Deskripsi Bisnis</Label>
           <Textarea
             id="description"
-            value={localSettings.description || ''}
+            value={localSettings['description'] || ''}
             onChange={(e) => handleChange('description', e.target.value)}
             onBlur={() => handleBlur('description')}
             placeholder="Deskripsikan bisnis Anda..."

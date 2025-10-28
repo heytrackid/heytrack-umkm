@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useIngredients } from '@/hooks'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 

@@ -32,7 +32,7 @@ export { default as AppLayout } from './layout/app-layout'
 
 
 // Error Components
-export { ErrorFallback as ErrorMessage } from './error-fallback'
+// export { ErrorFallback as ErrorMessage } from './error-fallback' // Removed - file doesn't exist
 
 // Export types if they exist
 export type { ColumnDef } from '@tanstack/react-table'

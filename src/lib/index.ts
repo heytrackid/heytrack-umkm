@@ -232,12 +232,16 @@ export {
   HPPAlertDetector,
   HPPSnapshotManager,
   HPPUtils,
-  calculateHPP,
-  detectHPPAlerts,
-  takeSnapshot,
-  getSnapshots,
-  compareSnapshots,
-} from './hpp/'
+}
+
+// HPP functions moved to modules/hpp
+// export {
+//   calculateHPP,
+//   detectHPPAlerts,
+//   takeSnapshot,
+//   getSnapshots,
+//   compareSnapshots,
+// } from './hpp/'
 
 export {
   AIClient,

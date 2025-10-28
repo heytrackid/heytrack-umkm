@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { useErrorHandler } from './useErrorHandler'
-import type { RetryOptions } from './types'
+// Removed unused import: RetryOptions
 
 /**
  * Hook untuk implement retry logic dengan exponential backoff

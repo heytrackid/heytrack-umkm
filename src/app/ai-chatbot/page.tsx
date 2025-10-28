@@ -1,8 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import AppLayout from '@/components/layout/app-layout'
+import { PageHeader } from '@/components/shared'
 import { ChatHeader, ChatInput, MessageList } from './components'
 import { useChatMessages, useAIService } from './hooks'
+
+const chatbotBreadcrumbs = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'AI Assistant' },
+  { label: 'Chatbot' }
+]
 
 export default function AIChatbotPage() {
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
@@ -55,20 +63,30 @@ export default function AIChatbotPage() {
   }
 
   return (
-    <div className="flex flex-col h-full max-h-screen">
-      <ChatHeader />
+    <AppLayout pageTitle="AI Chatbot">
+      <div className="flex h-full flex-col gap-6">
+        <PageHeader
+          title="AI Chatbot"
+          description="Interaksi cepat dengan asisten AI HeyTrack untuk tugas operasional harian"
+          breadcrumbs={chatbotBreadcrumbs}
+        />
 
-      <MessageList
-        messages={messages}
-        isLoading={isLoading}
-        scrollAreaRef={scrollAreaRef}
-        onSuggestionClick={handleSuggestionClick}
-      />
+        <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          <ChatHeader />
 
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        isLoading={isLoading}
-      />
-    </div>
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            scrollAreaRef={scrollAreaRef}
+            onSuggestionClick={handleSuggestionClick}
+          />
+
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
+        </div>
+      </div>
+    </AppLayout>
   )
 }

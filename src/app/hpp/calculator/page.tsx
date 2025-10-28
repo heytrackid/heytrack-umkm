@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Calculator, TrendingUp, DollarSign, Package, Users } from 'lucide-react'
+import { Calculator, TrendingUp, DollarSign, Package } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
@@ -19,6 +19,12 @@ import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
+
+const calculatorBreadcrumbs = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'HPP & Pricing', href: '/hpp' },
+  { label: 'HPP Calculator' }
+]
 
 interface HppCalculation {
   recipeId: string
@@ -59,7 +65,7 @@ export default function HppCalculatorPage() {
           void setRecipes(data.recipes || [])
         }
       } catch (err: unknown) {
-        dbLogger.error({ err: error }, 'Failed to load recipes')
+        dbLogger.error({ err }, 'Failed to load recipes')
         toast({
           title: 'Error',
           description: 'Failed to load recipes',
@@ -106,7 +112,7 @@ export default function HppCalculatorPage() {
         throw new Error('Failed to calculate HPP')
       }
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to calculate HPP')
+      dbLogger.error({ err }, 'Failed to calculate HPP')
       toast({
         title: 'Error',
         description: 'Failed to calculate HPP',
@@ -123,7 +129,42 @@ export default function HppCalculatorPage() {
         <PageHeader
           title="HPP Calculator"
           description="Hitung Harga Pokok Produksi untuk setiap resep dengan akurat"
+          breadcrumbs={calculatorBreadcrumbs}
         />
+        
+        {/* Stats Cards */}
+        {loading ? (
+          <StatsCardSkeleton />
+        ) : (
+          <SharedStatsCards 
+            stats={[
+              {
+                title: "Total Calculations",
+                value: "0",
+                subtitle: "Jumlah kalkulasi yang telah dilakukan",
+                icon: <Calculator className="h-4 w-4" />
+              },
+              {
+                title: "Avg. Processing Time",
+                value: "0ms",
+                subtitle: "Waktu rata-rata pemrosesan",
+                icon: <TrendingUp className="h-4 w-4" />
+              },
+              {
+                title: "Recipes Analyzed",
+                value: "0",
+                subtitle: "Jumlah resep yang dianalisis",
+                icon: <Package className="h-4 w-4" />
+              },
+              {
+                title: "Cost Savings Identified",
+                value: formatCurrency(0),
+                subtitle: "Potensi penghematan biaya",
+                icon: <DollarSign className="h-4 w-4" />
+              }
+            ]}
+          />
+        )}
 
         {/* Calculator Form */}
         <Card>

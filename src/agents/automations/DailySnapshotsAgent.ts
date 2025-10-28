@@ -13,12 +13,13 @@ import {
   createAgentLogger,
   executeAgentTask
 } from '@/agents/base'
-import { HppCalculatorService } from '@/modules/orders/services/HppCalculatorService'
+import { HppCalculatorService } from '@/modules/hpp'
 import supabase from '@/utils/supabase'
 
 interface DailySnapshotTaskData {
   targetDate?: string // Optional, defaults to yesterday
   recipeIds?: string[] // Optional, defaults to all active recipes
+  [key: string]: unknown // Index signature to make it compatible with Record<string, unknown>
 }
 
 interface SnapshotResult {
@@ -28,6 +29,7 @@ interface SnapshotResult {
     recipeId: string
     error: string
   }>
+  [key: string]: unknown // Index signature to make it compatible with Record<string, unknown>
 }
 
 /**
@@ -44,7 +46,7 @@ export class DailySnapshotsAgent {
   async executeDailySnapshots(data: DailySnapshotTaskData = {}): Promise<AgentResult> {
     const correlationId = generateCorrelationId()
     const context = createAgentContext(correlationId)
-    const logger = createAgentLogger('DailySnapshotsAgent', correlationId)
+    // const logger = createAgentLogger('DailySnapshotsAgent', correlationId)
 
     const task: AgentTask = {
       id: `daily-snapshots-${Date.now()}`,
@@ -74,7 +76,7 @@ export class DailySnapshotsAgent {
     // Determine target date (yesterday by default)
     const snapshotDate = targetDate ? new Date(targetDate) : new Date()
     snapshotDate.setDate(snapshotDate.getDate() - 1)
-    const snapshotDateStr = snapshotDate.toISOString().split('T')[0]
+    const snapshotDateStr: string = snapshotDate.toISOString().split('T')[0]!
 
     logger.info(`Processing daily HPP snapshots for date: ${snapshotDateStr}`)
 
@@ -104,7 +106,7 @@ export class DailySnapshotsAgent {
         }
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        logger.error({ error, recipeId }, `Failed to create snapshot for recipe ${recipeId}`)
+        logger.error({ message: `Failed to create snapshot for recipe ${recipeId}: ${errorMessage}` })
         errors.push({
           recipeId,
           error: errorMessage
@@ -158,7 +160,24 @@ export class DailySnapshotsAgent {
       }
 
       // Create snapshot record
-      const snapshotData = {
+      const snapshotData: {
+        snapshot_date: string
+        recipe_id: string
+        hpp_value: number
+        previous_hpp: number | null
+        change_percentage: number
+        material_cost_breakdown: {
+          totalMaterialCost: number
+          breakdown: Array<{
+            ingredientId: string
+            ingredientName: string
+            quantity: number
+            unit: string
+            unitPrice: number
+            totalCost: number
+          }>
+        }
+      } = {
         snapshot_date: snapshotDate,
         recipe_id: recipeId,
         hpp_value: hppResult.totalHpp,
@@ -170,24 +189,25 @@ export class DailySnapshotsAgent {
         }
       }
 
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('hpp_snapshots')
-        .insert(snapshotData)
+        .insert([snapshotData] as any)
 
-      if (error) {
+      if (insertError) {
         // Check if it's a duplicate key error (snapshot already exists)
-        if (error.code === '23505') { // unique_violation
+        if (insertError.code === '23505') { // unique_violation
           logger.warn(`Snapshot already exists for recipe ${recipeId} on ${snapshotDate}`)
           return false
         }
-        throw new Error(`Failed to create snapshot: ${error.message}`)
+        throw new Error(`Failed to create snapshot: ${insertError.message || 'Unknown error'}`)
       }
 
       logger.info(`Created HPP snapshot for recipe ${recipeId}: ${hppResult.totalHpp}`)
       return true
 
     } catch (error: unknown) {
-      logger.error({ error, recipeId }, `Failed to create snapshot for recipe ${recipeId}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error({ message: `Failed to create snapshot for recipe ${recipeId}: ${errorMessage}` })
       throw error
     }
   }
@@ -195,7 +215,7 @@ export class DailySnapshotsAgent {
   /**
    * Get previous snapshot for comparison
    */
-  private async getPreviousSnapshot(recipeId: string, currentDate: string) {
+  private async getPreviousSnapshot(recipeId: string, currentDate: string): Promise<{ hpp_value: number } | null> {
     try {
       const { data, error } = await supabase
         .from('hpp_snapshots')
@@ -204,7 +224,7 @@ export class DailySnapshotsAgent {
         .lt('snapshot_date', currentDate)
         .order('snapshot_date', { ascending: false })
         .limit(1)
-        .single()
+        .single<{ hpp_value: number }>()
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
         throw new Error(`Failed to fetch previous snapshot: ${error.message}`)
@@ -214,7 +234,8 @@ export class DailySnapshotsAgent {
 
     } catch (error: unknown) {
       // Log but don't fail the whole process
-      this.logger.error({ error }, `Failed to get previous snapshot for recipe ${recipeId}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      this.logger.error({ message: `Failed to get previous snapshot for recipe ${recipeId}: ${errorMessage}` })
       return null
     }
   }
@@ -233,10 +254,11 @@ export class DailySnapshotsAgent {
         throw new Error(`Failed to fetch active recipes: ${error.message}`)
       }
 
-      return data?.map(r => r.id) || []
+      return data?.map((r: { id: string }) => r.id) || []
 
     } catch (error: unknown) {
-      this.logger.error({ error }, 'Failed to get active recipe IDs')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      this.logger.error({ message: `Failed to get active recipe IDs: ${errorMessage}` })
       throw error
     }
   }
@@ -264,7 +286,8 @@ export class DailySnapshotsAgent {
       this.logger.info(`Cleaned up ${deletedCount} old HPP snapshots`)
 
     } catch (error: unknown) {
-      this.logger.error({ error }, 'Failed to cleanup old snapshots')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      this.logger.error({ message: `Failed to cleanup old snapshots: ${errorMessage}` })
       throw error
     }
   }

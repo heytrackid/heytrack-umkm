@@ -4,6 +4,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { DollarSign, Package, ShoppingCart, TrendingUp } from 'lucide-react'
 import type { IngredientPurchase, PurchaseStats } from './types'
+import type { LucideIcon } from 'lucide-react'
 
 interface PurchaseStatsProps {
   purchases: IngredientPurchase[]
@@ -15,12 +16,12 @@ export default function PurchaseStats({ purchases }: PurchaseStatsProps) {
     const purchaseDate = new Date(p.purchase_date)
     const now = new Date()
     return purchaseDate.getMonth() === now.getMonth() &&
-           purchaseDate.getFullYear() === now.getFullYear()
+      purchaseDate.getFullYear() === now.getFullYear()
   })
 
   const uniqueSuppliers = new Set(purchases.filter((p) => p.supplier).map((p) => p.supplier))
 
-  const stats: PurchaseStats[] = [
+  const stats: (PurchaseStats & { icon: LucideIcon })[] = [
     {
       title: 'Pembelian (Bulan Ini)',
       value: thisMonth.length,

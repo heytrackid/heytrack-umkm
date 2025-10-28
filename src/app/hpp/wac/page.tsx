@@ -5,30 +5,21 @@ import AppLayout from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { DollarSign, TrendingUp, Package, RefreshCw } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader, SharedStatsCards } from '@/components/shared'
+import { PageHeader } from '@/components/shared'
 import type { Database } from '@/types/supabase-generated'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
-
-interface WacCalculation {
-  ingredientId: string
-  currentWac: number
-  totalQuantity: number
-  totalValue: number
-  lastUpdated: string
-}
 
 export default function WacEnginePage() {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
   const [selectedIngredient, setSelectedIngredient] = useState<string>('')
-  const [wacData, setWacData] = useState<WacCalculation | null>(null)
+  // const [wacData, setWacData] = useState<WacCalculation | null>(null)
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)
   const [recalculating, setRecalculating] = useState(false)
@@ -44,7 +35,7 @@ export default function WacEnginePage() {
           void setIngredients(data.ingredients || [])
         }
       } catch (err: unknown) {
-        dbLogger.error({ err: error }, 'Failed to load ingredients')
+        dbLogger.error({ err }, 'Failed to load ingredients')
         toast({
           title: 'Error',
           description: 'Failed to load ingredients',
@@ -78,7 +69,7 @@ export default function WacEnginePage() {
         description: 'WAC calculation endpoint not yet implemented',
       })
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to calculate WAC')
+      dbLogger.error({ err }, 'Failed to calculate WAC')
       toast({
         title: 'Error',
         description: 'Failed to calculate WAC',
@@ -107,7 +98,7 @@ export default function WacEnginePage() {
         })
       }, 2000)
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to recalculate WAC')
+      dbLogger.error({ err }, 'Failed to recalculate WAC')
       toast({
         title: 'Error',
         description: 'Failed to recalculate WAC',
@@ -239,11 +230,11 @@ export default function WacEnginePage() {
               <div className="text-3xl font-bold text-green-600">
                 {ingredients.length > 0
                   ? formatCurrency(
-                      ingredients
-                        .filter(i => i.weighted_average_cost && i.weighted_average_cost > 0)
-                        .reduce((sum, i) => sum + (i.weighted_average_cost || 0), 0) /
-                      Math.max(1, ingredients.filter(i => i.weighted_average_cost && i.weighted_average_cost > 0).length)
-                    )
+                    ingredients
+                      .filter(i => i.weighted_average_cost && i.weighted_average_cost > 0)
+                      .reduce((sum, i) => sum + (i.weighted_average_cost || 0), 0) /
+                    Math.max(1, ingredients.filter(i => i.weighted_average_cost && i.weighted_average_cost > 0).length)
+                  )
                   : formatCurrency(0)
                 }
               </div>

@@ -70,7 +70,7 @@ export function useErrorHandler() {
     try {
       return await asyncFn()
     } catch (err) {
-      void handleError(_error, context)
+      void handleError(err, context)
       return null
     }
   }
@@ -165,7 +165,7 @@ export function createErrorRecovery<T>(
     try {
       return await primaryFn()
     } catch (err) {
-      errorHandler?.(_error as Error)
+      errorHandler?.(err as Error)
 
       if (fallbackFn) {
         try {

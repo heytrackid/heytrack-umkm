@@ -14,7 +14,7 @@ export function createTextColumn<T extends Record<string, unknown>>(
   header: string,
   options?: {
     sortable?: boolean
-    width?: string
+    width?: number
   }
 ): ColumnDef<T> {
   return {
@@ -22,7 +22,7 @@ export function createTextColumn<T extends Record<string, unknown>>(
     header: ({ column }) => header,
     cell: ({ getValue }) => getValue(),
     enableSorting: options?.sortable !== false,
-    size: options?.width as any,
+    size: options?.width,
   }
 }
 

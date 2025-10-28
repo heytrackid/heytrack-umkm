@@ -1,8 +1,7 @@
 'use client'
 
-import { lazy, Suspense } from 'react'
+import { Fragment, lazy, Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
-import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import {
@@ -40,7 +39,6 @@ export default function CategoriesPage() {
   const {
     categories,
     currentView,
-    editingCategory,
     selectedItems,
     searchTerm,
     isLoading,

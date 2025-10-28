@@ -1,7 +1,6 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { apiLogger } from '@/lib/logger'
 import type { AIAnalysisState, InventoryOptimizationRequest } from './types'
 
 /**

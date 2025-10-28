@@ -1,3 +1,5 @@
+'use client'
+
 // Shared business logic components and utilities
 
 import { type ReactNode, useState, useMemo } from 'react'
@@ -88,8 +90,8 @@ export const InventoryAlerts = ({
         const Icon = typeIcons[alert.type]
         return (
           <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
-              alert.severity === 'high' ? 'border-orange-500' :
-                'border-yellow-500'
+            alert.severity === 'high' ? 'border-orange-500' :
+              'border-yellow-500'
             }`}>
             <Icon className="h-4 w-4" />
             <AlertDescription>
@@ -158,16 +160,16 @@ export const StockLevelIndicator = ({
   const clampedPercentage = Math.min(Math.max(percentage, 0), 100)
 
   const getStatusColor = () => {
-    if (currentStock <= 0) {return 'bg-red-500'}
-    if (currentStock <= minStock) {return 'bg-orange-500'}
-    if (maxStock && currentStock >= maxStock) {return 'bg-blue-500'}
+    if (currentStock <= 0) { return 'bg-red-500' }
+    if (currentStock <= minStock) { return 'bg-orange-500' }
+    if (maxStock && currentStock >= maxStock) { return 'bg-blue-500' }
     return 'bg-green-500'
   }
 
   const getStatusText = () => {
-    if (currentStock <= 0) {return 'Out of Stock'}
-    if (currentStock <= minStock) {return 'Low Stock'}
-    if (maxStock && currentStock >= maxStock) {return 'Over Stock'}
+    if (currentStock <= 0) { return 'Out of Stock' }
+    if (currentStock <= minStock) { return 'Low Stock' }
+    if (maxStock && currentStock >= maxStock) { return 'Over Stock' }
     return 'In Stock'
   }
 
@@ -221,38 +223,38 @@ export const MetricCard = ({
   icon,
   className = ""
 }: MetricCardProps) => (
-    <Card className={className}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
-              {title}
-            </p>
-            <p className="text-2xl font-bold">
-              {value}
-            </p>
-            {change && (
-              <div className="flex items-center mt-2 text-sm">
-                {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500 mr-1" />}
-                {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
-                <span className={`${change.trend === 'up' ? 'text-green-600' :
-                    change.trend === 'down' ? 'text-red-600' :
-                      'text-muted-foreground'
-                  }`}>
-                  {change.value > 0 && '+'}{change.value}% {change.label}
-                </span>
-              </div>
-            )}
-          </div>
-          {icon && (
-            <div className="h-8 w-8 text-muted-foreground">
-              {icon}
+  <Card className={className}>
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground mb-1">
+            {title}
+          </p>
+          <p className="text-2xl font-bold">
+            {value}
+          </p>
+          {change && (
+            <div className="flex items-center mt-2 text-sm">
+              {change.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500 mr-1" />}
+              {change.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500 mr-1" />}
+              <span className={`${change.trend === 'up' ? 'text-green-600' :
+                change.trend === 'down' ? 'text-red-600' :
+                  'text-muted-foreground'
+                }`}>
+                {change.value > 0 && '+'}{change.value}% {change.label}
+              </span>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
-  )
+        {icon && (
+          <div className="h-8 w-8 text-muted-foreground">
+            {icon}
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+)
 
 // Profitability Calculator Component
 interface ProfitabilityData {

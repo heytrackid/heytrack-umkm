@@ -1,8 +1,8 @@
 // Production service hooks for Indonesian UMKM operations
 'use client'
 import { useMemo } from 'react'
-import { useSupabaseCRUD } from '@/hooks'
-import type { 
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks'
+import type {
   ProductionBatch,
   IngredientAllocation,
   QualityCheck,
@@ -15,56 +15,38 @@ import type {
   ProductionStatus,
   ProductionCapacity,
   BatchSchedule,
-  TemperatureLog
+  TemperatureLog,
+  BatchPriority
 } from '@/app/recipes/types/production.types'
-import { 
-  PRODUCTION_CONFIG
-} from '@/app/recipes/config/production.config'
-import type { 
-  BatchStatus, 
-  PriorityLevel 
-} from '@/app/recipes/config/production.config'
-import { formatCurrency, currencies } from '@/lib/currency'
-import { REGIONAL_DEFAULTS } from '@/lib/shared/utils/currency'
+import { PRODUCTION_CONFIG } from '@/app/recipes/config/production.config'
+import { formatCurrency, DEFAULT_CURRENCY, currencies } from '@/lib/currency'
+import type { Currency } from '@/lib/currency'
 
 // Main production batches hook
 export function useProductionBatches(filters?: ProductionFilters) {
-  const { 
-    data: batches, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<ProductionBatch, CreateBatchData, UpdateBatchData>({
-    table: 'production_batches',
-    relationConfig: {
-      quality_checks: {
-        table: 'quality_checks',
-        foreignKey: 'batch_id'
-      },
-      ingredient_allocations: {
-        table: 'ingredient_allocations',
-        foreignKey: 'batch_id'
-      },
-      production_logs: {
-        table: 'production_logs',
-        foreignKey: 'batch_id'
-      },
-      temperature_logs: {
-        table: 'temperature_logs',
-        foreignKey: 'batch_id'
-      }
-    },
-    orderBy: [{ column: 'scheduled_start', ascending: true }]
+  const {
+    data: batchesData,
+    loading,
+    error,
+    refetch: refetchBatches
+  } = useSupabaseQuery('production_batches' as any, {
+    select:
+      '*, quality_checks(*), ingredient_allocations(*), production_logs(*), temperature_logs(*)',
+    orderBy: { column: 'scheduled_start', ascending: true }
   })
+  const {
+    create: createBatchRecord,
+    update: updateBatchRecord,
+    delete: deleteBatchRecord
+  } = useSupabaseCRUD('production_batches' as any)
 
   // Filter batches based on criteria
   const filteredBatches = useMemo((): ProductionBatch[] | undefined => {
-    if (!batches || !filters) {return batches as ProductionBatch[] | undefined}
+    const castBatches = batchesData as ProductionBatch[] | undefined
 
-    return (batches as ProductionBatch[]).filter((batch: ProductionBatch) => {
+    if (!castBatches || !filters) {return castBatches}
+
+    return castBatches.filter((batch: ProductionBatch) => {
       // Status filter
       if (filters.status?.length && !filters.status.includes(batch.status)) {
         return false
@@ -132,131 +114,143 @@ export function useProductionBatches(filters?: ProductionFilters) {
 
       return true
     })
-  }, [batches, filters])
+  }, [batchesData, filters])
 
   return {
     batches: filteredBatches,
-    allBatches: batches,
+    allBatches: (batchesData as ProductionBatch[] | undefined) ?? [],
     loading,
     error,
-    createBatch: create,
-    updateBatch: update,
-    deleteBatch: remove,
-    refreshBatches: refresh
+    createBatch: createBatchRecord,
+    updateBatch: updateBatchRecord,
+    deleteBatch: deleteBatchRecord,
+    refreshBatches: refetchBatches
   }
 }
 
 // Quality checks management
 export function useQualityChecks(batchId: string) {
-  const { 
-    data: checks, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<QualityCheck>({
-    table: 'quality_checks',
-    filter: [{ column: 'batch_id', operator: 'eq', value: batchId }],
-    orderBy: [{ column: 'checked_at', ascending: true }]
-  })
-
-  return {
-    checks: checks || [],
+  const {
+    data: checksData,
     loading,
     error,
-    addCheck: create,
-    updateCheck: update,
-    removeCheck: remove,
-    refreshChecks: refresh
+    refetch: refetchChecks
+  } = useSupabaseQuery('quality_checks' as any, {
+    filter: { batch_id: batchId },
+    orderBy: { column: 'checked_at', ascending: true }
+  })
+  const {
+    create: createCheck,
+    update: updateCheckRecord,
+    delete: deleteCheck
+  } = useSupabaseCRUD('quality_checks' as any)
+
+  return {
+    checks: (checksData as QualityCheck[] | undefined) ?? [],
+    loading,
+    error,
+    addCheck: createCheck,
+    updateCheck: updateCheckRecord,
+    removeCheck: deleteCheck,
+    refreshChecks: refetchChecks
   }
 }
 
 // Equipment management
-export function useProductionEquipment(filters?: { type?: string, status?: string }) {
-  const { 
-    data: equipment, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<ProductionEquipment>({
-    table: 'production_equipment',
-    filter: filters ? [
-      ...(filters.type ? [{ column: 'type', operator: 'eq', value: filters.type }] : []),
-      ...(filters.status ? [{ column: 'status', operator: 'eq', value: filters.status }] : [])
-    ] : undefined,
-    orderBy: [{ column: 'name', ascending: true }]
-  })
+export function useProductionEquipment(filters?: { type?: string; status?: string }) {
+  const queryFilter: Record<string, unknown> | undefined = filters
+    ? {
+        ...(filters.type ? { type: filters.type } : {}),
+        ...(filters.status ? { status: filters.status } : {})
+      }
+    : undefined
 
-  return {
-    equipment: equipment || [],
+  const {
+    data: equipmentData,
     loading,
     error,
-    addEquipment: create,
-    updateEquipment: update,
-    removeEquipment: remove,
-    refreshEquipment: refresh
+    refetch: refetchEquipment
+  } = useSupabaseQuery('production_equipment' as any, {
+    filter: queryFilter,
+    orderBy: { column: 'name', ascending: true }
+  })
+  const {
+    create: createEquipment,
+    update: updateEquipmentRecord,
+    delete: deleteEquipment
+  } = useSupabaseCRUD('production_equipment' as any)
+
+  return {
+    equipment: (equipmentData as ProductionEquipment[] | undefined) ?? [],
+    loading,
+    error,
+    addEquipment: createEquipment,
+    updateEquipment: updateEquipmentRecord,
+    removeEquipment: deleteEquipment,
+    refreshEquipment: refetchEquipment
   }
 }
 
 // Staff management
-export function useProductionStaff(filters?: { role?: string, active?: boolean }) {
-  const { 
-    data: staff, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<ProductionStaff>({
-    table: 'production_staff',
-    filter: filters ? [
-      ...(filters.role ? [{ column: 'role', operator: 'eq', value: filters.role }] : []),
-      ...(filters.active !== undefined ? [{ column: 'active', operator: 'eq', value: filters.active }] : [])
-    ] : undefined,
-    orderBy: [{ column: 'name', ascending: true }]
-  })
+export function useProductionStaff(filters?: { role?: string; active?: boolean }) {
+  const queryFilter: Record<string, unknown> | undefined = filters
+    ? {
+        ...(filters.role ? { role: filters.role } : {}),
+        ...(filters.active !== undefined ? { active: filters.active } : {})
+      }
+    : undefined
 
-  return {
-    staff: staff || [],
+  const {
+    data: staffData,
     loading,
     error,
-    addStaff: create,
-    updateStaff: update,
-    removeStaff: remove,
-    refreshStaff: refresh
+    refetch: refetchStaff
+  } = useSupabaseQuery('production_staff' as any, {
+    filter: queryFilter,
+    orderBy: { column: 'name', ascending: true }
+  })
+  const {
+    create: createStaff,
+    update: updateStaffRecord,
+    delete: deleteStaff
+  } = useSupabaseCRUD('production_staff' as any)
+
+  return {
+    staff: (staffData as ProductionStaff[] | undefined) ?? [],
+    loading,
+    error,
+    addStaff: createStaff,
+    updateStaff: updateStaffRecord,
+    removeStaff: deleteStaff,
+    refreshStaff: refetchStaff
   }
 }
 
 // Ingredient allocations for a batch
 export function useIngredientAllocations(batchId: string) {
-  const { 
-    data: allocations, 
-    loading, 
-    error, 
-    create, 
-    update, 
-    remove,
-    refresh
-  } = useSupabaseCRUD<IngredientAllocation>({
-    table: 'ingredient_allocations',
-    filter: [{ column: 'batch_id', operator: 'eq', value: batchId }],
-    orderBy: [{ column: 'allocated_at', ascending: true }]
-  })
-
-  return {
-    allocations: allocations || [],
+  const {
+    data: allocationsData,
     loading,
     error,
-    addAllocation: create,
-    updateAllocation: update,
-    removeAllocation: remove,
-    refreshAllocations: refresh
+    refetch: refetchAllocations
+  } = useSupabaseQuery('ingredient_allocations' as any, {
+    filter: { batch_id: batchId },
+    orderBy: { column: 'allocated_at', ascending: true }
+  })
+  const {
+    create: createAllocation,
+    update: updateAllocationRecord,
+    delete: deleteAllocation
+  } = useSupabaseCRUD('ingredient_allocations' as any)
+
+  return {
+    allocations: (allocationsData as IngredientAllocation[] | undefined) ?? [],
+    loading,
+    error,
+    addAllocation: createAllocation,
+    updateAllocation: updateAllocationRecord,
+    removeAllocation: deleteAllocation,
+    refreshAllocations: refetchAllocations
   }
 }
 
@@ -266,10 +260,10 @@ export function useBatchScheduling(config = PRODUCTION_CONFIG) {
 
   const generateSchedule = (newBatchData: CreateBatchData): BatchSchedule => {
     const currentQueue = batches?.length || 0
-    
+
     const timeline = calculateProductionTimeline(
       newBatchData.recipe_id,
-      newBatchData.batch_size || config.batch.default_size,
+      newBatchData.batch_size || config.DEFAULT_BATCH_SIZE,
       config,
       {
         priority: newBatchData.priority,
@@ -509,56 +503,55 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
 
 // Production notifications
 export function useProductionNotifications() {
-  const { 
-    data: notifications, 
-    loading, 
-    error, 
-    update,
-    refresh
-  } = useSupabaseCRUD('production_notifications', {
+  const {
+    data: notificationsData,
+    loading,
+    error,
+    refetch: refetchNotifications
+  } = useSupabaseQuery('production_notifications' as any, {
     orderBy: { column: 'created_at', ascending: false }
   })
+  const { update: updateNotification } = useSupabaseCRUD('production_notifications' as any)
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await update(notificationId, { read: true })
+      await updateNotification(notificationId, { read: true })
     } catch (err: unknown) {
       throw new Error(`Failed to mark notification as read: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
-  const unreadCount = (notifications as any[])?.filter((n: any) => {
+  const unreadCount = (notificationsData as any[])?.filter((n: any) => {
     const notif = n as { read?: boolean }
     return !notif.read
   }).length || 0
 
   return {
-    notifications: notifications || [],
+    notifications: notificationsData || [],
     unreadCount,
     loading,
     error,
     markAsRead,
-    refreshNotifications: refresh
+    refreshNotifications: refetchNotifications
   }
 }
 
 // Temperature monitoring
 export function useTemperatureMonitoring(batchId: string) {
-  const { 
-    data: logs, 
-    loading, 
-    error, 
-    create, 
-    refresh
-  } = useSupabaseCRUD<TemperatureLog>({
-    table: 'temperature_logs',
-    filter: [{ column: 'batch_id', operator: 'eq', value: batchId }],
-    orderBy: [{ column: 'recorded_at', ascending: true }]
+  const {
+    data: logsData,
+    loading,
+    error,
+    refetch: refetchLogs
+  } = useSupabaseQuery('temperature_logs' as any, {
+    filter: { batch_id: batchId },
+    orderBy: { column: 'recorded_at', ascending: true }
   })
+  const { create: createTemperatureLog } = useSupabaseCRUD('temperature_logs' as any)
 
   const addTemperatureReading = async (reading: Omit<TemperatureLog, 'id' | 'batch_id'>) => {
     try {
-      await create({
+      await createTemperatureLog({
         ...reading,
         batch_id: batchId
       })
@@ -568,26 +561,65 @@ export function useTemperatureMonitoring(batchId: string) {
   }
 
   return {
-    temperatureLogs: logs || [],
+    temperatureLogs: (logsData as TemperatureLog[] | undefined) ?? [],
     loading,
     error,
     addReading: addTemperatureReading,
-    refreshLogs: refresh
+    refreshLogs: refetchLogs
   }
 }
 
 // Currency formatting for production costs
-export function useProductionCurrency(currency?: string) {
-  const defaultCurrency = DEFAULT_CURRENCY
+export function useProductionCurrency(currency?: string | Currency) {
+  const resolvedCurrency: Currency = typeof currency === 'string'
+    ? currencies.find(curr => curr.code === currency) ?? DEFAULT_CURRENCY
+    : currency ?? DEFAULT_CURRENCY
 
   const formatCost = (amount: number, options?: {
     showSymbol?: boolean
     showCode?: boolean
-  }) => formatCurrency(amount, currency || defaultCurrency)
+  }) => formatCurrency(amount, resolvedCurrency)
 
   return {
-    currency: currency || defaultCurrency,
+    currency: resolvedCurrency,
     formatCost
+  }
+}
+
+interface ProductionTimelineContext {
+  priority?: BatchPriority
+  current_queue_length?: number
+  rush_order?: boolean
+}
+
+interface ProductionTimelineResult {
+  estimated_start: Date
+  estimated_completion: Date
+  total_time_minutes: number
+}
+
+function calculateProductionTimeline(
+  _recipeId: string,
+  batchSize: number,
+  config: typeof PRODUCTION_CONFIG,
+  context: ProductionTimelineContext = {}
+): ProductionTimelineResult {
+  const now = new Date()
+  const queueDelay = (context.current_queue_length ?? 0) * config.DEFAULT_COOK_TIME
+  const priorityMultiplier = context.priority === 'urgent' || context.rush_order ? 0.75 : 1
+
+  const prepTime = config.DEFAULT_PREP_TIME
+  const cookTime = config.DEFAULT_COOK_TIME * priorityMultiplier
+  const buffer = config.BUFFER_TIME
+
+  const totalTime = Math.round((prepTime + cookTime + buffer) * Math.max(batchSize / config.DEFAULT_BATCH_SIZE, 1))
+  const estimatedStart = new Date(now.getTime() + queueDelay * 60 * 1000)
+  const estimatedCompletion = new Date(estimatedStart.getTime() + totalTime * 60 * 1000)
+
+  return {
+    estimated_start: estimatedStart,
+    estimated_completion: estimatedCompletion,
+    total_time_minutes: totalTime
   }
 }
 

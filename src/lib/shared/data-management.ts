@@ -1,3 +1,5 @@
+'use client'
+
 // Shared data management and caching utilities
 
 import { useCallback, useEffect, useState } from 'react'
@@ -149,7 +151,7 @@ export function useDataSync<T>(
       setLastSynced(new Date())
       globalCache.set(`${key}_synced`, syncedData)
     } catch (err) {
-      logger.error('Sync failed', { _error, key })
+      logger.error('Sync failed', { err, key })
       throw err
     } finally {
       void setSyncing(false)

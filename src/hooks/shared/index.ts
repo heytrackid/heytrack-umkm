@@ -3,17 +3,24 @@
 import { useState, useCallback } from 'react'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { useToast } from '@/hooks/use-toast'
+import type { Database } from '@/types/supabase-generated'
 
 /**
  * Generic CRUD hook for common operations
  */
-export function useGenericCRUD<T extends { id: string }>(tableName: string) {
+type TablesMap = Database['public']['Tables']
+
+type TableRow<TTable extends keyof TablesMap> = TablesMap[TTable]['Row']
+type TableInsert<TTable extends keyof TablesMap> = TablesMap[TTable]['Insert']
+type TableUpdate<TTable extends keyof TablesMap> = TablesMap[TTable]['Update']
+
+export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable) {
   const { create: createRecord, update: updateRecord, delete: deleteRecord } = useSupabaseCRUD(tableName)
   const { toast } = useToast()
 
   const [loading, setLoading] = useState(false)
 
-  const create = useCallback(async (data: Omit<T, 'id'>) => {
+  const create = useCallback(async (data: TableInsert<TTable>) => {
     void setLoading(true)
     try {
       const result = await createRecord(data)
@@ -34,7 +41,7 @@ export function useGenericCRUD<T extends { id: string }>(tableName: string) {
     }
   }, [createRecord, toast])
 
-  const update = useCallback(async (id: string, data: Partial<T>) => {
+  const update = useCallback(async (id: string, data: TableUpdate<TTable>) => {
     void setLoading(true)
     try {
       const result = await updateRecord(id, data)
@@ -98,8 +105,8 @@ export function useConfirmDialog() {
     onConfirm: () => void | Promise<void>
   } | null>(null)
 
-  const openDialog = useCallback((config: typeof config) => {
-    void setConfig(config)
+  const openDialog = useCallback((dialogConfig: NonNullable<typeof config>) => {
+    void setConfig(dialogConfig)
     void setIsOpen(true)
   }, [])
 
@@ -150,7 +157,7 @@ export function useFormState<T extends Record<string, unknown>>(initialValues: T
   const [values, setValues] = useState<T>(initialValues)
   const [isDirty, setIsDirty] = useState(false)
 
-  const updateValue = useCallback((key: keyof T, value: any) => {
+  const updateValue = useCallback(<K extends keyof T>(key: K, value: T[K]) => {
     setValues(prev => ({ ...prev, [key]: value }))
     void setIsDirty(true)
   }, [])
@@ -294,7 +301,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
     } catch (err) {
-      // Storage _error handled silently
+      // Storage error handled silently
     }
   }, [key, value])
 
@@ -305,7 +312,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
         window.localStorage.removeItem(key)
       }
     } catch (err) {
-      // Storage _error handled silently
+      // Storage error handled silently
     }
   }, [key, defaultValue])
 

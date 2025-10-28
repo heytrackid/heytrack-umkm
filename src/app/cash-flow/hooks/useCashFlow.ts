@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useLoading } from '@/hooks/loading/useLoading'
 
 import { apiLogger } from '@/lib/logger'
 // Types and constants embedded in hook file for now
@@ -43,10 +42,10 @@ export interface ChartDataPoint {
 }
 
 // Constants embedded in hook
-const LOADING_KEYS = {
-  LOAD_CASHFLOW: 'loadCashFlow',
-  SAVE_TRANSACTION: 'saveTransaction'
-} as const
+// const LOADING_KEYS = {
+//   LOAD_CASHFLOW: 'loadCashFlow',
+//   SAVE_TRANSACTION: 'saveTransaction'
+// } as const
 
 const incomeCategories = [
   'Penjualan Produk',
@@ -221,7 +220,7 @@ export function useCashFlow(): UseCashFlowReturn {
     description: '',
     category: '',
     amount: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0] || ''
   })
 
   // Fetch cash flow data
@@ -309,7 +308,7 @@ export function useCashFlow(): UseCashFlowReturn {
         description: '',
         category: '',
         amount: '',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0] || ''
       })
       void setIsAddDialogOpen(false)
 

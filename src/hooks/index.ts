@@ -41,16 +41,16 @@ export { useCurrency } from './useCurrency'
 export { useRoutePreloading } from './useRoutePreloading'
 
 // API Hooks
-export { useDashboard } from './api/useDashboard'
+export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDashboard'
 // export { useHPPAlerts } from './api/useHPPAlerts' // TODO: Implement
 // export { useHPPComparison } from './api/useHPPComparison' // TODO: Implement
 // export { useHPPExport } from './api/useHPPExport' // TODO: Implement
 // export { useHPPSnapshots } from './api/useHPPSnapshots' // TODO: Implement
 
 // HPP Hooks
-export { useHppOverview } from './useHppOverview'
-export { useInfiniteHppAlerts } from './useInfiniteHppAlerts'
-export { useHppWorker } from './useHppWorker'
+export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
+export { useInfiniteHppAlerts } from '@/modules/hpp/hooks/useInfiniteHppAlerts'
+export { useHppWorker } from '@/modules/hpp/hooks/useHppWorker'
 
 // Inventory Hooks
 export { useInventoryAlerts, useIngredientStockStatus } from './useInventoryAlerts'

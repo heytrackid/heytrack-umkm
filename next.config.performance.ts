@@ -91,6 +91,16 @@ export const performanceConfig: Partial<NextConfig> = {
 
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // Development optimizations for better HMR
+    if (dev) {
+      // Ensure module IDs are stable across HMR updates
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'named',
+        chunkIds: 'named'
+      }
+    }
+
     // Production optimizations
     if (!dev && !isServer) {
       // Enable tree shaking
@@ -128,6 +138,13 @@ export const performanceConfig: Partial<NextConfig> = {
             test: /[\\/]components[\\/]ui[\\/]/,
             chunks: 'all',
             priority: 30
+          },
+          // Sidebar components chunk (for better HMR)
+          sidebar: {
+            name: 'sidebar',
+            test: /[\\/]components[\\/]layout[\\/]sidebar[\\/]/,
+            chunks: 'all',
+            priority: 35
           },
           // Recharts chunk (heavy library)
           recharts: {

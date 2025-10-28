@@ -6,7 +6,7 @@
 
 
 import type { ProductionBatch } from './types'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import { productionLogger } from '@/lib/logger'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -67,7 +67,7 @@ export class ProductionServices {
       productionLogger.info({ batchId, recipeId: batch.recipe_id, quantity: batch.quantity }, 'Production batch scheduled successfully')
       return newBatch
     } catch (err) {
-      productionLogger._error({ _error, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
+      productionLogger.error({ err, recipeId: batch.recipe_id }, 'Error in scheduleProductionBatch')
       throw err
     }
   }
@@ -147,7 +147,7 @@ export class ProductionServices {
         requiredIngredients
       }
     } catch (err) {
-      productionLogger._error({ _error, recipeId, quantity }, 'Error in checkProductionFeasibility')
+      productionLogger.error({ err, recipeId, quantity }, 'Error in checkProductionFeasibility')
       return {
         feasible: false,
         insufficientIngredients: ['Error checking feasibility'],
@@ -199,7 +199,7 @@ export class ProductionServices {
 
       productionLogger.info({ recipeId, quantity }, 'Reserved ingredients for production batch')
     } catch (error) {
-      productionLogger._error({ error, recipeId, quantity }, 'Error in reserveIngredientsForProduction')
+      productionLogger.error({ error, recipeId, quantity }, 'Error in reserveIngredientsForProduction')
       throw error
     }
   }
@@ -210,7 +210,7 @@ export class ProductionServices {
       // For now, return empty array
       return []
     } catch (err) {
-      productionLogger._error({ err }, 'Error in getProductionQueue')
+      productionLogger.error({ err }, 'Error in getProductionQueue')
       return []
     }
   }
@@ -220,7 +220,7 @@ export class ProductionServices {
       // TODO: Implement when production_batches table is created
       productionLogger.info({ batchId, status }, 'Updating production batch status')
     } catch (err) {
-      productionLogger._error({ _error, batchId, status }, 'Error in updateBatchStatus')
+      productionLogger.error({ err, batchId, status }, 'Error in updateBatchStatus')
       throw err
     }
   }
@@ -230,7 +230,7 @@ export class ProductionServices {
       // TODO: Implement when production_batches table is created
       return []
     } catch (err) {
-      productionLogger._error({ err }, 'Error in getActiveBatches')
+      productionLogger.error({ err }, 'Error in getActiveBatches')
       return []
     }
   }
@@ -248,7 +248,7 @@ export class ProductionServices {
 
       productionLogger.info({ batchId }, 'Cancelling production batch')
     } catch (error) {
-      productionLogger._error({ error, batchId }, 'Error in cancelProductionBatch')
+      productionLogger.error({ error, batchId }, 'Error in cancelProductionBatch')
       throw error
     }
   }
@@ -302,7 +302,7 @@ export class ProductionServices {
         limitingFactor: limitingIngredient?.name || 'Unknown'
       }
     } catch (error) {
-      productionLogger._error({ error, recipeId }, 'Error in getProductionCapacity')
+      productionLogger.error({ error, recipeId }, 'Error in getProductionCapacity')
       return {
         maxBatchesPerDay: 0,
         estimatedProductionTime: 0,

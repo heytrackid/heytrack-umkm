@@ -24,21 +24,33 @@ import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
 // Lazy load heavy components
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton'), {
-  ssr: false
-})
+const ExcelExportButton = dynamic(
+  () => import(/* webpackChunkName: "excel-export-button" */ '@/components/export/ExcelExportButton'),
+  {
+    ssr: false
+  }
+)
 
-const SalesReport = dynamic(() => import('./SalesReport'), {
-  loading: () => <StatsCardSkeleton />
-})
+const SalesReport = dynamic(
+  () => import(/* webpackChunkName: "report-sales" */ './SalesReport'),
+  {
+    loading: () => <StatsCardSkeleton />
+  }
+)
 
-const InventoryReport = dynamic(() => import('./InventoryReport'), {
-  loading: () => <StatsCardSkeleton />
-})
+const InventoryReport = dynamic(
+  () => import(/* webpackChunkName: "report-inventory" */ './InventoryReport'),
+  {
+    loading: () => <StatsCardSkeleton />
+  }
+)
 
-const FinancialReport = dynamic(() => import('./FinancialReport'), {
-  loading: () => <StatsCardSkeleton />
-})
+const FinancialReport = dynamic(
+  () => import(/* webpackChunkName: "report-financial" */ './FinancialReport'),
+  {
+    loading: () => <StatsCardSkeleton />
+  }
+)
 
 interface ReportsLayoutProps {
   children?: ReactNode

@@ -1,6 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 import supabase from '@/utils/supabase'
-import type { Recipe } from '@/types'
+import type { Recipe } from '@/types/domain/recipes'
 
 /**
  * Service for calculating production time estimates for orders

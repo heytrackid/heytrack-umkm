@@ -3,7 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+import type { Tables } from '@/types/supabase-generated'
 
 interface SalesReportProps {
   dateRange: {
@@ -12,22 +13,36 @@ interface SalesReportProps {
   }
 }
 
+type Order = Tables<'orders'>
+
 export default function SalesReport({ dateRange }: SalesReportProps) {
   const { formatCurrency } = useCurrency()
-  const { data: orders } = useSupabaseCRUD('orders')
+  const { data: orders } = useSupabaseCRUD<'orders'>('orders')
 
   // Calculate sales report
-  const salesData = orders?.filter((order: any) => {
+  const salesData = (orders ?? []).filter((order): order is Order & { created_at: string } => {
+    if (!order.created_at) {return false}
     const orderDate = new Date(order.created_at).toISOString().split('T')[0]
     return orderDate >= dateRange.start && orderDate <= dateRange.end
-  }) || []
+  })
 
-  const salesStats = {
-    totalOrders: salesData.length,
-    totalRevenue: salesData.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0),
-    completedOrders: salesData.filter((o: any) => o.status === 'DELIVERED').length,
-    pendingOrders: salesData.filter((o: any) => o.status === 'PENDING' || o.status === 'CONFIRMED').length
-  }
+  const salesStats = salesData.reduce<{ totalOrders: number; totalRevenue: number; completedOrders: number; pendingOrders: number }>(
+    (stats, order) => {
+      stats.totalOrders += 1
+      stats.totalRevenue += order.total_amount ?? 0
+
+      if (order.status === 'DELIVERED') {
+        stats.completedOrders += 1
+      }
+
+      if (order.status === 'PENDING' || order.status === 'CONFIRMED') {
+        stats.pendingOrders += 1
+      }
+
+      return stats
+    },
+    { totalOrders: 0, totalRevenue: 0, completedOrders: 0, pendingOrders: 0 }
+  )
 
   return (
     <div className="space-y-4">
@@ -80,7 +95,7 @@ export default function SalesReport({ dateRange }: SalesReportProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {salesData.slice(0, 10).map((order: any) => (
+            {salesData.slice(0, 10).map((order) => (
               <div key={order.id} className="flex justify-between items-center p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">{order.order_no}</p>

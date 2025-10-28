@@ -4,9 +4,10 @@
  */
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
+import type { QueryKey } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
 
-interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T>, 'queryKey' | 'queryFn'> {
+interface OptimizedQueryOptions<T> extends Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'> {
   // Custom options
   enableCache?: boolean
   cacheTime?: number
@@ -34,7 +35,7 @@ export function useOptimizedQuery<T>(
   // Memoize query function
   const memoizedFn = useCallback(queryFn, [])
 
-  return useQuery({
+  return useQuery<T, Error, T, QueryKey>({
     queryKey: memoizedKey,
     queryFn: memoizedFn,
     gcTime: enableCache ? cacheTime : 0,
@@ -94,7 +95,7 @@ export function usePrefetchQuery<T>(
  */
 export function useOptimizedInfiniteQuery<T>(
   queryKey: string[],
-  queryFn: (page: number) => Promise<T>,
+  _queryFn: (page: number) => Promise<T>,
   options: {
     pageSize?: number
     enabled?: boolean

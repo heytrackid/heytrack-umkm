@@ -2,11 +2,10 @@ import { Suspense } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Search, Tags, AlertCircle } from 'lucide-react'
+import { Plus, Search, Tags } from 'lucide-react'
 import { CategoryTable } from './CategoryTable'
 import type {
   Category,
-  CategoryView,
   PageSize
 } from '../constants'
 

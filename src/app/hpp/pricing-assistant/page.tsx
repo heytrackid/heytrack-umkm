@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   Target,
   AlertTriangle,
   CheckCircle,
@@ -21,10 +20,16 @@ import {
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
-import { PageHeader } from '@/components/shared'
+import { PageHeader, SharedStatsCards } from '@/components/shared'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
+
+const pricingBreadcrumbs = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'HPP & Pricing', href: '/hpp' },
+  { label: 'AI Pricing Assistant' }
+]
 
 interface PricingRecommendation {
   recipeId: string
@@ -68,7 +73,7 @@ export default function PricingAssistantPage() {
           void setRecipes(data.recipes || [])
         }
       } catch (err: unknown) {
-        dbLogger.error({ err: error }, 'Failed to load recipes')
+        dbLogger.error({ err }, 'Failed to load recipes')
         toast({
           title: 'Error',
           description: 'Failed to load recipes',
@@ -115,7 +120,7 @@ export default function PricingAssistantPage() {
         throw new Error('Failed to generate recommendation')
       }
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to generate pricing recommendation')
+      dbLogger.error({ err }, 'Failed to generate pricing recommendation')
       toast({
         title: 'Error',
         description: 'Failed to generate pricing recommendation',
@@ -136,8 +141,8 @@ export default function PricingAssistantPage() {
   }
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) {return 'text-green-600'}
-    if (confidence >= 0.6) {return 'text-yellow-600'}
+    if (confidence >= 0.8) { return 'text-green-600' }
+    if (confidence >= 0.6) { return 'text-yellow-600' }
     return 'text-red-600'
   }
 
@@ -147,6 +152,37 @@ export default function PricingAssistantPage() {
         <PageHeader
           title="AI Pricing Assistant"
           description="Rekomendasi harga jual cerdas berdasarkan HPP, pasar, dan kompetitor"
+          breadcrumbs={pricingBreadcrumbs}
+        />
+        
+        {/* Stats Cards */}
+        <SharedStatsCards 
+          stats={[
+            {
+              title: "Total Recommendations",
+              value: "0",
+              subtitle: "Jumlah rekomendasi yang dihasilkan",
+              icon: <Lightbulb className="h-4 w-4" />
+            },
+            {
+              title: "Avg. Adjustment",
+              value: "0%",
+              subtitle: "Penyesuaian harga rata-rata",
+              icon: <TrendingUp className="h-4 w-4" />
+            },
+            {
+              title: "Market Insights",
+              value: "0",
+              subtitle: "Analisis pasar tersedia",
+              icon: <Target className="h-4 w-4" />
+            },
+            {
+              title: "Risk Assessment",
+              value: "-",
+              subtitle: "Tingkat risiko rekomendasi",
+              icon: <AlertTriangle className="h-4 w-4" />
+            }
+          ]}
         />
 
         {/* Pricing Calculator */}
@@ -274,7 +310,7 @@ export default function PricingAssistantPage() {
                     <span className="text-sm">Demand Level</span>
                     <Badge variant={
                       recommendation.marketFactors.demandLevel === 'high' ? 'default' :
-                      recommendation.marketFactors.demandLevel === 'medium' ? 'secondary' : 'outline'
+                        recommendation.marketFactors.demandLevel === 'medium' ? 'secondary' : 'outline'
                     }>
                       {recommendation.marketFactors.demandLevel}
                     </Badge>
@@ -284,7 +320,7 @@ export default function PricingAssistantPage() {
                     <span className="text-sm">Seasonality</span>
                     <Badge variant={
                       recommendation.marketFactors.seasonality === 'peak' ? 'default' :
-                      recommendation.marketFactors.seasonality === 'normal' ? 'secondary' : 'outline'
+                        recommendation.marketFactors.seasonality === 'normal' ? 'secondary' : 'outline'
                     }>
                       {recommendation.marketFactors.seasonality}
                     </Badge>

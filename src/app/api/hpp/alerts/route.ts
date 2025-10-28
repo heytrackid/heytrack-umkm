@@ -7,7 +7,7 @@ import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { HppAlertAgent } from '@/agents/automations/HppAlertAgent'
 
 // GET /api/hpp/alerts - Get HPP alerts with pagination and filtering
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(_request.url)
 
     // Validate query parameters
     const queryValidation = PaginationQuerySchema.safeParse({
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       const { data, error, count } = await query
 
       if (error) {
-        throw err
+        throw error
       }
 
       return {
@@ -156,8 +156,8 @@ export async function POST(request: NextRequest) {
 
     apiLogger.info({
       userId: user.id,
-      alertsCreated: result.data?.alertsCreated,
-      recipesChecked: result.data?.recipesChecked
+      alertsCreated: (result.data as { alertsCreated?: number })?.alertsCreated,
+      recipesChecked: (result.data as { recipesChecked?: number })?.recipesChecked
     }, 'Alert detection executed successfully')
 
     return NextResponse.json(result)
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
 }
 
 // PATCH /api/hpp/alerts/[id]/read - Mark alert as read
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()

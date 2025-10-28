@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 // import { automationEngine } from '@/lib/automation-engine'
 import { uiLogger } from '@/lib/logger'
-import type { Ingredient } from '@/types'
+import type { Ingredient } from '@/types/domain/inventory'
 import {
   AlertCircle,
   AlertTriangle,
@@ -36,7 +36,7 @@ interface SmartNotification {
   timestamp: Date
   read: boolean
   actionUrl?: string
-  data?: any
+  data?: Record<string, unknown>
 }
 
 interface SmartNotificationCenterProps {
@@ -69,7 +69,7 @@ export default function SmartNotificationCenter({
         //   orders,
         //   financialMetrics
         // )
-        
+
         // Mock smart notifications for now
         const mockNotifications = [
           {
@@ -176,13 +176,13 @@ export default function SmartNotificationCenter({
   }, [ingredients, orders, financialMetrics, soundEnabled])
 
   useEffect(() => {
-    if (!autoRefresh) {return}
+    if (!autoRefresh) { return }
 
     const interval = setInterval(() => {
       // Use a fresh timestamp for interval-based updates
-      setNotifications(prev => 
+      setNotifications(prev =>
         // Just update timestamps for existing notifications to show they're fresh
-         prev.map(notif => ({ ...notif, timestamp: new Date() }))
+        prev.map(notif => ({ ...notif, timestamp: new Date() }))
       )
     }, 30000) // Refresh every 30 seconds
 
@@ -190,7 +190,7 @@ export default function SmartNotificationCenter({
   }, [autoRefresh])
 
   const playNotificationSound = (type: 'critical' | 'warning' | 'info') => {
-    if (!soundEnabled) {return}
+    if (!soundEnabled) { return }
 
     // In a real app, you'd have audio files for different notification types
     const audio = new Audio('/notification-sound.mp3')

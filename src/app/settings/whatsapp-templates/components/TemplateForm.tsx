@@ -65,7 +65,7 @@ export default function TemplateForm({
     }
   }, [editingTemplate])
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = <K extends keyof TemplateFormData>(field: K, value: TemplateFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 

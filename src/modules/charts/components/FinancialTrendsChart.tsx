@@ -6,59 +6,77 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from"@/components/ui/chart"
+} from "@/components/ui/chart"
 import { formatCurrency } from '@/lib/currency'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-})
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
-const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false })
+const LineChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+  }
+)
+const Line = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  { ssr: false }
+)
+const XAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  { ssr: false }
+)
+const YAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  { ssr: false }
+)
+const CartesianGrid = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  { ssr: false }
+)
+const Legend = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Legend),
+  { ssr: false }
+)
 
 const financialData = [
   {
-    month:"Jan",
+    month: "Jan",
     revenue: 12000,
     expenses: 8000,
     profit: 4000,
     hpp: 6000,
   },
   {
-    month:"Feb", 
+    month: "Feb",
     revenue: 15000,
     expenses: 9500,
     profit: 5500,
     hpp: 7500,
   },
   {
-    month:"Mar",
+    month: "Mar",
     revenue: 18000,
     expenses: 11000,
     profit: 7000,
     hpp: 8800,
   },
   {
-    month:"Apr",
+    month: "Apr",
     revenue: 16500,
     expenses: 10200,
     profit: 6300,
     hpp: 8100,
   },
   {
-    month:"May",
+    month: "May",
     revenue: 20000,
     expenses: 12000,
     profit: 8000,
     hpp: 9600,
   },
   {
-    month:"Jun",
+    month: "Jun",
     revenue: 22000,
     expenses: 13000,
     profit: 9000,
@@ -68,24 +86,24 @@ const financialData = [
 
 const chartConfig = {
   revenue: {
-    label:"Pendapatan",
-    color:"#22c55e",
+    label: "Pendapatan",
+    color: "#22c55e",
   },
   expenses: {
-    label:"Pengeluaran", 
-    color:"#ef4444",
+    label: "Pengeluaran",
+    color: "#ef4444",
   },
   profit: {
-    label:"Keuntungan",
-    color:"#3b82f6",
+    label: "Keuntungan",
+    color: "#3b82f6",
   },
   hpp: {
-    label:"HPP",
-    color:"#f59e0b",
+    label: "HPP",
+    color: "#f59e0b",
   },
 }
 
-export default function FinancialTrendsChart(props: any) {
+export default function FinancialTrendsChart(_props?: Record<string, unknown>) {
   return (
     <ChartContainer config={chartConfig}>
       <LineChart
@@ -110,11 +128,11 @@ export default function FinancialTrendsChart(props: any) {
           tickMargin={8}
           tickFormatter={(value) => formatCurrency(value)}
         />
-        <ChartTooltip 
-          cursor={false} 
-          content={<ChartTooltipContent 
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent
             formatter={(value) => [formatCurrency(Number(value)), null]}
-          />} 
+          />}
         />
         <Line
           dataKey="revenue"
@@ -122,13 +140,13 @@ export default function FinancialTrendsChart(props: any) {
           stroke="#22c55e"
           strokeWidth={3}
           dot={{
-            fill:"#22c55e",
+            fill: "#22c55e",
             strokeWidth: 2,
             r: 4,
           }}
           activeDot={{
             r: 6,
-            stroke:"#22c55e",
+            stroke: "#22c55e",
             strokeWidth: 2,
           }}
         />
@@ -138,13 +156,13 @@ export default function FinancialTrendsChart(props: any) {
           stroke="#ef4444"
           strokeWidth={3}
           dot={{
-            fill:"#ef4444",
+            fill: "#ef4444",
             strokeWidth: 2,
             r: 4,
           }}
           activeDot={{
             r: 6,
-            stroke:"#ef4444",
+            stroke: "#ef4444",
             strokeWidth: 2,
           }}
         />
@@ -154,13 +172,13 @@ export default function FinancialTrendsChart(props: any) {
           stroke="#3b82f6"
           strokeWidth={3}
           dot={{
-            fill:"#3b82f6",
+            fill: "#3b82f6",
             strokeWidth: 2,
             r: 4,
           }}
           activeDot={{
             r: 6,
-            stroke:"#3b82f6",
+            stroke: "#3b82f6",
             strokeWidth: 2,
           }}
         />
@@ -172,7 +190,7 @@ export default function FinancialTrendsChart(props: any) {
           strokeDasharray="5 5"
           dot={false}
         />
-        <Legend 
+        <Legend
           content={({ payload }) => (
             <div className="flex flex-wrap justify-center gap-6 pt-6">
               {payload?.map((entry, index: number) => (
@@ -182,10 +200,10 @@ export default function FinancialTrendsChart(props: any) {
                     style={{ backgroundColor: entry.color }}
                   />
                   <span className="text-sm font-medium text-foreground">
-                    {entry.value === 'revenue' ? 'Pendapatan' : 
-                     entry.value === 'expenses' ? 'Pengeluaran' :
-                     entry.value === 'profit' ? 'Keuntungan' :
-                     entry.value === 'hpp' ? 'HPP' : entry.value}
+                    {entry.value === 'revenue' ? 'Pendapatan' :
+                      entry.value === 'expenses' ? 'Pengeluaran' :
+                        entry.value === 'profit' ? 'Keuntungan' :
+                          entry.value === 'hpp' ? 'HPP' : entry.value}
                   </span>
                 </div>
               ))}

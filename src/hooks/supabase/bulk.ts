@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import type { BulkUpdateItem } from './types'
 
 type Tables = Database['public']['Tables']
@@ -17,8 +17,8 @@ export class useSupabaseBulk {
     const supabase = createClient()
 
     const { data, error } = await supabase
-      .from(table as any)
-      .insert(records as any)
+      .from(table)
+      .insert(records)
       .select('*')
 
     if (error) {
@@ -37,8 +37,8 @@ export class useSupabaseBulk {
 
     for (const update of updates) {
       const { data, error } = await supabase
-        .from(table as any)
-        .update(update.data as any)
+        .from(table)
+        .update(update.data)
         .eq('id', update.id)
         .select('*')
         .single()
@@ -60,7 +60,7 @@ export class useSupabaseBulk {
     const supabase = createClient()
 
     const { error } = await supabase
-      .from(table as any)
+      .from(table)
       .delete()
       .in('id', ids)
 
@@ -79,8 +79,8 @@ export class useSupabaseBulk {
     const supabase = createClient()
 
     const { data, error } = await supabase
-      .from(table as any)
-      .upsert(records as any, { onConflict: conflictColumns.join(',') })
+      .from(table)
+      .upsert(records, { onConflict: conflictColumns.join(',') })
       .select('*')
 
     if (error) {

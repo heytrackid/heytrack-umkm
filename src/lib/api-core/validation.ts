@@ -21,7 +21,7 @@ export function validateRequestData<T>(
     const validatedData = schema.parse(data)
     return { success: true, data: validatedData }
   } catch (err) {
-    const errors = formatValidationErrors(_error)
+    const errors = formatValidationErrors(err)
     return { success: false, errors }
   }
 }
@@ -43,7 +43,7 @@ export async function validateRequestOrRespond<T>(
 
     return result.data!
   } catch (err) {
-    apiLogger.error({ err }, 'Request validation _error')
+    apiLogger.error({ err }, 'Request validation error')
     return createErrorResponse('Invalid request body', 400)
   }
 }

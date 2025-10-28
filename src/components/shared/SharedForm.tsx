@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useForm, UseFormReturn } from 'react-hook-form'
+import { useForm, type UseFormReturn, type Path, type DefaultValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -82,7 +82,7 @@ export const SharedForm = <T extends Record<string, unknown>>({
 }: SharedFormProps<T>) => {
   const form = useForm<T>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as DefaultValues<T> | undefined,
   })
 
   const handleSubmit = async (data: T) => {
@@ -129,7 +129,7 @@ export const SharedForm = <T extends Record<string, unknown>>({
                       label={field.label}
                       name={field.name}
                       type={field.type}
-                      {...form.register(field.name as any)}
+                      {...form.register(field.name as Path<T>)}
                       error={form.formState.errors[field.name as keyof typeof form.formState.errors]?.message}
                       required={field.required}
                       placeholder={field.placeholder}
@@ -172,7 +172,7 @@ export function useSharedForm<T extends Record<string, unknown>>(
 ) {
   const form = useForm<T>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as DefaultValues<T> | undefined,
   })
 
   return {

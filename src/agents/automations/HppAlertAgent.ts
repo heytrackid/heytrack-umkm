@@ -12,6 +12,7 @@ import supabase from '@/utils/supabase'
 interface AlertDetectionTaskData {
   threshold?: number // percentage threshold for alerts (default 10%)
   recipeIds?: string[] // optional, check all if not specified
+  [key: string]: unknown // Index signature to make it compatible with Record<string, unknown>
 }
 
 interface AlertResult {
@@ -23,6 +24,7 @@ interface AlertResult {
     currentHpp: number
     previousHpp: number
   }>
+  [key: string]: unknown // Index signature to make it compatible with Record<string, unknown>
 }
 
 /**
@@ -38,7 +40,7 @@ export class HppAlertAgent {
   async executeAlertDetection(data: AlertDetectionTaskData = {}): Promise<AgentResult> {
     const correlationId = `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const context = createAgentContext(correlationId)
-    const logger = createAgentLogger('HppAlertAgent', correlationId)
+    // const logger = createAgentLogger('HppAlertAgent', correlationId)
 
     const task: AgentTask = {
       id: `hpp-alert-detection-${Date.now()}`,
@@ -133,7 +135,7 @@ export class HppAlertAgent {
         .select('snapshot_date, hpp_value')
         .eq('recipe_id', recipeId)
         .order('snapshot_date', { ascending: false })
-        .limit(2)
+        .limit(2) as { data: Array<{ snapshot_date: string; hpp_value: number }> | null, error: Error | null }
 
       if (error) {
         throw new Error(`Failed to fetch snapshots: ${error.message}`)
@@ -144,7 +146,7 @@ export class HppAlertAgent {
         return null
       }
 
-      const [latest, previous] = snapshots
+      const [latest, previous] = snapshots as [{ snapshot_date: string; hpp_value: number }, { snapshot_date: string; hpp_value: number }]
       if (!latest || !previous) {
         return null // Not enough snapshots for comparison
       }
@@ -205,10 +207,19 @@ export class HppAlertAgent {
         .eq('id', change.recipeId)
         .single()
 
-      const recipeName = recipe?.name || `Recipe ${change.recipeId}`
+      const recipeName = recipe && 'name' in recipe ? (recipe as { name: string }).name : `Recipe ${change.recipeId}`
 
       // Create alert
-      const alertData = {
+      const alertData: {
+        recipe_id: string
+        alert_type: 'COST_INCREASE' | 'COST_DECREASE'
+        threshold: number
+        current_value: number
+        previous_value: number
+        change_percentage: number
+        message: string
+        is_read: boolean
+      } = {
         recipe_id: change.recipeId,
         alert_type: change.changePercentage > 0 ? 'COST_INCREASE' : 'COST_DECREASE',
         threshold,
@@ -221,7 +232,7 @@ export class HppAlertAgent {
 
       const { error: insertError } = await supabase
         .from('hpp_alerts')
-        .insert(alertData)
+        .insert([alertData])
 
       if (insertError) {
         throw new Error(`Failed to create alert: ${insertError.message}`)
@@ -251,7 +262,7 @@ export class HppAlertAgent {
         throw new Error(`Failed to fetch active recipes: ${error.message}`)
       }
 
-      return data?.map(r => r.id) || []
+      return data?.map((r: { id: string }) => r.id) || []
 
     } catch (error: unknown) {
       this.logger.error({ error }, 'Failed to get active recipe IDs')
@@ -262,7 +273,7 @@ export class HppAlertAgent {
   /**
    * Get unread alerts for a user
    */
-  async getUnreadAlerts(): Promise<any[]> {
+  async getUnreadAlerts(): Promise<Array<{ id: string; message: string; alert_type: string; severity: string; recipe_id: string | null; created_at: string }>> {
     try {
       const { data, error } = await supabase
         .from('hpp_alerts')
@@ -294,7 +305,7 @@ export class HppAlertAgent {
     try {
       const { error } = await supabase
         .from('hpp_alerts')
-        .update({ is_read: true })
+        .update([{ is_read: true }])
         .eq('id', alertId)
 
       if (error) {

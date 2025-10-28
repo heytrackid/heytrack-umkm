@@ -32,7 +32,7 @@ export interface ScheduledProductionItem {
     estimatedDuration: number
     batchCount: number
   }
-  ingredients: any // AvailabilityCheck
+  ingredients: { available: boolean; missing: string[] } // AvailabilityCheck
   recommendations: string[]
   scheduledStart: Date
   scheduledEnd: Date

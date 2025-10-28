@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 
-import { apiLogger } from '@/lib/logger'
+// Removed unused import: apiLogger
 
 /**
  * Smart preloading based on user behavior patterns

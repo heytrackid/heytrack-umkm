@@ -6,7 +6,7 @@
 'use client'
 
 import { useVirtualScroll } from '@/lib/performance-optimized'
-import { type ReactNode, type React, memo } from 'react'
+import { type ReactNode, memo } from 'react'
 
 interface VirtualizedListProps<T> {
   items: T[]

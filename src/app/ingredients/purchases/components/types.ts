@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 // Ingredient Purchases Types
 // Type definitions for ingredient purchase management
 
@@ -32,7 +31,6 @@ export interface PurchaseFormData {
 export interface PurchaseStats {
   title: string
   value: string | number
-  icon: string | ReactNode
   color: string
   bgColor: string
   description: string

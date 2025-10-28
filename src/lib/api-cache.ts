@@ -47,12 +47,18 @@ export function createCachedResponse<T>(
 /**
  * In-memory cache for API responses
  */
+interface CacheEntry {
+  data: unknown
+  timestamp: number
+  ttl: number
+}
+
 class MemoryCache {
-  private cache = new Map<string, { data: any; timestamp: number }>()
+  private cache = new Map<string, CacheEntry>()
   private maxSize = 100
   private ttl = 5 * 60 * 1000 // 5 minutes
 
-  set(key: string, data: any): void {
+  set(key: string, data: unknown, ttl = this.ttl): void {
     // Limit cache size
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value
@@ -61,11 +67,12 @@ class MemoryCache {
 
     this.cache.set(key, {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      ttl
     })
   }
 
-  get(key: string): any | null {
+  get<T>(key: string): T | null {
     const item = this.cache.get(key)
 
     if (!item) {
@@ -73,12 +80,12 @@ class MemoryCache {
     }
 
     // Check if expired
-    if (Date.now() - item.timestamp > this.ttl) {
+    if (Date.now() - item.timestamp > item.ttl) {
       this.cache.delete(key)
       return null
     }
 
-    return item.data
+    return item.data as T
   }
 
   clear(): void {
@@ -94,12 +101,16 @@ class MemoryCache {
     if (!item) {return false}
 
     // Check if expired
-    if (Date.now() - item.timestamp > this.ttl) {
+    if (Date.now() - item.timestamp > item.ttl) {
       this.cache.delete(key)
       return false
     }
 
     return true
+  }
+
+  keys(): string[] {
+    return Array.from(this.cache.keys())
   }
 }
 
@@ -110,7 +121,7 @@ export const apiCache = new MemoryCache()
  */
 export function generateCacheKey(
   endpoint: string,
-  params?: Record<string, any>
+  params?: Record<string, string | number | boolean | null | undefined>
 ): string {
   if (!params) {return endpoint}
 
@@ -131,14 +142,14 @@ export async function cachedFetch<T>(
   ttl?: number
 ): Promise<T> {
   // Check cache first
-  const cached = apiCache.get(key)
+  const cached = apiCache.get<T>(key)
   if (cached) {
-    return cached as T
+    return cached
   }
 
   // Fetch and cache
   const data = await fetcher()
-  apiCache.set(key, data)
+  apiCache.set(key, data, ttl ?? undefined)
 
   return data
 }
@@ -149,8 +160,7 @@ export async function cachedFetch<T>(
 export const cacheInvalidation = {
   // Invalidate all caches for a resource
   invalidateResource(resource: string): void {
-    const keys = Array.from((apiCache as any).cache.keys())
-    keys.forEach((key: string) => {
+    apiCache.keys().forEach((key) => {
       if (key.includes(resource)) {
         apiCache.delete(key)
       }
@@ -159,8 +169,7 @@ export const cacheInvalidation = {
 
   // Invalidate specific pattern
   invalidatePattern(pattern: RegExp): void {
-    const keys = Array.from((apiCache as any).cache.keys())
-    keys.forEach((key: string) => {
+    apiCache.keys().forEach((key) => {
       if (pattern.test(key)) {
         apiCache.delete(key)
       }

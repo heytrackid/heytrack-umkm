@@ -14,7 +14,7 @@ const triggerWorkflow = async (_workflow: string, _context: unknown) => {
 }
 
 import type { Database } from '@/types/supabase-generated'
-import type { StockTransactionsTable } from '@/types/inventory'
+import type { StockTransactionsTable } from '@/types/domain/inventory'
 
 // Workflow types
 export interface WorkflowResult {
@@ -398,8 +398,8 @@ export class OrderWorkflowHandlers {
       .single()
 
     if (customer) {
-      const newTotalOrders = (Number((customer as any).total_orders) || 0) + 1
-      const newTotalSpent = (Number((customer as any).total_spent) || 0) + Number(order.total_amount)
+      const newTotalOrders = (Number((customer).total_orders) || 0) + 1
+      const newTotalSpent = (Number((customer).total_spent) || 0) + Number(order.total_amount)
       const newAverageOrderValue = newTotalSpent / newTotalOrders
 
       await (supabase as any)

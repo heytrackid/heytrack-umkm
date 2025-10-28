@@ -9,18 +9,54 @@ import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users, Cale
 import { useCurrency } from '@/hooks/useCurrency';
 
 // Dynamically import Recharts components to reduce bundle size
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false })
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
-const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false })
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false })
-const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false })
-const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false })
-const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false })
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false })
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
+const BarChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.BarChart),
+  { ssr: false }
+)
+const Bar = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Bar),
+  { ssr: false }
+)
+const XAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  { ssr: false }
+)
+const YAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  { ssr: false }
+)
+const CartesianGrid = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  { ssr: false }
+)
+const Tooltip = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Tooltip),
+  { ssr: false }
+)
+const ResponsiveContainer = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  { ssr: false }
+)
+const PieChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.PieChart),
+  { ssr: false }
+)
+const Pie = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Pie),
+  { ssr: false }
+)
+const Cell = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Cell),
+  { ssr: false }
+)
+const LineChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  { ssr: false }
+)
+const Line = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  { ssr: false }
+)
 
 // Type definitions for data structures
 interface ChartEntry {
@@ -112,7 +148,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
     ];
 
     const marginStatus = data.profitMargin > 25 ? 'success' : data.profitMargin > 15 ? 'warning' : 'danger';
-    
+
     return (
       <Card className="w-full">
         <CardHeader className="pb-3">
@@ -135,15 +171,14 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
               </div>
               <div className="text-center col-span-2 md:col-span-1">
                 <div className="flex items-center justify-center space-x-2">
-                  <div className={`text-2xl font-bold ${
-                    marginStatus === 'success' ? 'text-green-600' :
-                    marginStatus === 'warning' ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
+                  <div className={`text-2xl font-bold ${marginStatus === 'success' ? 'text-green-600' :
+                      marginStatus === 'warning' ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
                     {data.profitMargin.toFixed(1)}%
                   </div>
                   {marginStatus === 'success' ? <TrendingUp className="h-5 w-5 text-green-600" /> :
-                   marginStatus === 'warning' ? <AlertCircle className="h-5 w-5 text-yellow-600" /> :
-                   <TrendingDown className="h-5 w-5 text-red-600" />}
+                    marginStatus === 'warning' ? <AlertCircle className="h-5 w-5 text-yellow-600" /> :
+                      <TrendingDown className="h-5 w-5 text-red-600" />}
                 </div>
                 <div className="text-sm text-gray-500">Profit Margin</div>
               </div>
@@ -174,8 +209,8 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
                 <span>Profit Margin Status</span>
                 <span className="font-medium">{data.profitMargin.toFixed(1)}% / 30% target</span>
               </div>
-              <Progress 
-                value={Math.min(data.profitMargin, 30) / 30 * 100} 
+              <Progress
+                value={Math.min(data.profitMargin, 30) / 30 * 100}
                 className="h-2"
               />
             </div>
@@ -187,67 +222,67 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
 
   // Inventory Status Visualization
   const InventoryChart = ({ data }: { data: InventoryData }) => (
-      <Card className="w-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center space-x-2">
-            <Package className="h-5 w-5 text-blue-600" />
-            <span>Inventory Status</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Critical items alert */}
-            {data.criticalItems.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <span className="font-medium text-red-800">
-                    {data.criticalItems.length} Critical Items
-                  </span>
-                </div>
-                <div className="mt-2 space-y-1">
-                  {data.criticalItems.slice(0, 3).map((item: InventoryItem, index: number) => (
-                    <div key={index} className="text-sm text-red-700">
-                      • {item.name}: {item.current_stock} {item.unit} remaining
-                    </div>
-                  ))}
-                  {data.criticalItems.length > 3 && (
-                    <div className="text-sm text-red-600 font-medium">
-                     {data.criticalItems.length - 3} more items
-                    </div>
-                  )}
-                </div>
+    <Card className="w-full">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2">
+          <Package className="h-5 w-5 text-blue-600" />
+          <span>Inventory Status</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {/* Critical items alert */}
+          {data.criticalItems.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <span className="font-medium text-red-800">
+                  {data.criticalItems.length} Critical Items
+                </span>
               </div>
-            )}
-
-            {/* Inventory summary */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{data.alerts.length}</div>
-                <div className="text-sm text-gray-600">Low Stock Items</div>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{data.criticalItems.length}</div>
-                <div className="text-sm text-gray-600">Critical Items</div>
-              </div>
-            </div>
-
-            {/* Recommendations */}
-            {data.recommendations.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="font-medium text-gray-900">Recommendations:</h4>
-                {data.recommendations.map((rec: string, index: number) => (
-                  <div key={index} className="flex items-start space-x-2">
-                    <Badge variant="outline" className="mt-0.5">•</Badge>
-                    <span className="text-sm text-gray-700">{rec}</span>
+              <div className="mt-2 space-y-1">
+                {data.criticalItems.slice(0, 3).map((item: InventoryItem, index: number) => (
+                  <div key={index} className="text-sm text-red-700">
+                    • {item.name}: {item.current_stock} {item.unit} remaining
                   </div>
                 ))}
+                {data.criticalItems.length > 3 && (
+                  <div className="text-sm text-red-600 font-medium">
+                    {data.criticalItems.length - 3} more items
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Inventory summary */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{data.alerts.length}</div>
+              <div className="text-sm text-gray-600">Low Stock Items</div>
+            </div>
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">{data.criticalItems.length}</div>
+              <div className="text-sm text-gray-600">Critical Items</div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    );
+
+          {/* Recommendations */}
+          {data.recommendations.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Recommendations:</h4>
+              {data.recommendations.map((rec: string, index: number) => (
+                <div key={index} className="flex items-start space-x-2">
+                  <Badge variant="outline" className="mt-0.5">•</Badge>
+                  <span className="text-sm text-gray-700">{rec}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   // Customer Analysis Visualization
   const CustomerChart = ({ data }: { data: CustomerData }) => {
@@ -330,7 +365,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
   // Product Analysis Visualization
   const ProductChart = ({ data }: { data: ProductData }) => {
     const chartData = data.topRecipes.slice(0, 5).map((recipe: Recipe) => ({
-      name: recipe.name.length > 10 ? `${recipe.name.substring(0, 10)  }...` : recipe.name,
+      name: recipe.name.length > 10 ? `${recipe.name.substring(0, 10)}...` : recipe.name,
       revenue: recipe.total_revenue || 0,
       count: recipe.times_made || 0
     }));
@@ -416,27 +451,27 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
 
   // Type guards for runtime validation
   const isFinancialData = (data: unknown): data is FinancialData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'revenue' in data && 'costs' in data && 'profitMargin' in data;
   };
 
   const isInventoryData = (data: unknown): data is InventoryData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'criticalItems' in data && 'alerts' in data && Array.isArray((data as InventoryData).criticalItems);
   };
 
   const isCustomerData = (data: unknown): data is CustomerData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'topCustomers' in data && 'summary' in data && Array.isArray((data as CustomerData).topCustomers);
   };
 
   const isProductData = (data: unknown): data is ProductData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'topRecipes' in data && 'recommendations' in data && Array.isArray((data as ProductData).topRecipes);
   };
 
   const isAnalysisData = (data: unknown): data is AnalysisData => {
-    if (!data || typeof data !== 'object') {return false;}
+    if (!data || typeof data !== 'object') { return false; }
     return 'analysis' in data && typeof (data as AnalysisData).analysis === 'object';
   };
 

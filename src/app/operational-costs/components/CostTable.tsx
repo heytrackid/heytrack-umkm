@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
+import {
   Edit2,
   Trash2,
   MoreHorizontal,
@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
-import type { OperationalCostsTable } from '@/types'
+import type { OperationalCostsTable } from '@/types/domain/operational-costs'
 
 interface CostTableProps {
   costs: Array<OperationalCostsTable['Row']>
@@ -61,27 +61,27 @@ export default function CostTable({
   formatCurrency,
   isMobile = false
 }: CostTableProps) {
-  
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
-  
+
   // Calculate pagination
   const totalItems = costs.length
   const totalPages = Math.ceil(totalItems / pageSize)
-  
+
   // Get paginated data
   const paginatedCosts = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
     const endIndex = startIndex + pageSize
     return costs.slice(startIndex, endIndex)
   }, [costs, currentPage, pageSize])
-  
+
   // Reset to page 1 when costs change
   useMemo(() => {
     void setCurrentPage(1)
   }, [costs.length])
-  
+
   if (costs.length === 0) {
     return (
       <Card>
@@ -118,7 +118,7 @@ export default function CostTable({
               {paginatedCosts.map((cost) => (
                 <TableRow key={cost.id}>
                   <TableCell>
-                    {format(new Date(cost.date), 'MMM dd, yyyy')}
+                    {cost.date ? format(new Date(cost.date), 'MMM dd, yyyy') : '-'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ export default function CostTable({
                             <Edit2 className="h-4 w-4 mr-2" />
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-red-600"
                             onClick={() => onDelete(cost)}
                           >
@@ -167,7 +167,7 @@ export default function CostTable({
               ))}
             </TableBody>
           </Table>
-          
+
           {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-4 py-4 border-t bg-muted/30">
@@ -176,7 +176,7 @@ export default function CostTable({
                   Menampilkan {((currentPage - 1) * pageSize) + 1} - {Math.min(currentPage * pageSize, totalItems)} dari {totalItems} data
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-6">
                 {/* Page Size Selector */}
                 <div className="flex items-center gap-2">
@@ -196,7 +196,7 @@ export default function CostTable({
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Page Navigation */}
                 <div className="flex items-center gap-2">
                   <Button
@@ -207,11 +207,11 @@ export default function CostTable({
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  
+
                   <span className="text-sm font-medium">
                     {currentPage} / {totalPages}
                   </span>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"

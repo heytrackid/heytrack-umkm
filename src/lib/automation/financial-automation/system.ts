@@ -68,7 +68,7 @@ export class FinancialAutomation {
   projectFinancialPerformance(
     historicalData: HistoricalData[],
     projectionMonths = 12
-  ): any {
+  ): { projections: Array<{ month: string; revenue: number; expenses: number; profit: number }>; trends: Record<string, number> } {
     return ProjectionEngine.projectFinancialPerformance(historicalData, projectionMonths)
   }
 

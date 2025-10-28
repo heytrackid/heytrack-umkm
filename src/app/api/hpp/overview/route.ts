@@ -4,7 +4,7 @@ import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys } from '@/lib/cache'
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient()
 

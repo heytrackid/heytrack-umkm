@@ -6,7 +6,7 @@ import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons
 import { DataGridSkeleton, SearchFormSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { toast } from '@/hooks/use-toast'
-import { lazy, Suspense } from 'react'
+import { Fragment, lazy, Suspense } from 'react'
 
 // Lazy load extracted components for better performance and code splitting
 const CostFormView = lazy(() => import('./components/CostFormView'))
@@ -15,22 +15,22 @@ const BulkActions = lazy(() => import('./components/BulkActions'))
 const CostListTable = lazy(() => import('./components/CostListTable'))
 
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { useResponsive } from '@/hooks/useResponsive'
 import {
-    Plus,
-    Receipt,
-    Search,
-    Zap
+  Plus,
+  Receipt,
+  Search,
+  Zap
 } from 'lucide-react'
 
 import { calculateMonthlyCost, costCategories, frequencies, getCategoryInfo, getTotalMonthlyCosts, useOperationalCosts } from './hooks/useOperationalCosts'
@@ -43,17 +43,14 @@ export default function OperationalCostsPage() {
   const {
     costs,
     currentView,
-    editingCost,
     selectedItems,
     searchTerm,
     isLoading,
     newCost,
     setNewCost,
     setCurrentView,
-    setEditingCost,
     setSelectedItems,
     setSearchTerm,
-    fetchCosts,
     handleSaveCost,
     handleEditCost,
     handleDeleteCost,
@@ -71,14 +68,14 @@ export default function OperationalCostsPage() {
       { label: 'Dashboard', href: '/' },
       { label: 'Biaya Operasional', href: currentView === 'list' ? undefined : '/operational-costs' }
     ]
-    
+
     if (currentView !== 'list') {
-      items.push({ 
+      items.push({
         label: currentView === 'add' ? 'Tambah Biaya' : 'Edit Biaya',
         href: undefined
       })
     }
-    
+
     return items
   }
 
@@ -107,7 +104,7 @@ export default function OperationalCostsPage() {
               ))}
             </BreadcrumbList>
           </Breadcrumb>
-          
+
           <div className="space-y-6">
             {/* Header Skeleton */}
             <div className="flex justify-between items-center">
@@ -206,8 +203,8 @@ export default function OperationalCostsPage() {
                   <Plus className="h-4 w-4 mr-2" />
                   Tambah Biaya
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className={isMobile ? 'w-full' : ''}
                   onClick={handleQuickSetup}
                   disabled={isLoading}
@@ -246,7 +243,7 @@ export default function OperationalCostsPage() {
                       💡 Mengapa Biaya Operasional Penting?
                     </h3>
                     <p className="text-sm text-orange-800 dark:text-orange-200">
-                      Biaya operasional digunakan untuk menghitung harga jual yang akurat. 
+                      Biaya operasional digunakan untuk menghitung harga jual yang akurat.
                       Semakin lengkap data biaya, semakin tepat perhitungan harga jual produk Anda.
                     </p>
                   </div>

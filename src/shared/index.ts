@@ -60,43 +60,43 @@ export { debounce } from '@/lib/debounce'
 // ============================================================================
 
 // Primitive type guards
-export function isString(value: any): value is string {
+export function isString(value: unknown): value is string {
   return typeof value === 'string'
 }
 
-export function isNumber(value: any): value is number {
+export function isNumber(value: unknown): value is number {
   return typeof value === 'number' && !isNaN(value)
 }
 
-export function isBoolean(value: any): value is boolean {
+export function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean'
 }
 
-export function isNull(value: any): value is null {
+export function isNull(value: unknown): value is null {
   return value === null
 }
 
-export function isUndefined(value: any): value is undefined {
+export function isUndefined(value: unknown): value is undefined {
   return value === undefined
 }
 
-export function isNullish(value: any): value is null | undefined {
+export function isNullish(value: unknown): value is null | undefined {
   return value === null || value === undefined
 }
 
-export function isArray(value: any): value is any[] {
+export function isArray<T = unknown>(value: unknown): value is T[] {
   return Array.isArray(value)
 }
 
-export function isObject(value: any): value is Record<string, any> {
+export function isObject<T extends Record<string, unknown>>(value: unknown): value is T {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-export function isFunction(value: any): value is Function {
+export function isFunction<T extends (...args: unknown[]) => unknown>(value: unknown): value is T {
   return typeof value === 'function'
 }
 
-export function isDate(value: any): value is Date {
+export function isDate(value: unknown): value is Date {
   return value instanceof Date && !isNaN(value.getTime())
 }
 
@@ -120,16 +120,16 @@ export function isValidPercentage(value: number): boolean {
 }
 
 // Error type guards
-export function isError(value: any): value is Error {
+export function isError(value: unknown): value is Error {
   return value instanceof Error
 }
 
-export function isApiError(value: any): boolean {
-  return isObject(value) && 'success' in value && value.success === false
+export function isApiError(value: unknown): boolean {
+  return isObject(value) && 'success' in value && value['success'] === false
 }
 
-export function isValidationError(value: any): boolean {
-  return isObject(value) && 'errors' in value && Array.isArray(value.errors)
+export function isValidationError(value: unknown): boolean {
+  return isObject(value) && 'errors' in value && Array.isArray(value['errors'])
 }
 
 // Get error message safely
@@ -140,8 +140,8 @@ export function getErrorMessage(error: unknown): string {
   if (isString(error)) {
     return error
   }
-  if (isObject(error) && 'message' in error && isString(error.message)) {
-    return error.message
+  if (isObject(error) && 'message' in error && isString(error['message'])) {
+    return error['message']
   }
   return 'An unexpected error occurred'
 }

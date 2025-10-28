@@ -47,7 +47,7 @@ const quickPresets = [
     },
 ]
 
-export function QuickDatePicker({
+export const QuickDatePicker = ({
     value,
     onChange,
     className,
@@ -55,7 +55,7 @@ export function QuickDatePicker({
     showPresets = true,
     minDate,
     maxDate,
-}: QuickDatePickerProps) {
+}: QuickDatePickerProps) => {
     const [open, setOpen] = useState(false)
 
     const handlePresetClick = (preset: typeof quickPresets[0]) => {
@@ -112,8 +112,8 @@ export function QuickDatePicker({
                             setOpen(false)
                         }}
                         disabled={(date) => {
-                            if (minDate && date < minDate) return true
-                            if (maxDate && date > maxDate) return true
+                            if (minDate && date < minDate) {return true}
+                            if (maxDate && date > maxDate) {return true}
                             return false
                         }}
                         initialFocus

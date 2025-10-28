@@ -7,7 +7,8 @@ import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
 import { uiLogger } from '@/lib/logger'
-import type { Order, OrderStatus } from '@/types'
+import type { Order } from '@/types/domain/orders'
+import type { OrderStatus } from '@/types/supabase-generated'
 
 export const OrdersTableView = () => {
   const [orders, setOrders] = useState<Order[]>([])
@@ -30,7 +31,7 @@ export const OrdersTableView = () => {
         void setOrders(data)
       }
     } catch (err) {
-      uiLogger.error('Error fetching orders', { error: err instanceof Error ? err.message : 'Unknown error' })
+      uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error fetching orders')
     } finally {
       void setLoading(false)
     }
@@ -56,7 +57,7 @@ export const OrdersTableView = () => {
         setOrders(prev => prev.filter(o => o.id !== order.id))
       }
     } catch (err) {
-      uiLogger.error('Error deleting order', { error: err instanceof Error ? err.message : 'Unknown error' })
+      uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error deleting order')
     }
   }
 
@@ -79,7 +80,7 @@ export const OrdersTableView = () => {
   }
 
   const handleBulkAction = async (action: string, orderIds: string[]) => {
-    uiLogger.info('Bulk action triggered', { action, orderCount: orderIds.length })
+    uiLogger.info({ action, orderCount: orderIds.length }, 'Bulk action triggered')
 
     switch (action) {
       case 'confirm':
@@ -90,7 +91,7 @@ export const OrdersTableView = () => {
         break
       case 'export':
         // Export selected orders
-        uiLogger.debug('Exporting orders', { orderIds })
+        uiLogger.debug({ orderIds }, 'Exporting orders')
         break
       case 'print':
         // Print selected orders

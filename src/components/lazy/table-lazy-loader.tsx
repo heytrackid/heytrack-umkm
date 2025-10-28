@@ -77,30 +77,30 @@ const TableLoadingSkeleton = ({
 
 // Lazy loaded table components
 export const LazyDataTable = lazy(() =>
-  import('@/components').then(async (m) => {
+  import(/* webpackChunkName: "data-table" */ '@/components').then(async (m) => {
     // Also preload the table UI components
-    await import('@/components')
+    await import(/* webpackChunkName: "table-ui" */ '@/components')
     return { default: m.useReactTable }
   })
 )
 
 // CRUD Table Components
 export const LazyCRUDTable = lazy(() =>
-  import('@/components').then(m => ({ default: m.IngredientsCRUD }))
+  import(/* webpackChunkName: "crud-table" */ '@/components').then(m => ({ default: m.IngredientsCRUD }))
 )
 
 export const LazyOrdersTable = lazy(() =>
-  import('@/components').then(m => ({ default: m.OrdersTable }))
+  import(/* webpackChunkName: "orders-table" */ '@/components').then(m => ({ default: m.OrdersTable }))
     .catch(() => ({ default: () => <div>Orders table not found</div> }))
 )
 
 export const LazyInventoryTable = lazy(() =>
-  import('@/components').then(m => ({ default: m.InventoryTable }))
+  import(/* webpackChunkName: "inventory-table" */ '@/components').then(m => ({ default: m.InventoryTable }))
     .catch(() => ({ default: () => <div>Inventory table not found</div> }))
 )
 
 export const LazyFinanceTable = lazy(() =>
-  import('@/components').then(m => ({ default: m.FinanceTable }))
+  import(/* webpackChunkName: "finance-table" */ '@/components').then(m => ({ default: m.FinanceTable }))
     .catch(() => ({ default: () => <div>Finance table not found</div> }))
 )
 
@@ -176,11 +176,11 @@ export const FinanceTableWithSuspense = (props: TableProps) => (
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
   Promise.resolve({
-    default: ({ data, height, ...props }: { data?: unknown[]; height?: number;[key: string]: unknown }) => 
+    default: ({ data, height, ...props }: { data?: unknown[]; height?: number;[key: string]: unknown }) =>
       // This would be a virtualized table implementation
       // For now, return a placeholder
-       <div style={{ height }}>Virtualized table with {data?.length || 0} items</div>
-    
+      <div style={{ height }}>Virtualized table with {data?.length || 0} items</div>
+
   })
 )
 
@@ -234,10 +234,10 @@ export const useTablePerformance = () => {
 
 // Table Bundle Preloader
 export const preloadTableBundle = () => Promise.all([
-    import('@/components'),
-    import('@/components'),
-    import('@/components'),
-  ])
+  import(/* webpackChunkName: "data-table" */ '@/components'),
+  import(/* webpackChunkName: "table-ui" */ '@/components'),
+  import(/* webpackChunkName: "crud-table" */ '@/components'),
+])
 
 // Table Type Detection for Dynamic Loading
 export type TableType = 'crud' | 'orders' | 'inventory' | 'finance' | 'virtualized'

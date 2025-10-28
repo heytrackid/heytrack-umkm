@@ -6,22 +6,40 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from"@/components/ui/chart"
+} from "@/components/ui/chart"
 import type { ChartConfig } from '@/types/charts'
 
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
-})
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false })
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false })
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false })
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false })
-const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false })
+const LineChart = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
+  }
+)
+const Line = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  { ssr: false }
+)
+const XAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  { ssr: false }
+)
+const YAxis = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  { ssr: false }
+)
+const CartesianGrid = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  { ssr: false }
+)
+const Legend = dynamic(
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Legend),
+  { ssr: false }
+)
 const ResponsiveContainer = dynamic(
-  () => import('recharts').then(mod => mod.ResponsiveContainer),
-  { 
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  {
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
   }
@@ -40,42 +58,42 @@ interface InventoryTrendDataPoint {
 
 const inventoryData: InventoryTrendDataPoint[] = [
   {
-    month:"Jan",
+    month: "Jan",
     stock: 850,
     purchases: 1200,
     usage: 1100,
     waste: 50,
   },
   {
-    month:"Feb", 
+    month: "Feb",
     stock: 950,
     purchases: 1500,
     usage: 1300,
     waste: 80,
   },
   {
-    month:"Mar",
+    month: "Mar",
     stock: 1150,
     purchases: 1800,
     usage: 1600,
     waste: 70,
   },
   {
-    month:"Apr",
+    month: "Apr",
     stock: 1350,
     purchases: 1600,
     usage: 1400,
     waste: 60,
   },
   {
-    month:"May",
+    month: "May",
     stock: 1550,
     purchases: 2000,
     usage: 1800,
     waste: 90,
   },
   {
-    month:"Jun",
+    month: "Jun",
     stock: 1660,
     purchases: 1900,
     usage: 1700,
@@ -95,28 +113,28 @@ interface InventoryTrendsChartProps {
 
 const chartConfig: ChartConfig = {
   stock: {
-    label:"Stok Tersedia",
-    color:"#22c55e",
+    label: "Stok Tersedia",
+    color: "#22c55e",
   },
   purchases: {
-    label:"Pembelian", 
-    color:"#3b82f6",
+    label: "Pembelian",
+    color: "#3b82f6",
   },
   usage: {
-    label:"Pemakaian",
-    color:"#f59e0b",
+    label: "Pemakaian",
+    color: "#f59e0b",
   },
   waste: {
-    label:"Waste",
-    color:"#ef4444",
+    label: "Waste",
+    color: "#ef4444",
   },
 }
 
-export default function InventoryTrendsChart({ 
-  data = inventoryData, 
+export default function InventoryTrendsChart({
+  data = inventoryData,
   config = chartConfig,
   height = 400,
-  className 
+  className
 }: InventoryTrendsChartProps) {
   return (
     <ChartContainer config={config} className={className}>
@@ -143,11 +161,11 @@ export default function InventoryTrendsChart({
             tickMargin={8}
             tickFormatter={(value) => `${value}`}
           />
-          <ChartTooltip 
-            cursor={false} 
-            content={<ChartTooltipContent 
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent
               formatter={(value) => [Number(value).toLocaleString('id-ID'), null]}
-            />} 
+            />}
           />
           <Line
             dataKey="stock"
@@ -155,13 +173,13 @@ export default function InventoryTrendsChart({
             stroke="#22c55e"
             strokeWidth={3}
             dot={{
-              fill:"#22c55e",
+              fill: "#22c55e",
               strokeWidth: 2,
               r: 4,
             }}
             activeDot={{
               r: 6,
-              stroke:"#22c55e",
+              stroke: "#22c55e",
               strokeWidth: 2,
             }}
           />
@@ -187,12 +205,12 @@ export default function InventoryTrendsChart({
             stroke="#ef4444"
             strokeWidth={2}
             dot={{
-              fill:"#ef4444",
+              fill: "#ef4444",
               strokeWidth: 2,
               r: 3,
             }}
           />
-          <Legend 
+          <Legend
             content={({ payload }) => (
               <div className="flex flex-wrap justify-center gap-6 pt-6">
                 {payload?.map((entry, index: number) => (
@@ -202,10 +220,10 @@ export default function InventoryTrendsChart({
                       style={{ backgroundColor: entry.color }}
                     />
                     <span className="text-sm font-medium text-foreground">
-                      {entry.value === 'stock' ? 'Stok Tersedia' : 
-                       entry.value === 'purchases' ? 'Pembelian' :
-                       entry.value === 'usage' ? 'Pemakaian' :
-                       entry.value === 'waste' ? 'Waste' : entry.value}
+                      {entry.value === 'stock' ? 'Stok Tersedia' :
+                        entry.value === 'purchases' ? 'Pembelian' :
+                          entry.value === 'usage' ? 'Pemakaian' :
+                            entry.value === 'waste' ? 'Waste' : entry.value}
                     </span>
                   </div>
                 ))}

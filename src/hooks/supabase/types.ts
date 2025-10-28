@@ -1,13 +1,13 @@
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 
 export type Tables = Database['public']['Tables']
 
 export interface UseSupabaseQueryOptions<T extends keyof Tables> {
   select?: string
-  filter?: Record<string, unknown>
-  orderBy?: { column: string; ascending?: boolean }
+  filter?: Partial<Record<keyof Tables[T]['Row'] & string, string | number | boolean | null>>
+  orderBy?: { column: keyof Tables[T]['Row'] & string; ascending?: boolean }
   limit?: number
-  initial?: unknown[]
+  initial?: Tables[T]['Row'][]
   refetchOnMount?: boolean
   realtime?: boolean
 }

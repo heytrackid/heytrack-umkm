@@ -2,11 +2,9 @@ import type {
   Breakpoint,
   ScreenSize,
   ResponsiveValue,
-  ColumnPriority} from '@/types/responsive';
-import {
-  BREAKPOINTS,
-  DEVICE_BREAKPOINTS
+  ColumnPriority
 } from '@/types/responsive';
+import { BREAKPOINTS, DEVICE_BREAKPOINTS } from '@/types/responsive';
 
 // Utility functions for responsive design
 
@@ -80,7 +78,7 @@ export function getResponsiveValue<T>(
   
   for (let i = currentIndex; i < breakpointOrder.length; i++) {
     const bp = breakpointOrder[i];
-    if (responsiveValues[bp] !== undefined) {
+    if (bp && responsiveValues[bp] !== undefined) {
       return responsiveValues[bp] as T;
     }
   }
@@ -189,16 +187,16 @@ export function getSafeAreaInsets(): {
 /**
  * Debounce function for resize handlers
  */
-export function debounce<T extends (...args: unknown[]) => void>(
+export function debounce<T extends (..._args: unknown[]) => void>(
   func: T,
   wait: number
-): (...args: Parameters<T>) => void {
+): (..._args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
   
-  return function executedFunction(...args: Parameters<T>) {
+  return function executedFunction(..._args: Parameters<T>) {
     const later = () => {
       clearTimeout(timeout);
-      func(...args);
+      func(..._args);
     };
     
     clearTimeout(timeout);
@@ -209,15 +207,15 @@ export function debounce<T extends (...args: unknown[]) => void>(
 /**
  * Throttle function for scroll/resize handlers
  */
-export function throttle<T extends (...args: unknown[]) => void>(
+export function throttle<T extends (..._args: unknown[]) => void>(
   func: T,
   limit: number
-): (...args: Parameters<T>) => void {
+): (..._args: Parameters<T>) => void {
   let inThrottle: boolean;
   
-  return function executedFunction(this: any, ...args: Parameters<T>) {
+  return function executedFunction(this: unknown, ..._args: Parameters<T>) {
     if (!inThrottle) {
-      func.apply(this, args);
+      func.apply(this, _args);
       inThrottle = true;
       setTimeout(() => (inThrottle = false), limit);
     }

@@ -16,15 +16,17 @@ export interface SecurityConfig {
 }
 
 export function createSecureApiHandler(
-  handler: (request: NextRequest, context?: { params?: Promise<Record<string, string>> }) => Promise<NextResponse> | NextResponse,
+  handler: (_request: NextRequest, _context?: { params?: Promise<Record<string, string>> }) => Promise<NextResponse> | NextResponse,
   config: SecurityConfig = {}
 ) {
-  return async (request: NextRequest, context?: { params?: Promise<Record<string, string>> }): Promise<NextResponse> => {
+  return async (_request: NextRequest, _context?: { params?: Promise<Record<string, string>> }): Promise<NextResponse> => {
+    const request = _request;
+    const context = _context;
     try {
       // Rate limiting
       if (config.rateLimit) {
-        const clientIP = request.headers.get('x-forwarded-for') ||
-                        request.headers.get('x-real-ip') ||
+        const clientIP = request.headers.get('x-forwarded-for') ??
+                        request.headers.get('x-real-ip') ??
                         'unknown'
 
         const allowed = RateLimiter.checkLimit(
@@ -108,7 +110,7 @@ export function withSecurity(
   config: SecurityConfig
 ) {
   return (
-    handler: (request: NextRequest, context?: { params?: Promise<Record<string, string>> }) => Promise<NextResponse> | NextResponse
+    handler: (_request: NextRequest, _context?: { params?: Promise<Record<string, string>> }) => Promise<NextResponse> | NextResponse
   ) => createSecureApiHandler(handler, config)
 }
 

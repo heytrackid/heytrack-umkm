@@ -37,9 +37,9 @@ export function useErrorHandler() {
     message: '',
   })
 
-  const handle = useCallback((error: any, context?: string) => {
+  const handle = useCallback((error: unknown, context?: string) => {
     const appError = error instanceof Error ? error : new Error(String(error))
-    logger.error(`Error in ${context || 'component'}`, { error, context })
+    logger.error({ error, context }, `Error in ${context || 'component'}`)
 
     setErrorState({
       error: appError as AppError,
@@ -59,13 +59,13 @@ export function useErrorHandler() {
   }, [])
 
   const throwError = useCallback((error: AppError) => {
-    logger.error('Throwing error', { error })
+    logger.error({ error }, 'Throwing error')
     setErrorState({
       error,
       isError: true,
       message: (error instanceof Error ? error.message : String(error)),
     })
-    throw err
+    throw error
   }, [])
 
   return {

@@ -4,7 +4,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, Tables, TablesInsert, TablesUpdate } from '@/types/supabase-generated'
+import type { Database } from '@/types/supabase-generated'
 import { createClient } from '@/utils/supabase/client'
 
 // ============================================================================
@@ -37,17 +37,16 @@ export interface QueryArrayResult<T> {
 export async function typedInsert<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
-  data: TableInsert<T> | Array<TableInsert<T>>
+  data: any | any[]
 ) {
-  const isArray = Array.isArray(data)
-  const result = await (supabase as any)
+  const result = await supabase
     .from(table)
     .insert(data)
     .select()
 
   return result as {
-    data: Array<TableRow<T>> | null
-    error: any
+    data: any[] | null
+    error: Error | null
   }
 }
 
@@ -58,17 +57,17 @@ export async function typedUpdate<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
   id: string,
-  data: TableUpdate<T>
+  data: any
 ) {
-  const result = await (supabase as any)
+  const result = await supabase
     .from(table)
     .update(data)
     .eq('id', id)
     .select()
 
   return result as {
-    data: Array<TableRow<T>> | null
-    error: any
+    data: any[] | null
+    error: Error | null
   }
 }
 
@@ -80,15 +79,15 @@ export async function typedDelete<T extends TableName>(
   table: T,
   id: string
 ) {
-  const result = await (supabase as any)
+  const result = await supabase
     .from(table)
     .delete()
     .eq('id', id)
     .select()
 
   return result as {
-    data: Array<TableRow<T>> | null
-    error: any
+    data: any[] | null
+    error: Error | null
   }
 }
 
@@ -111,7 +110,13 @@ export async function typedSelect<T extends TableName>(
   // Apply filters
   if (query?.filter) {
     Object.entries(query.filter).forEach(([key, value]) => {
-      queryBuilder = queryBuilder.eq(key, value)
+      if (value === undefined) {return}
+      const column = key
+      if (value === null) {
+        queryBuilder = queryBuilder.is(column, null)
+      } else {
+        queryBuilder = queryBuilder.eq(column, value)
+      }
     })
   }
 
@@ -132,8 +137,8 @@ export async function typedSelect<T extends TableName>(
     : await queryBuilder
 
   return result as {
-    data: TableRow<T> | Array<TableRow<T>> | null
-    error: any
+    data: any | any[] | null
+    error: Error | null
   }
 }
 
@@ -204,9 +209,6 @@ export async function signOut() {
 
 export type {
   Database,
-  Tables,
-  TablesInsert,
-  TablesUpdate,
   TableName,
   TableRow,
   TableInsert,

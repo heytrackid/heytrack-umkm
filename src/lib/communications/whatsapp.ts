@@ -125,7 +125,7 @@ Kami tunggu orderan selanjutnya! 🙏
   /**
    * Send WhatsApp message
    */
-  async sendMessage(to: string, templateId: string, data: Record<string, any>): Promise<boolean> {
+  async sendMessage(to: string, templateId: string, data: Record<string, unknown>): Promise<boolean> {
     try {
       const template = this.config.defaultTemplates.find(t => t.id === templateId) ||
                       WhatsAppService.getDefaultTemplates().find(t => t.id === templateId);

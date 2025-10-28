@@ -78,6 +78,9 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     // Get week start (7 days ago)
     const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
 
+    // Create Supabase client
+    const supabase = createClient()
+    
     // Fetch orders for today and this week
     const { data: todayOrders, error: todayError } = await supabase
       .from('orders')
@@ -110,18 +113,18 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
     if (inventoryError) {throw inventoryError}
 
     // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+    const todayRevenue = todayOrders?.reduce((sum, order: any) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const weeklyRevenue = weeklyOrders?.reduce((sum, order: any) => sum + ((order.total_amount as number) || 0), 0) || 0
     
-    const lowStockItems = inventory?.filter(item => 
+    const lowStockItems = inventory?.filter((item: any) => 
       item.current_stock <= (item.reorder_point || 0)
     ) || []
-    const outOfStockItems = inventory?.filter(item => item.current_stock === 0) || []
+    const outOfStockItems = inventory?.filter((item: any) => item.current_stock === 0) || []
     
-    const vipCustomers = customers?.filter(customer => customer.customer_type === 'vip').length || 0
+    const vipCustomers = customers?.filter((customer: any) => customer.customer_type === 'vip').length || 0
 
     // Get recent orders for activity
-    const recentOrders = todayOrders?.slice(-3).map(order => ({
+    const recentOrders = todayOrders?.slice(-3).map((order: any) => ({
       customer: order.customer_name || 'Unknown',
       amount: order.total_amount || 0,
       time: order.created_at
@@ -199,7 +202,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
       const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
       const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000)
       
-      const { data: orders, error } = await supabase
+      const { data: orders, error } = await createClient()
         .from('orders')
         .select('*')
         .gte('created_at', dayStart.toISOString())
@@ -207,7 +210,7 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       if (error) {throw error}
 
-      const revenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+      const revenue = orders?.reduce((sum, order: any) => sum + ((order.total_amount as number) || 0), 0) || 0
       
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),

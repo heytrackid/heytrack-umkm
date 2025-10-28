@@ -7,8 +7,8 @@ export async function updateSession(request: NextRequest) {
     })
 
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        process.env['NEXT_PUBLIC_SUPABASE_URL']!,
+        process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
         {
             cookies: {
                 getAll() {
@@ -31,9 +31,7 @@ export async function updateSession(request: NextRequest) {
     // supabase.auth.getUser(). A simple mistake could make it very hard to debug
     // issues with users being randomly logged out.
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
+    await supabase.auth.getUser()
 
     // IMPORTANT: You *must* return the supabaseResponse object as it is.
     // If you're creating a new response object with NextResponse.next() make sure to:

@@ -187,7 +187,7 @@ export interface SmartNotification {
   action: string
   priority: NotificationPriority
   timestamp?: Date
-  data?: any
+  data?: Record<string, unknown>
 }
 
 // Event types untuk automation triggers
@@ -212,13 +212,13 @@ export interface WorkflowEventData {
 export interface WorkflowResult {
   success: boolean
   message: string
-  data?: any
+  data?: Record<string, unknown>
   error?: string
 }
 
 export interface WorkflowContext {
   event: WorkflowEventData
   supabase: SupabaseClient<Database> | null
-  logger: any // Logger instance
+  logger: { info: (msg: string, data?: unknown) => void; error: (msg: string, data?: unknown) => void; warn: (msg: string, data?: unknown) => void }
   config: AutomationConfig
 }

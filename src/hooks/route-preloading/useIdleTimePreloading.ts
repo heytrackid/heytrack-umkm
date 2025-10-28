@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 
-import { apiLogger } from '@/lib/logger'
+// Removed unused import: apiLogger
 import { preloadChartBundle } from '@/components/lazy/index'
 
 /**

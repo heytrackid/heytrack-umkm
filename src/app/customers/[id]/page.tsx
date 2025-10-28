@@ -10,7 +10,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
-import type { Database } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
@@ -18,7 +17,7 @@ import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { ProfileSkeleton, CardSkeleton } from '@/components/ui'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseQuery, useSupabaseCRUD } from '@/hooks/supabase'
 import {
   ArrowLeft,
   Edit,
@@ -41,20 +40,23 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Fetch customer data
-  const { data: customers, loading: customerLoading, remove } = useSupabaseCRUD('customers', {
+  const { data: customers, loading: customerLoading } = useSupabaseQuery('customers', {
     filter: { id }
   })
   const customer = customers?.[0]
 
+  // CRUD operations
+  const { delete: deleteCustomer } = useSupabaseCRUD('customers')
+
   // Fetch customer orders
-  const { data: orders, loading: ordersLoading } = useSupabaseCRUD('orders', {
+  const { data: orders, loading: ordersLoading } = useSupabaseQuery('orders', {
     filter: { customer_id: id },
     orderBy: { column: 'created_at', ascending: false }
   })
 
   const handleDelete = async () => {
     try {
-      await remove(id)
+      await deleteCustomer(id)
       toast.success('Pelanggan berhasil dihapus')
       void router.push('/customers')
     } catch (err) {
@@ -89,7 +91,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const stats = {
     totalOrders: customer.total_orders || 0,
     totalSpent: customer.total_spent || 0,
-    averageOrder: customer.total_orders > 0 ? customer.total_spent / customer.total_orders : 0,
+    averageOrder: (customer.total_orders || 0) > 0 ? (customer.total_spent || 0) / (customer.total_orders || 0) : 0,
     lastOrder: customer.last_order_date
   }
 
@@ -234,7 +236,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               </div>
             ) : orders && orders.length > 0 ? (
               <div className="space-y-3">
-                {orders.map((order: Database['public']['Tables']['orders']['Row']) => (
+                {orders.map((order: any) => (
                   <div
                     key={order.id}
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
@@ -247,7 +249,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">{formatCurrency(order.total_amount)}</p>
+                      <p className="font-semibold">{formatCurrency(order.total_amount ?? 0)}</p>
                       <Badge variant={
                         order.status === 'DELIVERED' ? 'default' :
                           order.status === 'CANCELLED' ? 'destructive' :
@@ -271,7 +273,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           open={showDeleteConfirm}
           onOpenChange={setShowDeleteConfirm}
           onConfirm={handleDelete}
-          itemName={customer.name}
+          title="Hapus Pelanggan"
+          description="Apakah Anda yakin ingin menghapus pelanggan ini? Tindakan ini tidak dapat dibatalkan."
         />
       </div>
     </AppLayout>

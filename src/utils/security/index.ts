@@ -45,7 +45,7 @@ export class InputSanitizer {
         throw new Error('Invalid protocol')
       }
       return parsed.toString()
-    } catch (error) {
+    } catch {
       throw new Error('Invalid URL')
     }
   }
@@ -80,7 +80,7 @@ export class RateLimiter {
     const windowStart = now - windowMs
 
     // Get existing requests for this identifier
-    const requests = this.requests.get(identifier) || []
+    const requests = this.requests.get(identifier) ?? []
 
     // Remove old requests outside the window
     const validRequests = requests.filter(time => time > windowStart)
@@ -98,7 +98,7 @@ export class RateLimiter {
   }
 
   static getRemainingRequests(identifier: string, maxRequests = 100): number {
-    const requests = this.requests.get(identifier) || []
+    const requests = this.requests.get(identifier) ?? []
     return Math.max(0, maxRequests - requests.length)
   }
 
@@ -196,7 +196,7 @@ export class APISecurity {
     return !!(apiKey && apiKey.length > 20 && /^[a-zA-Z0-9_-]+$/.test(apiKey))
   }
 
-  static sanitizeAPIInput(input: any): unknown {
+  static sanitizeAPIInput(input: unknown): unknown {
     if (typeof input === 'string') {
       return InputSanitizer.sanitizeHtml(input)
     }

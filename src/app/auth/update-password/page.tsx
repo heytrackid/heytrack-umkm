@@ -12,6 +12,7 @@ import {
 } from '@/lib/auth-errors'
 import { Check, CheckCircle, Eye, EyeOff, Loader2, Lock, X } from 'lucide-react'
 import Link from 'next/link'
+import type { FormEvent} from 'react';
 import { useState, useTransition } from 'react'
 import { updatePassword } from './actions'
 

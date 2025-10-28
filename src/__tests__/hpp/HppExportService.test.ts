@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { HppExportService } from '@/modules/orders/services/HppExportService'
+import { HppExportService } from '@/modules/hpp'
 
 // Mock Blob and URL for export testing
 global.Blob = vi.fn()

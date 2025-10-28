@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 import supabase from '@/utils/supabase'
+import type { ZodType } from 'zod'
 
 /**
  * Structured environment for agent execution
@@ -9,13 +10,13 @@ export interface AgentContext {
   userId?: string
   sessionId?: string
   featureFlags: Record<string, boolean>
-  cache: Map<string, any>
+  cache: Map<string, unknown>
   telemetry: {
     startTime: Date
     events: Array<{
       event: string
       timestamp: Date
-      data?: Record<string, any>
+      data?: Record<string, unknown>
     }>
   }
   supabase: typeof supabase
@@ -28,7 +29,7 @@ export interface AgentTask {
   id: string
   type: string
   priority: 'low' | 'medium' | 'high' | 'critical'
-  data: Record<string, any>
+  data: Record<string, unknown>
   metadata?: {
     createdAt: Date
     timeoutMs?: number
@@ -40,13 +41,13 @@ export interface AgentTask {
 /**
  * Standardized success/failure payload
  */
-export interface AgentResult {
+export interface AgentResult<T = unknown> {
   success: boolean
-  data?: any
+  data?: T
   error?: {
     code: string
     message: string
-    details?: any
+    details?: unknown
   }
   metadata: {
     correlationId: string
@@ -62,7 +63,7 @@ export class AgentError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: unknown
   ) {
     super(message)
     this.name = 'AgentError'
@@ -70,14 +71,14 @@ export class AgentError extends Error {
 }
 
 export class ValidationError extends AgentError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'VALIDATION_ERROR', details)
     this.name = 'ValidationError'
   }
 }
 
 export class ProcessingError extends AgentError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'PROCESSING_ERROR', details)
     this.name = 'ProcessingError'
   }
@@ -96,7 +97,7 @@ export function createAgentContext(
     userId,
     sessionId,
     featureFlags: {}, // TODO: Load from feature flags service
-    cache: new Map(),
+    cache: new Map<string, unknown>(),
     telemetry: {
       startTime: new Date(),
       events: []
@@ -111,10 +112,10 @@ export function createAgentContext(
 export function createAgentLogger(agentName: string, correlationId: string) {
   // For now, use dbLogger with correlationId in context
   return {
-    info: (message: string, data?: any) => dbLogger.info({ agent: agentName, correlationId, ...data }, message),
-    error: (data: any, message?: string) => dbLogger.error({ agent: agentName, correlationId, ...data }, message),
-    warn: (message: string, data?: any) => dbLogger.warn({ agent: agentName, correlationId, ...data }, message),
-    debug: (message: string, data?: any) => dbLogger.debug({ agent: agentName, correlationId, ...data }, message)
+    info: (message: string, data?: Record<string, unknown>) => dbLogger.info({ agent: agentName, correlationId, ...data }, message),
+    error: (data: Record<string, unknown>, message?: string) => dbLogger.error({ agent: agentName, correlationId, ...data }, message),
+    warn: (message: string, data?: Record<string, unknown>) => dbLogger.warn({ agent: agentName, correlationId, ...data }, message),
+    debug: (message: string, data?: Record<string, unknown>) => dbLogger.debug({ agent: agentName, correlationId, ...data }, message)
   }
 }
 
@@ -126,7 +127,7 @@ export async function executeAgentTask<T>(
   task: AgentTask,
   context: AgentContext,
   executor: (task: AgentTask, context: AgentContext) => Promise<T>
-): Promise<AgentResult> {
+): Promise<AgentResult<T>> {
   const logger = createAgentLogger(agentName, context.correlationId)
   const startTime = Date.now()
 
@@ -203,8 +204,13 @@ export async function executeAgentTask<T>(
  */
 export function validateTask<T>(
   task: AgentTask,
-  schema: any // TODO: Use Zod schema type
+  schema: ZodType<T>
 ): T {
-  // TODO: Implement Zod validation
-  return task.data as T
+  const result = schema.safeParse(task.data)
+
+  if (!result.success) {
+    throw new ValidationError('Invalid task data', result.error.flatten())
+  }
+
+  return result.data
 }

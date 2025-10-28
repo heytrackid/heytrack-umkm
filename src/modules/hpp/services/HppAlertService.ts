@@ -1,0 +1,246 @@
+/**
+ * HPP Alert Service
+ * Detects and manages HPP-related alerts
+ */
+
+import { dbLogger } from '@/lib/logger'
+import supabase from '@/utils/supabase'
+import type { HppAlert } from '../types'
+
+export class HppAlertService {
+  private logger = dbLogger
+
+  // Alert thresholds
+  private readonly PRICE_INCREASE_THRESHOLD = 0.10 // 10% increase
+  private readonly MARGIN_LOW_THRESHOLD = 0.20 // 20% margin
+  private readonly COST_SPIKE_THRESHOLD = 0.15 // 15% spike
+
+  /**
+   * Detect alerts for a specific recipe
+   */
+  async detectAlertsForRecipe(recipeId: string): Promise<HppAlert[]> {
+    try {
+      this.logger.info(`Detecting HPP alerts for recipe ${recipeId}`)
+
+      const alerts: HppAlert[] = []
+
+      // Get latest and previous snapshots
+      const { data: snapshots, error } = await supabase
+        .from('hpp_snapshots')
+        .select('*')
+        .eq('recipe_id', recipeId)
+        .order('snapshot_date', { ascending: false })
+        .limit(2)
+
+      if (error) {
+        throw new Error(`Failed to fetch snapshots: ${error.message}`)
+      }
+
+      if (!snapshots || snapshots.length < 2) {
+        return alerts // Not enough data for comparison
+      }
+
+      const [current, previous] = snapshots
+
+      // Check for price increase
+      const priceIncrease = (current.hpp_value - previous.hpp_value) / previous.hpp_value
+      if (priceIncrease > this.PRICE_INCREASE_THRESHOLD) {
+        alerts.push(await this.createAlert({
+          recipe_id: recipeId,
+          alert_type: 'PRICE_INCREASE',
+          severity: priceIncrease > 0.20 ? 'HIGH' : 'MEDIUM',
+          message: `Biaya produksi naik ${(priceIncrease * 100).toFixed(1)}% dari ${previous.hpp_value} ke ${current.hpp_value}`,
+          current_value: current.hpp_value,
+          previous_value: previous.hpp_value,
+          threshold_value: this.PRICE_INCREASE_THRESHOLD
+        }))
+      }
+
+      // Check for low margin
+      if (current.margin_percentage && current.margin_percentage < this.MARGIN_LOW_THRESHOLD) {
+        alerts.push(await this.createAlert({
+          recipe_id: recipeId,
+          alert_type: 'MARGIN_LOW',
+          severity: current.margin_percentage < 0.10 ? 'CRITICAL' : 'MEDIUM',
+          message: `Margin keuntungan rendah: ${(current.margin_percentage * 100).toFixed(1)}%`,
+          current_value: current.margin_percentage,
+          threshold_value: this.MARGIN_LOW_THRESHOLD
+        }))
+      }
+
+      // Check for cost spike
+      const costSpike = (current.material_cost - previous.material_cost) / previous.material_cost
+      if (costSpike > this.COST_SPIKE_THRESHOLD) {
+        alerts.push(await this.createAlert({
+          recipe_id: recipeId,
+          alert_type: 'COST_SPIKE',
+          severity: 'HIGH',
+          message: `Biaya bahan naik drastis ${(costSpike * 100).toFixed(1)}%`,
+          current_value: current.material_cost,
+          previous_value: previous.material_cost,
+          threshold_value: this.COST_SPIKE_THRESHOLD
+        }))
+      }
+
+      this.logger.info({ recipeId, alertCount: alerts.length }, 'HPP alerts detected')
+      return alerts
+
+    } catch (err: unknown) {
+      this.logger.error({ error: err }, `Failed to detect alerts for recipe ${recipeId}`)
+      throw err
+    }
+  }
+
+  /**
+   * Create an alert
+   */
+  private async createAlert(alertData: Omit<HppAlert, 'id' | 'created_at' | 'is_read' | 'recipe_name'>): Promise<HppAlert> {
+    try {
+      const { data, error } = await supabase
+        .from('hpp_alerts')
+        .insert({
+          ...alertData,
+          is_read: false
+        })
+        .select()
+        .single()
+
+      if (error) {
+        throw new Error(`Failed to create alert: ${error.message}`)
+      }
+
+      return data as HppAlert
+
+    } catch (err: unknown) {
+      this.logger.error({ error: err }, 'Failed to create alert')
+      throw err
+    }
+  }
+
+  /**
+   * Detect alerts for all active recipes
+   */
+  async detectAlertsForAllRecipes(): Promise<{ success: number; failed: number; totalAlerts: number }> {
+    try {
+      this.logger.info('Detecting HPP alerts for all recipes')
+
+      const { data: recipes, error } = await supabase
+        .from('recipes')
+        .select('id')
+        .eq('is_active', true)
+
+      if (error) {
+        throw new Error(`Failed to fetch recipes: ${error.message}`)
+      }
+
+      let success = 0
+      let failed = 0
+      let totalAlerts = 0
+
+      for (const recipe of recipes || []) {
+        try {
+          const alerts = await this.detectAlertsForRecipe(recipe.id)
+          totalAlerts += alerts.length
+          success++
+        } catch (err) {
+          this.logger.error({ error: err, recipeId: recipe.id }, 'Failed to detect alerts')
+          failed++
+        }
+      }
+
+      this.logger.info({ success, failed, totalAlerts }, 'HPP alert detection completed')
+      return { success, failed, totalAlerts }
+
+    } catch (err: unknown) {
+      this.logger.error({ error: err }, 'Failed to detect alerts for all recipes')
+      throw err
+    }
+  }
+
+  /**
+   * Mark alert as read
+   */
+  async markAsRead(alertId: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('hpp_alerts')
+        .update({
+          is_read: true,
+          read_at: new Date().toISOString()
+        })
+        .eq('id', alertId)
+
+      if (error) {
+        throw new Error(`Failed to mark alert as read: ${error.message}`)
+      }
+
+      this.logger.info({ alertId }, 'Alert marked as read')
+
+    } catch (err: unknown) {
+      this.logger.error({ error: err }, `Failed to mark alert ${alertId} as read`)
+      throw err
+    }
+  }
+
+  /**
+   * Mark all alerts as read for a user
+   */
+  async markAllAsRead(userId: string): Promise<number> {
+    try {
+      const { data, error } = await supabase
+        .from('hpp_alerts')
+        .update({
+          is_read: true,
+          read_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('is_read', false)
+        .select()
+
+      if (error) {
+        throw new Error(`Failed to mark all alerts as read: ${error.message}`)
+      }
+
+      const count = data?.length || 0
+      this.logger.info({ userId, count }, 'All alerts marked as read')
+      return count
+
+    } catch (err: unknown) {
+      this.logger.error({ error: err }, 'Failed to mark all alerts as read')
+      throw err
+    }
+  }
+
+  /**
+   * Get unread alerts for a user
+   */
+  async getUnreadAlerts(userId: string, limit = 10): Promise<HppAlert[]> {
+    try {
+      const { data, error } = await supabase
+        .from('hpp_alerts')
+        .select(`
+          *,
+          recipes:recipe_id (
+            name
+          )
+        `)
+        .eq('user_id', userId)
+        .eq('is_read', false)
+        .order('created_at', { ascending: false })
+        .limit(limit)
+
+      if (error) {
+        throw new Error(`Failed to fetch unread alerts: ${error.message}`)
+      }
+
+      return (data || []).map((alert: HppAlert & { recipes?: { name?: string } }) => ({
+        ...alert,
+        recipe_name: alert.recipes?.name
+      })) as HppAlert[]
+
+    } catch (err: unknown) {
+      this.logger.error({ error: err }, 'Failed to get unread alerts')
+      throw err
+    }
+  }
+}

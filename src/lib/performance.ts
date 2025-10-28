@@ -180,7 +180,7 @@ export function useAdaptiveLoading() {
 /**
  * Measure and report web vitals
  */
-export function reportWebVitals(metric: any) {
+export function reportWebVitals(metric: { name: string; value: number; id: string }) {
   if (process.env.NODE_ENV === 'production') {
     // Send to analytics
     perfLogger.info('Web vital metric', { metric })

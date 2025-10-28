@@ -52,11 +52,11 @@ export const preloadRechartsBundle = () => {
 }
 
 // Smart chart loader with conditional loading based on data size
-export const SmartChartLoader = ({ 
-  chartType, 
-  data, 
+export const SmartChartLoader = ({
+  chartType,
+  data,
   height = 400,
-  ...props 
+  ...props
 }: {
   chartType: 'line' | 'bar' | 'area' | 'pie'
   data: unknown[]
@@ -90,7 +90,7 @@ export const ChartDashboardWithProgressiveLoading = ({
     id: string
     type: 'financial' | 'inventory' | 'mini'
     priority: 'high' | 'medium' | 'low'
-    data?: any[]
+    data?: Array<Record<string, unknown>>
   }>
 }) => {
   // Sort charts by priority
@@ -101,23 +101,21 @@ export const ChartDashboardWithProgressiveLoading = ({
 
   return (
     <div className="space-y-6">
-      {sortedCharts.map((chart) => {
-        return (
-          <div key={chart.id} className="chart-container">
-            <Suspense fallback={<ChartSkeleton />}>
-              {chart.type === 'financial' && (
-                <LazyFinancialTrendsChart />
-              )}
-              {chart.type === 'inventory' && (
-                <LazyInventoryTrendsChart />
-              )}
-              {chart.type === 'mini' && (
-                <LazyMiniChart data={chart.data || []} dataKey="value" />
-              )}
-            </Suspense>
-          </div>
-        )
-      })}
+      {sortedCharts.map((chart) => (
+        <div key={chart.id} className="chart-container">
+          <Suspense fallback={<ChartSkeleton />}>
+            {chart.type === 'financial' && (
+              <LazyFinancialTrendsChart />
+            )}
+            {chart.type === 'inventory' && (
+              <LazyInventoryTrendsChart />
+            )}
+            {chart.type === 'mini' && (
+              <LazyMiniChart data={chart.data || []} dataKey="value" />
+            )}
+          </Suspense>
+        </div>
+      ))}
     </div>
   )
 }
@@ -130,7 +128,7 @@ export function useChartProgressiveLoading() {
     () => import('@/components/ui/charts'),
     () => import('recharts'), // Heavy library
   ]
-  
+
   // Simple implementation since useProgressiveLoading doesn't exist
   return {
     loadNext: async () => {
@@ -159,8 +157,8 @@ export const ChartPerformanceUtils = {
 
   // Optimize data for rendering
   optimizeChartData: (data: unknown[], maxPoints = 50) => {
-    if (data.length <= maxPoints) {return data}
-    
+    if (data.length <= maxPoints) { return data }
+
     // Sample data points to reduce rendering load
     const step = Math.ceil(data.length / maxPoints)
     return data.filter((_, index) => index % step === 0)

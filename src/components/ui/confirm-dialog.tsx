@@ -45,7 +45,7 @@ export const ConfirmDialog = ({
   const canConfirm = !requireConfirmation || inputValue === confirmationText
 
   const handleConfirm = async () => {
-    if (!canConfirm) return
+    if (!canConfirm) {return}
 
     setIsLoading(true)
     try {

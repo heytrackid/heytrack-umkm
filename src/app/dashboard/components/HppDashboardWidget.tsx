@@ -1,23 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useCurrency } from '@/hooks/useCurrency'
-import { useToast } from '@/hooks/use-toast'
-import { dbLogger } from '@/lib/logger'
-import {
-  Calculator,
-  TrendingUp,
+import { 
+  Calculator, 
+  AlertTriangle, 
+  Target, 
+  DollarSign, 
+  TrendingUp, 
   TrendingDown,
-  Target,
-  AlertTriangle,
-  DollarSign,
   BarChart3
 } from 'lucide-react'
+import { useCurrency } from '@/hooks/useCurrency'
+import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
-import { SharedStatsCards, PageHeader } from '@/components/shared'
+import { useState, useEffect } from 'react'
+import { dbLogger } from '@/lib/logger'
 import {
   StatsCardSkeleton,
   QuickActionsSkeleton
@@ -110,7 +109,7 @@ export default function HppDashboardWidget() {
 
       void setData(mockData)
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to load HPP dashboard data')
+      dbLogger.error({ err }, 'Failed to load HPP dashboard data')
       toast({
         title: 'Error',
         description: 'Failed to load HPP data',
@@ -155,6 +154,7 @@ export default function HppDashboardWidget() {
           HPP & Costing Overview
           {data.unreadAlerts > 0 && (
             <Badge variant="destructive" className="ml-auto">
+              <AlertTriangle className="h-3 w-3 mr-1" />
               {data.unreadAlerts} alerts
             </Badge>
           )}
@@ -164,14 +164,16 @@ export default function HppDashboardWidget() {
         {/* Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-blue-600 flex items-center justify-center">
+              <Target className="h-4 w-4 mr-1" />
               {data.recipesWithHpp}/{data.totalRecipes}
             </div>
             <div className="text-sm text-muted-foreground">Recipes with HPP</div>
           </div>
 
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600 flex items-center justify-center">
+              <DollarSign className="h-4 w-4 mr-1" />
               {formatCurrency(data.averageHpp)}
             </div>
             <div className="text-sm text-muted-foreground">Average HPP</div>
@@ -238,9 +240,8 @@ export default function HppDashboardWidget() {
                     ) : (
                       <TrendingDown className="h-4 w-4 text-green-500" />
                     )}
-                    <span className={`font-semibold ${
-                      change.direction === 'increase' ? 'text-red-600' : 'text-green-600'
-                    }`}>
+                    <span className={`font-semibold ${change.direction === 'increase' ? 'text-red-600' : 'text-green-600'
+                      }`}>
                       {change.direction === 'increase' ? '+' : ''}{change.change_percentage}%
                     </span>
                   </div>

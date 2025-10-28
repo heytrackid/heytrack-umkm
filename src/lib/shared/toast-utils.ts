@@ -248,11 +248,11 @@ export async function withToastFeedback<T>(
     // Dismiss loading toast
     loadingToast.dismiss()
 
-    // Show _error toast
+    // Show error toast
     const errorMsg = err instanceof Error ? err.message : errorMessage
     showErrorToast(toast, 'Error', errorMsg)
 
-    onError?.(_error as Error)
+    onError?.(err as Error)
     return null
   }
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Edit2, Trash2 } from 'lucide-react'
 
@@ -34,14 +33,14 @@ export default function BulkActions({
   onBulkEdit,
   onBulkDelete
 }: BulkActionsProps) {
-  if (selectedItems.length === 0) {return null}
-  
+  if (selectedItems.length === 0) { return null }
+
   const selectedCostNames = costs
     .filter(cost => selectedItems.includes(cost.id))
     .map(cost => cost.name)
     .slice(0, 2)
     .join(', ')
-  
+
   return (
     <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
       <div className="flex items-center gap-2">

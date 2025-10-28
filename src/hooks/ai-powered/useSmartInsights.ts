@@ -9,6 +9,27 @@ interface UseSmartInsightsProps {
   optimizeInventory: (request: InventoryOptimizationRequest) => Promise<AIInsight['analysis']>
 }
 
+interface RecipeWithIngredients {
+  name?: string | null
+  selling_price?: number | null
+  recipe_ingredients?: Array<{
+    quantity: number
+    ingredient?: {
+      name?: string | null
+      price_per_unit?: number | null
+    } | null
+  }> | null
+}
+
+interface IngredientData {
+  name?: string | null
+  current_stock?: number | null
+  min_stock?: number | null
+  price_per_unit?: number | null
+  supplier?: string | null
+  lead_time?: number | null
+}
+
 /**
  * Smart Business Insights Generator Hook
  * Combines multiple AI analyses to provide comprehensive business intelligence
@@ -23,10 +44,10 @@ export function useSmartInsights({
 
     try {
       // Generate pricing insights if recipes available
-      if (businessData.recipes && businessData.ingredients) {
-        const topRecipes = businessData.recipes.slice(0, 3)
+      if (businessData.recipes && Array.isArray(businessData.recipes)) {
+        const topRecipes = (businessData.recipes as RecipeWithIngredients[]).slice(0, 3)
         for (const recipe of topRecipes) {
-          if ('recipe_ingredients' in recipe && Array.isArray(recipe.recipe_ingredients)) {
+          if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
             const ingredients = recipe.recipe_ingredients.map(ri => ({
               name: ri.ingredient?.name ?? 'Unknown',
               cost: (ri.ingredient?.price_per_unit ?? 0) * ri.quantity,
@@ -47,17 +68,17 @@ export function useSmartInsights({
                 priority: 'high'
               })
             } catch (err: unknown) {
-              logger.warn(`Pricing analysis failed for ${recipe.name}`, { err })
+              logger.warn({ err }, `Pricing analysis failed for ${recipe.name ?? 'unknown'}`)
             }
           }
         }
       }
 
       // Generate inventory insights if ingredients available
-      if (businessData.ingredients && businessData.ingredients.length > 0) {
+      if (businessData.ingredients && Array.isArray(businessData.ingredients) && businessData.ingredients.length > 0) {
         try {
           const inventoryOptimization = await optimizeInventory({
-            ingredients: businessData.ingredients.map(ingredient => ({
+            ingredients: (businessData.ingredients as IngredientData[]).map(ingredient => ({
               name: ingredient.name ?? 'Unknown Ingredient',
               currentStock: ingredient.current_stock ?? 0,
               minStock: ingredient.min_stock ?? 0,
@@ -73,14 +94,14 @@ export function useSmartInsights({
             priority: 'medium'
           })
         } catch (err: unknown) {
-          logger.warn('Inventory optimization failed', { err })
+          logger.warn({ err }, 'Inventory optimization failed')
         }
       }
 
       return insights
 
     } catch (err: unknown) {
-      logger.error('Smart insights generation failed', { err })
+      logger.error({ err }, 'Smart insights generation failed')
       return []
     }
   }, [analyzePricing, optimizeInventory])

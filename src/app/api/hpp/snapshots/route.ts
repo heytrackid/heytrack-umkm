@@ -156,8 +156,8 @@ export async function POST(request: NextRequest) {
 
     apiLogger.info({
       userId: user.id,
-      snapshotsCreated: result.data?.snapshotsCreated,
-      recipesProcessed: result.data?.recipesChecked
+      snapshotsCreated: (result.data as { snapshotsCreated?: number })?.snapshotsCreated,
+      recipesProcessed: (result.data as { recipesChecked?: number })?.recipesChecked
     }, 'Daily snapshots executed successfully')
 
     return NextResponse.json(result)

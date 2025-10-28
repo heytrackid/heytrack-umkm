@@ -10,12 +10,23 @@ import {
 } from '@/hooks/route-preloading'
 import { useRoutePreloading } from '@/hooks/useRoutePreloading'
 
+interface PreloadingMetrics {
+  currentRoute: string
+  preloadedRoutesCount: number
+  preloadedComponentsCount: number
+  preloadedRoutes: string[]
+  preloadedComponents: string[]
+  lazyLoadingMetrics?: {
+    averageLoadTime?: number
+  }
+}
+
 interface PreloadingContextType {
   isPreloading: boolean
   preloadedRoutes: Set<string>
   preloadedComponents: Set<string>
   preloadRoute: (route: string) => Promise<void>
-  getMetrics: () => unknown
+  getMetrics: () => PreloadingMetrics
 }
 
 const PreloadingContext = createContext<PreloadingContextType | null>(null)
@@ -85,7 +96,8 @@ export const PreloadingProvider = ({
       }
     } catch (err: unknown) {
       if (debug) {
-        apiLogger.warn(`❌ Failed to preload route ${route}: ${error}`)
+        const errorMsg = err instanceof Error ? err.message : String(err)
+        apiLogger.warn(`❌ Failed to preload route ${route}: ${errorMsg}`)
       }
     } finally {
       void setIsPreloading(false)
@@ -102,7 +114,7 @@ export const PreloadingProvider = ({
   }, [pathname, preloadedRoutes.size, preloadedComponents.size, debug])
 
   // Performance monitoring
-  const getMetrics = () => ({
+  const getMetrics = (): PreloadingMetrics => ({
     currentRoute: pathname,
     preloadedRoutesCount: preloadedRoutes.size,
     preloadedComponentsCount: preloadedComponents.size,
@@ -131,7 +143,7 @@ export const PreloadingProvider = ({
 const PreloadingDebugPanel = () => {
   const { getMetrics, isPreloading } = usePreloading()
   const [showDebug, setShowDebug] = useState(false)
-  const [metrics, setMetrics] = useState<any>(null)
+  const [metrics, setMetrics] = useState<PreloadingMetrics | null>(null)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -260,13 +272,13 @@ export const usePreloadingAnalytics = () => {
     const interval = setInterval(() => {
       const metrics = getMetrics()
 
-      if ((metrics as any).preloadedRoutesCount > 0 || (metrics as any).preloadedComponentsCount > 0) {
+      if (metrics.preloadedRoutesCount > 0 || metrics.preloadedComponentsCount > 0) {
         // Here you could send metrics to your analytics service
         apiLogger.info({
           params: {
-            route: (metrics as any).currentRoute,
-            preloadedRoutes: (metrics as any).preloadedRoutesCount,
-            preloadedComponents: (metrics as any).preloadedComponentsCount,
+            route: metrics.currentRoute,
+            preloadedRoutes: metrics.preloadedRoutesCount,
+            preloadedComponents: metrics.preloadedComponentsCount,
             timestamp: new Date().toISOString()
           }
         }, '📊 Preloading Analytics:')

@@ -27,7 +27,7 @@ export default function AuthCallbackPage() {
           void router.push('/auth/login')
         }
       } catch (err) {
-        apiLogger.error({ error }, 'Unexpected error in auth callback:')
+        apiLogger.error({ err }, 'Unexpected error in auth callback:')
         void router.push('/auth/login?error=unexpected_error')
       }
     }

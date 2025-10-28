@@ -3,11 +3,11 @@
  * Type definitions for business service operations
  */
 
-export interface ExportData {
+export interface ExportData<T = Record<string, unknown>> {
   filename: string
-  data: any[]
+  data: T[]
   headers?: string[]
-  sheets?: Array<{ name: string; data: any[]; headers?: string[] }>
+  sheets?: Array<{ name: string; data: T[]; headers?: string[] }>
 }
 
 export interface ExcelExportOptions {

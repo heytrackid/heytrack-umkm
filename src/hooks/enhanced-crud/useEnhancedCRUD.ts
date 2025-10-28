@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react'
 import { successToast } from '@/hooks/use-toast'
 import { createClient as createSupabaseClient } from '@/utils/supabase'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import type { EnhancedCRUDOptions, BulkUpdateItem } from './types'
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
 
@@ -41,7 +41,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     }
   }, [showSuccessToast, successMessages])
 
-  const createRecord = useCallback(async (data: Tables[T]['Insert']) => {
+  const createRecord = useCallback(async (data: any) => {
     validateCRUDInputs('create', data)
 
     void setLoading(true)
@@ -51,8 +51,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const supabase = createSupabaseClient()
 
       const { data: result, error } = await supabase
-        .from(table as any)
-        .insert(data as any)
+        .from(table)
+        .insert(data)
         .select('*')
         .single()
 
@@ -70,7 +70,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
-  const updateRecord = useCallback(async (id: string, data: Tables[T]['Update']) => {
+  const updateRecord = useCallback(async (id: string, data: any) => {
     validateCRUDInputs('update', data, id)
 
     void setLoading(true)
@@ -80,8 +80,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const supabase = createSupabaseClient()
 
       const { data: result, error } = await supabase
-        .from(table as any)
-        .update(data as any)
+        .from(table)
+        .update(data)
         .eq('id', id)
         .select('*')
         .single()
@@ -115,7 +115,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       // Check if record exists first
       const { data: existingRecord, error: fetchError } = await supabase
-        .from(table as any)
+        .from(table)
         .select('*')
         .eq('id', id)
         .single()
@@ -125,7 +125,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       const { error } = await supabase
-        .from(table as any)
+        .from(table)
         .delete()
         .eq('id', id)
 
@@ -143,7 +143,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
-  const bulkCreate = useCallback(async (records: Array<Tables[T]['Insert']>) => {
+  const bulkCreate = useCallback(async (records: any[]) => {
     validateBulkInputs('create', records)
 
     void setLoading(true)
@@ -153,8 +153,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const supabase = createSupabaseClient()
 
       const { data: result, error } = await supabase
-        .from(table as any)
-        .insert(records as any)
+        .from(table)
+        .insert(records)
         .select('*')
 
       if (error) {
@@ -178,7 +178,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const bulkUpdate = useCallback(async (
-    updates: Array<BulkUpdateItem<T>>
+    updates: Array<{ id: string; data: any }>
   ) => {
     validateBulkInputs('update', updates)
 
@@ -191,8 +191,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
       for (const update of updates) {
         const { data: result, error } = await supabase
-          .from(table as any)
-          .update(update.data as any)
+          .from(table)
+          .update(update.data)
           .eq('id', update.id)
           .select('*')
           .single()
@@ -230,7 +230,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       const supabase = createSupabaseClient()
 
       const { error } = await supabase
-        .from(table as any)
+        .from(table)
         .delete()
         .in('id', ids)
 

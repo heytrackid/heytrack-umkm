@@ -9,10 +9,13 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 
 // Dynamically import ExcelExportButton to reduce bundle size
-const ExcelExportButton = dynamic(() => import('@/components/export/ExcelExportButton').then(mod => ({ default: mod.default })), {
-  ssr: false,
-  loading: () => <Skeleton className="w-full h-8" />
-})
+const ExcelExportButton = dynamic(
+  () => import(/* webpackChunkName: "excel-export-button" */ '@/components/export/ExcelExportButton'),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="w-full h-8" />
+  }
+)
 
 interface SidebarFooterProps {
   variant?: 'default' | 'mobile'

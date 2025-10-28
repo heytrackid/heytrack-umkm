@@ -1,6 +1,6 @@
 import { dbLogger } from '@/lib/logger'
 import supabase from '@/utils/supabase'
-import { HppCalculatorService } from './HppCalculatorService'
+import { HppCalculatorService } from '@/modules/hpp'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -257,7 +257,14 @@ export class PricingAssistantService {
    * Assess pricing risks
    */
   private assessPricingRisks(
-    recommendations: any,
+    recommendations: {
+      recommendedPrice: number
+      minPrice: number
+      maxPrice: number
+      optimalMargin: number
+      reasoning: string[]
+      confidence: number
+    },
     marketFactors: PricingRecommendation['marketFactors']
   ): PricingRecommendation['riskAssessment'] {
     const riskFactors: string[] = []

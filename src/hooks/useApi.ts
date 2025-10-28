@@ -1,5 +1,7 @@
-import { useCallback, useState } from 'react'
-import { type ApiResponse, type RequestConfig, apiClient } from '@/lib/api/client'
+import { useCallback, useEffect, useState } from 'react'
+import { type ApiResponse, type ApiRequestOptions, apiClient } from '@/lib/api/client'
+
+type RequestConfig = ApiRequestOptions
 
 interface UseApiOptions<T> {
   onSuccess?: (data: T) => void

@@ -21,7 +21,7 @@ import type { SmartNotification } from './types'
 /**
  * Send WhatsApp message (convenience function)
  */
-export async function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, any>): Promise<boolean> {
+export async function sendWhatsAppMessage(to: string, templateId: string, data: Record<string, unknown>): Promise<boolean> {
   // This would need proper configuration in a real app
   const config = {
     businessNumber: '',

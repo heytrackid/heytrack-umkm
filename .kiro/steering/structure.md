@@ -33,7 +33,7 @@ src/app/
 │   ├── orders/           # Order management
 │   └── reports/          # Financial reports
 ├── dashboard/            # Main dashboard page
-├── hpp/                  # HPP tracking pages
+├── hpp/                  # HPP tracking pages (uses @/modules/hpp)
 ├── ingredients/          # Ingredient management pages
 ├── orders/               # Order management pages
 ├── recipes/              # Recipe management pages
@@ -141,6 +141,18 @@ Feature modules with encapsulated logic:
 
 ```
 src/modules/
+├── hpp/                   # HPP (Harga Pokok Produksi) Module
+│   ├── components/        # HPP UI components
+│   ├── services/          # HPP business logic
+│   │   ├── HppCalculatorService.ts
+│   │   ├── HppSnapshotService.ts
+│   │   ├── HppAlertService.ts
+│   │   └── HppExportService.ts
+│   ├── hooks/             # HPP React hooks
+│   ├── types/             # HPP TypeScript types
+│   ├── utils/             # HPP utilities
+│   ├── index.ts           # Public exports
+│   └── README.md          # Module documentation
 ├── orders/
 │   ├── components/        # Order-specific components
 │   ├── services/          # Order business logic
@@ -154,6 +166,8 @@ src/modules/
 - Self-contained feature modules
 - Services contain business logic
 - Components are feature-specific
+- Each module has index.ts for public exports
+- Use README.md for module documentation
 
 ## Supabase Directory (`supabase/`)
 

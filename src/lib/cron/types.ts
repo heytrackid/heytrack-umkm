@@ -20,10 +20,22 @@ export interface AutomationStatus {
 }
 
 export interface AutomationEngineResult {
-  inventory: any
-  financial: any
-  orders: any
-  hpp: any
+  inventory: {
+    alerts: unknown[]
+    reorderSuggestions: unknown[]
+  }
+  financial: {
+    metrics: Record<string, number>
+    alerts: unknown[]
+  }
+  orders: {
+    pending: unknown[]
+    overdue: unknown[]
+  }
+  hpp: {
+    calculations: unknown[]
+    alerts: unknown[]
+  }
 }
 
 export interface InventoryReorderSummary {
@@ -33,7 +45,7 @@ export interface InventoryReorderSummary {
 }
 
 export interface CronJobResult {
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface JobSchedule {

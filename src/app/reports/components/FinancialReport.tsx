@@ -3,7 +3,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useCurrency } from '@/hooks/useCurrency'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseCRUD } from '@/hooks/supabase/useSupabaseCRUD'
+import type { Tables } from '@/types/supabase-generated'
 
 interface FinancialReportProps {
   dateRange: {
@@ -12,25 +13,35 @@ interface FinancialReportProps {
   }
 }
 
+type FinancialRecord = Tables<'financial_records'>
+
 export default function FinancialReport({ dateRange }: FinancialReportProps) {
   const { formatCurrency } = useCurrency()
-  const { data: financialRecords } = useSupabaseCRUD('financial_records')
+  const { data: financialRecords } = useSupabaseCRUD<'financial_records'>('financial_records')
 
   // Calculate financial report
-  const financialData = financialRecords?.filter((record: any) => {
+  const financialData = (financialRecords ?? []).filter((record): record is FinancialRecord & { date: string } => {
+    if (!record.date) {return false}
     const recordDate = new Date(record.date).toISOString().split('T')[0]
     return recordDate >= dateRange.start && recordDate <= dateRange.end
-  }) || []
+  })
 
-  const financialStats = {
-    totalIncome: financialData.filter((r: any) => r.type === 'INCOME').reduce((sum: number, r: any) => sum + r.amount, 0),
-    totalExpense: financialData.filter((r: any) => r.type === 'EXPENSE').reduce((sum: number, r: any) => sum + r.amount, 0),
-    netProfit: 0,
-    profitMargin: 0
-  }
-  financialStats.netProfit = financialStats.totalIncome - financialStats.totalExpense
-  financialStats.profitMargin = financialStats.totalIncome > 0
-    ? (financialStats.netProfit / financialStats.totalIncome) * 100
+  const financialStats = financialData.reduce<{ totalIncome: number; totalExpense: number }>(
+    (stats, record) => {
+      if (record.type === 'INCOME') {
+        stats.totalIncome += record.amount
+      }
+      if (record.type === 'EXPENSE') {
+        stats.totalExpense += record.amount
+      }
+      return stats
+    },
+    { totalIncome: 0, totalExpense: 0 }
+  )
+
+  const netProfit = financialStats.totalIncome - financialStats.totalExpense
+  const profitMargin = financialStats.totalIncome > 0
+    ? (netProfit / financialStats.totalIncome) * 100
     : 0
 
   return (
@@ -67,8 +78,8 @@ export default function FinancialReport({ dateRange }: FinancialReportProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-bold ${financialStats.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(financialStats.netProfit)}
+            <p className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {formatCurrency(netProfit)}
             </p>
           </CardContent>
         </Card>
@@ -80,7 +91,7 @@ export default function FinancialReport({ dateRange }: FinancialReportProps) {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">
-              {financialStats.profitMargin.toFixed(1)}%
+              {profitMargin.toFixed(1)}%
             </p>
           </CardContent>
         </Card>

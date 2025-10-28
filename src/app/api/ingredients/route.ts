@@ -9,11 +9,10 @@ import {
   createPaginationMeta
 } from '@/lib/api-core'
 import {
-  IngredientInsertSchema,
-  IngredientUpdateSchema
+  IngredientInsertSchema
 } from '@/lib/validations/domains/ingredient'
 import { createClient } from '@/utils/supabase/server'
-import { type NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { z } from 'zod'
 
 import { apiLogger } from '@/lib/logger'
@@ -66,7 +65,6 @@ export async function GET(request: NextRequest) {
       supabaseQuery = supabaseQuery.order('name', { ascending: true })
     }
 
-    // @ts-ignore
     const { data, error, count } = await supabaseQuery
 
     if (error) {
@@ -110,8 +108,8 @@ export async function POST(request: NextRequest) {
       .from('ingredients')
       .insert({
         ...bodyValidation,
-        user_id: (user as any).id
-      } as any)
+        user_id: user.id
+      })
       .select('*')
       .single()
 

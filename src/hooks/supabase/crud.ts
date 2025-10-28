@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import { useCallback, useState } from 'react'
 import type { CRUDOptions } from './types'
 
@@ -57,8 +57,8 @@ export function useSupabaseCRUD<T extends keyof Tables>(
       const supabase = createClient()
 
       const { data: result, error } = await supabase
-        .from(table as any)
-        .insert(data as any)
+        .from(table)
+        .insert(data)
         .select('*')
         .single()
 
@@ -84,8 +84,8 @@ export function useSupabaseCRUD<T extends keyof Tables>(
       const supabase = createClient()
 
       const { data: result, error } = await supabase
-        .from(table as any)
-        .update(data as any)
+        .from(table)
+        .update(data)
         .eq('id', id)
         .select('*')
         .single()
@@ -116,7 +116,7 @@ export function useSupabaseCRUD<T extends keyof Tables>(
       const supabase = createClient()
 
       const { error } = await supabase
-        .from(table as any)
+        .from(table)
         .delete()
         .eq('id', id)
 

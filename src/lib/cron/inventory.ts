@@ -47,7 +47,7 @@ export class InventoryCronJobs {
 
       return summary
     } catch (err) {
-      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error checking inventory reorder')
+      cronLogger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error checking inventory reorder')
       throw err
     }
   }
@@ -101,7 +101,7 @@ export class InventoryCronJobs {
 
       return { alertsGenerated: alerts.length }
     } catch (err) {
-      cronLogger.error({ err: _err instanceof Error ? err.message : String(err) }, 'Error checking inventory alerts')
+      cronLogger.error({ err: err instanceof Error ? err.message : String(err) }, 'Error checking inventory alerts')
       throw err
     }
   }

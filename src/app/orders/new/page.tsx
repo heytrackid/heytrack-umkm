@@ -32,40 +32,40 @@ import { useOrderLogic } from './hooks/useOrderLogic'
 
 // ============= DYNAMIC IMPORTS (CODE SPLITTING) =============
 const OrderCustomerStep = dynamic(
-  () => import('./_components/OrderCustomerStep'),
-  { 
+  () => import(/* webpackChunkName: "order-customer-step" */ './_components/OrderCustomerStep'),
+  {
     loading: () => <StepSkeleton />,
     ssr: false
   }
 )
 
 const OrderItemsStep = dynamic(
-  () => import('./_components/OrderItemsStep'),
-  { 
+  () => import(/* webpackChunkName: "order-items-step" */ './_components/OrderItemsStep'),
+  {
     loading: () => <StepSkeleton />,
     ssr: false
   }
 )
 
 const OrderDeliveryStep = dynamic(
-  () => import('./_components/OrderDeliveryStep'),
-  { 
+  () => import(/* webpackChunkName: "order-delivery-step" */ './_components/OrderDeliveryStep'),
+  {
     loading: () => <StepSkeleton />,
     ssr: false
   }
 )
 
 const OrderPaymentStep = dynamic(
-  () => import('./_components/OrderPaymentStep'),
-  { 
+  () => import(/* webpackChunkName: "order-payment-step" */ './_components/OrderPaymentStep'),
+  {
     loading: () => <OrderFormSkeleton />,
     ssr: false
   }
 )
 
 const OrderSummary = dynamic(
-  () => import('./_components/OrderSummary'),
-  { 
+  () => import(/* webpackChunkName: "order-summary" */ './_components/OrderSummary'),
+  {
     loading: () => <OrderFormSkeleton />,
     ssr: false
   }
@@ -84,12 +84,12 @@ export default function NewOrderPage() {
     error,
     activeTab,
     loading,
-    
+
     // Calculated values
     subtotal,
     taxAmount,
     totalAmount,
-    
+
     // Handlers
     handleInputChange,
     addOrderItem,
@@ -99,7 +99,7 @@ export default function NewOrderPage() {
     handleSubmit,
     setActiveTab,
     setError,
-    
+
     // Navigation
     router
   } = useOrderLogic()
@@ -133,14 +133,14 @@ export default function NewOrderPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
+            <Button
               size="sm"
               onClick={() => router.back()}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Kembali
             </Button>
-            
+
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <ShoppingCart className="h-8 w-8" />
@@ -162,15 +162,15 @@ export default function NewOrderPage() {
                 <CardContent className="p-6">
                   <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList className="grid w-full grid-cols-4">
-                      <TabsTrigger 
-                        value="customer" 
+                      <TabsTrigger
+                        value="customer"
                         className="flex items-center gap-2"
                       >
                         <User className="h-4 w-4" />
                         <span className="hidden sm:inline">Pelanggan</span>
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="items" 
+                      <TabsTrigger
+                        value="items"
                         className="flex items-center gap-2"
                       >
                         <Package className="h-4 w-4" />
@@ -181,15 +181,15 @@ export default function NewOrderPage() {
                           </Badge>
                         )}
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="delivery" 
+                      <TabsTrigger
+                        value="delivery"
                         className="flex items-center gap-2"
                       >
                         <Truck className="h-4 w-4" />
                         <span className="hidden sm:inline">Pengiriman</span>
                       </TabsTrigger>
-                      <TabsTrigger 
-                        value="payment" 
+                      <TabsTrigger
+                        value="payment"
                         className="flex items-center gap-2"
                       >
                         <CreditCard className="h-4 w-4" />

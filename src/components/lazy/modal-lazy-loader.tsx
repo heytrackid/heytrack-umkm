@@ -37,46 +37,43 @@ const FormLoadingSkeleton = ({ fields = 4 }: { fields?: number }) => (
   </div>
 )
 
-// Lazy loaded form components
-export const LazyIngredientForm = lazy(() => 
-  import('@/components').then(m => ({ default: m.IngredientForm }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+// Lazy loaded form components - Placeholder implementations
+// These components don't exist yet in @/components, so we provide fallbacks
+const FormPlaceholder = () => <div className="p-4 text-center text-muted-foreground">Form component not available</div>
+const DetailPlaceholder = () => <div className="p-4 text-center text-muted-foreground">Detail view not available</div>
+
+export const LazyIngredientForm = lazy(() =>
+  Promise.resolve({ default: FormPlaceholder })
 )
 
-export const LazyOrderForm = lazy(() => 
-  import('@/components').then(m => ({ default: m.OrderForm }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyOrderForm = lazy(() =>
+  Promise.resolve({ default: FormPlaceholder })
 )
 
-export const LazyCustomerForm = lazy(() => 
-  import('@/components').then(m => ({ default: m.CustomerForm }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyCustomerForm = lazy(() =>
+  import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm').then(m => ({ default: m.CustomerForm }))
+    .catch(() => ({ default: FormPlaceholder }))
 )
 
-export const LazyRecipeForm = lazy(() => 
-  import('@/components').then(m => ({ default: m.RecipeForm }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyRecipeForm = lazy(() =>
+  Promise.resolve({ default: FormPlaceholder })
 )
 
-export const LazyFinanceForm = lazy(() => 
-  import('@/components').then(m => ({ default: m.FinanceForm }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyFinanceForm = lazy(() =>
+  Promise.resolve({ default: FormPlaceholder })
 )
 
 // Lazy loaded detail/view components
-export const LazyOrderDetail = lazy(() => 
-  import('@/components').then(m => ({ default: m.OrderDetail }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyOrderDetail = lazy(() =>
+  Promise.resolve({ default: DetailPlaceholder })
 )
 
-export const LazyCustomerDetail = lazy(() => 
-  import('@/components').then(m => ({ default: m.CustomerDetail }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyCustomerDetail = lazy(() =>
+  Promise.resolve({ default: DetailPlaceholder })
 )
 
-export const LazyInventoryDetail = lazy(() => 
-  import('@/components').then(m => ({ default: m.InventoryDetail }))
-    .catch(() => ({ default: () => <div>Informasi</div>}))
+export const LazyInventoryDetail = lazy(() =>
+  Promise.resolve({ default: DetailPlaceholder })
 )
 
 // Lazy Modal Wrapper Component
@@ -85,22 +82,22 @@ interface LazyModalProps {
   onClose: () => void
   title: string
   component: 'ingredient-form' | 'order-form' | 'customer-form' | 'recipe-form' | 'finance-form' |
-             'order-detail' | 'customer-detail' | 'inventory-detail'
+  'order-detail' | 'customer-detail' | 'inventory-detail'
   props?: any
   size?: 'sm' | 'md' | 'lg' | 'xl'
   mobile?: boolean
 }
 
-export const LazyModal = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  component, 
-  props = {}, 
+export const LazyModal = ({
+  isOpen,
+  onClose,
+  title,
+  component,
+  props = {},
   size = 'md',
-  mobile = false 
+  mobile = false
 }: LazyModalProps) => {
-  
+
   const getComponent = () => {
     switch (component) {
       case 'ingredient-form': return LazyIngredientForm
@@ -127,7 +124,7 @@ export const LazyModal = ({
 
   const Component = getComponent()
   const isFormComponent = component.includes('form')
-  
+
   if (mobile) {
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
@@ -202,7 +199,7 @@ export const useLazyModal = () => {
   }, [])
 
   const ModalRenderer = useCallback(() => {
-    if (!modalState.component) {return null}
+    if (!modalState.component) { return null }
 
     return (
       <LazyModal
@@ -227,32 +224,33 @@ export const useLazyModal = () => {
 // Preloader for modal components
 export const preloadModalComponent = (component: LazyModalProps['component']) => {
   switch (component) {
-    case 'ingredient-form': return import('@/components')
-    case 'order-form': return import('@/components')
-    case 'customer-form': return import('@/components')
-    case 'recipe-form': return import('@/components')
-    case 'finance-form': return import('@/components')
-    case 'order-detail': return import('@/components')
-    case 'customer-detail': return import('@/components')
-    case 'inventory-detail': return import('@/components')
-    default: return Promise.resolve()
+    case 'customer-form':
+      return import(/* webpackChunkName: "modal-customer-form" */ '@/components/forms/CustomerForm')
+    case 'ingredient-form':
+    case 'order-form':
+    case 'recipe-form':
+    case 'finance-form':
+    case 'order-detail':
+    case 'customer-detail':
+    case 'inventory-detail':
+    default:
+      return Promise.resolve()
   }
 }
 
-// Bulk Modal Components (for multiple items)
-export const LazyBulkActionModal = lazy(() => 
-  import('@/components').then(m => ({ default: m.BulkActionModal }))
-    .catch(() => ({ default: () => <div>Bulk action modal not available</div> }))
+// Bulk Modal Components (for multiple items) - Placeholders
+const ModalPlaceholder = () => <div className="p-4 text-center text-muted-foreground">Modal component not available</div>
+
+export const LazyBulkActionModal = lazy(() =>
+  Promise.resolve({ default: ModalPlaceholder })
 )
 
-export const LazyConfirmationModal = lazy(() => 
-  import('@/components').then(m => ({ default: m.ConfirmationModal }))
-    .catch(() => ({ default: () => <div>Confirmation modal not available</div> }))
+export const LazyConfirmationModal = lazy(() =>
+  Promise.resolve({ default: ModalPlaceholder })
 )
 
-export const LazyExportModal = lazy(() => 
-  import('@/components').then(m => ({ default: m.ExportModal }))
-    .catch(() => ({ default: () => <div>Export modal not available</div> }))
+export const LazyExportModal = lazy(() =>
+  Promise.resolve({ default: ModalPlaceholder })
 )
 
 // Specialized modal hooks
@@ -267,7 +265,7 @@ export const useConfirmationModal = () => {
   }>({
     title: '',
     message: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
     confirmText: 'Confirm',
     cancelText: 'Cancel'
   })
@@ -287,16 +285,26 @@ export const useConfirmationModal = () => {
         <DialogHeader>
           <DialogTitle>{config.title}</DialogTitle>
         </DialogHeader>
-        <Suspense fallback={<ModalLoadingSkeleton />}>
-          <LazyConfirmationModal
-            {...config}
-            onClose={hideConfirmation}
-            onConfirm={() => {
-              config.onConfirm()
-              hideConfirmation()
-            }}
-          />
-        </Suspense>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">{config.message}</p>
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={hideConfirmation}
+              className="px-4 py-2 text-sm border rounded-md hover:bg-gray-50"
+            >
+              {config.cancelText}
+            </button>
+            <button
+              onClick={() => {
+                config.onConfirm()
+                hideConfirmation()
+              }}
+              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              {config.confirmText}
+            </button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )
@@ -313,13 +321,13 @@ export const useConfirmationModal = () => {
 export const ModalLoadingStrategy = {
   // Essential modals (preload immediately)
   essential: ['confirmation-modal'],
-  
+
   // Form modals (load when user clicks "Add" button)
   forms: ['ingredient-form', 'order-form', 'customer-form', 'recipe-form', 'finance-form'],
-  
+
   // Detail modals (load when user clicks "View" button)
   details: ['order-detail', 'customer-detail', 'inventory-detail'],
-  
+
   // Advanced modals (load on demand)
   advanced: ['bulk-action-modal', 'export-modal'],
 }

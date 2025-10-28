@@ -152,7 +152,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
 
       void setStats(newStats)
     } catch (err) {
-      void setError(_err instanceof Error ? _err.message : 'Gagal memuat data pesanan')
+      void setError(err instanceof Error ? err.message : 'Gagal memuat data pesanan')
     } finally {
       void setLoading(false)
     }
@@ -160,13 +160,13 @@ export default function OrdersPage({ }: OrdersPageProps) {
 
   const getStatusColor = (status: OrderStatus) => {
     const config = ORDER_STATUSES[status]
-    if (!config) return 'bg-gray-100 text-gray-800'
+    if (!config) {return 'bg-gray-100 text-gray-800'}
     return config.color
   }
 
   const getPaymentStatusColor = (status: string) => {
     const config = PAYMENT_STATUSES[status as keyof typeof PAYMENT_STATUSES]
-    if (!config) return 'bg-gray-100 text-gray-800'
+    if (!config) {return 'bg-gray-100 text-gray-800'}
     return config.color
   }
 
@@ -201,7 +201,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
           : order
       ))
     } catch (err) {
-      uiLogger.error({ err: _err }, 'Failed to update status')
+      uiLogger.error({ err }, 'Failed to update status')
     }
   }
 

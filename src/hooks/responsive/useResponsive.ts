@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { type ScreenSize, type ResponsiveState, BREAKPOINTS } from './types'
 
-const MOBILE_BREAKPOINT = 768
-const TABLET_BREAKPOINT = BREAKPOINTS.lg
+// Removed unused constants: MOBILE_BREAKPOINT, TABLET_BREAKPOINT
 
 /**
  * Unified responsive hook untuk deteksi breakpoint

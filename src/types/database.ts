@@ -1,18 +1,15 @@
 // Re-export all types from the modular structure for backward compatibility
 // This file maintains the old import path while using the new split structure
 
+// Re-export types from domain files for backward compatibility
+// Only include types that actually exist in the modular structure
 export type {
-    AppSettingsTable, 
     AuditFields, 
-    BahanBaku, 
-    BahanBakuFormData, 
     BusinessUnit,
-    Constants,
     CustomersTable, 
     DailySalesSummaryTable, 
     Database, 
     Enums, 
-    ExpensesTable, 
     FinancialRecordsTable, 
     IngredientPurchasesTable, 
     IngredientsTable,
@@ -46,15 +43,15 @@ export type {
     UsageAnalyticsTable,
     UserProfile, 
     UserProfilesTable,
-    UserRole, 
-    WhatsAppTemplatesTable
+    UserRole
 } from './index'
 
 export type {
     Json
-} from './common'
+} from './shared/common'
 
-export {
-    DatabaseEnums
-} from './enums'
+// Note: DatabaseEnums may not exist - check if needed
+// export {
+//     DatabaseEnums
+// } from './enums'
 

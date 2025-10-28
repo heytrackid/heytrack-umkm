@@ -10,6 +10,13 @@ import { Sparkles, Lightbulb, TrendingUp, CheckCircle, AlertTriangle } from 'luc
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
+import { PageHeader } from '@/components/shared'
+
+const recommendationsBreadcrumbs = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'HPP & Pricing', href: '/hpp' },
+  { label: 'Cost Optimization' }
+]
 
 interface Recommendation {
   id: string
@@ -33,7 +40,9 @@ export default function HppRecommendationsPage() {
   const { toast } = useToast()
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'pending' | 'implemented'>('pending')
+  type RecommendationFilter = 'all' | 'pending' | 'implemented'
+
+  const [filter, setFilter] = useState<RecommendationFilter>('pending')
 
   // Load recommendations
   useEffect(() => {
@@ -56,7 +65,7 @@ export default function HppRecommendationsPage() {
         void setRecommendations(data.recommendations || [])
       }
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to load recommendations')
+      dbLogger.error({ err }, 'Failed to load recommendations')
       toast({
         title: 'Error',
         description: 'Failed to load recommendations',
@@ -72,10 +81,10 @@ export default function HppRecommendationsPage() {
       // In a real implementation, this would call an API to update the recommendation
       toast({
         title: 'Info',
-        description: 'Implementation tracking will be available in the API',
+        description: `Implementation tracking for recommendation ${recommendationId} will be available in the API`,
       })
     } catch (err: unknown) {
-      dbLogger.error({ err: error }, 'Failed to mark recommendation as implemented')
+      dbLogger.error({ err }, 'Failed to mark recommendation as implemented')
       toast({
         title: 'Error',
         description: 'Failed to update recommendation',
@@ -113,15 +122,11 @@ export default function HppRecommendationsPage() {
   return (
     <AppLayout pageTitle="Recommendations">
       <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Cost Optimization</h1>
-            <p className="text-muted-foreground">
-              Saran cerdas untuk optimasi biaya produksi dan efisiensi
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Cost Optimization"
+          description="Saran cerdas untuk optimasi biaya produksi dan efisiensi"
+          breadcrumbs={recommendationsBreadcrumbs}
+        />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -199,7 +204,14 @@ export default function HppRecommendationsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <label className="text-sm font-medium">Filter:</label>
-              <Select value={filter} onValueChange={(value: any) => setFilter(value)}>
+              <Select
+                value={filter}
+                onValueChange={(value) => {
+                  if (value === 'all' || value === 'pending' || value === 'implemented') {
+                    setFilter(value)
+                  }
+                }}
+              >
                 <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>

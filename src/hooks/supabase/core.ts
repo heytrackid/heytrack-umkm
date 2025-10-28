@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import { useCallback, useEffect, useState } from 'react'
 import type { UseSupabaseQueryOptions } from './types'
 
@@ -14,7 +14,7 @@ export function useSupabaseQuery<T extends keyof Tables>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
-  const [data, setData] = useState<any[]>(options.initial ?? [])
+  const [data, setData] = useState<Tables[T]['Row'][]>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,12 +24,18 @@ export function useSupabaseQuery<T extends keyof Tables>(
       void setError(null)
 
       const supabase = createClient()
-      let query = supabase.from(tableName as any).select(options.select || '*')
+      let query = supabase.from(tableName).select(options.select || '*')
 
       // Apply filters
       if (options.filter) {
         Object.entries(options.filter).forEach(([key, value]) => {
-          query = (query as any).eq(key, value)
+          if (value === undefined) {return}
+          const column = key as keyof Tables[T]['Row'] & string
+          if (value === null) {
+            query = query.is(column, null)
+          } else {
+            query = query.eq(column, value)
+          }
         })
       }
 
@@ -78,16 +84,16 @@ export function useSupabaseQuery<T extends keyof Tables>(
           },
           (payload) => {
             if (payload.eventType === 'INSERT') {
-              setData((prev) => [payload.new as any, ...prev])
+              setData((prev) => [payload.new as Tables[T]['Row'], ...prev])
             } else if (payload.eventType === 'UPDATE') {
               setData((prev) =>
-                prev.map((item) =>
-                  (item).id === payload.new.id ? payload.new : item
+                prev.map((item: Tables[T]['Row']) =>
+                  item.id === (payload.new as Tables[T]['Row']).id ? payload.new as Tables[T]['Row'] : item
                 )
               )
             } else if (payload.eventType === 'DELETE') {
               setData((prev) =>
-                prev.filter((item) => (item).id !== payload.old.id)
+                prev.filter((item: Tables[T]['Row']) => item.id !== (payload.old as Tables[T]['Row']).id)
               )
             }
           }

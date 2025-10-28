@@ -34,11 +34,6 @@ export interface CategoryFormData {
 export type PageSize = 10 | 20 | 50
 
 // Constants embedded in hook
-const PAGINATION_DEFAULTS = {
-  PAGE_SIZE: 20,
-  PAGE_SIZE_OPTIONS: [10, 20, 50] as const
-} as const
-
 const LOADING_DELAY = 800
 
 // Utility functions embedded in hook
@@ -348,7 +343,9 @@ export function useCategories(): UseCategoriesReturn {
     const selectedCategories = filteredCategories.filter(category =>
       selectedItems.includes(category.id)
     )
-    toast(`Bulk edit untuk ${selectedItems.length} kategori akan segera tersedia`, { icon: 'ℹ️' })
+    
+    // Use the selected categories for bulk edit
+    toast(`Bulk edit untuk ${selectedCategories.length} kategori akan segera tersedia`, { icon: 'ℹ️' })
   }
 
   // Handle view category (placeholder)

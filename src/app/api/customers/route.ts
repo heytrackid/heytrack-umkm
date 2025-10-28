@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('customers')
       .select('*')
-      .eq('user_id', (user as any).id)
+      .eq('user_id', user.id)
 
     // Add search filter if provided
     if (search) {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('customers')
       .insert({
-        user_id: (user as any).id,
+        user_id: user.id,
         name: validatedData.name,
         email: validatedData.email,
         phone: validatedData.phone,

@@ -168,7 +168,7 @@ CONTEXT: You are an AI assistant for HeyTrack, a comprehensive food business man
   static buildBusinessPrompt(query: string, context: {
     userRole?: string
     businessType?: string
-    currentData?: any
+    currentData?: Record<string, unknown>
   } = {}): string {
     const { userRole = 'owner', businessType = 'food business', currentData } = context
 
@@ -184,7 +184,7 @@ Please provide helpful, accurate, and actionable advice specific to Indonesian f
   /**
    * Build analysis prompt for business intelligence
    */
-  static buildAnalysisPrompt(data: any, analysisType: string): string {
+  static buildAnalysisPrompt(data: Record<string, unknown>, analysisType: string): string {
     return `Analyze the following business data for ${analysisType}:
 
 Data: ${JSON.stringify(data)}
@@ -222,7 +222,7 @@ export class AIService {
   /**
    * Generate AI insights for business data
    */
-  static async getPredictions(data: any): Promise<string> {
+  static async getPredictions(data: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'sales forecasting and trend analysis')
     const systemPrompt = 'You are a business intelligence analyst specializing in Indonesian food businesses.'
 
@@ -232,7 +232,7 @@ export class AIService {
   /**
    * Optimize inventory using AI
    */
-  static async optimizeInventory(inventoryData: any): Promise<string> {
+  static async optimizeInventory(inventoryData: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(inventoryData, 'inventory optimization and demand forecasting')
     const systemPrompt = 'You are an inventory management expert for food businesses.'
 
@@ -433,7 +433,7 @@ export class BusinessAI {
   /**
    * Generate business insights from data
    */
-  static async getBusinessInsights(data: any): Promise<string> {
+  static async getBusinessInsights(data: Record<string, unknown>): Promise<string> {
     const prompt = PromptBuilder.buildAnalysisPrompt(data, 'comprehensive business intelligence and strategic recommendations')
     const systemPrompt = 'You are a business consultant specializing in Indonesian UMKM food businesses.'
 
@@ -455,7 +455,7 @@ export async function processChatbotQuery(query: string): Promise<NLPAnalysis> {
 /**
  * Train NLP model (placeholder - would implement actual training)
  */
-export async function trainNLPModel(data: any): Promise<boolean> {
+export async function trainNLPModel(data: Record<string, unknown>): Promise<boolean> {
   apiLogger.info({ data }, 'NLP Model training requested (placeholder)')
   // In a real implementation, this would train/update the NLP model
   return true
@@ -471,6 +471,6 @@ export async function parseNaturalLanguage(text: string): Promise<NLPEntities> {
 /**
  * Generate AI insights (convenience function)
  */
-export async function generateAIInsights(data: any): Promise<string> {
+export async function generateAIInsights(data: Record<string, unknown>): Promise<string> {
   return BusinessAI.getBusinessInsights(data)
 }

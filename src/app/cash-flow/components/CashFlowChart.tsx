@@ -112,19 +112,34 @@ export default function CashFlowChart({
                       if (active && payload && payload.length) {
                         return (
                           <div className="bg-background border rounded-lg p-3 shadow-lg">
-                            <p className="font-medium mb-2">{payload[0].payload.date}</p>
-                            <div className="space-y-1 text-sm">
-                              <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-green-500" />
-                                <span>Pemasukan: {payload[0].value ? payload[0].value.toLocaleString('id-ID') : 0}</span>
+                            <p className="font-semibold mb-2">{payload[0].payload.date}</p>
+                            <div className="space-y-1.5 text-sm">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded-full bg-green-500" />
+                                  <span>Pemasukan</span>
+                                </div>
+                                <span className="font-semibold text-green-600">
+                                  Rp {payload[0].value ? payload[0].value.toLocaleString('id-ID') : 0}
+                                </span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-red-500" />
-                                <span>Pengeluaran: {payload[1].value ? payload[1].value.toLocaleString('id-ID') : 0}</span>
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded-full bg-red-500" />
+                                  <span>Pengeluaran</span>
+                                </div>
+                                <span className="font-semibold text-red-600">
+                                  Rp {payload[1].value ? payload[1].value.toLocaleString('id-ID') : 0}
+                                </span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <div className="h-3 w-3 rounded-full bg-blue-500" />
-                                <span>Arus Kas Bersih: {payload[2].value ? payload[2].value.toLocaleString('id-ID') : 0}</span>
+                              <div className="flex items-center justify-between gap-4 pt-1 border-t">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-3 w-3 rounded-full bg-blue-500" />
+                                  <span>Arus Kas Bersih</span>
+                                </div>
+                                <span className={`font-semibold ${(payload[2].value as number) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                  Rp {payload[2].value ? payload[2].value.toLocaleString('id-ID') : 0}
+                                </span>
                               </div>
                             </div>
                           </div>
@@ -171,6 +186,17 @@ export default function CashFlowChart({
                 </LineChart>
               </ResponsiveContainer>
             </div>
+            {/* Final Balance Summary */}
+            {chartData.length > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Saldo akhir periode:</span>
+                  <span className={`font-semibold ${(chartData?.[chartData.length - 1]?.net || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    Rp {(chartData?.[chartData.length - 1]?.net || 0).toLocaleString('id-ID')}
+                  </span>
+                </div>
+              </div>
+            )}
           </CardContent>
         </>
       )}

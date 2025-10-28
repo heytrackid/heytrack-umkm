@@ -4,33 +4,36 @@
  */
 
 import { createClient } from '@/utils/supabase/client'
+import { Database } from '@/types/database'
+
+import { SupabaseClient } from '@supabase/supabase-js'
 
 // Typed insert operation
-export async function typedInsert<T>(
-  table: string,
-  data: Partial<T>,
-  client?: any
+export async function typedInsert<T extends keyof Database['public']['Tables']>(
+  table: T,
+  data: Database['public']['Tables'][T]['Insert'],
+  client?: SupabaseClient<Database>
 ) {
   const supabase = client || createClient()
-  return await supabase.from(table).insert(data as any)
+  return await supabase.from(table).insert(data)
 }
 
 // Typed update operation
-export async function typedUpdate<T>(
-  table: string,
+export async function typedUpdate<T extends keyof Database['public']['Tables']>(
+  table: T,
   id: string | number,
-  data: Partial<T>,
-  client?: any
+  data: Database['public']['Tables'][T]['Update'],
+  client?: SupabaseClient<Database>
 ) {
   const supabase = client || createClient()
-  return await supabase.from(table).update(data as any).eq('id', id)
+  return await supabase.from(table).update(data).eq('id', id)
 }
 
 // Type casting helpers (re-exported for convenience)
-export function castRow<T>(row: any): T {
+export function castRow<T>(row: unknown): T {
   return row as T
 }
 
-export function castRows<T>(rows: any[]): T[] {
+export function castRows<T>(rows: unknown[]): T[] {
   return rows as T[]
 }

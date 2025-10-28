@@ -177,7 +177,7 @@ export async function GET(request: Request) {
     
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error fetching dashboard stats:')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }
 
@@ -242,9 +242,8 @@ export async function POST() {
     if (error) {throw error}
     
     return NextResponse.json({ success: true, message: 'Daily summary updated' })
-    
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error updating daily summary:')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 })
   }
 }

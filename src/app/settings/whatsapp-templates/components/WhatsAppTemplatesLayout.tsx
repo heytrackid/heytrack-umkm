@@ -25,17 +25,26 @@ import { uiLogger } from '@/lib/logger'
 import dynamic from 'next/dynamic'
 import { TEMPLATE_CATEGORIES, type WhatsAppTemplate } from './types'
 
-const TemplatesTable = dynamic(() => import('./TemplatesTable'), {
-  loading: () => <div className="p-4">Loading templates...</div>
-})
+const TemplatesTable = dynamic(
+  () => import(/* webpackChunkName: "whatsapp-templates-table" */ './TemplatesTable'),
+  {
+    loading: () => <div className="p-4">Loading templates...</div>
+  }
+)
 
-const TemplateForm = dynamic(() => import('./TemplateForm'), {
-  loading: () => <div className="p-4">Loading form...</div>
-})
+const TemplateForm = dynamic(
+  () => import(/* webpackChunkName: "whatsapp-template-form" */ './TemplateForm'),
+  {
+    loading: () => <div className="p-4">Loading form...</div>
+  }
+)
 
-const TemplatePreview = dynamic(() => import('./TemplatePreview'), {
-  loading: () => <div className="p-4">Loading preview...</div>
-})
+const TemplatePreview = dynamic(
+  () => import(/* webpackChunkName: "whatsapp-template-preview" */ './TemplatePreview'),
+  {
+    loading: () => <div className="p-4">Loading preview...</div>
+  }
+)
 
 export default function WhatsAppTemplatesPage() {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])

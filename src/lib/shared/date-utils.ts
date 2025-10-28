@@ -166,7 +166,7 @@ export function addBusinessDays(date: Date, businessDays: number): Date {
 }
 
 // Date validation utilities
-export function isValidDate(date: any): date is Date {
+export function isValidDate(date: unknown): date is Date {
   return date instanceof Date && !isNaN(date.getTime())
 }
 

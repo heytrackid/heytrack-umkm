@@ -8,7 +8,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { AlertTriangle, Bell, CheckCircle, Info, X, Zap } from 'lucide-react'
 
 import { apiLogger } from '@/lib/logger'
-import type { NotificationData, Order, OrderItem, Ingredient } from '@/types'
+import type { NotificationData } from '@/types/features/notifications'
+import type { Order, OrderItem } from '@/types/domain/orders'
+import type { Ingredient } from '@/types/domain/inventory'
 
 interface SmartNotification {
   id: string
@@ -45,11 +47,11 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
     try {
       // Fetch data needed for automation engine analysis with timeout
       const fetchWithTimeout = (url: string, timeout = 5000) => Promise.race([
-          fetch(url),
-          new Promise<Response>((_, reject) => 
-            setTimeout(() => reject(new Error('Timeout')), timeout)
-          )
-        ])
+        fetch(url),
+        new Promise<Response>((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), timeout)
+        )
+      ])
 
       const [ingredientsRes, ordersRes] = await Promise.allSettled([
         fetchWithTimeout('/api/ingredients'),
@@ -103,7 +105,7 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
 
         // Add additional custom notifications
         const additionalNotifications = await generateAdditionalNotifications(ingredients, orders)
-        
+
         void setNotifications([...additionalNotifications])
       }
     } catch (err: unknown) {
@@ -119,9 +121,9 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
 
     // Check for orders with tight delivery schedules
     const urgentOrders = orders.filter((order: unknown): order is Order => {
-      if (!order || typeof order !== 'object') {return false}
+      if (!order || typeof order !== 'object') { return false }
       const orderData = order as Order
-      if (!orderData.delivery_date) {return false}
+      if (!orderData.delivery_date) { return false }
       const deliveryTime = new Date(orderData.delivery_date).getTime()
       const now = Date.now()
       const hoursUntilDelivery = (deliveryTime - now) / (1000 * 60 * 60)
@@ -144,7 +146,7 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
 
     // Check for profitable vs unprofitable items
     const lowMarginCount = orders.filter((order: unknown): order is Order => {
-      if (!order || typeof order !== 'object') {return false}
+      if (!order || typeof order !== 'object') { return false }
       const orderData = order as Order & { order_items?: OrderItem[] }
       return orderData.order_items?.some((item: OrderItem) => {
         const margin = item.unit_price > 0 ? ((item.unit_price - 5000) / item.unit_price) * 100 : 0
@@ -167,7 +169,7 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
 
     // HPP calculation recommendations
     const needsHPPReview = ingredients.filter((ing: unknown): ing is Ingredient => {
-      if (!ing || typeof ing !== 'object') {return false}
+      if (!ing || typeof ing !== 'object') { return false }
       const ingData = ing as Ingredient
       return (ingData.current_stock ?? 0) > (ingData.min_stock ?? 0) * 2
     }).length
@@ -188,7 +190,7 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
   }
 
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map((notif: SmartNotification) => notif.id === id ? { ...notif, read: true } : notif)
     )
   }
@@ -229,8 +231,8 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <Badge 
-            variant="destructive" 
+          <Badge
+            variant="destructive"
             className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
           >
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -245,11 +247,11 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
       {isOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-40 bg-black/20 md:hidden" 
+          <div
+            className="fixed inset-0 z-40 bg-black/20 md:hidden"
             onClick={() => setIsOpen(false)}
           />
-          
+
           <div className="fixed md:absolute right-0 top-0 md:top-12 w-full md:w-[420px] h-full md:h-auto md:max-h-[600px] overflow-hidden bg-background border-l md:border border-border md:rounded-lg shadow-2xl z-50">
             <div className="p-4 border-b border-border flex-shrink-0">
               <div className="flex items-center justify-between">
@@ -269,101 +271,100 @@ const SmartNotifications = memo(({ className }: SmartNotificationsProps) => {
             </div>
 
             <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 120px)' }}>
-            {notifications.length === 0 ? (
-              <div className="p-4 sm:p-6 text-center text-muted-foreground">
-                <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm sm:text-base">Tidak ada notifikasi</p>
-                <p className="text-xs sm:text-sm">Sistem akan memberitahu jika ada yang perlu perhatian</p>
-              </div>
-            ) : (
-              <div className="divide-y divide-border">
-                {notifications
-                  .sort((a, b) => {
-                    // Sort by priority then by timestamp
-                    const priorityOrder = { high: 3, medium: 2, low: 1 }
-                    if (a.priority !== b.priority) {
-                      return priorityOrder[b.priority] - priorityOrder[a.priority]
-                    }
-                    return b.timestamp.getTime() - a.timestamp.getTime()
-                  })
-                  .map((notification) => (
-                    <Card 
-                      key={notification.id}
-                      className={`mx-3 my-2 ${getNotificationColor(notification.type)} ${
-                        notification.read ? 'opacity-60' : ''
-                      }`}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 mt-0.5">
-                            {getNotificationIcon(notification.type)}
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex flex-col gap-2">
-                              <p className="font-medium text-sm leading-tight break-words">{notification.title}</p>
-                              <div className="flex gap-1 flex-wrap">
-                                <Badge 
-                                  variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
-                                  className="text-xs"
-                                >
-                                  {notification.priority}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {notification.category}
-                                </Badge>
-                              </div>
+              {notifications.length === 0 ? (
+                <div className="p-4 sm:p-6 text-center text-muted-foreground">
+                  <Bell className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm sm:text-base">Tidak ada notifikasi</p>
+                  <p className="text-xs sm:text-sm">Sistem akan memberitahu jika ada yang perlu perhatian</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {notifications
+                    .sort((a, b) => {
+                      // Sort by priority then by timestamp
+                      const priorityOrder = { high: 3, medium: 2, low: 1 }
+                      if (a.priority !== b.priority) {
+                        return priorityOrder[b.priority] - priorityOrder[a.priority]
+                      }
+                      return b.timestamp.getTime() - a.timestamp.getTime()
+                    })
+                    .map((notification) => (
+                      <Card
+                        key={notification.id}
+                        className={`mx-3 my-2 ${getNotificationColor(notification.type)} ${notification.read ? 'opacity-60' : ''
+                          }`}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {getNotificationIcon(notification.type)}
                             </div>
-                            <p className="text-xs text-muted-foreground break-words">
-                              {notification.message}
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground">
-                                {notification.timestamp.toLocaleTimeString()}
-                              </span>
-                              <div className="flex gap-1">
-                                {!notification.read && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={() => markAsRead(notification.id)}
+                            <div className="flex-1 min-w-0 space-y-2">
+                              <div className="flex flex-col gap-2">
+                                <p className="font-medium text-sm leading-tight break-words">{notification.title}</p>
+                                <div className="flex gap-1 flex-wrap">
+                                  <Badge
+                                    variant={notification.priority === 'high' ? 'destructive' : 'secondary'}
+                                    className="text-xs"
                                   >
-                                    <span className="hidden sm:inline">Mark read</span>
-                                    <span className="sm:hidden">✓</span>
+                                    {notification.priority}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    {notification.category}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <p className="text-xs text-muted-foreground break-words">
+                                {notification.message}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">
+                                  {notification.timestamp.toLocaleTimeString()}
+                                </span>
+                                <div className="flex gap-1">
+                                  {!notification.read && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 px-2 text-xs"
+                                      onClick={() => markAsRead(notification.id)}
+                                    >
+                                      <span className="hidden sm:inline">Mark read</span>
+                                      <span className="sm:hidden">✓</span>
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 text-gray-600 dark:text-gray-400"
+                                    onClick={() => dismissNotification(notification.id)}
+                                  >
+                                    <X className="h-3 w-3" />
                                   </Button>
-                                )}
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  className="h-6 w-6 p-0 text-gray-600 dark:text-gray-400"
-                                  onClick={() => dismissNotification(notification.id)}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                }
+                        </CardContent>
+                      </Card>
+                    ))
+                  }
+                </div>
+              )}
+            </div>
+
+            {notifications.length > 0 && (
+              <div className="p-3 border-t border-border flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs"
+                  onClick={() => setNotifications(prev => prev.map((n: SmartNotification) => ({ ...n, read: true })))}
+                >
+                  Mark all as read
+                </Button>
               </div>
             )}
-          </div>
-
-          {notifications.length > 0 && (
-            <div className="p-3 border-t border-border flex-shrink-0">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="w-full text-xs"
-                onClick={() => setNotifications(prev => prev.map((n: SmartNotification) => ({ ...n, read: true })))}
-              >
-                Mark all as read
-              </Button>
-            </div>
-          )}
           </div>
         </>
       )}

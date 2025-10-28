@@ -14,7 +14,7 @@ interface MiniChartProps {
 
 // Dynamically import Recharts to reduce initial bundle size
 const DynamicChart = dynamic(
-  () => import('./MiniChartCore'),
+  () => import(/* webpackChunkName: "mini-chart-core" */ './MiniChartCore'),
   {
     loading: () => (
       <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded animate-pulse">
@@ -30,7 +30,7 @@ export default function MiniChart(props: MiniChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div 
+      <div
         className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded ${className}`}
         style={{ height }}
       >

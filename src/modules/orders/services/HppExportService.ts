@@ -18,7 +18,7 @@ export class HppExportService {
    * Export HPP data in specified format
    */
   async exportHppData(options: ExportOptions): Promise<{
-    data: any
+    data: string | Blob
     filename: string
     mimeType: string
   }> {
@@ -51,7 +51,23 @@ export class HppExportService {
   /**
    * Get data for export based on options
    */
-  private async getExportData(options: ExportOptions): Promise<any> {
+  private async getExportData(options: ExportOptions): Promise<{
+    calculations: Array<{
+      recipes?: { name?: string; category?: string; selling_price?: number }
+      calculation_date: string
+      total_hpp?: number
+      material_cost?: number
+      labor_cost?: number
+      overhead_cost?: number
+    }>
+    snapshots: unknown[]
+    alerts: unknown[]
+    metadata: {
+      exportDate: string
+      options: ExportOptions
+      totalRecords: number
+    }
+  }> {
     const { recipeIds, dateRange, metrics = ['hpp', 'margin', 'cost_breakdown'] } = options
 
     // Build query for HPP data
@@ -140,7 +156,7 @@ export class HppExportService {
   /**
    * Export as CSV format
    */
-  private exportAsCsv(data: any): { data: string; filename: string; mimeType: string } {
+  private exportAsCsv(data: ReturnType<typeof this.getExportData> extends Promise<infer T> ? T : never): { data: string; filename: string; mimeType: string } {
     const headers = [
       'Recipe Name',
       'Category',
@@ -154,7 +170,7 @@ export class HppExportService {
       'Margin %'
     ]
 
-    const rows = data.calculations.map((calc: any) => [
+    const rows = data.calculations.map((calc) => [
       calc.recipes?.name || 'Unknown',
       calc.recipes?.category || 'General',
       calc.calculation_date,
@@ -171,7 +187,7 @@ export class HppExportService {
 
     const csvContent = [
       headers.join(','),
-      ...rows.map((row: any[]) => row.map(cell => `"${cell}"`).join(','))
+      ...rows.map((row: (string | number)[]) => row.map(cell => `"${cell}"`).join(','))
     ].join('\n')
 
     return {
@@ -184,7 +200,7 @@ export class HppExportService {
   /**
    * Export as Excel format (simplified - would need exceljs in production)
    */
-  private exportAsExcel(data: any): { data: any; filename: string; mimeType: string } {
+  private exportAsExcel(data: ReturnType<typeof this.getExportData> extends Promise<infer T> ? T : never): { data: string; filename: string; mimeType: string } {
     // For now, return CSV as Excel (would need proper Excel library)
     const csvExport = this.exportAsCsv(data)
 
@@ -198,7 +214,7 @@ export class HppExportService {
   /**
    * Export as JSON format
    */
-  private exportAsJson(data: any): { data: string; filename: string; mimeType: string } {
+  private exportAsJson(data: ReturnType<typeof this.getExportData> extends Promise<infer T> ? T : never): { data: string; filename: string; mimeType: string } {
     return {
       data: JSON.stringify(data, null, 2),
       filename: `hpp-data-${new Date().toISOString().split('T')[0]}.json`,
@@ -209,7 +225,7 @@ export class HppExportService {
   /**
    * Export as PDF format (simplified - would need pdf library)
    */
-  private exportAsPdf(data: any): { data: string; filename: string; mimeType: string } {
+  private exportAsPdf(data: ReturnType<typeof this.getExportData> extends Promise<infer T> ? T : never): { data: string; filename: string; mimeType: string } {
     // Simplified PDF export - would need proper PDF generation library
     const pdfContent = this.generatePdfContent(data)
 
@@ -223,14 +239,14 @@ export class HppExportService {
   /**
    * Generate simple PDF content (placeholder)
    */
-  private generatePdfContent(data: any): string {
+  private generatePdfContent(data: ReturnType<typeof this.getExportData> extends Promise<infer T> ? T : never): string {
     const lines = [
       'HPP Cost Analysis Report',
       `Generated: ${new Date().toLocaleString()}`,
       `Total Calculations: ${data.calculations.length}`,
       '',
       'Summary:',
-      ...data.calculations.slice(0, 10).map((calc: any) =>
+      ...data.calculations.slice(0, 10).map((calc) =>
         `${calc.recipes?.name || 'Unknown'}: HPP ${calc.total_hpp || 0}`
       ),
       '',
@@ -243,7 +259,7 @@ export class HppExportService {
   /**
    * Download file helper
    */
-  static downloadFile(data: any, filename: string, mimeType: string) {
+  static downloadFile(data: string | Blob, filename: string, mimeType: string) {
     const blob = new Blob([data], { type: mimeType })
     const url = URL.createObjectURL(blob)
 

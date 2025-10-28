@@ -52,11 +52,14 @@ const SidebarSkeleton = () => (
   </div>
 )
 
-// Dynamically import the main sidebar component
-const LazySidebar = dynamic(() => import('./sidebar/LazySidebar').then(mod => ({ default: mod.default })), {
-  ssr: false,
-  loading: () => <SidebarSkeleton />
-})
+// Dynamically import the main sidebar component with webpack magic comment
+const LazySidebar = dynamic(
+  () => import(/* webpackChunkName: "lazy-sidebar" */ './sidebar/LazySidebar'),
+  {
+    ssr: false,
+    loading: () => <SidebarSkeleton />
+  }
+)
 
 interface SidebarProps {
   isOpen?: boolean
@@ -65,13 +68,13 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ isOpen, onToggle, isMobile }: SidebarProps) => (
-    <Suspense fallback={<SidebarSkeleton />}>
-      <LazySidebar
-        isOpen={isOpen}
-        onToggle={onToggle}
-        isMobile={isMobile}
-      />
-    </Suspense>
-  )
+  <Suspense fallback={<SidebarSkeleton />}>
+    <LazySidebar
+      isOpen={isOpen}
+      onToggle={onToggle}
+      isMobile={isMobile}
+    />
+  </Suspense>
+)
 
 export default Sidebar

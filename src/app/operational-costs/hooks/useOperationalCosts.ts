@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { apiLogger } from '@/lib/logger'
-import type { OperationalCostsTable } from '@/types'
+import type { OperationalCostsTable } from '@/types/domain/operational-costs'
 
 // Types and constants embedded in hook file for now
 export interface OperationalCost {
@@ -186,16 +186,19 @@ export function useOperationalCosts(): UseOperationalCostsReturn {
       if (!response.ok) {throw new Error('Failed to fetch costs')}
 
       const data = await response.json()
-      const transformedCosts = data.costs.map((cost: OperationalCostsTable['Row']) => ({
-        id: cost.id,
-        name: cost.name,
-        category: cost.category,
-        amount: cost.amount,
-        frequency: cost.frequency,
-        description: cost.description,
-        isFixed: cost.isFixed,
-        icon: cost.icon || '📦'
-      }))
+      const transformedCosts = data.costs.map((cost: OperationalCostsTable['Row']) => {
+        const category = costCategories.find(c => c.id === cost.category)
+        return {
+          id: cost.id,
+          name: cost.description, // Use description as name
+          category: cost.category,
+          amount: cost.amount,
+          frequency: (cost.frequency || 'monthly') as 'daily' | 'weekly' | 'monthly' | 'yearly',
+          description: cost.notes || undefined,
+          isFixed: cost.recurring || false,
+          icon: category?.icon || '📦'
+        }
+      })
       void setCosts(transformedCosts)
     } catch (err) {
       apiLogger.error({ err }, 'Error fetching costs:')

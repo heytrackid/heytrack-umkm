@@ -58,10 +58,10 @@ export const RecipeList = ({
     if (!recipe.recipe_ingredients || !ingredients) { return 0 }
 
     return recipe.recipe_ingredients.reduce((total: number, recipeIngredient: any) => {
-      const ingredient = ingredients.find(ing => ing.id === recipeIngredient.ingredient_id)
+      const ingredient = ingredients.find((ing: any) => ing.id === recipeIngredient.ingredient_id)
       if (!ingredient) { return total }
 
-      const cost = ingredient.price_per_unit * recipeIngredient.quantity
+      const cost = ingredient?.price_per_unit * recipeIngredient.quantity
       return total + cost
     }, 0)
   }
@@ -130,7 +130,7 @@ export const RecipeList = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecipes.map((recipe) => {
+                {filteredRecipes.map((recipe: any) => {
                   const hpp = calculateRecipeHPP(recipe)
                   const ingredientCount = recipe.recipe_ingredients?.length || 0
 

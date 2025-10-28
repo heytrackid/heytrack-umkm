@@ -1,8 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
-import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types'
+import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
 
 import { apiLogger } from '@/lib/logger'
@@ -40,7 +39,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('expenses')
       .select('*')
-      .eq('user_id', (user as any).id)
+      .eq('user_id', user.id)
       .neq('category', 'Revenue')
       .order('expense_date', { ascending: false })
 
@@ -81,31 +80,31 @@ export async function GET(request: NextRequest) {
 
     // Transform to match frontend interface
     const costs: CostSummary[] = data?.map((expense: ExpensesTable['Row']) => ({
-      id: (expense as any).id,
+      id: expense.id,
       name: expense.description,
-      category: (expense as any).category,
+      category: expense.category,
       subcategory: expense.subcategory || null,
-      amount: Number((expense as any).amount),
+      amount: Number(expense.amount),
       frequency: expense.recurring_frequency || 'monthly',
-      description: (expense as any).description,
+      description: expense.description,
       isFixed: expense.is_recurring || false,
-      expense_date: (expense as any).expense_date || null,
+      expense_date: expense.expense_date || null,
       supplier: expense.supplier || null,
       payment_method: expense.payment_method || null,
-      status: (expense as any).status || null,
+      status: expense.status || null,
       receipt_number: expense.receipt_number || null,
       created_at: expense.created_at || null,
-      updated_at: (expense as any).updated_at || null
+      updated_at: expense.updated_at || null
     })) || []
 
     return NextResponse.json({
       costs,
       total: costs.length,
       summary: {
-        total_amount: costs.reduce((sum: number, c: CostSummary) => sum + (c as any).amount, 0),
+        total_amount: costs.reduce((sum: number, c: CostSummary) => sum + c.amount, 0),
         total_monthly: costs
           .filter((c: CostSummary) => c.frequency === 'monthly')
-          .reduce((sum: number, c: CostSummary) => sum + (c as any).amount, 0),
+          .reduce((sum: number, c: CostSummary) => sum + c.amount, 0),
         fixed_costs: costs.filter((c: CostSummary) => c.isFixed).length,
         variable_costs: costs.filter((c: CostSummary) => !c.isFixed).length
       }
@@ -114,7 +113,7 @@ export async function GET(request: NextRequest) {
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error in GET /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(error) },
+      { error: getErrorMessage(err) },
       { status: 500 }
     )
   }
@@ -160,7 +159,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('expenses')
       .insert({
-        user_id: (user as any).id,
+        user_id: user.id,
         category: validatedData.category,
         subcategory: validatedData.subcategory,
         amount: validatedData.amount,
@@ -173,7 +172,7 @@ export async function POST(request: NextRequest) {
         is_recurring: validatedData.is_recurring,
         recurring_frequency: validatedData.recurring_frequency,
         tags: []
-      } as any)
+      })
       .select('*')
       .single()
 
@@ -190,7 +189,7 @@ export async function POST(request: NextRequest) {
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error in POST /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(error) },
+      { error: getErrorMessage(err) },
       { status: 500 }
     )
   }
@@ -243,22 +242,22 @@ export async function PUT(request: NextRequest) {
 
     // Build update object from validated data
     const updateData: ExpensesTable['Update'] = {}
-    if (validatedData.category !== undefined) {(updateData as any).category = validatedData.category}
-    if (validatedData.subcategory !== undefined) {(updateData as any).subcategory = validatedData.subcategory}
-    if (validatedData.amount !== undefined) {(updateData as any).amount = validatedData.amount}
-    if (validatedData.description !== undefined) {(updateData as any).description = validatedData.description}
-    if (validatedData.date !== undefined) {(updateData as any).expense_date = validatedData.date}
+    if (validatedData.category !== undefined) {updateData.category = validatedData.category}
+    if (validatedData.subcategory !== undefined) {updateData.subcategory = validatedData.subcategory}
+    if (validatedData.amount !== undefined) {updateData.amount = validatedData.amount}
+    if (validatedData.description !== undefined) {updateData.description = validatedData.description}
+    if (validatedData.date !== undefined) {updateData.expense_date = validatedData.date}
     if (validatedData.is_recurring !== undefined) {updateData.is_recurring = validatedData.is_recurring}
     if (validatedData.recurring_frequency !== undefined) {updateData.recurring_frequency = validatedData.recurring_frequency}
-    if (validatedData.vendor_name !== undefined) {(updateData as any).supplier = validatedData.vendor_name}
-    if (validatedData.invoice_number !== undefined) {(updateData as any).receipt_number = validatedData.invoice_number}
-    if (validatedData.is_paid !== undefined) {(updateData as any).status = validatedData.is_paid ? 'paid' : 'pending'}
+    if (validatedData.vendor_name !== undefined) {updateData.supplier = validatedData.vendor_name}
+    if (validatedData.invoice_number !== undefined) {updateData.receipt_number = validatedData.invoice_number}
+    if (validatedData.is_paid !== undefined) {updateData.status = validatedData.is_paid ? 'paid' : 'pending'}
 
     const { data, error } = await supabase
       .from('expenses')
-      .update(updateData as any)
+      .update(updateData)
       .eq('id', body.id)
-      .eq('user_id', (user as any).id)
+      .eq('user_id', user.id)
       .select('*')
       .single()
 
@@ -282,7 +281,7 @@ export async function PUT(request: NextRequest) {
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error in PUT /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(error) },
+      { error: getErrorMessage(err) },
       { status: 500 }
     )
   }
@@ -324,7 +323,7 @@ export async function DELETE(request: NextRequest) {
       .from('expenses')
       .delete()
       .eq('id', id)
-      .eq('user_id', (user as any).id)
+      .eq('user_id', user.id)
       .neq('category', 'Revenue')
       .select('*')
       .single()
@@ -349,7 +348,7 @@ export async function DELETE(request: NextRequest) {
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error in DELETE /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(error) },
+      { error: getErrorMessage(err) },
       { status: 500 }
     )
   }

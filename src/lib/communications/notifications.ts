@@ -152,15 +152,38 @@ export class SmartNotificationSystem {
   /**
    * Evaluate single condition
    */
-  private evaluateCondition(value: any, condition: NotificationRule['conditions'][0]): boolean {
+  private evaluateCondition(value: unknown, condition: NotificationRule['conditions'][0]): boolean {
+    if (value === null || value === undefined) {
+      return false
+    }
+
+    if (condition.operator === 'contains') {
+      return String(value).toLowerCase().includes(String(condition.value ?? '').toLowerCase())
+    }
+
+    const numericValue = typeof value === 'number' ? value : Number(value)
+    const numericTarget = typeof condition.value === 'number' ? condition.value : Number(condition.value)
+
+    if (!Number.isFinite(numericValue) || !Number.isFinite(numericTarget)) {
+      if (condition.operator === 'eq') {
+        return String(value) === String(condition.value)
+      }
+      return false
+    }
+
     switch (condition.operator) {
-      case 'gt': return value > condition.value;
-      case 'lt': return value < condition.value;
-      case 'eq': return value === condition.value;
-      case 'gte': return value >= condition.value;
-      case 'lte': return value <= condition.value;
-      case 'contains': return String(value).toLowerCase().includes(String(condition.value).toLowerCase());
-      default: return false;
+      case 'gt':
+        return numericValue > numericTarget
+      case 'lt':
+        return numericValue < numericTarget
+      case 'eq':
+        return numericValue === numericTarget
+      case 'gte':
+        return numericValue >= numericTarget
+      case 'lte':
+        return numericValue <= numericTarget
+      default:
+        return false
     }
   }
 

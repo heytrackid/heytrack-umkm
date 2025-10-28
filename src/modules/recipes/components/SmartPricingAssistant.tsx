@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 
-import type { RecipeWithIngredients } from '@/types'
-import type { SmartPricingAnalysis } from '@/types/analytics'
+import type { RecipeWithIngredients } from '@/types/domain/recipes'
+import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { uiLogger } from '@/lib/logger'
 import {
   AlertTriangle,
@@ -33,7 +33,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
   const [selectedTier, setSelectedTier] = useState<'economy' | 'standard' | 'premium'>('standard')
   const [customPrice, setCustomPrice] = useState<number>(0)
   const [loading, setLoading] = useState(false)
-  
+
   type PricingTierKey = 'economy' | 'standard' | 'premium'
 
   useEffect(() => {
@@ -48,25 +48,28 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       // Call API endpoint to calculate smart pricing
       const response = await fetch(`/api/recipes/${recipe.id}/pricing`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ recipe })
       })
-      
+
       if (!response.ok) {
         throw new Error(`API call failed: ${response.status}`)
       }
-      
+
       const pricingAnalysis = await response.json() as SmartPricingAnalysis
       void setAnalysis(pricingAnalysis)
       void setCustomPrice(pricingAnalysis.pricing.standard.price)
     } catch (err: unknown) {
-      uiLogger.error({ err: error }, 'Error analyzing pricing')
+      uiLogger.error({ err }, 'Error analyzing pricing')
       // Set fallback analysis to prevent UI breaks
       // Calculate basic analysis as fallback for now
       if (recipe?.recipe_ingredients && recipe.recipe_ingredients.length > 0) {
-        const totalCost = recipe.recipe_ingredients.reduce((sum, ri) => sum + (ri.ingredient.price_per_unit * ri.quantity), 0)
+        const totalCost = recipe.recipe_ingredients.reduce((sum, ri) => {
+          const ingredientPrice = ri.ingredient?.price_per_unit || 0
+          return sum + (ingredientPrice * ri.quantity)
+        }, 0)
         const fallbackAnalysis: SmartPricingAnalysis = {
           breakdown: {
             ingredientCost: totalCost,
@@ -102,7 +105,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
   }
 
   const handleApplyPrice = (tier: PricingTierKey | 'custom') => {
-    if (!analysis) {return}
+    if (!analysis) { return }
 
     let price: number
     let margin: number
@@ -146,39 +149,114 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
 
   return (
     <div className="space-y-6">
-      {/* Quick Overview */}
-      <Card className="border-l-4 border-l-blue-500">
+      {/* Enhanced Quick Overview with Status */}
+      <Card className="border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            Smart Pricing Assistant
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    AI Pricing Assistant
+                    <Badge variant="default" className="gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Aktif
+                    </Badge>
+                  </div>
+                  <p className="text-sm font-normal text-muted-foreground mt-0.5">
+                    Rekomendasi harga berbasis AI untuk profit maksimal
+                  </p>
+                </div>
+              </CardTitle>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={analyzePricing}
+              disabled={loading}
+            >
+              {loading ? 'Menganalisis...' : '🔄 Refresh'}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                {formatCurrency(analysis.breakdown.totalCost)}
+            <Card className="border-blue-200 dark:border-blue-800">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-1">
+                    {formatCurrency(analysis.breakdown.totalCost)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Total HPP</div>
+                  <Badge variant="outline" className="text-xs">
+                    Modal Produksi
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-200 dark:border-green-800">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">
+                    {formatCurrency(analysis.pricing.standard.price)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Harga Optimal</div>
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Target className="h-3 w-3" />
+                    Rekomendasi AI
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-purple-200 dark:border-purple-800">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600 mb-1">
+                    {analysis.pricing.standard.margin}%
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Margin Profit</div>
+                  <Badge
+                    variant={analysis.pricing.standard.margin >= 50 ? "default" : "secondary"}
+                    className="text-xs"
+                  >
+                    {analysis.pricing.standard.margin >= 50 ? 'Bagus' : 'Standar'}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-orange-200 dark:border-orange-800">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600 mb-1">
+                    {formatCurrency(analysis.pricing.standard.price - analysis.breakdown.totalCost)}
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Profit per Unit</div>
+                  <Badge variant="outline" className="text-xs">
+                    Keuntungan Bersih
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Insights */}
+          <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg border">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-semibold mb-1">💡 Insight Cepat:</p>
+                <p className="text-muted-foreground">
+                  Dengan harga <strong>{formatCurrency(analysis.pricing.standard.price)}</strong>,
+                  Anda akan mendapat keuntungan <strong>{formatCurrency(analysis.pricing.standard.price - analysis.breakdown.totalCost)}</strong> per produk.
+                  Jual <strong>{Math.ceil(100000 / (analysis.pricing.standard.price - analysis.breakdown.totalCost))}</strong> unit untuk profit Rp 100.000.
+                </p>
               </div>
-              <div className="text-xs text-muted-foreground">Total HPP</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                {formatCurrency(analysis.pricing.standard.price)}
-              </div>
-              <div className="text-xs text-muted-foreground">Harga Optimal</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                {analysis.pricing.standard.margin}%
-              </div>
-              <div className="text-xs text-muted-foreground">Margin Profit</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-                {formatCurrency(analysis.pricing.standard.price - analysis.breakdown.totalCost)}
-              </div>
-              <div className="text-xs text-muted-foreground">Profit per Unit</div>
             </div>
           </div>
         </CardContent>
@@ -342,6 +420,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
             <CardContent>
               <div className="space-y-2">
                 {recipe.recipe_ingredients?.map((ri, index) => {
+                  if (!ri.ingredient) { return null }
                   const cost = ri.ingredient.price_per_unit * ri.quantity
                   const percentage = (cost / analysis.breakdown.ingredientCost) * 100
                   return (
@@ -366,49 +445,144 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
           </Card>
         </TabsContent>
 
-        {/* Recommendations Tab */}
+        {/* Enhanced Recommendations Tab */}
         <TabsContent value="recommendations" className="space-y-4">
-          <Card>
+          <Card className="border-2 border-purple-200 dark:border-purple-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                Rekomendasi Pricing
+                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Lightbulb className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <div>Rekomendasi Pricing AI</div>
+                  <p className="text-sm font-normal text-muted-foreground mt-0.5">
+                    Saran berbasis analisis data dan tren pasar
+                  </p>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {analysis.recommendations.map((rec: string, index: number) => (
-                  <Alert key={index}>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>{rec}</AlertDescription>
-                  </Alert>
+                  <div key={index} className="flex items-start gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm">{rec}</p>
+                    </div>
+                    <CheckCircle className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                  </div>
                 ))}
+              </div>
+
+              {/* Action Items */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Langkah Selanjutnya:
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">1.</span>
+                    <span>Pilih tier pricing yang sesuai dengan target pasar Anda</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">2.</span>
+                    <span>Test harga dengan sample kecil customer terlebih dahulu</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">3.</span>
+                    <span>Monitor feedback dan sesuaikan jika diperlukan</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-blue-600 font-bold">4.</span>
+                    <span>Review pricing setiap bulan atau saat ada perubahan biaya bahan</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Market Positioning */}
+          {/* Enhanced Market Positioning */}
           <Card>
             <CardHeader>
-              <CardTitle>Positioning Pasar</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Positioning & Strategi Pasar
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="font-medium mb-2 text-gray-600 dark:text-gray-400">✅ Keunggulan Pricing</h4>
-                  <ul className="space-y-1 text-sm">
-                    <li>• Margin sehat untuk sustainability</li>
-                    <li>• Harga kompetitif di segment</li>
-                    <li>• Cover semua cost + profit</li>
-                  </ul>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                    <h4 className="font-semibold">Keunggulan Pricing Anda</h4>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                      <span className="text-green-600">✓</span>
+                      <span>Margin sehat {analysis.pricing.standard.margin}% untuk sustainability bisnis</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                      <span className="text-green-600">✓</span>
+                      <span>Harga kompetitif di segment pasar Anda</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                      <span className="text-green-600">✓</span>
+                      <span>Cover semua cost operasional + profit yang layak</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded">
+                      <span className="text-green-600">✓</span>
+                      <span>Fleksibilitas untuk promo tanpa rugi</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-2 text-gray-600 dark:text-gray-400">💡 Tips Optimasi</h4>
-                  <ul className="space-y-1 text-sm">
-                    <li>• Monitor competitor pricing</li>
-                    <li>• Test price sensitivity</li>
-                    <li>• Focus pada value proposition</li>
-                  </ul>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <Lightbulb className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <h4 className="font-semibold">Tips Optimasi Harga</h4>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                      <span className="text-blue-600">💡</span>
+                      <span>Monitor harga kompetitor secara berkala</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                      <span className="text-blue-600">💡</span>
+                      <span>Test price sensitivity dengan A/B testing</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                      <span className="text-blue-600">💡</span>
+                      <span>Fokus pada value proposition, bukan harga murah</span>
+                    </div>
+                    <div className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                      <span className="text-blue-600">💡</span>
+                      <span>Pertimbangkan bundling untuk increase average order value</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Competitive Analysis */}
+              <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
+                      ⚠️ Perhatian: Analisis Kompetitor
+                    </p>
+                    <p className="text-yellow-800 dark:text-yellow-200">
+                      Harga ini adalah rekomendasi berdasarkan cost Anda. Pastikan untuk riset harga kompetitor di area Anda
+                      dan sesuaikan dengan positioning brand yang diinginkan. Harga terlalu murah bisa merusak perceived value,
+                      terlalu mahal bisa mengurangi volume penjualan.
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>

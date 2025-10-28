@@ -1,18 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { 
-  Receipt, 
-  Edit2, 
-  Trash2, 
-  MoreHorizontal, 
-  Eye, 
+import {
+  Receipt,
+  Edit2,
+  Trash2,
+  MoreHorizontal,
+  Eye,
   Plus,
   ChevronLeft,
   ChevronRight
@@ -124,7 +124,7 @@ export default function CostListTable({
                   {paginatedCosts.map((cost) => {
                     const categoryInfo = getCategoryInfo(cost.category)
                     const frequencyLabel = frequencies.find(f => f.value === cost.frequency)?.label || 'Bulanan'
-                    
+
                     return (
                       <TableRow key={cost.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <TableCell>
@@ -187,7 +187,7 @@ export default function CostListTable({
                                   <Edit2 className="h-4 w-4 mr-2" />
                                   Edit
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   className="text-red-600"
                                   onClick={() => onDelete(cost.id)}
                                 >
@@ -246,7 +246,7 @@ export default function CostListTable({
               {searchTerm ? 'Tidak ada hasil pencarian' : 'Belum ada biaya operasional'}
             </h3>
             <p className="text-muted-foreground mb-4">
-              {searchTerm 
+              {searchTerm
                 ? 'Coba kata kunci lain untuk menemukan biaya operasional'
                 : 'Mulai dengan menambahkan biaya operasional seperti listrik, sewa, gaji karyawan, dll'
               }

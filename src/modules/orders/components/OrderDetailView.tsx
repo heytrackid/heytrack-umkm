@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { MapPin, Phone, Users } from 'lucide-react'
 import { useMemo } from 'react'
-import type { Order, OrderItem } from '@/types'
+import type { Order, OrderItem } from '@/types/domain/orders'
 import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
 interface OrderDetailViewProps {

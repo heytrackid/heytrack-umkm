@@ -21,23 +21,26 @@ import dynamic from 'next/dynamic'
 import { useProfitData, useProductChartData } from './components'
 
 // Lazy load heavy components
-const ProfitFilters = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitFilters })), {
-  loading: () => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4" />
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="h-10 bg-muted rounded" />
-            <div className="h-10 bg-muted rounded" />
-            <div className="h-10 bg-muted rounded" />
-            <div className="h-10 bg-muted rounded" />
+const ProfitFilters = dynamic(
+  () => import(/* webpackChunkName: "profit-filters" */ './components').then(mod => ({ default: mod.ProfitFilters })),
+  {
+    loading: () => (
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-muted rounded w-1/4" />
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="h-10 bg-muted rounded" />
+              <div className="h-10 bg-muted rounded" />
+              <div className="h-10 bg-muted rounded" />
+              <div className="h-10 bg-muted rounded" />
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
+        </CardContent>
+      </Card>
+    )
+  }
+)
 
 const ProfitSummaryCards = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitSummaryCards })), {
   loading: () => <StatsSkeleton count={4} />

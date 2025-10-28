@@ -3,7 +3,7 @@
  * Optimized bar chart for mobile devices
  */
 
-import { React, memo } from 'react'
+import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { BaseMobileChart } from './base-chart'

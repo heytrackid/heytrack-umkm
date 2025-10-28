@@ -4,7 +4,7 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 
 // POST /api/hpp/alerts/bulk-read - Mark all alerts as read
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const supabase = await createClient()
 

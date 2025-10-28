@@ -26,21 +26,30 @@ import { Plus, RefreshCw, Users } from 'lucide-react'
 // Lazy load components
 import dynamic from 'next/dynamic'
 
-const CustomersTable = dynamic(() => import('./CustomersTable'), {
-  loading: () => <CustomersTableSkeleton rows={10} />,
-  ssr: false
-})
+const CustomersTable = dynamic(
+  () => import(/* webpackChunkName: "customers-table" */ './CustomersTable'),
+  {
+    loading: () => <CustomersTableSkeleton rows={10} />,
+    ssr: false
+  }
+)
 
-const CustomerStats = dynamic(() => import('./CustomerStats'), {
-  loading: () => <StatsCardSkeleton />
-})
+const CustomerStats = dynamic(
+  () => import(/* webpackChunkName: "customer-stats" */ './CustomerStats'),
+  {
+    loading: () => <StatsCardSkeleton />
+  }
+)
 
-const CustomerSearchFilters = dynamic(() => import('./CustomerSearchFilters'), {
-  loading: () => <div>Loading search...</div>
-})
+const CustomerSearchFilters = dynamic(
+  () => import(/* webpackChunkName: "customer-search-filters" */ './CustomerSearchFilters'),
+  {
+    loading: () => <div>Loading search...</div>
+  }
+)
 
 import type { Customer } from './types'
-import type { CustomersTable } from '@/types/customers'
+import type { CustomersTable } from '@/types/domain/customers'
 
 export default function CustomersLayout() {
   const router = useRouter()
@@ -90,7 +99,7 @@ export default function CustomersLayout() {
         return
       }
 
-      if (!response.ok) {throw new Error('Failed to fetch customers')}
+      if (!response.ok) { throw new Error('Failed to fetch customers') }
       const data = await response.json()
       void setCustomers(data)
     } catch (err: unknown) {
@@ -131,7 +140,7 @@ export default function CustomersLayout() {
   }
 
   const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) {return}
+    if (selectedItems.length === 0) { return }
 
     const customerNames = filteredCustomers
       .filter(customer => selectedItems.includes(customer.id.toString()))
@@ -167,13 +176,14 @@ export default function CustomersLayout() {
   }
 
   const handleBulkEdit = () => {
-    if (selectedItems.length === 0) {return}
+    if (selectedItems.length === 0) { return }
 
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
-
+    
+    // Use the selected customers for bulk edit
     toast({
       title: 'Informasi',
-      description: `Bulk edit untuk ${selectedItems.length} pelanggan akan segera tersedia`,
+      description: `Bulk edit untuk ${selectedCustomers.length} pelanggan akan segera tersedia`,
       variant: 'default',
     })
   }
@@ -192,7 +202,7 @@ export default function CustomersLayout() {
     if (confirmed) {
       try {
         const response = await fetch(`/api/customers/${customer.id}`, { method: 'DELETE' })
-        if (!response.ok) {throw new Error('Failed')}
+        if (!response.ok) { throw new Error('Failed') }
         toast({
           title: 'Berhasil',
           description: 'Pelanggan berhasil dihapus',
@@ -259,6 +269,22 @@ export default function CustomersLayout() {
           }
         />
 
+        {/* View Switcher */}
+        <div className="flex gap-2 mb-4">
+          <Button 
+            variant={currentView === 'list' ? 'default' : 'outline'} 
+            onClick={() => setCurrentView('list')}
+          >
+            List View
+          </Button>
+          <Button 
+            variant={currentView === 'add' ? 'default' : 'outline'} 
+            onClick={() => setCurrentView('add')}
+          >
+            Add Customer
+          </Button>
+        </div>
+
         {/* Customer Stats - Lazy Loaded */}
         <CustomerStats
           customers={customers}
@@ -278,22 +304,47 @@ export default function CustomersLayout() {
           isLoading={isLoading(LOADING_KEYS.FETCH_CUSTOMERS)}
         />
 
-        {/* Customers Table */}
-        {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
-          <CustomersTableSkeleton rows={5} />
-        ) : (
-          <CustomersTable
-            customers={filteredCustomers}
-            selectedItems={selectedItems}
-            onSelectItem={handleSelectItem}
-            onSelectAll={handleSelectAll}
-            onView={handleViewCustomer}
-            onEdit={handleEditCustomer}
-            onDelete={handleDeleteCustomer}
-            onAddNew={() => setCurrentView('add')}
-            formatCurrency={formatCurrency}
-            isMobile={isMobile}
-          />
+        {/* Conditional rendering based on current view */}
+        {currentView === 'list' && (
+          <>
+            {/* Customers Table */}
+            {isLoading(LOADING_KEYS.FETCH_CUSTOMERS) ? (
+              <CustomersTableSkeleton rows={5} />
+            ) : (
+              <CustomersTable
+                customers={filteredCustomers}
+                selectedItems={selectedItems}
+                onSelectItem={handleSelectItem}
+                onSelectAll={handleSelectAll}
+                onView={handleViewCustomer}
+                onEdit={handleEditCustomer}
+                onDelete={handleDeleteCustomer}
+                onAddNew={() => setCurrentView('add')}
+                formatCurrency={formatCurrency}
+                isMobile={isMobile}
+              />
+            )}
+          </>
+        )}
+        
+        {currentView === 'add' && (
+          <div className="text-center py-8">
+            <h3 className="text-lg font-medium">Add Customer Form</h3>
+            <p className="text-muted-foreground">Customer creation form would be here</p>
+            <Button onClick={() => setCurrentView('list')} className="mt-4">
+              Back to List
+            </Button>
+          </div>
+        )}
+        
+        {currentView === 'edit' && (
+          <div className="text-center py-8">
+            <h3 className="text-lg font-medium">Edit Customer Form</h3>
+            <p className="text-muted-foreground">Customer edit form would be here</p>
+            <Button onClick={() => setCurrentView('list')} className="mt-4">
+              Back to List
+            </Button>
+          </div>
         )}
 
         {/* Info Card */}

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Receipt, Zap, RefreshCw } from 'lucide-react'
+// import { Receipt, Zap, RefreshCw } from 'lucide-react'
 
 interface CostStatsProps {
   totalCosts: number
@@ -24,7 +23,7 @@ export default function CostStats({
   isMobile = false
 }: CostStatsProps) {
   const variableCosts = totalCosts - fixedCosts
-  
+
   return (
     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-3'}`}>
       <Card>

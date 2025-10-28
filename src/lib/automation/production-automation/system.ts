@@ -50,7 +50,7 @@ export class ProductionAutomation {
    * Schedule production orders with optimal timing
    */
   scheduleOptimalProduction(
-    plan: any[], // ProductionPlanItem[]
+    plan: Array<{ recipeId: string; quantity: number; priority: number }>, // ProductionPlanItem[]
     workingHours: WorkingHours
   ): ScheduledProductionItem[] {
     return TimeCalculator.scheduleOptimalProduction(plan, workingHours)

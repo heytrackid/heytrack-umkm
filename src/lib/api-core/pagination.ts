@@ -47,7 +47,7 @@ export function createPaginationMeta(
 /**
  * Apply pagination to array of items
  */
-export function usePagination(items: any[], params: PaginationParams) {
+export function usePagination<T>(items: T[], params: PaginationParams) {
   const { page = 1, limit = 10, offset } = params
   const actualOffset = offset ?? calculateOffset(page, limit)
   const paginatedItems = items.slice(actualOffset, actualOffset + limit)

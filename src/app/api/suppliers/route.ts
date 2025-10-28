@@ -2,9 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types'
 
-import { apiLogger } from '@/lib/logger';
 import { getErrorMessage } from '@/lib/type-guards'
 
 export async function GET(request: NextRequest) {

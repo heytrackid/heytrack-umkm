@@ -125,7 +125,8 @@ export function useRealtimeAlerts({
           })
 
           // Call callback if provided
-          if (payload.old?.is_read !== updatedAlert.is_read && !updatedAlert.is_read) {
+          const oldAlert = payload.old as HppAlert | undefined
+          if (oldAlert && oldAlert['is_read'] !== updatedAlert.is_read && !updatedAlert.is_read) {
             onAlertRead?.(updatedAlert.id)
           }
         }
@@ -156,12 +157,14 @@ export function useRealtimeAlerts({
 
   // Mark alert as read
   const markAsRead = async (alertId: string) => {
+    if (!userId) {return}
+    
     try {
       const { error } = await supabase
         .from('hpp_alerts')
-        .update({ is_read: true })
-        .eq('id', alertId)
-        .eq('user_id', userId)
+        .update({ is_read: true } as never)
+        .eq('id', alertId as never)
+        .eq('user_id', userId as never)
 
       if (error) {throw error}
     } catch (err: unknown) {
@@ -174,12 +177,14 @@ export function useRealtimeAlerts({
 
   // Mark all alerts as read
   const markAllAsRead = async () => {
+    if (!userId) {return}
+    
     try {
       const { error } = await supabase
         .from('hpp_alerts')
-        .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_read', false)
+        .update({ is_read: true } as never)
+        .eq('user_id', userId as never)
+        .eq('is_read', false as never)
 
       if (error) {throw error}
 

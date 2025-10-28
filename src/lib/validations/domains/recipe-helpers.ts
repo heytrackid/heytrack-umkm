@@ -133,8 +133,8 @@ export class RecipeValidationHelpers {
    * Check recipe complexity
    */
   static getRecipeComplexity(recipe: {
-    ingredients: any[]
-    instructions?: any[]
+    ingredients: Array<Record<string, unknown>>
+    instructions?: Array<Record<string, unknown>>
     preparation_time?: number
     cooking_time?: number
   }): 'simple' | 'moderate' | 'complex' {
@@ -193,11 +193,11 @@ export class RecipeValidationHelpers {
    * Validate bulk recipe import
    */
   static validateBulkImport(recipes: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: Array<Record<string, unknown>>
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: Array<Record<string, unknown>> = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     recipes.forEach((recipe, index) => {
       const result = this.validateInsert(recipe)

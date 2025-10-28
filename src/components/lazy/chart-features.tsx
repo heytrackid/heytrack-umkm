@@ -69,19 +69,19 @@ const MiniChartLoadingSkeleton = () => (
 
 // Lazy chart components
 const LazyFinancialTrendsChart = lazy(
-  () => import('@/modules/charts/components/FinancialTrendsChart')
+  () => import(/* webpackChunkName: "financial-trends-chart" */ '@/modules/charts/components/FinancialTrendsChart')
 )
 
 const LazyInventoryTrendsChart = lazy(
-  () => import('@/modules/charts/components/InventoryTrendsChart')
+  () => import(/* webpackChunkName: "inventory-trends-chart" */ '@/modules/charts/components/InventoryTrendsChart')
 )
 
 const LazyChart = lazy(
-  () => import('@/components/ui/chart').then(m => ({ default: m.Chart }))
+  () => import(/* webpackChunkName: "chart-ui" */ '@/components/ui/chart').then(m => ({ default: m.Chart }))
 )
 
 const LazyMiniChart = lazy(
-  () => import('@/components/ui/charts').then(m => ({ default: m.MiniChart }))
+  () => import(/* webpackChunkName: "mini-chart" */ '@/components/ui/charts').then(m => ({ default: m.MiniChart }))
 )
 
 // Recharts components (heavy library) - removed for now as it causes typing issues
@@ -116,19 +116,19 @@ export const MiniChartWithLoading = (props: any) => (
 
 // Advanced chart components yang bisa di-lazy load
 const LazyPieChart = lazy(
-  () => import('recharts').then(m => ({ default: m.PieChart }))
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.PieChart }))
 )
 
 const LazyLineChart = lazy(
-  () => import('recharts').then(m => ({ default: m.LineChart }))
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.LineChart }))
 )
 
 const LazyBarChart = lazy(
-  () => import('recharts').then(m => ({ default: m.BarChart }))
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.BarChart }))
 )
 
 const LazyAreaChart = lazy(
-  () => import('recharts').then(m => ({ default: m.AreaChart }))
+  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ default: m.AreaChart }))
 )
 
 // Custom chart wrapper untuk specific chart types
@@ -172,19 +172,19 @@ export const ChartFeatureBundle = {
 export const loadChartWhenNeeded = async (chartType: string) => {
   switch (chartType) {
     case 'financial':
-      return import('@/modules/charts/components/FinancialTrendsChart')
+      return import(/* webpackChunkName: "financial-trends-chart" */ '@/modules/charts/components/FinancialTrendsChart')
     case 'inventory':
-      return import('@/modules/charts/components/InventoryTrendsChart')
+      return import(/* webpackChunkName: "inventory-trends-chart" */ '@/modules/charts/components/InventoryTrendsChart')
     case 'pie':
-      return import('recharts').then(m => ({ PieChart: m.PieChart }))
+      return import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ PieChart: m.PieChart }))
     case 'line':
-      return import('recharts').then(m => ({ LineChart: m.LineChart }))
+      return import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ LineChart: m.LineChart }))
     case 'bar':
-      return import('recharts').then(m => ({ BarChart: m.BarChart }))
+      return import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ BarChart: m.BarChart }))
     case 'area':
-      return import('recharts').then(m => ({ AreaChart: m.AreaChart }))
+      return import(/* webpackChunkName: "recharts" */ 'recharts').then(m => ({ AreaChart: m.AreaChart }))
     default:
-      return import('recharts')
+      return import(/* webpackChunkName: "recharts" */ 'recharts')
   }
 }
 

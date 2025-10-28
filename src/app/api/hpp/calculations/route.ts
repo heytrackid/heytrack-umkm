@@ -4,7 +4,7 @@ import { PaginationQuerySchema } from '@/lib/validations/api-validations'
 
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
-import { HppCalculatorService } from '@/modules/orders/services/HppCalculatorService'
+import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
 
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
 export async function GET(request: NextRequest) {

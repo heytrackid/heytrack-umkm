@@ -6,20 +6,6 @@ import { safeParseAmount, safeString } from '@/lib/api-helpers'
 
 type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
 
-interface FinancialTransaction {
-  id: string
-  reference_id?: string
-  date: string | null
-  description: string
-  category: string
-  subcategory?: string
-  amount: number
-  type: string
-  user_id: string
-  created_at: string | null
-  reference?: string | null
-}
-
 interface PeriodCashFlow {
   period: string
   income: number
@@ -66,10 +52,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     // Parse query parameters
-    const startDate = searchParams.get('start_date') || new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
-    const endDate = searchParams.get('end_date') || new Date().toISOString().split('T')[0] // Today
-    const period = searchParams.get('period') || 'daily'
+    const startDateParam = searchParams.get('start_date')
+    const endDateParam = searchParams.get('end_date')
+    const periodParam = searchParams.get('period')
     const compare = searchParams.get('compare') === 'true'
+    
+    const startDate = startDateParam || new Date(new Date().setDate(1)).toISOString().split('T')[0] // First day of current month
+    const endDate = endDateParam || new Date().toISOString().split('T')[0] // Today
+    const period = periodParam || 'daily'
 
     const supabase = createServiceRoleClient()
 
@@ -77,8 +67,8 @@ export async function GET(request: NextRequest) {
     const { data: transactions, error: transError } = await supabase
       .from('financial_records')
       .select('*')
-      .gte('date', startDate)
-      .lte('date', endDate)
+      .gte('date', startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0])
+      .lte('date', endDateParam ? endDateParam : new Date().toISOString().split('T')[0])
       .order('date', { ascending: true })
 
     if (transError) {
@@ -111,7 +101,11 @@ export async function GET(request: NextRequest) {
     // Compare with previous period if requested
     let comparison = null
     if (compare) {
-      comparison = await calculateComparison(supabase, startDate, endDate, period)
+      comparison = await calculateComparison(
+        supabase, 
+        (startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0]) as string, 
+        (endDateParam ? endDateParam : new Date().toISOString().split('T')[0]) as string
+      )
     }
 
     // Transform transactions for frontend
@@ -175,12 +169,12 @@ function groupByPeriod(transactions: FinancialRecord[], period: string) {
 
     switch (period) {
       case 'daily':
-        key = transaction.date || ''
+        key = transaction.date ?? ''
         break
       case 'weekly':
         const weekStart = new Date(date)
         weekStart.setDate(date.getDate() - date.getDay())
-        key = weekStart.toISOString().split('T')[0]
+        key = weekStart.toString() !== 'Invalid Date' ? (weekStart.toISOString().split('T')[0] ?? '') : ''
         break
       case 'monthly':
         key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
@@ -189,7 +183,7 @@ function groupByPeriod(transactions: FinancialRecord[], period: string) {
         key = `${date.getFullYear()}`
         break
       default:
-        key = transaction.date || ''
+        key = transaction.date ?? ''
     }
 
     if (!grouped[key]) {
@@ -252,13 +246,13 @@ function calculateCategoryBreakdown(transactions: FinancialRecord[]) {
   })
 
   // Calculate percentages
-  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + (cat as any).total, 0)
+  const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + cat.total, 0)
   Object.values(breakdown).forEach((cat: CategoryBreakdownProcessing) => {
-    cat.percentage = totalAmount > 0 ? ((cat as any).total / totalAmount) * 100 : 0
-    ;(cat as any as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
+    cat.percentage = totalAmount > 0 ? (cat.total / totalAmount) * 100 : 0
+    ;(cat as unknown as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
   })
 
-  return Object.values(breakdown).map(cat => cat as any as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => (b as any).total - (a as any).total)
+  return Object.values(breakdown).map(cat => cat as unknown as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => b.total - a.total)
 }
 
 // Helper: Group by category for summary
@@ -281,8 +275,19 @@ function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
     }
   }
 
-  const recent = cashFlowByPeriod[cashFlowByPeriod.length - 1].net_cash_flow
-  const previous = cashFlowByPeriod[cashFlowByPeriod.length - 2].net_cash_flow
+  const recentItem = cashFlowByPeriod[cashFlowByPeriod.length - 1]
+  const previousItem = cashFlowByPeriod[cashFlowByPeriod.length - 2]
+  
+  if (!recentItem || !previousItem) {
+    return {
+      direction: 'stable' as const,
+      change_percentage: 0,
+      average_cash_flow: 0
+    }
+  }
+
+  const recent = recentItem.net_cash_flow
+  const previous = previousItem.net_cash_flow
 
   const change = recent - previous
   const changePercentage = previous !== 0 ? (change / Math.abs(previous)) * 100 : 0
@@ -300,8 +305,7 @@ function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
 }
 
 // Helper: Calculate comparison with previous period
-async function calculateComparison(supabase: ReturnType<typeof createServiceRoleClient>, startDate: string, endDate: string, period: string) {
-  // Remove unused period parameter
+async function calculateComparison(supabase: ReturnType<typeof createServiceRoleClient>, startDate: string, endDate: string) {
   const start = new Date(startDate)
   const end = new Date(endDate)
   const duration = end.getTime() - start.getTime()

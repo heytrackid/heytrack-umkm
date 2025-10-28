@@ -2,7 +2,8 @@ import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { ORDER_CONFIG } from '@/lib/constants'
 import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
-import type { Recipe, RecipeIngredient, Ingredient } from '@/types'
+import type { Recipe, RecipeIngredient } from '@/types/domain/recipes'
+import type { Ingredient } from '@/types/domain/inventory'
 
 /**
  * Recipe with ingredients for pricing calculation

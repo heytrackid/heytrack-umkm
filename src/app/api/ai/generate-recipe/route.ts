@@ -106,11 +106,11 @@ export async function POST(request: NextRequest) {
         if (existingRecipes && existingRecipes.length > 0) {
             apiLogger.warn({ recipeName: (recipe as Partial<Recipe>).name || 'Unknown', count: existingRecipes.length }, 'Duplicate recipe name detected')
             // Add version suffix to name
-            ;(recipe).name = `${(recipe).name} v${existingRecipes.length + 1}`
+            ;(recipe as Recipe).name = `${(recipe as Recipe).name} v${existingRecipes.length + 1}`
         }
 
         // Calculate HPP for the generated recipe
-        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, ingredients as Ingredient[], userId)
+        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, ingredients || [], userId)
 
         return NextResponse.json({
             success: true,
@@ -208,7 +208,7 @@ function buildRecipePrompt(params: {
 
     // Format available ingredients with prices
     const ingredientsList = availableIngredients
-        .map(ing => `- ${(ing as any).name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit}`)
+        .map(ing => `- ${ing.name}: Rp ${ing.price_per_unit.toLocaleString('id-ID')}/${ing.unit}`)
         .join('\n')
 
     const prompt = `<SYSTEM_INSTRUCTION>
@@ -500,8 +500,8 @@ function parseRecipeResponse(response: string) {
         }
 
         // Validate each ingredient
-        (recipe).ingredients.forEach((ing: RecipeIngredient, index: number) => {
-            if (!(ing as any).name || !ing.quantity || !ing.unit) {
+        (recipe.ingredients as RecipeIngredient[]).forEach((ing: RecipeIngredient, index: number) => {
+            if (!ing.name || !ing.quantity || !ing.unit) {
                 throw new Error(`Invalid ingredient at index ${index}: missing required fields`)
             }
             if (typeof ing.quantity !== 'number' || ing.quantity <= 0) {
@@ -531,21 +531,21 @@ function findBestIngredientMatch(searchName: string, ingredients: Ingredient[]):
     
     // 1. Exact match
     let match = ingredients.find(i => 
-        (i as any).name.toLowerCase() === search
+        i.name.toLowerCase() === search
     )
     if (match) {return match}
     
     // 2. Contains match
     match = ingredients.find(i => 
-        (i as any).name.toLowerCase().includes(search) ||
-        search.includes((i as any).name.toLowerCase())
+        i.name.toLowerCase().includes(search) ||
+        search.includes(i.name.toLowerCase())
     )
     if (match) {return match}
     
     // 3. Partial word match
     const searchWords = search.split(' ')
     match = ingredients.find((i: Ingredient) => {
-        const nameWords = (i as any).name.toLowerCase().split(' ')
+        const nameWords = i.name.toLowerCase().split(' ')
         return searchWords.some((sw: string) => nameWords.some((nw: string) => nw.includes(sw) || sw.includes(nw)))
     })
     
@@ -568,12 +568,12 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
     
     const supabase = createClient()
 
-    for (const recipeIng of (recipe as any).ingredients) {
+    for (const recipeIng of recipe.ingredients as RecipeIngredient[]) {
         // Find matching ingredient using fuzzy matching
-        const ingredient = findBestIngredientMatch((recipeIng).name, availableIngredients)
+        const ingredient = findBestIngredientMatch(recipeIng.name, availableIngredients)
 
         if (!ingredient) {
-            apiLogger.warn(`Ingredient not found in inventory: ${(recipeIng).name}`)
+            apiLogger.warn(`Ingredient not found in inventory: ${recipeIng.name}`)
             continue
         }
 
@@ -594,7 +594,7 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
         totalMaterialCost += cost
 
         ingredientBreakdown.push({
-            name: (ingredient as any).name,
+            name: ingredient.name,
             quantity: recipeIng.quantity,
             unit: recipeIng.unit,
             pricePerUnit: ingredient.price_per_unit,

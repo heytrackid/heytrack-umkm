@@ -52,7 +52,7 @@ export function createRouteHandler<T>(
       }
 
       // Extract pagination
-      let pagination: any
+      let pagination: { page: number; limit: number; offset: number } | undefined
       if (config.pagination) {
         pagination = extractPagination(request)
       }
@@ -88,7 +88,7 @@ export function createRouteHandler<T>(
 
       return response
     } catch (err) {
-      const apiError = handleAPIError(_error)
+      const apiError = handleAPIError(err)
       return createAPIErrorResponse(apiError)
     }
   }

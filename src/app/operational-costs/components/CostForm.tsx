@@ -36,17 +36,16 @@ const costCategories = [
 export default function CostForm({
   cost,
   onSave,
-  onCancel,
-  isMobile = false
+  onCancel
 }: CostFormProps) {
-  const form = useForm<OperationalCostForm>({
+  const form = useForm({
     resolver: zodResolver(OperationalCostFormSchema),
     defaultValues: cost || {
       name: '',
       category: '',
       description: '',
       amount: 0,
-      frequency: 'MONTHLY',
+      frequency: 'MONTHLY' as const,
       is_active: true
     }
   })
@@ -125,16 +124,16 @@ export default function CostForm({
           <Label>Frekuensi</Label>
           <Select
             value={form.watch('frequency')}
-            onValueChange={(value) => form.setValue('frequency', value)}
+            onValueChange={(value) => form.setValue('frequency', value as 'MONTHLY' | 'YEARLY' | 'QUARTERLY' | 'ONE_TIME')}
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="daily">Harian</SelectItem>
-              <SelectItem value="weekly">Mingguan</SelectItem>
-              <SelectItem value="monthly">Bulanan</SelectItem>
-              <SelectItem value="yearly">Tahunan</SelectItem>
+              <SelectItem value="ONE_TIME">Sekali</SelectItem>
+              <SelectItem value="MONTHLY">Bulanan</SelectItem>
+              <SelectItem value="QUARTERLY">Kuartalan</SelectItem>
+              <SelectItem value="YEARLY">Tahunan</SelectItem>
             </SelectContent>
           </Select>
           {form.formState.errors.frequency && (
@@ -157,6 +156,7 @@ export default function CostForm({
         {/* Actions */}
         <div className="flex gap-3 pt-4">
           <Button
+            type="button"
             onClick={form.handleSubmit(handleSubmit)}
             className="flex-1"
             disabled={form.formState.isSubmitting}
@@ -164,7 +164,7 @@ export default function CostForm({
             <Save className="h-4 w-4 mr-2" />
             {cost ? "Update" : "Simpan"}
           </Button>
-          <Button variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             <X className="h-4 w-4 mr-2" />
             Batal
           </Button>

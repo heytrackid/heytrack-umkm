@@ -31,7 +31,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 interface Column<T> {
   key: keyof T | string
   header: string
-  render?: (value: any, item: T) => ReactNode
+  render?: (value: unknown, item: T) => ReactNode
   sortable?: boolean
   filterable?: boolean
   filterType?: 'text' | 'select'
@@ -158,8 +158,16 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
         const aVal = getValue(a, sortBy)
         const bVal = getValue(b, sortBy)
 
-        if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1}
-        if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1}
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1}
+          if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1}
+          return 0
+        }
+
+        const aText = String(aVal ?? '')
+        const bText = String(bVal ?? '')
+        if (aText < bText) {return sortOrder === 'asc' ? -1 : 1}
+        if (aText > bText) {return sortOrder === 'asc' ? 1 : -1}
         return 0
       })
     }
@@ -181,7 +189,14 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
   // Utility functions
   function getValue(item: T, key: keyof T | string): unknown {
     if (typeof key === 'string' && key.includes('.')) {
-      return key.split('.').reduce((obj, k) => obj?.[k], item)
+      return key
+        .split('.')
+        .reduce<unknown>((acc, segment) => {
+          if (acc && typeof acc === 'object') {
+            return (acc as Record<string, unknown>)[segment]
+          }
+          return undefined
+        }, item as Record<string, unknown>)
     }
     return item[key as keyof T]
   }

@@ -5,6 +5,9 @@
 
 import { cronLogger } from '@/lib/logger'
 import type { AutomationEngineResult } from './types'
+import { HppSnapshotService } from '@/modules/hpp/services/HppSnapshotService'
+import { HppAlertService } from '@/modules/hpp/services/HppAlertService'
+import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
 
 export class HPPCronJobs {
   /**
@@ -16,22 +19,24 @@ export class HPPCronJobs {
     cronLogger.info('Starting daily HPP snapshots creation')
 
     try {
-      // TODO: Implement daily snapshots logic
-      // This will be called by the Edge Function or cron job
+      const snapshotService = new HppSnapshotService()
+      const result = await snapshotService.createDailySnapshots()
       
       const duration = Date.now() - startTime
       
       cronLogger.info({
         duration,
-        status: 'success'
+        status: 'success',
+        ...result
       }, 'Daily HPP snapshots completed')
 
       return {
         success: true,
         message: 'Daily HPP snapshots created successfully',
         data: {
-          snapshotsCreated: 0,
-          recipesProcessed: 0,
+          snapshotsCreated: result.success,
+          recipesProcessed: result.success + result.failed,
+          failed: result.failed,
           duration
         }
       }
@@ -42,7 +47,7 @@ export class HPPCronJobs {
       return {
         success: false,
         message: 'Failed to create daily HPP snapshots',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: err instanceof Error ? err.message : 'Unknown error',
         data: { duration }
       }
     }
@@ -57,22 +62,24 @@ export class HPPCronJobs {
     cronLogger.info('Starting HPP alert detection')
 
     try {
-      // TODO: Implement alert detection logic
-      // This will be called by the Edge Function or cron job
+      const alertService = new HppAlertService()
+      const result = await alertService.detectAlertsForAllRecipes()
       
       const duration = Date.now() - startTime
       
       cronLogger.info({
         duration,
-        status: 'success'
+        status: 'success',
+        ...result
       }, 'HPP alert detection completed')
 
       return {
         success: true,
         message: 'HPP alerts detected successfully',
         data: {
-          alertsCreated: 0,
-          recipesChecked: 0,
+          alertsCreated: result.totalAlerts,
+          recipesChecked: result.success,
+          failed: result.failed,
           duration
         }
       }
@@ -83,7 +90,7 @@ export class HPPCronJobs {
       return {
         success: false,
         message: 'Failed to detect HPP alerts',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: err instanceof Error ? err.message : 'Unknown error',
         data: { duration }
       }
     }
@@ -98,21 +105,22 @@ export class HPPCronJobs {
     cronLogger.info('Starting HPP snapshots archival')
 
     try {
-      // TODO: Implement archival logic
-      // Archive snapshots older than 90 days
+      const snapshotService = new HppSnapshotService()
+      const archivedCount = await snapshotService.archiveOldSnapshots()
       
       const duration = Date.now() - startTime
       
       cronLogger.info({
         duration,
-        status: 'success'
+        status: 'success',
+        archivedCount
       }, 'HPP snapshots archival completed')
 
       return {
         success: true,
         message: 'Old HPP snapshots archived successfully',
         data: {
-          snapshotsArchived: 0,
+          snapshotsArchived: archivedCount,
           duration
         }
       }
@@ -123,7 +131,7 @@ export class HPPCronJobs {
       return {
         success: false,
         message: 'Failed to archive HPP snapshots',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: err instanceof Error ? err.message : 'Unknown error',
         data: { duration }
       }
     }
@@ -137,14 +145,16 @@ export class HPPCronJobs {
     cronLogger.info({ recipeId }, 'Starting HPP recalculation for recipe')
 
     try {
-      // TODO: Implement recalculation logic
+      const calculatorService = new HppCalculatorService()
+      const result = await calculatorService.calculateRecipeHpp(recipeId)
       
       const duration = Date.now() - startTime
       
       cronLogger.info({
         recipeId,
         duration,
-        status: 'success'
+        status: 'success',
+        totalHpp: result.totalHpp
       }, 'HPP recalculation completed')
 
       return {
@@ -152,6 +162,7 @@ export class HPPCronJobs {
         message: 'HPP recalculated successfully',
         data: {
           recipeId,
+          totalHpp: result.totalHpp,
           duration
         }
       }
@@ -162,7 +173,7 @@ export class HPPCronJobs {
       return {
         success: false,
         message: 'Failed to recalculate HPP',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: err instanceof Error ? err.message : 'Unknown error',
         data: { recipeId, duration }
       }
     }

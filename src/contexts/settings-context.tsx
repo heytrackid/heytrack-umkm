@@ -49,8 +49,8 @@ export const languages: Language[] = [
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ]
 
-const DEFAULT_CURRENCY_CODE = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'IDR'
-const DEFAULT_LANGUAGE_CODE = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE || 'id'
+const DEFAULT_CURRENCY_CODE = process.env['NEXT_PUBLIC_DEFAULT_CURRENCY'] || 'IDR'
+const DEFAULT_LANGUAGE_CODE = process.env['NEXT_PUBLIC_DEFAULT_LANGUAGE'] || 'id'
 
 const defaultCurrency = currencies.find(c => c.code === DEFAULT_CURRENCY_CODE) || currencies[0]
 const defaultLanguage = languages.find(l => l.code === DEFAULT_LANGUAGE_CODE) || languages[0]
@@ -80,7 +80,7 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
         void setSettings(newSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
       } catch (err: unknown) {
-        uiLogger.error({ error }, 'Failed to parse saved settings from localStorage')
+        uiLogger.error({ err }, 'Failed to parse saved settings from localStorage')
         void setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }

@@ -11,7 +11,7 @@ import {
 } from '@/lib/automation/types'
 import type { Database } from '@/types/supabase-generated'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { NotificationsTable } from '@/types/notifications'
+import type { NotificationsTable } from '@/types/features/notifications'
 
 export class InventoryWorkflowHandlers {
   /**
@@ -95,7 +95,7 @@ export class InventoryWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         ingredientName: ingredient.name,
-        _error: getErrorMessage(error)
+        error: getErrorMessage(error)
       }, 'Failed to process low stock alert')
 
       return {
@@ -135,7 +135,7 @@ export class InventoryWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         ingredientId: event.entityId,
-        _error: getErrorMessage(error)
+        error: getErrorMessage(error)
       }, 'Failed to process out of stock alert')
 
       return {
@@ -205,7 +205,7 @@ export class InventoryWorkflowHandlers {
       entity_id?: string
       entity_type?: string
       action_url?: string
-      metadata?: any
+      metadata?: Record<string, unknown>
     }
   ): Promise<void> {
     try {

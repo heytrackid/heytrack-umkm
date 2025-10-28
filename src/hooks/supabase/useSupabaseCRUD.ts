@@ -3,28 +3,48 @@
  * Generic hook for CRUD operations with Supabase
  */
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 
-interface UseSupabaseCRUDReturn<T> {
-  data: T[] | null
+type TablesMap = Database['public']['Tables']
+type TableKey = keyof TablesMap
+
+type TableRow<TTable extends string> = TTable extends TableKey
+  ? TablesMap[TTable]['Row']
+  : Record<string, unknown>
+
+type TableInsert<TTable extends string> = TTable extends TableKey
+  ? TablesMap[TTable]['Insert']
+  : Record<string, unknown>
+
+type TableUpdate<TTable extends string> = TTable extends TableKey
+  ? TablesMap[TTable]['Update']
+  : Record<string, unknown>
+
+type TableFilters<TTable extends string> = Partial<
+  Record<keyof TableRow<TTable> & string, string | number | boolean | null>
+>
+
+interface UseSupabaseCRUDReturn<Row, Insert, Update> {
+  data: Row[] | null
   loading: boolean
   error: Error | null
   refetch: () => Promise<void>
   remove: (id: string) => Promise<void>
-  create: (data: Partial<T>) => Promise<T | null>
-  update: (id: string, data: Partial<T>) => Promise<T | null>
+  create: (data: Partial<Insert>) => Promise<Row | null>
+  update: (id: string, data: Partial<Update>) => Promise<Row | null>
 }
 
-export function useSupabaseCRUD<T = any>(
-  table: string,
+export function useSupabaseCRUD<TTable extends string>(
+  table: TTable,
   options?: {
     select?: string
-    filter?: Record<string, any>
-    orderBy?: { column: string; ascending?: boolean }
+    filter?: TableFilters<TTable>
+    orderBy?: { column: keyof TableRow<TTable> & string; ascending?: boolean }
   }
-): UseSupabaseCRUDReturn<T> {
-  const [data, setData] = useState<T[] | null>(null)
+): UseSupabaseCRUDReturn<TableRow<TTable>, TableInsert<TTable>, TableUpdate<TTable>> {
+  const [data, setData] = useState<TableRow<TTable>[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -39,13 +59,19 @@ export function useSupabaseCRUD<T = any>(
       // Apply filters
       if (options?.filter) {
         Object.entries(options.filter).forEach(([key, value]) => {
-          query = query.eq(key, value)
+          if (value === undefined) {return}
+          const column = key as keyof TableRow<TTable> & string
+          if (value === null) {
+            query = query.is(column, null)
+          } else {
+            query = query.eq(column, value)
+          }
         })
       }
 
       // Apply ordering
       if (options?.orderBy) {
-        query = query.order(options.orderBy.column, {
+        query = query.order(options.orderBy.column as never, {
           ascending: options.orderBy.ascending ?? true
         })
       }
@@ -54,7 +80,7 @@ export function useSupabaseCRUD<T = any>(
 
       if (queryError) {throw queryError}
 
-      void setData(result as T[])
+      void setData((result as unknown as TableRow<TTable>[]) ?? null)
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
@@ -80,12 +106,12 @@ export function useSupabaseCRUD<T = any>(
     }
   }
 
-  const create = async (newData: Partial<T>): Promise<T | null> => {
+  const create = async (newData: Partial<TableInsert<TTable>>): Promise<TableRow<TTable> | null> => {
     try {
       const supabase = createClient()
       const { data: result, error: createError } = await supabase
         .from(table)
-        .insert(newData as any)
+        .insert(newData as never)
         .select()
         .single()
 
@@ -93,20 +119,20 @@ export function useSupabaseCRUD<T = any>(
 
       // Refresh data after create
       await fetchData()
-      return result as T
+      return result as unknown as TableRow<TTable>
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Create failed'))
       throw err
     }
   }
 
-  const update = async (id: string, updateData: Partial<T>): Promise<T | null> => {
+  const update = async (id: string, updateData: Partial<TableUpdate<TTable>>): Promise<TableRow<TTable> | null> => {
     try {
       const supabase = createClient()
       const { data: result, error: updateError } = await supabase
         .from(table)
-        .update(updateData as any)
-        .eq('id', id)
+        .update(updateData as never)
+        .eq('id', id as never)
         .select()
         .single()
 
@@ -114,7 +140,7 @@ export function useSupabaseCRUD<T = any>(
 
       // Refresh data after update
       await fetchData()
-      return result as T
+      return result as unknown as TableRow<TTable>
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Update failed'))
       throw err

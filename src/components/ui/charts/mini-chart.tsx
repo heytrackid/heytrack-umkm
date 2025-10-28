@@ -3,7 +3,7 @@
  * Small charts for dashboard cards
  */
 
-import { React, memo } from 'react'
+import { memo } from 'react'
 import { cn } from '@/lib/utils'
 import { Line, LineChart, Area, AreaChart, Bar, BarChart, ResponsiveContainer } from 'recharts'
 import { type ChartDataPoint, CHART_COLORS } from './types'

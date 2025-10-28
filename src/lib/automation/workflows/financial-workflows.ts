@@ -59,7 +59,7 @@ export class FinancialWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         ingredientId,
-        _error: getErrorMessage(error)
+        error: getErrorMessage(error)
       }, 'Failed to process ingredient price change')
 
       return {
@@ -134,7 +134,7 @@ export class FinancialWorkflowHandlers {
     } catch (error: unknown) {
       logger.error({
         costId,
-        _error: getErrorMessage(error)
+        error: getErrorMessage(error)
       }, 'Failed to process operational cost change')
 
       return {

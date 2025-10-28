@@ -29,7 +29,7 @@ import {
   Trash2,
   Users
 } from 'lucide-react'
-import type { CustomersTable } from '@/types/customers'
+import type { CustomersTable } from '@/types/domain/customers'
 import { useMemo, useState } from 'react'
 
 interface CustomersTableProps {
@@ -163,12 +163,12 @@ export default function CustomersTable({
                   </TableCell>
                   <TableCell>
                     <span className="font-medium text-green-600">
-                      {formatCurrency(customer.total_spent)}
+                      {formatCurrency(customer.total_spent ?? 0)}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="font-medium">
-                      {customer.total_orders}
+                      {customer.total_orders ?? 0}
                     </span>
                   </TableCell>
                   <TableCell>

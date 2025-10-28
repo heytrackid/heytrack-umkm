@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { getErrorMessage } from '@/lib/type-guards'
 import { ErrorLogSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 
@@ -77,7 +76,7 @@ export async function POST(request: NextRequest) {
     })
     
   } catch (err: unknown) {
-    apiLogger.error({ err }, 'Failed to log _error:')
+    apiLogger.error({ err }, 'Failed to log error:')
     
     return NextResponse.json(
       { error: 'Failed to log error' },

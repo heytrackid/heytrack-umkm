@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import type { FormEvent } from 'react'
+import type { Recipe } from '@/types/domain/recipes'
+import type { Customer } from '@/types/domain/customers'
 
 import { apiLogger } from '@/lib/logger'
 export interface OrderItem {
@@ -64,8 +66,8 @@ export const useOrderLogic = () => {
   })
 
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
-  const [availableRecipes, setAvailableRecipes] = useState<any[]>([])
-  const [customers, setCustomers] = useState<any[]>([])
+  const [availableRecipes, setAvailableRecipes] = useState<Recipe[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
 
   // Load initial data
   useEffect(() => {
@@ -113,7 +115,7 @@ export const useOrderLogic = () => {
   const totalAmount = subtotal - formData.discount_amount + taxAmount + formData.delivery_fee
 
   // Form handlers
-  const handleInputChange = (field: keyof OrderFormData, value: any) => {
+  const handleInputChange = (field: keyof OrderFormData, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -136,10 +138,10 @@ export const useOrderLogic = () => {
     void setOrderItems(prev => [...prev, newItem])
   }
 
-  const updateOrderItem = (index: number, field: keyof OrderItem, value: any) => {
+  const updateOrderItem = (index: number, field: keyof OrderItem, value: unknown) => {
     setOrderItems(prev => {
       const updated = [...prev]
-      if (index < 0 || index >= updated.length || !updated[index]) return updated
+      if (index < 0 || index >= updated.length || !updated[index]) {return updated}
 
       const currentItem = updated[index]
 
@@ -179,7 +181,7 @@ export const useOrderLogic = () => {
     setOrderItems(prev => prev.filter((_, i) => i !== index))
   }
 
-  const selectCustomer = (customer: any) => {
+  const selectCustomer = (customer: Customer) => {
     setFormData(prev => ({
       ...prev,
       customer_name: customer.name,

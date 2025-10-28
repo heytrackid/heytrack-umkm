@@ -57,7 +57,7 @@ self.onmessage = (e: MessageEvent<HppCalculationInput>) => {
   } catch (err) {
     self.postMessage({
       success: false,
-      _error: err instanceof Error ? err.message : 'Calculation failed'
+      error: err instanceof Error ? err.message : 'Calculation failed'
     })
   }
 }

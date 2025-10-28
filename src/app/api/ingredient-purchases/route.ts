@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
           price_per_unit
         )
       `)
-            .eq('user_id', (user as any).id)
+            .eq('user_id', user.id)
             .order('purchase_date', { ascending: false })
 
         // Apply filters
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
             .from('ingredients')
             .select('*')
             .eq('id', validatedData.ingredient_id)
-            .eq('user_id', (user as any).id)
+            .eq('user_id', user.id)
             .single()
 
         if (ingredientError || !ingredient) {
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
         const { data: transaction, error: transactionError } = await supabase
             .from('financial_records')
             .insert({
-                user_id: (user as any).id,
+                user_id: user.id,
                 type: 'EXPENSE',
                 category: 'Pembelian Bahan Baku',
                 amount: totalHarga,
@@ -153,14 +153,14 @@ export async function POST(request: NextRequest) {
             apiLogger.error({ error: transactionError }, 'Error creating financial transaction:')
             // Continue without financial transaction
         } else {
-            financialTransactionId = (transaction as any).id
+            financialTransactionId = transaction?.id || null
         }
 
         // 2. Create purchase record
         const { data: purchase, error: purchaseError } = await supabase
             .from('ingredient_purchases')
             .insert({
-                user_id: (user as any).id,
+                user_id: user.id,
                 ingredient_id: validatedData.ingredient_id,
                 supplier: validatedData.supplier,
                 quantity: qtyBeli,
@@ -203,9 +203,9 @@ export async function POST(request: NextRequest) {
 
         const { error: stockError } = await supabase
             .from('ingredients')
-            .update({ current_stock: newStock } as any)
+            .update({ current_stock: newStock })
             .eq('id', validatedData.ingredient_id)
-            .eq('user_id', (user as any).id)
+            .eq('user_id', user.id)
 
         if (stockError) {
             apiLogger.error({ error: stockError }, 'Error updating stock:')
@@ -216,13 +216,13 @@ export async function POST(request: NextRequest) {
         await supabase
             .from('inventory_stock_logs')
             .insert({
-                user_id: (user as any).id,
+                user_id: user.id,
                 ingredient_id: validatedData.ingredient_id,
                 quantity_before: ingredient.current_stock || 0,
                 quantity_after: newStock,
                 quantity_changed: qtyBeli,
                 change_type: 'PURCHASE',
-                reference_id: (purchase).id,
+                reference_id: purchase?.id,
                 reference_type: 'ingredient_purchase',
                 transaction_date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
             })
@@ -270,7 +270,7 @@ export async function DELETE(request: NextRequest) {
             .from('ingredient_purchases')
             .select('*')
             .eq('id', id)
-            .eq('user_id', (user as any).id)
+            .eq('user_id', user.id)
             .single()
 
         if (fetchError || !purchase) {
@@ -285,7 +285,7 @@ export async function DELETE(request: NextRequest) {
             .from('ingredients')
             .select('current_stock')
             .eq('id', purchase.ingredient_id)
-            .eq('user_id', (user as any).id)
+            .eq('user_id', user.id)
             .single()
 
         if (ingredient) {
@@ -293,16 +293,16 @@ export async function DELETE(request: NextRequest) {
 
             await supabase
                 .from('ingredients')
-                .update({ current_stock: newStock } as any)
+                .update({ current_stock: newStock })
                 .eq('id', purchase.ingredient_id)
-                .eq('user_id', (user as any).id)
+                .eq('user_id', user.id)
         }
 
         // 2. Create stock ledger entry for reversal
         await supabase
             .from('inventory_stock_logs')
             .insert({
-                user_id: (user as any).id,
+                user_id: user.id,
                 ingredient_id: purchase.ingredient_id,
                 quantity_before: ingredient?.current_stock || 0,
                 quantity_after: ingredient ? Math.max(0, (ingredient.current_stock || 0) - purchase.quantity) : 0,
@@ -319,7 +319,7 @@ export async function DELETE(request: NextRequest) {
             .from('ingredient_purchases')
             .delete()
             .eq('id', id)
-            .eq('user_id', (user as any).id)
+            .eq('user_id', user.id)
 
         if (deleteError) {
             apiLogger.error({ error: deleteError }, 'Error deleting purchase:')
