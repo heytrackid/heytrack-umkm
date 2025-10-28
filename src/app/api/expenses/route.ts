@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('expenses')
-      .select('*')
+      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -106,12 +106,12 @@ export async function GET(request: NextRequest) {
     
     const { data: todayExpenses } = await supabase
       .from('expenses')
-      .select('*')
+      .select('amount, category')
       .eq('expense_date', today)
 
     const { data: monthExpenses } = await supabase
       .from('expenses')
-      .select('*')
+      .select('amount, category')
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
@@ -178,7 +178,7 @@ export async function POST(request: Request) {
     const { data: expense, error } = await supabase
       .from('expenses')
       .insert([insertPayload] as any)
-      .select('*')
+      .select('id, description, category, amount, expense_date, created_at')
       .single()
 
     if (error) {throw error}
@@ -195,7 +195,6 @@ export async function POST(request: Request) {
         entity_id: expense.id,
         priority: 'high' as const
       }
-      // @ts-expect-error - Supabase insert type
       await supabase.from('notifications').insert([notificationPayload])
     }
 

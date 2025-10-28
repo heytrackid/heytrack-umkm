@@ -190,7 +190,7 @@ export const VirtualizedTableWithSuspense = ({
   height = 400,
   ...props
 }: {
-  data?: any[];
+  data?: unknown[];
   columns?: unknown[];
   height?: number;
   [key: string]: unknown

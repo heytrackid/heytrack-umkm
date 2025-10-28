@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { apiLogger } from '@/lib/logger'
+import type { HppCalculationResult, MaterialBreakdown } from '@/modules/hpp/types'
 
+// Input data for worker calculation
 interface HppCalculationData {
   ingredients: Array<{
     id: string
@@ -20,19 +22,14 @@ interface HppCalculationData {
   batchSize?: number
 }
 
-interface HppCalculationResult {
+// Extended result with additional breakdown fields
+interface HppWorkerResult extends Omit<HppCalculationResult, 'materialBreakdown'> {
   total_hpp: number
   cost_per_unit: number
   ingredient_cost: number
   operational_cost: number
   batch_size: number
-  ingredient_breakdown: Array<{
-    ingredient_id: string
-    ingredient_name: string
-    quantity: number
-    unit_price: number
-    total_cost: number
-  }>
+  ingredient_breakdown: MaterialBreakdown[]
   operational_breakdown: Array<{
     cost_id: string
     cost_name: string
@@ -80,7 +77,7 @@ export function useHppWorker() {
     }
   }, [])
 
-  const calculateHPP = (data: HppCalculationData): Promise<HppCalculationResult> => new Promise((resolve, reject) => {
+  const calculateHPP = (data: HppCalculationData): Promise<HppWorkerResult> => new Promise((resolve, reject) => {
       if (!workerRef.current || !isReady) {
         reject(new Error('Worker not ready'))
         return
@@ -109,7 +106,7 @@ export function useHppWorker() {
       })
     })
 
-  const calculateBatchHPP = (recipes: Array<{ id: string; name: string }>): Promise<HppCalculationResult[]> => new Promise((resolve, reject) => {
+  const calculateBatchHPP = (recipes: Array<{ id: string; name: string }>): Promise<HppWorkerResult[]> => new Promise((resolve, reject) => {
       if (!workerRef.current || !isReady) {
         reject(new Error('Worker not ready'))
         return

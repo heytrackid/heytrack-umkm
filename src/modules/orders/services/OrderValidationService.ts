@@ -1,8 +1,12 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/server'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 /**
- * Recipe with ingredients for validation
+ * Recipe with ingredients for validation (query result structure)
  */
 interface RecipeValidationQueryResult {
   id: string
@@ -10,14 +14,7 @@ interface RecipeValidationQueryResult {
   recipe_ingredients: Array<{
     quantity: number
     unit: string
-    ingredient: Array<{
-      id: string
-      name: string
-      current_stock: number | null
-      reorder_point: number | null
-      unit_type: string | null
-      is_active: boolean | null
-    }>
+    ingredient: Ingredient[]
   }>
 }
 
@@ -42,6 +39,8 @@ export class OrderValidationService {
     const errors: string[] = []
 
     try {
+      const supabase = await createClient()
+      
       for (const item of items) {
         const { data: recipe, error } = await supabase
           .from('recipes')

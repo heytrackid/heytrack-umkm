@@ -10,19 +10,16 @@ export type OrderRow = Database['public']['Tables']['orders']['Row']
 export type OrderItemRow = Database['public']['Tables']['order_items']['Row']
 export type OrderStatus = Database['public']['Enums']['order_status']
 
-// Extended types with relations
-export interface Order extends Omit<OrderRow, 'priority'> {
-  items: OrderItem[]
-  order_number?: string
-  discount_amount?: number
-  tax_rate?: number
-  special_requirements?: string
-  notes?: string
-  priority: string | null
+// Backwards compatible aliases
+export type Order = OrderRow
+export type OrderItem = OrderItemRow
+
+// Extended types with relations for UI
+export interface OrderWithItems extends OrderRow {
+  items: OrderItemWithRecipe[]
 }
 
-export interface OrderItem extends OrderItemRow {
-  notes?: string
+export interface OrderItemWithRecipe extends OrderItemRow {
   recipe?: {
     id: string
     name: string
@@ -35,7 +32,7 @@ export interface OrderItem extends OrderItemRow {
 
 // Form props
 export interface OrderFormProps {
-  order?: Order
+  order?: OrderWithItems
   onSubmit: (data: OrderFormData) => Promise<void>
   onCancel: () => void
   loading?: boolean

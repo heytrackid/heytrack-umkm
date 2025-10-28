@@ -1,28 +1,13 @@
 import { dbLogger } from '@/lib/logger'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type { Database } from '@/types/supabase-generated'
+import type { HppCalculation } from '@/modules/hpp/types'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Production = Database['public']['Tables']['productions']['Row']
-
-// Temporary interface until supabase types are regenerated
-interface HppCalculation {
-  id: string
-  recipe_id: string
-  calculation_date: string
-  material_cost: number
-  labor_cost: number
-  overhead_cost: number
-  total_hpp: number
-  cost_per_unit: number
-  wac_adjustment: number
-  production_quantity: number
-  notes?: string
-  created_at: string
-}
 
 interface HppCalculationResult {
   recipeId: string;

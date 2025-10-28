@@ -3,8 +3,11 @@
  * Extends base performance.ts with more advanced features
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, DependencyList } from 'react'
-import { perfLogger } from '@/lib/logger'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { DependencyList, UIEvent as ReactUIEvent } from 'react'
+import { createLogger } from '@/lib/logger'
+
+const perfLogger = createLogger('PerformanceOptimized')
 
 /**
  * Memoize array operations to prevent unnecessary recalculations
@@ -44,7 +47,7 @@ export function useMemoizedArrayOps<T>(
 export function useExpensiveCalculation<T, R>(
   data: T,
   calculator: (data: T) => R,
-  deps: React.DependencyList = []
+  deps: DependencyList = []
 ): R {
   return useMemo(() => calculator(data), [data, ...deps])
 }
@@ -88,7 +91,7 @@ export function useVirtualScroll<T>(
   const totalHeight = items.length * itemHeight
   const offsetY = visibleRange.startIndex * itemHeight
 
-  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+  const handleScroll = useCallback((e: ReactUIEvent<HTMLDivElement>) => {
     void setScrollTop(e.currentTarget.scrollTop)
   }, [])
 

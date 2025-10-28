@@ -10,6 +10,10 @@ import { SuggestionEngine } from '@/lib/services/SuggestionEngine';
 import { AIFallbackService } from '@/lib/services/AIFallbackService';
 import { logger } from '@/lib/logger';
 import { createClient } from '@/utils/supabase/server';
+import type { Database } from '@/types/supabase-generated';
+
+type ChatSession = Database['public']['Tables']['chat_sessions']['Row'];
+type ChatMessage = Database['public']['Tables']['chat_messages']['Row'];
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;

@@ -6,7 +6,6 @@ import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useSupabaseCRUD } from '@/hooks/supabase'
-
 // UI Components
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'

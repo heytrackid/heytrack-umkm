@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 import type { RecipeOption } from './OrderRecipeService'
 
 /**
@@ -34,6 +35,8 @@ export class RecipeAvailabilityService {
    */
   static async getAvailableRecipes(): Promise<RecipeOption[]> {
     try {
+      const supabase = createClient()
+      
       const { data: recipes, error } = await supabase
         .from('recipes')
         .select(`

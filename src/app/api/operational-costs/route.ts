@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('expenses')
-      .select('*')
+      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
       .eq('user_id', user.id)
       .neq('category', 'Revenue')
       .order('expense_date', { ascending: false })
@@ -172,8 +172,8 @@ export async function POST(request: NextRequest) {
         is_recurring: validatedData.is_recurring,
         recurring_frequency: validatedData.recurring_frequency,
         tags: []
-      })
-      .select('*')
+      } as any)
+      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
       .single()
 
     if (error) {
@@ -248,17 +248,17 @@ export async function PUT(request: NextRequest) {
     if (validatedData.description !== undefined) {updateData.description = validatedData.description}
     if (validatedData.date !== undefined) {updateData.expense_date = validatedData.date}
     if (validatedData.is_recurring !== undefined) {updateData.is_recurring = validatedData.is_recurring}
-    if (validatedData.recurring_frequency !== undefined) {updateData.recurring_frequency = validatedData.recurring_frequency}
+    if (validatedData.recurring_frequency !== undefined) {updateData.recurring_frequency = validatedData.recurring_frequency ?? null}
     if (validatedData.vendor_name !== undefined) {updateData.supplier = validatedData.vendor_name}
     if (validatedData.invoice_number !== undefined) {updateData.receipt_number = validatedData.invoice_number}
     if (validatedData.is_paid !== undefined) {updateData.status = validatedData.is_paid ? 'paid' : 'pending'}
 
     const { data, error } = await supabase
       .from('expenses')
-      .update(updateData)
+      .update(updateData as any)
       .eq('id', body.id)
       .eq('user_id', user.id)
-      .select('*')
+      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, updated_at')
       .single()
 
     if (error) {
@@ -325,7 +325,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id)
       .eq('user_id', user.id)
       .neq('category', 'Revenue')
-      .select('*')
+      .select('id')
       .single()
 
     if (error) {

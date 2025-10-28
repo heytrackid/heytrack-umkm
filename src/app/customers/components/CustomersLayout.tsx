@@ -49,7 +49,9 @@ const CustomerSearchFilters = dynamic(
 )
 
 import type { Customer } from './types'
-import type { CustomersTable } from '@/types/domain/customers'
+import type { Database } from '@/types/supabase-generated'
+
+type CustomersTable = Database['public']['Tables']['customers']
 
 export default function CustomersLayout() {
   const router = useRouter()
@@ -179,7 +181,7 @@ export default function CustomersLayout() {
     if (selectedItems.length === 0) { return }
 
     const selectedCustomers = filteredCustomers.filter(customer => selectedItems.includes(customer.id.toString()))
-    
+
     // Use the selected customers for bulk edit
     toast({
       title: 'Informasi',
@@ -271,14 +273,14 @@ export default function CustomersLayout() {
 
         {/* View Switcher */}
         <div className="flex gap-2 mb-4">
-          <Button 
-            variant={currentView === 'list' ? 'default' : 'outline'} 
+          <Button
+            variant={currentView === 'list' ? 'default' : 'outline'}
             onClick={() => setCurrentView('list')}
           >
             List View
           </Button>
-          <Button 
-            variant={currentView === 'add' ? 'default' : 'outline'} 
+          <Button
+            variant={currentView === 'add' ? 'default' : 'outline'}
             onClick={() => setCurrentView('add')}
           >
             Add Customer
@@ -326,7 +328,7 @@ export default function CustomersLayout() {
             )}
           </>
         )}
-        
+
         {currentView === 'add' && (
           <div className="text-center py-8">
             <h3 className="text-lg font-medium">Add Customer Form</h3>
@@ -336,7 +338,7 @@ export default function CustomersLayout() {
             </Button>
           </div>
         )}
-        
+
         {currentView === 'edit' && (
           <div className="text-center py-8">
             <h3 className="text-lg font-medium">Edit Customer Form</h3>

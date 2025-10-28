@@ -3,16 +3,10 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import type { HppAlertWithRecipe } from '@/modules/hpp/types'
 
-interface HppAlert {
-  id: string
-  recipe_id: string
-  recipe_name: string
-  alert_type: string
-  message: string
-  is_read: boolean
-  created_at: string
-}
+// Alias for backwards compatibility
+type HppAlert = HppAlertWithRecipe
 
 interface HppAlertsResponse {
   alerts: HppAlert[]

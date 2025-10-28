@@ -9,6 +9,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type Notification = Database['public']['Tables']['notifications']['Row']
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('notifications')
-      .select('*')
+      .select('id, title, message, category, severity, is_read, is_dismissed, created_at, metadata')
       .order('created_at', { ascending: false })
       .limit(limit)
 

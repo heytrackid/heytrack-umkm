@@ -1,8 +1,11 @@
 import { triggerWorkflow } from '@/lib/automation-engine'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
-
+import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
+
+type Order = Database['public']['Tables']['orders']['Row']
+type OrderStatus = Database['public']['Enums']['order_status']
 // PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
 export async function PATCH(
   request: NextRequest,
@@ -40,7 +43,7 @@ export async function PATCH(
     // Get current order to check previous status
     const { data: currentOrder, error: fetchError } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, order_no, status, total_amount, delivery_date, order_date, customer_name, user_id')
       .eq('id', orderId)
       .single()
 
@@ -92,7 +95,7 @@ export async function PATCH(
         ...(incomeRecordId && { financial_record_id: incomeRecordId })
       })
       .eq('id', orderId)
-      .select('*')
+      .select('id, order_no, status, total_amount, customer_name, delivery_date, order_date, updated_at, financial_record_id')
       .single()
 
     if (updateError) {
@@ -192,7 +195,7 @@ export async function GET(
     // Get order with basic info
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, order_no, status, updated_at')
       .eq('id', orderId)
       .single()
 

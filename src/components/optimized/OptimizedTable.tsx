@@ -128,14 +128,14 @@ interface BulkActionsBarProps<T> {
   getPreviewNames: (items: string[]) => string
 }
 
-const BulkActionsBar = memo(({
+const BulkActionsBar = memo(<T,>({
   selectedCount,
   selectedItems,
   onClearSelection,
   onBulkEdit,
   onBulkDelete,
   getPreviewNames
-}: BulkActionsBarProps<any>) => {
+}: BulkActionsBarProps<T>) => {
   if (selectedCount === 0) { return null }
 
   return (
@@ -225,8 +225,9 @@ export const OptimizedTable = memo(<T extends { id: string | number }>({
   const getPreviewNames = useCallback((items: string[]) => {
     const selectedData = data.filter(item => items.includes(item.id.toString()))
     const names = selectedData.map(item => {
-      const itemAny = item as any
-      return itemAny.name || itemAny.title || item.id
+      // Use type assertion to access common properties like name, title, etc.
+      const itemTyped = item as Record<string, unknown>
+      return (itemTyped.name as string) || (itemTyped.title as string) || String(item.id)
     }).slice(0, 2)
     return names.join(', ') + (items.length > 2 ? ` +${items.length - 2} lainnya` : '')
   }, [data])

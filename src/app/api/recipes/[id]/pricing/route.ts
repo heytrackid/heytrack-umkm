@@ -2,7 +2,17 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { RecipeWithIngredients } from '@/types/domain/recipes'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+
+interface RecipeWithIngredients extends Recipe {
+  recipe_ingredients?: Array<RecipeIngredient & {
+    ingredient?: Ingredient
+  }>
+}
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

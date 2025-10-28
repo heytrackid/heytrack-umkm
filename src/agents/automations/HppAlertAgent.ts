@@ -7,7 +7,13 @@ import {
   createAgentLogger,
   executeAgentTask
 } from '@/agents/base'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
+type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
+type HppAlertInsert = Database['public']['Tables']['hpp_alerts']['Insert']
 
 interface AlertDetectionTaskData {
   threshold?: number // percentage threshold for alerts (default 10%)
@@ -130,7 +136,7 @@ export class HppAlertAgent {
   ): Promise<AlertResult['significantChanges'][0] | null> {
     try {
       // Get the latest two snapshots for this recipe
-      const { data: snapshots, error } = await supabase
+      const { data: snapshots, error } = await context.supabase
         .from('hpp_snapshots')
         .select('snapshot_date, hpp_value')
         .eq('recipe_id', recipeId)
@@ -183,7 +189,7 @@ export class HppAlertAgent {
       const logger = createAgentLogger('HppAlertAgent', context.correlationId)
 
       // Check if alert already exists for this change (avoid duplicates)
-      const { data: existingAlert, error: checkError } = await supabase
+      const { data: existingAlert, error: checkError } = await context.supabase
         .from('hpp_alerts')
         .select('id')
         .eq('recipe_id', change.recipeId)
@@ -201,7 +207,7 @@ export class HppAlertAgent {
       }
 
       // Get recipe name for better alert message
-      const { data: recipe } = await supabase
+      const { data: recipe } = await context.supabase
         .from('recipes')
         .select('name')
         .eq('id', change.recipeId)
@@ -229,9 +235,7 @@ export class HppAlertAgent {
         message: `${recipeName}: HPP ${change.changePercentage > 0 ? 'increased' : 'decreased'} by ${Math.abs(change.changePercentage).toFixed(1)}% (Rp ${change.previousHpp.toLocaleString()} → Rp ${change.currentHpp.toLocaleString()})`,
         is_read: false
       }
-
-      // @ts-expect-error - Supabase insert type
-      const { error: insertError } = await supabase
+      const { error: insertError } = await context.supabase
         .from('hpp_alerts')
         .insert([alertData])
 
@@ -254,6 +258,7 @@ export class HppAlertAgent {
    */
   private async getActiveRecipeIds(): Promise<string[]> {
     try {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('recipes')
         .select('id')
@@ -276,6 +281,7 @@ export class HppAlertAgent {
    */
   async getUnreadAlerts(): Promise<Array<{ id: string; message: string; alert_type: string; severity: string; recipe_id: string | null; created_at: string }>> {
     try {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('hpp_alerts')
         .select(`
@@ -304,7 +310,7 @@ export class HppAlertAgent {
    */
   async markAlertAsRead(alertId: string): Promise<void> {
     try {
-      // @ts-expect-error - Supabase update type
+      const supabase = createClient()
       const { error } = await supabase
         .from('hpp_alerts')
         .update([{ is_read: true }])

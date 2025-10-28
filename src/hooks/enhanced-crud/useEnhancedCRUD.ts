@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { successToast } from '@/hooks/use-toast'
-import { createClient as createSupabaseClient } from '@/utils/supabase'
+import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 import type { EnhancedCRUDOptions, BulkUpdateItem } from './types'
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
@@ -11,9 +11,20 @@ type Tables = Database['public']['Tables']
 
 /**
  * Enhanced CRUD hook with toast notifications and error handling
+ * 
+ * Generic type parameters:
+ * - TTable: Table name from database
+ * - TRow: Row type for query results
+ * - TInsert: Insert type for create operations
+ * - TUpdate: Update type for update operations
  */
-export function useEnhancedCRUD<T extends keyof Tables>(
-  table: T,
+export function useEnhancedCRUD<
+  TTable extends keyof Tables,
+  TRow = Tables[TTable]['Row'],
+  TInsert = Tables[TTable]['Insert'],
+  TUpdate = Tables[TTable]['Update']
+>(
+  table: TTable,
   options: EnhancedCRUDOptions = {}
 ) {
   const [loading, setLoading] = useState(false)
@@ -41,7 +52,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     }
   }, [showSuccessToast, successMessages])
 
-  const createRecord = useCallback(async (data: any) => {
+  const createRecord = useCallback(async (data: TInsert): Promise<TRow> => {
     validateCRUDInputs('create', data)
 
     void setLoading(true)
@@ -61,7 +72,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       void handleSuccess('create')
-      return result
+      return result as TRow
     } catch (error: unknown) {
       void handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
       throw error
@@ -70,7 +81,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
-  const updateRecord = useCallback(async (id: string, data: any) => {
+  const updateRecord = useCallback(async (id: string, data: TUpdate): Promise<TRow> => {
     validateCRUDInputs('update', data, id)
 
     void setLoading(true)
@@ -95,7 +106,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
       }
 
       void handleSuccess('update')
-      return result
+      return result as TRow
     } catch (error: unknown) {
       void handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
       throw error
@@ -143,7 +154,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
     }
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
-  const bulkCreate = useCallback(async (records: any[]) => {
+  const bulkCreate = useCallback(async (records: TInsert[]): Promise<TRow[]> => {
     validateBulkInputs('create', records)
 
     void setLoading(true)
@@ -168,7 +179,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
         )
       }
 
-      return result
+      return result as TRow[]
     } catch (error: unknown) {
       void handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
       throw error
@@ -178,8 +189,8 @@ export function useEnhancedCRUD<T extends keyof Tables>(
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const bulkUpdate = useCallback(async (
-    updates: Array<{ id: string; data: any }>
-  ) => {
+    updates: Array<{ id: string; data: TUpdate }>
+  ): Promise<TRow[]> => {
     validateBulkInputs('update', updates)
 
     void setLoading(true)
@@ -187,7 +198,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
 
     try {
       const supabase = createSupabaseClient()
-      const results = []
+      const results: TRow[] = []
 
       for (const update of updates) {
         const { data: result, error } = await supabase
@@ -201,7 +212,7 @@ export function useEnhancedCRUD<T extends keyof Tables>(
           throw new Error(`Gagal update record ${update.id}: ${error.message}`)
         }
 
-        results.push(result)
+        results.push(result as TRow)
       }
 
       if (showSuccessToast) {

@@ -1,16 +1,13 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { Database } from '@/types/supabase-generated'
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Package } from 'lucide-react'
 
-interface Recipe {
-    id: string
-    name: string
-}
-
 interface RecipeSelectorProps {
-    recipes: Recipe[]
+    recipes: Pick<Recipe, 'id' | 'name'>[]
     selectedRecipeId: string
     onRecipeSelect: (recipeId: string) => void
     isLoading?: boolean

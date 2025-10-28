@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type ProductionStatus = Database['public']['Enums']['production_status']
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,33 +16,18 @@ import {
     Clock,
     CheckCircle,
     XCircle,
-    AlertCircle,
     TrendingUp,
     Package
 } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
+import { useProductionBatches } from '@/hooks/useProduction'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 
-type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-
-interface Production {
-    id: string
-    recipe_id: string
-    batch_number: string
-    quantity: number
-    unit: string
-    status: ProductionStatus
-    planned_date: string
-    started_at: string | null
-    completed_at: string | null
-    actual_cost: number | null
-    notes: string | null
-    created_at: string
-    recipe?: {
-        name: string
-    }
-}
+// Extended type for production page display (currently using any for flexibility)
+// interface ProductionWithRecipe extends Production {
+//     recipe?: Pick<Recipe, 'name'>
+// }
 
 const STATUS_CONFIG = {
     PLANNED: {
@@ -67,31 +54,15 @@ const STATUS_CONFIG = {
 
 export const ProductionPage = () => {
     const { formatCurrency } = useCurrency()
-    const [productions, setProductions] = useState<Production[]>([])
-    const [loading, setLoading] = useState(true)
+
+    // ✅ OPTIMIZED: Use TanStack Query with auto-refresh
+    const { data: productionsData, isLoading: loading } = useProductionBatches()
+    const productions = productionsData || []
+
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
 
-    useEffect(() => {
-        fetchProductions()
-    }, [])
-
-    const fetchProductions = async () => {
-        try {
-            setLoading(true)
-            const response = await fetch('/api/production-batches')
-            if (response.ok) {
-                const data = await response.json()
-                setProductions(data)
-            }
-        } catch (error) {
-            console.error('Error fetching productions:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const filteredProductions = productions.filter(prod => {
+    const filteredProductions = productions.filter((prod: any) => {
         const matchesSearch =
             prod.batch_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
             prod.recipe?.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -102,12 +73,12 @@ export const ProductionPage = () => {
     // Calculate stats
     const stats = {
         total: productions.length,
-        planned: productions.filter(p => p.status === 'PLANNED').length,
-        inProgress: productions.filter(p => p.status === 'IN_PROGRESS').length,
-        completed: productions.filter(p => p.status === 'COMPLETED').length,
+        planned: productions.filter((p: any) => p.status === 'PLANNED').length,
+        inProgress: productions.filter((p: any) => p.status === 'IN_PROGRESS').length,
+        completed: productions.filter((p: any) => p.status === 'COMPLETED').length,
         totalCost: productions
-            .filter(p => p.actual_cost)
-            .reduce((sum, p) => sum + (p.actual_cost || 0), 0)
+            .filter((p: any) => p.actual_cost)
+            .reduce((sum: number, p: any) => sum + (p.actual_cost || 0), 0)
     }
 
     const getStatusBadge = (status: ProductionStatus) => {
@@ -280,7 +251,7 @@ export const ProductionPage = () => {
                 </Card>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredProductions.map((production) => (
+                    {filteredProductions.map((production: any) => (
                         <Card key={production.id} className="hover:shadow-lg transition-shadow">
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">

@@ -2,8 +2,11 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-
+import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
+
+type Supplier = Database['public']['Tables']['suppliers']['Row']
+type SupplierInsert = Database['public']['Tables']['suppliers']['Insert']
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('suppliers')
-      .select('*')
+      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -94,7 +97,7 @@ export async function POST(request: Request) {
     const { data: supplier, error } = await supabase
       .from('suppliers')
       .insert([validatedData])
-      .select('*')
+      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .single();
 
     if (error) {throw error;}

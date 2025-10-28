@@ -1,6 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type Order = Database['public']['Tables']['orders']['Row']
+type OrderItem = Database['public']['Tables']['order_items']['Row']
 // GET /api/orders/[id] - Get single order
 export async function GET(
   _request: NextRequest,
@@ -74,7 +78,7 @@ export async function PUT(
       .from('orders')
       .update(updatePayload)
       .eq('id', id)
-      .select('*')
+      .select('id, order_no, customer_name, status, total_amount, updated_at')
       .single()
     
     if (error) {

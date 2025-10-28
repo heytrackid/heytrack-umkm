@@ -10,9 +10,12 @@ import { ChefHat, Sparkles, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { createClient as createSupabaseClient } from '@/utils/supabase'
+import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
+
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 // Lazy load heavy components
 import dynamic from 'next/dynamic'

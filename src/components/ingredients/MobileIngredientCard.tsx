@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +18,6 @@ import {
 import { useSettings } from '@/contexts/settings-context'
 import { StockBadge, CompactStockIndicator } from './StockBadge'
 import { cn } from '@/lib/utils'
-import type { Ingredient } from '@/types/domain/inventory'
 
 interface MobileIngredientCardProps {
     ingredient: Ingredient

@@ -1,6 +1,7 @@
 'use client'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import type { Database } from '@/types/supabase-generated'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,10 +9,18 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
-
-import type { RecipeWithIngredients } from '@/types/domain/recipes'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { uiLogger } from '@/lib/logger'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+
+interface RecipeWithIngredients extends Recipe {
+  recipe_ingredients?: Array<RecipeIngredient & {
+    ingredient?: Ingredient
+  }>
+}
 import {
   AlertTriangle,
   Calculator,

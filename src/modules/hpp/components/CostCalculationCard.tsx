@@ -1,27 +1,31 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { Database } from '@/types/supabase-generated'
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertTriangle, Calculator, ShoppingBag, Zap } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 
-interface Ingredient {
+// Extended type for cost calculation display
+interface IngredientForCost {
     name: string
     quantity: number
     unit: string
     unit_price: number
 }
 
-interface Recipe {
+interface RecipeForCost {
     id: string
-    ingredients: Ingredient[]
+    ingredients: IngredientForCost[]
     operational_costs: number
     total_cost: number
 }
 
 interface CostCalculationCardProps {
-    recipe: Recipe
+    recipe: RecipeForCost
     onRecalculate: () => void
     isCalculating?: boolean
 }

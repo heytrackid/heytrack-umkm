@@ -1,6 +1,11 @@
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
+import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeUpdate = Database['public']['Tables']['recipes']['Update']
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
   _request: NextRequest,
@@ -9,22 +14,10 @@ export async function GET(
   const { id } = await params
   try {
     const supabase = createServiceRoleClient()
+    // ✅ OPTIMIZED: Use specific fields
     const { data: recipe, error } = await supabase
       .from('recipes')
-      .select(`
-        *,
-        recipe_ingredients (
-          id,
-          quantity,
-          unit,
-          ingredient:ingredients (
-            id,
-            name,
-            unit,
-            price_per_unit
-          )
-        )
-      `)
+      .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
       .single()
 
@@ -68,7 +61,7 @@ export async function PUT(
       .from('recipes')
       .update(recipeData)
       .eq('id', id)
-      .select('*')
+      .select('id, name, updated_at')
       .single()
 
     if (recipeError) {
@@ -132,22 +125,10 @@ export async function PUT(
     }
 
     // Fetch the complete updated recipe with ingredients
+    // ✅ OPTIMIZED: Use specific fields
     const { data: completeRecipe, error: fetchError } = await supabase
       .from('recipes')
-      .select(`
-        *,
-        recipe_ingredients (
-          id,
-          quantity,
-          unit,
-          ingredient:ingredients (
-            id,
-            name,
-            unit,
-            price_per_unit
-          )
-        )
-      `)
+      .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
       .single()
 
@@ -179,7 +160,7 @@ export async function DELETE(
     // const { data: existingRecipe, error: checkError } = await supabase
     const { error: checkError } = await supabase
       .from('recipes')
-      .select('*')
+      .select('id')
       .eq('id', id)
       .single()
 

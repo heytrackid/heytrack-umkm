@@ -4,9 +4,13 @@
  */
 
 import { dbLogger } from '@/lib/logger'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
-import type { HppSnapshot } from '../types'
+import type { Database } from '@/types/supabase-generated'
+
+type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
+type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
+type Recipe = Database['public']['Tables']['recipes']['Row']
 
 export class HppSnapshotService {
   private logger = dbLogger

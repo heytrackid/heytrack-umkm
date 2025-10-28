@@ -10,20 +10,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import type { Database } from '@/types/supabase-generated'
 
-type OrderStatus = 'pending' | 'confirmed' | 'in_production' | 'completed' | 'cancelled'
-type PaymentStatus = 'unpaid' | 'partial' | 'paid'
+type Order = Database['public']['Tables']['orders']['Row']
+type OrderStatus = Database['public']['Enums']['order_status']
+type PaymentStatus = Database['public']['Enums']['payment_status']
 
-interface Order {
-  id: string
+// Extended type for table display
+interface OrderForTable extends Order {
   order_number: string
-  customer_name: string
   customer_phone: string
-  order_date: string
   due_date: string
-  status: OrderStatus
-  payment_status: PaymentStatus
-  total_amount: number
 }
 
 const OrdersTableSection = ({
@@ -31,7 +28,7 @@ const OrdersTableSection = ({
   formatCurrency,
   formatDate,
 }: {
-  orders: Order[]
+  orders: OrderForTable[]
   formatCurrency: (n: number) => string
   formatDate: (d: string) => string
 }) => {
@@ -40,24 +37,24 @@ const OrdersTableSection = ({
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
 
-  const ORDER_STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = useMemo(() => ({
-    pending: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
-    confirmed: { label: "Confirmed", color: 'bg-gray-200 text-gray-900' },
-    in_production: { label: "In Production", color: 'bg-gray-300 text-gray-900' },
-    completed: { label: "Completed", color: 'bg-gray-400 text-white' },
-    cancelled: { label: "Cancelled", color: 'bg-gray-500 text-white' }
+  const ORDER_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
+    PENDING: { label: "Pending", color: 'bg-gray-100 text-gray-800' },
+    CONFIRMED: { label: "Confirmed", color: 'bg-gray-200 text-gray-900' },
+    IN_PROGRESS: { label: "In Production", color: 'bg-gray-300 text-gray-900' },
+    COMPLETED: { label: "Completed", color: 'bg-gray-400 text-white' },
+    CANCELLED: { label: "Cancelled", color: 'bg-gray-500 text-white' }
   }), [])
 
-  const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, { label: string; color: string }> = useMemo(() => ({
-    unpaid: { label: "Unpaid", color: 'bg-gray-100 text-gray-800' },
-    partial: { label: "Partial", color: 'bg-gray-200 text-gray-900' },
-    paid: { label: "Paid", color: 'bg-gray-300 text-gray-900' }
+  const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string }> = useMemo(() => ({
+    UNPAID: { label: "Unpaid", color: 'bg-gray-100 text-gray-800' },
+    PARTIAL: { label: "Partial", color: 'bg-gray-200 text-gray-900' },
+    PAID: { label: "Paid", color: 'bg-gray-300 text-gray-900' }
   }), [])
-  
+
   // Calculate pagination
   const totalItems = orders.length
   const totalPages = Math.ceil(totalItems / pageSize)
-  
+
   // Get paginated data
   const paginatedOrders = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
@@ -86,7 +83,7 @@ const OrdersTableSection = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedOrders.map((order: Order) => (
+          {paginatedOrders.map((order: OrderForTable) => (
             <TableRow key={order.id}>
               <TableCell className="font-medium">{order.order_number}</TableCell>
               <TableCell>

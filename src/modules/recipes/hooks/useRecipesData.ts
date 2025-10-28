@@ -1,19 +1,7 @@
 import { useState, useEffect } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { useSupabaseCRUD } from '@/hooks'
-
-interface Recipe {
-  id: string
-  name: string
-  description: string
-  servings: number
-  prep_time: number
-  cook_time: number
-  difficulty: 'easy' | 'medium' | 'hard'
-  category: string
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
 
 interface UseRecipesDataOptions {
   category?: string

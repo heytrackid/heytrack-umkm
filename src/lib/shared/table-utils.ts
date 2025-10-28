@@ -6,18 +6,18 @@
 import { type ReactNode, createElement, useMemo, useState } from 'react'
 
 // Table column configuration types
-export interface TableColumn<T = any> {
+export interface TableColumn<T = unknown, TValue = unknown> {
   key: keyof T | string
   header: string
   sortable?: boolean
   filterable?: boolean
   width?: number | string
   align?: 'left' | 'center' | 'right'
-  render?: (value: any, row: T, index: number) => ReactNode
-  format?: (value: any) => string
+  render?: (value: TValue, row: T, index: number) => ReactNode
+  format?: (value: TValue) => string
 }
 
-export interface TableConfig<T = any> {
+export interface TableConfig<T = unknown> {
   columns: Array<TableColumn<T>>
   data: T[]
   loading?: boolean
@@ -31,7 +31,7 @@ export interface TableConfig<T = any> {
     key: string
     direction: 'asc' | 'desc'
   }
-  filters?: Record<string, any>
+  filters?: Record<string, unknown>
 }
 
 // Table sorting utilities
@@ -53,15 +53,19 @@ export function sortData<T>(
 // Table filtering utilities
 export function filterData<T>(
   data: T[],
-  filters: Record<string, any>
+  filters: Record<string, unknown>
 ): T[] {
   return data.filter(item => Object.entries(filters).every(([key, filterValue]) => {
       if (!filterValue || filterValue === '') {return true}
 
       const itemValue = getNestedValue(item, key)
-      if (typeof itemValue === 'string') {
+      
+      // String comparison
+      if (typeof itemValue === 'string' && typeof filterValue === 'string') {
         return itemValue.toLowerCase().includes(filterValue.toLowerCase())
       }
+      
+      // Exact match for other types
       return itemValue === filterValue
     }))
 }
@@ -89,14 +93,14 @@ export function useTableData<T>(
   initialData: T[],
   config?: {
     initialSort?: { key: string; direction: 'asc' | 'desc' }
-    initialFilters?: Record<string, any>
+    initialFilters?: Record<string, unknown>
     initialPage?: number
     pageSize?: number
   }
 ) {
   const [data, setData] = useState(initialData)
   const [sorting, setSorting] = useState(config?.initialSort)
-  const [filters, setFilters] = useState(config?.initialFilters || {})
+  const [filters, setFilters] = useState<Record<string, unknown>>(config?.initialFilters || {})
   const [currentPage, setCurrentPage] = useState(config?.initialPage || 1)
   const [pageSize] = useState(config?.pageSize || 10)
 
@@ -133,7 +137,7 @@ export function useTableData<T>(
     setCurrentPage(1) // Reset to first page
   }
 
-  const handleFilter = (key: string, value: any) => {
+  const handleFilter = (key: string, value: unknown) => {
     setFilters(prev => ({
       ...prev,
       [key]: value
@@ -202,12 +206,12 @@ export const tableFormatters = {
 
 // Common table column configurations
 export const commonColumns = {
-  actions: (render: (row: any) => ReactNode) => ({
+  actions: <T>(render: (row: T) => ReactNode): TableColumn<T> => ({
     key: 'actions',
     header: 'Aksi',
     width: 120,
     align: 'center' as const,
-    render
+    render: (_value: unknown, row: T) => render(row)
   }),
 
   status: (key = 'status', statusMap?: Record<string, string>) => ({
@@ -283,9 +287,20 @@ export function exportToCSV<T>(
   URL.revokeObjectURL(url)
 }
 
-// Helper function to get nested object values
-function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, key) => current?.[key], obj)
+/**
+ * Helper function to get nested object values
+ * Returns unknown because we can't type-check dynamic string paths at compile time
+ */
+function getNestedValue(obj: unknown, path: string): unknown {
+  return path.split('.').reduce(
+    (current: unknown, key: string) => {
+      if (current && typeof current === 'object' && key in current) {
+        return (current as Record<string, unknown>)[key]
+      }
+      return undefined
+    },
+    obj
+  )
 }
 
 // Table selection utilities

@@ -7,6 +7,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
 export async function GET(__request: NextRequest) {
   try {

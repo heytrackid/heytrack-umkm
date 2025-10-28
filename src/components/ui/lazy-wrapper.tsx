@@ -3,7 +3,7 @@
  * Provides consistent lazy loading with skeletons and error boundaries
  */
 
-import { Suspense, lazy, Component, type ComponentType, type ReactNode } from 'react'
+import { Suspense, lazy, Component, type ComponentType, type ReactNode, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { uiLogger } from '@/lib/logger'
 
@@ -153,4 +153,6 @@ export function logBundleSize() {
       return () => observer.disconnect()
     }
   }
+  
+  return null
 }

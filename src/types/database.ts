@@ -1,57 +1,66 @@
-// Re-export all types from the modular structure for backward compatibility
-// This file maintains the old import path while using the new split structure
+import type { Database as SupabaseDatabase } from './supabase-generated'
 
-// Re-export types from domain files for backward compatibility
-// Only include types that actually exist in the modular structure
+// Core Supabase-generated helpers
 export type {
-    AuditFields, 
-    BusinessUnit,
-    CustomersTable, 
-    DailySalesSummaryTable, 
-    Database, 
-    Enums, 
-    FinancialRecordsTable, 
-    IngredientPurchasesTable, 
-    IngredientsTable,
-    InventoryAlertsTable,
-    OrderItemsTable, 
-    OrderStatus, 
-    OrderSummaryView, 
-    OrdersTable, 
-    PaymentMethod, 
-    PaymentsTable, 
-    ProductionSchedulesTable, 
-    ProductionStatus, 
-    ProductionsTable, 
-    RecentSyncEventsView, 
-    RecipeAvailabilityView, 
-    RecipeIngredientsTable, 
-    RecipesTable, 
-    RecordType, 
-    SecurityContext, 
-    StockTransactionsTable,
-    SupplierIngredientsTable, 
-    SuppliersTable, 
-    SyncEvent, 
-    SyncEventsTable, 
-    SystemMetric, 
-    SystemMetricsTable, 
-    Tables,
-    TablesInsert,
-    TablesUpdate, 
-    TransactionType, 
-    UsageAnalyticsTable,
-    UserProfile, 
-    UserProfilesTable,
-    UserRole
-} from './index'
+  Database,
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+  Enums,
+  CompositeTypes,
+} from './supabase-generated'
 
+export type { Json } from './shared/common'
+
+// Backwards compatibility exports for auth/domain helpers
 export type {
-    Json
-} from './shared/common'
+  AuditFields,
+  BusinessUnit,
+  SecurityContext,
+  UserProfile,
+  UserProfilesTable,
+  UserRole,
+} from './features/auth'
 
-// Note: DatabaseEnums may not exist - check if needed
-// export {
-//     DatabaseEnums
-// } from './enums'
+type PublicSchema = SupabaseDatabase['public']
+type TablesMap = PublicSchema['Tables']
+type ViewsMap = PublicSchema['Views']
+type EnumsMap = PublicSchema['Enums']
 
+export type CustomersTable = TablesMap['customers']
+export type DailySalesSummaryTable = ViewsMap['daily_sales_summary']
+export type FinancialRecordsTable = TablesMap['financial_records']
+export type IngredientPurchasesTable = TablesMap['ingredient_purchases']
+export type IngredientsTable = TablesMap['ingredients']
+export type InventoryAlertsTable = TablesMap['inventory_alerts']
+export type OrderItemsTable = TablesMap['order_items']
+export type OrdersTable = TablesMap['orders']
+export type PaymentsTable = TablesMap['payments']
+export type ProductionSchedulesTable = TablesMap['production_schedules']
+export type ProductionsTable = TablesMap['productions']
+export type RecipeIngredientsTable = TablesMap['recipe_ingredients']
+export type RecipesTable = TablesMap['recipes']
+export type StockTransactionsTable = TablesMap['stock_transactions']
+export type SupplierIngredientsTable = TablesMap['supplier_ingredients']
+export type SuppliersTable = TablesMap['suppliers']
+export type SyncEventsTable = TablesMap['sync_events']
+export type SystemMetricsTable = TablesMap['system_metrics']
+export type UsageAnalyticsTable = TablesMap['usage_analytics']
+
+export type OrderSummaryView = ViewsMap['order_summary']
+export type RecentSyncEventsView = ViewsMap['recent_sync_events']
+export type RecipeAvailabilityView = ViewsMap['recipe_availability']
+
+export type OrderStatus = EnumsMap['order_status']
+export type PaymentMethod = EnumsMap['payment_method']
+export type ProductionStatus = EnumsMap['production_status']
+export type RecordType = EnumsMap['record_type']
+export type TransactionType = EnumsMap['transaction_type']
+
+export type SyncEvent = SyncEventsTable['Row']
+export type SystemMetric = SystemMetricsTable['Row']
+export type SyncEventInsert = SyncEventsTable['Insert']
+export type SyncEventUpdate = SyncEventsTable['Update']
+
+// Maintain compatibility for old naming
+export type DatabasePublicSchema = PublicSchema

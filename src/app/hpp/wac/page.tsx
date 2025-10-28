@@ -17,14 +17,16 @@ type Ingredient = Database['public']['Tables']['ingredients']['Row']
 export default function WacEnginePage() {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
+
+  // ✅ OPTIMIZED: Use TanStack Query for caching (to be fully implemented)
+  // TODO: Import and use useIngredients({ limit: 1000 })
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
   const [selectedIngredient, setSelectedIngredient] = useState<string>('')
-  // const [wacData, setWacData] = useState<WacCalculation | null>(null)
   const [loading, setLoading] = useState(false)
   const [calculating, setCalculating] = useState(false)
   const [recalculating, setRecalculating] = useState(false)
 
-  // Load ingredients
+  // Load ingredients - TODO: Replace with useIngredients hook
   useEffect(() => {
     const loadIngredients = async () => {
       try {

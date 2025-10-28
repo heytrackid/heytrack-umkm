@@ -3,10 +3,14 @@
  * Scheduled jobs for financial alerts and monitoring
  */
 
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
 import { SmartNotificationSystem } from '@/lib/communications/notifications'
 import type { NotificationAlert } from './types'
+import type { Database } from '@/types/supabase-generated'
+
+type Order = Database['public']['Tables']['orders']['Row']
+type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
 
 export class FinancialCronJobs {
   /**

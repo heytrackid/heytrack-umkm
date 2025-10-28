@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 
 // Force dynamic rendering to avoid SSG issues
@@ -13,12 +13,14 @@ import { Separator } from '@/components/ui/separator'
 import { Calculator, TrendingUp, DollarSign, Package } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useToast } from '@/hooks/use-toast'
+import { useRecipes } from '@/hooks/useRecipes'
 import { dbLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
 const calculatorBreadcrumbs = [
   { label: 'Dashboard', href: '/' },
@@ -26,12 +28,8 @@ const calculatorBreadcrumbs = [
   { label: 'HPP Calculator' }
 ]
 
-interface HppCalculation {
-  recipeId: string
-  materialCost: number
-  laborCost: number
-  overheadCost: number
-  totalHpp: number
+// Extended type for calculator display
+interface HppCalculationExtended extends HppCalculation {
   costPerUnit: number
   wacAdjustment: number
   productionQuantity: number
@@ -48,36 +46,14 @@ interface HppCalculation {
 export default function HppCalculatorPage() {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
-  const [recipes, setRecipes] = useState<Recipe[]>([])
+
+  // ✅ OPTIMIZED: Use TanStack Query for caching
+  const { data: recipesData, isLoading: loading } = useRecipes({ limit: 1000 })
+  const recipes = recipesData?.recipes || []
+
   const [selectedRecipe, setSelectedRecipe] = useState<string>('')
-  const [calculation, setCalculation] = useState<HppCalculation | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [calculation, setCalculation] = useState<HppCalculationExtended | null>(null)
   const [calculating, setCalculating] = useState(false)
-
-  // Load recipes
-  useEffect(() => {
-    const loadRecipes = async () => {
-      try {
-        void setLoading(true)
-        const response = await fetch('/api/recipes?limit=1000')
-        if (response.ok) {
-          const data = await response.json()
-          void setRecipes(data.recipes || [])
-        }
-      } catch (err: unknown) {
-        dbLogger.error({ err }, 'Failed to load recipes')
-        toast({
-          title: 'Error',
-          description: 'Failed to load recipes',
-          variant: 'destructive'
-        })
-      } finally {
-        void setLoading(false)
-      }
-    }
-
-    void loadRecipes()
-  }, [toast])
 
   // Calculate HPP
   const calculateHpp = async () => {
@@ -131,12 +107,12 @@ export default function HppCalculatorPage() {
           description="Hitung Harga Pokok Produksi untuk setiap resep dengan akurat"
           breadcrumbs={calculatorBreadcrumbs}
         />
-        
+
         {/* Stats Cards */}
         {loading ? (
           <StatsCardSkeleton />
         ) : (
-          <SharedStatsCards 
+          <SharedStatsCards
             stats={[
               {
                 title: "Total Calculations",

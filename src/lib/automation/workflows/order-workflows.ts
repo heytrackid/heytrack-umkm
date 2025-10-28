@@ -14,7 +14,6 @@ const triggerWorkflow = async (_workflow: string, _context: unknown) => {
 }
 
 import type { Database } from '@/types/supabase-generated'
-import type { StockTransactionsTable } from '@/types/domain/inventory'
 
 // Workflow types
 export interface WorkflowResult {
@@ -39,7 +38,7 @@ type OrderItemRow = Database['public']['Tables']['order_items']['Row']
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
 type IngredientRow = Database['public']['Tables']['ingredients']['Row']
-type StockTransactionInsert = StockTransactionsTable['Insert']
+// StockTransactionInsert already imported from domain types
 type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
 type CustomerUpdate = Database['public']['Tables']['customers']['Update']
@@ -269,13 +268,13 @@ export class OrderWorkflowHandlers {
         // Create stock transaction record
         const stockTransaction: StockTransactionInsert = {
           ingredient_id: ingredient.id,
-          ingredient_name: ingredient.name,
           quantity: -usedQuantity,
           reference: `ORDER-${order.order_no}`,
-          total_value: usedQuantity * Number(ingredient.price_per_unit ?? 0),
+          total_price: usedQuantity * Number(ingredient.price_per_unit ?? 0),
           type: 'USAGE',
           unit_price: ingredient.price_per_unit ?? null,
-          user_id: transactionUserId
+          user_id: transactionUserId,
+          notes: `Used for order ${order.order_no} - ${ingredient.name}`
         }
 
         await (supabase as any).from('stock_transactions').insert(stockTransaction)
@@ -343,13 +342,13 @@ export class OrderWorkflowHandlers {
 
         const stockTransaction: StockTransactionInsert = {
           ingredient_id: ingredient.id,
-          ingredient_name: ingredient.name,
           quantity: restoredQuantity,
           reference: `ORDER-CANCEL-${order.order_no}`,
-          total_value: restoredQuantity * Number(ingredient.price_per_unit ?? 0),
+          total_price: restoredQuantity * Number(ingredient.price_per_unit ?? 0),
           type: 'ADJUSTMENT',
           unit_price: ingredient.price_per_unit ?? null,
-          user_id: transactionUserId
+          user_id: transactionUserId,
+          notes: `Restored from cancelled order ${order.order_no} - ${ingredient.name}`
         }
 
         await (supabase as any).from('stock_transactions').insert(stockTransaction)

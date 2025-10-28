@@ -3,8 +3,16 @@
  * Helpers for optimizing database queries
  */
 
-import type { PostgrestFilterBuilder } from '@supabase/postgrest-js'
 import { dbLogger } from '@/lib/logger'
+
+type PostgrestFilterBuilder<T = unknown> = {
+  eq: (column: string, value: unknown) => PostgrestFilterBuilder<T>
+  gte: (column: string, value: unknown) => PostgrestFilterBuilder<T>
+  lte: (column: string, value: unknown) => PostgrestFilterBuilder<T>
+  range: (from: number, to: number) => PostgrestFilterBuilder<T>
+  ilike: (column: string, pattern: string) => PostgrestFilterBuilder<T>
+  filter?: (column: string, operator: string, value: unknown) => PostgrestFilterBuilder<T>
+}
 
 /**
  * Select only needed fields to reduce payload size
@@ -102,11 +110,11 @@ export const selectFields = {
  */
 export const queryFilters = {
   // Active records only
-  activeOnly: <T>(query: PostgrestFilterBuilder<any, any, T>) => query.eq('is_active', true),
+  activeOnly: <T>(query: PostgrestFilterBuilder<T>) => query.eq('is_active', true),
 
   // By date range
   dateRange: <T>(
-    query: PostgrestFilterBuilder<any, any, T>,
+    query: PostgrestFilterBuilder<T>,
     field: string,
     from: string,
     to: string
@@ -114,7 +122,7 @@ export const queryFilters = {
 
   // Recent records
   recent: <T>(
-    query: PostgrestFilterBuilder<any, any, T>,
+    query: PostgrestFilterBuilder<T>,
     field: string,
     days: number
   ) => {
@@ -125,7 +133,7 @@ export const queryFilters = {
 
   // Paginated
   paginated: <T>(
-    query: PostgrestFilterBuilder<any, any, T>,
+    query: PostgrestFilterBuilder<T>,
     page: number,
     pageSize: number
   ) => {

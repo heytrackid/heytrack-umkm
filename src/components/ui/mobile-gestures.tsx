@@ -2,7 +2,7 @@
 import { type ReactNode, type TouchEvent as ReactTouchEvent, useState, useEffect, useRef, useCallback } from 'react'
 
 import { cn } from '@/lib/utils'
-import { Loader2, RefreshCw, ChevronDown } from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import { useResponsive } from '@/hooks/useResponsive'
 
 import { apiLogger } from '@/lib/logger'
@@ -42,14 +42,14 @@ export const PullToRefresh = ({
 
     if (distance > 0 && window.scrollY === 0) {
       // Prevent default scrolling when pulling down at top
-      e.preventDefault
+      e.preventDefault()
       
       // Apply resistance to the pull
       const resistance = 0.5
       const adjustedDistance = distance * resistance
       
-      void setPullDistance(adjustedDistance)
-      void setCanRefresh(adjustedDistance >= refreshThreshold)
+      setPullDistance(adjustedDistance)
+      setCanRefresh(adjustedDistance >= refreshThreshold)
     }
   }
 
@@ -57,19 +57,19 @@ export const PullToRefresh = ({
     if (disabled || !isMobile || startY.current === 0) {return}
 
     if (canRefresh && !isRefreshing) {
-      void setIsRefreshing(true)
+      setIsRefreshing(true)
       try {
         await onRefresh()
-      } catch (err: unknown) {
+      } catch (error: unknown) {
         apiLogger.error({ error }, 'Refresh failed:')
       } finally {
-        void setIsRefreshing(false)
+        setIsRefreshing(false)
       }
     }
 
     // Reset states
-    void setPullDistance(0)
-    void setCanRefresh(false)
+    setPullDistance(0)
+    setCanRefresh(false)
     startY.current = 0
     currentY.current = 0
   }
@@ -185,10 +185,10 @@ export const InfiniteScroll = ({
     const distanceFromBottom = scrollHeight - (scrollTop + clientHeight)
 
     if (distanceFromBottom < threshold && !isNearBottom) {
-      void setIsNearBottom(true)
+      setIsNearBottom(true)
       onLoadMore()
     } else if (distanceFromBottom >= threshold && isNearBottom) {
-      void setIsNearBottom(false)
+      setIsNearBottom(false)
     }
   }, [loading, hasMore, threshold, isNearBottom, onLoadMore])
 
@@ -208,8 +208,8 @@ export const InfiniteScroll = ({
     }
 
     // Small delay to ensure content is rendered
-    const timeout = setTimeout
-    return () => clearTimeout
+    const timeout = setTimeout(checkInitialLoad, 100);
+    return () => clearTimeout(timeout);
   }, [hasMore, loading, onLoadMore])
 
   const defaultLoadingComponent = (
@@ -308,14 +308,14 @@ export const SwipeActions = ({
   const startX = useRef(0)
   const currentX = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
-  const { isMobile, isTouchDevice } = useResponsive()
+  const { isTouchDevice } = useResponsive()
 
   const handleTouchStart = (e: TouchEvent | ReactTouchEvent) => {
     if (!isTouchDevice || actions.length === 0) {return}
     
     const touch = 'touches' in e ? e.touches[0] : e
     startX.current = touch.clientX
-    void setIsSwipeActive(true)
+    setIsSwipeActive(true)
     onSwipeStart?.()
   }
 
@@ -336,17 +336,17 @@ export const SwipeActions = ({
   const handleTouchEnd = () => {
     if (!isTouchDevice || !isSwipeActive) {return}
 
-    void setIsSwipeActive(false)
+    setIsSwipeActive(false)
     onSwipeEnd?.()
 
     // If swipe distance is less than threshold, snap back
     if (swipeDistance < threshold) {
-      void setSwipeDistance(0)
+      setSwipeDistance(0)
     } else {
       // Keep actions visible
       const actionWidth = 80
       const visibleActions = Math.min(Math.ceil(swipeDistance / actionWidth), actions.length)
-      void setSwipeDistance(visibleActions * actionWidth)
+      setSwipeDistance(visibleActions * actionWidth)
     }
 
     startX.current = 0
@@ -407,7 +407,7 @@ export const SwipeActions = ({
                "w-20 h-full flex flex-col items-center justify-center",
                "transition-colors duration-200",
                "text-xs font-medium",
-                void getActionColor(action.color)
+                getActionColor(action.color)
               )}
               style={{
                 opacity: swipeDistance > (index + 1) * 20 ? 1 : 0.5

@@ -2,6 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type InventoryAlert = Database['public']['Tables']['inventory_alerts']['Row']
 
 /**
  * PATCH /api/inventory/alerts/[id]

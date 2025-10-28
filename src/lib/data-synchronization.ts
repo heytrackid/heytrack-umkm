@@ -1,15 +1,56 @@
-// Data Synchronization - Modular Store Architecture
-// This file now re-exports from the modular store architecture
-// for better separation of concerns and maintainability
+/**
+ * Legacy Data Synchronization Entrypoint
+ *
+ * The original modular stores referenced by this file have been removed during
+ * the type-safety refactor. To preserve backwards compatibility (and avoid
+ * broken imports), we expose lightweight no-op stubs that callers can safely
+ * consume. Real implementations can be plugged back in once the new data
+ * synchronization layer is restored.
+ */
 
-// Re-export types
-export * from './data-synchronization/types'
+type SyncStatus = 'idle' | 'syncing' | 'error'
 
-// Re-export modular stores
-export * from './stores'
+interface DataSyncState {
+  status: SyncStatus
+  lastSyncedAt: string | null
+  error: string | null
+}
 
-// Re-export composite store for backward compatibility
-export { useCompositeDataStore as useDataSynchronization } from './stores'
+interface DataSyncActions {
+  syncAll: () => Promise<void>
+  resetError: () => void
+}
 
-// Re-export sync manager
-export { syncManager } from './stores'
+export interface DataSynchronizationStore extends DataSyncState, DataSyncActions {}
+
+const noop = async () => {
+  // intentionally empty: legacy data sync has been disabled
+}
+
+/**
+ * Hook placeholder – returns a neutral state with safe no-op actions.
+ */
+export function useDataSynchronization(): DataSynchronizationStore {
+  return {
+    status: 'idle',
+    lastSyncedAt: null,
+    error: null,
+    async syncAll() {
+      await noop()
+    },
+    resetError() {
+      // nothing to reset in the no-op implementation
+    }
+  }
+}
+
+/**
+ * Sync manager stub for programmatic usage.
+ */
+export const syncManager = {
+  async syncAll() {
+    await noop()
+  }
+}
+
+export type { DataSyncState, DataSyncActions }

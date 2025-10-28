@@ -3,15 +3,15 @@ import { apiLogger } from '@/lib/logger'
 import { type NextRequest, NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
+import type { Database } from '@/types/supabase-generated'
 
-// Type definitions for better type safety
-interface Ingredient {
-  id: string
-  name: string
-  price_per_unit: number
-  unit: string
-}
+// Use generated types
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
+type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
 
+// AI response structure (not a table type)
 interface RecipeIngredient {
   name: string
   quantity: number
@@ -19,7 +19,7 @@ interface RecipeIngredient {
   notes?: string
 }
 
-interface Recipe {
+interface AIGeneratedRecipe {
   name: string
   category: string
   servings: number
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         // 3. Get user's available ingredients from database
         const { data: ingredients, error: ingredientsError } = await (await supabase)
             .from('ingredients')
-            .select('*')
+            .select('id, name, unit, price_per_unit, current_stock')
             .eq('user_id', userId)
 
         if (ingredientsError) {

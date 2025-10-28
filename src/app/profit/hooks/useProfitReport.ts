@@ -11,7 +11,7 @@ import {
   prepareProductChartData,
   validateProfitData,
   exportProfitReport
-} from '@/utils'
+} from '../utils'
 
 interface UseProfitReportReturn {
   // State

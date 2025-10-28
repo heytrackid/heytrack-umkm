@@ -1,48 +1,36 @@
 // Orders Domain Types
 // Comprehensive type definitions for order management system
+// Uses generated Supabase types as base
 
-export type OrderStatus = 
-  | 'draft'         // Order sedang dibuat
-  | 'pending'       // Menunggu konfirmasi
-  | 'confirmed'     // Dikonfirmasi, siap produksi
-  | 'in_production' // Sedang diproduksi
-  | 'ready'         // Siap diambil/dikirim  
-  | 'completed'     // Selesai/sudah diambil
-  | 'cancelled'     // Dibatalkan
+import type { Database } from '@/types/supabase-generated'
 
-export type PaymentStatus = 
-  | 'unpaid'        // Belum dibayar
-  | 'partial'       // Dibayar sebagian (DP)
-  | 'paid'          // Lunas
-  | 'refunded'      // Dikembalikan
+// Table helpers for convenience
+export type CustomersTable = Database['public']['Tables']['customers']
+export type OrdersTable = Database['public']['Tables']['orders']
+export type OrderItemsTable = Database['public']['Tables']['order_items']
+export type PaymentsTable = Database['public']['Tables']['payments']
 
-export type PaymentMethod = 
-  | 'cash'          // Tunai
-  | 'transfer'      // Transfer bank
-  | 'qris'          // QRIS
-  | 'card'          // Kartu kredit/debit
-  | 'ewallet'       // E-wallet (GoPay, OVO, dll)
+// Use generated types from Supabase
+export type Customer = CustomersTable['Row']
+export type CustomerInsert = CustomersTable['Insert']
+export type CustomerUpdate = CustomersTable['Update']
 
-export type DeliveryMethod = 
-  | 'pickup'        // Ambil sendiri
-  | 'delivery'      // Diantar
-  | 'shipping'      // Dikirim via ekspedisi
+export type OrderItem = OrderItemsTable['Row']
+export type OrderItemInsert = OrderItemsTable['Insert']
+export type OrderItemUpdate = OrderItemsTable['Update']
 
-export interface Customer {
-  id: string
-  name: string
-  email?: string
-  phone?: string
-  address?: string
-  notes?: string
-  created_at: string
-  updated_at: string
-}
+export type Order = OrdersTable['Row']
+export type OrderInsert = OrdersTable['Insert']
+export type OrderUpdate = OrdersTable['Update']
 
-export interface OrderItem {
-  id: string
-  order_id: string
-  recipe_id: string
+// Type aliases for enums from database
+export type OrderStatus = Database['public']['Enums']['order_status']
+export type PaymentStatus = Database['public']['Enums']['payment_status']
+export type PaymentMethod = Database['public']['Enums']['payment_method']
+export type DeliveryMethod = Database['public']['Enums']['delivery_method']
+
+// Extended types with relations for UI
+export interface OrderItemWithRecipe extends OrderItem {
   recipe?: {
     id: string
     name: string
@@ -51,77 +39,17 @@ export interface OrderItem {
     servings: number
     description?: string
   }
-  quantity: number
-  unit_price: number
-  total_price: number
-  notes?: string
-  created_at: string
-  updated_at: string
 }
 
-export interface Payment {
-  id: string
-  order_id: string
-  amount: number
-  method: PaymentMethod
-  status: PaymentStatus
-  reference_number?: string
-  notes?: string
-  created_at: string
-  updated_at: string
-}
+export type Payment = Database['public']['Tables']['payments']['Row']
+export type PaymentInsert = Database['public']['Tables']['payments']['Insert']
+export type PaymentUpdate = Database['public']['Tables']['payments']['Update']
 
-export interface Order {
-  id: string
-  customer_id?: string
+// Extended Order type with relations for UI
+export interface OrderWithRelations extends Order {
   customer?: Customer
-  customer_name: string
-  customer_phone?: string
-  customer_email?: string
-  customer_address?: string
-  
-  // Order details
-  order_number: string
-  status: OrderStatus
-  priority: 'low' | 'normal' | 'high' | 'urgent'
-  
-  // Timing
-  order_date: string
-  due_date: string
-  delivery_date?: string
-  completed_date?: string
-  
-  // Items and pricing
-  items: OrderItem[]
-  subtotal: number
-  tax_amount: number
-  tax_rate: number
-  discount_amount: number
-  discount_percentage: number
-  total_amount: number
-  
-  // Payment
-  payments: Payment[]
-  payment_status: PaymentStatus
-  paid_amount: number
-  remaining_amount: number
-  
-  // Delivery
-  delivery_method: DeliveryMethod
-  delivery_address?: string
-  delivery_fee: number
-  delivery_notes?: string
-  
-  // Additional info
-  notes?: string
-  internal_notes?: string
-  special_requirements?: string
-  
-  // Metadata
-  created_by?: string
-  updated_by?: string
-  created_at: string
-  updated_at: string
+  items?: OrderItemWithRecipe[]
+  payments?: Payment[]
 }
 
 // API Response types
@@ -229,7 +157,7 @@ export interface OrderAnalytics {
 
 // UI Component Props
 export interface OrderFormProps {
-  order?: Order
+  order?: OrderWithRelations
   onSubmit: (data: CreateOrderRequest | UpdateOrderRequest) => Promise<void>
   onCancel: () => void
   loading?: boolean
@@ -237,18 +165,18 @@ export interface OrderFormProps {
 }
 
 export interface OrderDetailProps {
-  order: Order
-  onEdit: (order: Order) => void
+  order: OrderWithRelations
+  onEdit: (order: OrderWithRelations) => void
   onUpdateStatus: (orderId: string, status: OrderStatus) => Promise<void>
-  onAddPayment: (orderId: string, payment: Omit<Payment, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
+  onAddPayment: (orderId: string, payment: PaymentInsert) => Promise<void>
   loading?: boolean
 }
 
 export interface OrdersListProps {
-  orders: Order[]
+  orders: OrderWithRelations[]
   loading?: boolean
-  onEdit: (order: Order) => void
-  onView: (order: Order) => void
+  onEdit: (order: OrderWithRelations) => void
+  onView: (order: OrderWithRelations) => void
   onUpdateStatus: (orderId: string, status: OrderStatus) => Promise<void>
   filters: OrderFilters
   onFiltersChange: (filters: OrderFilters) => void
@@ -256,7 +184,7 @@ export interface OrdersListProps {
 
 // Hook return types
 export interface UseOrdersDataReturn {
-  orders: Order[]
+  orders: OrderWithRelations[]
   loading: boolean
   error: string | null
   stats: OrderStats | null

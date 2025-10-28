@@ -14,20 +14,11 @@ import { SupplierFormFields } from '@/components/forms/shared/SupplierFormFields
 import { CreateModal, EditModal, DeleteModal } from '@/components/ui';
 
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated';
 
-// Using generic types since suppliers might not be in the database schema yet
-interface Supplier {
-  id: string;
-  name: string;
-  contact_person?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  created_at: string;
-  updated_at: string;
-}
-type SupplierInsert = Omit<Supplier, 'id' | 'created_at' | 'updated_at'>;
-type SupplierUpdate = Partial<SupplierInsert>;
+type Supplier = Database['public']['Tables']['suppliers']['Row'];
+type SupplierInsert = Database['public']['Tables']['suppliers']['Insert'];
+type SupplierUpdate = Database['public']['Tables']['suppliers']['Update'];
 
 export const SuppliersCRUD = () => {
   const { data: suppliersData, loading, error } = useSuppliers();

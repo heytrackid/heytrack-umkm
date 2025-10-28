@@ -5,7 +5,9 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react'
-import { perfLogger } from '@/lib/logger'
+import { createLogger } from '@/lib/logger'
+
+const perfLogger = createLogger('Performance')
 
 /**
  * Debounce function

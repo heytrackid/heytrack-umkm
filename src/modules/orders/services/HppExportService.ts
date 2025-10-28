@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 
 export interface ExportOptions {
   format: 'csv' | 'excel' | 'json' | 'pdf'
@@ -13,6 +14,7 @@ export interface ExportOptions {
 
 export class HppExportService {
   private logger = dbLogger
+  private supabase = createClient()
 
   /**
    * Export HPP data in specified format

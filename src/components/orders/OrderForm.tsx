@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -15,17 +17,12 @@ import { validateOrderData } from '@/lib/validations/form-validations'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { apiLogger } from '@/lib/logger'
+
 interface OrderFormProps {
   order?: Order // For editing existing order
   onSave: (orderData: OrderFormData) => void
   onCancel: () => void
   loading?: boolean
-}
-
-interface Recipe {
-  id: string
-  name: string
-  price?: number
 }
 
 export default function OrderForm({

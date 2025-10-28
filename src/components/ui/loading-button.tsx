@@ -1,11 +1,11 @@
 'use client'
 
-import { forwardRef } from 'react'
+import { forwardRef, type ComponentProps } from 'react'
 import { Loader2 } from 'lucide-react'
-import { type ButtonProps, Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export interface LoadingButtonProps extends ButtonProps {
+export interface LoadingButtonProps extends ComponentProps<typeof Button> {
   loading?: boolean
   loadingText?: string
 }

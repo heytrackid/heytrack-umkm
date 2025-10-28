@@ -17,9 +17,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
 
 interface RecipeFormProps {
-  initialData?: Partial<RecipeFormData>
+  initialData?: Partial<RecipeFormData> & Partial<Recipe>
   onSubmit: (data: RecipeFormData) => Promise<void>
   isLoading?: boolean
 }

@@ -1,5 +1,5 @@
 import { dbLogger } from '@/lib/logger'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { extractFirst, ensureArray } from '@/lib/type-guards'
 import type { TablesInsert, TablesUpdate } from '@/types/supabase-generated'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'

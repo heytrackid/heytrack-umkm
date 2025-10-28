@@ -3,15 +3,11 @@
 import { useState, useEffect } from 'react'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
+
 const supabase = createClient()
 
-interface HppSnapshot {
-  snapshot_date: string
-  hpp_value: number
-  previous_hpp: number | null
-  change_percentage: number | null
-  material_cost_breakdown: Record<string, number> | null
-}
+type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
 
 interface HppTrendChartProps {
   recipeId: string

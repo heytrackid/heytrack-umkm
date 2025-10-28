@@ -1,6 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import type { Recipe } from '@/types/domain/recipes'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 
 /**
  * Service for calculating production time estimates for orders
@@ -21,20 +21,23 @@ export class ProductionTimeService {
     parallel_processing_time: number
   }> {
     try {
+      const supabase = createClient()
       const recipeIds = items.map(item => item.recipe_id)
-      const { data: recipes, error } = await supabase
+      const { data, error } = await supabase
         .from('recipes')
         .select('id, prep_time, cook_time')
         .in('id', recipeIds)
 
       if (error) {throw error}
+      
+      const recipes = data as Pick<Recipe, 'id' | 'prep_time' | 'cook_time'>[]
 
       let total_prep_time = 0
       let total_cook_time = 0
       let max_single_recipe_time = 0
 
       items.forEach(item => {
-        const recipe = recipes?.find((r: Recipe) => r.id === item.recipe_id)
+        const recipe = recipes?.find((r) => r.id === item.recipe_id)
         if (recipe) {
           const prep_time = (recipe.prep_time ?? 0) * item.quantity
           const cook_time = (recipe.cook_time ?? 0) * item.quantity

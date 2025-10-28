@@ -1,12 +1,16 @@
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { withValidation } from '@/lib/api-core/middleware'
 import { handleDatabaseError } from '@/lib/errors'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import {
   IdParamSchema,
   IngredientUpdateSchema
 } from '@/lib/validations'
 import type { NextRequest } from 'next/server'
+import type { Database } from '@/types/supabase-generated'
+
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(
@@ -24,7 +28,7 @@ export async function GET(
     const supabase = createServiceRoleClient()
     const { data, error } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, created_at, updated_at, user_id')
       .eq('id', id)
       .single()
 
@@ -70,7 +74,7 @@ export async function PUT(
       .from('ingredients')
       .update(validatedData as any)
       .eq('id', id)
-      .select('*')
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, updated_at')
       .single()
 
     if (error) {
@@ -105,7 +109,7 @@ export async function DELETE(
     // Check if bahan baku exists
     const { data: existing } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id')
       .eq('id', id)
       .single()
 
@@ -116,7 +120,7 @@ export async function DELETE(
     // Check if bahan baku is used in recipes (recipe_ingredients table with ingredient_id foreign key)
     const { data: resepItems } = await supabase
       .from('recipe_ingredients')
-      .select('*')
+      .select('id')
       .eq('ingredient_id', id)
       .limit(1)
 

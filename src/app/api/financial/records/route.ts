@@ -1,12 +1,16 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 
 /**
  * POST /api/financial/records
  * Create a new financial record (manual entry)
  */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -45,7 +49,6 @@ export async function POST(_request: NextRequest) {
     }
 
     // Insert into financial_records
-    // @ts-expect-error - Supabase insert type
     const { data: record, error: insertError } = await supabase
       .from('financial_records')
       .insert({
@@ -86,7 +89,7 @@ export async function POST(_request: NextRequest) {
  * GET /api/financial/records
  * Get financial records for the current user
  */
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
 
@@ -107,7 +110,7 @@ export async function GET(_request: NextRequest) {
 
     let query = supabase
       .from('financial_records')
-      .select('*')
+      .select('id, description, category, amount, date, reference, type, source, created_at')
       .eq('user_id', user.id)
       .order('date', { ascending: false })
       .limit(limit)

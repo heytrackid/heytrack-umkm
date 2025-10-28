@@ -1,8 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
-
+import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { typedInsert } from '@/lib/supabase/typed-insert'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
@@ -30,9 +31,10 @@ export async function GET(request: NextRequest) {
     const sort_by = searchParams.get('sort_by')
     const sort_order = searchParams.get('sort_order')
 
+    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let query = supabase
       .from('customers')
-      .select('*')
+      .select(CUSTOMER_FIELDS.LIST)
       .eq('user_id', user.id)
 
     // Add search filter if provided
@@ -101,24 +103,27 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = validation.data
-
-    // @ts-expect-error - Supabase insert type inference issue
+    
+    // Type-safe data preparation (see docs/SUPABASE_TYPE_WORKAROUND.md)
+    const customerData = typedInsert<'customers'>({
+      user_id: user.id,
+      name: validatedData.name,
+      email: validatedData.email,
+      phone: validatedData.phone,
+      address: validatedData.address,
+      customer_type: validatedData.customer_type || 'retail',
+      discount_percentage: validatedData.discount_percentage,
+      notes: validatedData.notes,
+      is_active: validatedData.is_active,
+      loyalty_points: validatedData.loyalty_points,
+      favorite_items: validatedData.favorite_items,
+    })
+    
+    // Workaround: Type assertion for Supabase SSR client inference issue
     const { data, error } = await supabase
       .from('customers')
-      .insert({
-        user_id: user.id,
-        name: validatedData.name,
-        email: validatedData.email,
-        phone: validatedData.phone,
-        address: validatedData.address,
-        customer_type: validatedData.customer_type || 'retail',
-        discount_percentage: validatedData.discount_percentage,
-        notes: validatedData.notes,
-        is_active: validatedData.is_active,
-        loyalty_points: validatedData.loyalty_points,
-        favorite_items: validatedData.favorite_items,
-      })
-      .select('*')
+      .insert(customerData as any)
+      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, created_at, updated_at')
       .single()
 
     if (error) {

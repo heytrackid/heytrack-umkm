@@ -5,12 +5,13 @@ import { RecipeRecommendationService } from './RecipeRecommendationService'
 import { ProductionTimeService } from './ProductionTimeService'
 import { InventoryUpdateService } from './InventoryUpdateService'
 
+// Extended types for service operations
 export interface RecipeOption {
   id: string
   name: string
   category: string
   servings: number
-  description?: string
+  description?: string | null
   price: number
   hpp_cost: number
   margin: number

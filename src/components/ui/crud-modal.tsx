@@ -41,10 +41,10 @@ export const CrudModal = ({
     </Modal>
   )
 
-interface CreateModalProps extends Omit<CrudModalProps, 'title'> {
+interface CreateModalProps<T = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
-  form: any
-  onSubmit: (data: any) => Promise<void>
+  form: any // This would be ReactHookForm type, kept as any for compatibility
+  onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
   children: ReactNode
 }
@@ -76,10 +76,10 @@ export const CreateModal = ({
     </CrudModal>
   )
 
-interface EditModalProps extends Omit<CrudModalProps, 'title'> {
+interface EditModalProps<T = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
-  form: any
-  onSubmit: (data: any) => Promise<void>
+  form: any // This would be ReactHookForm type, kept as any for compatibility
+  onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
   children: ReactNode
 }

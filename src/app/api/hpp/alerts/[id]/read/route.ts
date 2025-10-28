@@ -2,6 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
+import type { Database } from '@/types/supabase-generated'
+
+type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
 
 // PATCH /api/hpp/alerts/[id]/read - Mark alert as read
 export async function PATCH(

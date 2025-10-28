@@ -1,6 +1,9 @@
 'use client'
 
 import { Suspense } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Customer = Database['public']['Tables']['customers']['Row']
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -65,14 +68,13 @@ interface ChartEntry {
   color: string
 }
 
-interface Customer {
-  name: string
+// Extended types for visualization
+interface CustomerForViz extends Customer {
   total_spent?: number
   total_orders?: number
 }
 
-interface Recipe {
-  name: string
+interface RecipeForViz extends Recipe {
   total_revenue?: number
   times_made?: number
 }
@@ -96,12 +98,12 @@ interface InventoryData {
 }
 
 interface CustomerData {
-  topCustomers: Customer[]
+  topCustomers: CustomerForViz[]
   summary: string
 }
 
 interface ProductData {
-  topRecipes: Recipe[]
+  topRecipes: RecipeForViz[]
   recommendations: string[]
 }
 
@@ -172,7 +174,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
               <div className="text-center col-span-2 md:col-span-1">
                 <div className="flex items-center justify-center space-x-2">
                   <div className={`text-2xl font-bold ${marginStatus === 'success' ? 'text-green-600' :
-                      marginStatus === 'warning' ? 'text-yellow-600' : 'text-red-600'
+                    marginStatus === 'warning' ? 'text-yellow-600' : 'text-red-600'
                     }`}>
                     {data.profitMargin.toFixed(1)}%
                   </div>
@@ -286,7 +288,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
 
   // Customer Analysis Visualization
   const CustomerChart = ({ data }: { data: CustomerData }) => {
-    const pieData = data.topCustomers.slice(0, 5).map((customer: Customer, index: number) => ({
+    const pieData = data.topCustomers.slice(0, 5).map((customer: CustomerForViz, index: number) => ({
       name: customer.name,
       value: customer.total_spent || 0,
       color: COLORS[index % COLORS.length]
@@ -346,7 +348,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
             {/* Top customers list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Top Customers:</h4>
-              {data.topCustomers.slice(0, 3).map((customer: Customer, index: number) => (
+              {data.topCustomers.slice(0, 3).map((customer: CustomerForViz, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{customer.name}</span>
                   <div className="text-right">
@@ -364,7 +366,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
 
   // Product Analysis Visualization
   const ProductChart = ({ data }: { data: ProductData }) => {
-    const chartData = data.topRecipes.slice(0, 5).map((recipe: Recipe) => ({
+    const chartData = data.topRecipes.slice(0, 5).map((recipe: RecipeForViz) => ({
       name: recipe.name.length > 10 ? `${recipe.name.substring(0, 10)}...` : recipe.name,
       revenue: recipe.total_revenue || 0,
       count: recipe.times_made || 0
@@ -402,7 +404,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
             {/* Top products list */}
             <div className="space-y-2">
               <h4 className="font-medium text-gray-900">Best Selling Products:</h4>
-              {data.topRecipes.slice(0, 3).map((recipe: Recipe, index: number) => (
+              {data.topRecipes.slice(0, 3).map((recipe: RecipeForViz, index: number) => (
                 <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <span className="font-medium">{recipe.name}</span>
                   <div className="text-right">

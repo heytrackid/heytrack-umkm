@@ -1,19 +1,18 @@
-// Production module - basic exports for now
-export interface ProductionBatch {
-  id: string
-  batch_number: string
-  recipe_id: string
-  recipe_name: string
-  status: 'planned' | 'in_progress' | 'completed' | 'cancelled'
-  quantity: number
-  scheduled_start: string
-  scheduled_completion: string
-  actual_start?: string
-  actual_completion?: string
-  created_at: string
-  updated_at: string
-}
+// Production module - use generated Supabase types
+import type { Database } from '@/types/supabase-generated'
 
+// Base types from generated schema
+export type Production = Database['public']['Tables']['productions']['Row']
+export type ProductionInsert = Database['public']['Tables']['productions']['Insert']
+export type ProductionUpdate = Database['public']['Tables']['productions']['Update']
+export type ProductionStatus = Database['public']['Enums']['production_status']
+
+// Backward compatibility aliases
+export type ProductionBatch = Production
+export type ProductionBatchInsert = ProductionInsert
+export type ProductionBatchUpdate = ProductionUpdate
+
+// Extended types for UI
 export interface ProductionSchedule {
   id: string
   date: string

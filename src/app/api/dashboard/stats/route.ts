@@ -33,35 +33,35 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const today = new Date().toISOString().split('T')[0] as string
     
-    // Get orders statistics
+    // Get orders statistics - only fields needed for calculations
     const { data: orders } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, total_amount, status, order_date, customer_name, created_at')
       
     const { data: todayOrders } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, total_amount, status, customer_name, created_at')
       .eq('order_date', today)
     
-    // Get customers statistics  
+    // Get customers statistics - only count and type
     const { data: customers } = await supabase
       .from('customers')
-      .select('*')
+      .select('id, customer_type')
     
-    // Get ingredients statistics
+    // Get ingredients statistics - only stock-related fields
     const { data: ingredients } = await supabase
       .from('ingredients')
-      .select('*')
+      .select('id, current_stock, min_stock, category')
     
-    // Get recipes count
+    // Get recipes count - only needed fields
     const { data: recipes } = await supabase
       .from('recipes')
-      .select('*')
+      .select('id, times_made, name')
     
-    // Get expenses for today
+    // Get expenses for today - only amount
     const { data: todayExpenses } = await supabase
       .from('expenses')  
-      .select('*')
+      .select('amount')
       .eq('expense_date', today)
     
     // Calculate metrics
@@ -98,7 +98,7 @@ export async function GET(request: Request) {
 
     const { data: yesterdayOrders } = await supabase
       .from('orders')
-      .select('*')
+      .select('total_amount')
       .eq('order_date', yesterdayStr)
 
     const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: Order) =>
@@ -187,19 +187,19 @@ export async function POST() {
     const supabase = await createClient()
     const today = new Date().toISOString().split('T')[0] as string
     
-    // Get today's data
+    // Get today's data - only needed fields
     const { data: todayOrders } = await supabase
       .from('orders')
-      .select('*')
+      .select('id, total_amount')
       .eq('order_date', today)
     
     const { data: todayOrderItems } = await supabase
       .from('order_items')
-      .select('*')
+      .select('order_id, quantity')
     
     const { data: todayExpenses } = await supabase
       .from('expenses')
-      .select('*')
+      .select('amount')
       .eq('expense_date', today)
     
     const todayOrderIds = todayOrders?.map((order: Order) => order.id) || []
@@ -223,8 +223,6 @@ export async function POST() {
 
     // Upsert daily summary
     type DailySalesSummary = Database['public']['Tables']['daily_sales_summary']['Insert']
-    
-    // @ts-expect-error - Supabase upsert type inference
     const { error } = await supabase
       .from('daily_sales_summary')
       .upsert([{

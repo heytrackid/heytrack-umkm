@@ -1,7 +1,8 @@
 'use client'
 
 import { uiLogger } from '@/lib/logger'
-
+import type { Database } from '@/types/supabase-generated'
+type Customer = Database['public']['Tables']['customers']['Row']
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,7 +12,6 @@ import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
 import { memo, useEffect, useState, type FormEvent } from 'react'
 import { ORDER_CONFIG, ORDER_PRIORITIES } from '@/lib/constants'
-import type { Customer } from '@/types/domain/customers'
 import type { Order, OrderFormProps, OrderItem, PaymentMethod } from '@/app/orders/types/orders-db.types'
 import { calculateOrderTotals, generateOrderNumber } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'

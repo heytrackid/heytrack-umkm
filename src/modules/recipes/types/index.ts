@@ -1,38 +1,17 @@
-// Recipe types - basic definitions for now
-export interface Recipe {
-  id: string
-  name: string
-  description?: string
-  category: string
-  servings: number
-  prep_time?: number
-  cook_time?: number
-  difficulty?: string
-  instructions?: string
-  notes?: string
-  cost_per_unit?: number
-  selling_price?: number
-  margin_percentage?: number
-  rating?: number
-  times_made?: number
-  image_url?: string
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
+// Recipe types - use generated Supabase types as base
+import type { Database } from '@/types/supabase-generated'
 
-export interface RecipeIngredient {
-  id: string
-  recipe_id: string
-  ingredient_id: string
-  quantity: number
-  unit: string
-  cost?: number
-  notes?: string
-  created_at: string
-}
+// Base types from generated schema
+export type Recipe = Database['public']['Tables']['recipes']['Row']
+export type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
+export type RecipeUpdate = Database['public']['Tables']['recipes']['Update']
 
-export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at'> {
+export type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+export type RecipeIngredientInsert = Database['public']['Tables']['recipe_ingredients']['Insert']
+export type RecipeIngredientUpdate = Database['public']['Tables']['recipe_ingredients']['Update']
+
+// Extended types for UI
+export interface RecipeFormData extends Omit<Recipe, 'id' | 'created_at' | 'updated_at' | 'user_id'> {
   recipe_ingredients?: Array<Omit<RecipeIngredient, 'id' | 'recipe_id' | 'created_at'>>
 }
 

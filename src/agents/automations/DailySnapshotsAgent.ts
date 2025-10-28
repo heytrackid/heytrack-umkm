@@ -1,9 +1,3 @@
-/**
- * Generate a simple correlation ID
- */
-function generateCorrelationId(): string {
-  return `hpp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-}
 import type {
   AgentContext,
   AgentTask,
@@ -14,7 +8,19 @@ import {
   executeAgentTask
 } from '@/agents/base'
 import { HppCalculatorService } from '@/modules/hpp'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
+type HppSnapshotInsert = Database['public']['Tables']['hpp_snapshots']['Insert']
+
+/**
+ * Generate a simple correlation ID
+ */
+function generateCorrelationId(): string {
+  return `hpp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+}
 
 interface DailySnapshotTaskData {
   targetDate?: string // Optional, defaults to yesterday
@@ -189,7 +195,7 @@ export class DailySnapshotsAgent {
         }
       }
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await context.supabase
         .from('hpp_snapshots')
         .insert([snapshotData] as any)
 
@@ -217,6 +223,7 @@ export class DailySnapshotsAgent {
    */
   private async getPreviousSnapshot(recipeId: string, currentDate: string): Promise<{ hpp_value: number } | null> {
     try {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('hpp_snapshots')
         .select('hpp_value')
@@ -245,6 +252,7 @@ export class DailySnapshotsAgent {
    */
   private async getActiveRecipeIds(): Promise<string[]> {
     try {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('recipes')
         .select('id')
@@ -268,6 +276,7 @@ export class DailySnapshotsAgent {
    */
   async cleanupOldSnapshots(): Promise<void> {
     try {
+      const supabase = createClient()
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - 365)
       const cutoffDateStr = cutoffDate.toISOString().split('T')[0]

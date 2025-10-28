@@ -39,7 +39,7 @@ export interface NotificationItem {
   read: boolean
   actionUrl?: string
   actionLabel?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   priority: 'low' | 'medium' | 'high' | 'urgent'
 }
 
@@ -334,7 +334,7 @@ interface ActivityItem {
     name: string
     avatar?: string
   }
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface ActivityFeedProps {

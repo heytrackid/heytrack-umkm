@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,12 +16,6 @@ import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-
-interface Recipe {
-    id: string
-    name: string
-    unit: string
-}
 
 interface ProductionFormDialogProps {
     open: boolean

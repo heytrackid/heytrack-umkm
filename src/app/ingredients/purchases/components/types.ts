@@ -1,22 +1,14 @@
 // Ingredient Purchases Types
 // Type definitions for ingredient purchase management
 
-export interface IngredientPurchase {
-  id: string
-  ingredient_id: string
-  quantity: number
-  unit_price: number
-  total_price: number
-  supplier?: string
-  purchase_date: string
-  notes?: string
-  created_at: string
-  updated_at: string
-  ingredient?: {
-    id: string
-    name: string
-    unit: string
-  }
+import type { Database } from '@/types/supabase-generated'
+
+type IngredientPurchaseBase = Database['public']['Tables']['ingredient_purchases']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+
+// Re-export base type with relations
+export interface IngredientPurchase extends IngredientPurchaseBase {
+  ingredient?: Pick<Ingredient, 'id' | 'name' | 'unit'>
 }
 
 export interface PurchaseFormData {
@@ -36,10 +28,4 @@ export interface PurchaseStats {
   description: string
 }
 
-export interface AvailableIngredient {
-  id: string
-  name: string
-  unit: string
-  current_stock: number
-  price_per_unit: number
-}
+export type AvailableIngredient = Pick<Ingredient, 'id' | 'name' | 'unit' | 'current_stock' | 'price_per_unit'>

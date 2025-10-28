@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
 
 // GET /api/hpp/comparison - Get recipe comparison data
 export async function GET(request: NextRequest) {
@@ -50,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Process comparison data
-    const comparisonData = (recipes || []).map(recipe => {
+    const comparisonData = ((recipes as Recipe[]) || []).map(recipe => {
       const hppValue = Number(recipe.cost_per_unit) || 0
       const sellingPrice = Number(recipe.selling_price) || 0
       const margin = sellingPrice - hppValue

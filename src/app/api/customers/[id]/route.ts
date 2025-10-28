@@ -1,8 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type Customer = Database['public']['Tables']['customers']['Row']
 // GET /api/customers/[id] - Get single customer
 export async function GET(
   _request: NextRequest,
@@ -13,7 +16,7 @@ export async function GET(
     const supabase = createServiceRoleClient()
     const { data, error } = await supabase
       .from('customers')
-      .select('*')
+      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, favorite_items, created_at, updated_at, user_id')
       .eq('id', id)
       .single()
     
@@ -74,7 +77,7 @@ export async function PUT(
       .from('customers')
       .update(updatePayload)
       .eq('id', id)
-      .select('*')
+      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at')
       .single()
     
     if (error) {
@@ -119,7 +122,7 @@ export async function DELETE(
     // Check if customer has orders
     const { data: orders } = await supabase
       .from('orders')
-      .select('*')
+      .select('id')
       .eq('customer_id', id)
       .limit(1)
     

@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { SuggestionEngine } from '@/lib/services/SuggestionEngine';
 import { logger } from '@/lib/logger';
+import type { Database } from '@/types/supabase-generated';
 
 /**
  * GET /api/ai/suggestions - Get dynamic chat suggestions

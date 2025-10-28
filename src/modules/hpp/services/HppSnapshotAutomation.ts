@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 import { HppCalculatorService } from './HppCalculatorService'
 
 /**
@@ -8,6 +9,7 @@ import { HppCalculatorService } from './HppCalculatorService'
 export class HppSnapshotAutomation {
   private logger = dbLogger
   private hppCalculator = new HppCalculatorService()
+  private supabase = createClient()
 
   /**
    * Create HPP snapshot for a recipe
@@ -18,7 +20,7 @@ export class HppSnapshotAutomation {
       const hppResult = await this.hppCalculator.calculateRecipeHpp(recipeId)
 
       // Get previous snapshot for comparison
-      const { data: previousSnapshot } = await supabase
+      const { data: previousSnapshot } = await this.supabase
         .from('hpp_snapshots')
         .select('*')
         .eq('recipe_id', recipeId)
@@ -33,7 +35,7 @@ export class HppSnapshotAutomation {
         : 0
 
       // Get recipe selling price for margin calculation
-      const { data: recipe } = await supabase
+      const { data: recipe } = await this.supabase
         .from('recipes')
         .select('selling_price')
         .eq('id', recipeId)
@@ -45,7 +47,7 @@ export class HppSnapshotAutomation {
         : 0
 
       // Create snapshot
-      const { error } = await supabase
+      const { error } = await this.supabase
         .from('hpp_snapshots')
         .insert({
           recipe_id: recipeId,
@@ -91,7 +93,7 @@ export class HppSnapshotAutomation {
    */
   async createSnapshotsForAllRecipes(userId: string): Promise<void> {
     try {
-      const { data: recipes, error } = await supabase
+      const { data: recipes, error } = await this.supabase
         .from('recipes')
         .select('id')
         .eq('user_id', userId)
@@ -202,7 +204,7 @@ export class HppSnapshotAutomation {
           is_dismissed: false
         }))
 
-        const { error } = await supabase
+        const { error } = await this.supabase
           .from('hpp_alerts')
           .insert(alertsToInsert)
 
@@ -224,7 +226,7 @@ export class HppSnapshotAutomation {
   async onIngredientPriceChange(ingredientId: string, userId: string): Promise<void> {
     try {
       // Find all recipes using this ingredient
-      const { data: recipeIngredients, error } = await supabase
+      const { data: recipeIngredients, error } = await this.supabase
         .from('recipe_ingredients')
         .select('recipe_id')
         .eq('ingredient_id', ingredientId)

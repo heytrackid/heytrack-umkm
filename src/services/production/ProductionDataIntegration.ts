@@ -4,8 +4,8 @@
  */
 
 import { apiLogger } from '@/lib/logger'
-import type { ProductionBatch } from './BatchSchedulingService'
 
+// Extended types for metrics
 export interface ProductionMetrics {
   total_batches: number
   completed_batches: number

@@ -4,20 +4,13 @@
  */
 
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
 
-export interface ProductionBatch {
-  id: string
-  recipe_id: string
-  recipe_name: string
-  quantity: number
-  scheduled_date: string
-  status: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-  estimated_duration: number
-  actual_duration?: number
-  created_at: string
-  updated_at: string
-}
+// Use generated types
+export type ProductionBatch = Database['public']['Tables']['productions']['Row']
+export type ProductionBatchInsert = Database['public']['Tables']['productions']['Insert']
 
+// Extended types for UI
 export interface BatchSchedule {
   batches: ProductionBatch[]
   total_capacity: number
@@ -43,7 +36,7 @@ export class BatchSchedulingService {
   /**
    * Create a new batch
    */
-  static async createBatch(batch: Partial<ProductionBatch>): Promise<ProductionBatch | null> {
+  static async createBatch(batch: Partial<ProductionBatchInsert>): Promise<ProductionBatch | null> {
     try {
       const response = await fetch('/api/production/batches', {
         method: 'POST',
@@ -63,7 +56,7 @@ export class BatchSchedulingService {
    */
   static async updateBatchStatus(
     batchId: string,
-    status: ProductionBatch['status']
+    status: Database['public']['Enums']['production_status']
   ): Promise<boolean> {
     try {
       const response = await fetch(`/api/production/batches/${batchId}`, {
@@ -84,7 +77,7 @@ export class BatchSchedulingService {
   static calculateCapacity(batches: ProductionBatch[]): number {
     return batches.reduce((total, batch) => {
       if (batch.status !== 'CANCELLED') {
-        return total + batch.quantity
+        return total + (batch.quantity || 0)
       }
       return total
     }, 0)

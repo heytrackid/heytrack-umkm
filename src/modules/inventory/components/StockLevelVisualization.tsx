@@ -1,6 +1,8 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import type { Database } from '@/types/supabase-generated'
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useCurrency } from '@/hooks/useCurrency'
@@ -12,16 +14,6 @@ import {
     TrendingUp,
     DollarSign
 } from 'lucide-react'
-
-interface Ingredient {
-    id: string
-    name: string
-    current_stock: number
-    min_stock: number
-    unit: string
-    price_per_unit: number
-    category?: string
-}
 
 interface StockLevelVisualizationProps {
     ingredients: Ingredient[]

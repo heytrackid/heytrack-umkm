@@ -4,7 +4,6 @@
  */
 
 // Core recipe components
-export { default as RecipesPage } from './components/RecipesPage'
 export { default as SmartPricingAssistant } from './components/SmartPricingAssistant'
 
 // Extracted HPP calculator components

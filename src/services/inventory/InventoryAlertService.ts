@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 
 /**
  * Service for managing inventory alerts
@@ -12,6 +13,8 @@ export class InventoryAlertService {
    */
   async checkLowStockAlerts(userId: string): Promise<void> {
     try {
+      const supabase = createClient()
+      
       // Get all ingredients with stock below reorder point
       const { data: ingredients, error } = await supabase
         .from('ingredients')
@@ -165,6 +168,8 @@ export class InventoryAlertService {
    */
   async checkIngredientAlert(ingredientId: string, userId: string): Promise<void> {
     try {
+      const supabase = createClient()
+      
       const { data: ingredient, error } = await supabase
         .from('ingredients')
         .select('*')
@@ -261,6 +266,8 @@ export class InventoryAlertService {
    */
   async getActiveAlerts(userId: string): Promise<unknown[]> {
     try {
+      const supabase = createClient()
+      
       const { data: alerts, error } = await supabase
         .from('inventory_alerts')
         .select(`
@@ -289,6 +296,8 @@ export class InventoryAlertService {
    */
   async acknowledgeAlert(alertId: string, userId: string): Promise<void> {
     try {
+      const supabase = createClient()
+      
       await supabase
         .from('inventory_alerts')
         .update({

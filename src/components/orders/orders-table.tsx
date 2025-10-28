@@ -1,10 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Order = Database['public']['Tables']['orders']['Row']
+type OrderItem = Database['public']['Tables']['order_items']['Row']
+type OrderStatus = Database['public']['Enums']['order_status']
+type PaymentStatus = Database['public']['Enums']['payment_status']
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -46,30 +51,17 @@ import {
 } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 
-interface Order {
-  id: string
-  order_no: string
-  customer_name: string
-  customer_phone?: string
-  status: string
-  priority: string
-  order_date: string
-  delivery_date?: string
-  total_amount: number
-  paid_amount: number
-  payment_status: string
-  order_items?: Array<{
-    product_name: string
-    quantity: number
-  }>
+// Extended type for table display
+interface OrderWithItems extends Order {
+  order_items?: Array<Pick<OrderItem, 'product_name' | 'quantity'>>
 }
 
 interface OrdersTableProps {
-  orders: Order[]
+  orders: OrderWithItems[]
   loading?: boolean
-  onViewOrder: (order: Order) => void
-  onEditOrder: (order: Order) => void
-  onDeleteOrder?: (order: Order) => void
+  onViewOrder: (order: OrderWithItems) => void
+  onEditOrder: (order: OrderWithItems) => void
+  onDeleteOrder?: (order: OrderWithItems) => void
   onUpdateStatus?: (orderId: string, status: string) => void
   onBulkAction?: (action: string, orderIds: string[]) => void
 }
@@ -86,7 +78,7 @@ const OrdersTable = ({
   const { formatCurrency } = useCurrency()
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
+  const [orderToDelete, setOrderToDelete] = useState<OrderWithItems | null>(null)
 
   // Status configurations
   const statusConfig = {
@@ -139,7 +131,7 @@ const OrdersTable = ({
   }
 
   // Delete handler
-  const handleDeleteOrder = (order: Order) => {
+  const handleDeleteOrder = (order: OrderWithItems) => {
     void setOrderToDelete(order)
     void setShowDeleteDialog(true)
   }
@@ -180,10 +172,10 @@ const OrdersTable = ({
   }
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    })
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
 
   // Using formatCurrency from useCurrency hook
 
@@ -228,35 +220,35 @@ const OrdersTable = ({
               {selectedOrders.length} pesanan dipilih
             </span>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => handleBulkAction('confirm')}
             >
               <CheckCircle className="h-4 w-4 mr-2" />
               Konfirmasi
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => handleBulkAction('export')}
             >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            
-            <Button 
-              variant="outline" 
+
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => handleBulkAction('print')}
             >
               <Printer className="h-4 w-4 mr-2" />
               Print
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
@@ -273,7 +265,7 @@ const OrdersTable = ({
                   Batalkan
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleBulkAction('delete')}
                   className="text-red-600"
                 >
@@ -282,9 +274,9 @@ const OrdersTable = ({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <Button 
-              variant="ghost" 
+
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => setSelectedOrders([])}
             >
@@ -304,7 +296,7 @@ const OrdersTable = ({
                   checked={isAllSelected}
                   onCheckedChange={handleSelectAll}
                   ref={(el) => {
-                    if (el) {el.indeterminate = isIndeterminate}
+                    if (el) { el.indeterminate = isIndeterminate }
                   }}
                 />
               </TableHead>
@@ -327,7 +319,7 @@ const OrdersTable = ({
               </TableRow>
             ) : (
               orders.map((order) => (
-                <TableRow 
+                <TableRow
                   key={order.id}
                   className={selectedOrders.includes(order.id) ? 'bg-blue-50' : ''}
                 >
@@ -337,7 +329,7 @@ const OrdersTable = ({
                       onCheckedChange={(checked) => handleSelectOrder(order.id, !!checked)}
                     />
                   </TableCell>
-                  
+
                   <TableCell>
                     <div className="space-y-1">
                       <div className="font-medium">{order.order_no}</div>
@@ -346,7 +338,7 @@ const OrdersTable = ({
                       </div>
                     </div>
                   </TableCell>
-                  
+
                   <TableCell>
                     <div className="space-y-1">
                       <div className="font-medium">{order.customer_name}</div>
@@ -355,14 +347,14 @@ const OrdersTable = ({
                       )}
                     </div>
                   </TableCell>
-                  
+
                   <TableCell>
                     <div className="space-y-2">
                       {getStatusBadge(order.status)}
                       {order.priority !== 'normal' && getPriorityBadge(order.priority)}
                     </div>
                   </TableCell>
-                  
+
                   <TableCell>
                     <div className="space-y-1 text-sm">
                       <div>Pesan: {formatDate(order.order_date)}</div>
@@ -373,7 +365,7 @@ const OrdersTable = ({
                       )}
                     </div>
                   </TableCell>
-                  
+
                   <TableCell>
                     <div className="space-y-2">
                       <div className="font-medium">{formatCurrency(order.total_amount)}</div>
@@ -385,7 +377,7 @@ const OrdersTable = ({
                       )}
                     </div>
                   </TableCell>
-                  
+
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -398,47 +390,47 @@ const OrdersTable = ({
                           <Eye className="h-4 w-4 mr-2" />
                           Lihat Detail
                         </DropdownMenuItem>
-                        
+
                         <DropdownMenuItem onClick={() => onEditOrder(order)}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
-                        
-                        
+
+
                         <DropdownMenuSeparator />
-                        
+
                         {order.status === 'PENDING' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'CONFIRMED')}>
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Konfirmasi Pesanan
                           </DropdownMenuItem>
                         )}
-                        
+
                         {order.status === 'CONFIRMED' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'IN_PROGRESS')}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Mulai Proses
                           </DropdownMenuItem>
                         )}
-                        
+
                         {order.status === 'IN_PROGRESS' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'READY')}>
                             <Package className="h-4 w-4 mr-2" />
                             Siap Antar
                           </DropdownMenuItem>
                         )}
-                        
+
                         {order.status === 'READY' && onUpdateStatus && (
                           <DropdownMenuItem onClick={() => onUpdateStatus(order.id, 'DELIVERED')}>
                             <Truck className="h-4 w-4 mr-2" />
                             Kirim Pesanan
                           </DropdownMenuItem>
                         )}
-                        
+
                         <DropdownMenuSeparator />
-                        
+
                         {onDeleteOrder && (
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleDeleteOrder(order)}
                             className="text-red-600"
                           >

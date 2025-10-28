@@ -3,7 +3,7 @@ import { getErrorMessage } from '@/lib/type-guards'
 import { InventoryCronJobs, GeneralCronJobs, getAutomationStatus } from '@/lib/cron'
 import { AutomationTaskSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
-
+import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 /**
  * API Endpoint to manually trigger automation tasks

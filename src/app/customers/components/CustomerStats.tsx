@@ -5,10 +5,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { UserPlus, Users } from 'lucide-react'
-import type { CustomersTable } from '@/types/domain/customers'
+import type { Database } from '@/types/supabase-generated'
+
+type Customer = Database['public']['Tables']['customers']['Row']
 
 interface CustomerStatsProps {
-  customers: Array<CustomersTable['Row']>
+  customers: Array<Customer>
   isLoading: boolean
   isMobile: boolean
 }

@@ -3,7 +3,7 @@
  * Optimized textarea for mobile devices with character count
  */
 
-import { React, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Textarea } from '../textarea'

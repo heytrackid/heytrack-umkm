@@ -1,16 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import type { HppCalculation } from '@/modules/hpp/types'
 
-interface Recipe {
-  id: string
-  name: string
-  category: string
-  selling_price: number | null
-  margin_percentage: number | null
+// Extended type for UI with calculated fields
+interface RecipeWithCosts extends Recipe {
   ingredients: Array<{
     id: string
     name: string
@@ -20,16 +19,6 @@ interface Recipe {
   }>
   operational_costs: number
   total_cost: number
-}
-
-interface HppCalculation {
-  id: string
-  recipe_id: string
-  cost_per_unit: number
-  total_hpp: number
-  ingredient_cost: number
-  operational_cost: number
-  calculated_at: string
 }
 
 export function useUnifiedHpp() {
@@ -62,14 +51,14 @@ export function useUnifiedHpp() {
   })
 
   // Fetch selected recipe details
-  const { data: recipeData, isLoading: recipeLoading } = useQuery({
+  const { data: recipeData, isLoading: recipeLoading } = useQuery<RecipeWithCosts | null>({
     queryKey: ['recipe-detail', selectedRecipeId],
     queryFn: async () => {
       if (!selectedRecipeId) {return null}
       
       const response = await fetch(`/api/recipes/${selectedRecipeId}`)
       if (!response.ok) {throw new Error('Failed to fetch recipe')}
-      const data = await response.json()
+      const data: Recipe = await response.json()
       
       // Calculate total cost from ingredients
       let ingredientCost = 0
@@ -86,11 +75,7 @@ export function useUnifiedHpp() {
       const operationalCost = Math.max(ingredientCost * 0.15, 2500)
       
       return {
-        id: data.id,
-        name: data.name,
-        category: data.category,
-        selling_price: data.selling_price,
-        margin_percentage: data.margin_percentage,
+        ...data,
         ingredients: data.recipe_ingredients?.map((ri: { ingredient_id: string; ingredients?: { name?: string; weighted_average_cost?: number; price_per_unit?: number }; quantity?: number; unit?: string }) => ({
           id: ri.ingredient_id,
           name: ri.ingredients?.name || 'Unknown',

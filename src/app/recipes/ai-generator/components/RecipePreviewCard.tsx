@@ -1,8 +1,10 @@
 // Recipe Preview Card - Shows live preview as user types
 // Helps users understand what they'll get before generating
+// ✅ OPTIMIZED: Wrapped with React.memo to prevent unnecessary re-renders
 
 'use client'
 
+import { memo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChefHat, Package, DollarSign, Clock } from 'lucide-react'
 import type { AvailableIngredient } from './types'
@@ -34,14 +36,15 @@ const estimatedIngredients: Record<string, string[]> = {
   other: ['Tepung terigu', 'Gula', 'Telur', 'Mentega'],
 }
 
-export default function RecipePreviewCard({
+// ✅ OPTIMIZED: Memoized component with custom comparison
+const RecipePreviewCard = memo(({
   productName,
   productType,
   servings,
   targetPrice,
   selectedIngredients,
   availableIngredients,
-}: RecipePreviewCardProps) {
+}: RecipePreviewCardProps) => {
   const hasInput = productName || servings > 0
   const estimatedCost = targetPrice ? parseFloat(targetPrice) * 0.45 : null
   const ingredients = selectedIngredients.length > 0
@@ -185,4 +188,18 @@ export default function RecipePreviewCard({
       </CardContent>
     </Card>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
+  return (
+    prevProps.productName === nextProps.productName &&
+    prevProps.productType === nextProps.productType &&
+    prevProps.servings === nextProps.servings &&
+    prevProps.targetPrice === nextProps.targetPrice &&
+    prevProps.selectedIngredients.length === nextProps.selectedIngredients.length &&
+    prevProps.selectedIngredients.every((ing, idx) => ing === nextProps.selectedIngredients[idx])
+  )
+})
+
+RecipePreviewCard.displayName = 'RecipePreviewCard'
+
+export default RecipePreviewCard

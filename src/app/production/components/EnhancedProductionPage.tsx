@@ -1,6 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Production = Database['public']['Tables']['productions']['Row']
+type ProductionStatus = Database['public']['Enums']['production_status']
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,24 +34,9 @@ import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
 
-type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
-
-interface Production {
-    id: string
-    recipe_id: string
-    batch_number: string
-    quantity: number
-    unit: string
-    status: ProductionStatus
-    planned_date: string
-    started_at: string | null
-    completed_at: string | null
-    actual_cost: number | null
-    notes: string | null
-    created_at: string
-    recipe?: {
-        name: string
-    } | null
+// Extended type for production page display
+interface ProductionWithRecipe extends Production {
+    recipe?: Pick<Recipe, 'name'> | null
 }
 
 const STATUS_CONFIG = {
@@ -76,7 +65,7 @@ const STATUS_CONFIG = {
 export const EnhancedProductionPage = () => {
     const { formatCurrency } = useCurrency()
     const { isMobile } = useResponsive()
-    const [productions, setProductions] = useState<Production[]>([])
+    const [productions, setProductions] = useState<ProductionWithRecipe[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -507,7 +496,7 @@ export const EnhancedProductionPage = () => {
 
 // Production Card Component
 interface ProductionCardProps {
-    production: Production
+    production: ProductionWithRecipe
     onStart: (id: string) => void
     onComplete: (id: string) => void
     formatCurrency: (amount: number) => string

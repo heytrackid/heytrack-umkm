@@ -16,9 +16,12 @@ import {
   type CustomerForm as CustomerFormData
 } from '@/lib/validations/domains/customer'
 import { FormField } from './shared/FormField'
+import type { Database } from '@/types/supabase-generated'
+
+type Customer = Database['public']['Tables']['customers']['Row']
 
 interface CustomerFormComponentProps {
-  initialData?: Partial<CustomerFormData>
+  initialData?: Partial<CustomerFormData> & Partial<Customer>
   onSubmit: (data: CustomerFormData) => Promise<void>
   isLoading?: boolean
 }

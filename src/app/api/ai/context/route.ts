@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { logger } from '@/lib/logger';
+import type { Database } from '@/types/supabase-generated';
 
 /**
  * GET /api/ai/context - Load business context for AI chat

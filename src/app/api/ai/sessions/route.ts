@@ -6,6 +6,9 @@ import { createClient } from '@/utils/supabase/server';
 import { ChatSessionService } from '@/lib/services/ChatSessionService';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { logger } from '@/lib/logger';
+import type { Database } from '@/types/supabase-generated';
+
+type ChatSession = Database['public']['Tables']['chat_sessions']['Row'];
 
 /**
  * GET /api/ai/sessions - List user's chat sessions

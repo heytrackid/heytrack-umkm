@@ -2,6 +2,11 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
 export async function POST(request: NextRequest) {
@@ -45,8 +50,6 @@ export async function POST(request: NextRequest) {
         } | null
       }> | null
     }
-
-    // @ts-expect-error - Supabase join types
     const { data: recipe, error: recipeError } = await supabase
       .from('recipes')
       .select(`
@@ -95,7 +98,6 @@ export async function POST(request: NextRequest) {
     const costPerUnit = servings > 0 ? totalHpp / servings : totalHpp
 
     // Save calculation
-    // @ts-expect-error - Supabase insert types
     const { data: calculation, error: calcError } = await supabase
       .from('hpp_calculations')
       .insert({
@@ -112,12 +114,11 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (calcError) {
-      throw calcError
+    if (calcError || !calculation) {
+      throw calcError || new Error('Failed to create calculation')
     }
 
     // Update recipe with cost
-    // @ts-expect-error - Supabase update types
     await supabase
       .from('recipes')
       .update({
@@ -128,7 +129,6 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
 
     // Create snapshot
-    // @ts-expect-error - Supabase insert types
     await supabase
       .from('hpp_snapshots')
       .insert({

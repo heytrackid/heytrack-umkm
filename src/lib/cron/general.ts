@@ -3,13 +3,14 @@
  * General automation and maintenance cron jobs
  */
 
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
 import { InventoryCronJobs } from './inventory'
 import { FinancialCronJobs } from './financial'
 import { OrderCronJobs } from './orders'
 import { HPPCronJobs } from './hpp'
 import type { AutomationEngineResult, AutomationStatus } from './types'
+import type { Database } from '@/types/supabase-generated'
 
 export class GeneralCronJobs {
   /**

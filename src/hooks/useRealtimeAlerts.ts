@@ -3,21 +3,11 @@
 import { useEffect, useState } from 'react'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
-const supabase = createClient()
+import type { Database } from '@/types/supabase-generated'
 
-interface HppAlert {
-  id: string
-  recipe_id: string
-  alert_type: string
-  severity: string
-  title: string
-  message: string
-  old_value: number | null
-  new_value: number | null
-  change_percentage: number | null
-  is_read: boolean
-  created_at: string
-}
+type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
+
+const supabase = createClient()
 
 interface UseRealtimeAlertsOptions {
   userId?: string

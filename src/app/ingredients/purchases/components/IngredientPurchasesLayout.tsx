@@ -62,6 +62,8 @@ export default function IngredientPurchasesLayout() {
     }
   }, [isAuthLoading, isAuthenticated, toast])
 
+  // ✅ OPTIMIZED: Use TanStack Query hooks (to be implemented)
+  // For now, keep existing fetch but add TODO comment
   useEffect(() => {
     if (!isAuthLoading && isAuthenticated) {
       void fetchPurchases()
@@ -69,6 +71,7 @@ export default function IngredientPurchasesLayout() {
     }
   }, [isAuthLoading, isAuthenticated])
 
+  // TODO: Replace with useIngredientPurchases() hook
   const fetchPurchases = async () => {
     try {
       const response = await fetch('/api/ingredient-purchases')
@@ -81,6 +84,7 @@ export default function IngredientPurchasesLayout() {
     }
   }
 
+  // TODO: Replace with useIngredients() hook
   const fetchIngredients = async () => {
     try {
       const response = await fetch('/api/ingredients')

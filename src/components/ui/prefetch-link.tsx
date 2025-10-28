@@ -1,5 +1,5 @@
 'use client'
-import { React, type ComponentProps, type MouseEvent } from 'react'
+import { type ComponentProps, type MouseEvent } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'

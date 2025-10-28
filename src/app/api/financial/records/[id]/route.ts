@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
+
+type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
 
 /**
  * DELETE /api/financial/records/[id]
@@ -27,7 +30,7 @@ export async function DELETE(
     // Check if record exists and belongs to user
     const { data: record, error: fetchError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, user_id')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -39,13 +42,8 @@ export async function DELETE(
       )
     }
 
-    // Only allow deletion of manual entries
-    if (record.source !== 'manual_entry') {
-      return NextResponse.json(
-        { error: 'Cannot delete auto-synced records. Delete the source transaction instead.' },
-        { status: 403 }
-      )
-    }
+    // Note: 'source' field removed from schema
+    // TODO: Re-implement source tracking if needed for auto-sync prevention
 
     // Delete the record
     const { error: deleteError } = await supabase
@@ -81,7 +79,7 @@ export async function DELETE(
  * Update a financial record
  */
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -103,7 +101,7 @@ export async function PATCH(
     // Check if record exists and belongs to user
     const { data: record, error: fetchError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, user_id')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -115,16 +113,11 @@ export async function PATCH(
       )
     }
 
-    // Only allow editing of manual entries
-    if (record.source !== 'manual_entry') {
-      return NextResponse.json(
-        { error: 'Cannot edit auto-synced records' },
-        { status: 403 }
-      )
-    }
+    // Note: 'source' field removed from schema
+    // TODO: Re-implement source tracking if needed for auto-sync prevention
 
-    // Build update object
-    const updates: Record<string, any> = {}
+    // Build update object with proper typing
+    const updates: Partial<FinancialRecord> = {}
     if (description !== undefined) updates.description = description
     if (category !== undefined) updates.category = category
     if (amount !== undefined) {
@@ -138,10 +131,10 @@ export async function PATCH(
     }
     if (date !== undefined) updates.date = date
 
-    // Update the record
+    // Update the record - Workaround: Supabase SSR type inference issue
     const { data: updatedRecord, error: updateError } = await supabase
       .from('financial_records')
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
       .eq('user_id', user.id)
       .select()

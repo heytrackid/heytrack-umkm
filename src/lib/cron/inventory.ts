@@ -3,12 +3,16 @@
  * Scheduled jobs for inventory management and alerts
  */
 
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
 import { inventoryServices } from '@/lib/business-services/utils'
 import type { ReorderSummary } from '@/lib/business-services/types'
 import { SmartNotificationSystem } from '@/lib/communications/notifications'
 import type { InventoryReorderSummary, NotificationAlert } from './types'
+import type { Database } from '@/types/supabase-generated'
+
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type InventoryAlert = Database['public']['Tables']['inventory_alerts']['Row']
 
 export class InventoryCronJobs {
   /**

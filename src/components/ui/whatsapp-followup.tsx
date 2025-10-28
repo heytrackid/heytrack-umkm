@@ -1,6 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { Database } from '@/types/supabase-generated'
+type Order = Database['public']['Tables']['orders']['Row']
+type OrderItem = Database['public']['Tables']['order_items']['Row']
+type OrderStatus = Database['public']['Enums']['order_status']
+type PaymentStatus = Database['public']['Enums']['payment_status']
+type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { apiLogger } from '@/lib/logger'
-import { 
+import {
   MessageCircle,
   Send,
   Copy,
@@ -24,28 +30,18 @@ import {
   AlertCircle
 } from 'lucide-react'
 
-interface Order {
-  id: string
+// Extended type for WhatsApp follow-up
+interface OrderForWhatsApp extends Order {
   order_number: string
-  customer_name: string
-  customer_phone?: string
-  status: string
-  order_date: string
   due_date?: string
-  total_amount: number
-  items: Array<{
-    recipe?: {
-      name: string
-    }
-    product_name?: string
-    quantity: number
+  items: Array<OrderItem & {
+    recipe?: Pick<Recipe, 'name'>
   }>
-  payment_status?: string
   remaining_amount?: number
 }
 
 interface WhatsAppFollowUpProps {
-  order: Order
+  order: OrderForWhatsApp
   onSent?: (method: 'whatsapp' | 'business', message: string, phone: string) => void
 }
 
@@ -110,9 +106,9 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
 
   const getCurrentTemplate = () => templates.find(t => t.id === selectedTemplateId)
 
-  const processTemplate = (templateContent: string, orderData: Order): string => {
+  const processTemplate = (templateContent: string, orderData: OrderForWhatsApp): string => {
     let processed = templateContent
-    
+
     // Replace common variables
     const replacements = {
       'customer_name': orderData.customer_name,
@@ -123,26 +119,26 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
       'remaining_amount': orderData.remaining_amount ? orderData.remaining_amount.toLocaleString('id-ID') : '0',
       'estimated_arrival': orderData.due_date ? new Date(orderData.due_date).toLocaleDateString('id-ID') : ''
     }
-    
+
     // Replace simple variables
     Object.entries(replacements).forEach(([key, value]) => {
       const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g')
       processed = processed.replace(regex, value.toString())
     })
-    
+
     // Handle order_items array
     const itemsRegex = /\{\{#each order_items\}\}([\s\S]*?)\{\{\/each\}\}/g
     processed = processed.replace(itemsRegex, (match, itemTemplate) => orderData.items.map(item => itemTemplate
-          .replace(/\{\{product_name\}\}/g, item.recipe?.name || item.product_name || 'Unknown Product')
-          .replace(/\{\{quantity\}\}/g, item.quantity.toString())).join(''))
-    
+      .replace(/\{\{product_name\}\}/g, item.recipe?.name || item.product_name || 'Unknown Product')
+      .replace(/\{\{quantity\}\}/g, item.quantity.toString())).join(''))
+
     // Handle conditional blocks
     const ifRegex = /\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g
     processed = processed.replace(ifRegex, (match, condition, content) => {
       const value = replacements[condition as keyof typeof replacements]
       return value && value !== '' ? content : ''
     })
-    
+
     return processed
   }
 
@@ -151,31 +147,31 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     if (!template) {
       return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Silakan pilih template atau tulis pesan custom]`
     }
-    
+
     if (selectedTemplateId === 'custom') {
       return customMessage || `Halo ${order.customer_name}!\n\nTerkait pesanan ${order.order_number}...\n\n[Tulis pesan Anda di sini]`
     }
-    
+
     return processTemplate(template.template_content, order)
   }
 
   const formatPhoneNumber = (phone: string) => {
     // Remove all non-digit characters
     let cleaned = phone.replace(/\D/g, '')
-    
+
     // If starts with 08, replace with 628
     if (cleaned.startsWith('08')) {
-      cleaned = `62${  cleaned.substring(1)}`
+      cleaned = `62${cleaned.substring(1)}`
     }
     // If starts with 8, add 62
     else if (cleaned.startsWith('8')) {
-      cleaned = `62${  cleaned}`
+      cleaned = `62${cleaned}`
     }
     // If doesn't start with 62, add it
     else if (!cleaned.startsWith('62')) {
-      cleaned = `62${  cleaned}`
+      cleaned = `62${cleaned}`
     }
-    
+
     return cleaned
   }
 
@@ -183,7 +179,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
     const message = getCurrentMessage()
     const formattedPhone = formatPhoneNumber(phoneNumber)
     const encodedMessage = encodeURIComponent(message);
-    
+
     let url: string
     if (type === 'business') {
       // WhatsApp Business API - opens in web browser
@@ -192,13 +188,13 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
       // Regular WhatsApp - tries to open app first, falls back to web
       url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`
     }
-    
+
     // Open in new tab
     window.open(url, '_blank')
-    
+
     // Call callback if provided
     onSent?.(type, message, formattedPhone)
-    
+
     // Close dialog
     void setIsDialogOpen(false)
   }
@@ -328,16 +324,14 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <button
                           key={template.id}
                           onClick={() => setSelectedTemplateId(template.id)}
-                          className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
-                            selectedTemplateId === template.id
-                              ? 'border-blue-500 bg-blue-50 text-blue-900 '
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
-                          }`}
+                          className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === template.id
+                            ? 'border-blue-500 bg-blue-50 text-blue-900 '
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
+                            }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${
-                              selectedTemplateId === template.id ? 'bg-blue-100' : 'bg-gray-100'
-                            }`}>
+                            <div className={`p-2 rounded-full ${selectedTemplateId === template.id ? 'bg-blue-100' : 'bg-gray-100'
+                              }`}>
                               {getTemplateIcon(template.category)}
                             </div>
                             <div>
@@ -354,20 +348,18 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                           </div>
                         </button>
                       ))}
-                      
+
                       {/* Custom Template Option */}
                       <button
                         onClick={() => setSelectedTemplateId('custom')}
-                        className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${
-                          selectedTemplateId === 'custom'
-                            ? 'border-blue-500 bg-blue-50 text-blue-900 '
-                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
-                        }`}
+                        className={`p-4 text-left border-2 rounded-lg transition-all duration-200 ${selectedTemplateId === 'custom'
+                          ? 'border-blue-500 bg-blue-50 text-blue-900 '
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:'
+                          }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-full ${
-                            selectedTemplateId === 'custom' ? 'bg-blue-100' : 'bg-gray-100'
-                          }`}>
+                          <div className={`p-2 rounded-full ${selectedTemplateId === 'custom' ? 'bg-blue-100' : 'bg-gray-100'
+                            }`}>
                             <MessageCircle className="h-4 w-4" />
                           </div>
                           <div>
@@ -434,7 +426,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                     <TabsTrigger value="whatsapp" className="text-sm">WhatsApp Regular</TabsTrigger>
                     <TabsTrigger value="business" className="text-sm">WhatsApp Business</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="whatsapp" className="mt-4 space-y-4">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
@@ -446,7 +438,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                       </p>
                     </div>
                     <div className="flex gap-3">
-                      <Button 
+                      <Button
                         onClick={() => handleSendWhatsApp('whatsapp')}
                         disabled={!phoneNumber.trim()}
                         className="flex-1 h-11 text-sm"
@@ -455,8 +447,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Send className="h-4 w-4 mr-2" />
                         Kirim via WhatsApp
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={handleCopyMessage}
                         size="lg"
                         className="h-11 px-4"
@@ -465,7 +457,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                       </Button>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="business" className="mt-4 space-y-4">
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
@@ -477,7 +469,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                       </p>
                     </div>
                     <div className="flex gap-3">
-                      <Button 
+                      <Button
                         onClick={() => handleSendWhatsApp('business')}
                         disabled={!phoneNumber.trim()}
                         className="flex-1 bg-green-600 hover:bg-green-700 h-11 text-sm"
@@ -486,8 +478,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Send className="h-4 w-4 mr-2" />
                         Kirim via WA Business
                       </Button>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={handleCopyMessage}
                         size="lg"
                         className="h-11 px-4"

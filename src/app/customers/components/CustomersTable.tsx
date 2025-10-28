@@ -29,8 +29,10 @@ import {
   Trash2,
   Users
 } from 'lucide-react'
-import type { CustomersTable } from '@/types/domain/customers'
+import type { Database } from '@/types/supabase-generated'
 import { useMemo, useState } from 'react'
+
+type CustomersTable = Database['public']['Tables']['customers']
 
 interface CustomersTableProps {
   customers: Array<CustomersTable['Row']>

@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
-
+import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 
 type OrdersTable = Database['public']['Tables']['orders']
@@ -45,20 +45,10 @@ export async function GET(request: NextRequest) {
     const { page, limit, search, sort_by, sort_order } = queryValidation.data
     const status = searchParams.get('status') // Status filter is separate from pagination
 
+    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let query = supabase
       .from('orders')
-      .select(`
-        *,
-        order_items (
-          id,
-          recipe_id,
-          product_name,
-          quantity,
-          unit_price,
-          total_price,
-          special_requests
-        )
-      `)
+      .select(ORDER_FIELDS.DETAIL) // Specific fields for better performance
       .eq('user_id', user.id)
 
     // Add search filter
@@ -153,7 +143,7 @@ export async function POST(request: NextRequest) {
           date: validatedData.delivery_date || validatedData.order_date || new Date().toISOString().split('T')[0],
           reference: `Order #${validatedData.order_no}${validatedData.customer_name ? ` - ${  validatedData.customer_name}` : ''}`,
           description: `Income from order ${validatedData.order_no}`
-        })
+        } as any)
         .select()
         .single()
 
@@ -165,7 +155,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      incomeRecordId = (incomeRecord).id
+      incomeRecordId = (incomeRecord as any).id
     }
 
     // Create order with financial_record_id if income was created
@@ -188,8 +178,8 @@ export async function POST(request: NextRequest) {
         notes: validatedData.notes,
         special_instructions: validatedData.special_instructions,
         financial_record_id: incomeRecordId
-      })
-      .select('*')
+      } as any)
+      .select('id, order_no, customer_name, status, total_amount, created_at')
       .single()
 
     if (orderError) {
@@ -208,11 +198,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const createdOrder = orderData as any
+
     // Update income record with order reference
     if (incomeRecordId) {
       await supabase
         .from('financial_records')
-        .update({ reference: `Order ${orderData.id} - ${validatedData.customer_name || 'Customer'}` })
+        .update({ reference: `Order ${createdOrder.id} - ${validatedData.customer_name || 'Customer'}` } as any)
         .eq('id', incomeRecordId)
         .eq('user_id', user.id)
     }
@@ -220,7 +212,7 @@ export async function POST(request: NextRequest) {
     // If order items provided, create them
     if (validatedData.items && validatedData.items.length > 0) {
       const orderItems = validatedData.items.map((item) => ({
-        order_id: (orderData).id,
+        order_id: createdOrder.id,
         recipe_id: (item as any).recipe_id,
         product_name: item.product_name,
         quantity: item.quantity,
@@ -231,7 +223,7 @@ export async function POST(request: NextRequest) {
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems)
+        .insert(orderItems as any)
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Error creating order items:')
@@ -239,7 +231,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('orders')
           .delete()
-          .eq('id', orderData.id)
+          .eq('id', createdOrder.id)
           .eq('user_id', user.id)
 
         return NextResponse.json(
@@ -251,7 +243,7 @@ export async function POST(request: NextRequest) {
 
     // Return order data with income tracking info
     return NextResponse.json({
-      ...orderData,
+      ...createdOrder,
       income_recorded: !!incomeRecordId
     }, { status: 201 })
   } catch (err: unknown) {

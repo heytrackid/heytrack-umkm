@@ -1,10 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
-
+import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { HppAlertAgent } from '@/agents/automations/HppAlertAgent'
+
+type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
 
 // GET /api/hpp/alerts - Get HPP alerts with pagination and filtering
 export async function GET(_request: NextRequest) {

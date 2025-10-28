@@ -1,6 +1,7 @@
 // Chat Session Service - Manages chat session persistence
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server'
+import type { Database } from '@/types/supabase-generated';
 import type {
   ChatSession,
   ChatMessage,

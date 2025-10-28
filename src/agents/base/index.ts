@@ -1,5 +1,7 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ZodType } from 'zod'
 
 /**
@@ -19,7 +21,7 @@ export interface AgentContext {
       data?: Record<string, unknown>
     }>
   }
-  supabase: typeof supabase
+  supabase: SupabaseClient<Database>
 }
 
 /**
@@ -102,7 +104,7 @@ export function createAgentContext(
       startTime: new Date(),
       events: []
     },
-    supabase
+    supabase: createClient()
   }
 }
 

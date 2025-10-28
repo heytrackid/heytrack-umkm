@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 
 // Re-export standard client
 export const createTypedClient = createClient

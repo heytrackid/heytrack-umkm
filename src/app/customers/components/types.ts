@@ -1,25 +1,13 @@
 // Customers Page Types
 // Type definitions for customer management
 
-export interface Customer {
-  id: string
-  name: string
-  email: string | null
-  phone: string | null
-  address: string | null
-  customer_type: string | null
-  is_active: boolean | null
-  total_orders: number | null
-  total_spent: number | null
-  last_order_date: string | null
-  loyalty_points: number | null
-  discount_percentage: number | null
-  favorite_items: unknown | null
-  notes: string | null
-  created_at: string | null
-  updated_at: string | null
-  created_by: string | null
-  updated_by: string | null
+// Use generated types from Supabase
+import type { Database } from '@/types/supabase-generated'
+
+export type Customer = Database['public']['Tables']['customers']['Row']
+
+// Extended type for UI state
+export interface CustomerWithStatus extends Customer {
   status?: string // Additional field for UI state
 }
 

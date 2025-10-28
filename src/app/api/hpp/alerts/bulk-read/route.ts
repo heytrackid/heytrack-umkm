@@ -2,6 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
+import type { Database } from '@/types/supabase-generated'
+
+type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
 
 // POST /api/hpp/alerts/bulk-read - Mark all alerts as read
 export async function POST(_request: NextRequest) {

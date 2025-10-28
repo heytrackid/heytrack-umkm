@@ -14,7 +14,7 @@ import {
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
 import { z } from 'zod'
-
+import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 
 // Extended schema for ingredients query
@@ -47,9 +47,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query - using ingredients table
+    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let supabaseQuery = supabase
       .from('ingredients')
-      .select('*', { count: 'exact' })
+      .select(INGREDIENT_FIELDS.LIST, { count: 'exact' })
       .eq('user_id', (user as any).id)
       .range(offset, offset + limit - 1)
 
@@ -109,8 +110,8 @@ export async function POST(request: NextRequest) {
       .insert({
         ...bodyValidation,
         user_id: user.id
-      })
-      .select('*')
+      } as any)
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, created_at, updated_at')
       .single()
 
     if (error) {

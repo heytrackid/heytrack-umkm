@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 import type { RecipeOption } from './OrderRecipeService'
 
 /**
@@ -14,6 +15,7 @@ export class RecipeRecommendationService {
     limit = 5
   ): Promise<RecipeOption[]> {
     try {
+      const supabase = createClient()
       let query = supabase
         .from('orders')
         .select(`

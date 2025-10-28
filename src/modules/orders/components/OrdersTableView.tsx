@@ -7,8 +7,10 @@ import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
 import { uiLogger } from '@/lib/logger'
-import type { Order } from '@/types/domain/orders'
-import type { OrderStatus } from '@/types/supabase-generated'
+import type { Database } from '@/types/supabase-generated'
+
+type Order = Database['public']['Tables']['orders']['Row']
+type OrderStatus = Database['public']['Enums']['order_status']
 
 export const OrdersTableView = () => {
   const [orders, setOrders] = useState<Order[]>([])

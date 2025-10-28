@@ -17,9 +17,12 @@ import {
   type FinancialRecordFormData
 } from '@/lib/validations'
 import { FormField } from './shared/FormField'
+import type { Database } from '@/types/supabase-generated'
+
+type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
 
 interface FinancialRecordFormProps {
-  initialData?: Partial<FinancialRecordFormData>
+  initialData?: Partial<FinancialRecordFormData> & Partial<FinancialRecord>
   onSubmit: (data: FinancialRecordFormData) => Promise<void>
   isLoading?: boolean
 }

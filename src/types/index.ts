@@ -29,15 +29,8 @@ export type {
 // ============================================================================
 // DOMAIN TYPES (Business Logic)
 // ============================================================================
-export * from './domain/recipes'
-export * from './domain/orders'
-export * from './domain/inventory'
-export * from './domain/customers'
-export * from './domain/suppliers'
-export * from './domain/finance'
-export * from './domain/operational-costs'
-export * from './domain/ingredient-purchases'
-export * from './domain/inventory-reorder'
+// Domain types removed - use Database types directly from supabase-generated
+// Example: type Recipe = Database['public']['Tables']['recipes']['Row']
 
 // ============================================================================
 // FEATURE TYPES (Application Features)

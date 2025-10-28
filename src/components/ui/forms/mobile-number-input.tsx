@@ -3,7 +3,7 @@
  * Optimized number input with +/- buttons for mobile
  */
 
-import { React, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Input } from '../input'

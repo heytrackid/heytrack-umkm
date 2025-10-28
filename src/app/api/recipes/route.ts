@@ -1,9 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
-
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 // GET /api/recipes - Get all recipes with ingredient relationships
 export async function GET(request: NextRequest) {
   try {
@@ -47,23 +47,11 @@ export async function GET(request: NextRequest) {
     const cacheKey = `${cacheKeys.recipes.all}:${user.id}:${page}:${limit}:${search || ''}:${sort_by || ''}:${sort_order || ''}:${category || ''}:${status || ''}`
 
     // Wrap database query with caching
+    // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     const recipes = await withCache(async () => {
       let query = supabase
         .from('recipes')
-        .select(`
-          *,
-          recipe_ingredients (
-            id,
-            quantity,
-            unit,
-            ingredient:ingredients (
-              id,
-              name,
-              unit,
-              price_per_unit
-            )
-          )
-        `)
+        .select(RECIPE_FIELDS.DETAIL) // Specific fields for better performance
         .eq('created_by', user.id)
 
       // Add search filter
@@ -154,8 +142,8 @@ export async function POST(request: NextRequest) {
         ...recipeData,
         created_by: user.id,
         name: recipeData.name || recipeData.nama
-      }])
-      .select('*')
+      }] as any)
+      .select('id, name, created_at')
       .single()
 
     if (recipeError) {
@@ -167,9 +155,10 @@ export async function POST(request: NextRequest) {
     }
 
     // If ingredients are provided, add them to recipe_ingredients
+    const createdRecipe = recipe as any
     if (recipe_ingredients && recipe_ingredients.length > 0) {
       const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
-        recipe_id: recipe.id,
+        recipe_id: createdRecipe.id,
         ingredient_id: ingredient.ingredient_id || ingredient.bahan_id,
         quantity: ingredient.quantity || ingredient.qty_per_batch,
         unit: ingredient.unit || 'g'
@@ -177,7 +166,7 @@ export async function POST(request: NextRequest) {
 
       const { error: ingredientsError } = await supabase
         .from('recipe_ingredients')
-        .insert(recipeIngredientsToInsert)
+        .insert(recipeIngredientsToInsert as any)
 
       if (ingredientsError) {
         apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')
@@ -185,7 +174,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('recipes')
           .delete()
-          .eq('id', recipe.id)
+          .eq('id', createdRecipe.id)
           .eq('created_by', user.id)
         return NextResponse.json(
           { error: 'Failed to add recipe ingredients' },
@@ -195,23 +184,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch the complete recipe with ingredients for response
+    // ✅ OPTIMIZED: Use specific fields
     const { data: completeRecipe, error: fetchError } = await supabase
       .from('recipes')
-      .select(`
-        *,
-        recipe_ingredients (
-          id,
-          quantity,
-          unit,
-          ingredient:ingredients (
-            id,
-            name,
-            unit,
-            price_per_unit
-          )
-        )
-      `)
-      .eq('id', recipe.id)
+      .select(RECIPE_FIELDS.DETAIL)
+      .eq('id', createdRecipe.id)
       .eq('created_by', user.id)
       .single()
 

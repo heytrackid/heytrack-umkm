@@ -11,11 +11,14 @@ import { LabelWithTooltip, UMKM_TOOLTIPS } from '@/components/ui/tooltip-helper'
 import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 import type { SimpleIngredientFormData } from '@/lib/validations/form-validations'
+import type { Database } from '@/types/supabase-generated'
+
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 interface EnhancedIngredientFormProps {
     form: UseFormReturn<SimpleIngredientFormData>
     mode: 'create' | 'edit'
-    initialData?: SimpleIngredientFormData
+    initialData?: SimpleIngredientFormData & Partial<Ingredient>
 }
 
 export const EnhancedIngredientForm = ({

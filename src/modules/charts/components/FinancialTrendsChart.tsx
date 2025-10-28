@@ -8,34 +8,33 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { formatCurrency } from '@/lib/currency'
-import { Skeleton } from '@/components/ui/skeleton'
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  () => import('recharts').then(mod => mod.LineChart),
   {
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
   }
 )
 const Line = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  () => import('recharts').then(mod => mod.Line),
   { ssr: false }
 )
 const XAxis = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  () => import('recharts').then(mod => mod.XAxis),
   { ssr: false }
 )
 const YAxis = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  () => import('recharts').then(mod => mod.YAxis),
   { ssr: false }
 )
 const CartesianGrid = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  () => import('recharts').then(mod => mod.CartesianGrid),
   { ssr: false }
 )
 const Legend = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Legend),
+  () => import('recharts').then(mod => mod.Legend),
   { ssr: false }
 )
 
@@ -190,26 +189,7 @@ export default function FinancialTrendsChart(_props?: Record<string, unknown>) {
           strokeDasharray="5 5"
           dot={false}
         />
-        <Legend
-          content={({ payload }) => (
-            <div className="flex flex-wrap justify-center gap-6 pt-6">
-              {payload?.map((entry, index: number) => (
-                <div key={`legend-${index}`} className="flex items-center gap-2">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: entry.color }}
-                  />
-                  <span className="text-sm font-medium text-foreground">
-                    {entry.value === 'revenue' ? 'Pendapatan' :
-                      entry.value === 'expenses' ? 'Pengeluaran' :
-                        entry.value === 'profit' ? 'Keuntungan' :
-                          entry.value === 'hpp' ? 'HPP' : entry.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        />
+        <Legend />
       </LineChart>
     </ChartContainer>
   )

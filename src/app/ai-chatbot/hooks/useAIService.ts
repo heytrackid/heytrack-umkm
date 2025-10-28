@@ -1,6 +1,7 @@
 import { apiLogger } from '@/lib/logger'
 import { processChatbotQuery, generateAIInsights } from '@/lib/ai'
 import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 const supabase = createClient()
 
 export function useAIService() {

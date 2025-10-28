@@ -2,6 +2,9 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { PricingAssistantService } from '@/modules/orders/services/PricingAssistantService'
+import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
 
 // POST /api/hpp/pricing-assistant - Generate pricing recommendation
 export async function POST(request: NextRequest) {

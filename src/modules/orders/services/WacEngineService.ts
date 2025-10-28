@@ -1,5 +1,5 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -23,6 +23,7 @@ interface WacUpdateResult {
 
 export class WacEngineService {
   private logger = dbLogger
+  private supabase = createClient()
 
   /**
    * Calculate current WAC for an ingredient based on all purchase transactions
@@ -32,7 +33,7 @@ export class WacEngineService {
       this.logger.info(`Calculating WAC for ingredient ${ingredientId}`)
 
       // Get all purchase transactions for this ingredient, ordered by date
-      const { data: transactions, error } = await supabase
+      const { data: transactions, error } = await this.supabase
         .from('stock_transactions')
         .select('*')
         .eq('ingredient_id', ingredientId)
@@ -152,7 +153,7 @@ export class WacEngineService {
   ): Promise<void> {
     try {
       // Get current ingredient price
-      const { data: ingredient, error } = await supabase
+      const { data: ingredient, error } = await this.supabase
         .from('ingredients')
         .select('price_per_unit')
         .eq('id', ingredientId)
@@ -170,7 +171,7 @@ export class WacEngineService {
       const percentageDifference = currentPrice > 0 ? (priceDifference / currentPrice) * 100 : 100
 
       if (percentageDifference >= 5) {
-        const { error: updateError } = await supabase
+        const { error: updateError } = await this.supabase
           .from('ingredients')
           .update({
             price_per_unit: newWac,
@@ -198,7 +199,7 @@ export class WacEngineService {
       this.logger.info('Starting WAC recalculation for all ingredients')
 
       // Get all ingredients
-      const { data: ingredients, error } = await supabase
+      const { data: ingredients, error } = await this.supabase
         .from('ingredients')
         .select('id')
         .eq('is_active', true)
@@ -243,7 +244,7 @@ export class WacEngineService {
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - days)
 
-      const { data: transactions, error } = await supabase
+      const { data: transactions, error } = await this.supabase
         .from('stock_transactions')
         .select('id, transaction_date, unit_price, quantity, total_value')
         .eq('ingredient_id', ingredientId)

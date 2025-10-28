@@ -24,17 +24,17 @@ import {
 import { Input } from './input'
 
 // Types for mobile table
-export interface MobileTableColumn<T = any> {
+export interface MobileTableColumn<T = Record<string, unknown>> {
   key: string
   label: string
   accessor: keyof T | ((item: T) => ReactNode)
   sortable?: boolean
   width?: string
   className?: string
-  render?: (value: any, item: T) => ReactNode
+  render?: (value: unknown, item: T) => ReactNode
 }
 
-export interface MobileTableAction<T = any> {
+export interface MobileTableAction<T = Record<string, unknown>> {
   label: string
   icon?: ReactNode
   onClick: (item: T) => void
@@ -42,7 +42,7 @@ export interface MobileTableAction<T = any> {
   show?: (item: T) => boolean
 }
 
-interface MobileTableProps<T = any> {
+interface MobileTableProps<T = Record<string, unknown>> {
   data: T[]
   columns: Array<MobileTableColumn<T>>
   actions?: Array<MobileTableAction<T>>

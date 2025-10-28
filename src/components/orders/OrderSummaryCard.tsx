@@ -1,5 +1,7 @@
+// ✅ OPTIMIZED: Memoized to prevent unnecessary re-renders in lists
 'use client'
 
+import { memo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -22,11 +24,12 @@ interface OrderSummaryCardProps {
     showActions?: boolean
 }
 
-export default function OrderSummaryCard({
+// ✅ OPTIMIZED: Memoized component
+const OrderSummaryCard = memo(({
     order,
     onClick,
     showActions = false
-}: OrderSummaryCardProps) {
+}: OrderSummaryCardProps) => {
     const { formatCurrency } = useCurrency()
     const statusInfo = getStatusInfo(order.status)
     const paymentInfo = getPaymentInfo(order.payment_status)
@@ -121,4 +124,18 @@ export default function OrderSummaryCard({
             </CardContent>
         </Card>
     )
-}
+}, (prevProps, nextProps) => {
+    // Custom comparison - only re-render if order data actually changed
+    return (
+        prevProps.order.id === nextProps.order.id &&
+        prevProps.order.status === nextProps.order.status &&
+        prevProps.order.payment_status === nextProps.order.payment_status &&
+        prevProps.order.total_amount === nextProps.order.total_amount &&
+        prevProps.order.updated_at === nextProps.order.updated_at &&
+        prevProps.showActions === nextProps.showActions
+    )
+})
+
+OrderSummaryCard.displayName = 'OrderSummaryCard'
+
+export default OrderSummaryCard

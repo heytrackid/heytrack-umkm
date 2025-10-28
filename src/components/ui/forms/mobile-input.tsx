@@ -3,7 +3,7 @@
  * Optimized input field for mobile devices with password toggle
  */
 
-import { React, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Input } from '../input'

@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
-import type { TablesInsert } from '@/types/supabase-generated'
+import { typedInsert, type TablesInsert } from '@/lib/supabase/typed-insert'
 import { apiLogger } from '@/lib/logger'
 /**
  * GET /api/ingredient-purchases
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         // Get ingredient info
     const { data: ingredient, error: ingredientError } = await supabase
             .from('ingredients')
-            .select('*')
+            .select('id, name, unit, current_stock, price_per_unit, user_id')
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', user.id)
             .single()
@@ -134,6 +134,9 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Type assertion for ingredient data
+        const ingredientData = ingredient as any
+
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
         const financialRecord: TablesInsert<'financial_records'> = {
@@ -141,7 +144,7 @@ export async function POST(request: NextRequest) {
             type: 'EXPENSE',
             category: 'Pembelian Bahan Baku',
             amount: totalHarga,
-            description: `Pembelian: ${ingredient.name} (${qtyBeli} ${ingredient.unit}) dari ${validatedData.supplier || 'Supplier'}`,
+            description: `Pembelian: ${ingredientData.name} (${qtyBeli} ${ingredientData.unit}) dari ${validatedData.supplier || 'Supplier'}`,
             date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
         }
         
@@ -155,7 +158,7 @@ export async function POST(request: NextRequest) {
             apiLogger.error({ error: transactionError }, 'Error creating financial transaction:')
             // Continue without financial transaction
         } else {
-            financialTransactionId = transaction?.id || null
+            financialTransactionId = (transaction as any)?.id || null
         }
 
         // 2. Create purchase record
@@ -203,7 +206,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Update ingredient stock
-        const newStock = (ingredient.current_stock || 0) + qtyBeli
+        const newStock = (ingredientData.current_stock || 0) + qtyBeli
 
         const { error: stockError } = await supabase
             .from('ingredients')
@@ -217,16 +220,18 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Create stock ledger entry
-        const stockLog: TablesInsert<'inventory_stock_logs'> = {
+        const purchaseData = purchase as any
+        const stockLog = typedInsert<'inventory_stock_logs'>({
             ingredient_id: validatedData.ingredient_id,
-            quantity_before: ingredient.current_stock || 0,
+            quantity_before: ingredientData.current_stock || 0,
             quantity_after: newStock,
             quantity_changed: qtyBeli,
             change_type: 'increase',
-            reference_id: purchase?.id || null,
+            reference_id: purchaseData?.id || null,
             reference_type: 'ingredient_purchase'
-        }
+        })
         
+        // Workaround: Supabase SSR type inference issue
         await supabase
             .from('inventory_stock_logs')
             .insert(stockLog as any)
@@ -272,7 +277,7 @@ export async function DELETE(request: NextRequest) {
         // Get purchase details
         const { data: purchase, error: fetchError } = await supabase
             .from('ingredient_purchases')
-            .select('*')
+            .select('id, ingredient_id, quantity, user_id')
             .eq('id', id)
             .eq('user_id', user.id)
             .single()
@@ -288,32 +293,36 @@ export async function DELETE(request: NextRequest) {
         const { data: ingredient } = await supabase
             .from('ingredients')
             .select('current_stock')
-            .eq('id', purchase.ingredient_id)
+            .eq('id', (purchase as any).ingredient_id)
             .eq('user_id', user.id)
             .single()
 
-        if (ingredient) {
-            const newStock = Math.max(0, (ingredient.current_stock || 0) - purchase.quantity)
+        const ingredientDeleteData = ingredient as any
+        const purchaseData = purchase as any
+
+        if (ingredientDeleteData) {
+            const newStock = Math.max(0, (ingredientDeleteData.current_stock || 0) - purchaseData.quantity)
 
             await supabase
                 .from('ingredients')
                 .update({ current_stock: newStock } as any)
-                .eq('id', purchase.ingredient_id)
+                .eq('id', purchaseData.ingredient_id)
                 .eq('user_id', user.id)
         }
 
         // 2. Create stock ledger entry for reversal
-        const reversalLog: TablesInsert<'inventory_stock_logs'> = {
-            ingredient_id: purchase.ingredient_id,
-            quantity_before: ingredient?.current_stock || 0,
-            quantity_after: ingredient ? Math.max(0, (ingredient.current_stock || 0) - purchase.quantity) : 0,
-            quantity_changed: -purchase.quantity,
+        const reversalLog = typedInsert<'inventory_stock_logs'>({
+            ingredient_id: purchaseData.ingredient_id,
+            quantity_before: ingredientDeleteData?.current_stock || 0,
+            quantity_after: ingredientDeleteData ? Math.max(0, (ingredientDeleteData.current_stock || 0) - purchaseData.quantity) : 0,
+            quantity_changed: -purchaseData.quantity,
             change_type: 'adjustment',
             reason: 'Purchase deletion',
-            reference_id: purchase.id,
+            reference_id: purchaseData.id,
             reference_type: 'ingredient_purchase'
-        }
+        })
         
+        // Workaround: Supabase SSR type inference issue
         await supabase
             .from('inventory_stock_logs')
             .insert(reversalLog as any)

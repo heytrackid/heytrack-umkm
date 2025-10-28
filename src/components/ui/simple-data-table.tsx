@@ -36,7 +36,7 @@ import { TablePaginationControls } from '@/components/ui/table-pagination-contro
 interface SimpleColumn<T> {
   key: keyof T | string
   header: string
-  render?: (value: any, item: T) => ReactNode
+  render?: (value: unknown, item: T) => ReactNode
   sortable?: boolean
   filterable?: boolean
   filterType?: 'text' | 'select'

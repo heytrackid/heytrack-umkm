@@ -1,20 +1,13 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/supabase-generated'
 import { ORDER_CONFIG } from '@/lib/constants'
 import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
-import { extractFirst, ensureArray, safeNumber } from '@/lib/type-guards'
 import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
-import type { Recipe, RecipeIngredient } from '@/types/domain/recipes'
-import type { Ingredient } from '@/types/domain/inventory'
 
-/**
- * Recipe with ingredients for pricing calculation
- */
-interface RecipeWithIngredients extends Recipe {
-  recipe_ingredients?: Array<RecipeIngredient & {
-    ingredient?: Ingredient
-  }>
-}
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
+type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 /**
  * Service for handling order pricing calculations
@@ -43,6 +36,7 @@ export class OrderPricingService {
       } = options
 
       // Get recipe details for pricing
+      const supabase = createClient()
       const recipeIds = items.map(item => item.recipe_id)
       const { data: recipes, error } = await supabase
         .from('recipes')

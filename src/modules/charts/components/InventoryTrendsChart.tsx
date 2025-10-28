@@ -11,34 +11,34 @@ import type { ChartConfig } from '@/types/charts'
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
+  () => import('recharts').then(mod => mod.LineChart),
   {
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
   }
 )
 const Line = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
+  () => import('recharts').then(mod => mod.Line),
   { ssr: false }
 )
 const XAxis = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.XAxis),
+  () => import('recharts').then(mod => mod.XAxis),
   { ssr: false }
 )
 const YAxis = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.YAxis),
+  () => import('recharts').then(mod => mod.YAxis),
   { ssr: false }
 )
 const CartesianGrid = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.CartesianGrid),
+  () => import('recharts').then(mod => mod.CartesianGrid),
   { ssr: false }
 )
 const Legend = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Legend),
+  () => import('recharts').then(mod => mod.Legend),
   { ssr: false }
 )
 const ResponsiveContainer = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.ResponsiveContainer),
+  () => import('recharts').then(mod => mod.ResponsiveContainer),
   {
     ssr: false,
     loading: () => <div className="w-full h-full bg-muted animate-pulse rounded" />
@@ -210,26 +210,7 @@ export default function InventoryTrendsChart({
               r: 3,
             }}
           />
-          <Legend
-            content={({ payload }) => (
-              <div className="flex flex-wrap justify-center gap-6 pt-6">
-                {payload?.map((entry, index: number) => (
-                  <div key={`legend-${index}`} className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: entry.color }}
-                    />
-                    <span className="text-sm font-medium text-foreground">
-                      {entry.value === 'stock' ? 'Stok Tersedia' :
-                        entry.value === 'purchases' ? 'Pembelian' :
-                          entry.value === 'usage' ? 'Pemakaian' :
-                            entry.value === 'waste' ? 'Waste' : entry.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          />
+          <Legend />
         </LineChart>
       </ResponsiveContainer>
     </ChartContainer>

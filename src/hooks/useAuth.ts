@@ -4,8 +4,10 @@ import { createClient } from '@/utils/supabase/client'
 import type { Session, User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-
+import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
+
+type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 interface AuthState {
   user: User | null
   session: Session | null

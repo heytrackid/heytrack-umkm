@@ -21,12 +21,13 @@ import {
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
 import { apiLogger } from '@/lib/logger'
+// ✅ OPTIMIZED: Lazy load charts to reduce initial bundle
 import {
-    LineChart,
+    LazyLineChart,
+    LazyBarChart,
+    LazyPieChart,
     Line,
-    BarChart,
     Bar,
-    PieChart,
     Pie,
     Cell,
     XAxis,
@@ -35,7 +36,7 @@ import {
     Tooltip,
     Legend,
     ResponsiveContainer
-} from 'recharts'
+} from '@/components/charts/LazyCharts'
 
 interface ProfitReportProps {
     dateRange: {
@@ -371,7 +372,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={profitData.profit_by_period}>
+                                <LazyLineChart data={profitData.profit_by_period}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="period" />
                                     <YAxis />
@@ -380,7 +381,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                                     <Line type="monotone" dataKey="revenue" stroke="#3b82f6" name="Revenue" />
                                     <Line type="monotone" dataKey="cogs" stroke="#f59e0b" name="COGS" />
                                     <Line type="monotone" dataKey="gross_profit" stroke="#10b981" name="Gross Profit" strokeWidth={2} />
-                                </LineChart>
+                                </LazyLineChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
@@ -450,7 +451,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                         <CardContent>
                             <div className="grid gap-6 md:grid-cols-2">
                                 <ResponsiveContainer width="100%" height={300}>
-                                    <PieChart>
+                                    <LazyPieChart>
                                         <Pie
                                             data={profitData.operating_expenses_breakdown}
                                             dataKey="total"
@@ -465,7 +466,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                                             ))}
                                         </Pie>
                                         <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                                    </PieChart>
+                                    </LazyPieChart>
                                 </ResponsiveContainer>
 
                                 <div className="space-y-3">
@@ -499,7 +500,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={profitData.profit_by_period}>
+                                <LazyBarChart data={profitData.profit_by_period}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="period" />
                                     <YAxis />
@@ -508,7 +509,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                                     <Bar dataKey="revenue" fill="#3b82f6" name="Revenue" />
                                     <Bar dataKey="cogs" fill="#f59e0b" name="COGS" />
                                     <Bar dataKey="gross_profit" fill="#10b981" name="Gross Profit" />
-                                </BarChart>
+                                </LazyBarChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>

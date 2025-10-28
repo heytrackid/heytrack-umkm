@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server'
+import type { Database } from '@/types/supabase-generated';
 import { getErrorMessage } from '@/lib/type-guards';
 
 export async function GET(
@@ -12,7 +13,7 @@ export async function GET(
     
     const { data: supplier, error } = await supabase
       .from('suppliers')
-      .select('*')
+      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .eq('id', id)
       .single();
 
@@ -42,7 +43,7 @@ export async function PUT(
       .from('suppliers')
       .update(updatePayload)
       .eq('id', id)
-      .select('*')
+      .select('id, name, contact_person, email, phone, address, notes, is_active, updated_at')
       .single();
 
     if (error) {throw error;}

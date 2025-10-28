@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
-import { HppCalculatorService } from '@/modules/hpp'
+import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
+import { HppCalculatorService } from '@/modules/hpp'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 
@@ -36,6 +36,7 @@ interface PricingStrategy {
 export class PricingAssistantService {
   private logger = dbLogger
   private hppCalculator = new HppCalculatorService()
+  private supabase = createClient()
 
   /**
    * Generate pricing recommendation for a recipe
@@ -45,7 +46,7 @@ export class PricingAssistantService {
       this.logger.info(`Generating pricing recommendation for recipe ${recipeId}`)
 
       // Get recipe details
-      const { data: recipe, error } = await supabase
+      const { data: recipe, error } = await this.supabase
         .from('recipes')
         .select('*')
         .eq('id', recipeId)

@@ -5,6 +5,10 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { ChatSessionService } from '@/lib/services/ChatSessionService';
 import { logger } from '@/lib/logger';
+import type { Database } from '@/types/supabase-generated';
+
+type ChatSession = Database['public']['Tables']['chat_sessions']['Row'];
+type ChatMessage = Database['public']['Tables']['chat_messages']['Row'];
 
 /**
  * GET /api/ai/sessions/[id] - Get session with messages

@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Get all transactions (income and expenses) within date range
     const { data: transactions, error: transError } = await supabase
       .from('financial_records')
-      .select('*')
+      .select('id, date, description, category, amount, reference')
       .gte('date', startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0])
       .lte('date', endDateParam ? endDateParam : new Date().toISOString().split('T')[0])
       .order('date', { ascending: true })
@@ -315,7 +315,7 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
 
   const { data: prevTransactions } = await supabase
     .from('financial_records')
-    .select('*')
+    .select('category, amount')
     .gte('date', prevStart.toISOString().split('T')[0])
     .lte('date', prevEnd.toISOString().split('T')[0])
 

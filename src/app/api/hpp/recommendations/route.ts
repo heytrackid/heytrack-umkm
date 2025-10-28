@@ -1,9 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
-
+import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
 // GET /api/hpp/recommendations - Get HPP recommendations
 export async function GET(request: NextRequest) {

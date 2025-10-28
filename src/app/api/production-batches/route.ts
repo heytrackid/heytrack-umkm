@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getErrorMessage } from '@/lib/type-guards'
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server'
+import type { Database } from '@/types/supabase-generated';
 
 export async function GET() {
   try {

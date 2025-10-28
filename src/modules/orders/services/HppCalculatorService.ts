@@ -1,27 +1,13 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
+import type { HppCalculation } from '@/modules/hpp/types'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Production = Database['public']['Tables']['productions']['Row']
-
-// Temporary interface until supabase types are regenerated
-interface HppCalculation {
-  id: string
-  recipe_id: string
-  calculation_date: string
-  material_cost: number
-  labor_cost: number
-  overhead_cost: number
-  total_hpp: number
-  cost_per_unit: number
-  wac_adjustment: number
-  production_quantity: number
-  notes?: string
-  created_at: string
-}
 
 interface HppCalculationResult {
   recipeId: string;
@@ -52,19 +38,23 @@ export class HppCalculatorService {
     try {
       this.logger.info(`Calculating HPP for recipe ${recipeId}`);
 
+      const supabase = createClient()
+
       // Get recipe details
-      const { data: recipe, error: recipeError } = await supabase
+      const { data, error: recipeError } = await supabase
         .from('recipes')
         .select('*')
         .eq('id', recipeId)
         .single();
 
-      if (recipeError || !recipe) {
+      if (recipeError || !data) {
         throw new Error(`Recipe not found: ${recipeId}`);
       }
+      
+      const recipe = data as Recipe
 
       // Get recipe ingredients with ingredient details
-      const { data: recipeIngredients, error: ingredientsError } = await supabase
+      const { data: ingredientsData, error: ingredientsError } = await supabase
         .from('recipe_ingredients')
         .select(`
           *,
@@ -80,13 +70,20 @@ export class HppCalculatorService {
       if (ingredientsError) {
         throw new Error(`Failed to fetch recipe ingredients: ${ingredientsError.message}`);
       }
+      
+      type RecipeIngredientWithIngredient = RecipeIngredient & {
+        ingredients: Ingredient[]
+      }
+      const recipeIngredients = ingredientsData as RecipeIngredientWithIngredient[]
 
       // Calculate material costs
       const materialBreakdown: HppCalculationResult['materialBreakdown'] = [];
       let totalMaterialCost = 0;
 
       for (const ri of recipeIngredients || []) {
-        const ingredient = ri.ingredients as Ingredient;
+        // Supabase returns arrays for joined data
+        const ingredients = ri.ingredients as unknown as Ingredient[]
+        const ingredient = ingredients?.[0]
         if (!ingredient) {continue;}
 
         const quantity = Number(ri.quantity);
@@ -109,7 +106,7 @@ export class HppCalculatorService {
       const laborCost = await this.calculateLaborCost(recipeId);
 
       // Calculate overhead cost
-      const overheadCost = await this.calculateOverheadCost(recipeId);
+      const overheadCost = await this.calculateOverheadCost();
 
       // Apply WAC adjustment if applicable
       const wacAdjustment = await this.calculateWacAdjustment(recipeId, totalMaterialCost);
@@ -147,6 +144,8 @@ export class HppCalculatorService {
    */
   private async calculateLaborCost(recipeId: string): Promise<number> {
     try {
+      const supabase = createClient()
+      
       // Get recent productions for this recipe
       const { data: productions, error } = await supabase
         .from('productions')
@@ -163,7 +162,7 @@ export class HppCalculatorService {
 
       if (!productions || productions.length === 0) {
         // Fallback: estimate based on average labor cost per serving
-        return 5000; // IDR per serving
+        return HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING
       }
 
       // Calculate average labor cost per unit
@@ -181,10 +180,12 @@ export class HppCalculatorService {
   /**
    * Calculate overhead cost allocation
    */
-  private async calculateOverheadCost(recipeId: string): Promise<number> {
+  private async calculateOverheadCost(): Promise<number> {
     try {
+      const supabase = createClient()
+      
       // Get active operational costs
-      const { data: operationalCosts, error } = await supabase
+      const { data: operationalCosts, error} = await supabase
         .from('operational_costs')
         .select('*')
         .eq('is_active', true);
@@ -196,7 +197,7 @@ export class HppCalculatorService {
 
       if (!operationalCosts || operationalCosts.length === 0) {
         // Fallback: estimate overhead per serving
-        return 2000; // IDR per serving
+        return HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
       }
 
       // For now, allocate equally across all recipes
@@ -210,7 +211,7 @@ export class HppCalculatorService {
         .eq('is_active', true);
 
       if (countError || !recipeCount) {
-        return totalOverhead / 10; // Assume 10 recipes as fallback
+        return totalOverhead / HPP_CONFIG.FALLBACK_RECIPE_COUNT
       }
 
       return totalOverhead / recipeCount;
@@ -226,30 +227,36 @@ export class HppCalculatorService {
    */
   private async calculateWacAdjustment(recipeId: string, _currentMaterialCost: number): Promise<number> {
     try {
+      const supabase = createClient()
+      
       // Get recent stock transactions for ingredients used in this recipe
-      const { data: recipeIngredients } = await supabase
+      const { data: ingredientsData } = await supabase
         .from('recipe_ingredients')
         .select('ingredient_id')
         .eq('recipe_id', recipeId);
 
-      if (!recipeIngredients || recipeIngredients.length === 0) {
+      if (!ingredientsData || ingredientsData.length === 0) {
         return 0;
       }
-
+      
+      const recipeIngredients = ingredientsData as Pick<RecipeIngredient, 'ingredient_id'>[]
       const ingredientIds = recipeIngredients.map(ri => ri.ingredient_id);
 
       // Get recent purchases for these ingredients
-      const { data: transactions, error } = await supabase
+      const { data: transactionsData, error } = await supabase
         .from('stock_transactions')
-        .select('ingredient_id, quantity, unit_price, total_value')
+        .select('ingredient_id, quantity, unit_price, total_price')
         .in('ingredient_id', ingredientIds)
         .eq('type', 'PURCHASE')
-        .order('transaction_date', { ascending: false })
-        .limit(50);
+        .order('created_at', { ascending: false })
+        .limit(HPP_CONFIG.WAC_LOOKBACK_TRANSACTIONS)
 
-      if (error || !transactions) {
+      if (error || !transactionsData) {
         return 0;
       }
+      
+      type StockTransactionForWAC = Pick<Database['public']['Tables']['stock_transactions']['Row'], 'ingredient_id' | 'quantity' | 'unit_price' | 'total_price'>
+      const transactions = transactionsData as StockTransactionForWAC[]
 
       // Calculate WAC for each ingredient and adjust if current price differs
       let totalAdjustment = 0;
@@ -260,17 +267,19 @@ export class HppCalculatorService {
         if (ingredientTransactions.length === 0) {continue;}
 
         // Calculate weighted average cost
-        const totalQuantity = ingredientTransactions.reduce((sum: number, t: { quantity: number }) => sum + Number(t.quantity), 0);
-        const totalValue = ingredientTransactions.reduce((sum: number, t: { total_value: number }) => sum + Number(t.total_value), 0);
+        const totalQuantity = ingredientTransactions.reduce((sum: number, t) => sum + Number(t.quantity), 0);
+        const totalValue = ingredientTransactions.reduce((sum: number, t) => sum + Number(t.total_price ?? 0), 0);
         const wac = totalQuantity > 0 ? totalValue / totalQuantity : 0;
 
         // Get current price from ingredients table
-        const { data: ingredient } = await supabase
+        const { data: ingredientData } = await supabase
           .from('ingredients')
           .select('price_per_unit')
           .eq('id', ingredientId)
           .single();
 
+        const ingredient = ingredientData as Pick<Ingredient, 'price_per_unit'> | null
+        
         if (ingredient && wac > 0 && ingredientTransactions[0]) {
           const currentPrice = Number(ingredient.price_per_unit);
           const adjustment = (wac - currentPrice) * ingredientTransactions[0].quantity; // Adjust for the quantity used
@@ -291,7 +300,11 @@ export class HppCalculatorService {
    */
   private async saveHppCalculation(result: HppCalculationResult): Promise<void> {
     try {
-      const calculationData = {
+      const supabase = createClient()
+      
+      type HppCalculationInsert = Database['public']['Tables']['hpp_calculations']['Insert']
+      
+      const calculationData: HppCalculationInsert = {
         recipe_id: result.recipeId,
         calculation_date: new Date().toISOString().split('T')[0],
         material_cost: result.materialCost,
@@ -304,7 +317,7 @@ export class HppCalculatorService {
         notes: `Auto-calculated HPP for ${result.productionQuantity} servings`
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('hpp_calculations')
         .insert(calculationData);
 
@@ -325,6 +338,8 @@ export class HppCalculatorService {
    */
   async getLatestHpp(recipeId: string): Promise<HppCalculation | null> {
     try {
+      const supabase = createClient()
+      
       const { data, error } = await supabase
         .from('hpp_calculations')
         .select('*')
