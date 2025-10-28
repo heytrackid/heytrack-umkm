@@ -9,11 +9,13 @@ import AppLayout from '@/components/layout/app-layout'
 import { useSupabaseCRUD } from '@/hooks/supabase'
 import { IngredientFormSchema, type SimpleIngredientFormData } from '@/lib/validations/form-validations'
 import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcrumb'
-import { PageHeader } from '@/components/ui/page-patterns'
-import { CrudForm, FormActions } from '@/components/ui/crud-form'
 import { EnhancedIngredientForm } from '@/components/ingredients'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
+import { ArrowLeft, Package } from 'lucide-react'
 import type { Database } from '@/types/supabase-generated'
 
 type IngredientInsert = Database['public']['Tables']['ingredients']['Insert']
@@ -21,6 +23,7 @@ type IngredientInsert = Database['public']['Tables']['ingredients']['Insert']
 export default function NewIngredientPage() {
   const router = useRouter()
   const { create: createIngredient } = useSupabaseCRUD('ingredients')
+  const { toast } = useToast()
 
   const [loading, setLoading] = useState(false)
 
@@ -38,7 +41,7 @@ export default function NewIngredientPage() {
 
   const handleSubmit = async (data: SimpleIngredientFormData) => {
     try {
-      void setLoading(true)
+      setLoading(true)
 
       const supabase = createClient()
       const {
@@ -63,35 +66,80 @@ export default function NewIngredientPage() {
       }
 
       await createIngredient(payload)
+
+      toast({
+        title: 'Berhasil',
+        description: `Bahan baku "${data.name}" berhasil ditambahkan`,
+      })
+
       router.push('/ingredients')
     } catch (err: unknown) {
       apiLogger.error({ error: err }, 'Failed to create ingredient:')
+      toast({
+        title: 'Gagal',
+        description: 'Gagal menambahkan bahan baku. Silakan coba lagi.',
+        variant: 'destructive',
+      })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredientNew} />
 
-        <PageHeader
-          title="Tambah Bahan Baku Baru"
-          description="Tambahkan bahan baku baru ke dalam sistem"
-          backHref="/ingredients"
-        />
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <Package className="h-7 w-7 sm:h-8 sm:w-8" />
+              Tambah Bahan Baku
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Tambahkan bahan baku baru ke dalam sistem
+            </p>
+          </div>
+        </div>
 
+        {/* Form */}
         <div className="max-w-3xl">
-          <CrudForm onSubmit={form.handleSubmit(handleSubmit)}>
-            <EnhancedIngredientForm form={form} mode="create" />
+          <Card>
+            <CardContent className="p-6">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <EnhancedIngredientForm form={form} mode="create" />
 
-            <FormActions
-              onCancel={() => router.back()}
-              submitText="Simpan Bahan Baku"
-              loading={loading}
-            />
-          </CrudForm>
+                {/* Actions */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.back()}
+                    disabled={loading}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 sm:flex-none"
+                  >
+                    {loading ? 'Menyimpan...' : 'Simpan Bahan Baku'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>

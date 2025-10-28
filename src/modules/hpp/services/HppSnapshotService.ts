@@ -4,7 +4,8 @@
  */
 
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type { HppSnapshot } from '../types'
 
 export class HppSnapshotService {
@@ -16,6 +17,8 @@ export class HppSnapshotService {
   async createSnapshot(recipeId: string): Promise<HppSnapshot> {
     try {
       this.logger.info(`Creating HPP snapshot for recipe ${recipeId}`)
+
+      const supabase = createServiceRoleClient()
 
       // Get latest HPP calculation
       const { data: calculation, error: calcError } = await supabase
@@ -80,6 +83,8 @@ export class HppSnapshotService {
     try {
       this.logger.info('Creating daily HPP snapshots for all recipes')
 
+      const supabase = createServiceRoleClient()
+
       // Get all active recipes
       const { data: recipes, error } = await supabase
         .from('recipes')
@@ -121,6 +126,8 @@ export class HppSnapshotService {
     endDate?: string
   ): Promise<HppSnapshot[]> {
     try {
+      const supabase = createServiceRoleClient()
+      
       let query = supabase
         .from('hpp_snapshots')
         .select('*')
@@ -156,8 +163,10 @@ export class HppSnapshotService {
     try {
       this.logger.info('Archiving old HPP snapshots')
 
+      const supabase = createServiceRoleClient()
+
       const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - 90)
+      cutoffDate.setDate(cutoffDate.getDate() - HPP_CONFIG.SNAPSHOTS.RETENTION_DAYS)
       const cutoffDateStr = cutoffDate.toISOString().split('T')[0]
 
       const { data, error } = await supabase

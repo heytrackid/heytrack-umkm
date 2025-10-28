@@ -8,6 +8,7 @@ import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from
 import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import {
   AlertTriangle,
   Package,
@@ -42,7 +43,7 @@ export default function IngredientsPage() {
   // Calculate stats
   const totalIngredients = ingredients?.length || 0;
   const lowStockCount = ingredients?.filter(i =>
-    (i.current_stock || 0) <= (i.min_stock || 0)
+    (i.current_stock || 0) <= (i.min_stock || 0) && (i.current_stock || 0) > 0
   ).length || 0;
   const totalValue = ingredients?.reduce((sum, i) =>
     sum + ((i.current_stock || 0) * (i.price_per_unit || 0)), 0
@@ -53,16 +54,16 @@ export default function IngredientsPage() {
   if (isAuthLoading) {
     return (
       <AppLayout>
-        <div className="space-y-6">
+        <div className="space-y-6 p-6">
           <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold flex items-center gap-2">
-                <Package className="h-8 w-8" />
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                <Package className="h-7 w-7 sm:h-8 sm:w-8" />
                 Bahan Baku
               </h1>
-              <p className="text-muted-foreground">
-                Kelola stok dan harga bahan baku untuk produksi
+              <p className="text-sm text-muted-foreground mt-1">
+                Kelola stok dan harga bahan baku
               </p>
             </div>
           </div>
@@ -74,35 +75,36 @@ export default function IngredientsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Package className="h-8 w-8" />
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <Package className="h-7 w-7 sm:h-8 sm:w-8" />
               Bahan Baku
             </h1>
-            <p className="text-muted-foreground">
-              Kelola stok dan harga bahan baku untuk produksi
+            <p className="text-sm text-muted-foreground mt-1">
+              Kelola stok dan harga bahan baku
             </p>
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="outline"
               onClick={() => router.push('/ingredients/purchases')}
-              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="flex-1 sm:flex-none"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Pembelian
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => router.push('/ingredients/new')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+              className="flex-1 sm:flex-none"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Tambah Bahan Baku
-            </button>
+              Tambah
+            </Button>
           </div>
         </div>
 
@@ -117,16 +119,19 @@ export default function IngredientsPage() {
         )}
 
         {/* Alert for Low Stock */}
-        {!loading && lowStockCount > 0 && (
+        {!loading && (lowStockCount > 0 || outOfStockCount > 0) && (
           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-orange-900 text-sm mb-1">
-                  Peringatan Stok Rendah
+                  Peringatan Stok
                 </h3>
                 <p className="text-sm text-orange-700">
-                  {lowStockCount} bahan baku mencapai atau di bawah stok minimum. Segera lakukan pemesanan untuk menghindari kehabisan stok.
+                  {outOfStockCount > 0 && `${outOfStockCount} bahan habis`}
+                  {outOfStockCount > 0 && lowStockCount > 0 && ', '}
+                  {lowStockCount > 0 && `${lowStockCount} bahan stok rendah`}
+                  . Segera lakukan pemesanan.
                 </p>
               </div>
             </div>
@@ -134,9 +139,7 @@ export default function IngredientsPage() {
         )}
 
         {/* Main Content */}
-        <div className="bg-white rounded-lg border">
-          <IngredientsCRUD />
-        </div>
+        <IngredientsCRUD />
       </div>
     </AppLayout>
   );

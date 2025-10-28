@@ -1,5 +1,6 @@
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -47,10 +48,14 @@ export class HppCalculatorService {
 
   /**
    * Calculate HPP for a specific recipe
+   * @param recipeId - Recipe ID to calculate HPP for
+   * @param userId - User ID for RLS context (optional for service role operations)
    */
-  async calculateRecipeHpp(recipeId: string): Promise<HppCalculationResult> {
+  async calculateRecipeHpp(recipeId: string, userId?: string): Promise<HppCalculationResult> {
     try {
       this.logger.info(`Calculating HPP for recipe ${recipeId}`);
+
+      const supabase = createServiceRoleClient()
 
       // Get recipe details
       const { data: recipe, error: recipeError } = await supabase
@@ -147,6 +152,8 @@ export class HppCalculatorService {
    */
   private async calculateLaborCost(recipeId: string): Promise<number> {
     try {
+      const supabase = createServiceRoleClient()
+      
       // Get recent productions for this recipe
       const { data: productions, error } = await supabase
         .from('productions')
@@ -163,7 +170,7 @@ export class HppCalculatorService {
 
       if (!productions || productions.length === 0) {
         // Fallback: estimate based on average labor cost per serving
-        return 5000; // IDR per serving
+        return HPP_CONFIG.DEFAULT_LABOR_COST_PER_SERVING
       }
 
       // Calculate average labor cost per unit
@@ -183,6 +190,8 @@ export class HppCalculatorService {
    */
   private async calculateOverheadCost(recipeId: string): Promise<number> {
     try {
+      const supabase = createServiceRoleClient()
+      
       // Get active operational costs
       const { data: operationalCosts, error } = await supabase
         .from('operational_costs')
@@ -196,7 +205,7 @@ export class HppCalculatorService {
 
       if (!operationalCosts || operationalCosts.length === 0) {
         // Fallback: estimate overhead per serving
-        return 2000; // IDR per serving
+        return HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
       }
 
       // For now, allocate equally across all recipes
@@ -210,7 +219,7 @@ export class HppCalculatorService {
         .eq('is_active', true);
 
       if (countError || !recipeCount) {
-        return totalOverhead / 10; // Assume 10 recipes as fallback
+        return totalOverhead / HPP_CONFIG.FALLBACK_RECIPE_COUNT
       }
 
       return totalOverhead / recipeCount;
@@ -226,6 +235,8 @@ export class HppCalculatorService {
    */
   private async calculateWacAdjustment(recipeId: string, _currentMaterialCost: number): Promise<number> {
     try {
+      const supabase = createServiceRoleClient()
+      
       // Get recent stock transactions for ingredients used in this recipe
       const { data: recipeIngredients } = await supabase
         .from('recipe_ingredients')
@@ -245,7 +256,7 @@ export class HppCalculatorService {
         .in('ingredient_id', ingredientIds)
         .eq('type', 'PURCHASE')
         .order('transaction_date', { ascending: false })
-        .limit(50);
+        .limit(HPP_CONFIG.WAC_LOOKBACK_TRANSACTIONS)
 
       if (error || !transactions) {
         return 0;
@@ -291,6 +302,8 @@ export class HppCalculatorService {
    */
   private async saveHppCalculation(result: HppCalculationResult): Promise<void> {
     try {
+      const supabase = createServiceRoleClient()
+      
       const calculationData = {
         recipe_id: result.recipeId,
         calculation_date: new Date().toISOString().split('T')[0],
@@ -325,6 +338,8 @@ export class HppCalculatorService {
    */
   async getLatestHpp(recipeId: string): Promise<HppCalculation | null> {
     try {
+      const supabase = createServiceRoleClient()
+      
       const { data, error } = await supabase
         .from('hpp_calculations')
         .select('*')

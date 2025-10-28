@@ -196,7 +196,7 @@ export default function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                HeyTrack
+                Beranda
               </h1>
               <p className="text-muted-foreground mt-1">
                 {currentTime.toLocaleDateString('id-ID', {
@@ -208,7 +208,7 @@ export default function Dashboard() {
               </p>
               {user && (
                 <p className="text-sm text-muted-foreground mt-1">
-                  Selamat datang, {user.email}
+                  Selamat datang kembali, {user.email?.split('@')[0]}! 👋
                 </p>
               )}
             </div>
@@ -286,39 +286,39 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
-              Aksi Cepat
+              Menu Cepat
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/recipes">
-                  <ChefHat className="h-6 w-6" />
-                  <span>Resep</span>
-                </a>
-              </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/hpp/calculator">
-                  <Calculator className="h-6 w-6" />
-                  <span>HPP</span>
-                </a>
-              </Button>
-              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
-                <a href="/inventory">
-                  <Package className="h-6 w-6" />
-                  <span>Inventory</span>
-                </a>
-              </Button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
                 <a href="/orders">
                   <ShoppingCart className="h-6 w-6" />
-                  <span>Pesanan</span>
+                  <span className="text-sm font-medium">Pesanan</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/recipes">
+                  <ChefHat className="h-6 w-6" />
+                  <span className="text-sm font-medium">Resep</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/ingredients">
+                  <Package className="h-6 w-6" />
+                  <span className="text-sm font-medium">Bahan Baku</span>
+                </a>
+              </Button>
+              <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
+                <a href="/hpp">
+                  <Calculator className="h-6 w-6" />
+                  <span className="text-sm font-medium">Biaya Produksi</span>
                 </a>
               </Button>
               <Button className="h-20 flex-col space-y-2" variant="outline" asChild>
                 <a href="/reports">
                   <BarChart3 className="h-6 w-6" />
-                  <span>Laporan</span>
+                  <span className="text-sm font-medium">Laporan</span>
                 </a>
               </Button>
             </div>

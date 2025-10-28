@@ -5,6 +5,7 @@ import js from "@eslint/js";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import ts from "typescript-eslint";
+import consistentErrorHandling from "./eslint-rules/consistent-error-handling.js";
 
 export default [
   js.configs.recommended,
@@ -24,6 +25,11 @@ export default [
       react,
       "react-hooks": reactHooks,
       "@typescript-eslint": ts.plugin,
+      "heytrack": {
+        rules: {
+          "consistent-error-handling": consistentErrorHandling,
+        },
+      },
     },
     settings: {
       react: {
@@ -151,6 +157,11 @@ export default [
       // ============================================
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+
+      // ============================================
+      // HEYTRACK CUSTOM RULES
+      // ============================================
+      "heytrack/consistent-error-handling": "error",
 
       // ============================================
       // CODE STYLE & CONSISTENCY

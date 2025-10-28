@@ -7,7 +7,7 @@ import { apiLogger } from '@/lib/logger'
  * Middleware will handle the redirect, but this provides server-side fallback
  */
 export default async function HomePage() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -17,8 +17,8 @@ export default async function HomePage() {
     } else {
       redirect('/auth/login')
     }
-  } catch (err) {
-    apiLogger.error({ err }, 'Error checking auth:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error checking auth')
     redirect('/auth/login')
   }
 }

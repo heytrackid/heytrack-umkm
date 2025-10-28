@@ -1,106 +1,11 @@
 'use client'
 
-import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { Menu, X } from 'lucide-react'
-import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
-
-// Lazy imports for sidebar components with webpack magic comments for better HMR
-const ApplicationSidebarHeader = dynamic(
-  () => import(/* webpackChunkName: "sidebar-header" */ './ApplicationSidebarHeader'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-16 px-4 lg:px-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Skeleton className="w-10 h-10 rounded-lg" />
-          <div className="space-y-1">
-            <Skeleton className="h-5 w-20" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-)
-
-const SidebarNavigation = dynamic(
-  () => import(/* webpackChunkName: "sidebar-navigation" */ './SidebarNavigation'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex-1 px-3 lg:px-4 py-4 space-y-6 overflow-y-auto">
-        {Array(5).fill(0).map((_, i) => (
-          <div key={i} className="space-y-2">
-            <Skeleton className="h-6 w-32 mx-3" />
-            <div className="space-y-1">
-              {Array(3).fill(0).map((_, j) => (
-                <div key={j} className="px-3 py-3 space-y-2">
-                  <div className="flex items-center gap-3">
-                    <Skeleton className="h-5 w-5" />
-                    <Skeleton className="h-4 flex-1" />
-                    <Skeleton className="h-4 w-12" />
-                  </div>
-                  <Skeleton className="h-3 w-3/4 ml-8" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    )
-  }
-)
-
-const SidebarFooter = dynamic(
-  () => import(/* webpackChunkName: "sidebar-footer" */ './SidebarFooter'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-800">
-        <Skeleton className="w-full h-8" />
-        <div className="mt-2 text-center">
-          <Skeleton className="h-3 w-20 mx-auto" />
-        </div>
-      </div>
-    )
-  }
-)
-
-const MobileSidebar = dynamic(
-  () => import(/* webpackChunkName: "sidebar-mobile" */ './MobileSidebar'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-full flex flex-col bg-background">
-        <div className="h-16 px-4 border-b border-border flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Skeleton className="w-10 h-10 rounded-lg" />
-            <div className="space-y-1">
-              <Skeleton className="h-5 w-20" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
-          {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-24 mx-3" />
-              <div className="space-y-1">
-                {Array(2).fill(0).map((_, j) => (
-                  <Skeleton key={j} className="h-12 w-full" />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-)
-
-// Hook imports
+import ApplicationSidebarHeader from './ApplicationSidebarHeader'
+import SidebarNavigation from './SidebarNavigation'
+import SidebarFooter from './SidebarFooter'
+import MobileSidebar from './MobileSidebar'
 import { useSidebarLogic } from './useSidebarLogic'
 
 interface LazySidebarProps {
@@ -120,11 +25,7 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
 
   // If it's mobile mode (used within Sheet), render simplified version
   if (isMobile) {
-    return (
-      <Suspense fallback={<div className="h-full bg-background" />}>
-        <MobileSidebar />
-      </Suspense>
-    )
+    return <MobileSidebar />
   }
 
   return (
@@ -153,28 +54,22 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
-        <Suspense fallback={<div className="h-16 border-b border-border" />}>
-          <ApplicationSidebarHeader
-            isMobile={Boolean(isOpen && onToggle)}
-            onClose={onToggle}
-          />
-        </Suspense>
+        <ApplicationSidebarHeader
+          isMobile={Boolean(isOpen && onToggle)}
+          onClose={onToggle}
+        />
 
         {/* Navigation */}
-        <Suspense fallback={<div className="flex-1" />}>
-          <SidebarNavigation
-            sections={navigationSections}
-            isItemActive={isItemActive}
-            onItemMouseEnter={prefetchRoute}
-            isSectionCollapsed={isSectionCollapsed}
-            onToggleSection={toggleSection}
-          />
-        </Suspense>
+        <SidebarNavigation
+          sections={navigationSections}
+          isItemActive={isItemActive}
+          onItemMouseEnter={prefetchRoute}
+          isSectionCollapsed={isSectionCollapsed}
+          onToggleSection={toggleSection}
+        />
 
         {/* Footer */}
-        <Suspense fallback={<div className="flex-shrink-0 h-20 border-t border-border" />}>
-          <SidebarFooter />
-        </Suspense>
+        <SidebarFooter />
       </aside>
 
       {/* Mobile toggle button with smooth transitions */}

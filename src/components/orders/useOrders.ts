@@ -3,6 +3,7 @@ import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from
 import { generateOrderNumber } from './utils'
 
 import { apiLogger } from '@/lib/logger'
+
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -185,7 +186,7 @@ export function useOrders() {
                 }))
               })
             })
-            apiLogger.info('Inventory auto-updated', { action: inventoryAction })
+            apiLogger.info({ action: inventoryAction }, 'Inventory auto-updated')
           }
         } catch (err) {
           apiLogger.error({ error: err }, '⚠️ Failed to auto-update inventory for status change:')

@@ -4,16 +4,12 @@
  */
 
 import { dbLogger } from '@/lib/logger'
-import supabase from '@/utils/supabase'
+import { createServiceRoleClient } from '@/utils/supabase'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type { HppAlert } from '../types'
 
 export class HppAlertService {
   private logger = dbLogger
-
-  // Alert thresholds
-  private readonly PRICE_INCREASE_THRESHOLD = 0.10 // 10% increase
-  private readonly MARGIN_LOW_THRESHOLD = 0.20 // 20% margin
-  private readonly COST_SPIKE_THRESHOLD = 0.15 // 15% spike
 
   /**
    * Detect alerts for a specific recipe
@@ -22,6 +18,7 @@ export class HppAlertService {
     try {
       this.logger.info(`Detecting HPP alerts for recipe ${recipeId}`)
 
+      const supabase = createServiceRoleClient()
       const alerts: HppAlert[] = []
 
       // Get latest and previous snapshots
@@ -44,33 +41,33 @@ export class HppAlertService {
 
       // Check for price increase
       const priceIncrease = (current.hpp_value - previous.hpp_value) / previous.hpp_value
-      if (priceIncrease > this.PRICE_INCREASE_THRESHOLD) {
+      if (priceIncrease > HPP_CONFIG.ALERTS.PRICE_INCREASE_THRESHOLD) {
         alerts.push(await this.createAlert({
           recipe_id: recipeId,
           alert_type: 'PRICE_INCREASE',
-          severity: priceIncrease > 0.20 ? 'HIGH' : 'MEDIUM',
+          severity: priceIncrease > HPP_CONFIG.ALERTS.PRICE_INCREASE_CRITICAL ? 'HIGH' : 'MEDIUM',
           message: `Biaya produksi naik ${(priceIncrease * 100).toFixed(1)}% dari ${previous.hpp_value} ke ${current.hpp_value}`,
           current_value: current.hpp_value,
           previous_value: previous.hpp_value,
-          threshold_value: this.PRICE_INCREASE_THRESHOLD
+          threshold_value: HPP_CONFIG.ALERTS.PRICE_INCREASE_THRESHOLD
         }))
       }
 
       // Check for low margin
-      if (current.margin_percentage && current.margin_percentage < this.MARGIN_LOW_THRESHOLD) {
+      if (current.margin_percentage && current.margin_percentage < HPP_CONFIG.ALERTS.MARGIN_LOW_THRESHOLD) {
         alerts.push(await this.createAlert({
           recipe_id: recipeId,
           alert_type: 'MARGIN_LOW',
-          severity: current.margin_percentage < 0.10 ? 'CRITICAL' : 'MEDIUM',
+          severity: current.margin_percentage < HPP_CONFIG.ALERTS.MARGIN_CRITICAL_THRESHOLD ? 'CRITICAL' : 'MEDIUM',
           message: `Margin keuntungan rendah: ${(current.margin_percentage * 100).toFixed(1)}%`,
           current_value: current.margin_percentage,
-          threshold_value: this.MARGIN_LOW_THRESHOLD
+          threshold_value: HPP_CONFIG.ALERTS.MARGIN_LOW_THRESHOLD
         }))
       }
 
       // Check for cost spike
       const costSpike = (current.material_cost - previous.material_cost) / previous.material_cost
-      if (costSpike > this.COST_SPIKE_THRESHOLD) {
+      if (costSpike > HPP_CONFIG.ALERTS.COST_SPIKE_THRESHOLD) {
         alerts.push(await this.createAlert({
           recipe_id: recipeId,
           alert_type: 'COST_SPIKE',
@@ -78,7 +75,7 @@ export class HppAlertService {
           message: `Biaya bahan naik drastis ${(costSpike * 100).toFixed(1)}%`,
           current_value: current.material_cost,
           previous_value: previous.material_cost,
-          threshold_value: this.COST_SPIKE_THRESHOLD
+          threshold_value: HPP_CONFIG.ALERTS.COST_SPIKE_THRESHOLD
         }))
       }
 
@@ -96,6 +93,8 @@ export class HppAlertService {
    */
   private async createAlert(alertData: Omit<HppAlert, 'id' | 'created_at' | 'is_read' | 'recipe_name'>): Promise<HppAlert> {
     try {
+      const supabase = createServiceRoleClient()
+      
       const { data, error } = await supabase
         .from('hpp_alerts')
         .insert({
@@ -123,6 +122,8 @@ export class HppAlertService {
   async detectAlertsForAllRecipes(): Promise<{ success: number; failed: number; totalAlerts: number }> {
     try {
       this.logger.info('Detecting HPP alerts for all recipes')
+
+      const supabase = createServiceRoleClient()
 
       const { data: recipes, error } = await supabase
         .from('recipes')
@@ -162,6 +163,8 @@ export class HppAlertService {
    */
   async markAsRead(alertId: string): Promise<void> {
     try {
+      const supabase = createServiceRoleClient()
+      
       const { error } = await supabase
         .from('hpp_alerts')
         .update({
@@ -187,6 +190,8 @@ export class HppAlertService {
    */
   async markAllAsRead(userId: string): Promise<number> {
     try {
+      const supabase = createServiceRoleClient()
+      
       const { data, error } = await supabase
         .from('hpp_alerts')
         .update({
@@ -216,6 +221,8 @@ export class HppAlertService {
    */
   async getUnreadAlerts(userId: string, limit = 10): Promise<HppAlert[]> {
     try {
+      const supabase = createServiceRoleClient()
+      
       const { data, error } = await supabase
         .from('hpp_alerts')
         .select(`

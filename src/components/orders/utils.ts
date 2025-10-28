@@ -1,5 +1,5 @@
 import type { OrderStatus, PaymentStatus, Priority, StatusInfo } from './types'
-import { formatCurrentCurrency, formatDate } from '@/shared'
+import { formatCurrentCurrency } from '@/shared'
 
 // Order Status Configurations
 export const orderStatuses: Record<OrderStatus, StatusInfo> = {
@@ -54,6 +54,8 @@ export function calculateOrderTotal(orderItems: Array<{quantity: number; price: 
 
 // Format currency
 export const formatCurrency = formatCurrentCurrency
+
+export { formatDate } from '@/shared'
 
 export function formatTime(date: string | Date): string {
   return new Date(date).toLocaleTimeString('id-ID', {

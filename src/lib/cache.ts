@@ -156,6 +156,14 @@ export const cacheInvalidation = {
     apiLogger.info({ orderId }, 'Orders cache invalidated')
   },
   
+  customers: async (customerId?: string) => {
+    if (customerId) {
+      memoryCache.deletePattern(`^customers:.*${customerId}`)
+    }
+    memoryCache.deletePattern('^customers:')
+    apiLogger.info({ customerId }, 'Customers cache invalidated')
+  },
+  
   all: async () => {
     memoryCache.clear()
     apiLogger.info('All cache cleared')

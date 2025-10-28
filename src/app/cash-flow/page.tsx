@@ -18,25 +18,26 @@ import {
 } from '@/components/ui/breadcrumb'
 import { StatsSkeleton, CardSkeleton } from '@/components/ui'
 
-// Lazy load extracted components for better performance and code splitting
-const TransactionForm = lazy(() => import('./components/TransactionForm'))
-const SummaryCards = lazy(() => import('./components/SummaryCards'))
-const CashFlowChart = lazy(() => import('./components/CashFlowChart'))
-const TransactionList = lazy(() => import('./components/TransactionList'))
+// Lazy load enhanced components for better performance and code splitting
+const EnhancedTransactionForm = lazy(() => import('./components/EnhancedTransactionForm'))
+const EnhancedSummaryCards = lazy(() => import('./components/EnhancedSummaryCards'))
+const EnhancedCashFlowChart = lazy(() => import('./components/EnhancedCashFlowChart'))
+const EnhancedTransactionList = lazy(() => import('./components/EnhancedTransactionList'))
 const CategoryBreakdown = lazy(() => import('./components/CategoryBreakdown'))
 const FilterPeriod = lazy(() => import('./components/FilterPeriod'))
 
-import { useCashFlow } from './hooks/useCashFlow'
+import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
 
 export default function CashFlowPage() {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
 
-  // Use the custom hook for all cash flow logic
+  // Use the enhanced hook for all cash flow logic
   const {
     loading,
     error,
     cashFlowData,
+    comparison,
     selectedPeriod,
     startDate,
     endDate,
@@ -54,7 +55,7 @@ export default function CashFlowPage() {
     handleAddTransaction,
     handleDeleteTransaction,
     exportReport
-  } = useCashFlow()
+  } = useEnhancedCashFlow()
 
   // Loading state
   if (loading && !cashFlowData) {
@@ -144,9 +145,9 @@ export default function CashFlowPage() {
           )}
         </div>
 
-        {/* Transaction Form Dialog */}
+        {/* Enhanced Transaction Form Dialog */}
         <Suspense fallback={null}>
-          <TransactionForm
+          <EnhancedTransactionForm
             isOpen={isAddDialogOpen}
             onOpenChange={setIsAddDialogOpen}
             transactionType={transactionType}
@@ -203,7 +204,7 @@ export default function CashFlowPage() {
           />
         </Suspense>
 
-        {/* Summary Cards */}
+        {/* Enhanced Summary Cards */}
         <Suspense fallback={
           <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
             {Array.from({ length: 3 }, (_, i) => (
@@ -211,16 +212,17 @@ export default function CashFlowPage() {
             ))}
           </div>
         }>
-          <SummaryCards
+          <EnhancedSummaryCards
             summary={summary}
+            comparison={comparison}
             formatCurrency={formatCurrency}
             isMobile={isMobile}
           />
         </Suspense>
 
-        {/* Cash Flow Trend Chart */}
+        {/* Enhanced Cash Flow Trend Chart */}
         <Suspense fallback={<div className="h-80 bg-gray-100 animate-pulse rounded-lg" />}>
-          <CashFlowChart
+          <EnhancedCashFlowChart
             chartData={chartData}
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
@@ -232,9 +234,9 @@ export default function CashFlowPage() {
           />
         </Suspense>
 
-        {/* Transactions List */}
+        {/* Enhanced Transactions List */}
         <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse rounded-lg" />}>
-          <TransactionList
+          <EnhancedTransactionList
             transactions={transactions}
             onDeleteTransaction={handleDeleteTransaction}
             formatCurrency={formatCurrency}

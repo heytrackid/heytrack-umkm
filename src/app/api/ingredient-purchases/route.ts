@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
-
+import type { TablesInsert } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 /**
  * GET /api/ingredient-purchases
@@ -135,17 +135,19 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Create financial transaction (expense)
-        let financialTransactionId = null
+        let financialTransactionId: string | null = null
+        const financialRecord: TablesInsert<'financial_records'> = {
+            user_id: user.id,
+            type: 'EXPENSE',
+            category: 'Pembelian Bahan Baku',
+            amount: totalHarga,
+            description: `Pembelian: ${ingredient.name} (${qtyBeli} ${ingredient.unit}) dari ${validatedData.supplier || 'Supplier'}`,
+            date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
+        }
+        
         const { data: transaction, error: transactionError } = await supabase
             .from('financial_records')
-            .insert({
-                user_id: user.id,
-                type: 'EXPENSE',
-                category: 'Pembelian Bahan Baku',
-                amount: totalHarga,
-                date: validatedData.purchase_date || new Date().toISOString().split('T')[0],
-                reference: `Pembelian: ${ingredient.name} (${qtyBeli} ${ingredient.unit}) dari ${validatedData.supplier || 'Supplier'}`
-            })
+            .insert(financialRecord as any)
             .select('id')
             .single()
 
@@ -157,18 +159,20 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Create purchase record
+        const purchaseRecord: TablesInsert<'ingredient_purchases'> = {
+            user_id: user.id,
+            ingredient_id: validatedData.ingredient_id,
+            supplier: validatedData.supplier,
+            quantity: qtyBeli,
+            unit_price: hargaSatuan,
+            total_price: totalHarga,
+            purchase_date: validatedData.purchase_date || new Date().toISOString().split('T')[0],
+            notes: validatedData.notes
+        }
+        
         const { data: purchase, error: purchaseError } = await supabase
             .from('ingredient_purchases')
-            .insert({
-                user_id: user.id,
-                ingredient_id: validatedData.ingredient_id,
-                supplier: validatedData.supplier,
-                quantity: qtyBeli,
-                unit_price: hargaSatuan,
-                total_price: totalHarga,
-                purchase_date: validatedData.purchase_date || new Date().toISOString().split('T')[0],
-                notes: validatedData.notes
-            })
+            .insert(purchaseRecord as any)
             .select(`
         *,
         ingredient:ingredients (
@@ -203,7 +207,7 @@ export async function POST(request: NextRequest) {
 
         const { error: stockError } = await supabase
             .from('ingredients')
-            .update({ current_stock: newStock })
+            .update({ current_stock: newStock } as any)
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', user.id)
 
@@ -213,19 +217,19 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Create stock ledger entry
+        const stockLog: TablesInsert<'inventory_stock_logs'> = {
+            ingredient_id: validatedData.ingredient_id,
+            quantity_before: ingredient.current_stock || 0,
+            quantity_after: newStock,
+            quantity_changed: qtyBeli,
+            change_type: 'increase',
+            reference_id: purchase?.id || null,
+            reference_type: 'ingredient_purchase'
+        }
+        
         await supabase
             .from('inventory_stock_logs')
-            .insert({
-                user_id: user.id,
-                ingredient_id: validatedData.ingredient_id,
-                quantity_before: ingredient.current_stock || 0,
-                quantity_after: newStock,
-                quantity_changed: qtyBeli,
-                change_type: 'PURCHASE',
-                reference_id: purchase?.id,
-                reference_type: 'ingredient_purchase',
-                transaction_date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
-            })
+            .insert(stockLog as any)
 
         return NextResponse.json(purchase, { status: 201 })
     } catch (err: unknown) {
@@ -293,26 +297,26 @@ export async function DELETE(request: NextRequest) {
 
             await supabase
                 .from('ingredients')
-                .update({ current_stock: newStock })
+                .update({ current_stock: newStock } as any)
                 .eq('id', purchase.ingredient_id)
                 .eq('user_id', user.id)
         }
 
         // 2. Create stock ledger entry for reversal
+        const reversalLog: TablesInsert<'inventory_stock_logs'> = {
+            ingredient_id: purchase.ingredient_id,
+            quantity_before: ingredient?.current_stock || 0,
+            quantity_after: ingredient ? Math.max(0, (ingredient.current_stock || 0) - purchase.quantity) : 0,
+            quantity_changed: -purchase.quantity,
+            change_type: 'adjustment',
+            reason: 'Purchase deletion',
+            reference_id: purchase.id,
+            reference_type: 'ingredient_purchase'
+        }
+        
         await supabase
             .from('inventory_stock_logs')
-            .insert({
-                user_id: user.id,
-                ingredient_id: purchase.ingredient_id,
-                quantity_before: ingredient?.current_stock || 0,
-                quantity_after: ingredient ? Math.max(0, (ingredient.current_stock || 0) - purchase.quantity) : 0,
-                quantity_changed: -purchase.quantity,
-                change_type: 'ADJUSTMENT',
-                reason: 'Purchase deletion',
-                reference_id: purchase.id,
-                reference_type: 'ingredient_purchase',
-                transaction_date: new Date().toISOString().split('T')[0]
-            })
+            .insert(reversalLog as any)
 
         // 3. Delete purchase
         const { error: deleteError } = await supabase

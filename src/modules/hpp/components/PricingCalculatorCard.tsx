@@ -1,24 +1,29 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Info, Loader2, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 
 interface PricingCalculatorCardProps {
     totalCost: number
+    currentPrice?: number | null
     marginPercentage: number
     suggestedPrice: number
     onMarginChange: (margin: number) => void
-    onSavePrice: () => void
+    onSavePrice: (price: number, margin: number) => void
     isSaving?: boolean
 }
 
 export const PricingCalculatorCard = ({
     totalCost,
+    currentPrice,
     marginPercentage,
     suggestedPrice,
     onMarginChange,
@@ -26,81 +31,151 @@ export const PricingCalculatorCard = ({
     isSaving
 }: PricingCalculatorCardProps) => {
     const { formatCurrency } = useCurrency()
+    const [mode, setMode] = useState<'auto' | 'manual'>('auto')
+    const [manualPrice, setManualPrice] = useState(suggestedPrice)
+
+    // Update manual price when suggested price changes (only in auto mode)
+    useEffect(() => {
+        if (mode === 'auto') {
+            setManualPrice(suggestedPrice)
+        }
+    }, [suggestedPrice, mode])
+
+    const displayPrice = mode === 'manual' ? manualPrice : suggestedPrice
+    const profit = displayPrice - totalCost
+    const hasCurrentPrice = currentPrice && currentPrice > 0
+    const currentProfit = hasCurrentPrice ? currentPrice - totalCost : 0
+    const currentMargin = hasCurrentPrice ? ((currentProfit / totalCost) * 100) : 0
+    const displayMargin = mode === 'manual' ? ((profit / totalCost) * 100) : marginPercentage
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    💵 Langkah 3: Tentukan Harga Jual yang Pas
-                    <Tooltip>
-                        <TooltipTrigger>
-                            <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p className="font-semibold mb-1">Cara Hitung Harga Jual:</p>
-                            <p className="text-xs">Modal + Untung = Harga Jual</p>
-                            <p className="text-xs mt-2">Contoh:</p>
-                            <ul className="text-xs list-disc list-inside">
-                                <li>Modal: Rp 25.000</li>
-                                <li>Untung 60%: Rp 15.000</li>
-                                <li>Harga Jual: Rp 40.000</li>
-                            </ul>
-                            <p className="text-xs text-muted-foreground mt-2">Rekomendasi: 50-70% untuk makanan/kue</p>
-                        </TooltipContent>
-                    </Tooltip>
+                <CardTitle className="text-base flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    Kalkulator Harga Jual
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                <div className="bg-gray-50 dark:bg-gray-900/20 p-4 rounded-lg">
-                    <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">💰 Modal Buat 1 Porsi:</span>
-                        <span className="font-semibold text-lg">{formatCurrency(totalCost)}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Ini uang yang keluar untuk bahan & operasional</p>
-                </div>
+                {/* Current Price Info */}
+                {hasCurrentPrice && (
+                    <Alert>
+                        <DollarSign className="h-4 w-4" />
+                        <AlertDescription>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="font-semibold">Harga Jual Saat Ini</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Margin: {currentMargin.toFixed(0)}% • Untung: {formatCurrency(currentProfit)}
+                                    </p>
+                                </div>
+                                <span className="text-xl font-bold">{formatCurrency(currentPrice)}</span>
+                            </div>
+                        </AlertDescription>
+                    </Alert>
+                )}
 
-                {/* Margin Slider */}
-                <div>
-                    <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium">🎯 Mau Untung Berapa Persen?</span>
-                        <Badge variant="secondary" className="text-base">{marginPercentage}%</Badge>
-                    </div>
-                    <Slider
-                        value={[marginPercentage]}
-                        onValueChange={(value) => {
-                            const newValue = value[0]
-                            if (newValue !== undefined) {
-                                onMarginChange(newValue)
-                            }
-                        }}
-                        min={30}
-                        max={150}
-                        step={5}
-                        className="w-full"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                        <span>30% (Minimum)</span>
-                        <span>60% (Rekomendasi)</span>
-                        <span>150% (Premium)</span>
+                {/* Current Cost */}
+                <div className="p-4 bg-gray-50 dark:bg-gray-900/20 rounded-lg">
+                    <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Biaya Produksi</span>
+                        <span className="text-lg font-semibold">{formatCurrency(totalCost)}</span>
                     </div>
                 </div>
 
-                {/* Enhanced Suggested Price with Status */}
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border-2 border-purple-200 dark:border-purple-800 relative overflow-hidden">
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4">
+                {/* Mode Tabs */}
+                <Tabs value={mode} onValueChange={(v) => setMode(v as 'auto' | 'manual')}>
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="auto">Otomatis (Margin)</TabsTrigger>
+                        <TabsTrigger value="manual">Manual</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="auto" className="space-y-4 mt-4">
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium">Target Margin Keuntungan</span>
+                                <Badge
+                                    variant={marginPercentage >= 50 ? "default" : "secondary"}
+                                    className="text-base"
+                                >
+                                    {marginPercentage}%
+                                </Badge>
+                            </div>
+                            <Slider
+                                value={[marginPercentage]}
+                                onValueChange={(value) => {
+                                    const newValue = value[0]
+                                    if (newValue !== undefined) {
+                                        onMarginChange(newValue)
+                                    }
+                                }}
+                                min={30}
+                                max={150}
+                                step={5}
+                                className="w-full"
+                            />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                                <span>30%</span>
+                                <span>60% (Rekomendasi)</span>
+                                <span>150%</span>
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="manual" className="space-y-4 mt-4">
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium">Masukkan Harga Jual</span>
+                                <Badge
+                                    variant={displayMargin >= 50 ? "default" : displayMargin >= 30 ? "secondary" : "destructive"}
+                                    className="text-base"
+                                >
+                                    Margin: {displayMargin.toFixed(0)}%
+                                </Badge>
+                            </div>
+                            <Input
+                                type="number"
+                                value={manualPrice}
+                                onChange={(e) => setManualPrice(Number(e.target.value))}
+                                placeholder="Masukkan harga jual"
+                                min={totalCost}
+                                step={1000}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Minimal: {formatCurrency(totalCost)} (biaya produksi)
+                            </p>
+                            {manualPrice < totalCost && (
+                                <p className="text-xs text-red-600">
+                                    ⚠️ Harga jual tidak boleh lebih rendah dari biaya produksi
+                                </p>
+                            )}
+                        </div>
+                    </TabsContent>
+                </Tabs>
+
+                {/* Display Price */}
+                <div className="p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-800">
+                    <div className="flex items-start justify-between mb-4">
+                        <div>
+                            <div className="text-sm text-muted-foreground mb-1">
+                                Harga Jual {mode === 'manual' ? 'yang Anda Masukkan' : 'yang Disarankan'}
+                            </div>
+                            <div className="text-4xl font-bold text-purple-600">
+                                {formatCurrency(displayPrice)}
+                            </div>
+                        </div>
                         <Badge
-                            variant={marginPercentage >= 50 ? "default" : marginPercentage >= 30 ? "secondary" : "destructive"}
+                            variant={displayMargin >= 50 ? "default" : displayMargin >= 30 ? "secondary" : "destructive"}
                             className="gap-1"
                         >
-                            {marginPercentage >= 50 ? (
+                            {displayMargin >= 50 ? (
                                 <>
                                     <TrendingUp className="h-3 w-3" />
                                     Margin Bagus
                                 </>
-                            ) : marginPercentage >= 30 ? (
+                            ) : displayMargin >= 30 ? (
                                 <>
-                                    <Info className="h-3 w-3" />
+                                    <TrendingUp className="h-3 w-3" />
                                     Margin Standar
                                 </>
                             ) : (
@@ -112,82 +187,68 @@ export const PricingCalculatorCard = ({
                         </Badge>
                     </div>
 
-                    <div className="text-center">
-                        <div className="text-sm text-muted-foreground mb-2">
-                            ✨ Harga Jual yang Disarankan:
+                    {/* Breakdown */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-2 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Biaya Produksi</span>
+                            <span className="font-medium">{formatCurrency(totalCost)}</span>
                         </div>
-                        <div className="text-5xl font-bold text-purple-600 mb-3">
-                            {formatCurrency(suggestedPrice)}
+                        <div className="flex justify-between text-green-600">
+                            <span>Keuntungan ({displayMargin.toFixed(0)}%)</span>
+                            <span className="font-semibold">+ {formatCurrency(profit)}</span>
                         </div>
+                        <div className="flex justify-between pt-2 border-t font-semibold">
+                            <span>Harga Jual</span>
+                            <span className="text-purple-600">{formatCurrency(displayPrice)}</span>
+                        </div>
+                    </div>
 
-                        {/* Breakdown */}
-                        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg inline-block min-w-[280px]">
-                            <div className="text-xs text-muted-foreground mb-2">Rincian Perhitungan:</div>
-                            <div className="text-sm space-y-2">
-                                <div className="flex justify-between gap-8 pb-2 border-b">
-                                    <span className="text-muted-foreground">Modal Produksi:</span>
-                                    <span className="font-semibold">{formatCurrency(totalCost)}</span>
-                                </div>
-                                <div className="flex justify-between gap-8 text-green-600">
-                                    <span>Keuntungan ({marginPercentage}%):</span>
-                                    <span className="font-semibold">+ {formatCurrency(suggestedPrice - totalCost)}</span>
-                                </div>
-                                <div className="flex justify-between gap-8 pt-2 border-t text-base">
-                                    <span className="font-semibold">Total Harga Jual:</span>
-                                    <span className="font-bold text-purple-600">{formatCurrency(suggestedPrice)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Profit Indicator */}
-                        <div className="mt-4 flex items-center justify-center gap-2 text-sm">
-                            <span className="text-muted-foreground">Keuntungan per produk:</span>
-                            <span className="font-bold text-green-600 text-lg">
-                                {formatCurrency(suggestedPrice - totalCost)}
-                            </span>
-                        </div>
+                    {/* Profit per item */}
+                    <div className="mt-3 text-center">
+                        <span className="text-sm text-muted-foreground">Keuntungan per produk: </span>
+                        <span className="text-lg font-bold text-green-600">
+                            {formatCurrency(profit)}
+                        </span>
                     </div>
                 </div>
 
                 {/* Tips */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-start gap-2">
-                        <TrendingUp className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm space-y-2">
-                            <div><span className="font-semibold">💡 Tips Biar Untung Maksimal:</span></div>
-                            <ul className="ml-4 space-y-1.5">
-                                <li>• <strong>50-70% untung</strong> → Cocok untuk kue/makanan premium</li>
-                                <li>• <strong>30-50% untung</strong> → Buat bersaing dengan tetangga</li>
-                                <li>• <strong>Cek harga kompetitor</strong> di area Anda dulu</li>
-                                <li>• <strong>Jangan lupa</strong> tambahkan biaya kemasan & ongkir</li>
-                            </ul>
-                            <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded text-xs">
-                                <strong>⚠️ Ingat:</strong> Harga terlalu murah = rugi. Harga terlalu mahal = gak laku!
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Alert>
+                    <Lightbulb className="h-4 w-4" />
+                    <AlertDescription>
+                        <p className="font-semibold mb-2">Tips Menentukan Harga</p>
+                        <ul className="text-sm space-y-1">
+                            <li>• <strong>50-70%</strong> untuk produk premium/kue</li>
+                            <li>• <strong>30-50%</strong> untuk bersaing dengan kompetitor</li>
+                            <li>• Cek harga pasar di area Anda</li>
+                            <li>• Pertimbangkan biaya kemasan & ongkir</li>
+                        </ul>
+                    </AlertDescription>
+                </Alert>
 
-                <div className="flex gap-2">
-                    <Button
-                        onClick={onSavePrice}
-                        className="flex-1"
-                        disabled={isSaving}
-                    >
-                        {isSaving ? (
-                            <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Menyimpan...
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Pakai Harga Ini
-                            </>
-                        )}
-                    </Button>
-                    <Button variant="outline">Masukkan Harga Sendiri</Button>
-                </div>
+                {/* Actions */}
+                <Button
+                    onClick={() => onSavePrice(displayPrice, displayMargin)}
+                    className="w-full"
+                    disabled={isSaving || displayPrice === currentPrice || (mode === 'manual' && manualPrice < totalCost)}
+                >
+                    {isSaving ? (
+                        <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Menyimpan...
+                        </>
+                    ) : displayPrice === currentPrice ? (
+                        <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Harga Sudah Tersimpan
+                        </>
+                    ) : (
+                        <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            {hasCurrentPrice ? 'Update Harga' : 'Simpan Harga Ini'}
+                        </>
+                    )}
+                </Button>
             </CardContent>
         </Card>
     )

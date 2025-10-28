@@ -14,6 +14,7 @@ export { HppCalculatorService } from './services/HppCalculatorService'
 export { HppExportService } from './services/HppExportService'
 export { HppSnapshotService } from './services/HppSnapshotService'
 export { HppAlertService } from './services/HppAlertService'
+export { HppSnapshotAutomation } from './services/HppSnapshotAutomation'
 
 // Hooks
 export { useUnifiedHpp } from './hooks/useUnifiedHpp'

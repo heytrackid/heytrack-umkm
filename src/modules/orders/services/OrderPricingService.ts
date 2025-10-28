@@ -1,6 +1,8 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import { ORDER_CONFIG } from '@/lib/constants'
+import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
+import { extractFirst, ensureArray, safeNumber } from '@/lib/type-guards'
 import type { OrderItemCalculation, OrderPricing } from './OrderRecipeService'
 import type { Recipe, RecipeIngredient } from '@/types/domain/recipes'
 import type { Ingredient } from '@/types/domain/inventory'
@@ -79,7 +81,8 @@ export class OrderPricingService {
         }>
       }
 
-      // Calculate each item
+      // Calculate each item with real HPP
+      const hppCalculator = new HppCalculatorService()
       const calculatedItems: OrderItemCalculation[] = await Promise.all(
         items.map(async (item) => {
           const recipe = (recipes as RecipeQueryResult[]).find(r => r.id === item.recipe_id)
@@ -87,13 +90,44 @@ export class OrderPricingService {
             throw new Error(`Recipe with ID ${item.recipe_id} not found`)
           }
 
-          // Use recipe selling price as unit price (no HPP calculation)
+          // Use recipe selling price as unit price
           const unit_price = item.custom_price || recipe.selling_price || 0
           const total_price = unit_price * item.quantity
           
-          // For now, assume cost is 70% of selling price (rough estimate without detailed costing)
-          const estimated_cost_percentage = 0.7
-          const estimated_cost = unit_price * estimated_cost_percentage
+          // Try to get real HPP calculation
+          let estimated_cost = unit_price * 0.7 // Fallback to 70% estimate
+          
+          try {
+            const latestHpp = await hppCalculator.getLatestHpp(recipe.id)
+            if (latestHpp && latestHpp.cost_per_unit > 0) {
+              estimated_cost = latestHpp.cost_per_unit
+              dbLogger.info({ 
+                recipeId: recipe.id, 
+                hpp: estimated_cost 
+              }, 'Using real HPP for order pricing')
+            } else {
+              // If no HPP exists, try to calculate it
+              try {
+                const hppResult = await hppCalculator.calculateRecipeHpp(recipe.id)
+                estimated_cost = hppResult.costPerUnit
+                dbLogger.info({ 
+                  recipeId: recipe.id, 
+                  hpp: estimated_cost 
+                }, 'Calculated new HPP for order pricing')
+              } catch (calcError) {
+                dbLogger.warn({ 
+                  recipeId: recipe.id, 
+                  error: calcError 
+                }, 'Failed to calculate HPP, using estimate')
+              }
+            }
+          } catch (hppError) {
+            dbLogger.warn({ 
+              recipeId: recipe.id, 
+              error: hppError 
+            }, 'Failed to fetch HPP, using estimate')
+          }
+          
           const total_cost = estimated_cost * item.quantity
           const profit = total_price - total_cost
           const margin_percentage = total_price > 0 ? (profit / total_price) * 100 : 0

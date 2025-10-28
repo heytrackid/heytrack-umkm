@@ -251,26 +251,28 @@ export default function AIRecipeGeneratorPage() {
     <AppLayout>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header with Mode Toggle */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Sparkles className="h-6 w-6 text-white" />
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shadow-lg">
+              <Sparkles className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">AI Recipe Generator</h1>
-              <p className="text-muted-foreground">
-                Generate resep UMKM profesional dengan AI dalam hitungan detik
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                AI Recipe Generator
+              </h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                ✨ Generate resep UMKM profesional dengan AI dalam hitungan detik
               </p>
             </div>
           </div>
 
           {/* Mode Toggle */}
-          <div className="flex gap-2 bg-muted p-1 rounded-lg">
+          <div className="flex gap-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-1.5 rounded-xl border border-purple-200 dark:border-purple-800">
             <button
               onClick={() => setMode('quick')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${mode === 'quick'
-                  ? 'bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'quick'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-black/20'
                 }`}
             >
               <Zap className="h-4 w-4" />
@@ -278,9 +280,9 @@ export default function AIRecipeGeneratorPage() {
             </button>
             <button
               onClick={() => setMode('complete')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${mode === 'complete'
-                  ? 'bg-background shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+              className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'complete'
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-black/20'
                 }`}
             >
               <ChefHat className="h-4 w-4" />
@@ -313,21 +315,46 @@ export default function AIRecipeGeneratorPage() {
           {/* Right Side - Preview or Result */}
           <div className="space-y-6">
             {loading && (
-              <Card>
-                <CardContent className="py-12">
-                  <div className="text-center space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto">
-                      <ChefHat className="h-8 w-8 text-white animate-bounce" />
+              <Card className="border-2 border-purple-200 dark:border-purple-800">
+                <CardContent className="py-16">
+                  <div className="text-center space-y-6">
+                    <div className="relative">
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center mx-auto shadow-xl">
+                        <ChefHat className="h-10 w-10 text-white animate-bounce" />
+                      </div>
+                      <div className="absolute inset-0 h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mx-auto animate-ping opacity-20" />
                     </div>
                     <div>
-                      <p className="font-medium text-lg">🧑‍🍳 AI sedang meracik resep...</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Tunggu sebentar ya, ini butuh waktu 10-30 detik
+                      <p className="font-semibold text-xl mb-2">🧑‍🍳 AI sedang meracik resep...</p>
+                      <p className="text-sm text-muted-foreground">
+                        Tunggu sebentar ya, proses ini membutuhkan waktu 10-30 detik
                       </p>
-                      <div className="mt-4 flex justify-center gap-1">
-                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="mt-6 flex justify-center gap-2">
+                        <div className="h-3 w-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="h-3 w-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="h-3 w-3 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+
+                    {/* Progress Steps */}
+                    <div className="mt-8 space-y-3 max-w-sm mx-auto">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                        <span className="text-muted-foreground">Menganalisis input Anda</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-6 w-6 rounded-full bg-purple-500 flex items-center justify-center flex-shrink-0 animate-pulse">
+                          <span className="text-white text-xs">⚡</span>
+                        </div>
+                        <span className="font-medium">Meracik komposisi bahan</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                          <span className="text-muted-foreground text-xs">3</span>
+                        </div>
+                        <span className="text-muted-foreground">Menyusun instruksi</span>
                       </div>
                     </div>
                   </div>

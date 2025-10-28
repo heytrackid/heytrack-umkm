@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calculator, TrendingUp, Bell, CheckCircle, Lightbulb, History, BarChart3, FileSpreadsheet } from 'lucide-react'
+import { Calculator, TrendingUp, Bell, CheckCircle, History, BarChart3, FileSpreadsheet } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
@@ -29,36 +29,40 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
             })
             if (response.ok) {
                 toast({
-                    title: 'Berhasil ✓',
+                    title: 'Berhasil',
                     description: 'Semua biaya produksi berhasil dihitung'
                 })
                 window.location.reload()
             }
         } catch {
             toast({
-                title: 'Error',
+                title: 'Gagal',
                 description: 'Gagal menghitung biaya',
                 variant: 'destructive'
             })
         }
     }
 
+    const completionPercentage = overview.totalRecipes > 0
+        ? Math.round((overview.recipesWithHpp / overview.totalRecipes) * 100)
+        : 0
+
     return (
-        <Card className="border-2">
+        <Card>
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-xl flex items-center gap-2">
-                            📊 Ringkasan HPP & Pricing
-                            <Badge variant={overview.recipesWithHpp === overview.totalRecipes ? "default" : "secondary"}>
-                                {overview.recipesWithHpp === overview.totalRecipes ? "Lengkap" : "Perlu Perhatian"}
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            Ringkasan HPP
+                            <Badge variant={completionPercentage === 100 ? "default" : "secondary"}>
+                                {completionPercentage === 100 ? "Lengkap" : "Perlu Perhatian"}
                             </Badge>
                         </CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">
-                            Pantau biaya produksi dan profitabilitas produk Anda
+                            Pantau biaya produksi dan profitabilitas produk
                         </p>
                     </div>
-                    {overview.recipesWithHpp < overview.totalRecipes && (
+                    {completionPercentage < 100 && (
                         <Button size="sm" onClick={handleCalculateAll}>
                             <Calculator className="h-4 w-4 mr-2" />
                             Hitung Semua
@@ -66,90 +70,76 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                     )}
                 </div>
             </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <Card className="border-blue-200 dark:border-blue-800">
-                        <CardContent className="pt-6">
-                            <div className="text-center">
-                                <div className="text-3xl font-bold text-blue-600 mb-1">
-                                    {overview.recipesWithHpp}/{overview.totalRecipes}
-                                </div>
-                                <div className="text-sm text-muted-foreground">Produk Dihitung</div>
-                                <div className="mt-2">
-                                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                        <div
-                                            className="bg-blue-600 h-2 rounded-full transition-all"
-                                            style={{ width: `${overview.totalRecipes > 0 ? (overview.recipesWithHpp / overview.totalRecipes) * 100 : 0}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+            <CardContent className="space-y-6">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {/* Produk Dihitung */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="text-2xl font-bold text-blue-600 mb-1">
+                            {overview.recipesWithHpp}/{overview.totalRecipes}
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-2">Produk Dihitung</div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                            <div
+                                className="bg-blue-600 h-1.5 rounded-full transition-all"
+                                style={{ width: `${completionPercentage}%` }}
+                            />
+                        </div>
+                    </div>
 
-                    <Card className="border-green-200 dark:border-green-800">
-                        <CardContent className="pt-6">
-                            <div className="text-center">
-                                <div className="text-3xl font-bold text-green-600 mb-1">
-                                    {formatCurrency(overview.averageHpp)}
-                                </div>
-                                <div className="text-sm text-muted-foreground">Biaya Rata-rata</div>
-                                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-green-600">
-                                    <TrendingUp className="h-3 w-3" />
-                                    <span>Per produk</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {/* Biaya Rata-rata */}
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                        <div className="text-2xl font-bold text-green-600 mb-1">
+                            {formatCurrency(overview.averageHpp)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Biaya Rata-rata</div>
+                        <div className="flex items-center gap-1 mt-1 text-xs text-green-600">
+                            <TrendingUp className="h-3 w-3" />
+                            <span>Per produk</span>
+                        </div>
+                    </div>
 
-                    <Card className={`border-2 ${overview.unreadAlerts > 0 ? 'border-orange-500 dark:border-orange-600' : 'border-gray-200 dark:border-gray-700'}`}>
-                        <CardContent className="pt-6">
-                            <div className="text-center">
-                                <div className={`text-3xl font-bold mb-1 ${overview.unreadAlerts > 0 ? 'text-orange-600 animate-pulse' : 'text-gray-400'}`}>
-                                    {overview.unreadAlerts}
-                                </div>
-                                <div className="text-sm text-muted-foreground">Peringatan Baru</div>
-                                <div className="flex items-center justify-center gap-1 mt-2 text-xs">
-                                    {overview.unreadAlerts > 0 ? (
-                                        <>
-                                            <Bell className="h-3 w-3 text-orange-600" />
-                                            <span className="text-orange-600">Perlu tindakan</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CheckCircle className="h-3 w-3 text-green-600" />
-                                            <span className="text-green-600">Semua aman</span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {/* Peringatan */}
+                    <div className={`p-4 rounded-lg border ${overview.unreadAlerts > 0
+                            ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+                            : 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700'
+                        }`}>
+                        <div className={`text-2xl font-bold mb-1 ${overview.unreadAlerts > 0 ? 'text-orange-600' : 'text-gray-400'
+                            }`}>
+                            {overview.unreadAlerts}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Peringatan Baru</div>
+                        <div className="flex items-center gap-1 mt-1 text-xs">
+                            {overview.unreadAlerts > 0 ? (
+                                <>
+                                    <Bell className="h-3 w-3 text-orange-600" />
+                                    <span className="text-orange-600">Perlu tindakan</span>
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle className="h-3 w-3 text-green-600" />
+                                    <span className="text-green-600">Semua aman</span>
+                                </>
+                            )}
+                        </div>
+                    </div>
 
-                    <Card className="border-purple-200 dark:border-purple-800">
-                        <CardContent className="pt-6">
-                            <div className="text-center">
-                                <div className="text-3xl font-bold text-purple-600 mb-1">
-                                    {overview.recipesWithHpp > 0
-                                        ? Math.round((overview.recipesWithHpp / overview.totalRecipes) * 100)
-                                        : 0}%
-                                </div>
-                                <div className="text-sm text-muted-foreground">Progress</div>
-                                <div className="flex items-center justify-center gap-1 mt-2 text-xs text-purple-600">
-                                    <Calculator className="h-3 w-3" />
-                                    <span>Kelengkapan data</span>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {/* Progress */}
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="text-2xl font-bold text-purple-600 mb-1">
+                            {completionPercentage}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">Progress</div>
+                        <div className="flex items-center gap-1 mt-1 text-xs text-purple-600">
+                            <Calculator className="h-3 w-3" />
+                            <span>Kelengkapan data</span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Quick Actions */}
-                <div className="border-t pt-4">
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        Aksi Cepat
-                    </h4>
+                <div className="pt-4 border-t">
+                    <h4 className="text-sm font-semibold mb-3">Aksi Cepat</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         <Button
                             variant="outline"
@@ -158,7 +148,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                             onClick={() => router.push('/hpp/calculator')}
                         >
                             <Calculator className="h-4 w-4 mr-2" />
-                            Kalkulator HPP
+                            Kalkulator
                         </Button>
                         <Button
                             variant="outline"
@@ -167,7 +157,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                             onClick={() => router.push('/hpp/snapshots')}
                         >
                             <History className="h-4 w-4 mr-2" />
-                            Riwayat Snapshot
+                            Riwayat
                         </Button>
                         <Button
                             variant="outline"
@@ -176,7 +166,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                             onClick={() => router.push('/hpp/comparison')}
                         >
                             <BarChart3 className="h-4 w-4 mr-2" />
-                            Bandingkan Produk
+                            Bandingkan
                         </Button>
                         <Button
                             variant="outline"
@@ -185,7 +175,7 @@ export const HppOverviewCard = ({ overview }: HppOverviewCardProps) => {
                             onClick={() => router.push('/hpp/reports')}
                         >
                             <FileSpreadsheet className="h-4 w-4 mr-2" />
-                            Export Laporan
+                            Export
                         </Button>
                     </div>
                 </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import { type ReactNode, type FormEvent, useState, useEffect } from 'react'
-import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -231,9 +230,6 @@ const MobileHeader = ({
           {/* Dark/Light Mode Toggle */}
           <ThemeToggle />
 
-          {/* Smart Notification - Shared component with desktop */}
-          <SmartNotifications />
-
           {/* Custom Actions */}
           {actions && actions.length > 0 && (
             <div className="flex items-center space-x-1">
@@ -314,14 +310,14 @@ export default MobileHeader
 
 // Pre-built header variants for common use cases
 export const DashboardHeader = () => (
-    <MobileHeader
-      title="Dashboard"
-      notification={{
-        count: 5,
-        onClick: () => uiLogger.debug('Notifications clicked')
-      }}
-    />
-  )
+  <MobileHeader
+    title="Dashboard"
+    notification={{
+      count: 5,
+      onClick: () => uiLogger.debug('Notifications clicked')
+    }}
+  />
+)
 
 export const PageHeader = ({
   title,
@@ -332,11 +328,11 @@ export const PageHeader = ({
   showBackButton?: boolean
   actions?: ReactNode[]
 }) => (
-    <MobileHeader
-      title={title}
-      showBackButton={showBackButton}
-      onBackClick={() => window.history.back()}
-      actions={actions}
-      showSearch={false}
-    />
-  )
+  <MobileHeader
+    title={title}
+    showBackButton={showBackButton}
+    onBackClick={() => window.history.back()}
+    actions={actions}
+    showSearch={false}
+  />
+)

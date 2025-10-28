@@ -58,6 +58,14 @@ export function useExpenses(options?: { realtime?: boolean }) {
   })
 }
 
+// Operational Costs
+export function useOperationalCosts(options?: { realtime?: boolean }) {
+  return useSupabaseQuery('operational_costs', {
+    orderBy: { column: 'created_at', ascending: false },
+    realtime: options?.realtime,
+  })
+}
+
 // Financial Records
 export function useFinancialRecords(options?: {
   startDate?: string

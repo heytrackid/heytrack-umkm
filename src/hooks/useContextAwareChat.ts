@@ -33,11 +33,13 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
   // Load sessions on mount
   useEffect(() => {
     void loadSessions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load suggestions when page changes
   useEffect(() => {
     void loadSuggestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const loadSessions = useCallback(async () => {
@@ -133,8 +135,16 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
           setSuggestions(data.suggestions);
         }
 
-        // Reload sessions to update list
-        await loadSessions();
+        // Reload sessions to update list (without triggering re-render loop)
+        try {
+          const sessionsResponse = await fetch('/api/ai/sessions');
+          if (sessionsResponse.ok) {
+            const sessionsData = await sessionsResponse.json();
+            setSessions(sessionsData.sessions || []);
+          }
+        } catch (err) {
+          logger.error({ error: err }, 'Failed to reload sessions');
+        }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Terjadi kesalahan';
@@ -147,7 +157,7 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
         setIsLoading(false);
       }
     },
-    [sessionId, pathname, loadSessions]
+    [sessionId, pathname]
   );
 
   const loadSession = useCallback(async (newSessionId: string) => {
@@ -193,17 +203,27 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
         // If deleted session is current, create new session
         if (sessionIdToDelete === sessionId) {
-          await createNewSession();
+          setSessionId(null);
+          setMessages([]);
+          setError(null);
         }
 
-        // Reload sessions
-        await loadSessions();
+        // Reload sessions inline to avoid dependency loop
+        try {
+          const sessionsResponse = await fetch('/api/ai/sessions');
+          if (sessionsResponse.ok) {
+            const sessionsData = await sessionsResponse.json();
+            setSessions(sessionsData.sessions || []);
+          }
+        } catch (err) {
+          logger.error({ error: err }, 'Failed to reload sessions');
+        }
       } catch (err) {
         logger.error({ error: err }, 'Failed to delete session');
         throw err;
       }
     },
-    [sessionId, createNewSession, loadSessions]
+    [sessionId]
   );
 
   const clearError = useCallback(() => {

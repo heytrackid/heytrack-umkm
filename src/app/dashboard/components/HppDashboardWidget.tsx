@@ -3,12 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  Calculator, 
-  AlertTriangle, 
-  Target, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  Calculator,
+  AlertTriangle,
+  Target,
+  DollarSign,
+  TrendingUp,
   TrendingDown,
   BarChart3
 } from 'lucide-react'
@@ -59,55 +59,15 @@ export default function HppDashboardWidget() {
     try {
       void setLoading(true)
 
-      // Load summary data - this would come from a new API endpoint
-      // For now, we'll use placeholder data
-      const mockData: HppDashboardData = {
-        totalRecipes: 15,
-        recipesWithHpp: 12,
-        averageHpp: 45000,
-        averageMargin: 35,
-        totalAlerts: 3,
-        unreadAlerts: 2,
-        topRecipes: [
-          {
-            id: '1',
-            name: 'Nasi Goreng Special',
-            hpp_value: 25000,
-            margin_percentage: 45,
-            last_updated: '2025-01-26'
-          },
-          {
-            id: '2',
-            name: 'Ayam Bakar Madu',
-            hpp_value: 35000,
-            margin_percentage: 40,
-            last_updated: '2025-01-26'
-          },
-          {
-            id: '3',
-            name: 'Sate Ayam',
-            hpp_value: 30000,
-            margin_percentage: 38,
-            last_updated: '2025-01-25'
-          }
-        ],
-        recentChanges: [
-          {
-            recipe_id: '1',
-            recipe_name: 'Nasi Goreng Special',
-            change_percentage: 5.2,
-            direction: 'increase'
-          },
-          {
-            recipe_id: '4',
-            recipe_name: 'Mie Goreng',
-            change_percentage: -3.1,
-            direction: 'decrease'
-          }
-        ]
+      // Fetch real data from API
+      const response = await fetch('/api/dashboard/hpp-summary')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch HPP dashboard data')
       }
 
-      void setData(mockData)
+      const realData: HppDashboardData = await response.json()
+      void setData(realData)
     } catch (err: unknown) {
       dbLogger.error({ err }, 'Failed to load HPP dashboard data')
       toast({

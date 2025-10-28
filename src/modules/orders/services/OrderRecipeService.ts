@@ -120,11 +120,12 @@ export class OrderRecipeService {
    */
   static updateInventoryForOrder(
     order_id: string,
+    user_id: string,
     items: Array<{
       recipe_id: string
       quantity: number
     }>
   ): Promise<void> {
-    return InventoryUpdateService.updateInventoryForOrder(order_id, items)
+    return InventoryUpdateService.updateInventoryForOrder(order_id, user_id, items)
   }
 }

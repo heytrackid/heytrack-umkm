@@ -9,8 +9,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResponsive } from '@/hooks/useResponsive'
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
-import type { Order, OrderFormData, Priority } from './types'
-import { generateOrderNumber, calculateOrderTotal, validateOrderData } from './utils'
+import type { Order, OrderFormData, Priority, OrderItem } from './types'
+import { generateOrderNumber, calculateOrderTotal } from './utils'
+import { validateOrderData } from '@/lib/validations/form-validations'
 import { useCurrency } from '@/hooks/useCurrency'
 
 import { apiLogger } from '@/lib/logger'
@@ -27,11 +28,11 @@ interface Recipe {
   price?: number
 }
 
-export default function OrderForm({ 
-  order, 
-  onSave, 
-  onCancel, 
-  loading = false 
+export default function OrderForm({
+  order,
+  onSave,
+  onCancel,
+  loading = false
 }: OrderFormProps) {
   const { isMobile } = useResponsive()
   const { formatCurrency } = useCurrency()
@@ -57,7 +58,7 @@ export default function OrderForm({
         customer_phone: order.customer_phone || '',
         customer_email: order.customer_email || '',
         customer_address: order.customer_address || '',
-        delivery_date: order.delivery_date.split('T')[0], // Extract date part
+        delivery_date: order.delivery_date?.split('T')[0] || '', // Extract date part
         delivery_time: order.delivery_time || '10:00',
         priority: order.priority,
         notes: order.notes || '',
@@ -85,7 +86,7 @@ export default function OrderForm({
         void setRecipes(data)
       }
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Error fetching recipes:')
+      apiLogger.error({ err }, 'Error fetching recipes')
     }
   }
 
@@ -112,14 +113,14 @@ export default function OrderForm({
     }))
   }
 
-  const updateOrderItem = <K extends keyof Omit<OrderItem, 'id'>>(
+  const updateOrderItem = (
     index: number,
-    field: K,
-    value: Omit<OrderItem, 'id'>[K]
+    field: keyof Omit<OrderItem, 'id'>,
+    value: string | number
   ) => {
     setFormData(prev => ({
       ...prev,
-      order_items: prev.order_items.map((item, i) => 
+      order_items: prev.order_items.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       )
     }))
@@ -133,8 +134,8 @@ export default function OrderForm({
   }
 
   const handleRecipeSelect = (index: number, recipeId: string) => {
-    if (recipeId === 'placeholder') {return} // Ignore placeholder selection
-    
+    if (recipeId === 'placeholder') { return } // Ignore placeholder selection
+
     const recipe = recipes.find(r => r.id === recipeId)
     if (recipe) {
       void updateOrderItem(index, 'recipe_id', recipeId)
@@ -146,7 +147,7 @@ export default function OrderForm({
   }
 
   const handleSubmit = () => {
-    const validationErrors = validateOrderData(formData)
+    const validationErrors = validateOrderData(formData as unknown as Record<string, unknown>)
     if (validationErrors.length > 0) {
       void setErrors(validationErrors)
       return
@@ -197,7 +198,7 @@ export default function OrderForm({
         {/* Customer Information */}
         <Card>
           <CardHeader>
-          <CardTitle>Informasi Pelanggan</CardTitle>
+            <CardTitle>Informasi Pelanggan</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -208,7 +209,7 @@ export default function OrderForm({
                 placeholder=""
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Nomor Telepon *</Label>
               <Input
@@ -217,7 +218,7 @@ export default function OrderForm({
                 placeholder=""
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Alamat Email</Label>
               <Input
@@ -227,7 +228,7 @@ export default function OrderForm({
                 placeholder=""
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Alamat Pengiriman</Label>
               <Textarea
@@ -256,7 +257,7 @@ export default function OrderForm({
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Waktu Pengiriman</Label>
                 <Input
@@ -266,11 +267,11 @@ export default function OrderForm({
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Tingkat Prioritas</Label>
-              <Select 
-                value={formData.priority} 
+              <Select
+                value={formData.priority}
                 onValueChange={(value: Priority) => handleInputChange('priority', value)}
               >
                 <SelectTrigger>
@@ -283,7 +284,7 @@ export default function OrderForm({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Catatan Pesanan</Label>
               <Textarea
@@ -340,7 +341,7 @@ export default function OrderForm({
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <div>
                       <Label>Jumlah</Label>
                       <Input
@@ -350,7 +351,7 @@ export default function OrderForm({
                         min="1"
                       />
                     </div>
-                    
+
                     <div>
                       <Label>Harga</Label>
                       <Input
@@ -360,7 +361,7 @@ export default function OrderForm({
                         min="0"
                       />
                     </div>
-                    
+
                     <div className="flex items-end">
                       <Button
                         variant="ghost"
@@ -372,7 +373,7 @@ export default function OrderForm({
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="mt-3">
                     <Label>Catatan (Opsional)</Label>
                     <Input
@@ -383,7 +384,7 @@ export default function OrderForm({
                   </div>
                 </div>
               ))}
-              
+
               <div className="border-t pt-4">
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total Harga:</span>
@@ -397,8 +398,8 @@ export default function OrderForm({
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <Button 
-          onClick={handleSubmit} 
+        <Button
+          onClick={handleSubmit}
           disabled={loading || formData.order_items.length === 0}
           className="flex-1"
         >

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, memo, type ReactNode } from 'react'
-import SmartNotifications from '@/components/automation/smart-notifications'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
@@ -110,7 +109,6 @@ const AppLayout = memo(({
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <SmartNotifications />
               <ThemeToggle />
               {/* User Authentication */}
               {loading ? (

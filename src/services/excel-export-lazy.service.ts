@@ -55,21 +55,11 @@ export class LazyExcelExportService {
 
   /**
    * Export all data with automatic download
+   * @param data - The data to export (must be provided by caller)
    * @returns Promise that resolves when export is complete
    */
-  static async exportAllData(): Promise<void> {
-    // Simplified mock export - in a real implementation, this would gather data from APIs
-    const mockData: ExportData<string[]> = {
-      headers: ['Name', 'Value'],
-      data: [
-        ['Sample Export', 'Success'],
-        ['Date', new Date().toISOString()],
-        ['Status', 'Completed']
-      ],
-      filename: 'HeyTrack-Export.json'
-    }
-
-    const blob = await this.exportToExcel(mockData)
+  static async exportAllData(data: ExportData<string[]>): Promise<void> {
+    const blob = await this.exportToExcel(data)
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
