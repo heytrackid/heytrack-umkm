@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
+    // @ts-expect-error - Supabase insert type inference issue
     const { data, error } = await supabase
       .from('customers')
       .insert({

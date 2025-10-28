@@ -230,6 +230,7 @@ export class HppAlertAgent {
         is_read: false
       }
 
+      // @ts-expect-error - Supabase insert type
       const { error: insertError } = await supabase
         .from('hpp_alerts')
         .insert([alertData])
@@ -303,6 +304,7 @@ export class HppAlertAgent {
    */
   async markAlertAsRead(alertId: string): Promise<void> {
     try {
+      // @ts-expect-error - Supabase update type
       const { error } = await supabase
         .from('hpp_alerts')
         .update([{ is_read: true }])

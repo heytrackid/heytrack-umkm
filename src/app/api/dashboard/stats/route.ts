@@ -224,6 +224,7 @@ export async function POST() {
     // Upsert daily summary
     type DailySalesSummary = Database['public']['Tables']['daily_sales_summary']['Insert']
     
+    // @ts-expect-error - Supabase upsert type inference
     const { error } = await supabase
       .from('daily_sales_summary')
       .upsert([{

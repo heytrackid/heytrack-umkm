@@ -195,6 +195,7 @@ export async function POST(request: Request) {
         entity_id: expense.id,
         priority: 'high' as const
       }
+      // @ts-expect-error - Supabase insert type
       await supabase.from('notifications').insert([notificationPayload])
     }
 

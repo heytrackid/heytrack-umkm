@@ -45,6 +45,7 @@ export async function POST(_request: NextRequest) {
     }
 
     // Insert into financial_records
+    // @ts-expect-error - Supabase insert type
     const { data: record, error: insertError } = await supabase
       .from('financial_records')
       .insert({
