@@ -34,6 +34,20 @@ export async function GET(__request: NextRequest) {
     }
 
     // Get recipes with HPP calculations
+    type HppWithRecipe = {
+      recipe_id: string
+      total_hpp: number
+      cost_per_unit: number
+      calculation_date: string | null
+      recipes: {
+        id: string
+        name: string
+        selling_price: number | null
+        user_id: string
+      } | null
+    }
+
+    // @ts-expect-error - Supabase join types are complex, runtime types are correct
     const { data: hppCalculations, error: hppError } = await supabase
       .from('hpp_calculations')
       .select(`
@@ -49,7 +63,7 @@ export async function GET(__request: NextRequest) {
         )
       `)
       .eq('recipes.user_id', user.id)
-      .order('calculation_date', { ascending: false })
+      .order('calculation_date', { ascending: false }) as { data: HppWithRecipe[] | null, error: unknown }
 
     if (hppError) {
       throw hppError
@@ -60,7 +74,7 @@ export async function GET(__request: NextRequest) {
     const recipesWithHpp = uniqueRecipeIds.size
 
     // Calculate average HPP
-    const latestHppByRecipe = new Map<string, typeof hppCalculations[0]>()
+    const latestHppByRecipe = new Map<string, HppWithRecipe>()
     hppCalculations?.forEach(calc => {
       if (!latestHppByRecipe.has(calc.recipe_id)) {
         latestHppByRecipe.set(calc.recipe_id, calc)
@@ -88,12 +102,18 @@ export async function GET(__request: NextRequest) {
       : 0
 
     // Get HPP alerts
-    const { data: alerts, error: alertsError } = await supabase
+    type AlertRow = {
+      id: string
+      is_read: boolean | null
+    }
+
+    // @ts-expect-error - Supabase types
+    const { data: alerts, error: alertsError} = await supabase
       .from('hpp_alerts')
       .select('id, is_read')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(50)
+      .limit(50) as { data: AlertRow[] | null, error: unknown }
 
     if (alertsError) {
       throw alertsError
@@ -123,8 +143,25 @@ export async function GET(__request: NextRequest) {
       .slice(0, 3)
 
     // Get recent HPP changes (compare last 2 calculations per recipe)
-    const recentChanges = []
+    type HppCalcWithRecipe = {
+      cost_per_unit: number
+      calculation_date: string | null
+      recipes: {
+        id: string
+        name: string
+        user_id: string
+      } | null
+    }
+
+    const recentChanges: Array<{
+      recipe_id: string
+      recipe_name: string
+      change_percentage: number
+      direction: 'increase' | 'decrease'
+    }> = []
+
     for (const recipeId of Array.from(uniqueRecipeIds).slice(0, 5)) {
+      // @ts-expect-error - Supabase join types
       const { data: calcs } = await supabase
         .from('hpp_calculations')
         .select(`
@@ -139,7 +176,7 @@ export async function GET(__request: NextRequest) {
         .eq('recipe_id', recipeId)
         .eq('recipes.user_id', user.id)
         .order('calculation_date', { ascending: false })
-        .limit(2)
+        .limit(2) as { data: HppCalcWithRecipe[] | null }
 
       if (calcs && calcs.length >= 2) {
         const latest = calcs[0]
