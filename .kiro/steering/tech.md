@@ -27,7 +27,8 @@ const supabase = await createClient()
 import { createClient } from '@/utils/supabase/client'
 const supabase = createClient()
 
-// ✅ Admin/Service Role
+// ✅ Admin/Service Role (SERVER-ONLY - Add 'server-only' import)
+import 'server-only' // REQUIRED
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 const supabase = createServiceRoleClient()
 

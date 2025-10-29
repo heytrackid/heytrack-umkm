@@ -21,7 +21,7 @@ interface ValidationCacheConfig {
 
 // Global cache instance
 class ValidationCache {
-  private cache = new Map<string, ValidationCacheEntry<any>>()
+  private cache = new Map<string, ValidationCacheEntry<unknown>>()
   private config: ValidationCacheConfig
 
   constructor(config: Partial<ValidationCacheConfig> = {}) {

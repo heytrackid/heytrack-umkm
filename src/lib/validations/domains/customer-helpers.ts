@@ -112,16 +112,16 @@ export class CustomerValidationHelpers {
    * Validate bulk customer import data
    */
   static validateBulkImport(customers: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: CustomerInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: CustomerInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     customers.forEach((customer, index) => {
       const result = this.validateInsert(customer)
       if (result.success) {
-        valid.push(result.data)
+        valid.push(result.data!)
       } else {
         invalid.push({
           index,

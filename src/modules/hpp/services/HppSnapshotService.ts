@@ -1,16 +1,17 @@
 /**
  * HPP Snapshot Service
  * Handles daily snapshots of HPP calculations for trend analysis
+ * SERVER-ONLY: Uses service role client for automated tasks
  */
 
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type { Database } from '@/types/supabase-generated'
 
 type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
-type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
-type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppSnapshotInsert = Database['public']['Tables']['hpp_snapshots']['Insert']
 
 export class HppSnapshotService {
   private logger = dbLogger
@@ -48,17 +49,23 @@ export class HppSnapshotService {
         throw new Error(`Failed to fetch recipe: ${recipeError.message}`)
       }
 
-      // Create snapshot
-      const snapshotData = {
+      // Create snapshot with all required fields
+      const snapshotData: HppSnapshotInsert = {
         recipe_id: recipeId,
         snapshot_date: new Date().toISOString().split('T')[0],
         hpp_value: calculation.total_hpp,
         material_cost: calculation.material_cost,
         labor_cost: calculation.labor_cost,
         overhead_cost: calculation.overhead_cost,
+        operational_cost: calculation.overhead_cost, // Use overhead_cost as operational_cost
+        cost_breakdown: {
+          material: calculation.material_cost,
+          labor: calculation.labor_cost,
+          overhead: calculation.overhead_cost,
+          total: calculation.total_hpp
+        },
         selling_price: recipe?.selling_price || null,
-        margin_percentage: recipe?.margin_percentage || null,
-        notes: 'Daily automated snapshot'
+        margin_percentage: recipe?.margin_percentage || null
       }
 
       const { data: snapshot, error: snapshotError } = await supabase

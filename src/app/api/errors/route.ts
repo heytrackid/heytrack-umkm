@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { ErrorLogSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
-import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 interface ErrorRecord {
   id: string

@@ -1,24 +1,29 @@
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
+import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type RecipeUpdate = Database['public']['Tables']['recipes']['Update']
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // ✅ OPTIMIZED: Use specific fields
     const { data: recipe, error } = await supabase
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -35,6 +40,13 @@ export async function GET(
       )
     }
 
+    if (!recipe) {
+      return NextResponse.json(
+        { error: 'Recipe not found' },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json(recipe)
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in GET /api/recipes/[id]:')
@@ -48,19 +60,27 @@ export async function GET(
 // PUT /api/recipes/[id] - Update recipe and its ingredients
 export async function PUT(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    // Get authenticated user for user_id
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await _request.json()
     const { recipe_ingredients, ...recipeData } = body
 
-    // Update the recipe
+    // Update the recipe ensuring it belongs to the user
     const { data: recipe, error: recipeError } = await supabase
       .from('recipes')
       .update(recipeData)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select('id, name, updated_at')
       .single()
 
@@ -78,6 +98,13 @@ export async function PUT(
       )
     }
 
+    if (!recipe) {
+      return NextResponse.json(
+        { error: 'Recipe not found or unauthorized' },
+        { status: 404 }
+      )
+    }
+
     // If ingredients are provided, update them
     if (recipe_ingredients !== undefined) {
       // Delete existing recipe ingredients
@@ -85,6 +112,7 @@ export async function PUT(
         .from('recipe_ingredients')
         .delete()
         .eq('recipe_id', id)
+        .eq('user_id', user.id)
 
       if (deleteError) {
         apiLogger.error({ error: deleteError }, 'Error deleting existing ingredients:')
@@ -96,17 +124,25 @@ export async function PUT(
 
       // Add new ingredients if any
       if (recipe_ingredients.length > 0) {
-        const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => {
+        type RecipeIngredientInput = {
+          ingredient_id?: string
+          bahan_id?: string
+          quantity?: number
+          qty_per_batch?: number
+          unit?: string
+        }
+
+        const recipeIngredientsToInsert: Database['public']['Tables']['recipe_ingredients']['Insert'][] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => {
           if (!ingredient || typeof ingredient !== 'object') {
             throw new Error('Invalid ingredient format')
           }
 
-          const ing = ingredient as Record<string, unknown>
           return {
             recipe_id: id,
-            ingredient_id: ing['ingredient_id'] || ing['bahan_id'],
-            quantity: ing['quantity'] || ing['qty_per_batch'],
-            unit: ing['unit'] || 'g'
+            ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
+            quantity: ingredient.quantity || ingredient.qty_per_batch || 0,
+            unit: ingredient.unit || 'g',
+            user_id: user.id
           }
         })
 
@@ -130,11 +166,19 @@ export async function PUT(
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError) {
       apiLogger.error({ error: fetchError }, 'Error fetching updated recipe:')
       return NextResponse.json(recipe)
+    }
+
+    if (!completeRecipe) {
+      return NextResponse.json(
+        { error: 'Recipe not found after update' },
+        { status: 404 }
+      )
     }
 
     return NextResponse.json(completeRecipe)
@@ -150,18 +194,23 @@ export async function PUT(
 // DELETE /api/recipes/[id] - Delete recipe (cascade will delete resep_item)
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
 
-    // Check if recipe exists first
-    // const { data: existingRecipe, error: checkError } = await supabase
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check if recipe exists and belongs to user first
     const { error: checkError } = await supabase
       .from('recipes')
       .select('id')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (checkError?.code === 'PGRST116') {
@@ -176,6 +225,7 @@ export async function DELETE(
       .from('recipes')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       apiLogger.error({ error }, 'Error deleting recipe:')

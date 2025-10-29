@@ -6,9 +6,9 @@ import { safeUpdate } from '@/lib/supabase/type-helpers';
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const supabase = await createClient();
     
@@ -18,7 +18,18 @@ export async function GET(
       .eq('id', id)
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Supplier not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to fetch supplier' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(supplier);
   } catch (err: unknown) {
@@ -28,9 +39,9 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const supabase = await createClient();
     const body = await request.json();
@@ -42,7 +53,24 @@ export async function PUT(
       .select('id, name, contact_person, email, phone, address, notes, is_active, updated_at')
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Supplier not found' },
+          { status: 404 }
+        )
+      }
+      if (error.code === '23505') { // Unique constraint violation
+        return NextResponse.json(
+          { error: 'Supplier with this email already exists' },
+          { status: 409 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to update supplier' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(supplier);
   } catch (err: unknown) {
@@ -52,9 +80,9 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const supabase = await createClient();
 
@@ -63,7 +91,12 @@ export async function DELETE(
       .delete()
       .eq('id', id);
 
-    if (error) {throw error;}
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || 'Failed to delete supplier' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ message: 'Supplier deleted successfully' });
   } catch (err: unknown) {

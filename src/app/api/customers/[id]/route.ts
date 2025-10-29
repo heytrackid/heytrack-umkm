@@ -1,24 +1,30 @@
+import 'server-only'
 import { type NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 import { prepareUpdate } from '@/lib/supabase/insert-helpers'
-
-type Customer = Database['public']['Tables']['customers']['Row']
 // GET /api/customers/[id] - Get single customer
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
     const { data, error } = await supabase
       .from('customers')
       .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, favorite_items, created_at, updated_at, user_id')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
     
     if (error) {
@@ -35,6 +41,13 @@ export async function GET(
       )
     }
 
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Customer not found' },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json(data)
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in GET /api/customers/[id]:')
@@ -48,9 +61,9 @@ export async function GET(
 // PUT /api/customers/[id] - Update customer
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     const supabase = createServiceRoleClient()
     const body = await request.json()
@@ -111,9 +124,9 @@ export async function PUT(
 // DELETE /api/customers/[id] - Delete customer
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     const supabase = createServiceRoleClient()
     

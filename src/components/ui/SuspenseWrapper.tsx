@@ -35,7 +35,7 @@ interface SkeletonProps {
 }
 
 // Loading components mapped to skeleton types
-const loadingComponents: Record<string, ComponentType<any>> = {
+const loadingComponents: Record<string, ComponentType<Record<string, unknown>>> = {
   // Page-level skeletons
   page: () => <div className="p-6 space-y-6">
     <DashboardHeaderSkeleton />
@@ -163,7 +163,7 @@ export const RouteSuspenseWrapper = ({
 /**
  * Lazy component with automatic performance tracking
  */
-export function createTrackedLazyComponent<T extends ComponentType<any>>(
+export function createTrackedLazyComponent<T extends ComponentType<Record<string, unknown>>>(
   importFn: () => Promise<{ default: T }>,
   componentName: string,
   options: {

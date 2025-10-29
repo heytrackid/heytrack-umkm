@@ -1,10 +1,12 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
 import type { RecipeOption } from '../types'
 
 /**
  * Service for handling recipe recommendations based on order history
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class RecipeRecommendationService {
   /**
@@ -15,7 +17,7 @@ export class RecipeRecommendationService {
     limit = 5
   ): Promise<RecipeOption[]> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       let query = supabase
         .from('orders')
         .select(`
@@ -36,7 +38,7 @@ export class RecipeRecommendationService {
       }
 
       query = query
-        .eq('status', 'completed')
+        .eq('status', 'DELIVERED')
         .order('created_at', { ascending: false })
         .limit(50) // Get recent orders
 
@@ -68,8 +70,9 @@ export class RecipeRecommendationService {
       }
       const recipeFrequency = new Map<string, RecipeFrequencyData>()
 
-      orders.forEach((order: OrderQueryResult) => {
-        order.order_items?.forEach((item) => {
+      orders.forEach((order: unknown) => {
+        const typedOrder = order as OrderQueryResult
+        typedOrder.order_items?.forEach((item) => {
           // Supabase returns arrays for joins, get first element
           const recipe = item.recipe?.[0]
           if (recipe) {
@@ -105,7 +108,7 @@ export class RecipeRecommendationService {
           margin: 0, // Would need to calculate
           is_available: true, // Would need to check
           estimated_prep_time: 0 // Would need to calculate
-        }))
+        } as RecipeOption))
 
       return recommendations
     } catch (err: unknown) {

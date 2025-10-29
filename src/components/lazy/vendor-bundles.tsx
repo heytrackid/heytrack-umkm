@@ -80,66 +80,88 @@ export const LazyDateBundle = {
 // }
 
 // Wrapper components untuk vendor libraries
-export const RechartsWithLoading = (
-  ChartComponent: ComponentType<any>,
+export function RechartsWithLoading<T = Record<string, unknown>>(
+  ChartComponent: ComponentType<T>,
   chartName: string
-) => (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
-    <ChartComponent {...props} />
-  </Suspense>
-)
+) {
+  return function WrappedChart(props: T) {
+    return (
+      <Suspense fallback={<VendorLoadingSkeleton name={`${chartName} Chart`} />}>
+        <ChartComponent {...props} />
+      </Suspense>
+    )
+  }
+}
 
-export const RadixWithLoading = (
-  RadixComponent: ComponentType<any>,
-  _componentName: string
-) => (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name={`${_componentName} Component`} />}>
-    <RadixComponent {...props} />
-  </Suspense>
-)
+export function RadixWithLoading<T = Record<string, unknown>>(
+  RadixComponent: ComponentType<T>,
+  componentName: string
+) {
+  return function WrappedComponent(props: T) {
+    return (
+      <Suspense fallback={<VendorLoadingSkeleton name={`${componentName} Component`} />}>
+        <RadixComponent {...props} />
+      </Suspense>
+    )
+  }
+}
 
 // Pre-wrapped common components
-export const LineChartWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Line Chart" />}>
-    <LazyRechartsBundle.LineChart {...props} />
-  </Suspense>
-)
+export function LineChartWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Line Chart" />}>
+      <LazyRechartsBundle.LineChart {...props} />
+    </Suspense>
+  )
+}
 
-export const BarChartWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Bar Chart" />}>
-    <LazyRechartsBundle.BarChart {...props} />
-  </Suspense>
-)
+export function BarChartWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Bar Chart" />}>
+      <LazyRechartsBundle.BarChart {...props} />
+    </Suspense>
+  )
+}
 
-export const AreaChartWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Area Chart" />}>
-    <LazyRechartsBundle.AreaChart {...props} />
-  </Suspense>
-)
+export function AreaChartWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Area Chart" />}>
+      <LazyRechartsBundle.AreaChart {...props} />
+    </Suspense>
+  )
+}
 
-export const PieChartWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Pie Chart" />}>
-    <LazyRechartsBundle.PieChart {...props} />
-  </Suspense>
-)
+export function PieChartWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Pie Chart" />}>
+      <LazyRechartsBundle.PieChart {...props} />
+    </Suspense>
+  )
+}
 
-export const NavigationMenuWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Navigation Menu" />}>
-    <LazyRadixBundle.NavigationMenu {...props} />
-  </Suspense>
-)
+export function NavigationMenuWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Navigation Menu" />}>
+      <LazyRadixBundle.NavigationMenu {...props} />
+    </Suspense>
+  )
+}
 
-export const ScrollAreaWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Scroll Area" />}>
-    <LazyRadixBundle.ScrollArea {...props} />
-  </Suspense>
-)
+export function ScrollAreaWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Scroll Area" />}>
+      <LazyRadixBundle.ScrollArea {...props} />
+    </Suspense>
+  )
+}
 
-export const HoverCardWithSuspense = (props: any) => (
-  <Suspense fallback={<VendorLoadingSkeleton name="Hover Card" />}>
-    <LazyRadixBundle.HoverCard {...props} />
-  </Suspense>
-)
+export function HoverCardWithSuspense<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<VendorLoadingSkeleton name="Hover Card" />}>
+      <LazyRadixBundle.HoverCard {...props} />
+    </Suspense>
+  )
+}
 
 // Utility untuk conditional vendor loading
 export const loadVendorWhenNeeded = async (vendorName: string) => {
@@ -164,19 +186,19 @@ export const loadVendorWhenNeeded = async (vendorName: string) => {
 }
 
 // Hook untuk lazy vendor loading dengan error handling
-export const useVendorLib = (vendorName: string) => {
-  const [lib, setLib] = useState<any>(null)
+export const useVendorLib = <T = Record<string, unknown>>(vendorName: string) => {
+  const [lib, setLib] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     void loadVendorWhenNeeded(vendorName)
       .then(module => {
-        void setLib(module)
+        void setLib(module as T)
         void setLoading(false)
       })
       .catch(err => {
-        void setError(err)
+        void setError(err instanceof Error ? err : new Error(String(err)))
         void setLoading(false)
       })
   }, [vendorName])

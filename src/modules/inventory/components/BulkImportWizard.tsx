@@ -38,9 +38,9 @@ type Step = 'upload' | 'validate' | 'review' | 'import' | 'complete'
 
 export function BulkImportWizard({ onImport, onCancel }: BulkImportWizardProps) {
     const [currentStep, setCurrentStep] = useState<Step>('upload')
-    const [file, setFile] = useState<File | null>(null)
+    const [_file, setFile] = useState<File | null>(null)
     const [parsedData, setParsedData] = useState<ImportRow[]>([])
-    const [importing, setImporting] = useState(false)
+    const [_importing, setImporting] = useState(false)
     const [importProgress, setImportProgress] = useState(0)
     const [importResults, setImportResults] = useState<{ success: number; failed: number }>({ success: 0, failed: 0 })
     const fileInputRef = useRef<HTMLInputElement>(null)

@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { OperationalCostInsertSchema } from '@/lib/validations/domains/finance'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
-import { safeInsert, safeUpdate } from '@/lib/supabase/type-helpers'
 import { apiLogger } from '@/lib/logger'
 
 type ExpensesTable = Database['public']['Tables']['expenses']
@@ -36,12 +35,12 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 
-    // Query operational_costs table (for HPP-related costs)
+    // Query expenses table (operational costs)
     let query = supabase
-      .from('operational_costs')
-      .select('id, description, category, amount, date, supplier, payment_method, recurring, frequency, is_active, notes, created_at, updated_at')
+      .from('expenses')
+      .select('*')
       .eq('user_id', user.id)
-      .order('date', { ascending: false })
+      .order('expense_date', { ascending: false })
 
     if (startDate) {
       query = query.gte('expense_date', startDate)
@@ -172,7 +171,9 @@ export async function POST(request: NextRequest) {
       tags: []
     }
 
-    const { data, error } = await safeInsert(supabase as any, 'expenses', insertPayload)
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert(insertPayload)
       .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
       .single()
 
@@ -254,7 +255,9 @@ export async function PUT(request: NextRequest) {
       status: validatedData.is_paid ? 'paid' : 'pending'
     }
 
-    const { data, error } = await safeUpdate(supabase as any, 'expenses', updatePayload)
+    const { data, error } = await supabase
+      .from('expenses')
+      .update(updatePayload)
       .eq('id', body.id)
       .eq('user_id', user.id)
       .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, updated_at')
@@ -319,7 +322,7 @@ export async function DELETE(request: NextRequest) {
 
     // Delete operational cost
     const { data, error } = await supabase
-      .from('operational_costs')
+      .from('expenses')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)

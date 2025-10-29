@@ -367,7 +367,7 @@ export function useBundleAnalyzer() {
 // Performance optimization utilities
 export const perfUtils = {
   // Debounce function
-  debounce: <T extends (...args: any[]) => any>(
+  debounce: <T extends (...args: Parameters<T>) => ReturnType<T>>(
     func: T,
     wait: number,
     immediate = false
@@ -390,7 +390,7 @@ export const perfUtils = {
   },
 
   // Throttle function
-  throttle: <T extends (...args: any[]) => any>(
+  throttle: <T extends (...args: Parameters<T>) => ReturnType<T>>(
     func: T,
     limit: number
   ): ((...args: Parameters<T>) => void) => {
@@ -406,7 +406,7 @@ export const perfUtils = {
   },
 
   // Memoization utility
-  memoize: <T extends (...args: any[]) => any>(
+  memoize: <T extends (...args: Parameters<T>) => ReturnType<T>>(
     func: T,
     getKey?: (...args: Parameters<T>) => string
   ): T => {

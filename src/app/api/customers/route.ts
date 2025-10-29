@@ -119,10 +119,10 @@ export async function POST(request: NextRequest) {
       favorite_items: validatedData.favorite_items,
     })
     
-    // Workaround: Type assertion for Supabase SSR client inference issue
+    // Insert with proper typing
     const { data, error } = await supabase
       .from('customers')
-      .insert(customerData as any)
+      .insert(customerData)
       .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, created_at, updated_at')
       .single()
 

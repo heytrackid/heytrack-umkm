@@ -27,7 +27,8 @@ export function MyComponent() {
   // ... use supabase
 }
 
-// ✅ CORRECT - For Service Role (Admin operations)
+// ✅ CORRECT - For Service Role (Admin operations - SERVER-ONLY)
+import 'server-only' // REQUIRED for service role usage
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 export async function adminOperation() {

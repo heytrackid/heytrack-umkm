@@ -1,6 +1,5 @@
 'use client'
 
-import { Suspense } from 'react'
 import type { Database } from '@/types/supabase-generated'
 type Customer = Database['public']['Tables']['customers']['Row']
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -8,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, DollarSign, Package, Users } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 
 // Dynamically import Recharts components to reduce bundle size
@@ -52,14 +51,7 @@ const Cell = dynamic(
   () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Cell),
   { ssr: false }
 )
-const LineChart = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.LineChart),
-  { ssr: false }
-)
-const Line = dynamic(
-  () => import(/* webpackChunkName: "recharts" */ 'recharts').then(mod => mod.Line),
-  { ssr: false }
-)
+
 
 // Type definitions for data structures
 interface ChartEntry {
@@ -69,12 +61,12 @@ interface ChartEntry {
 }
 
 // Extended types for visualization
-interface CustomerForViz extends Customer {
+interface CustomerForViz extends Omit<Customer, 'total_spent' | 'total_orders'> {
   total_spent?: number
   total_orders?: number
 }
 
-interface RecipeForViz extends Recipe {
+interface RecipeForViz extends Omit<Recipe, 'total_revenue' | 'times_made'> {
   total_revenue?: number
   times_made?: number
 }
@@ -194,7 +186,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(value) => `${value / 1000000}M`} />
-                    <Tooltip formatter={(value: number) => [formatCurrency(value), '']} />
+                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
                     <Bar dataKey="value" fill="#8884d8">
                       {chartData.map((entry: ChartEntry, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -330,7 +322,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ name, percent }) => `${name} (${((percent as number) * 100).toFixed(0)}%)`}
                       outerRadius={60}
                       fill="#8884d8"
                       dataKey="value"
@@ -339,7 +331,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
                         <Cell key={`cell-${_index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [formatCurrency(value), 'Total Spent']} />
+                    <Tooltip formatter={(value) => [formatCurrency(value as number), 'Total Spent']} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -390,8 +382,8 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(value) => `${value / 1000}K`} />
-                    <Tooltip formatter={(value: number, name: string) => [
-                      name === 'revenue' ? formatCurrency(value) : formatNumber(value),
+                    <Tooltip formatter={(value, name) => [
+                      name === 'revenue' ? formatCurrency(value as number) : formatNumber(value as number),
                       name === 'revenue' ? 'Revenue' : 'Sales Count'
                     ]} />
                     <Bar dataKey="revenue" fill="#FF8042" />

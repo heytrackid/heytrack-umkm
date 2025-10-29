@@ -15,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 
 interface Scenario {
     id: string
@@ -34,21 +35,7 @@ interface Scenario {
 }
 
 interface HppScenarioPlannerProps {
-    recipe: {
-        id: string
-        name: string
-        total_cost: number
-        selling_price?: number
-        recipe_ingredients?: Array<{
-            quantity: number
-            unit: string
-            ingredient?: {
-                id: string
-                name: string
-                price_per_unit: number
-            }
-        }>
-    }
+    recipe: RecipeWithCosts
 }
 
 export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
@@ -67,19 +54,17 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
         type: 'price' | 'quantity',
         changePercent: number
     ) => {
-        const ingredient = recipe.recipe_ingredients?.find(
-            ri => ri.ingredient?.id === ingredientId
-        )
-        if (!ingredient?.ingredient) return null
+        const ingredient = recipe.ingredients.find((item) => item.id === ingredientId)
+        if (!ingredient) return null
 
-        const originalCost = ingredient.ingredient.price_per_unit * ingredient.quantity
+        const originalCost = ingredient.unit_price * ingredient.quantity
         const multiplier = 1 + (changePercent / 100)
 
         let newIngredientCost = originalCost
         if (type === 'price') {
-            newIngredientCost = ingredient.ingredient.price_per_unit * multiplier * ingredient.quantity
+            newIngredientCost = ingredient.unit_price * multiplier * ingredient.quantity
         } else {
-            newIngredientCost = ingredient.ingredient.price_per_unit * ingredient.quantity * multiplier
+            newIngredientCost = ingredient.unit_price * ingredient.quantity * multiplier
         }
 
         const costDiff = newIngredientCost - originalCost
@@ -98,19 +83,17 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
     const addScenario = () => {
         if (!selectedIngredient) return
 
-        const ingredient = recipe.recipe_ingredients?.find(
-            ri => ri.ingredient?.id === selectedIngredient
-        )
-        if (!ingredient?.ingredient) return
+        const ingredient = recipe.ingredients.find((item) => item.id === selectedIngredient)
+        if (!ingredient) return
 
         const impact = calculateScenario(selectedIngredient, changeType, changePercent)
         if (!impact) return
 
         const newScenario: Scenario = {
             id: Date.now().toString(),
-            name: `${ingredient.ingredient.name} ${changeType === 'price' ? 'harga' : 'qty'} ${changePercent > 0 ? '+' : ''}${changePercent}%`,
+            name: `${ingredient.name} ${changeType === 'price' ? 'harga' : 'qty'} ${changePercent > 0 ? '+' : ''}${changePercent}%`,
             changes: [{
-                ingredient: ingredient.ingredient.name,
+                ingredient: ingredient.name,
                 type: changeType,
                 change: changePercent
             }],
@@ -133,12 +116,11 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
 
     const applyQuickScenario = (type: 'price' | 'quantity', change: number) => {
         // Apply to all ingredients
-        const allIngredients = recipe.recipe_ingredients?.filter(ri => ri.ingredient) || []
+        const allIngredients = recipe.ingredients
 
         let totalNewCost = currentCost
-        allIngredients.forEach(ri => {
-            if (!ri.ingredient) return
-            const impact = calculateScenario(ri.ingredient.id, type, change)
+        allIngredients.forEach((ri) => {
+            const impact = calculateScenario(ri.id, type, change)
             if (impact) {
                 totalNewCost = impact.newCost
             }
@@ -150,7 +132,7 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
             id: Date.now().toString(),
             name: `Semua bahan ${type === 'price' ? 'harga' : 'qty'} ${change > 0 ? '+' : ''}${change}%`,
             changes: allIngredients.map(ri => ({
-                ingredient: ri.ingredient!.name,
+                ingredient: ri.name,
                 type,
                 change
             })),
@@ -246,12 +228,10 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
                                     <SelectValue placeholder="Pilih bahan..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {recipe.recipe_ingredients?.map((ri) => (
-                                        ri.ingredient && (
-                                            <SelectItem key={ri.ingredient.id} value={ri.ingredient.id}>
-                                                {ri.ingredient.name}
-                                            </SelectItem>
-                                        )
+                                    {recipe.ingredients.map((ingredient) => (
+                                        <SelectItem key={ingredient.id} value={ingredient.id}>
+                                            {ingredient.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>

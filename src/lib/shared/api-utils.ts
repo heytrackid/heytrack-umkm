@@ -13,14 +13,14 @@ export function createSuccessResponse<T>(
   message?: string,
   status = 200
 ) {
-  const response: any = {
+  const response = {
     success: true,
     data,
     timestamp: new Date().toISOString()
   }
 
   if (message) {
-    response.message = message
+    Object.assign(response, { message })
   }
 
   return NextResponse.json(response, { status })
@@ -29,16 +29,16 @@ export function createSuccessResponse<T>(
 export function createErrorResponse(
   message: string,
   status = 500,
-  details?: any
+  details?: unknown
 ) {
-  const errorResponse: any = {
+  const errorResponse = {
     success: false,
     error: message,
     timestamp: new Date().toISOString()
   }
 
   if (details) {
-    errorResponse.details = details
+    Object.assign(errorResponse, { details })
   }
 
   apiLogger.error({ message, status, details }, 'API Error Response')
@@ -66,9 +66,11 @@ export function createPaginatedResponse<T>(
 }
 
 // Request validation helpers
+import { ZodSchema } from 'zod'
+
 export async function validateRequestData<T>(
   request: NextRequest,
-  schema: any
+  schema: ZodSchema<T>
 ): Promise<T> {
   try {
     const body = await request.json()
@@ -78,7 +80,7 @@ export async function validateRequestData<T>(
       throw new Error(`Validation failed: ${result.error.issues.map(i => i.message).join(', ')}`)
     }
 
-    return result.data as T
+    return result.data
   } catch (err) {
     throw new Error(`Request validation failed: ${getErrorMessage(err)}`)
   }
@@ -127,7 +129,7 @@ export function createPaginationMeta(
 // Search and filter helpers
 export function extractSearchParams(request: NextRequest): {
   search?: string
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 } {
@@ -138,7 +140,7 @@ export function extractSearchParams(request: NextRequest): {
   const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc'
 
   // Extract filters (any param that starts with 'filter_')
-  const filters: Record<string, any> = {}
+  const filters: Record<string, unknown> = {}
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
       const filterKey = key.replace('filter_', '')
@@ -155,7 +157,7 @@ export function createRateLimitKey(identifier: string, action: string): string {
 }
 
 // Caching helpers
-export function generateETag(data: any): string {
+export function generateETag(data: unknown): string {
   const crypto = require('crypto')
   return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')
 }
@@ -179,7 +181,7 @@ export function handleConditionalGET(
 export function logAPIRequest(
   request: NextRequest,
   userId?: string,
-  additionalData?: any
+  additionalData?: unknown
 ) {
   const url = new URL(request.url)
   const logData = {

@@ -1,6 +1,6 @@
 'use client'
 
-import useState from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -17,8 +17,7 @@ import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated';
 
 type Supplier = Database['public']['Tables']['suppliers']['Row'];
-type SupplierInsert = Database['public']['Tables']['suppliers']['Insert'];
-type SupplierUpdate = Database['public']['Tables']['suppliers']['Update'];
+
 
 export const SuppliersCRUD = () => {
   const { data: suppliersData, loading, error } = useSuppliers();
@@ -57,30 +56,35 @@ export const SuppliersCRUD = () => {
     {
       key: 'name',
       header: 'Name',
-      priority: 'high' as const,
     },
     {
       key: 'contact_person',
       header: 'Contact Person',
-      render: (value: string) => value || '-',
-      priority: 'high' as const,
+      render: (value: unknown) => (value as string) || '-',
     },
     {
       key: 'phone',
       header: 'Phone',
-      render: (value: string) => value || '-',
+      render: (value: unknown) => (value as string) || '-',
       hideOnMobile: true,
     },
     {
       key: 'email',
       header: 'Email',
-      render: (value: string) => value || '-',
+      render: (value: unknown) => (value as string) || '-',
       hideOnMobile: true,
     },
   ];
 
   const handleCreate = () => {
-    createForm.reset()
+    createForm.reset({
+      name: '',
+      contact_person: '',
+      phone: '',
+      email: '',
+      address: '',
+      notes: '',
+    })
     void setIsCreateModalOpen(true)
   }
 
@@ -92,7 +96,7 @@ export const SuppliersCRUD = () => {
       phone: supplier.phone || '',
       email: supplier.email || '',
       address: supplier.address || '',
-      notes: '' // Notes field not in supplier type
+      notes: supplier.notes || '',
     })
     void setIsEditModalOpen(true)
   }
@@ -102,26 +106,40 @@ export const SuppliersCRUD = () => {
     void setIsDeleteDialogOpen(true)
   }
 
-  const handleSubmitCreate = async (data: SupplierForm) => {
+  const handleSubmitCreate = async (data: Record<string, unknown>) => {
     try {
-      await createSupplier(data)
+      await createSupplier(data as Database['public']['Tables']['suppliers']['Insert'])
       void setIsCreateModalOpen(false)
-      createForm.reset()
+      createForm.reset({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      })
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Failed to create supplier:')
+      apiLogger.error({ err }, 'Failed to create supplier:')
     }
   }
 
-  const handleSubmitEdit = async (data: SupplierForm) => {
+  const handleSubmitEdit = async (data: Record<string, unknown>) => {
     if (!selectedSupplier) {return}
 
     try {
-      await updateSupplier(selectedSupplier.id, data)
+      await updateSupplier(selectedSupplier.id, data as Database['public']['Tables']['suppliers']['Update'])
       void setIsEditModalOpen(false)
       void setSelectedSupplier(null)
-      editForm.reset()
+      editForm.reset({
+        name: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      })
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Failed to update supplier:')
+      apiLogger.error({ err }, 'Failed to update supplier:')
     }
   }
 
@@ -133,18 +151,11 @@ export const SuppliersCRUD = () => {
       setIsDeleteDialogOpen(false);
       setSelectedSupplier(null);
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Failed to delete supplier:');
+      apiLogger.error({ err }, 'Failed to delete supplier:');
     }
   }
 
-  const closeModals = () => {
-    void setIsCreateModalOpen(false)
-    void setIsEditModalOpen(false)
-    void setIsDeleteDialogOpen(false)
-    void setSelectedSupplier(null)
-    createForm.reset()
-    editForm.reset()
-  }
+
 
   if (error) {
     return (

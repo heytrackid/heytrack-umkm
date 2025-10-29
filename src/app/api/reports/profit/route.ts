@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
-import { transformRecipeWithIngredients, calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
+import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
 import type { RecipeWithIngredients } from '@/types/query-results'
 
 type Order = Database['public']['Tables']['orders']['Row']
@@ -91,13 +91,20 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Transform recipes to proper structure
-    const recipes = (recipesRaw ?? []).map(transformRecipeWithIngredients)
+    // Transform recipes - handle Supabase join structure
+    // Supabase returns ingredient as array, we need to extract first element
+    const recipes: RecipeWithIngredients[] = (recipesRaw ?? []).map((recipe) => ({
+      ...recipe,
+      recipe_ingredients: (recipe.recipe_ingredients ?? []).map((ri) => ({
+        ...ri,
+        ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient!
+      }))
+    })) as RecipeWithIngredients[]
 
     // Get all expenses (non-revenue) in the period for operating costs
     const { data: expenses, error: expensesError } = await supabase
       .from('financial_records')
-      .select('amount, category')
+      .select('*')
       .eq('user_id', user.id)
       .eq('type', 'EXPENSE')
       .gte('date', startDate)

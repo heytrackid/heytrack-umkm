@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { useSupabaseCRUD } from '@/hooks/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,13 +15,22 @@ import {
     Clock,
     Users,
     ArrowLeft,
-    Copy,
 } from 'lucide-react'
 import type { Database } from '@/types/supabase-generated'
+import { createClient } from '@/utils/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
+type RecipeRow = Database['public']['Tables']['recipes']['Row']
+type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
+type IngredientRow = Database['public']['Tables']['ingredients']['Row']
+
+type RecipeIngredientWithDetails = RecipeIngredientRow & {
+    ingredient: Pick<IngredientRow, 'id' | 'name' | 'unit' | 'price_per_unit'> | null
+}
+
+type RecipeWithIngredients = RecipeRow & {
+    recipe_ingredients: RecipeIngredientWithDetails[]
+}
 
 interface RecipeDetailPageProps {
     recipeId: string
@@ -31,25 +39,49 @@ interface RecipeDetailPageProps {
 export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
-    const { read, delete: deleteRecipe } = useSupabaseCRUD('recipes')
-    const { data: recipeIngredients } = useSupabaseCRUD('recipe_ingredients', {
-        filter: { recipe_id: recipeId },
-    })
-    const { data: ingredients } = useSupabaseCRUD('ingredients')
+    const { user, isLoading: authLoading } = useAuth()
 
-    const [recipe, setRecipe] = useState<Recipe | null>(null)
+    const supabase = useMemo(() => createClient(), [])
+
+    const [recipe, setRecipe] = useState<RecipeWithIngredients | null>(null)
     const [loading, setLoading] = useState(true)
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-    useEffect(() => {
-        loadRecipe()
-    }, [recipeId])
-
-    const loadRecipe = async () => {
+    const loadRecipe = useCallback(async (userId: string) => {
         try {
-            setLoading(true)
-            const data = await read(recipeId)
-            setRecipe(data)
+            void setLoading(true)
+
+            const { data, error } = await supabase
+                .from('recipes')
+                .select(`
+                    *,
+                    recipe_ingredients (
+                        id,
+                        ingredient_id,
+                        quantity,
+                        unit,
+                        ingredient:ingredients (
+                            id,
+                            name,
+                            unit,
+                            price_per_unit
+                        )
+                    )
+                `)
+                .eq('id', recipeId)
+                .eq('user_id', userId)
+                .maybeSingle()
+
+            if (error) {
+                throw error
+            }
+
+            if (!data) {
+                setRecipe(null)
+                return
+            }
+
+            setRecipe(data as RecipeWithIngredients)
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal memuat resep'
             toast({
@@ -57,17 +89,38 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 description: message,
                 variant: 'destructive',
             })
-            router.push('/recipes')
+            setRecipe(null)
         } finally {
-            setLoading(false)
+            void setLoading(false)
         }
-    }
+    }, [recipeId, supabase, toast])
+
+    useEffect(() => {
+        if (!user?.id) {
+            if (!authLoading) {
+                void setLoading(false)
+                setRecipe(null)
+            }
+            return
+        }
+
+        void loadRecipe(user.id)
+    }, [user?.id, authLoading, loadRecipe])
 
     const handleDelete = async () => {
-        if (!recipe) return
+        if (!recipe || !user?.id) {return}
 
         try {
-            await deleteRecipe(recipeId)
+            const { error } = await supabase
+                .from('recipes')
+                .delete()
+                .eq('id', recipeId)
+                .eq('user_id', user.id)
+
+            if (error) {
+                throw error
+            }
+
             toast({
                 title: 'Resep dihapus',
                 description: `${recipe.name} berhasil dihapus`,
@@ -111,12 +164,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
         return labels[difficulty] || difficulty
     }
 
-    const getIngredientDetails = (recipeIngredient: RecipeIngredient) => {
-        const ingredient = ingredients.data?.find((i: Ingredient) => i.id === recipeIngredient.ingredient_id)
-        return ingredient
-    }
-
-    if (loading) {
+    if (loading || authLoading) {
         return (
             <div className="space-y-6">
                 <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-48" />
@@ -154,7 +202,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     </Button>
                     <div>
                         <h1 className="text-3xl font-bold flex items-center gap-2">
-                            <span className="text-3xl">{getCategoryIcon(recipe.category)}</span>
+                            <span className="text-3xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
                             {recipe.name}
                         </h1>
                         {recipe.description && (
@@ -197,7 +245,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Persiapan</p>
-                                <p className="text-2xl font-bold">{recipe.prep_time || 0} menit</p>
+                                <p className="text-2xl font-bold">{recipe.prep_time ?? 0} menit</p>
                             </div>
                             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
                         </div>
@@ -209,7 +257,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Memasak</p>
-                                <p className="text-2xl font-bold">{recipe.cook_time || 0} menit</p>
+                                <p className="text-2xl font-bold">{recipe.cook_time ?? 0} menit</p>
                             </div>
                             <Clock className="h-8 w-8 text-gray-600 dark:text-gray-400" />
                         </div>
@@ -221,8 +269,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Kesulitan</p>
-                                <Badge className={getDifficultyColor(recipe.difficulty || 'medium')}>
-                                    {getDifficultyLabel(recipe.difficulty || 'medium')}
+                                <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
+                                    {getDifficultyLabel(recipe.difficulty ?? 'medium')}
                                 </Badge>
                             </div>
                             <ChefHat className="h-8 w-8 text-gray-600 dark:text-gray-400" />
@@ -237,30 +285,20 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                     <CardTitle>Bahan-bahan</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {recipeIngredients.loading ? (
+                    {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 ? (
                         <div className="space-y-2">
-                            {[...Array(3)].map((_, i) => (
-                                <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                            ))}
-                        </div>
-                    ) : recipeIngredients.data && recipeIngredients.data.length > 0 ? (
-                        <div className="space-y-2">
-                            {recipeIngredients.data.map((ri: RecipeIngredient) => {
-                                const ingredient = getIngredientDetails(ri)
+                            {recipe.recipe_ingredients.map((ri) => {
                                 return (
                                     <div
                                         key={ri.id}
                                         className="flex items-center justify-between p-3 border rounded-lg"
                                     >
                                         <div className="flex-1">
-                                            <p className="font-medium">{ingredient?.name || 'Unknown'}</p>
+                                            <p className="font-medium">{ri.ingredient?.name || 'Unknown'}</p>
                                             <p className="text-sm text-muted-foreground">
                                                 {ri.quantity} {ri.unit}
                                             </p>
                                         </div>
-                                        {ri.notes && (
-                                            <p className="text-sm text-muted-foreground italic">{ri.notes}</p>
-                                        )}
                                     </div>
                                 )
                             })}

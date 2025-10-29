@@ -22,21 +22,21 @@ export const RecipeDashboardWithProgressiveLoading = ({
   recipeId: string
   recipeName: string
 }) => (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <h1 className="text-3xl font-bold">Recipe Management: {recipeName}</h1>
-        <Suspense fallback={<CardSkeleton />}>
-          <div className="grid gap-4 md:grid-cols-4" />
-        </Suspense>
-      </div>
-
-      <div className="space-y-6">
-        <Suspense fallback={<ChartSkeleton />}>
-          <LazySmartPricingAssistant recipeId={recipeId} recipeName={recipeName} />
-        </Suspense>
-      </div>
+  <div className="space-y-6">
+    <div className="space-y-4">
+      <h1 className="text-3xl font-bold">Recipe Management: {recipeName}</h1>
+      <Suspense fallback={<CardSkeleton />}>
+        <div className="grid gap-4 md:grid-cols-4" />
+      </Suspense>
     </div>
-  )
+
+    <div className="space-y-6">
+      <Suspense fallback={<ChartSkeleton />}>
+        <LazySmartPricingAssistant recipeId={recipeId} recipeName={recipeName} />
+      </Suspense>
+    </div>
+  </div>
+)
 
 export function useRecipeProgressiveLoading(delay = 250) {
   useEffect(() => {

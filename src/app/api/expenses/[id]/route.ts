@@ -6,9 +6,9 @@ import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const supabase = await createClient();
     
@@ -21,7 +21,18 @@ export async function GET(
       .eq('id', id)
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Expense not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to fetch expense' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(expense);
   } catch (error: unknown) {
@@ -31,9 +42,9 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const supabase = await createClient();
     const body = await request.json();
@@ -48,7 +59,18 @@ export async function PUT(
       .select()
       .single();
 
-    if (error) {throw error;}
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Expense record not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json(
+        { error: error.message || 'Failed to update expense' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(expense);
   } catch (error: unknown) {
@@ -58,9 +80,9 @@ export async function PUT(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
+  const { id } = params;
   try {
     const supabase = await createClient();
 
@@ -69,7 +91,12 @@ export async function DELETE(
       .delete()
       .eq('id', id);
 
-    if (error) {throw error;}
+    if (error) {
+      return NextResponse.json(
+        { error: error.message || 'Failed to delete expense' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ message: 'Expense deleted successfully' });
   } catch (error: unknown) {

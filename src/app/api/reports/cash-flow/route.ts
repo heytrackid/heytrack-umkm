@@ -1,10 +1,18 @@
+import 'server-only'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
 
-type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
+// Partial type for cash flow queries (only fields we fetch)
+type FinancialRecordPartial = {
+  id: string
+  date: string | null
+  description: string
+  category: string
+  amount: number
+  reference: string | null
+}
 
 interface PeriodCashFlow {
   period: string
@@ -80,13 +88,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Separate income and expenses
-    const validTransactions = (transactions || []).filter((t: FinancialRecord) => t.date !== null)
-    const income = validTransactions.filter((t: FinancialRecord) => t.category === 'Revenue')
-    const expenses = validTransactions.filter((t: FinancialRecord) => t.category !== 'Revenue')
+    const validTransactions = (transactions || []).filter((t: FinancialRecordPartial) => t.date !== null)
+    const income = validTransactions.filter((t: FinancialRecordPartial) => t.category === 'Revenue')
+    const expenses = validTransactions.filter((t: FinancialRecordPartial) => t.category !== 'Revenue')
 
     // Calculate totals
-    const totalIncome = income.reduce((sum: number, t: FinancialRecord) => sum + safeParseAmount(t.amount), 0)
-    const totalExpenses = expenses.reduce((sum: number, t: FinancialRecord) => sum + safeParseAmount(t.amount), 0)
+    const totalIncome = income.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
+    const totalExpenses = expenses.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
     const netCashFlow = totalIncome - totalExpenses
 
     // Group by period
@@ -109,7 +117,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform transactions for frontend
-    const transactionsList = validTransactions.map((t: FinancialRecord) => ({
+    const transactionsList = validTransactions.map((t: FinancialRecordPartial) => ({
       id: t.id,
       reference_id: t.reference || t.id,
       date: t.date || '',
@@ -160,7 +168,7 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper: Group transactions by period
-function groupByPeriod(transactions: FinancialRecord[], period: string) {
+function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
   const grouped: Record<string, PeriodCashFlow> = {}
 
   transactions.forEach(transaction => {
@@ -213,7 +221,7 @@ function groupByPeriod(transactions: FinancialRecord[], period: string) {
 }
 
 // Helper: Calculate category breakdown
-function calculateCategoryBreakdown(transactions: FinancialRecord[]) {
+function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
   const breakdown: Record<string, CategoryBreakdownProcessing> = {}
 
   transactions.forEach(transaction => {
@@ -256,7 +264,7 @@ function calculateCategoryBreakdown(transactions: FinancialRecord[]) {
 }
 
 // Helper: Group by category for summary
-function groupByCategory(transactions: FinancialRecord[]) {
+function groupByCategory(transactions: FinancialRecordPartial[]) {
   const grouped: Record<string, number> = {}
   transactions.forEach(t => {
     const category = safeString(t.category)
@@ -323,11 +331,11 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
     return null
   }
 
-  const prevIncome = prevTransactions.filter((t: FinancialRecord) => t.category === 'Revenue')
-  const prevExpenses = prevTransactions.filter((t: FinancialRecord) => t.category !== 'Revenue')
+  const prevIncome = prevTransactions.filter((t: FinancialRecordPartial) => t.category === 'Revenue')
+  const prevExpenses = prevTransactions.filter((t: FinancialRecordPartial) => t.category !== 'Revenue')
 
-  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialRecord) => sum + safeParseAmount(t.amount), 0)
-  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialRecord) => sum + safeParseAmount(t.amount), 0)
+  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
+  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
   const prevNetCashFlow = prevTotalIncome - prevTotalExpenses
 
   return {
@@ -342,7 +350,7 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
 }
 
 // Helper: Get top transactions
-function getTopTransactions(transactions: FinancialRecord[], limit: number) {
+function getTopTransactions(transactions: FinancialRecordPartial[], limit: number) {
   return transactions
     .sort((a, b) => safeParseAmount(b.amount) - safeParseAmount(a.amount))
     .slice(0, limit)

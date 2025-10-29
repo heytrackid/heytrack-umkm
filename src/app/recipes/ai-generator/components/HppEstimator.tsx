@@ -7,11 +7,9 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Calculator, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react'
-import { formatCurrency } from '@/lib/currency'
-import { calculateEstimatedHPP } from '@/lib/utils/recipe-helpers'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface HppEstimatorProps {
     selectedIngredients: Array<{
@@ -29,6 +27,7 @@ export function HppEstimator({ selectedIngredients, servings, targetPrice }: Hpp
     const [estimatedHPP, setEstimatedHPP] = useState(0)
     const [materialCost, setMaterialCost] = useState(0)
     const [operationalCost, setOperationalCost] = useState(0)
+    const { formatCurrency } = useCurrency()
 
     useEffect(() => {
         if (selectedIngredients.length > 0 && servings > 0) {

@@ -156,23 +156,15 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                         <Label htmlFor="quantity">
                             Jumlah Produksi <span className="text-red-500">*</span>
                         </Label>
-                        <div className="flex gap-2">
-                            <Input
-                                id="quantity"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder="0"
-                                value={formData.quantity}
-                                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                className="flex-1"
-                            />
-                            {selectedRecipe && (
-                                <div className="flex items-center px-3 border rounded-md bg-muted">
-                                    <span className="text-sm text-muted-foreground">{selectedRecipe.unit}</span>
-                                </div>
-                            )}
-                        </div>
+                        <Input
+                            id="quantity"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0"
+                            value={formData.quantity}
+                            onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                        />
                     </div>
 
                     {/* Planned Date */}

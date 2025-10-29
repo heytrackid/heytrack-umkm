@@ -48,7 +48,7 @@ export function useHppWorker() {
     // Check if Web Workers are supported
     if (typeof Worker === 'undefined') {
       apiLogger.warn('Web Workers not supported in this browser')
-      return
+      return undefined
     }
 
     try {
@@ -74,6 +74,7 @@ export function useHppWorker() {
       }
     } catch (err) {
       apiLogger.error({ error: err }, 'Failed to initialize HPP Worker')
+      return undefined
     }
   }, [])
 

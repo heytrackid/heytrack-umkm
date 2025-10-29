@@ -23,7 +23,8 @@ import {
     Legend,
     ResponsiveContainer,
     Area,
-    AreaChart
+    AreaChart,
+    type TooltipProps
 } from 'recharts'
 import { useState } from 'react'
 import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
@@ -115,7 +116,7 @@ export default function EnhancedCashFlowChart({
         return value.toString()
     }
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-background border rounded-lg p-3 shadow-lg">

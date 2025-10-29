@@ -1,6 +1,5 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/supabase-generated'
 import type {
   HppCalculation,
   HppSnapshot,
@@ -92,7 +91,7 @@ export class HppExportService {
     }
 
     // Get snapshots data if needed
-    let snapshots = []
+    let snapshots: HppSnapshot[] = []
     if (metrics.includes('trends') || metrics.includes('alerts')) {
       const snapshotQuery = this.supabase
         .from('hpp_snapshots')
@@ -113,7 +112,7 @@ export class HppExportService {
     }
 
     // Get alerts data if needed
-    let alerts = []
+    let alerts: HppAlert[] = []
     if (metrics.includes('alerts')) {
       const alertQuery = this.supabase
         .from('hpp_alerts')

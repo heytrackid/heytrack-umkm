@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -102,7 +101,6 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             >
               <Input 
                 {...form.register('category')}
-
               />
             </FormField>
 
@@ -116,7 +114,6 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
                 min="0"
                 step="0.01"
                 {...form.register('amount', { valueAsNumber: true })}
-
               />
             </FormField>
 
@@ -166,7 +163,6 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
             >
               <Input 
                 {...form.register('reference_no')}
-
               />
             </FormField>
           </div>
@@ -178,7 +174,6 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
           >
             <Textarea 
               {...form.register('description')}
-
               rows={3}
             />
           </FormField>
@@ -189,7 +184,6 @@ export const FinancialRecordForm = ({ initialData, onSubmit, isLoading }: Financ
           >
             <Textarea 
               {...form.register('notes')}
-
               rows={2}
             />
           </FormField>

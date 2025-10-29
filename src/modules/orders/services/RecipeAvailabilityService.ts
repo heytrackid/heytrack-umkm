@@ -1,10 +1,12 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
 import type { RecipeOption } from '../types'
 
 /**
  * Service for handling recipe availability and ingredient checking
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class RecipeAvailabilityService {
   /**
@@ -22,7 +24,7 @@ export class RecipeAvailabilityService {
       if (!ri.ingredient?.is_active) {return false}
 
       // Check if current stock is above reorder point
-      const currentStock = ri.ingredient.current_stock ?? 0 || 0
+      const currentStock = (ri.ingredient.current_stock ?? 0) || 0
       const reorderPoint = ri.ingredient.reorder_point || 0
       const requiredQuantity = ri.quantity || 0
 
@@ -35,7 +37,7 @@ export class RecipeAvailabilityService {
    */
   static async getAvailableRecipes(): Promise<RecipeOption[]> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       
       const { data: recipes, error } = await supabase
         .from('recipes')
@@ -45,10 +47,7 @@ export class RecipeAvailabilityService {
           category,
           servings,
           description,
-          price,
-          margin,
-          prep_time,
-          cook_time,
+          selling_price,
           is_active,
           recipe_ingredients!inner (
             quantity,
@@ -58,7 +57,6 @@ export class RecipeAvailabilityService {
               name,
               current_stock,
               reorder_point,
-              unit_cost,
               is_active
             )
           )
@@ -72,25 +70,25 @@ export class RecipeAvailabilityService {
       // Process recipes and check availability
       const recipeOptions: RecipeOption[] = await Promise.all(
         recipes.map(async (recipe) => {
-          // Use recipe price directly (no HPP calculation)
-          const price = recipe.price || 0
-          const estimatedMargin = recipe.margin || 0.3 // Default 30% margin
+          // Use recipe selling_price
+          const price = recipe.selling_price || 0
+          const estimatedMargin = 0.3 // Default 30% margin
 
           // Check ingredient availability
-          const isAvailable = this.checkIngredientAvailability(recipe.recipe_ingredients)
+          const isAvailable = this.checkIngredientAvailability(recipe.recipe_ingredients as any)
 
           return {
             id: recipe.id,
             name: recipe.name,
             category: recipe.category,
-            servings: recipe.servings,
+            servings: recipe.servings ?? 1,
             description: recipe.description,
             price,
             hpp_cost: price * 0.7, // Estimate cost as 70% of price
             margin: estimatedMargin,
             is_available: isAvailable,
-            estimated_prep_time: (recipe.prep_time || 0) + (recipe.cook_time || 0)
-          }
+            estimated_prep_time: 30 // Default 30 minutes
+          } as RecipeOption
         })
       )
 

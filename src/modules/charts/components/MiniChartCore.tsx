@@ -52,25 +52,27 @@ export default function MiniChartCore({
   className = ''
 }: MiniChartCoreProps) {
   return (
-    <Suspense fallback={<div className="w-full h-16 bg-muted animate-pulse rounded" />}>
-      <ResponsiveContainer width="100%" height="100%">
-        {type === 'line' ? (
-          <LineChart data={data}>
-            <Line
-              type="monotone"
-              dataKey={dataKey}
-              stroke={color}
-              strokeWidth={2}
-              dot={false}
-              activeDot={false}
-            />
-          </LineChart>
-        ) : (
-          <BarChart data={data}>
-            <Bar dataKey={dataKey} fill={color} />
-          </BarChart>
-        )}
-      </ResponsiveContainer>
-    </Suspense>
+    <div className={className} style={{ height }}>
+      <Suspense fallback={<div className="w-full h-full bg-muted animate-pulse rounded" />}>
+        <ResponsiveContainer width="100%" height="100%">
+          {type === 'line' ? (
+            <LineChart data={data}>
+              <Line
+                type="monotone"
+                dataKey={dataKey}
+                stroke={color}
+                strokeWidth={2}
+                dot={false}
+                activeDot={false}
+              />
+            </LineChart>
+          ) : (
+            <BarChart data={data}>
+              <Bar dataKey={dataKey} fill={color} />
+            </BarChart>
+          )}
+        </ResponsiveContainer>
+      </Suspense>
+    </div>
   )
 }

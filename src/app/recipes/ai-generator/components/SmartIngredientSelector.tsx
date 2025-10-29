@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Package, Search, Sparkles, AlertCircle } from 'lucide-react'
 import { getSmartIngredientSuggestions } from '@/lib/utils/recipe-helpers'
-import { formatCurrency } from '@/lib/currency'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface SmartIngredientSelectorProps {
     availableIngredients: Array<{
@@ -36,14 +36,14 @@ export function SmartIngredientSelector({
     productType
 }: SmartIngredientSelectorProps) {
     const [searchQuery, setSearchQuery] = useState('')
-    const [showSuggestions, setShowSuggestions] = useState(true)
+    const { formatCurrency } = useCurrency()
 
     // Get smart suggestions based on product type
     const suggestions = getSmartIngredientSuggestions(productType)
 
     // Auto-select suggested ingredients on product type change
     useEffect(() => {
-        if (productType && selectedIngredients.length === 0 && showSuggestions) {
+        if (productType && selectedIngredients.length === 0) {
             const suggestedIds: string[] = []
 
             suggestions.forEach(suggestion => {
@@ -99,10 +99,11 @@ export function SmartIngredientSelector({
     }
 
     const getStockStatus = (ingredient: typeof availableIngredients[0]) => {
-        if (ingredient.current_stock === 0) {
+        if ((ingredient.current_stock ?? 0) === 0) {
             return { label: 'Habis', color: 'bg-red-500' }
         }
-        if (ingredient.current_stock < ingredient.minimum_stock) {
+        const minimumStock = ingredient.minimum_stock ?? 0
+        if ((ingredient.current_stock ?? 0) < minimumStock) {
             return { label: 'Menipis', color: 'bg-yellow-500' }
         }
         return { label: 'Tersedia', color: 'bg-green-500' }

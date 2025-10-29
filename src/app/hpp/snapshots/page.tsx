@@ -13,6 +13,7 @@ import { HppTrendChart } from '@/modules/orders/components/hpp/HppTrendChart'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
+type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
 
 interface SnapshotSummary {
   total: number
@@ -75,7 +76,7 @@ export default function HppSnapshotsPage() {
     }
   }
 
-  const calculateSummary = (snapshots: any[]) => {
+  const calculateSummary = (snapshots: HppSnapshot[]) => {
     if (snapshots.length === 0) {
       void setSummary(null)
       return

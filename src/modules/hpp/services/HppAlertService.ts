@@ -1,15 +1,17 @@
 /**
  * HPP Alert Service
  * Detects and manages HPP-related alerts
+ * SERVER-ONLY: Uses service role client for automated tasks
  */
 
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import type { Database } from '@/types/supabase-generated'
 
 type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
-type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
+type HppAlertInsert = Database['public']['Tables']['hpp_alerts']['Insert']
 
 export class HppAlertService {
   private logger = dbLogger
@@ -49,10 +51,12 @@ export class HppAlertService {
           recipe_id: recipeId,
           alert_type: 'PRICE_INCREASE',
           severity: priceIncrease > HPP_CONFIG.ALERTS.PRICE_INCREASE_CRITICAL ? 'HIGH' : 'MEDIUM',
+          title: 'Kenaikan Biaya Produksi',
           message: `Biaya produksi naik ${(priceIncrease * 100).toFixed(1)}% dari ${previous.hpp_value} ke ${current.hpp_value}`,
-          current_value: current.hpp_value,
-          previous_value: previous.hpp_value,
-          threshold_value: HPP_CONFIG.ALERTS.PRICE_INCREASE_THRESHOLD
+          new_value: current.hpp_value,
+          old_value: previous.hpp_value,
+          threshold: HPP_CONFIG.ALERTS.PRICE_INCREASE_THRESHOLD,
+          change_percentage: priceIncrease
         }))
       }
 
@@ -62,9 +66,10 @@ export class HppAlertService {
           recipe_id: recipeId,
           alert_type: 'MARGIN_LOW',
           severity: current.margin_percentage < HPP_CONFIG.ALERTS.MARGIN_CRITICAL_THRESHOLD ? 'CRITICAL' : 'MEDIUM',
+          title: 'Margin Keuntungan Rendah',
           message: `Margin keuntungan rendah: ${(current.margin_percentage * 100).toFixed(1)}%`,
-          current_value: current.margin_percentage,
-          threshold_value: HPP_CONFIG.ALERTS.MARGIN_LOW_THRESHOLD
+          new_value: current.margin_percentage,
+          threshold: HPP_CONFIG.ALERTS.MARGIN_LOW_THRESHOLD
         }))
       }
 
@@ -75,10 +80,12 @@ export class HppAlertService {
           recipe_id: recipeId,
           alert_type: 'COST_SPIKE',
           severity: 'HIGH',
+          title: 'Lonjakan Biaya Bahan',
           message: `Biaya bahan naik drastis ${(costSpike * 100).toFixed(1)}%`,
-          current_value: current.material_cost,
-          previous_value: previous.material_cost,
-          threshold_value: HPP_CONFIG.ALERTS.COST_SPIKE_THRESHOLD
+          new_value: current.material_cost,
+          old_value: previous.material_cost,
+          threshold: HPP_CONFIG.ALERTS.COST_SPIKE_THRESHOLD,
+          change_percentage: costSpike
         }))
       }
 
@@ -94,7 +101,7 @@ export class HppAlertService {
   /**
    * Create an alert
    */
-  private async createAlert(alertData: Omit<HppAlert, 'id' | 'created_at' | 'is_read' | 'recipe_name'>): Promise<HppAlert> {
+  private async createAlert(alertData: HppAlertInsert): Promise<HppAlert> {
     try {
       const supabase = createServiceRoleClient()
       
@@ -111,7 +118,7 @@ export class HppAlertService {
         throw new Error(`Failed to create alert: ${error.message}`)
       }
 
-      return data as HppAlert
+      return data
 
     } catch (err: unknown) {
       this.logger.error({ error: err }, 'Failed to create alert')

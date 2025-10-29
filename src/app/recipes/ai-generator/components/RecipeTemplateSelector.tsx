@@ -12,13 +12,12 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Sparkles, Clock, TrendingUp } from 'lucide-react'
 import {
-    RECIPE_TEMPLATES,
     RECIPE_CATEGORIES,
     getTemplatesByCategory,
     type RecipeTemplate
 } from '@/lib/constants/recipe-templates'
-import { formatCurrency } from '@/lib/currency'
 import { getDifficultyColor, formatTime, getCategoryIcon } from '@/lib/utils/recipe-helpers'
+import { useCurrency } from '@/hooks/useCurrency'
 
 interface RecipeTemplateSelectorProps {
     onSelectTemplate: (template: RecipeTemplate) => void
@@ -27,8 +26,7 @@ interface RecipeTemplateSelectorProps {
 
 export function RecipeTemplateSelector({ onSelectTemplate, selectedTemplateId }: RecipeTemplateSelectorProps) {
     const [selectedCategory, setSelectedCategory] = useState<string>(RECIPE_CATEGORIES[0])
-
-    const templates = getTemplatesByCategory(selectedCategory)
+    const { formatCurrency } = useCurrency()
 
     return (
         <Card>

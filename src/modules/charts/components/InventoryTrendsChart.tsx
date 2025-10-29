@@ -1,13 +1,14 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
+import { Legend } from 'recharts'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import type { ChartConfig } from '@/types/charts'
+
+type TrendChartConfig = Record<string, { label: string; color: string }>
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(
@@ -31,10 +32,6 @@ const YAxis = dynamic(
 )
 const CartesianGrid = dynamic(
   () => import('recharts').then(mod => mod.CartesianGrid),
-  { ssr: false }
-)
-const Legend = dynamic(
-  () => import('recharts').then(mod => mod.Legend),
   { ssr: false }
 )
 const ResponsiveContainer = dynamic(
@@ -106,12 +103,12 @@ const inventoryData: InventoryTrendDataPoint[] = [
  */
 interface InventoryTrendsChartProps {
   data?: InventoryTrendDataPoint[]
-  config?: ChartConfig
+  config?: TrendChartConfig
   height?: number
   className?: string
 }
 
-const chartConfig: ChartConfig = {
+const chartConfig: TrendChartConfig = {
   stock: {
     label: "Stok Tersedia",
     color: "#22c55e",

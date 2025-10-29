@@ -4,10 +4,11 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 
-type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
+type HppAlertUpdate = Database['public']['Tables']['hpp_alerts']['Update']
 
 // PATCH /api/hpp/alerts/[id]/read - Mark alert as read
 export async function PATCH(
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -31,10 +32,15 @@ export async function PATCH(
       )
     }
 
-    // Mark alert as read
+    // Mark alert as read with proper typing
+    const updateData: HppAlertUpdate = {
+      is_read: true,
+      read_at: new Date().toISOString()
+    }
+
     const { error } = await supabase
       .from('hpp_alerts')
-      .update({ is_read: true } as any)
+      .update(updateData)
       .eq('id', alertId)
       .eq('user_id', user.id)
 
@@ -52,8 +58,8 @@ export async function PATCH(
 
     return NextResponse.json({ success: true })
 
-  } catch (err: unknown) {
-    apiLogger.error({ error: err }, 'Error marking alert as read')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error marking alert as read')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

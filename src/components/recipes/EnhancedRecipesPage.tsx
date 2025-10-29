@@ -91,11 +91,11 @@ export const EnhancedRecipesPage = () => {
 
                 // Category filter
                 const matchesCategory =
-                    categoryFilter === 'all' || recipe.category === categoryFilter
+                    categoryFilter === 'all' || (recipe.category ?? 'other') === categoryFilter
 
                 // Difficulty filter
                 const matchesDifficulty =
-                    difficultyFilter === 'all' || recipe.difficulty === difficultyFilter
+                    difficultyFilter === 'all' || (recipe.difficulty ?? 'medium') === difficultyFilter
 
                 // Only show active recipes
                 return matchesSearch && matchesCategory && matchesDifficulty && recipe.is_active
@@ -369,7 +369,7 @@ export const EnhancedRecipesPage = () => {
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-2xl">{getCategoryIcon(recipe.category)}</span>
+                                                <span className="text-2xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
                                                 <h3 className="font-semibold text-lg">{recipe.name}</h3>
                                             </div>
                                             {recipe.description && (
@@ -431,10 +431,10 @@ export const EnhancedRecipesPage = () => {
                                         </Badge>
                                         <Badge variant="outline" className="flex items-center gap-1">
                                             <Clock className="h-3 w-3" />
-                                            {(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit
+                                            {(recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)} menit
                                         </Badge>
-                                        <Badge className={getDifficultyColor(recipe.difficulty || 'medium')}>
-                                            {getDifficultyLabel(recipe.difficulty || 'medium')}
+                                        <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
+                                            {getDifficultyLabel(recipe.difficulty ?? 'medium')}
                                         </Badge>
                                     </div>
                                 </div>

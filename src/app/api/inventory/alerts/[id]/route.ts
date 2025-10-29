@@ -2,9 +2,6 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
-
-type InventoryAlert = Database['public']['Tables']['inventory_alerts']['Row']
 
 /**
  * PATCH /api/inventory/alerts/[id]
@@ -12,9 +9,9 @@ type InventoryAlert = Database['public']['Tables']['inventory_alerts']['Row']
  */
 export async function PATCH(
   __request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   
   try {
     const supabase = await createClient()

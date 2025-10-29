@@ -7,7 +7,7 @@ import type { OrderFormData } from '@/app/orders/new/hooks/useOrderLogic'
 
 interface OrderPaymentStepProps {
   formData: OrderFormData
-  onInputChange: (field: keyof OrderFormData, value: any) => void
+  onInputChange: (field: keyof OrderFormData, value: string | number | boolean) => void
 }
 
 export default function OrderPaymentStep({

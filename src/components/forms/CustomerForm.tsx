@@ -31,7 +31,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
   const form = useForm<CustomerFormData>({
     resolver: zodResolver(CustomerFormSchema),
-    mode: 'onChange' as const,
+    mode: 'onChange',
     defaultValues: {
       name: initialData?.name || '',
       email: initialData?.email || '',
@@ -40,7 +40,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
       customer_type: initialData?.customer_type || 'REGULAR',
       loyalty_points: initialData?.loyalty_points || 0,
       notes: initialData?.notes || '',
-      is_active: initialData?.is_active ?? true,
+      is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
     }
   })
 

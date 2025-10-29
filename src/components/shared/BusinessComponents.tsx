@@ -27,10 +27,22 @@ import {
 import { formatCurrency, formatNumber, getStatusColor, calculatePercentage } from '@/lib/shared/utilities'
 
 // Inventory Status Components
-interface InventoryAlert {
-  id: string
-  type: 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring'
-  item: {
+import { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
+
+// Define a UI-specific type that extends the database type with UI-specific fields
+interface BaseInventoryAlert extends DatabaseInventoryAlert {
+  // Additional UI fields that are not in the database schema
+  ingredient_name?: string
+  current_stock?: number
+  reorder_point?: number
+  min_stock?: number
+  max_stock?: number
+  unit?: string
+}
+
+interface InventoryAlert extends BaseInventoryAlert {
+  // Additional UI fields that are not in the database schema
+  item?: {
     id: string
     name: string
     currentStock: number
@@ -38,9 +50,9 @@ interface InventoryAlert {
     maxStock?: number
     unit: string
   }
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  message: string
   suggestedAction?: string
+  // Map the database alert_type to the UI type field
+  type?: 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring'
 }
 
 interface InventoryAlertsProps {
@@ -63,13 +75,6 @@ export const InventoryAlerts = ({
     critical: 'bg-red-200 text-red-900'
   }
 
-  const typeIcons = {
-    low_stock: AlertTriangle,
-    out_of_stock: AlertTriangle,
-    over_stock: Info,
-    expiring: AlertTriangle
-  }
-
   if (alerts.length === 0) {
     return (
       <Card className={className}>
@@ -87,7 +92,16 @@ export const InventoryAlerts = ({
   return (
     <div className={cn("space-y-3", className)}>
       {alerts.map((alert) => {
-        const Icon = typeIcons[alert.type]
+        // Map alert_type from database to UI type
+        const alertType = alert.alert_type as 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring' | undefined;
+        const Icon = alertType === 'low_stock' || alertType === 'out_of_stock' || alertType === 'expiring' 
+          ? AlertTriangle 
+          : Info
+        
+        // Determine item details - prefer the item object if available, otherwise extract from alert
+        const itemName = alert.item?.name || alert.ingredient_name || 'Unknown Item';
+        const itemId = alert.item?.id || alert.ingredient_id || '';
+        
         return (
           <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
             alert.severity === 'high' ? 'border-orange-500' :
@@ -98,10 +112,10 @@ export const InventoryAlerts = ({
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge className={severityColors[alert.severity]}>
-                      {alert.severity.toUpperCase()}
+                    <Badge className={severityColors[(alert.severity as keyof typeof severityColors) || 'low']}>
+                      {(alert.severity || 'low').toUpperCase()}
                     </Badge>
-                    <span className="font-medium">{alert.item.name}</span>
+                    <span className="font-medium">{itemName}</span>
                   </div>
                   <p className="text-sm">{alert.message}</p>
                   {alert.suggestedAction && (
@@ -115,7 +129,7 @@ export const InventoryAlerts = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onViewItem(alert.item.id)}
+                      onClick={() => onViewItem(itemId)}
                     >
                       View
                     </Button>

@@ -7,9 +7,9 @@ import { logger } from '@/lib/logger'
 
 // Cache implementation
 class MemoryCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>()
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>()
 
-  set(key: string, data: any, ttl = 5 * 60 * 1000) { // 5 minutes default
+  set<T>(key: string, data: T, ttl = 5 * 60 * 1000) { // 5 minutes default
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -336,12 +336,12 @@ export function useSearchAndFilter<T>(
   searchFields: Array<keyof T> = [],
   filterOptions: Array<{
     field: keyof T
-    value: any
+    value: unknown
     operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan'
   }> = []
 ) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [filters, setFilters] = useState<Record<string, any>>({})
+  const [filters, setFilters] = useState<Record<string, unknown>>({})
 
   const filteredData = useCallback(() => {
     let filtered = data
@@ -392,7 +392,7 @@ export function useSearchAndFilter<T>(
     return filtered
   }, [data, searchTerm, searchFields, filters, filterOptions])
 
-  const setFilter = useCallback((field: string, value: any) => {
+  const setFilter = useCallback((field: string, value: unknown) => {
     setFilters(prev => ({ ...prev, [field]: value }))
   }, [])
 
@@ -422,8 +422,8 @@ export function useSearchAndFilter<T>(
 
 // Export cache utilities
 export const cacheUtils = {
-  get: (key: string) => globalCache.get(key),
-  set: (key: string, data: any, ttl?: number) => globalCache.set(key, data, ttl),
+  get: <T = unknown>(key: string) => globalCache.get<T>(key),
+  set: <T = unknown>(key: string, data: T, ttl?: number) => globalCache.set(key, data, ttl),
   delete: (key: string) => globalCache.delete(key),
   clear: () => globalCache.clear(),
   size: () => globalCache.size()

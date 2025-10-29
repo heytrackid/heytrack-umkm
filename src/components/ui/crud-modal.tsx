@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { UseFormReturn } from 'react-hook-form'
 /**
  * Shared CRUD Modal Components
  * Reusable modal components for CRUD operations
@@ -41,9 +42,9 @@ export const CrudModal = ({
     </Modal>
   )
 
-interface CreateModalProps<T = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
+interface CreateModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
-  form: any // This would be ReactHookForm type, kept as any for compatibility
+  form: UseFormReturn<FormData>
   onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
   children: ReactNode
@@ -52,14 +53,15 @@ interface CreateModalProps<T = Record<string, unknown>> extends Omit<CrudModalPr
 /**
  * Create modal with form
  */
-export const CreateModal = ({
+export function CreateModal<T = Record<string, unknown>, FormData = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: CreateModalProps) => (
+}: CreateModalProps<T, FormData>) {
+  return (
     <CrudModal
       {...modalProps}
       title={`Tambah ${entityName} Baru`}
@@ -75,10 +77,11 @@ export const CreateModal = ({
       </CrudForm>
     </CrudModal>
   )
+}
 
-interface EditModalProps<T = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
+interface EditModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
-  form: any // This would be ReactHookForm type, kept as any for compatibility
+  form: UseFormReturn<FormData>
   onSubmit: (data: T) => Promise<void>
   isLoading?: boolean
   children: ReactNode
@@ -87,14 +90,15 @@ interface EditModalProps<T = Record<string, unknown>> extends Omit<CrudModalProp
 /**
  * Edit modal with form
  */
-export const EditModal = ({
+export function EditModal<T = Record<string, unknown>, FormData = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: EditModalProps) => (
+}: EditModalProps<T, FormData>) {
+  return (
     <CrudModal
       {...modalProps}
       title={`Edit ${entityName}`}
@@ -110,6 +114,7 @@ export const EditModal = ({
       </CrudForm>
     </CrudModal>
   )
+}
 
 interface DeleteModalProps {
   isOpen: boolean

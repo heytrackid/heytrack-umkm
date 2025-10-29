@@ -45,7 +45,7 @@ export const MobileRecipeCard = ({
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xl">{getCategoryIcon(recipe.category)}</span>
+                                <span className="text-xl">{getCategoryIcon(recipe.category ?? 'other')}</span>
                                 <h3 className="font-semibold">{recipe.name}</h3>
                             </div>
                             {recipe.description && (
@@ -107,10 +107,10 @@ export const MobileRecipeCard = ({
                         </Badge>
                         <Badge variant="outline" className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {(recipe.prep_time || 0) + (recipe.cook_time || 0)} menit
+                            {(recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)} menit
                         </Badge>
-                        <Badge className={getDifficultyColor(recipe.difficulty || 'medium')}>
-                            {getDifficultyLabel(recipe.difficulty || 'medium')}
+                        <Badge className={getDifficultyColor(recipe.difficulty ?? 'medium')}>
+                            {getDifficultyLabel(recipe.difficulty ?? 'medium')}
                         </Badge>
                     </div>
                 </div>

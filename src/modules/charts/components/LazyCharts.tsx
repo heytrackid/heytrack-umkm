@@ -1,7 +1,8 @@
 'use client'
 
 import { createLazyComponent, ChartSkeleton } from '@/components/lazy/LazyWrapper'
-import { Suspense } from 'react'
+import { Suspense, lazy, type ComponentType } from 'react'
+import type { ChartDataPoint } from '@/components/ui/charts/types'
 
 export const LazyFinancialTrendsChart = createLazyComponent(
   () => import('@/modules/charts/components/FinancialTrendsChart'),
@@ -66,18 +67,23 @@ export const SmartChartLoader = ({
   // Use lightweight version for small datasets, heavy version for large
   const useAdvancedChart = data.length > 20
 
-  const ChartComponents = {
-    line: useAdvancedChart ? LazyRechartsLineChart : LazyMiniChart,
-    bar: useAdvancedChart ? LazyRechartsBarChart : LazyMiniChart,
-    area: useAdvancedChart ? LazyRechartsAreaChart : LazyMiniChart,
-    pie: useAdvancedChart ? LazyRechartsPieChart : LazyMiniChart,
+  const chartComponents: Record<'line' | 'bar' | 'area' | 'pie', ComponentType<Record<string, unknown>>> = {
+    line: (useAdvancedChart ? LazyRechartsLineChart : LazyMiniChart) as ComponentType<Record<string, unknown>>,
+    bar: (useAdvancedChart ? LazyRechartsBarChart : LazyMiniChart) as ComponentType<Record<string, unknown>>,
+    area: (useAdvancedChart ? LazyRechartsAreaChart : LazyMiniChart) as ComponentType<Record<string, unknown>>,
+    pie: (useAdvancedChart ? LazyRechartsPieChart : LazyMiniChart) as ComponentType<Record<string, unknown>>,
   }
 
-  const ChartComponent = ChartComponents[chartType]
+  const ChartComponent = chartComponents[chartType]
 
   return (
     <Suspense fallback={<ChartSkeleton />}>
-      <ChartComponent data={data} height={height} dataKey="value" {...props} />
+      <ChartComponent
+        data={data as Record<string, unknown>[]}
+        height={height}
+        dataKey="value"
+        {...props}
+      />
     </Suspense>
   )
 }
@@ -90,7 +96,7 @@ export const ChartDashboardWithProgressiveLoading = ({
     id: string
     type: 'financial' | 'inventory' | 'mini'
     priority: 'high' | 'medium' | 'low'
-    data?: Array<Record<string, unknown>>
+    data?: ChartDataPoint[]
   }>
 }) => {
   // Sort charts by priority
@@ -111,7 +117,7 @@ export const ChartDashboardWithProgressiveLoading = ({
               <LazyInventoryTrendsChart />
             )}
             {chart.type === 'mini' && (
-              <LazyMiniChart data={chart.data || []} dataKey="value" />
+              <LazyMiniChart data={chart.data ?? []} dataKey="value" type="line" />
             )}
           </Suspense>
         </div>

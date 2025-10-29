@@ -11,7 +11,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * This helps bypass the SSR client type inference issues
  */
 export function safeInsert<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<Database>,
   table: T,
   data: Database['public']['Tables'][T]['Insert']
 ) {
@@ -24,7 +24,7 @@ export function safeInsert<T extends keyof Database['public']['Tables']>(
  * Type-safe wrapper for Supabase update operations
  */
 export function safeUpdate<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<Database>,
   table: T,
   data: Database['public']['Tables'][T]['Update']
 ) {
@@ -37,7 +37,7 @@ export function safeUpdate<T extends keyof Database['public']['Tables']>(
  * Type-safe wrapper for Supabase select operations
  */
 export function safeSelect<T extends keyof Database['public']['Tables']>(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient<Database>,
   table: T
 ) {
   return supabase.from(table).select()

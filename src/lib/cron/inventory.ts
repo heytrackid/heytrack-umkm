@@ -1,8 +1,10 @@
 /**
  * Inventory Cron Jobs Module
  * Scheduled jobs for inventory management and alerts
+ * SERVER-ONLY: Uses service role client for automated tasks
  */
 
+import 'server-only'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
 import { inventoryServices } from '@/lib/business-services/utils'

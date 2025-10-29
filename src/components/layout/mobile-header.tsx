@@ -32,7 +32,7 @@ import {
 import { useMobile } from '@/hooks/useResponsive'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
-import SimpleSidebar from './sidebar'
+import Sidebar from './sidebar'
 
 interface MobileHeaderProps {
   title?: string
@@ -89,7 +89,7 @@ const MobileHeader = ({
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: string, session: any) => {
+      async (event: string, session: { user: SupabaseUser | null } | null) => {
         void setUser(session?.user ?? null)
         void setLoading(false)
       }
@@ -167,7 +167,7 @@ const MobileHeader = ({
                   <SheetTitle>Menu Navigasi</SheetTitle>
                 </SheetHeader>
                 <div className="h-full">
-                  <SimpleSidebar isMobile />
+                  <Sidebar isMobile />
                 </div>
               </SheetContent>
             </Sheet>

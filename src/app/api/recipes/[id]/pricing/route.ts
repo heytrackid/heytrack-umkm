@@ -14,10 +14,10 @@ interface RecipeWithIngredients extends Recipe {
   }>
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = await createClient()
-    const resolvedParams = await params
+    const { id: recipeId } = params
     
     // Verify user is authenticated
     const { data: { user } } = await supabase.auth.getUser()
@@ -27,7 +27,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Get the recipe data from the request
     let recipeData: RecipeWithIngredients | null = await request.json()
-    const recipeId = resolvedParams.id
 
     // If recipe data wasn't provided in the request body, fetch it from the database
     if (!recipeData || Object.keys(recipeData).length === 0) {

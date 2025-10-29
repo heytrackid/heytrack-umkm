@@ -19,7 +19,7 @@ export function createTextColumn<T extends Record<string, unknown>>(
 ): ColumnDef<T> {
   return {
     accessorKey: key,
-    header: ({ column }) => header,
+    header,
     cell: ({ getValue }) => getValue(),
     enableSorting: options?.sortable !== false,
     size: options?.width,

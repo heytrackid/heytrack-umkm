@@ -60,7 +60,7 @@ const ExcelExportButton = memo(({
     try {
       // Dynamically load export service only when needed
       const ExcelExportService = await loadExportService()
-      await ExcelExportService.exportAllData()
+      await ExcelExportService.exportAllData({})
       void setExportStatus('success')
 
       // Auto close dialog after 2 seconds if successful
@@ -69,7 +69,7 @@ const ExcelExportButton = memo(({
         void setExportStatus('idle')
       }, 2000)
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Export failed:')
+      apiLogger.error({ err }, 'Export failed:')
       void setExportStatus('error')
     } finally {
       void setIsExporting(false)

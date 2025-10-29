@@ -1,12 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
-import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { DailySnapshotsAgent } from '@/agents/automations/DailySnapshotsAgent'
-
-type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
 
 // GET /api/hpp/snapshots - Get HPP snapshots with pagination and filtering
 export async function GET(request: NextRequest) {

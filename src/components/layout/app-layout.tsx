@@ -9,7 +9,7 @@ import { uiLogger } from '@/lib/logger'
 import { cn } from '@/lib/utils'
 import { Search, User } from 'lucide-react'
 import MobileHeader from './mobile-header'
-import SimpleSidebar from './sidebar'
+import Sidebar from './sidebar'
 // Supabase auth
 import {
   DropdownMenu,
@@ -33,7 +33,7 @@ const AppLayout = memo(({
   showMobileHeader = true
 }: AppLayoutProps) => {
   const { isMobile } = useMobile()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -47,7 +47,7 @@ const AppLayout = memo(({
         const { data: { user } } = await supabase.auth.getUser()
         void setUser(user)
       } catch (err) {
-        uiLogger.error({ error }, 'Error getting user:')
+        uiLogger.error({ err }, 'Error getting user:')
       } finally {
         void setLoading(false)
       }
@@ -66,7 +66,11 @@ const AppLayout = memo(({
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
+  useEffect(() => {
+    setSidebarOpen(!isMobile)
+  }, [isMobile])
+
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev)
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
 
   return (
@@ -76,7 +80,7 @@ const AppLayout = memo(({
     )}>
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <SimpleSidebar
+        <Sidebar
           isOpen={sidebarOpen}
           onToggle={toggleSidebar}
         />

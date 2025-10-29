@@ -4,8 +4,6 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 
-type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
-
 // POST /api/hpp/alerts/bulk-read - Mark all alerts as read
 export async function POST(_request: NextRequest) {
   try {
@@ -22,9 +20,15 @@ export async function POST(_request: NextRequest) {
     }
 
     // Update all unread alerts
+    // Mark all unread alerts as read with proper typing
+    const updateData: Database['public']['Tables']['hpp_alerts']['Update'] = {
+      is_read: true,
+      read_at: new Date().toISOString()
+    }
+
     const { data, error } = await supabase
       .from('hpp_alerts')
-      .update({ is_read: true } as any)
+      .update(updateData)
       .eq('user_id', user.id)
       .eq('is_read', false)
       .select('id')

@@ -7,9 +7,6 @@ import { createCachedResponse, cachePresets } from '@/lib/api-cache'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import type { NextRequest } from 'next/server'
-import type { Database } from '@/types/supabase-generated'
-
-type Recipe = Database['public']['Tables']['recipes']['Row']
 
 export async function GET(request: NextRequest) {
   try {

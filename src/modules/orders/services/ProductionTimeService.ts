@@ -1,9 +1,13 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
+
+type Recipe = Database['public']['Tables']['recipes']['Row']
 
 /**
  * Service for calculating production time estimates for orders
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class ProductionTimeService {
   /**
@@ -21,7 +25,7 @@ export class ProductionTimeService {
     parallel_processing_time: number
   }> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       const recipeIds = items.map(item => item.recipe_id)
       const { data, error } = await supabase
         .from('recipes')

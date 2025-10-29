@@ -13,7 +13,7 @@ const perfLogger = createLogger('Performance')
  * Debounce function
  * Delays execution until after wait milliseconds have elapsed since last call
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: Parameters<T>) => void>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -36,7 +36,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * Throttle function
  * Ensures function is called at most once per specified time period
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: Parameters<T>) => void>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -54,8 +54,8 @@ export function throttle<T extends (...args: any[]) => any>(
 /**
  * Memoize expensive calculations
  */
-export function memoize<T extends (...args: any[]) => any>(fn: T): T {
-  const cache = new Map()
+export function memoize<T extends (...args: Parameters<T>) => unknown>(fn: T): T {
+  const cache = new Map<string, unknown>()
 
   return ((...args: Parameters<T>) => {
     const key = JSON.stringify(args)
@@ -147,7 +147,7 @@ export function useBatchedUpdates() {
 /**
  * Preload component for faster navigation
  */
-export function preloadComponent(importFn: () => Promise<any>) {
+export function preloadComponent<T = Record<string, unknown>>(importFn: () => Promise<{ default: T }>) {
   return importFn()
 }
 
@@ -157,7 +157,18 @@ export function preloadComponent(importFn: () => Promise<any>) {
 export function isSlowConnection(): boolean {
   if (typeof navigator === 'undefined') {return false}
   
-  const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection
+  interface NetworkInformation extends EventTarget {
+    readonly effectiveType: 'slow-2g' | '2g' | '3g' | '4g'
+    readonly saveData: boolean
+  }
+  
+  const connection = (navigator as Navigator & { 
+    connection?: NetworkInformation, 
+    mozConnection?: NetworkInformation, 
+    webkitConnection?: NetworkInformation 
+  }).connection || 
+  (navigator as any).mozConnection || 
+  (navigator as any).webkitConnection
   
   if (!connection) {return false}
   

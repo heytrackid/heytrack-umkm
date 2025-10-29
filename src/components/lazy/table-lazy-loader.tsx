@@ -94,10 +94,9 @@ export const LazyOrdersTable = lazy(() =>
     .catch(() => ({ default: () => <div>Orders table not found</div> }))
 )
 
-export const LazyInventoryTable = lazy(() =>
-  import(/* webpackChunkName: "inventory-table" */ '@/components').then(m => ({ default: m.InventoryTable }))
-    .catch(() => ({ default: () => <div>Inventory table not found</div> }))
-)
+export const LazyInventoryTable = lazy(async () => ({
+  default: () => <div>Inventory table unavailable</div>
+}))
 
 export const LazyFinanceTable = lazy(() =>
   import(/* webpackChunkName: "finance-table" */ '@/components').then(m => ({ default: m.FinanceTable }))

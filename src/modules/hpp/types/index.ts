@@ -69,7 +69,7 @@ export interface HppComparison {
 export interface RecipeWithHpp {
   id: string
   name: string
-  category: string
+  category: string | null
   selling_price: number | null
   margin_percentage: number | null
   ingredients: RecipeIngredientWithPrice[]
@@ -83,6 +83,7 @@ export interface RecipeIngredientWithPrice {
   quantity: number
   unit: string
   unit_price: number
+  category?: string
 }
 
 export type HppExportFormat = 'csv' | 'json' | 'pdf' | 'excel'

@@ -2,12 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys } from '@/lib/cache'
-import type { Database } from '@/types/supabase-generated'
-
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
-type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
-type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
+// Types removed - not needed - queries use specific fields
 
 // GET /api/hpp/overview - Get comprehensive HPP overview data in one request
 export async function GET(_request: NextRequest) {

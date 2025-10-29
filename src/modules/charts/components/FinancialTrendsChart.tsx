@@ -1,13 +1,13 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { Suspense } from 'react'
+import { Legend } from 'recharts'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { formatCurrency } from '@/lib/currency'
+import { formatCurrentCurrency } from '@/lib/currency'
 
 // Dynamically import recharts components to reduce bundle size
 const LineChart = dynamic(
@@ -31,10 +31,6 @@ const YAxis = dynamic(
 )
 const CartesianGrid = dynamic(
   () => import('recharts').then(mod => mod.CartesianGrid),
-  { ssr: false }
-)
-const Legend = dynamic(
-  () => import('recharts').then(mod => mod.Legend),
   { ssr: false }
 )
 
@@ -125,12 +121,12 @@ export default function FinancialTrendsChart(_props?: Record<string, unknown>) {
           tickLine={false}
           axisLine={false}
           tickMargin={8}
-          tickFormatter={(value) => formatCurrency(value)}
+          tickFormatter={(value) => formatCurrentCurrency(Number(value))}
         />
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent
-            formatter={(value) => [formatCurrency(Number(value)), null]}
+            formatter={(value) => [formatCurrentCurrency(Number(value)), null]}
           />}
         />
         <Line

@@ -3,8 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 
-type FinancialRecord = Database['public']['Tables']['financial_records']['Row']
-type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
+// Unused types removed
 
 /**
  * POST /api/financial/records

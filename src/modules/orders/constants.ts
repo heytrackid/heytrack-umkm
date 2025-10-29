@@ -37,52 +37,43 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
   allowEdit: boolean
   allowCancel: boolean
 }> = {
-  draft: {
-    label: 'Draft',
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100',
-    description: 'Order sedang dalam proses pembuatan',
-    nextStatuses: ['pending', 'cancelled'],
-    allowEdit: true,
-    allowCancel: true
-  },
-  pending: {
+  PENDING: {
     label: 'Menunggu Konfirmasi',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Menunggu konfirmasi dari customer atau admin',
-    nextStatuses: ['confirmed', 'cancelled'],
+    nextStatuses: ['CONFIRMED', 'CANCELLED'],
     allowEdit: true,
     allowCancel: true
   },
-  confirmed: {
+  CONFIRMED: {
     label: 'Dikonfirmasi',
     color: 'text-gray-600 dark:text-gray-400', 
     bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Order sudah dikonfirmasi, siap untuk produksi',
-    nextStatuses: ['in_production', 'cancelled'],
+    nextStatuses: ['IN_PROGRESS', 'CANCELLED'],
     allowEdit: false,
     allowCancel: true
   },
-  in_production: {
+  IN_PROGRESS: {
     label: 'Sedang Diproduksi',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800', 
     description: 'Order sedang dalam proses produksi',
-    nextStatuses: ['ready', 'cancelled'],
+    nextStatuses: ['READY', 'CANCELLED'],
     allowEdit: false,
     allowCancel: false
   },
-  ready: {
+  READY: {
     label: 'Siap Diambil',
     color: 'text-orange-600',
     bgColor: 'bg-orange-100',
     description: 'Order sudah selesai dan siap diambil/dikirim',
-    nextStatuses: ['completed'],
+    nextStatuses: ['DELIVERED'],
     allowEdit: false,
     allowCancel: false
   },
-  completed: {
+  DELIVERED: {
     label: 'Selesai',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800',
@@ -91,7 +82,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
     allowEdit: false,
     allowCancel: false
   },
-  cancelled: {
+  CANCELLED: {
     label: 'Dibatalkan',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800',
@@ -109,25 +100,25 @@ export const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, {
   bgColor: string
   description: string
 }> = {
-  unpaid: {
+  PENDING: {
     label: 'Belum Dibayar',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Belum ada pembayaran yang diterima'
   },
-  partial: {
+  PARTIAL: {
     label: 'Dibayar Sebagian',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800', 
     description: 'Sudah dibayar sebagian (DP)'
   },
-  paid: {
+  PAID: {
     label: 'Lunas',
     color: 'text-gray-600 dark:text-gray-400',
     bgColor: 'bg-gray-100 dark:bg-gray-800',
     description: 'Sudah dibayar lunas'
   },
-  refunded: {
+  REFUNDED: {
     label: 'Dikembalikan',
     color: 'text-gray-600',
     bgColor: 'bg-gray-100',
@@ -143,38 +134,37 @@ export const PAYMENT_METHOD_CONFIG: Record<PaymentMethod, {
   isOnline: boolean
   processingFee?: number // Percentage
 }> = {
-  cash: {
+  CASH: {
     label: 'Tunai',
     icon: '💵',
     description: 'Pembayaran cash di tempat',
     isOnline: false
   },
-  transfer: {
+  BANK_TRANSFER: {
     label: 'Transfer Bank',
     icon: '🏦',
     description: 'Transfer via internet banking',
     isOnline: true
   },
-  qris: {
-    label: 'QRIS',
-    icon: '📱',
-    description: 'Scan QR Code dengan aplikasi bank/e-wallet',
-    isOnline: true,
-    processingFee: 0.7 // 0.7% fee
-  },
-  card: {
-    label: 'Kartu',
+  CREDIT_CARD: {
+    label: 'Kartu Kredit',
     icon: '💳',
     description: 'Kartu kredit/debit',
     isOnline: true,
     processingFee: 2.9 // 2.9% fee
   },
-  ewallet: {
+  DIGITAL_WALLET: {
     label: 'E-Wallet',
     icon: '📲',
     description: 'GoPay, OVO, Dana, ShopeePay',
     isOnline: true,
     processingFee: 1.5 // 1.5% fee
+  },
+  OTHER: {
+    label: 'Lainnya',
+    icon: '💰',
+    description: 'Metode pembayaran lainnya',
+    isOnline: false
   }
 }
 
@@ -186,26 +176,26 @@ export const DELIVERY_METHOD_CONFIG: Record<DeliveryMethod, {
   estimatedTime: string
   feeCalculation: 'fixed' | 'distance' | 'weight'
 }> = {
-  pickup: {
+  PICKUP: {
     label: 'Ambil Sendiri',
     icon: '🏪',
     description: 'Customer ambil sendiri di toko',
     estimatedTime: 'Sesuai waktu buka toko',
     feeCalculation: 'fixed' // No fee
   },
-  delivery: {
+  DELIVERY: {
     label: 'Diantar',
     icon: '🏍️',
     description: 'Diantar ke alamat customer',
     estimatedTime: '1-2 jam dalam kota',
     feeCalculation: 'distance'
   },
-  shipping: {
-    label: 'Dikirim',
-    icon: '📦',
-    description: 'Dikirim via ekspedisi (JNE, GoSend, dll)',
-    estimatedTime: '1-3 hari',
-    feeCalculation: 'weight'
+  DINE_IN: {
+    label: 'Dine In',
+    icon: '🍽️',
+    description: 'Makan di tempat',
+    estimatedTime: 'Langsung',
+    feeCalculation: 'fixed'
   }
 }
 

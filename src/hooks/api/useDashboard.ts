@@ -112,19 +112,23 @@ const fetchDashboardStats = async (): Promise<DashboardStats> => {
 
     if (inventoryError) {throw inventoryError}
 
+    type Order = Database['public']['Tables']['orders']['Row']
+    type Ingredient = Database['public']['Tables']['ingredients']['Row']
+    type Customer = Database['public']['Tables']['customers']['Row']
+
     // Calculate stats
-    const todayRevenue = todayOrders?.reduce((sum, order: any) => sum + ((order.total_amount as number) || 0), 0) || 0
-    const weeklyRevenue = weeklyOrders?.reduce((sum, order: any) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const todayRevenue = todayOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
+    const weeklyRevenue = weeklyOrders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
     
-    const lowStockItems = inventory?.filter((item: any) => 
+    const lowStockItems = inventory?.filter((item: Ingredient) => 
       item.current_stock <= (item.reorder_point || 0)
     ) || []
-    const outOfStockItems = inventory?.filter((item: any) => item.current_stock === 0) || []
+    const outOfStockItems = inventory?.filter((item: Ingredient) => item.current_stock === 0) || []
     
-    const vipCustomers = customers?.filter((customer: any) => customer.customer_type === 'vip').length || 0
+    const vipCustomers = customers?.filter((customer: Customer) => customer.customer_type === 'vip').length || 0
 
     // Get recent orders for activity
-    const recentOrders = todayOrders?.slice(-3).map((order: any) => ({
+    const recentOrders = todayOrders?.slice(-3).map((order: Order) => ({
       customer: order.customer_name || 'Unknown',
       amount: order.total_amount || 0,
       time: order.created_at
@@ -210,7 +214,8 @@ const fetchWeeklySales = async (): Promise<WeeklySalesData[]> => {
 
       if (error) {throw error}
 
-      const revenue = orders?.reduce((sum, order: any) => sum + ((order.total_amount as number) || 0), 0) || 0
+      type Order = Database['public']['Tables']['orders']['Row']
+      const revenue = orders?.reduce((sum, order: Order) => sum + ((order.total_amount as number) || 0), 0) || 0
       
       weekData.push({
         day: date.toLocaleDateString('id-ID', { weekday: 'short' }),

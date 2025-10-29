@@ -16,6 +16,7 @@ import { type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
 
 // Extended schema for ingredients query
 const IngredientsQuerySchema = PaginationSchema.extend({
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
     let supabaseQuery = supabase
       .from('ingredients')
       .select(INGREDIENT_FIELDS.LIST, { count: 'exact' })
-      .eq('user_id', (user as any).id)
+      .eq('user_id', user.id)
       .range(offset, offset + limit - 1)
 
     // Apply search filter - using name instead of nama_bahan
@@ -105,12 +106,14 @@ export async function POST(request: NextRequest) {
       return createErrorResponse('Unauthorized', 401)
     }
 
+    const ingredientData: Database['public']['Tables']['ingredients']['Insert'] = {
+      ...bodyValidation,
+      user_id: user.id
+    }
+
     const { data: insertedData, error } = await supabase
       .from('ingredients')
-      .insert({
-        ...bodyValidation,
-        user_id: user.id
-      } as any)
+      .insert(ingredientData)
       .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, created_at, updated_at')
       .single()
 

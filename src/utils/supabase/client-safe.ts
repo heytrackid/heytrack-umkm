@@ -44,4 +44,3 @@ export async function createServerClient() {
 }
 
 // Export server client only for server-side use
-export { createServiceRoleClient } from './service-role'

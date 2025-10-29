@@ -15,30 +15,21 @@ import {
     Download,
     Info
 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
+import type { RecipeIngredientWithPrice } from '@/modules/hpp/types'
+
+interface IngredientDisplay extends RecipeIngredientWithPrice {
+    category?: string
+}
 
 interface HppBreakdownVisualProps {
-    recipe: {
-        id: string
-        name: string
-        total_cost: number
-        selling_price?: number
-        margin_percentage?: number
-        recipe_ingredients?: Array<{
-            quantity: number
-            unit: string
-            ingredient?: {
-                name: string
-                price_per_unit: number
-                category?: string
-            }
-        }>
-    }
+    recipe: RecipeWithCosts
     operationalCosts?: {
         labor: number
         utilities: number
@@ -61,10 +52,44 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
         setExpandedSections(newExpanded)
     }
 
+    const ingredients: IngredientDisplay[] = useMemo(() => {
+        if (recipe.ingredients.length > 0) {
+            return recipe.ingredients
+        }
+
+        const legacyIngredients = (recipe as { recipe_ingredients?: unknown }).recipe_ingredients
+        if (Array.isArray(legacyIngredients)) {
+            return legacyIngredients.map((ri) => {
+                const record = ri as {
+                    ingredient?: {
+                        name?: string
+                        price_per_unit?: number
+                        category?: string
+                        weighted_average_cost?: number
+                    }
+                    quantity?: number
+                    unit?: string
+                    ingredient_id?: string
+                }
+
+                return {
+                    id: record.ingredient_id ?? Math.random().toString(36).slice(2),
+                    name: record.ingredient?.name ?? 'Unknown',
+                    quantity: record.quantity ?? 0,
+                    unit: record.unit ?? 'unit',
+                    unit_price: record.ingredient?.weighted_average_cost ?? record.ingredient?.price_per_unit ?? 0,
+                    category: record.ingredient?.category ?? undefined
+                }
+            })
+        }
+
+        return []
+    }, [recipe])
+
     // Calculate costs
-    const ingredientCost = recipe.recipe_ingredients?.reduce((sum, ri) => {
-        return sum + (ri.ingredient?.price_per_unit || 0) * ri.quantity
-    }, 0) || 0
+    const ingredientCost = ingredients.reduce((sum, item) => {
+        return sum + item.unit_price * item.quantity
+    }, 0)
 
     const opCosts = operationalCosts || {
         labor: ingredientCost * 0.10,
@@ -78,15 +103,16 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
     const sellingPrice = recipe.selling_price || 0
     const profit = sellingPrice - totalCost
     const marginPercent = sellingPrice > 0 ? (profit / sellingPrice) * 100 : 0
+    const ingredientSharePercent = totalCost > 0 ? (ingredientCost / totalCost) * 100 : 0
+    const operationalSharePercent = totalCost > 0 ? (totalOperational / totalCost) * 100 : 0
 
     // Group ingredients by category
-    const ingredientsByCategory = recipe.recipe_ingredients?.reduce((acc, ri) => {
-        if (!ri.ingredient) return acc
-        const category = ri.ingredient.category || 'Lainnya'
+    const ingredientsByCategory = ingredients.reduce((acc, item) => {
+        const category = item.category || 'Lainnya'
         if (!acc[category]) acc[category] = []
-        acc[category].push(ri)
+        acc[category].push(item)
         return acc
-    }, {} as Record<string, typeof recipe.recipe_ingredients>)
+    }, {} as Record<string, IngredientDisplay[]>)
 
     const exportToPDF = () => {
         // TODO: Implement PDF export
@@ -117,7 +143,7 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Bahan Baku</div>
                             <div className="text-xs font-medium text-blue-600 mt-1">
-                                {totalCost > 0 ? ((ingredientCost / totalCost) * 100).toFixed(0) : 0}% dari total
+                                {ingredientSharePercent.toFixed(0)}% dari total
                             </div>
                         </div>
 
@@ -127,7 +153,7 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">Operasional</div>
                             <div className="text-xs font-medium text-orange-600 mt-1">
-                                {totalCost > 0 ? ((totalOperational / totalCost) * 100).toFixed(0) : 0}% dari total
+                                {operationalSharePercent.toFixed(0)}% dari total
                             </div>
                         </div>
 
@@ -164,18 +190,18 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
                         <div className="relative h-8 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                             <div
                                 className="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium"
-                                style={{ width: `${(ingredientCost / totalCost) * 100}%` }}
+                                style={{ width: `${ingredientSharePercent}%` }}
                             >
-                                {((ingredientCost / totalCost) * 100).toFixed(0)}%
+                                {ingredientSharePercent.toFixed(0)}%
                             </div>
                             <div
                                 className="absolute h-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white text-xs font-medium"
                                 style={{
-                                    left: `${(ingredientCost / totalCost) * 100}%`,
-                                    width: `${(totalOperational / totalCost) * 100}%`
+                                    left: `${ingredientSharePercent}%`,
+                                    width: `${operationalSharePercent}%`
                                 }}
                             >
-                                {((totalOperational / totalCost) * 100).toFixed(0)}%
+                                {operationalSharePercent.toFixed(0)}%
                             </div>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
@@ -207,11 +233,11 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
                 </CardHeader>
                 {expandedSections.has('ingredients') && (
                     <CardContent className="space-y-4">
-                        {ingredientsByCategory && Object.entries(ingredientsByCategory).map(([category, items]) => {
-                            const categoryCost = items.reduce((sum, ri) => {
-                                return sum + (ri.ingredient?.price_per_unit || 0) * ri.quantity
+                        {Object.entries(ingredientsByCategory).map(([category, items]) => {
+                            const categoryCost = items.reduce((sum, item) => {
+                                return sum + item.unit_price * item.quantity
                             }, 0)
-                            const categoryPercent = (categoryCost / ingredientCost) * 100
+                            const categoryPercent = ingredientCost > 0 ? (categoryCost / ingredientCost) * 100 : 0
 
                             return (
                                 <div key={category} className="space-y-2">
@@ -227,29 +253,28 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
                                     <Progress value={categoryPercent} className="h-2" />
 
                                     <div className="ml-4 space-y-2">
-                                        {items.map((ri, idx) => {
-                                            if (!ri.ingredient) return null
-                                            const itemCost = ri.ingredient.price_per_unit * ri.quantity
-                                            const itemPercent = (itemCost / ingredientCost) * 100
+                                        {items.map((item) => {
+                                            const itemCost = item.unit_price * item.quantity
+                                            const itemPercent = ingredientCost > 0 ? (itemCost / ingredientCost) * 100 : 0
 
                                             return (
-                                                <div key={idx} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
+                                                <div key={item.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2">
-                                                            <span>{ri.ingredient.name}</span>
+                                                            <span>{item.name}</span>
                                                             <Tooltip>
                                                                 <TooltipTrigger>
                                                                     <Info className="h-3 w-3 text-muted-foreground" />
                                                                 </TooltipTrigger>
                                                                 <TooltipContent>
                                                                     <p className="text-xs">
-                                                                        {ri.quantity} {ri.unit} × {formatCurrency(ri.ingredient.price_per_unit)}/{ri.unit}
+                                                                        {item.quantity} {item.unit} × {formatCurrency(item.unit_price)}/{item.unit}
                                                                     </p>
                                                                 </TooltipContent>
                                                             </Tooltip>
                                                         </div>
                                                         <div className="text-xs text-muted-foreground">
-                                                            {ri.quantity} {ri.unit} • {itemPercent.toFixed(1)}% dari total bahan
+                                                            {item.quantity} {item.unit} • {itemPercent.toFixed(1)}% dari total bahan
                                                         </div>
                                                     </div>
                                                     <span className="font-medium">{formatCurrency(itemCost)}</span>

@@ -1,9 +1,11 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/supabase-generated'
+import { createClient } from '@/utils/supabase/server'
+import type { Database, Json } from '@/types/supabase-generated'
 
 /**
  * Service for managing inventory alerts
+ * SERVER-ONLY: Uses server client for database operations
  */
 export class InventoryAlertService {
   private logger = dbLogger
@@ -13,7 +15,7 @@ export class InventoryAlertService {
    */
   async checkLowStockAlerts(userId: string): Promise<void> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       
       // Get all ingredients with stock below reorder point
       const { data: ingredients, error } = await supabase
@@ -30,13 +32,16 @@ export class InventoryAlertService {
         return
       }
 
-      const alerts: Array<{
+      type InventoryAlertInsert = Database['public']['Tables']['inventory_alerts']['Insert']
+      type PendingInventoryAlert = {
         ingredient_id: string
-        alert_type: string
-        severity: string
-        message: string
-        metadata: Record<string, unknown>
-      }> = []
+        alert_type: InventoryAlertInsert['alert_type']
+        severity: InventoryAlertInsert['severity']
+        message: InventoryAlertInsert['message']
+        metadata: InventoryAlertInsert['metadata']
+      }
+
+      const alerts: PendingInventoryAlert[] = []
 
       for (const ingredient of ingredients) {
         const currentStock = ingredient.current_stock || 0
@@ -55,7 +60,7 @@ export class InventoryAlertService {
               min_stock: minStock,
               ingredient_name: ingredient.name,
               unit: ingredient.unit
-            }
+            } as Json
           })
         }
         // Low stock (below reorder point)
@@ -73,7 +78,7 @@ export class InventoryAlertService {
               unit: ingredient.unit,
               supplier: ingredient.supplier,
               lead_time: ingredient.lead_time
-            }
+            } as Json
           })
         }
         // Below minimum stock
@@ -88,7 +93,7 @@ export class InventoryAlertService {
               min_stock: minStock,
               ingredient_name: ingredient.name,
               unit: ingredient.unit
-            }
+            } as Json
           })
         }
       }
@@ -140,6 +145,8 @@ export class InventoryAlertService {
     ingredients: Array<{ id: string; current_stock: number | null; min_stock: number | null; reorder_point: number | null }>
   ): Promise<void> {
     try {
+      const supabase = await createClient()
+      
       for (const ingredient of ingredients) {
         const currentStock = ingredient.current_stock || 0
         const minStock = ingredient.min_stock || 0
@@ -168,7 +175,7 @@ export class InventoryAlertService {
    */
   async checkIngredientAlert(ingredientId: string, userId: string): Promise<void> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       
       const { data: ingredient, error } = await supabase
         .from('ingredients')
@@ -266,7 +273,7 @@ export class InventoryAlertService {
    */
   async getActiveAlerts(userId: string): Promise<unknown[]> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       
       const { data: alerts, error } = await supabase
         .from('inventory_alerts')
@@ -296,7 +303,7 @@ export class InventoryAlertService {
    */
   async acknowledgeAlert(alertId: string, userId: string): Promise<void> {
     try {
-      const supabase = createClient()
+      const supabase = await createClient()
       
       await supabase
         .from('inventory_alerts')

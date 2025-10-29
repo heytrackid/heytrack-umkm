@@ -60,7 +60,7 @@ class ErrorBoundary extends Component<
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     uiLogger.error({ error, errorInfo }, 'Lazy loading error:')
   }
 
@@ -74,13 +74,13 @@ class ErrorBoundary extends Component<
 }
 
 // Utility function to create lazy components with consistent patterns
-export function createLazyComponent(
-  importFunc: () => Promise<{ default: ComponentType<any> }>,
+export function createLazyComponent<TProps = Record<string, unknown>>(
+  importFunc: () => Promise<{ default: ComponentType<TProps> }>,
   fallback?: ReactNode
 ) {
   const LazyComponent = lazy(importFunc)
 
-  return (props: any) => (
+  return (props: TProps) => (
     <LazyWrapper fallback={fallback}>
       <LazyComponent {...props} />
     </LazyWrapper>
@@ -88,12 +88,12 @@ export function createLazyComponent(
 }
 
 // Preload utility for critical components
-export function preloadComponent(importFunc: () => Promise<any>) {
-  const link = document.createElement('link')
-  link.rel = 'preload'
-  link.as = 'script'
-  link.href = '' // This would need to be implemented based on the import
-  document.head.appendChild(link)
+export function preloadComponent<T = Record<string, unknown>>(importFunc: () => Promise<{ default: ComponentType<T> }>) {
+  // Note: Actual implementation would need dynamic import URL resolution
+  // For now, we just type the function properly
+  // The actual preload would need the resolved module URL
+  const modulePromise = importFunc();
+  return modulePromise;
 }
 
 // Performance monitoring hook
@@ -109,8 +109,13 @@ export function usePerformanceMonitor(componentName: string) {
       uiLogger.info({ componentName, loadTime }, `${componentName} loaded in ${loadTime.toFixed(2)}ms`)
 
       // Could send to analytics service
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        ; (window as any).gtag('event', 'component_load_time', {
+      interface WindowWithGtag extends Window {
+        gtag?: (event: string, action: string, params: Record<string, unknown>) => void
+      }
+      
+      const win = window as WindowWithGtag
+      if (typeof window !== 'undefined' && win.gtag) {
+        win.gtag('event', 'component_load_time', {
           component_name: componentName,
           load_time: loadTime,
           page_path: window.location.pathname

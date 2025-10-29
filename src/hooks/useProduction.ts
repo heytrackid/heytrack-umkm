@@ -34,7 +34,7 @@ export function useCreateProductionBatch() {
   const { toast } = useToast()
   
   return useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async <T = unknown>(data: T) => {
       const response = await fetch('/api/production-batches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

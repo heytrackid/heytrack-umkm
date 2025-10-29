@@ -189,16 +189,16 @@ export class OrderValidationHelpers {
    * Validate bulk order import
    */
   static validateBulkImport(orders: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: OrderInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: OrderInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     orders.forEach((order, index) => {
       const result = this.validateInsert(order)
       if (result.success) {
-        valid.push(result.data)
+        valid.push(result.data!)
       } else {
         invalid.push({
           index,

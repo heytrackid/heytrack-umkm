@@ -5,7 +5,7 @@
 
 import { memo } from 'react'
 import { useResponsive } from '@/hooks/useResponsive'
-import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { Pie, PieChart, Cell, Tooltip, Legend, ResponsiveContainer, type PieLabelRenderProps } from 'recharts'
 import { BaseMobileChart } from './base-chart'
 import { MobileTooltip } from './mobile-tooltip'
 import { type BaseMobileChartProps, CHART_COLORS, PieLabelProps } from './types'
@@ -33,7 +33,7 @@ export const MobilePieChart = memo(({
 }: MobilePieChartProps) => {
   const { isMobile } = useResponsive()
 
-  const renderLabel = (props: any) => {
+  const renderLabel = (props: PieLabelRenderProps) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props
     if (!showLabels || !percent || percent < 0.05) {return null} // Don't show labels for slices < 5%
 

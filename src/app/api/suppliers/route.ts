@@ -2,12 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
 import { prepareInsert } from '@/lib/supabase/insert-helpers'
-
-type Supplier = Database['public']['Tables']['suppliers']['Row']
-type SupplierInsert = Database['public']['Tables']['suppliers']['Insert']
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

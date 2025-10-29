@@ -152,16 +152,16 @@ export class IngredientValidationHelpers {
    * Validate bulk ingredient import
    */
   static validateBulkImport(ingredients: unknown[]): {
-    valid: any[]
-    invalid: Array<{ index: number; data: any; errors: string[] }>
+    valid: IngredientInsert[]
+    invalid: Array<{ index: number; data: unknown; errors: string[] }>
   } {
-    const valid: any[] = []
-    const invalid: Array<{ index: number; data: any; errors: string[] }> = []
+    const valid: IngredientInsert[] = []
+    const invalid: Array<{ index: number; data: unknown; errors: string[] }> = []
 
     ingredients.forEach((ingredient, index) => {
       const result = this.validateInsert(ingredient)
       if (result.success) {
-        valid.push(result.data)
+        valid.push(result.data!)
       } else {
         invalid.push({
           index,

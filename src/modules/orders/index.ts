@@ -11,11 +11,6 @@ export { OrdersTableView } from './components/OrdersTableView'
 
 // Services
 export { OrderRecipeService } from './services/OrderRecipeService'
-export type { 
-  RecipeOption, 
-  OrderItemCalculation, 
-  OrderPricing 
-} from './services/OrderRecipeService'
 
 // Types
 export type {

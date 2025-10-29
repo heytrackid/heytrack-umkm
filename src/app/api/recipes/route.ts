@@ -4,6 +4,7 @@ import { PaginationQuerySchema } from '@/lib/validations'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
+import type { Database } from '@/types/supabase-generated'
 // GET /api/recipes - Get all recipes with ingredient relationships
 export async function GET(request: NextRequest) {
   try {
@@ -142,7 +143,7 @@ export async function POST(request: NextRequest) {
         ...recipeData,
         created_by: user.id,
         name: recipeData.name || recipeData.nama
-      }] as any)
+      }])
       .select('id, name, created_at')
       .single()
 
@@ -155,18 +156,27 @@ export async function POST(request: NextRequest) {
     }
 
     // If ingredients are provided, add them to recipe_ingredients
-    const createdRecipe = recipe as any
+    const createdRecipe = recipe
     if (recipe_ingredients && recipe_ingredients.length > 0) {
-      const recipeIngredientsToInsert = recipe_ingredients.map((ingredient: any) => ({
+      type RecipeIngredientInput = {
+        ingredient_id?: string
+        bahan_id?: string
+        quantity?: number
+        qty_per_batch?: number
+        unit?: string
+      }
+
+      const recipeIngredientsToInsert: Database['public']['Tables']['recipe_ingredients']['Insert'][] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
         recipe_id: createdRecipe.id,
-        ingredient_id: ingredient.ingredient_id || ingredient.bahan_id,
-        quantity: ingredient.quantity || ingredient.qty_per_batch,
-        unit: ingredient.unit || 'g'
+        ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
+        quantity: ingredient.quantity || ingredient.qty_per_batch || 0,
+        unit: ingredient.unit || 'g',
+        user_id: user.id
       }))
 
       const { error: ingredientsError } = await supabase
         .from('recipe_ingredients')
-        .insert(recipeIngredientsToInsert as any)
+        .insert(recipeIngredientsToInsert)
 
       if (ingredientsError) {
         apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients:')

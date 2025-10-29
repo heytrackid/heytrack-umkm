@@ -4,8 +4,6 @@ import { Badge } from '@/components/ui/badge'
 import type { Database } from '@/types/supabase-generated'
 type Order = Database['public']['Tables']['orders']['Row']
 type OrderItem = Database['public']['Tables']['order_items']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
-type PaymentStatus = Database['public']['Enums']['payment_status']
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -14,14 +12,18 @@ import { MapPin, Phone, Users } from 'lucide-react'
 import { useMemo } from 'react'
 import { getPriorityInfo, getStatusInfo } from '../utils/helpers'
 
+interface OrderWithItems extends Order {
+  order_items?: OrderItem[]
+}
+
 interface OrderDetailViewProps {
-  order: Order
+  order: OrderWithItems
 }
 
 export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
   const { formatCurrency } = useCurrency()
-  const statusInfo = getStatusInfo(order.status)
-  const priorityInfo = getPriorityInfo(order.priority)
+  const statusInfo = getStatusInfo(order.status ?? 'PENDING')
+  const priorityInfo = getPriorityInfo(order.priority ?? 'MEDIUM')
 
   return (
     <Tabs defaultValue="overview" className="w-full">

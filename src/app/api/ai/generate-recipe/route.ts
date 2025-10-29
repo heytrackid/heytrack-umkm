@@ -8,8 +8,8 @@ import type { Database } from '@/types/supabase-generated'
 // Use generated types
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Recipe = Database['public']['Tables']['recipes']['Row']
-type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
-type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
+// type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
+// type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
 
 // AI response structure (not a table type)
 interface RecipeIngredient {
@@ -19,21 +19,21 @@ interface RecipeIngredient {
   notes?: string
 }
 
-interface AIGeneratedRecipe {
-  name: string
-  category: string
-  servings: number
-  prep_time_minutes: number
-  bake_time_minutes: number
-  total_time_minutes: number
-  difficulty: string
-  description: string
-  ingredients: RecipeIngredient[]
-  instructions: unknown[]
-  tips?: string[]
-  storage?: string
-  shelf_life?: string
-}
+// interface AIGeneratedRecipe {
+//   name: string
+//   category: string
+//   servings: number
+//   prep_time_minutes: number
+//   bake_time_minutes: number
+//   total_time_minutes: number
+//   difficulty: string
+//   description: string
+//   ingredients: RecipeIngredient[]
+//   instructions: unknown[]
+//   tips?: string[]
+//   storage?: string
+//   shelf_life?: string
+// }
 export const runtime = 'edge'
 export const maxDuration = 60
 
@@ -568,7 +568,8 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
     
     const supabase = createClient()
 
-    for (const recipeIng of recipe.ingredients as RecipeIngredient[]) {
+    const recipeIngredients = (recipe as any).ingredients as RecipeIngredient[] || []
+    for (const recipeIng of recipeIngredients) {
         // Find matching ingredient using fuzzy matching
         const ingredient = findBestIngredientMatch(recipeIng.name, availableIngredients)
 
@@ -627,14 +628,15 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
         : totalMaterialCost * 0.3 // Fallback to 30% if no data
 
     const totalHPP = totalMaterialCost + operationalCostPerBatch
-    const hppPerUnit = totalHPP / recipe.servings
+    const servings = recipe.servings || 1
+    const hppPerUnit = totalHPP / servings
 
     return {
         totalMaterialCost,
         operationalCost: operationalCostPerBatch,
         totalHPP,
         hppPerUnit,
-        servings: recipe.servings,
+        servings,
         ingredientBreakdown,
         breakdown: {
             materials: totalMaterialCost,

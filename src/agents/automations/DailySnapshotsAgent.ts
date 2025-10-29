@@ -1,4 +1,5 @@
-import type {
+import 'server-only'
+import {
   AgentContext,
   AgentTask,
   AgentResult} from '@/agents/base';
@@ -8,12 +9,7 @@ import {
   executeAgentTask
 } from '@/agents/base'
 import { HppCalculatorService } from '@/modules/hpp'
-import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/supabase-generated'
-
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
-type HppSnapshotInsert = Database['public']['Tables']['hpp_snapshots']['Insert']
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 /**
  * Generate a simple correlation ID
@@ -150,7 +146,7 @@ export class DailySnapshotsAgent {
 
     try {
       // Calculate current HPP for the recipe
-      const hppResult = await this.hppCalculator.calculateRecipeHpp(recipeId)
+      const hppResult = await this.hppCalculator.calculateRecipeHpp(context.supabase, recipeId, context.userId!)
 
       // Get previous snapshot for comparison
       const previousSnapshot = await this.getPreviousSnapshot(recipeId, snapshotDate)
@@ -223,7 +219,7 @@ export class DailySnapshotsAgent {
    */
   private async getPreviousSnapshot(recipeId: string, currentDate: string): Promise<{ hpp_value: number } | null> {
     try {
-      const supabase = createClient()
+      const supabase = createServiceRoleClient()
       const { data, error } = await supabase
         .from('hpp_snapshots')
         .select('hpp_value')
@@ -252,7 +248,7 @@ export class DailySnapshotsAgent {
    */
   private async getActiveRecipeIds(): Promise<string[]> {
     try {
-      const supabase = createClient()
+      const supabase = createServiceRoleClient()
       const { data, error } = await supabase
         .from('recipes')
         .select('id')
@@ -276,7 +272,7 @@ export class DailySnapshotsAgent {
    */
   async cleanupOldSnapshots(): Promise<void> {
     try {
-      const supabase = createClient()
+      const supabase = createServiceRoleClient()
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - 365)
       const cutoffDateStr = cutoffDate.toISOString().split('T')[0]

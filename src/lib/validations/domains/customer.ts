@@ -31,7 +31,7 @@ export const CustomerFormSchema = z.object({
   customer_type: z.string().max(50).optional().or(z.literal('')),
   discount_percentage: z.number().min(0).max(100).optional(),
   notes: z.string().max(1000).optional().or(z.literal('')),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean().default(true).optional(),
   loyalty_points: z.number().min(0).optional(),
 })
 

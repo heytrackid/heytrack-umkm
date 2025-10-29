@@ -1,7 +1,7 @@
 import { createErrorResponse, createSuccessResponse } from '@/lib/api-core/responses'
 import { withValidation } from '@/lib/api-core/middleware'
 import { handleDatabaseError } from '@/lib/errors'
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
+import { createClient } from '@/utils/supabase/server'
 import {
   IdParamSchema,
   IngredientUpdateSchema
@@ -15,9 +15,9 @@ type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     // Validate ID parameter
     const validation = IdParamSchema.safeParse({ id })
@@ -25,11 +25,18 @@ export async function GET(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return createErrorResponse('Unauthorized', 401)
+    }
+
     const { data, error } = await supabase
       .from('ingredients')
       .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, created_at, updated_at, user_id')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (error) {
@@ -39,7 +46,11 @@ export async function GET(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(data as any)
+    if (!data) {
+      return createErrorResponse('Bahan baku tidak ditemukan', 404)
+    }
+
+    return createSuccessResponse(data as Ingredient)
 
   } catch (error: unknown) {
     return handleDatabaseError(error)
@@ -49,9 +60,9 @@ export async function GET(
 // PUT /api/ingredients/[id] - Update bahan baku
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   const validationResult = await withValidation(IngredientUpdateSchema)(request)
 
   if (validationResult instanceof Response) {
@@ -67,13 +78,19 @@ export async function PUT(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return createErrorResponse('Unauthorized', 401)
+    }
 
     // Update bahan baku
     const { data, error } = await supabase
       .from('ingredients')
-      .update(validatedData as any)
+      .update(validatedData)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, updated_at')
       .single()
 
@@ -84,7 +101,7 @@ export async function PUT(
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(data as any, 'Bahan baku berhasil diupdate')
+    return createSuccessResponse(data as Ingredient, 'Bahan baku berhasil diupdate')
 
   } catch (error: unknown) {
     return handleDatabaseError(error)
@@ -94,9 +111,9 @@ export async function PUT(
 // DELETE /api/ingredients/[id] - Delete bahan baku
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const { id } = params
   try {
     // Validate ID parameter
     const validation = IdParamSchema.safeParse({ id })
@@ -104,13 +121,19 @@ export async function DELETE(
       return createErrorResponse('Invalid bahan baku ID format', 400)
     }
 
-    const supabase = createServiceRoleClient()
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return createErrorResponse('Unauthorized', 401)
+    }
 
-    // Check if bahan baku exists
+    // Check if bahan baku exists and belongs to user
     const { data: existing } = await supabase
       .from('ingredients')
       .select('id')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (!existing) {
@@ -136,12 +159,13 @@ export async function DELETE(
       .from('ingredients')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       return handleDatabaseError(error)
     }
 
-    return createSuccessResponse(null as any, 'Bahan baku berhasil dihapus')
+    return createSuccessResponse(null, 'Bahan baku berhasil dihapus')
 
   } catch (error: unknown) {
     return handleDatabaseError(error)

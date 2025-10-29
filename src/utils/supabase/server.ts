@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 import type { Database } from '@/types/supabase-generated'
 
@@ -21,7 +22,7 @@ function validateServerEnvironment() {
   }
 }
 
-export async function createClient() {
+export async function createClient(): Promise<SupabaseClient<Database>> {
   validateServerEnvironment()
 
   const cookieStore = await cookies()
@@ -50,5 +51,5 @@ export async function createClient() {
         },
       },
     }
-  )
+  ) as SupabaseClient<Database>
 }

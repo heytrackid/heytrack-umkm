@@ -34,6 +34,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
+import { ProductionFormDialog } from './ProductionFormDialog'
 
 // Extended type for production page display
 interface ProductionWithRecipe extends ProductionBatch {
@@ -73,6 +74,7 @@ export const EnhancedProductionPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [dateFilter, setDateFilter] = useState<string>('all')
+    const [isFormOpen, setIsFormOpen] = useState(false)
 
     useEffect(() => {
         void fetchProductions()
@@ -236,7 +238,10 @@ export const EnhancedProductionPage = () => {
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Refresh
                     </Button>
-                    <Button size={isMobile ? 'sm' : 'default'}>
+                    <Button
+                        size={isMobile ? 'sm' : 'default'}
+                        onClick={() => setIsFormOpen(true)}
+                    >
                         <Plus className="h-4 w-4 mr-2" />
                         Produksi Baru
                     </Button>
@@ -492,6 +497,11 @@ export const EnhancedProductionPage = () => {
                     </CardContent>
                 </Card>
             )}
+            <ProductionFormDialog
+                open={isFormOpen}
+                onOpenChange={setIsFormOpen}
+                onSuccess={fetchProductions}
+            />
         </div>
     )
 }

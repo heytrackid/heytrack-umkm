@@ -2,17 +2,18 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
 import type { Database } from '@/types/supabase-generated'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { HppAlertAgent } from '@/agents/automations/HppAlertAgent'
 
-type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
+// Types removed - not needed
 
 // GET /api/hpp/alerts - Get HPP alerts with pagination and filtering
 export async function GET(_request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -130,7 +131,7 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -177,7 +178,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Create authenticated Supabase client
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
 
     // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()

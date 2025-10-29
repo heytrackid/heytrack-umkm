@@ -73,7 +73,7 @@ export class HppExportService {
     const { recipeIds, dateRange, metrics = ['hpp', 'margin', 'cost_breakdown'] } = options
 
     // Build query for HPP data
-    let query = supabase
+    let query = this.supabase
       .from('hpp_calculations')
       .select(`
         *,
@@ -102,9 +102,9 @@ export class HppExportService {
     }
 
     // Get snapshots data if needed
-    let snapshots = []
+    let snapshots: unknown[] = []
     if (metrics.includes('trends') || metrics.includes('alerts')) {
-      const snapshotQuery = supabase
+      const snapshotQuery = this.supabase
         .from('hpp_snapshots')
         .select('*')
 
@@ -123,9 +123,9 @@ export class HppExportService {
     }
 
     // Get alerts data if needed
-    let alerts = []
+    let alerts: unknown[] = []
     if (metrics.includes('alerts')) {
-      const alertQuery = supabase
+      const alertQuery = this.supabase
         .from('hpp_alerts')
         .select(`
           *,

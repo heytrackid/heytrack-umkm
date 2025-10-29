@@ -5,8 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { lazy, Suspense } from 'react'
 
 // Chart component props interfaces
-interface ChartProps {
-  data?: any[]
+interface ChartProps<T = Record<string, unknown>> {
+  data?: T[]
   width?: number | string
   height?: number | string
   margin?: {
@@ -23,12 +23,6 @@ interface FinancialChartProps extends ChartProps {
   showLegend?: boolean
   showTooltip?: boolean
   currency?: string
-}
-
-interface InventoryChartProps extends ChartProps {
-  category?: string
-  showLowStock?: boolean
-  alertThreshold?: number
 }
 
 // Chart loading skeleton
@@ -90,29 +84,37 @@ const LazyMiniChart = lazy(
 // )
 
 // Chart wrapper components dengan loading states
-export const FinancialTrendsChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Financial Trends" height="h-80" />}>
-    <LazyFinancialTrendsChart {...props} />
-  </Suspense>
-)
+export function FinancialTrendsChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Financial Trends" height="h-80" />}>
+      <LazyFinancialTrendsChart {...props} />
+    </Suspense>
+  )
+}
 
-export const InventoryTrendsChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Inventory Trends" height="h-80" />}>
-    <LazyInventoryTrendsChart {...props} />
-  </Suspense>
-)
+export function InventoryTrendsChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Inventory Trends" height="h-80" />}>
+      <LazyInventoryTrendsChart {...props} />
+    </Suspense>
+  )
+}
 
-export const ChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Chart" height="h-64" />}>
-    <LazyChart {...props} />
-  </Suspense>
-)
+export function ChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Chart" height="h-64" />}>
+      <LazyChart {...props} />
+    </Suspense>
+  )
+}
 
-export const MiniChartWithLoading = (props: any) => (
-  <Suspense fallback={<MiniChartLoadingSkeleton />}>
-    <LazyMiniChart {...props} />
-  </Suspense>
-)
+export function MiniChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<MiniChartLoadingSkeleton />}>
+      <LazyMiniChart {...props} />
+    </Suspense>
+  )
+}
 
 // Advanced chart components yang bisa di-lazy load
 const LazyPieChart = lazy(
@@ -132,29 +134,37 @@ const LazyAreaChart = lazy(
 )
 
 // Custom chart wrapper untuk specific chart types
-export const PieChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Pie Chart" height="h-64" />}>
-    <LazyPieChart {...props} />
-  </Suspense>
-)
+export function PieChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Pie Chart" height="h-64" />}>
+      <LazyPieChart {...props} />
+    </Suspense>
+  )
+}
 
-export const LineChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Line Chart" height="h-64" />}>
-    <LazyLineChart {...props} />
-  </Suspense>
-)
+export function LineChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Line Chart" height="h-64" />}>
+      <LazyLineChart {...props} />
+    </Suspense>
+  )
+}
 
-export const BarChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Bar Chart" height="h-64" />}>
-    <LazyBarChart {...props} />
-  </Suspense>
-)
+export function BarChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Bar Chart" height="h-64" />}>
+      <LazyBarChart {...props} />
+    </Suspense>
+  )
+}
 
-export const AreaChartWithLoading = (props: any) => (
-  <Suspense fallback={<ChartLoadingSkeleton title="Area Chart" height="h-64" />}>
-    <LazyAreaChart {...props} />
-  </Suspense>
-)
+export function AreaChartWithLoading<T = Record<string, unknown>>(props: T) {
+  return (
+    <Suspense fallback={<ChartLoadingSkeleton title="Area Chart" height="h-64" />}>
+      <LazyAreaChart {...props} />
+    </Suspense>
+  )
+}
 
 // Chart feature bundle
 export const ChartFeatureBundle = {

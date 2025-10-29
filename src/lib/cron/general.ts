@@ -1,8 +1,10 @@
 /**
  * General Cron Jobs Module
  * General automation and maintenance cron jobs
+ * SERVER-ONLY: Uses service role client for automated tasks
  */
 
+import 'server-only'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
 import { InventoryCronJobs } from './inventory'

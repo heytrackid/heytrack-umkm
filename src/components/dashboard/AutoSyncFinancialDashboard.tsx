@@ -355,7 +355,7 @@ export default function AutoSyncFinancialDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.recentTransactions.slice(0, 5).map((tx, index: number) => (
+              {data.recentTransactions.slice(0, 5).map((tx) => (
                 <div key={tx.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-sm font-medium">
@@ -396,7 +396,6 @@ export default function AutoSyncFinancialDashboard() {
             </Button>
             {data.recommendations.missingSync > 0 && (
               <Button variant="secondary">
-                <Sync className="h-4 w-4 mr-2" />
                 Manual Sync ({data.recommendations.missingSync})
               </Button>
             )}

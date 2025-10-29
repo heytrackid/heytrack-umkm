@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, memo } from 'react'
+import { memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -10,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import {
-    RecipeSchema,
-    type RecipeFormData
-} from '@/lib/validations'
+    RecipeFormSchema,
+    type RecipeForm as RecipeFormData
+} from '@/lib/validations/domains/recipe'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Plus, Trash2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
@@ -31,32 +31,40 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
   const { toast } = useToast()
   
   const form = useForm<RecipeFormData>({
-    resolver: zodResolver(RecipeSchema),
+    resolver: zodResolver(RecipeFormSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       servings: initialData?.servings || 1,
-      prep_time_minutes: initialData?.prep_time_minutes || 30,
-      cook_time_minutes: initialData?.cook_time_minutes || 0,
-      instructions: initialData?.instructions || [''],
-      difficulty_level: initialData?.difficulty_level || 'EASY',
+      preparation_time: initialData?.preparation_time || 30,
+      cooking_time: initialData?.cooking_time || 0,
+      instructions: initialData?.instructions || [],
+      difficulty: initialData?.difficulty || 'EASY',
       category: initialData?.category || '',
       is_active: initialData?.is_active ?? true,
+      is_available: initialData?.is_available ?? true,
       ...initialData
     }
   })
 
-  const { fields, append, remove } = form.watch('instructions') ? {
-    fields: form.watch('instructions').map((instruction, index: number) => ({ id: index.toString(), value: instruction })),
-    append: (value: string) => {
-      const current = form.getValues('instructions')
+  const { fields: instructionFields, append: appendInstruction, remove: removeInstruction } = form.watch('instructions') ? {
+    fields: form.watch('instructions').map((instruction: { step_number: number; instruction: string; duration?: number; notes?: string }, index: number) => ({ 
+      id: index.toString(), 
+      value: instruction 
+    })) || [],
+    append: (value: { step_number: number; instruction: string; duration?: number; notes?: string }) => {
+      const current = form.getValues('instructions') || []
       form.setValue('instructions', [...current, value])
     },
     remove: (index: number) => {
-      const current = form.getValues('instructions')
-      form.setValue('instructions', current.filter((_, i) => i !== index))
+      const current = form.getValues('instructions') || []
+      form.setValue('instructions', current.filter((_: unknown, i: number) => i !== index))
     }
-  } : { fields: [], append: () => {}, remove: () => {} }
+  } : { 
+    fields: [], 
+    append: (value: { step_number: number; instruction: string; duration?: number; notes?: string }) => {}, 
+    remove: (index: number) => {} 
+  }
 
   const handleSubmit = async (data: RecipeFormData) => {
     try {

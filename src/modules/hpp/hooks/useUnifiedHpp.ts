@@ -1,74 +1,141 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Database } from '@/types/supabase-generated'
 type Recipe = Database['public']['Tables']['recipes']['Row']
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  type UseMutationResult,
+} from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import type { HppCalculation } from '@/modules/hpp/types'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import type {
+  RecipeIngredientWithPrice,
+  RecipeWithHpp,
+  HppOverview,
+  HppComparison,
+  HppAlertWithRecipe,
+} from '@/modules/hpp/types'
+
+interface RecipeIngredientRecord {
+  ingredient_id: string
+  quantity?: number | null
+  unit?: string | null
+  ingredients?: {
+    name?: string | null
+    weighted_average_cost?: number | null
+    price_per_unit?: number | null
+    category?: string | null
+  } | null
+}
+
+interface RecipeDetailResponse extends Recipe {
+  recipe_ingredients?: RecipeIngredientRecord[] | null
+}
+
+interface RecipesListResponse {
+  recipes: Array<Pick<Recipe, 'id' | 'name'>>
+}
+
+interface HppComparisonResponse {
+  recipes: HppComparison[]
+}
+
+interface HppAlertsResponse {
+  alerts: HppAlertWithRecipe[]
+}
 
 // Extended type for UI with calculated fields
-interface RecipeWithCosts extends Recipe {
-  ingredients: Array<{
-    id: string
-    name: string
-    quantity: number
-    unit: string
-    unit_price: number
-  }>
+export type RecipeWithCosts = RecipeDetailResponse & RecipeWithHpp & {
+  ingredients: RecipeIngredientWithPrice[]
   operational_costs: number
   total_cost: number
 }
 
+export interface UseUnifiedHppReturn {
+  recipes: Array<Pick<Recipe, 'id' | 'name'>>
+  overview: HppOverview | undefined
+  recipe: RecipeWithCosts | null
+  comparison: HppComparison[]
+  alerts: HppAlertWithRecipe[]
+  isLoading: boolean
+  recipeLoading: boolean
+  selectedRecipeId: string
+  setSelectedRecipeId: (id: string) => void
+  calculateHpp: UseMutationResult<unknown, unknown, string, unknown>
+  updatePrice: UseMutationResult<unknown, unknown, { recipeId: string; price: number; margin: number }, unknown>
+  markAlertAsRead: UseMutationResult<unknown, unknown, string, unknown>
+}
+
 // Type guard for recipe ingredient structure
-function isValidRecipeIngredient(ri: unknown): ri is {
-  ingredient_id: string
-  ingredients?: {
-    name?: string
-    weighted_average_cost?: number
-    price_per_unit?: number
-  }
-  quantity?: number
-  unit?: string
-} {
+function isValidRecipeIngredient(ri: unknown): ri is RecipeIngredientRecord {
   if (!ri || typeof ri !== 'object') return false
-  const ingredient = ri as { ingredient_id?: string }
+  const ingredient = ri as { ingredient_id?: unknown }
   return typeof ingredient.ingredient_id === 'string'
 }
 
-export function useUnifiedHpp() {
+function isRecipesListResponse(payload: unknown): payload is RecipesListResponse {
+  return typeof payload === 'object' && payload !== null && Array.isArray((payload as RecipesListResponse).recipes)
+}
+
+function isHppComparisonResponse(payload: unknown): payload is HppComparisonResponse {
+  return typeof payload === 'object' && payload !== null && Array.isArray((payload as HppComparisonResponse).recipes)
+}
+
+function isHppAlertsResponse(payload: unknown): payload is HppAlertsResponse {
+  return typeof payload === 'object' && payload !== null && Array.isArray((payload as HppAlertsResponse).alerts)
+}
+
+export function useUnifiedHpp(): UseUnifiedHppReturn {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>('')
 
   // Fetch all recipes
-  const { data: recipesData, isLoading: recipesLoading } = useQuery({
+  const { data: recipesData, isLoading: recipesLoading } = useQuery<Pick<Recipe, 'id' | 'name'>[]>({
     queryKey: ['recipes-list'],
-    queryFn: async () => {
+    queryFn: async (): Promise<Array<Pick<Recipe, 'id' | 'name'>>> => {
       const response = await fetch('/api/recipes?limit=100')
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
-      const data = await response.json()
-      apiLogger.info({ 
-        dataType: typeof data, 
-        isArray: Array.isArray(data),
-        hasRecipesKey: data?.recipes !== undefined,
-        count: Array.isArray(data) ? data.length : (data?.recipes?.length || 0)
+      const payload = await response.json() as RecipesListResponse | Recipe[] | null
+      const recipeCount = Array.isArray(payload)
+        ? payload.length
+        : isRecipesListResponse(payload)
+          ? payload.recipes.length
+          : 0
+
+      apiLogger.info({
+        hasPayload: payload !== null,
+        isArray: Array.isArray(payload),
+        hasRecipesKey: isRecipesListResponse(payload),
+        count: recipeCount
       }, 'HPP: Recipes data fetched')
-      return data
+      if (!payload) { return [] }
+
+      if (Array.isArray(payload)) {
+        return payload.map(({ id, name }) => ({ id, name }))
+      }
+
+      if (isRecipesListResponse(payload)) {
+        return payload.recipes.map(({ id, name }) => ({ id, name }))
+      }
+
+      return []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false
   })
 
   // Fetch HPP overview
-  const { data: overviewData, isLoading: overviewLoading } = useQuery({
+  const { data: overviewData, isLoading: overviewLoading } = useQuery<HppOverview>({
     queryKey: ['hpp-overview'],
-    queryFn: async () => {
+    queryFn: async (): Promise<HppOverview> => {
       const response = await fetch('/api/hpp/overview')
       if (!response.ok) {throw new Error('Failed to fetch overview')}
-      return response.json()
+      return response.json() as Promise<HppOverview>
     },
     staleTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: false
@@ -77,25 +144,28 @@ export function useUnifiedHpp() {
   // Fetch selected recipe details
   const { data: recipeData, isLoading: recipeLoading } = useQuery<RecipeWithCosts | null>({
     queryKey: ['recipe-detail', selectedRecipeId],
-    queryFn: async () => {
+    queryFn: async (): Promise<RecipeWithCosts | null> => {
       if (!selectedRecipeId) {return null}
       
       const response = await fetch(`/api/recipes/${selectedRecipeId}`)
       if (!response.ok) {throw new Error('Failed to fetch recipe')}
-      const data: Recipe = await response.json()
+      const data: RecipeDetailResponse = await response.json()
       
       // Calculate total cost from ingredients with type safety
       let ingredientCost = 0
-      if (data.recipe_ingredients && Array.isArray(data.recipe_ingredients)) {
-        ingredientCost = data.recipe_ingredients
-          .filter(isValidRecipeIngredient)
-          .reduce((sum: number, ri) => {
-            const quantity = ri.quantity || 0
-            // Use WAC if available, otherwise use current price
-            const unitPrice = ri.ingredients?.weighted_average_cost || ri.ingredients?.price_per_unit || 0
-            return sum + (quantity * unitPrice)
-          }, 0)
-      }
+      const recipeIngredients = Array.isArray(data.recipe_ingredients)
+        ? data.recipe_ingredients.filter(isValidRecipeIngredient)
+        : []
+
+      ingredientCost = recipeIngredients.reduce((sum: number, ri) => {
+        const quantity = ri.quantity ?? 0
+        // Use WAC if available, otherwise use current price
+        const unitPrice =
+          ri.ingredients?.weighted_average_cost ??
+          ri.ingredients?.price_per_unit ??
+          0
+        return sum + quantity * unitPrice
+      }, 0)
       
       // Get operational costs using configured percentage and minimum
       const operationalCost = Math.max(
@@ -103,20 +173,24 @@ export function useUnifiedHpp() {
         HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
       )
       
-      return {
+      const result = {
         ...data,
-        ingredients: (data.recipe_ingredients || [])
-          .filter(isValidRecipeIngredient)
-          .map((ri) => ({
-            id: ri.ingredient_id,
-            name: ri.ingredients?.name || 'Unknown',
-            quantity: ri.quantity || 0,
-            unit: ri.unit || 'unit',
-            unit_price: ri.ingredients?.weighted_average_cost || ri.ingredients?.price_per_unit || 0
-          })),
+        ingredients: recipeIngredients.map((ri): RecipeIngredientWithPrice => ({
+          id: ri.ingredient_id,
+          name: ri.ingredients?.name ?? 'Unknown',
+          quantity: ri.quantity ?? 0,
+          unit: ri.unit ?? 'unit',
+          unit_price:
+            ri.ingredients?.weighted_average_cost ??
+            ri.ingredients?.price_per_unit ??
+            0,
+          category: ri.ingredients?.category ?? undefined
+        })),
         operational_costs: operationalCost,
         total_cost: ingredientCost + operationalCost
-      }
+      } as RecipeWithCosts
+      
+      return result
     },
     enabled: !!selectedRecipeId,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -124,31 +198,39 @@ export function useUnifiedHpp() {
   })
 
   // Fetch comparison data
-  const { data: comparisonData } = useQuery({
+  const { data: comparisonData } = useQuery<HppComparison[]>({
     queryKey: ['hpp-comparison'],
-    queryFn: async () => {
+    queryFn: async (): Promise<HppComparison[]> => {
       const response = await fetch('/api/hpp/comparison')
       if (!response.ok) {throw new Error('Failed to fetch comparison')}
-      return response.json()
+      const payload = await response.json() as HppComparisonResponse | HppComparison[] | null
+      if (!payload) { return [] }
+      if (Array.isArray(payload)) { return payload }
+      if (isHppComparisonResponse(payload)) { return payload.recipes }
+      return []
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false
   })
 
   // Fetch alerts
-  const { data: alertsData } = useQuery({
+  const { data: alertsData } = useQuery<HppAlertWithRecipe[]>({
     queryKey: ['hpp-alerts'],
-    queryFn: async () => {
+    queryFn: async (): Promise<HppAlertWithRecipe[]> => {
       const response = await fetch('/api/hpp/alerts?limit=5&is_read=false')
       if (!response.ok) {throw new Error('Failed to fetch alerts')}
-      return response.json()
+      const payload = await response.json() as HppAlertsResponse | HppAlertWithRecipe[] | null
+      if (!payload) { return [] }
+      if (Array.isArray(payload)) { return payload }
+      if (isHppAlertsResponse(payload)) { return payload.alerts }
+      return []
     },
     staleTime: 30 * 1000, // 30 seconds (alerts should be fresher)
     refetchOnWindowFocus: false
   })
 
   // Calculate HPP
-  const calculateHpp = useMutation({
+  const calculateHpp = useMutation<unknown, unknown, string>({
     mutationFn: async (recipeId: string) => {
       const response = await fetch('/api/hpp/calculate', {
         method: 'POST',
@@ -159,7 +241,7 @@ export function useUnifiedHpp() {
       if (!response.ok) {throw new Error('Failed to calculate HPP')}
       return response.json()
     },
-    onSuccess: (data, recipeId) => {
+    onSuccess: (_data, recipeId) => {
       // Granular cache invalidation - only invalidate affected recipe
       queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
       queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
@@ -181,7 +263,7 @@ export function useUnifiedHpp() {
   })
 
   // Update recipe price
-  const updatePrice = useMutation({
+  const updatePrice = useMutation<unknown, unknown, { recipeId: string; price: number; margin: number }>({
     mutationFn: async ({ recipeId, price, margin }: { recipeId: string; price: number; margin: number }) => {
       const response = await fetch(`/api/recipes/${recipeId}`, {
         method: 'PUT',
@@ -195,7 +277,7 @@ export function useUnifiedHpp() {
       if (!response.ok) {throw new Error('Failed to update price')}
       return response.json()
     },
-    onSuccess: (data, { recipeId }) => {
+    onSuccess: (_data, { recipeId }) => {
       // Granular cache invalidation - only invalidate affected recipe
       queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
       queryClient.invalidateQueries({ queryKey: ['recipes-list'] })
@@ -218,7 +300,7 @@ export function useUnifiedHpp() {
   })
 
   // Mark alert as read
-  const markAlertAsRead = useMutation({
+  const markAlertAsRead = useMutation<unknown, unknown, string>({
     mutationFn: async (alertId: string) => {
       const response = await fetch(`/api/hpp/alerts/${alertId}/read`, {
         method: 'PATCH'
@@ -233,22 +315,17 @@ export function useUnifiedHpp() {
   })
 
   return {
-    // Data
-    recipes: Array.isArray(recipesData) ? recipesData : (recipesData?.recipes || []),
+    recipes: recipesData ?? [],
     overview: overviewData,
-    recipe: recipeData,
-    comparison: comparisonData?.recipes || [],
-    alerts: alertsData?.alerts || [],
-    
-    // Loading states
+    recipe: (recipeData ?? null) as RecipeWithCosts | null,
+    comparison: comparisonData ?? [],
+    alerts: alertsData ?? [],
     isLoading: recipesLoading || overviewLoading,
     recipeLoading,
-    
-    // Actions
     selectedRecipeId,
     setSelectedRecipeId,
     calculateHpp,
     updatePrice,
     markAlertAsRead
-  }
+  } satisfies UseUnifiedHppReturn
 }

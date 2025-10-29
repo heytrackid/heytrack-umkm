@@ -61,7 +61,7 @@ export function StockLevelVisualization({ ingredients }: StockLevelVisualization
 
     // Group by status
     const byStatus = ingredients.reduce((acc, ing) => {
-        const status = getStockStatus(ing.current_stock, ing.min_stock)
+        const status = getStockStatus(ing.current_stock ?? 0, ing.min_stock ?? 0)
         if (!acc[status]) acc[status] = []
         acc[status].push(ing)
         return acc
@@ -73,11 +73,12 @@ export function StockLevelVisualization({ ingredients }: StockLevelVisualization
     const normalCount = byStatus.normal?.length || 0
     const goodCount = byStatus.good?.length || 0
     const totalCount = ingredients.length
+    const safeTotalCount = totalCount === 0 ? 1 : totalCount
 
     const criticalValue = byStatus.critical?.reduce((sum, i) =>
-        sum + (i.current_stock * i.price_per_unit), 0) || 0
+        sum + ((i.current_stock ?? 0) * i.price_per_unit), 0) || 0
     const totalValue = ingredients.reduce((sum, i) =>
-        sum + (i.current_stock * i.price_per_unit), 0)
+        sum + ((i.current_stock ?? 0) * i.price_per_unit), 0)
 
     return (
         <div className="space-y-4">
@@ -165,33 +166,33 @@ export function StockLevelVisualization({ ingredients }: StockLevelVisualization
                                 <div
                                     className="absolute h-full bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-center text-white text-xs font-medium"
                                     style={{
-                                        left: `${(criticalCount / totalCount) * 100}%`,
-                                        width: `${(lowCount / totalCount) * 100}%`
+                                        left: `${(criticalCount / safeTotalCount) * 100}%`,
+                                        width: `${(lowCount / safeTotalCount) * 100}%`
                                     }}
                                 >
-                                    {((lowCount / totalCount) * 100).toFixed(0)}%
+                                    {((lowCount / safeTotalCount) * 100).toFixed(0)}%
                                 </div>
                             )}
                             {normalCount > 0 && (
                                 <div
                                     className="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-medium"
                                     style={{
-                                        left: `${((criticalCount + lowCount) / totalCount) * 100}%`,
-                                        width: `${(normalCount / totalCount) * 100}%`
+                                        left: `${((criticalCount + lowCount) / safeTotalCount) * 100}%`,
+                                        width: `${(normalCount / safeTotalCount) * 100}%`
                                     }}
                                 >
-                                    {((normalCount / totalCount) * 100).toFixed(0)}%
+                                    {((normalCount / safeTotalCount) * 100).toFixed(0)}%
                                 </div>
                             )}
                             {goodCount > 0 && (
                                 <div
                                     className="absolute h-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-medium"
                                     style={{
-                                        left: `${((criticalCount + lowCount + normalCount) / totalCount) * 100}%`,
-                                        width: `${(goodCount / totalCount) * 100}%`
+                                        left: `${((criticalCount + lowCount + normalCount) / safeTotalCount) * 100}%`,
+                                        width: `${(goodCount / safeTotalCount) * 100}%`
                                     }}
                                 >
-                                    {((goodCount / totalCount) * 100).toFixed(0)}%
+                                    {((goodCount / safeTotalCount) * 100).toFixed(0)}%
                                 </div>
                             )}
                         </div>
@@ -238,8 +239,11 @@ export function StockLevelVisualization({ ingredients }: StockLevelVisualization
                         <CardContent>
                             <div className="space-y-3">
                                 {items.map(ing => {
-                                    const stockPercent = (ing.current_stock / (ing.min_stock * 2)) * 100
-                                    const value = ing.current_stock * ing.price_per_unit
+                                    const currentStock = ing.current_stock ?? 0
+                                    const minStock = ing.min_stock ?? 0
+                                    const maxStockBaseline = Math.max(minStock * 2, 1)
+                                    const stockPercent = (currentStock / maxStockBaseline) * 100
+                                    const value = currentStock * (ing.price_per_unit ?? 0)
 
                                     return (
                                         <div key={ing.id} className="p-3 bg-white dark:bg-gray-900 rounded-lg border">
@@ -247,13 +251,13 @@ export function StockLevelVisualization({ ingredients }: StockLevelVisualization
                                                 <div className="flex-1">
                                                     <div className="font-medium">{ing.name}</div>
                                                     <div className="text-xs text-muted-foreground mt-0.5">
-                                                        {ing.current_stock} {ing.unit} / Min: {ing.min_stock} {ing.unit}
+                                                        {currentStock} {ing.unit ?? ''} / Min: {minStock} {ing.unit ?? ''}
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <div className="font-semibold text-sm">{formatCurrency(value)}</div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        {formatCurrency(ing.price_per_unit)}/{ing.unit}
+                                                        {formatCurrency(ing.price_per_unit ?? 0)}/{ing.unit ?? ''}
                                                     </div>
                                                 </div>
                                             </div>

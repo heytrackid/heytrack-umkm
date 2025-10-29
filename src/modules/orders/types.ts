@@ -25,9 +25,11 @@ export type OrderUpdate = OrdersTable['Update']
 
 // Type aliases for enums from database
 export type OrderStatus = Database['public']['Enums']['order_status']
-export type PaymentStatus = Database['public']['Enums']['payment_status']
 export type PaymentMethod = Database['public']['Enums']['payment_method']
-export type DeliveryMethod = Database['public']['Enums']['delivery_method']
+
+// Custom types (not in database enums)
+export type PaymentStatus = 'PENDING' | 'PAID' | 'PARTIAL' | 'REFUNDED'
+export type DeliveryMethod = 'PICKUP' | 'DELIVERY' | 'DINE_IN'
 
 // Extended types with relations for UI
 export interface OrderItemWithRecipe extends OrderItem {
@@ -249,32 +251,31 @@ export interface UseOrderFormReturn {
 
 // Constants
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  draft: 'Draft',
-  pending: 'Menunggu Konfirmasi',
-  confirmed: 'Dikonfirmasi', 
-  in_production: 'Sedang Diproduksi',
-  ready: 'Siap Diambil',
-  completed: 'Selesai',
-  cancelled: 'Dibatalkan'
+  PENDING: 'Menunggu Konfirmasi',
+  CONFIRMED: 'Dikonfirmasi', 
+  IN_PROGRESS: 'Sedang Diproduksi',
+  READY: 'Siap Diambil',
+  DELIVERED: 'Selesai',
+  CANCELLED: 'Dibatalkan'
 }
 
 export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
-  unpaid: 'Belum Dibayar',
-  partial: 'Dibayar Sebagian',
-  paid: 'Lunas',
-  refunded: 'Dikembalikan'
+  PENDING: 'Belum Dibayar',
+  PARTIAL: 'Dibayar Sebagian',
+  PAID: 'Lunas',
+  REFUNDED: 'Dikembalikan'
 }
 
 export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  cash: 'Tunai',
-  transfer: 'Transfer Bank',
-  qris: 'QRIS',
-  card: 'Kartu',
-  ewallet: 'E-Wallet'
+  CASH: 'Tunai',
+  BANK_TRANSFER: 'Transfer Bank',
+  CREDIT_CARD: 'Kartu Kredit',
+  DIGITAL_WALLET: 'E-Wallet',
+  OTHER: 'Lainnya'
 }
 
 export const DELIVERY_METHOD_LABELS: Record<DeliveryMethod, string> = {
-  pickup: 'Ambil Sendiri',
-  delivery: 'Diantar',
-  shipping: 'Dikirim'
+  PICKUP: 'Ambil Sendiri',
+  DELIVERY: 'Diantar',
+  DINE_IN: 'Dine In'
 }

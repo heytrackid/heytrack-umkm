@@ -251,7 +251,7 @@ export function sortBy<T>(
 /**
  * Debounce utility for search inputs
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -270,7 +270,7 @@ export function safeLocalStorage() {
   const isAvailable = typeof window !== 'undefined' && !!window.localStorage
 
   return {
-    get: (key: string, defaultValue: any = null) => {
+    get: <T = unknown>(key: string, defaultValue: T | null = null) => {
       if (!isAvailable) {return defaultValue}
       try {
         const item = window.localStorage.getItem(key)
@@ -280,7 +280,7 @@ export function safeLocalStorage() {
       }
     },
 
-    set: (key: string, value: any) => {
+    set: <T = unknown>(key: string, value: T) => {
       if (!isAvailable) {return false}
       try {
         window.localStorage.setItem(key, JSON.stringify(value))

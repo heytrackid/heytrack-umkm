@@ -1,12 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
-import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-
-type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
 export async function GET(request: NextRequest) {

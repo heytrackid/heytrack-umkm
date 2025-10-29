@@ -3,18 +3,14 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
-import { prepareInsert, prepareUpdate } from '@/lib/supabase/insert-helpers'
-import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { prepareInsert } from '@/lib/supabase/insert-helpers'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -151,7 +147,7 @@ export async function POST(request: NextRequest) {
 // POST /api/hpp/calculate/batch - Calculate HPP for all recipes
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient() as SupabaseClient<Database>
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 

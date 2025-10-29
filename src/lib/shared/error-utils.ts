@@ -11,7 +11,7 @@ import { logger } from '@/lib/logger'
 export interface AppError {
   code: string
   message: string
-  details?: any
+  details?: Record<string, unknown>
   timestamp: Date
 }
 
@@ -23,11 +23,11 @@ export interface ValidationError {
 export interface APIError {
   status: number
   message: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 // Error creation utilities
-export function createAppError(code: string, message: string, details?: any): AppError {
+export function createAppError(code: string, message: string, details?: Record<string, unknown>): AppError {
   return {
     code,
     message,
@@ -40,7 +40,7 @@ export function createValidationError(field: string, message: string): Validatio
   return { field, message }
 }
 
-export function createAPIError(status: number, message: string, details?: any): APIError {
+export function createAPIError(status: number, message: string, details?: Record<string, unknown>): APIError {
   return { status, message, details }
 }
 
@@ -80,7 +80,7 @@ export function useErrorHandler() {
 
 // API error handling
 export function handleAPIResponse<T>(
-  response: { data?: T; error?: any },
+  response: { data?: T; error?: unknown },
   successMessage?: string,
   errorContext?: string
 ) {
@@ -109,15 +109,15 @@ export function handleAPIResponse<T>(
 }
 
 // Form error handling
-export function formatFormErrors(errors: Record<string, any>): string[] {
+export function formatFormErrors(errors: Record<string, unknown>): string[] {
   return Object.entries(errors).map(([field, error]) => {
-    const message = typeof error === 'string' ? error : error?.message || 'Invalid value'
+    const message = typeof error === 'string' ? error : (error as any)?.message || 'Invalid value'
     return `${field}: ${message}`
   })
 }
 
 // Error boundary helpers
-export function logErrorToService(error: Error, context?: any) {
+export function logErrorToService(error: Error, context?: unknown) {
   // In a real app, send to error monitoring service like Sentry
   logger.error({
     error: error.message,

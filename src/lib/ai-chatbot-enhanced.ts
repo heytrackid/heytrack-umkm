@@ -526,7 +526,7 @@ export class ContextAwareAI {
     return parts.join('\n')
   }
 
-  async getConversationSessions(): Promise<any[]> {
+  async getConversationSessions(): Promise<unknown[]> {
     try {
       // In a real implementation, this would fetch conversation history
       // For now, returning an empty array as placeholder

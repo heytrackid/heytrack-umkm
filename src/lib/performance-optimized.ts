@@ -12,29 +12,32 @@ const perfLogger = createLogger('PerformanceOptimized')
 /**
  * Memoize array operations to prevent unnecessary recalculations
  */
-export function useMemoizedArrayOps<T>(
+/**
+ * Memoize array operations to prevent unnecessary recalculations
+ */
+export function useMemoizedArrayOps<T, M = T>(
   array: T[],
   operations: {
     filter?: (item: T) => boolean
-    map?: (item: T) => any
-    reduce?: (acc: any, item: T) => any
+    map?: (item: T) => M
+    reduce?: (acc: M[], item: T) => M[]
     sort?: (a: T, b: T) => number
   }
 ) {
   return useMemo(() => {
-    let result: any = array
+    let result: T[] | M[] = [...array]
 
     if (operations.filter) {
-      result = result.filter(operations.filter)
+      result = (result as T[]).filter(operations.filter)
     }
     if (operations.map) {
-      result = result.map(operations.map)
+      result = (result as T[]).map(operations.map)
     }
     if (operations.sort) {
-      result = [...result].sort(operations.sort)
+      result = [...(result as T[])].sort(operations.sort)
     }
     if (operations.reduce) {
-      result = result.reduce(operations.reduce, 0)
+      result = (result as T[]).reduce(operations.reduce, [] as M[])
     }
 
     return result
@@ -107,7 +110,7 @@ export function useVirtualScroll<T>(
 /**
  * Optimize re-renders with stable callbacks
  */
-export function useStableCallback<T extends (...args: any[]) => any>(
+export function useStableCallback<T extends (...args: Parameters<T>) => ReturnType<T>>(
   callback: T
 ): T {
   const callbackRef = useRef<T>(callback)
@@ -224,7 +227,7 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
 /**
  * Throttled callback
  */
-export function useThrottledCallback<T extends (...args: any[]) => any>(
+export function useThrottledCallback<T extends (...args: Parameters<T>) => ReturnType<T>>(
   callback: T,
   delay: number
 ): T {
@@ -304,7 +307,7 @@ export function useLazyLoad(threshold = 0.1) {
 /**
  * Cache expensive function results
  */
-export function createMemoizedFunction<T extends (...args: any[]) => any>(
+export function createMemoizedFunction<T extends (...args: Parameters<T>) => ReturnType<T>>(
   fn: T,
   maxCacheSize = 100
 ): T {

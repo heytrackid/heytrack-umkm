@@ -19,14 +19,15 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
     const difficultyMap = { easy: 1, medium: 2, hard: 3 }
     const avgDifficulty =
         recipes.length > 0
-            ? recipes.reduce((sum, r) => sum + (difficultyMap[r.difficulty as keyof typeof difficultyMap] || 2), 0) /
+            ? recipes.reduce((sum, r) => sum + (difficultyMap[(r.difficulty ?? 'medium') as keyof typeof difficultyMap] || 2), 0) /
             recipes.length
             : 0
 
     // Find most common category
     const categoryCount = recipes.reduce(
         (acc, r) => {
-            acc[r.category] = (acc[r.category] || 0) + 1
+            const category = r.category ?? 'other';
+            acc[category] = (acc[category] || 0) + 1
             return acc
         },
         {} as Record<string, number>
@@ -83,7 +84,7 @@ export const RecipeStatsCards = ({ recipes }: RecipeStatsCardsProps) => {
                             <p className="text-sm font-medium text-muted-foreground">Kategori Terbanyak</p>
                             <p className="text-2xl font-bold">{getCategoryLabel(mostCommonCategory)}</p>
                             <p className="text-xs text-muted-foreground">
-                                {categoryCount[mostCommonCategory] || 0} resep
+                                {categoryCount[mostCommonCategory as keyof typeof categoryCount] || 0} resep
                             </p>
                         </div>
                         <BarChart3 className="h-8 w-8 text-gray-600 dark:text-gray-400" />

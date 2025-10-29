@@ -6,7 +6,6 @@ import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { formatCurrency } from '@/lib/currency'
-import { safeInsert } from '@/lib/supabase/type-helpers'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
@@ -116,15 +115,15 @@ export async function GET(request: NextRequest) {
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
-    type ExpenseRow = Database['public']['Tables']['expenses']['Row']
+    type ExpensePartial = { amount: number; category: string }
     
-    const todayTotal = todayExpenses?.reduce((sum: number, exp: ExpenseRow) =>
+    const todayTotal = todayExpenses?.reduce((sum: number, exp: ExpensePartial) =>
       sum + safeParseAmount(exp.amount), 0) || 0
-    const monthTotal = monthExpenses?.reduce((sum: number, exp: ExpenseRow) =>
+    const monthTotal = monthExpenses?.reduce((sum: number, exp: ExpensePartial) =>
       sum + safeParseAmount(exp.amount), 0) || 0
 
     // Category breakdown
-    const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: ExpenseRow) => {
+    const categoryBreakdown = monthExpenses?.reduce((acc: Record<string, number>, exp: ExpensePartial) => {
       const category = safeString(exp.category, 'Uncategorized')
       acc[category] = (acc[category] || 0) + safeParseAmount(exp.amount)
       return acc
@@ -183,8 +182,10 @@ export async function POST(request: Request) {
       description: validatedData.description || '',
     }
 
-    // ✅ Use financial_records table (expenses table doesn't exist)
-    const { data: expense, error } = await safeInsert(supabase as any, 'financial_records', insertPayload)
+    // Insert financial record with proper typing
+    const { data: expense, error } = await supabase
+      .from('financial_records')
+      .insert(insertPayload)
       .select('id, description, category, amount, date, created_at, user_id')
       .single()
 
@@ -203,7 +204,10 @@ export async function POST(request: Request) {
         entity_id: expense.id,
         priority: 'high'
       }
-      await safeInsert(supabase as any, 'notifications', notificationPayload).select()
+      await supabase
+        .from('notifications')
+        .insert(notificationPayload)
+        .select()
     }
 
     return NextResponse.json(expense, { status: 201 })

@@ -1,6 +1,7 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
-import { extractFirst, ensureArray } from '@/lib/type-guards'
+import { extractFirst } from '@/lib/type-guards'
 import type { Database, TablesInsert, TablesUpdate } from '@/types/supabase-generated'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 
@@ -32,6 +33,7 @@ function isRecipeIngredientsResult(data: unknown): data is RecipeIngredientsQuer
 
 /**
  * Service for updating inventory after order confirmation
+ * SERVER-ONLY: Uses service role client for bypassing RLS
  */
 export class InventoryUpdateService {
   /**

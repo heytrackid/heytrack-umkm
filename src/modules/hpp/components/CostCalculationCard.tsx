@@ -1,41 +1,23 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import type { Database } from '@/types/supabase-generated'
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, AlertTriangle, Calculator, ShoppingBag, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
-
-// Extended type for cost calculation display
-interface IngredientForCost {
-    name: string
-    quantity: number
-    unit: string
-    unit_price: number
-}
-
-interface RecipeForCost {
-    id: string
-    ingredients: IngredientForCost[]
-    operational_costs: number
-    total_cost: number
-    previous_cost?: number // For showing change
-}
+import type { RecipeWithCosts } from '../hooks/useUnifiedHpp'
 
 interface CostCalculationCardProps {
-    recipe: RecipeForCost
+    recipe: RecipeWithCosts
     onRecalculate: () => void
     isCalculating?: boolean
 }
 
 export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: CostCalculationCardProps) => {
     const { formatCurrency } = useCurrency()
-    const hasIngredientsWithoutPrice = recipe.ingredients.some((i) => i.unit_price === 0)
-    const ingredientsCost = recipe.ingredients.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0)
+    const hasIngredientsWithoutPrice = recipe.ingredients.some((ingredient) => ingredient.unit_price === 0)
+    const ingredientsCost = recipe.ingredients.reduce((sum, ingredient) => sum + (ingredient.quantity * ingredient.unit_price), 0)
 
     // Calculate HPP change
     const hppChange = recipe.previous_cost ? recipe.total_cost - recipe.previous_cost : 0

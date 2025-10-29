@@ -63,7 +63,8 @@ export async function GET(request: NextRequest) {
 
     // Add status filter
     if (status) {
-      query = query.eq('status', status)
+      // Type assertion for status - validated by database enum
+      query = query.eq('status', status as Database['public']['Enums']['order_status'])
     }
 
     // Add sorting
@@ -86,9 +87,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Map data to match our interface (order_items -> items)
-    const mappedData = data?.map((order: OrdersTable['Row'] & { order_items?: unknown[] }) => ({
+    // The query returns order_items with nested recipe data
+    type OrderItemWithRecipe = {
+      id: string
+      quantity: number
+      unit_price: number
+      total_price: number
+      product_name: string | null
+      special_requests: string | null
+      recipe_id: string
+      recipe: {
+        id: string
+        name: string
+        image_url: string | null
+      }
+    }
+    
+    type OrderWithItems = OrdersTable['Row'] & { 
+      order_items?: OrderItemWithRecipe[]
+    }
+    
+    const mappedData = data?.map((order) => ({
       ...order,
-      items: (order as any).order_items || []
+      items: (order as OrderWithItems).order_items || []
     }))
 
     return NextResponse.json(mappedData)
@@ -150,8 +171,8 @@ export async function POST(request: NextRequest) {
     
     const { data: incomeRecord, error: incomeError } = await supabase
         .from('financial_records')
-        .insert(incomeData as never)
-        .select()
+        .insert(incomeData)
+        .select('id')
         .single()
 
       if (incomeError) {
@@ -162,7 +183,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      incomeRecordId = (incomeRecord as any).id
+      incomeRecordId = incomeRecord.id
     }
 
     // Create order with financial_record_id if income was created
@@ -187,7 +208,7 @@ export async function POST(request: NextRequest) {
     
     const { data: orderData, error: orderError } = await supabase
       .from('orders')
-      .insert(orderInsertData as never)
+      .insert(orderInsertData)
       .select('id, order_no, customer_name, status, total_amount, created_at')
       .single()
 
@@ -207,7 +228,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const createdOrder = orderData as any
+    const createdOrder = orderData
 
     // Update income record with order reference
     if (incomeRecordId) {
@@ -216,7 +237,7 @@ export async function POST(request: NextRequest) {
         }
       await supabase
         .from('financial_records')
-        .update(updateData as never)
+        .update(updateData)
         .eq('id', incomeRecordId)
         .eq('user_id', user.id)
     }
@@ -225,7 +246,7 @@ export async function POST(request: NextRequest) {
     if (validatedData.items && validatedData.items.length > 0) {
       const orderItems: OrderItemInsert[] = validatedData.items.map((item) => ({
         order_id: createdOrder.id,
-        recipe_id: (item as any).recipe_id,
+        recipe_id: item.recipe_id,
         product_name: item.product_name,
         quantity: item.quantity,
         unit_price: item.unit_price,
@@ -236,7 +257,7 @@ export async function POST(request: NextRequest) {
 
       const { error: itemsError } = await supabase
         .from('order_items')
-        .insert(orderItems as never)
+        .insert(orderItems)
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Error creating order items:')

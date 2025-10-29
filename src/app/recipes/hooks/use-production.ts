@@ -503,6 +503,19 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
 
 // Production notifications
 export function useProductionNotifications() {
+  type Notification = {
+    id: string
+    title: string
+    message: string
+    type: string
+    priority: string
+    batch_id?: string
+    recipe_id?: string
+    created_at: string
+    read?: boolean
+    user_id?: string
+  }
+  
   const {
     data: notificationsData,
     loading,
@@ -521,8 +534,8 @@ export function useProductionNotifications() {
     }
   }
 
-  const unreadCount = (notificationsData as any[])?.filter((n: any) => {
-    const notif = n as { read?: boolean }
+  const unreadCount = (notificationsData as Notification[] | undefined)?.filter((n) => {
+    const notif = n as Notification
     return !notif.read
   }).length || 0
 

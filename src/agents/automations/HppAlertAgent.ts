@@ -1,4 +1,5 @@
-import type {
+import 'server-only'
+import {
   AgentContext,
   AgentTask,
   AgentResult} from '@/agents/base';
@@ -7,13 +8,7 @@ import {
   createAgentLogger,
   executeAgentTask
 } from '@/agents/base'
-import { createClient } from '@/utils/supabase/client'
-import type { Database } from '@/types/supabase-generated'
-
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
-type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
-type HppAlertInsert = Database['public']['Tables']['hpp_alerts']['Insert']
+import { createServiceRoleClient } from '@/utils/supabase/service-role'
 
 interface AlertDetectionTaskData {
   threshold?: number // percentage threshold for alerts (default 10%)
@@ -218,21 +213,27 @@ export class HppAlertAgent {
       // Create alert
       const alertData: {
         recipe_id: string
-        alert_type: 'COST_INCREASE' | 'COST_DECREASE'
-        threshold: number
-        current_value: number
-        previous_value: number
-        change_percentage: number
+        alert_type: string
+        change_percentage: number | null
         message: string
-        is_read: boolean
+        new_value: number | null
+        old_value: number | null
+        severity: string
+        threshold: number | null
+        title: string
+        user_id: string | null
+        is_read: boolean | null
       } = {
         recipe_id: change.recipeId,
         alert_type: change.changePercentage > 0 ? 'COST_INCREASE' : 'COST_DECREASE',
-        threshold,
-        current_value: change.currentHpp,
-        previous_value: change.previousHpp,
         change_percentage: change.changePercentage,
         message: `${recipeName}: HPP ${change.changePercentage > 0 ? 'increased' : 'decreased'} by ${Math.abs(change.changePercentage).toFixed(1)}% (Rp ${change.previousHpp.toLocaleString()} → Rp ${change.currentHpp.toLocaleString()})`,
+        new_value: change.currentHpp,
+        old_value: change.previousHpp,
+        severity: Math.abs(change.changePercentage) > threshold * 1.5 ? 'high' : 'medium',
+        threshold: threshold,
+        title: `HPP ${change.changePercentage > 0 ? 'Increase' : 'Decrease'} Alert`,
+        user_id: null, // Will be set by database or auth
         is_read: false
       }
       const { error: insertError } = await context.supabase
@@ -258,7 +259,7 @@ export class HppAlertAgent {
    */
   private async getActiveRecipeIds(): Promise<string[]> {
     try {
-      const supabase = createClient()
+      const supabase = createServiceRoleClient()
       const { data, error } = await supabase
         .from('recipes')
         .select('id')
@@ -281,7 +282,7 @@ export class HppAlertAgent {
    */
   async getUnreadAlerts(): Promise<Array<{ id: string; message: string; alert_type: string; severity: string; recipe_id: string | null; created_at: string }>> {
     try {
-      const supabase = createClient()
+      const supabase = createServiceRoleClient()
       const { data, error } = await supabase
         .from('hpp_alerts')
         .select(`
@@ -297,7 +298,15 @@ export class HppAlertAgent {
         throw new Error(`Failed to fetch unread alerts: ${error.message}`)
       }
 
-      return data || []
+      // Map to expected return type
+      return (data || []).map(alert => ({
+        id: alert.id,
+        message: alert.message,
+        alert_type: alert.alert_type,
+        severity: alert.severity,
+        recipe_id: alert.recipe_id,
+        created_at: alert.created_at || new Date().toISOString()
+      }))
 
     } catch (error: unknown) {
       this.logger.error({ error }, 'Failed to get unread alerts')
@@ -310,10 +319,11 @@ export class HppAlertAgent {
    */
   async markAlertAsRead(alertId: string): Promise<void> {
     try {
-      const supabase = createClient()
+      const supabase = createServiceRoleClient()
+      // @ts-ignore - Known typing issue with Supabase update method
       const { error } = await supabase
         .from('hpp_alerts')
-        .update([{ is_read: true }])
+        .update({ is_read: true })
         .eq('id', alertId)
 
       if (error) {

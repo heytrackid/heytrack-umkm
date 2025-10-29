@@ -5,11 +5,38 @@ import type { Database } from '@/types/supabase-generated'
 import { safeParseAmount, safeString, safeParseInt, safeTimestamp, isInArray } from '@/lib/api-helpers'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
-type Order = Database['public']['Tables']['orders']['Row']
-type Customer = Database['public']['Tables']['customers']['Row']
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type Recipe = Database['public']['Tables']['recipes']['Row']
-type Expense = Database['public']['Tables']['expenses']['Row']
+
+// Partial types for dashboard queries (only fields we fetch)
+type OrderStats = {
+  id: string
+  total_amount: number | null
+  status: Database['public']['Enums']['order_status'] | null
+  order_date?: string | null
+  customer_name?: string | null
+  created_at?: string | null
+}
+
+type CustomerStats = {
+  id: string
+  customer_type: string | null
+}
+
+type IngredientStats = {
+  id: string
+  current_stock: number | null
+  min_stock: number | null
+  category: string | null
+}
+
+type RecipeStats = {
+  id: string
+  times_made: number | null
+  name: string
+}
+
+type ExpenseStats = {
+  amount: number
+}
 
 export async function GET(request: Request) {
   try {
@@ -65,21 +92,21 @@ export async function GET(request: Request) {
       .eq('expense_date', today)
     
     // Calculate metrics
-    const totalRevenue = orders?.reduce((sum: number, order: Order) =>
+    const totalRevenue = orders?.reduce((sum: number, order: OrderStats) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
 
-    const todayRevenue = todayOrders?.reduce((sum: number, order: Order) =>
+    const todayRevenue = todayOrders?.reduce((sum: number, order: OrderStats) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
 
     const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] as const
-    const activeOrders = orders?.filter((order: Order) =>
+    const activeOrders = orders?.filter((order: OrderStats) =>
       isInArray(order.status, validStatuses)).length || 0
 
     const totalCustomers = customers?.length || 0
-    const vipCustomers = customers?.filter((customer: Customer) =>
+    const vipCustomers = customers?.filter((customer: CustomerStats) =>
       safeString(customer.customer_type) === 'vip').length || 0
 
-    const lowStockItems = ingredients?.filter((ingredient: Ingredient) => {
+    const lowStockItems = ingredients?.filter((ingredient: IngredientStats) => {
       const currentStock = safeParseAmount(ingredient.current_stock)
       const minStock = safeParseAmount(ingredient.min_stock)
       return currentStock <= minStock
@@ -88,7 +115,7 @@ export async function GET(request: Request) {
     const totalIngredients = ingredients?.length || 0
     const totalRecipes = recipes?.length || 0
     
-    const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: Expense) =>
+    const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: ExpenseStats) =>
       sum + safeParseAmount(expense.amount), 0) || 0
 
     // Calculate yesterday for comparison
@@ -101,11 +128,11 @@ export async function GET(request: Request) {
       .select('total_amount')
       .eq('order_date', yesterdayStr)
 
-    const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: Order) =>
+    const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: { total_amount: number | null }) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
     
     // Category breakdown for ingredients
-    const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: Ingredient) => {
+    const categoryBreakdown = ingredients?.reduce((acc: Record<string, number>, ingredient: IngredientStats) => {
       const category = safeString(ingredient.category, 'General')
       acc[category] = (acc[category] || 0) + 1
       return acc
@@ -113,7 +140,7 @@ export async function GET(request: Request) {
 
     // Recent orders for activity feed
     const recentOrders = orders
-      ?.sort((a: Order, b: Order) => {
+      ?.sort((a: OrderStats, b: OrderStats) => {
         const aTime = safeTimestamp(a.created_at)
         const bTime = safeTimestamp(b.created_at)
         return bTime - aTime
@@ -135,7 +162,7 @@ export async function GET(request: Request) {
         active: activeOrders,
         total: orders?.length || 0,
         today: todayOrders?.length || 0,
-        recent: recentOrders.map((order: Order) => ({
+        recent: recentOrders.map((order: OrderStats) => ({
           id: order.id,
           customer: safeString(order.customer_name, 'Walk-in customer'),
           amount: order.total_amount,
@@ -157,7 +184,7 @@ export async function GET(request: Request) {
       recipes: {
         total: totalRecipes,
         popular: recipes
-          ?.sort((a: Recipe, b: Recipe) => {
+          ?.sort((a: RecipeStats, b: RecipeStats) => {
             const aUsage = safeParseInt(a.times_made)
             const bUsage = safeParseInt(b.times_made)
             return bUsage - aUsage
@@ -202,21 +229,23 @@ export async function POST() {
       .select('amount')
       .eq('expense_date', today)
     
-    const todayOrderIds = todayOrders?.map((order: Order) => order.id) || []
-    type OrderItem = Database['public']['Tables']['order_items']['Row']
+    type OrderIdOnly = { id: string; total_amount: number | null }
+    type OrderItemPartial = { order_id: string; quantity: number }
     
-    const todayItems = todayOrderItems?.filter((item: OrderItem) =>
+    const todayOrderIds = todayOrders?.map((order: OrderIdOnly) => order.id) || []
+    
+    const todayItems = todayOrderItems?.filter((item: OrderItemPartial) =>
       todayOrderIds.includes(item.order_id)) || []
 
-    const totalRevenue = todayOrders?.reduce((sum: number, order: Order) =>
+    const totalRevenue = todayOrders?.reduce((sum: number, order: OrderIdOnly) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
 
-    const totalItemsSold = todayItems.reduce((sum: number, item: OrderItem) =>
+    const totalItemsSold = todayItems.reduce((sum: number, item: OrderItemPartial) =>
       sum + safeParseInt(item.quantity), 0) || 0
 
     const averageOrderValue = todayOrders?.length ? totalRevenue / todayOrders.length : 0
 
-    const totalExpenses = todayExpenses?.reduce((sum: number, expense: Expense) =>
+    const totalExpenses = todayExpenses?.reduce((sum: number, expense: { amount: number }) =>
       sum + safeParseAmount(expense.amount), 0) || 0
 
     const profitEstimate = totalRevenue - totalExpenses
@@ -224,15 +253,13 @@ export async function POST() {
     // Upsert daily summary
     type DailySalesSummary = Database['public']['Tables']['daily_sales_summary']['Insert']
     const summaryData: DailySalesSummary = {
-      user_id: user.id,
       sales_date: today,
       total_orders: todayOrders?.length || 0,
       total_revenue: totalRevenue,
       total_items_sold: totalItemsSold,
       average_order_value: averageOrderValue,
       expenses_total: totalExpenses,
-      profit_estimate: profitEstimate,
-      updated_at: new Date().toISOString()
+      profit_estimate: profitEstimate
     }
     const { error } = await supabase
       .from('daily_sales_summary')

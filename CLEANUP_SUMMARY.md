@@ -1,136 +1,153 @@
-# Cleanup Summary - Removed Old/Unused Files
+# 🧹 Cleanup Summary - Files to Delete
 
-## Files Deleted ✅
+## 📊 Quick Stats
 
-### 1. Production Module
-- ❌ `src/app/production/components/ProductionPage.tsx` - Replaced by EnhancedProductionPage
-- ❌ `src/app/production/layout.tsx` - Empty layout (only returned children)
-- ❌ `src/app/production/hooks/` - Empty directory
-
-**Reason**: Production page now uses `EnhancedProductionPage.tsx` with better features (tabs, filters, refresh button, mobile responsive).
-
-### 2. Recipes Module
-- ❌ `src/app/recipes/services/production-orders-integration.ts.broken` - Broken service file
-- ❌ `src/app/recipes/components/` - Empty directory
-- ❌ `src/app/recipes/services/` - Empty directory after cleanup
-
-**Reason**: File was marked as `.broken` and not imported anywhere. Empty directories cleaned up.
-
-### 3. HPP Module
-- ❌ `src/components/hpp/UnifiedHppPage.tsx` - Deprecated re-export
-- ❌ `src/components/hpp/` - Empty directory after cleanup
-
-**Reason**: File was marked as `@deprecated` and only re-exported from `@/modules/hpp/components/UnifiedHppPage.tsx`. No imports found.
-
-### 4. Operational Costs
-- ❌ `src/app/operational-costs/components/` - Empty directory
-- ❌ `src/app/operational-costs/hooks/` - Empty directory
-
-**Reason**: Empty directories with no files.
-
-### 5. API Automation
-- ❌ `src/app/api/automation/financial-analysis/` - Empty directory
-- ❌ `src/app/api/automation/production-plan/` - Empty directory
-- ❌ `src/app/api/automation/inventory-analysis/` - Empty directory
-
-**Reason**: Empty directories, likely from incomplete feature implementation.
-
-## Files Kept (Important) ✅
-
-### Layout Files with Dynamic Rendering
-These files look simple but are **important** for forcing dynamic rendering:
-
-- ✅ `src/app/customers/layout.tsx` - Has `export const dynamic = 'force-dynamic'`
-- ✅ `src/app/hpp/layout.tsx` - Has `export const dynamic = 'force-dynamic'` and `runtime = 'nodejs'`
-- ✅ `src/app/reports/layout.tsx` - Has `export const dynamic = 'force-dynamic'`
-- ✅ `src/app/orders/layout.tsx` - Has `export const dynamic = 'force-dynamic'`
-
-**Reason**: These exports are necessary for Next.js to know these routes should be dynamically rendered, not statically generated.
-
-### Enhanced Components (Active)
-All "Enhanced" versions are actively used:
-
-- ✅ `src/components/ingredients/EnhancedIngredientsPage.tsx`
-- ✅ `src/components/ingredients/EnhancedIngredientForm.tsx`
-- ✅ `src/app/production/components/EnhancedProductionPage.tsx`
-- ✅ `src/app/reports/components/EnhancedProfitReport.tsx`
-- ✅ `src/modules/hpp/components/UnifiedHppPage.tsx`
-
-## Deprecated Code Found (Not Deleted Yet)
-
-### Backward Compatibility Hooks
-Located in `src/hooks/responsive/compatibility.ts`:
-
-```typescript
-/**
- * @deprecated Use useResponsive() instead
- */
-export function useIsMobile(): boolean { ... }
-
-/**
- * @deprecated Use useResponsive() instead
- */
-export function useMobile(): MobileState { ... }
-```
-
-**Action**: Keep for now for backward compatibility. Can be removed in future major version.
-
-## Statistics
-
-| Category | Count |
-|----------|-------|
-| Files Deleted | 5 |
-| Directories Removed | 9 |
-| Deprecated Files Found | 3 |
-| Empty Directories Cleaned | 9 |
-
-## Benefits
-
-✅ **Cleaner codebase** - No more confusion between old and new versions
-✅ **Faster builds** - Less files to process
-✅ **Better maintainability** - Clear which components are active
-✅ **Reduced bundle size** - Removed unused code paths
-
-## Next Steps (Optional)
-
-### 1. Remove Deprecated Hooks (Breaking Change)
-If no code uses `useIsMobile()` or `useMobile()`:
-```bash
-# Search for usage
-grep -r "useIsMobile\|useMobile" src/
-# If no results, safe to delete compatibility.ts
-```
-
-### 2. Audit Remaining Empty Directories
-```bash
-find src -type d -empty
-```
-
-### 3. Check for Unused Exports
-Use tools like `ts-prune` or `knip` to find unused exports:
-```bash
-npx knip
-```
-
-## Verification
-
-Run these commands to verify everything still works:
-
-```bash
-# Type check
-pnpm type-check
-
-# Build
-pnpm build
-
-# Run dev server
-pnpm dev
-```
-
-All should pass without errors.
+- **Unused files (0 imports):** 5 files ✅ Safe to delete
+- **Low usage files (1-2 imports):** 7 files ⚠️ Review first
+- **Total potential cleanup:** 12 files
+- **Estimated LOC reduction:** ~1,500-2,000 lines
 
 ---
 
-**Date**: October 29, 2025
-**Status**: ✅ Cleanup Complete
-**Impact**: No breaking changes, only removed unused files
+## ❌ SAFE TO DELETE (0 imports)
+
+### 1. `src/lib/toast-helpers.ts`
+- **Reason:** Not imported anywhere
+- **Alternative:** Use `src/lib/shared/toast-utils.ts` or direct toast calls
+
+### 2. `src/lib/supabase-helpers.ts`
+- **Reason:** Not imported anywhere
+- **Alternative:** Use `src/lib/supabase/` folder utilities
+
+### 3. `src/lib/supabase-typed-client.ts`
+- **Reason:** Not imported anywhere
+- **Alternative:** Use `src/lib/supabase-client.ts`
+
+### 4. `src/lib/data-synchronization.ts`
+- **Reason:** Not imported anywhere
+- **Alternative:** Functionality likely moved elsewhere or unused
+
+### 5. `src/lib/query-optimization.ts`
+- **Reason:** Not imported anywhere
+- **Alternative:** Optimization logic likely in other files
+
+---
+
+## ⚠️ REVIEW BEFORE DELETE (1-2 imports)
+
+### 1. `src/hooks/responsive/compatibility.ts` (1 import)
+- **Status:** Marked as `@deprecated`
+- **Alternative:** Use `useResponsive()` hook
+- **Action:** Find the 1 import, replace with `useResponsive()`, then delete
+
+### 2. `src/lib/automation-engine.ts` (1 import)
+- **Alternative:** Use `src/lib/automation/index.ts`
+- **Action:** Check if it's just a re-export, if yes delete
+
+### 3. `src/lib/business-services.ts` (2 imports)
+- **Alternative:** Use `src/lib/business-services/index.ts`
+- **Action:** Check if it's just a re-export, if yes delete
+
+### 4. `src/lib/cron.ts` (2 imports)
+- **Alternative:** Use `src/lib/cron/index.ts`
+- **Action:** Check if it's just a re-export, if yes delete
+
+### 5. `src/lib/debounce.ts` (1 import)
+- **Alternative:** Use `useDebounce` hook from `src/hooks/useDebounce.ts`
+- **Action:** Replace import with hook, then delete
+
+### 6. `src/lib/ingredients-toast.ts` (1 import)
+- **Alternative:** Use generic toast utilities
+- **Action:** Replace with generic toast, then delete
+
+### 7. `src/lib/settings-validation.ts` (1 import)
+- **Alternative:** Use `src/lib/validations/` folder
+- **Action:** Move validation to proper location, then delete
+
+---
+
+## 🎯 Deletion Commands
+
+### Step 1: Delete unused files (safe)
+```bash
+rm src/lib/toast-helpers.ts
+rm src/lib/supabase-helpers.ts
+rm src/lib/supabase-typed-client.ts
+rm src/lib/data-synchronization.ts
+rm src/lib/query-optimization.ts
+```
+
+### Step 2: Verify no errors
+```bash
+pnpm type-check
+```
+
+### Step 3: Review low-usage files
+```bash
+# Find where each file is imported
+grep -r "toast-helpers" src --include="*.ts" --include="*.tsx"
+grep -r "compatibility" src --include="*.ts" --include="*.tsx"
+# ... etc
+```
+
+### Step 4: Delete after review
+```bash
+# After replacing imports
+rm src/hooks/responsive/compatibility.ts
+rm src/lib/automation-engine.ts
+rm src/lib/business-services.ts
+rm src/lib/cron.ts
+rm src/lib/debounce.ts
+rm src/lib/ingredients-toast.ts
+rm src/lib/settings-validation.ts
+```
+
+### Step 5: Final verification
+```bash
+pnpm type-check
+pnpm build
+```
+
+---
+
+## 📈 Expected Benefits
+
+1. **Reduced bundle size** - Less code to bundle
+2. **Faster builds** - Fewer files to process
+3. **Cleaner codebase** - Less confusion about which file to use
+4. **Better maintainability** - Clear single source of truth
+5. **Improved DX** - Easier to find the right utility
+
+---
+
+## ⚠️ Important Notes
+
+1. **Always run `pnpm type-check` after deletion**
+2. **Test critical features** after cleanup
+3. **Commit changes incrementally** (delete 1-2 files at a time)
+4. **Keep git history** in case you need to restore
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Run the check script
+./scripts/check-unused-files.sh
+
+# 2. Delete safe files
+rm src/lib/toast-helpers.ts src/lib/supabase-helpers.ts src/lib/supabase-typed-client.ts src/lib/data-synchronization.ts src/lib/query-optimization.ts
+
+# 3. Verify
+pnpm type-check
+
+# 4. Commit
+git add -A
+git commit -m "chore: remove unused utility files"
+```
+
+---
+
+**Generated:** $(date)
+**Script:** `scripts/check-unused-files.sh`
+**Full list:** `FILES_TO_DELETE.md`

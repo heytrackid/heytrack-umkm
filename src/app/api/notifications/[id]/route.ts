@@ -5,18 +5,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
-
-type Notification = Database['public']['Tables']['notifications']['Row']
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createClient()
-    const resolvedParams = await params
-    const notificationId = resolvedParams.id
+    const { id: notificationId } = params
 
     const body = await request.json()
     const { is_read, is_dismissed } = body

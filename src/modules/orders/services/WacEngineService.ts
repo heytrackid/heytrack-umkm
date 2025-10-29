@@ -1,9 +1,8 @@
+import 'server-only'
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
-
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type StockTransaction = Database['public']['Tables']['stock_transactions']['Row']
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Use type instead of interface for consistency
 type WacCalculation = {
@@ -22,9 +21,20 @@ type WacUpdateResult = {
   reason: string
 }
 
+/**
+ * WAC (Weighted Average Cost) Engine Service
+ * SERVER-ONLY: Uses server client for database operations
+ */
 export class WacEngineService {
   private logger = dbLogger
-  private supabase = createClient()
+  private supabase: SupabaseClient<Database> | null = null
+
+  private async getSupabase() {
+    if (!this.supabase) {
+      this.supabase = await createClient()
+    }
+    return this.supabase
+  }
 
   /**
    * Calculate current WAC for an ingredient based on all purchase transactions
@@ -33,8 +43,10 @@ export class WacEngineService {
     try {
       this.logger.info({ ingredientId }, 'Calculating WAC for ingredient')
 
+      const supabase = await this.getSupabase()
+
       // Get all purchase transactions for this ingredient, ordered by date
-      const { data: transactions, error } = await this.supabase
+      const { data: transactions, error } = await supabase
         .from('stock_transactions')
         .select('*')
         .eq('ingredient_id', ingredientId)
@@ -153,8 +165,10 @@ export class WacEngineService {
     newWac: number
   ): Promise<void> {
     try {
+      const supabase = await this.getSupabase()
+      
       // Get current ingredient price
-      const { data: ingredient, error } = await this.supabase
+      const { data: ingredient, error } = await supabase
         .from('ingredients')
         .select('price_per_unit')
         .eq('id', ingredientId)
@@ -172,7 +186,7 @@ export class WacEngineService {
       const percentageDifference = currentPrice > 0 ? (priceDifference / currentPrice) * 100 : 100
 
       if (percentageDifference >= 5) {
-        const { error: updateError } = await this.supabase
+        const { error: updateError } = await supabase
           .from('ingredients')
           .update({
             price_per_unit: newWac,
@@ -199,8 +213,10 @@ export class WacEngineService {
     try {
       this.logger.info('Starting WAC recalculation for all ingredients')
 
+      const supabase = await this.getSupabase()
+
       // Get all ingredients
-      const { data: ingredients, error } = await this.supabase
+      const { data: ingredients, error } = await supabase
         .from('ingredients')
         .select('id')
         .eq('is_active', true)
@@ -220,6 +236,7 @@ export class WacEngineService {
           if (wac) {
             return this.updateIngredientPriceIfNeeded(ingredient.id, 0, wac.currentWac)
           }
+          return Promise.resolve()
         })
       )
 
@@ -242,10 +259,12 @@ export class WacEngineService {
     transactionId: string
   }>> {
     try {
+      const supabase = await this.getSupabase()
+      
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - days)
 
-      const { data: transactions, error } = await this.supabase
+      const { data: transactions, error } = await supabase
         .from('stock_transactions')
         .select('id, created_at, unit_price, quantity, total_price')
         .eq('ingredient_id', ingredientId)
@@ -281,7 +300,7 @@ export class WacEngineService {
         const wac = runningQuantity > 0 ? runningValue / runningQuantity : 0
 
         history.push({
-          date: transaction.created_at,
+          date: transaction.created_at ?? new Date().toISOString(),
           wac,
           transactionId: transaction.id
         })

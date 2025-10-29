@@ -1,8 +1,10 @@
 /**
  * Order Cron Jobs Module
  * Scheduled jobs for order management and alerts
+ * SERVER-ONLY: Uses service role client for automated tasks
  */
 
+import 'server-only'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
 import { SmartNotificationSystem } from '@/lib/communications/notifications'

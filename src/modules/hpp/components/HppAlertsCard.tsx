@@ -8,17 +8,10 @@ import { formatDistanceToNow } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-
-interface Alert {
-    id: string
-    recipe_name: string
-    message: string
-    alert_type: string
-    created_at: string
-}
+import type { HppAlertWithRecipe } from '@/modules/hpp/types'
 
 interface HppAlertsCardProps {
-    alerts: Alert[]
+    alerts: HppAlertWithRecipe[]
     onMarkAsRead: (alertId: string) => void
 }
 
@@ -108,34 +101,43 @@ export const HppAlertsCard = ({ alerts, onMarkAsRead }: HppAlertsCardProps) => {
                     {alerts.length > 0 ? (
                         <>
                             {alerts.map((alert) => {
-                                const config = alertTypeConfig[alert.alert_type as keyof typeof alertTypeConfig] || alertTypeConfig.price_increase
+                                const typeKey = (alert.alert_type ?? 'price_increase') as keyof typeof alertTypeConfig
+                                const config = alertTypeConfig[typeKey] || alertTypeConfig.price_increase
                                 const AlertIcon = config.icon
+                                const createdAt = alert.created_at ? new Date(alert.created_at) : null
+                                const alertId = alert.id ?? ''
 
                                 return (
                                     <div
-                                        key={alert.id}
+                                        key={alertId}
                                         className={`flex items-start gap-3 p-4 rounded-lg cursor-pointer transition-all border ${config.bgClass}`}
-                                        onClick={() => onMarkAsRead(alert.id)}
+                                        onClick={() => {
+                                            if (alertId) {
+                                                onMarkAsRead(alertId)
+                                            }
+                                        }}
                                     >
                                         <div className={`w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center flex-shrink-0 ${config.iconClass}`}>
                                             <AlertIcon className="h-5 w-5" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-2 mb-1">
-                                                <div className="font-semibold">{alert.recipe_name}</div>
+                                                <div className="font-semibold">{alert.recipe_name ?? 'Produk Tidak Diketahui'}</div>
                                                 <Badge variant="outline" className="text-xs flex-shrink-0">
                                                     {config.label}
                                                 </Badge>
                                             </div>
                                             <div className="text-sm text-muted-foreground mb-2">
-                                                {alert.message}
+                                                {alert.message ?? 'Tidak ada detail tambahan.'}
                                             </div>
                                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                                 <span>
-                                                    {formatDistanceToNow(new Date(alert.created_at), {
-                                                        addSuffix: true,
-                                                        locale: idLocale
-                                                    })}
+                                                    {createdAt
+                                                        ? formatDistanceToNow(createdAt, {
+                                                            addSuffix: true,
+                                                            locale: idLocale
+                                                        })
+                                                        : 'Waktu tidak diketahui'}
                                                 </span>
                                                 <span className="text-blue-600 dark:text-blue-400 font-medium">
                                                     Klik untuk tandai dibaca →

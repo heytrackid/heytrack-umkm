@@ -37,7 +37,7 @@ export interface QueryArrayResult<T> {
 export async function typedInsert<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
-  data: any | any[]
+  data: TableInsert<T> | TableInsert<T>[]
 ) {
   const result = await supabase
     .from(table)
@@ -45,7 +45,7 @@ export async function typedInsert<T extends TableName>(
     .select()
 
   return result as {
-    data: any[] | null
+    data: TableRow<T>[] | null
     error: Error | null
   }
 }
@@ -57,7 +57,7 @@ export async function typedUpdate<T extends TableName>(
   supabase: SupabaseClient<Database>,
   table: T,
   id: string,
-  data: any
+  data: Partial<TableUpdate<T>>
 ) {
   const result = await supabase
     .from(table)
@@ -66,7 +66,7 @@ export async function typedUpdate<T extends TableName>(
     .select()
 
   return result as {
-    data: any[] | null
+    data: TableRow<T>[] | null
     error: Error | null
   }
 }
@@ -86,7 +86,7 @@ export async function typedDelete<T extends TableName>(
     .select()
 
   return result as {
-    data: any[] | null
+    data: TableRow<T>[] | null
     error: Error | null
   }
 }
@@ -99,7 +99,7 @@ export async function typedSelect<T extends TableName>(
   table: T,
   query?: {
     select?: string
-    filter?: Record<string, any>
+    filter?: Record<string, unknown>
     orderBy?: { column: string; ascending?: boolean }
     limit?: number
     single?: boolean
@@ -137,7 +137,7 @@ export async function typedSelect<T extends TableName>(
     : await queryBuilder
 
   return result as {
-    data: any | any[] | null
+    data: TableRow<T> | TableRow<T>[] | null
     error: Error | null
   }
 }

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getErrorMessage } from '@/lib/type-guards'
 import { createClient } from '@/utils/supabase/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated';
 
 export async function GET() {
   try {
@@ -36,7 +34,7 @@ export async function GET() {
       batch_number: batch.id.slice(0, 8).toUpperCase(), // Generate batch number from ID
       planned_date: batch.created_at, // Use created_at as planned_date
       actual_cost: batch.total_cost, // Map total_cost to actual_cost
-      unit: Array.isArray(batch.recipe) ? batch.recipe[0]?.unit : batch.recipe?.unit || 'pcs'
+      unit: 'pcs' // Default unit since recipes table doesn't have unit column
     })) || []
 
     return NextResponse.json(mappedBatches);
@@ -81,7 +79,7 @@ export async function POST(request: Request) {
       batch_number: batch.id.slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
-      unit: Array.isArray(batch.recipe) ? batch.recipe[0]?.unit : batch.recipe?.unit || 'pcs'
+      unit: 'pcs' // Default unit since recipes table doesn't have unit column
     }
 
     return NextResponse.json(mappedBatch, { status: 201 });

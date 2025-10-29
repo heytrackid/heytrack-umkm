@@ -104,7 +104,7 @@ export function createAgentContext(
       startTime: new Date(),
       events: []
     },
-    supabase: createClient()
+    supabase: createClient() as unknown as SupabaseClient<Database>
   }
 }
 

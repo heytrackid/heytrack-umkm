@@ -1,19 +1,16 @@
+import 'server-only'
 import { triggerWorkflow } from '@/lib/automation-engine'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
-import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 
-type Order = Database['public']['Tables']['orders']['Row']
-type OrderStatus = Database['public']['Enums']['order_status']
 // PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const resolvedParams = await params
-    const { id: orderId } = resolvedParams
+    const { id: orderId } = params
 
     const body = await request.json()
     const { status, notes } = body
@@ -184,11 +181,10 @@ export async function PATCH(
 // GET /api/orders/[id]/status - Get order status history (optional)
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const resolvedParams = await params
-    const { id: orderId } = resolvedParams
+    const { id: orderId } = params
 
     const supabase = createServiceRoleClient()
 

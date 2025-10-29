@@ -16,7 +16,7 @@ interface RouteParams {
   }
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createClient()
 
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const supabase = await createClient()
 

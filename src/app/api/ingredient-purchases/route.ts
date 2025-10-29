@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-validations'
-import { safeInsert, safeUpdate } from '@/lib/supabase/type-helpers'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 /**
@@ -135,8 +134,9 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Type assertion for ingredient data
-        const ingredientData = ingredient as any
+        // Type-safe ingredient data
+        type IngredientRow = Database['public']['Tables']['ingredients']['Row']
+        const ingredientData = ingredient as IngredientRow
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null
@@ -149,7 +149,9 @@ export async function POST(request: NextRequest) {
             date: validatedData.purchase_date || new Date().toISOString().split('T')[0]
         }
         
-        const { data: transaction, error: transactionError } = await safeInsert(supabase as any, 'financial_records', financialRecord)
+        const { data: transaction, error: transactionError } = await supabase
+            .from('financial_records')
+            .insert(financialRecord)
             .select('id')
             .single()
 
@@ -157,7 +159,7 @@ export async function POST(request: NextRequest) {
             apiLogger.error({ error: transactionError }, 'Error creating financial transaction:')
             // Continue without financial transaction
         } else {
-            financialTransactionId = (transaction as any)?.id || null
+            financialTransactionId = transaction?.id || null
         }
 
         // 2. Create purchase record
@@ -172,7 +174,9 @@ export async function POST(request: NextRequest) {
             notes: validatedData.notes
         }
         
-        const { data: purchase, error: purchaseError } = await safeInsert(supabase as any, 'ingredient_purchases', purchaseRecord)
+        const { data: purchase, error: purchaseError } = await supabase
+            .from('ingredient_purchases')
+            .insert(purchaseRecord)
             .select(`
         *,
         ingredient:ingredients (
@@ -211,11 +215,13 @@ export async function POST(request: NextRequest) {
             current_stock: newStock
         }
 
-        const { error: stockError } = await safeUpdate(supabase as any, 'ingredients', stockUpdate)
+        const { error: stockError } = await supabase
+            .from('ingredients')
+            .update(stockUpdate)
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', user.id)
             // Add optimistic lock: only update if current_stock hasn't changed
-            .eq('current_stock', ingredientData.current_stock)
+            .eq('current_stock', ingredientData.current_stock || 0)
 
         if (stockError) {
             apiLogger.error({ error: stockError }, 'Error updating stock (possible race condition):')
@@ -224,18 +230,20 @@ export async function POST(request: NextRequest) {
         }
 
         // 4. Create stock ledger entry
-        const purchaseData = purchase as any
         const stockLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
             ingredient_id: validatedData.ingredient_id,
             quantity_before: ingredientData.current_stock || 0,
             quantity_after: newStock,
             quantity_changed: qtyBeli,
             change_type: 'increase',
-            reference_id: purchaseData?.id || null,
+            reference_id: purchase?.id || null,
             reference_type: 'ingredient_purchase'
         }
         
-        await safeInsert(supabase as any, 'inventory_stock_logs', stockLog).select()
+        await supabase
+            .from('inventory_stock_logs')
+            .insert(stockLog)
+            .select()
 
         return NextResponse.json(purchase, { status: 201 })
     } catch (error: unknown) {
@@ -294,40 +302,42 @@ export async function DELETE(request: NextRequest) {
         const { data: ingredient } = await supabase
             .from('ingredients')
             .select('current_stock')
-            .eq('id', (purchase as any).ingredient_id)
+            .eq('id', purchase.ingredient_id)
             .eq('user_id', user.id)
             .single()
 
-        const ingredientDeleteData = ingredient as any
-        const purchaseData = purchase as any
-
-        if (ingredientDeleteData) {
-            const newStock = Math.max(0, (ingredientDeleteData.current_stock || 0) - purchaseData.quantity)
+        if (ingredient) {
+            const newStock = Math.max(0, (ingredient.current_stock || 0) - purchase.quantity)
 
             const stockUpdate: Database['public']['Tables']['ingredients']['Update'] = {
                 current_stock: newStock
             }
 
             // Use optimistic locking to prevent race condition
-            await safeUpdate(supabase as any, 'ingredients', stockUpdate)
-                .eq('id', purchaseData.ingredient_id)
+            await supabase
+                .from('ingredients')
+                .update(stockUpdate)
+                .eq('id', purchase.ingredient_id)
                 .eq('user_id', user.id)
-                .eq('current_stock', ingredientDeleteData.current_stock)
+                .eq('current_stock', ingredient.current_stock || 0)
         }
 
         // 2. Create stock ledger entry for reversal
         const reversalLog: Database['public']['Tables']['inventory_stock_logs']['Insert'] = {
-            ingredient_id: purchaseData.ingredient_id,
-            quantity_before: ingredientDeleteData?.current_stock || 0,
-            quantity_after: ingredientDeleteData ? Math.max(0, (ingredientDeleteData.current_stock || 0) - purchaseData.quantity) : 0,
-            quantity_changed: -purchaseData.quantity,
+            ingredient_id: purchase.ingredient_id,
+            quantity_before: ingredient?.current_stock || 0,
+            quantity_after: ingredient ? Math.max(0, (ingredient.current_stock || 0) - purchase.quantity) : 0,
+            quantity_changed: -purchase.quantity,
             change_type: 'adjustment',
             reason: 'Purchase deletion',
-            reference_id: purchaseData.id,
+            reference_id: purchase.id,
             reference_type: 'ingredient_purchase'
         }
         
-        await safeInsert(supabase as any, 'inventory_stock_logs', reversalLog).select()
+        await supabase
+            .from('inventory_stock_logs')
+            .insert(reversalLog)
+            .select()
 
         // 3. Delete purchase
         const { error: deleteError } = await supabase

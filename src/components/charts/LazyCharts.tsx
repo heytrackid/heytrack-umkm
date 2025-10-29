@@ -74,7 +74,10 @@ export const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mo
 export const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })))
 export const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
 export const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-export const Legend = dynamic(() => import('recharts').then(mod => ({ default: mod.Legend })))
+export const ChartLegend = dynamic(() => import('recharts').then(mod => mod.Legend), {
+  loading: () => <ChartSkeleton />,
+  ssr: false,
+})
 export const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
 export const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })))
 
