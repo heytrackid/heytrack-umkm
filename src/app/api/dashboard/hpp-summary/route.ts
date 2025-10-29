@@ -101,25 +101,8 @@ export async function GET(__request: NextRequest) {
       ? marginsData.reduce((sum, m) => sum + m, 0) / marginsData.length
       : 0
 
-    // Get HPP alerts
-    type AlertRow = {
-      id: string
-      is_read: boolean | null
-    }
-
-    const { data: alerts, error: alertsError} = await supabase
-      .from('hpp_alerts')
-      .select('id, is_read')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(50) as { data: AlertRow[] | null, error: unknown }
-
-    if (alertsError) {
-      throw alertsError
-    }
-
-    const totalAlerts = alerts?.length || 0
-    const unreadAlerts = alerts?.filter(a => !a.is_read).length || 0
+    const totalAlerts = 0
+    const unreadAlerts = 0
 
     // Get top recipes by margin
     const topRecipes = hppValues

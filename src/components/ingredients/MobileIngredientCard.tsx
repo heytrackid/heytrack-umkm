@@ -5,9 +5,9 @@ import type { Database } from '@/types/supabase-generated'
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 import {
-    Eye,
+    // Eye,
     Edit,
     Trash2,
     ChevronDown,

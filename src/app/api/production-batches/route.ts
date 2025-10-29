@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { cacheInvalidation } from '@/lib/cache'
 
 export async function GET() {
   try {
@@ -82,7 +83,10 @@ export async function POST(request: Request) {
       unit: 'pcs' // Default unit since recipes table doesn't have unit column
     }
 
-    return NextResponse.json(mappedBatch, { status: 201 });
+    // Invalidate cache
+    await cacheInvalidation.all()
+
+    return NextResponse.json(mappedBatch, { status: 201 })
   } catch (error: unknown) {
     return handleAPIError(error)
   }

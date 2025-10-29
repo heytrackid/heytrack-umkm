@@ -153,7 +153,9 @@ const nextConfig = {
   // External packages for server components
   serverExternalPackages: [
     '@supabase/realtime-js',
-    '@supabase/ssr'
+    '@supabase/ssr',
+    'exceljs',
+    'jsdom'
   ],
 
   // Redirects for security

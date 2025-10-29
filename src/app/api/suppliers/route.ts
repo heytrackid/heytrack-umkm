@@ -4,6 +4,9 @@ import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
 import { prepareInsert } from '@/lib/supabase/insert-helpers'
+import type { Database } from '@/types/supabase-generated'
+
+type Supplier = Database['public']['Tables']['suppliers']['Row']
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -27,14 +30,24 @@ export async function GET(request: NextRequest) {
   const { page, limit, search, sort_by, sort_order } = queryValidation.data
 
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
 
     let query = supabase
       .from('suppliers')
-      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
+      .select<keyof Supplier>(`
+        id, name, contact_person, email, phone, address, 
+        notes, is_active, created_at, updated_at
+      `)
+      .eq('user_id', user.id)
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -52,7 +65,7 @@ export async function GET(request: NextRequest) {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('suppliers').select('*', { count: 'exact', head: true })
+    let countQuery = supabase.from('suppliers').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
     if (search) {
       countQuery = countQuery.or(`name.ilike.%${search}%,contact_person.ilike.%${search}%,email.ilike.%${search}%`)
     }
@@ -66,16 +79,23 @@ export async function GET(request: NextRequest) {
         total: count || 0,
         totalPages: Math.ceil((count || 0) / limit)
       }
-    });
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const body = await request.json();
+    const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    const body = await request.json()
 
     // Validate request body
     const validation = SupplierInsertSchema.safeParse(body)
@@ -91,18 +111,26 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    const insertPayload = prepareInsert('suppliers', validatedData)
+    const insertPayload: Database['public']['Tables']['suppliers']['Insert'] = {
+      ...validatedData,
+      user_id: user.id
+    }
 
     const { data: supplier, error } = await supabase
       .from('suppliers')
       .insert(insertPayload)
-      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
-      .single();
+      .select<keyof Supplier>(`
+        id, name, contact_person, email, phone, address, 
+        notes, is_active, created_at, updated_at
+      `)
+      .single()
 
-    if (error) {throw error;}
+    if (error) {
+      return NextResponse.json({ error: 'Failed to create supplier' }, { status: 500 })
+    }
 
-    return NextResponse.json(supplier, { status: 201 });
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    return NextResponse.json(supplier, { status: 201 })
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }

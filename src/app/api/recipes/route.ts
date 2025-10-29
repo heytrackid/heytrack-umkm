@@ -5,8 +5,10 @@ import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import type { Database } from '@/types/supabase-generated'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+
 // GET /api/recipes - Get all recipes with ingredient relationships
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -109,7 +111,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/recipes - Create new recipe with ingredients
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -125,6 +127,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // The request body is already sanitized by the security middleware
     const body = await request.json()
     const { recipe_ingredients, ...recipeData } = body
 
@@ -219,3 +222,10 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

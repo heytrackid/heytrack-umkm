@@ -36,10 +36,10 @@ export interface OrderItemWithRecipe extends OrderItem {
   recipe?: {
     id: string
     name: string
-    price: number
-    category: string
-    servings: number
-    description?: string
+    selling_price: number | null // Use actual DB column name
+    category: string | null
+    servings: number | null
+    description: string | null
   }
 }
 
@@ -61,11 +61,12 @@ export interface RecipeOption {
   category: string
   servings: number
   description?: string | null
-  price: number
-  hpp_cost: number
-  margin: number
+  selling_price: number // Use actual DB column name
+  cost_per_unit: number | null // Use actual DB column name
+  margin_percentage: number | null // Use actual DB column name
   is_available: boolean
-  estimated_prep_time: number
+  prep_time: number | null // Use actual DB column name
+  cook_time: number | null // Use actual DB column name
 }
 
 export interface OrderItemCalculation {
@@ -74,7 +75,7 @@ export interface OrderItemCalculation {
   quantity: number
   unit_price: number
   total_price: number
-  estimated_cost: number
+  cost_per_unit: number // Use actual DB column name
   total_cost: number
   profit: number
   margin_percentage: number

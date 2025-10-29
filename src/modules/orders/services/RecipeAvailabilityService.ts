@@ -83,11 +83,12 @@ export class RecipeAvailabilityService {
             category: recipe.category,
             servings: recipe.servings ?? 1,
             description: recipe.description,
-            price,
-            hpp_cost: price * 0.7, // Estimate cost as 70% of price
-            margin: estimatedMargin,
+            selling_price: price,
+            cost_per_unit: recipe.cost_per_unit || (price * 0.7), // Use DB value or estimate
+            margin_percentage: recipe.margin_percentage || estimatedMargin,
             is_available: isAvailable,
-            estimated_prep_time: 30 // Default 30 minutes
+            prep_time: recipe.prep_time || null,
+            cook_time: recipe.cook_time || null
           } as RecipeOption
         })
       )

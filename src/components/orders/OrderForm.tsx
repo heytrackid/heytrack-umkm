@@ -36,7 +36,7 @@ export default function OrderForm({
   const [formData, setFormData] = useState<OrderFormData>({
     customer_name: '',
     customer_phone: '',
-    customer_email: '',
+    // customer_email: '', // Field doesn't exist in DB
     customer_address: '',
     delivery_date: '',
     delivery_time: '10:00',
@@ -53,7 +53,7 @@ export default function OrderForm({
       setFormData({
         customer_name: order.customer_name,
         customer_phone: order.customer_phone || '',
-        customer_email: order.customer_email || '',
+        // customer_email: order.customer_email || '', // Field doesn't exist in DB
         customer_address: order.customer_address || '',
         delivery_date: order.delivery_date?.split('T')[0] || '', // Extract date part
         delivery_time: order.delivery_time || '10:00',
@@ -61,10 +61,13 @@ export default function OrderForm({
         notes: order.notes || '',
         order_items: order.order_items?.map(item => ({
           recipe_id: item.recipe_id,
-          product_name: item.product_name,
+          product_name: item.product_name || '',
           quantity: item.quantity,
-          price: item.price,
-          notes: item.notes
+          unit_price: item.unit_price,
+          total_price: item.total_price,
+          special_requests: item.special_requests || '',
+          order_id: item.order_id,
+          user_id: item.user_id
         })) || []
       })
     }
@@ -137,8 +140,9 @@ export default function OrderForm({
     if (recipe) {
       void updateOrderItem(index, 'recipe_id', recipeId)
       void updateOrderItem(index, 'product_name', recipe.name)
-      if (recipe.price) {
-        void updateOrderItem(index, 'price', recipe.price)
+      if (recipe.selling_price) {
+        void updateOrderItem(index, 'unit_price', recipe.selling_price)
+        void updateOrderItem(index, 'total_price', recipe.selling_price * formData.order_items[index].quantity)
       }
     }
   }
@@ -216,15 +220,7 @@ export default function OrderForm({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Alamat Email</Label>
-              <Input
-                type="email"
-                value={formData.customer_email}
-                onChange={(e) => handleInputChange('customer_email', e.target.value)}
-                placeholder=""
-              />
-            </div>
+            {/* Email field removed - not in database schema */}
 
             <div className="space-y-2">
               <Label>Alamat Pengiriman</Label>

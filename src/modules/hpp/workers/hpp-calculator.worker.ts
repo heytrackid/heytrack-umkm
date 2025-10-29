@@ -11,10 +11,10 @@ interface HppCalculationInput {
 }
 
 interface HppCalculationResult {
-  materialCost: number
-  operationalCostPerUnit: number
-  totalCost: number
-  costPerUnit: number
+  material_cost: number
+  operational_cost_per_unit: number
+  total_cost: number
+  cost_per_unit: number
   breakdown: {
     materials: number
     operational: number
@@ -37,10 +37,10 @@ self.onmessage = function(e: MessageEvent<HppCalculationInput>) {
     const costPerUnit = batchSize > 0 ? totalCost / batchSize : totalCost;
 
     const result: HppCalculationResult = {
-      materialCost,
-      operationalCostPerUnit,
-      totalCost,
-      costPerUnit,
+      material_cost: materialCost,
+      operational_cost_per_unit: operationalCostPerUnit,
+      total_cost: totalCost,
+      cost_per_unit: costPerUnit,
       breakdown: {
         materials: materialCost,
         operational: operationalCost

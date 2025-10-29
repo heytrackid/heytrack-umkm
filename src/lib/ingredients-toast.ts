@@ -135,14 +135,7 @@ export const importSuccessToast = (count: number, skipped?: number): ToastOption
   }
 }
 
-/**
- * Export success toast
- */
-export const exportSuccessToast = (count: number, format = 'CSV'): ToastOptions => ({
-  title: '✅ Export Berhasil',
-  description: `${count} bahan baku berhasil di-export ke ${format}`,
-  variant: 'default'
-})
+
 
 /**
  * Network error toast

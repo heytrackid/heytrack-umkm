@@ -183,7 +183,7 @@ export const CreateOrderAPISchema = OrderInsertSchema.extend({
 |---------|---------|--------|
 | Date handling | date-fns | `import { format } from 'date-fns'` |
 | Currency | Custom | `import { formatCurrency } from '@/lib/currency'` |
-| Excel export | ExcelJS | `import { ExcelExportService } from '@/services/excel-export-lazy.service'` |
+
 | Charts | Recharts | `import { LineChart, BarChart } from 'recharts'` |
 | Icons | Lucide | `import { Plus, Edit } from 'lucide-react'` |
 | Forms | React Hook Form | `import { useForm } from 'react-hook-form'` |

@@ -1,21 +1,29 @@
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
-// Note: DOMPurify import commented out - install 'isomorphic-dompurify' if needed
-// import DOMPurify from 'isomorphic-dompurify'
+import DOMPurify from 'isomorphic-dompurify'
 
 // Input Sanitization
 export class InputSanitizer {
   // Sanitize HTML input to prevent XSS
   static sanitizeHtml(input: string): string {
-    // Basic sanitization without DOMPurify - strips all HTML tags
-    return input.replace(/<[^>]*>/g, '')
+    // Use DOMPurify for comprehensive HTML sanitization
+    return DOMPurify.sanitize(input, {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+      ALLOWED_ATTR: [],
+      FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'frame', 'frameset', 'meta', 'link', 'style'],
+    })
   }
 
   // Sanitize for rich text (limited HTML)
   static sanitizeRichText(input: string): string {
-    // Basic sanitization - in production, install and use DOMPurify
-    return input.replace(/<(?!\/?(?:p|br|strong|em|u|ul|ol|li)\b)[^>]*>/gi, '')
+    // Use DOMPurify for rich text sanitization
+    return DOMPurify.sanitize(input, {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div'],
+      ALLOWED_ATTR: ['class', 'style'],
+      FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'frame', 'frameset', 'meta', 'link', 'style'],
+      FORBID_ATTR: ['style'] // Forbid style attributes to prevent CSS injection
+    })
   }
 
   // Sanitize SQL-like inputs (remove dangerous characters)
@@ -24,6 +32,8 @@ export class InputSanitizer {
       .replace(/['"`;\\]/g, '') // Remove quotes and semicolons
       .replace(/--/g, '') // Remove SQL comments
       .replace(/\/\*[\s\S]*?\*\//g, '') // Remove block comments
+      .replace(/\b(OR|AND)\s+.*(?:=|>|<|LIKE)\s*['"][^'"]*['"]/gi, '') // Remove potential SQL injection patterns
+      .replace(/DROP\s+|DELETE\s+|INSERT\s+|UPDATE\s+/gi, '') // Remove potential SQL commands
       .trim()
   }
 
@@ -198,7 +208,10 @@ export class APISecurity {
 
   static sanitizeAPIInput(input: unknown): unknown {
     if (typeof input === 'string') {
-      return InputSanitizer.sanitizeHtml(input)
+      // Apply multiple sanitization layers
+      let sanitized = InputSanitizer.sanitizeHtml(input)
+      sanitized = InputSanitizer.sanitizeSQLInput(sanitized)
+      return sanitized
     }
 
     if (Array.isArray(input)) {
@@ -208,13 +221,35 @@ export class APISecurity {
     if (typeof input === 'object' && input !== null) {
       const sanitized: Record<string, unknown> = {}
       for (const [key, value] of Object.entries(input)) {
-        if (typeof key === 'string') {
-          sanitized[key] = this.sanitizeAPIInput(value)
-        }
+        // Sanitize both keys and values
+        const sanitizedKey = typeof key === 'string' ? InputSanitizer.sanitizeSQLInput(key) : key
+        sanitized[sanitizedKey] = this.sanitizeAPIInput(value)
       }
       return sanitized
     }
 
     return input
   }
+  
+  // Additional sanitization that can be applied to entire request bodies
+  static sanitizeRequestBody<T>(body: T): T {
+    return this.sanitizeAPIInput(body) as T
+  }
+  
+  // Sanitize query parameters
+  static sanitizeQueryParams(params: Record<string, string | string[]>): Record<string, string | string[]> {
+    const sanitized: Record<string, string | string[]> = {}
+    for (const [key, value] of Object.entries(params)) {
+      const sanitizedKey = InputSanitizer.sanitizeSQLInput(key)
+      if (Array.isArray(value)) {
+        sanitized[sanitizedKey] = value.map(v => InputSanitizer.sanitizeHtml(v))
+      } else {
+        sanitized[sanitizedKey] = InputSanitizer.sanitizeHtml(value)
+      }
+    }
+    return sanitized
+  }
 }
+
+// Export the middleware functions
+export { withSecurity, SecurityPresets } from './api-middleware'

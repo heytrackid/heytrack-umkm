@@ -257,35 +257,7 @@ export const commonColumns = {
   })
 }
 
-// Table export utilities
-export function exportToCSV<T>(
-  data: T[],
-  columns: Array<TableColumn<T>>,
-  filename = 'export.csv'
-) {
-  const headers = columns.map(col => col.header).join(',')
-  const rows = data.map(row =>
-    columns.map(col => {
-      const value = getNestedValue(row, col.key as string)
-      const formatted = col.format ? col.format(value) : String(value || '')
-      // Escape quotes and wrap in quotes if contains comma
-      const escaped = formatted.replace(/"/g, '""')
-      return escaped.includes(',') ? `"${escaped}"` : escaped
-    }).join(',')
-  )
 
-  const csv = [headers, ...rows].join('\n')
-  const blob = new Blob([csv], { type: 'text/csv' })
-  const url = URL.createObjectURL(blob)
-
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
 
 /**
  * Helper function to get nested object values

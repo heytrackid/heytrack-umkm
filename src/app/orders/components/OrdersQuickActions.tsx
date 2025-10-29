@@ -6,10 +6,10 @@ import { MessageCircle, Package } from 'lucide-react'
 
 import { apiLogger } from '@/lib/logger'
 interface OrdersQuickActionsProps {
-  t: unknown
+  _t?: unknown
 }
 
-export default function OrdersQuickActions({ t }: OrdersQuickActionsProps) {
+export default function OrdersQuickActions({ _t }: OrdersQuickActionsProps) {
   return (
     <Card>
       <CardContent className="p-4">

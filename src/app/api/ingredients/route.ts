@@ -17,6 +17,7 @@ import { z } from 'zod'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // Extended schema for ingredients query
 const IngredientsQuerySchema = PaginationSchema.extend({
@@ -24,8 +25,9 @@ const IngredientsQuerySchema = PaginationSchema.extend({
   order: z.enum(['asc', 'desc']).default('desc'),
   search: z.string().optional()
 })
+
 // GET /api/ingredients - Get all bahan baku with pagination and filtering
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     // Validate query parameters
     const queryValidation = withQueryValidation(IngredientsQuerySchema)(request)
@@ -87,13 +89,18 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/ingredients - Create new bahan baku
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
+    // The request body is already validated and sanitized by the security middleware
+    const body = await request.json()
+    
     // Validate request body
-    const bodyValidation = withValidation(IngredientInsertSchema)(request)
-    if (bodyValidation instanceof Response) {
-      return bodyValidation // Return error response
+    const validation = IngredientInsertSchema.safeParse(body)
+    if (!validation.success) {
+      return createErrorResponse('Invalid request data', 400, validation.error.issues)
     }
+
+    const validatedData = validation.data
 
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -107,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ingredientData: Database['public']['Tables']['ingredients']['Insert'] = {
-      ...bodyValidation,
+      ...validatedData,
       user_id: user.id
     }
 
@@ -127,3 +134,10 @@ export async function POST(request: NextRequest) {
     return handleAPIError(error)
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

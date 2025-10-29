@@ -3,19 +3,7 @@
  * Type definitions for business service operations
  */
 
-export interface ExportData<T = Record<string, unknown>> {
-  filename: string
-  data: T[]
-  headers?: string[]
-  sheets?: Array<{ name: string; data: T[]; headers?: string[] }>
-}
 
-export interface ExcelExportOptions {
-  filename?: string
-  sheetName?: string
-  includeHeaders?: boolean
-  dateFormat?: string
-}
 
 export interface ProductionBatch {
   id: string

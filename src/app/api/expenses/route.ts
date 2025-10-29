@@ -6,7 +6,10 @@ import { apiLogger } from '@/lib/logger'
 import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { formatCurrency } from '@/lib/currency'
-export async function GET(request: NextRequest) {
+import { withSecurity, SecurityPresets } from '@/utils/security'
+
+// Define the original GET function
+async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -44,6 +47,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
@@ -51,6 +60,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('expenses')
       .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
+      .eq('user_id', user.id)
       .range(offset, offset + limit - 1)
 
     // Add search filter
@@ -82,7 +92,7 @@ export async function GET(request: NextRequest) {
     if (error) {throw error}
 
     // Get total count for pagination
-    let countQuery = supabase.from('expenses').select('*', { count: 'exact', head: true })
+    let countQuery = supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
 
     // Apply same filters to count query
     if (search) {
@@ -107,11 +117,13 @@ export async function GET(request: NextRequest) {
     const { data: todayExpenses } = await supabase
       .from('expenses')
       .select('amount, category')
+      .eq('user_id', user.id)
       .eq('expense_date', today)
 
     const { data: monthExpenses } = await supabase
       .from('expenses')
       .select('amount, category')
+      .eq('user_id', user.id)
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
@@ -150,7 +162,8 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
+// Define the original POST function
+async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
     
@@ -160,6 +173,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // The request body is already sanitized by the security middleware
     const body = await request.json()
 
     // Validate request body
@@ -217,3 +231,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

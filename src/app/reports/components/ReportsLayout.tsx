@@ -23,13 +23,7 @@ import {
 import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
-// Lazy load heavy components
-const ExcelExportButton = dynamic(
-  () => import(/* webpackChunkName: "excel-export-button" */ '@/components/export/ExcelExportButton'),
-  {
-    ssr: false
-  }
-)
+
 
 const SalesReport = dynamic(
   () => import(/* webpackChunkName: "report-sales" */ './SalesReport'),
@@ -96,13 +90,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
             </h1>
             <p className="text-muted-foreground">Analisis bisnis dan laporan keuangan</p>
           </div>
-          <div className="flex gap-2">
-            <ExcelExportButton variant="outline" />
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export PDF
-            </Button>
-          </div>
+
         </div>
 
         {/* Date Range Picker */}

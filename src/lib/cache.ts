@@ -4,7 +4,7 @@ import { apiLogger } from './logger'
 export const cacheKeys = {
   hpp: {
     overview: 'hpp:overview',
-    snapshots: 'hpp:snapshots',
+    // snapshots: // REMOVED 'hpp:snapshots',
     alerts: 'hpp:alerts',
     recommendations: 'hpp:recommendations',
     comparison: 'hpp:comparison',
@@ -116,22 +116,6 @@ export const cacheInvalidation = {
     apiLogger.info('HPP cache invalidated')
   },
   
-  hppAlerts: async () => {
-    memoryCache.deletePattern('^hpp:alerts')
-    memoryCache.delete(cacheKeys.hpp.overview)
-    apiLogger.info('HPP alerts cache invalidated')
-  },
-  
-  hppSnapshots: async (recipeId?: string) => {
-    if (recipeId) {
-      memoryCache.deletePattern(`^hpp:snapshots.*${recipeId}`)
-    } else {
-      memoryCache.deletePattern('^hpp:snapshots')
-    }
-    memoryCache.delete(cacheKeys.hpp.overview)
-    apiLogger.info({ recipeId }, 'HPP snapshots cache invalidated')
-  },
-  
   recipes: async (recipeId?: string) => {
     if (recipeId) {
       memoryCache.delete(cacheKeys.recipes.detail(recipeId))
@@ -162,6 +146,14 @@ export const cacheInvalidation = {
     }
     memoryCache.deletePattern('^customers:')
     apiLogger.info({ customerId }, 'Customers cache invalidated')
+  },
+  
+  suppliers: async (supplierId?: string) => {
+    if (supplierId) {
+      memoryCache.deletePattern(`^suppliers:.*${supplierId}`)
+    }
+    memoryCache.deletePattern('^suppliers:')
+    apiLogger.info({ supplierId }, 'Suppliers cache invalidated')
   },
   
   all: async () => {

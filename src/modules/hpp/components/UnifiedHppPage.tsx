@@ -10,7 +10,6 @@ import { HppEmptyState } from './HppEmptyState'
 import { CostCalculationCard } from './CostCalculationCard'
 import { PricingCalculatorCard } from './PricingCalculatorCard'
 import { ProductComparisonCard } from './ProductComparisonCard'
-import { HppAlertsCard } from './HppAlertsCard'
 import { HppBreakdownVisual } from './HppBreakdownVisual'
 import { HppScenarioPlanner } from './HppScenarioPlanner'
 import { Card, CardContent } from '@/components/ui/card'
@@ -22,7 +21,6 @@ export const UnifiedHppPage = memo(() => {
     overview,
     recipe,
     comparison,
-    alerts,
     recipeLoading,
     selectedRecipeId,
     setSelectedRecipeId,
@@ -85,65 +83,10 @@ export const UnifiedHppPage = memo(() => {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        {/* Overview Card */}
+        {/* Overview Card - Always visible */}
         {overview && <HppOverviewCard overview={overview} />}
 
-        {/* Progress Indicator */}
-        {selectedRecipeId && (
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4">
-                {/* Step 1 */}
-                <div className="flex items-center gap-2 flex-1">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step1Complete ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-                    }`}>
-                    {step1Complete ? <CheckCircle className="h-5 w-5" /> : '1'}
-                  </div>
-                  <div className="hidden sm:block">
-                    <div className="text-xs font-medium">Pilih Produk</div>
-                    <div className="text-xs text-muted-foreground">
-                      {step1Complete ? recipe?.name : 'Belum dipilih'}
-                    </div>
-                  </div>
-                </div>
-
-                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-
-                {/* Step 2 */}
-                <div className="flex items-center gap-2 flex-1">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step2Complete ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-                    }`}>
-                    {step2Complete ? <CheckCircle className="h-5 w-5" /> : '2'}
-                  </div>
-                  <div className="hidden sm:block">
-                    <div className="text-xs font-medium">Hitung Biaya</div>
-                    <div className="text-xs text-muted-foreground">
-                      {step2Complete ? 'Selesai' : 'Menunggu'}
-                    </div>
-                  </div>
-                </div>
-
-                <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-
-                {/* Step 3 */}
-                <div className="flex items-center gap-2 flex-1">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step3Complete ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
-                    }`}>
-                    {step3Complete ? <CheckCircle className="h-5 w-5" /> : '3'}
-                  </div>
-                  <div className="hidden sm:block">
-                    <div className="text-xs font-medium">Tentukan Harga</div>
-                    <div className="text-xs text-muted-foreground">
-                      {step3Complete ? 'Tersimpan' : 'Menunggu'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Recipe Selector */}
+        {/* Recipe Selector - Prominent position */}
         <RecipeSelector
           recipes={recipes}
           selectedRecipeId={selectedRecipeId}
@@ -151,67 +94,75 @@ export const UnifiedHppPage = memo(() => {
           isLoading={recipeLoading}
         />
 
-        {/* Empty State */}
+        {/* Empty State - Show when no recipe selected */}
         {!selectedRecipeId && !recipeLoading && <HppEmptyState />}
 
-        {/* Main Content with Tabs */}
+        {/* Main Content - Show immediately when recipe selected */}
         {recipe && (
-          <Tabs defaultValue="calculator" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="calculator" className="gap-2">
-                <Calculator className="h-4 w-4" />
-                Kalkulator HPP
-              </TabsTrigger>
-              <TabsTrigger value="breakdown" className="gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Detail Breakdown
-              </TabsTrigger>
-              <TabsTrigger value="scenario" className="gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Scenario Planning
-              </TabsTrigger>
-            </TabsList>
+          <div className="space-y-6">
+            {/* Primary Action: Cost Calculation */}
+            <CostCalculationCard
+              recipe={recipe}
+              onRecalculate={handleRecalculate}
+              isCalculating={calculateHpp.isPending}
+            />
 
-            <TabsContent value="calculator" className="space-y-6 mt-6">
-              {/* Cost Calculation */}
-              <CostCalculationCard
-                recipe={recipe}
-                onRecalculate={handleRecalculate}
-                isCalculating={calculateHpp.isPending}
+            {/* Secondary Action: Pricing (only show if cost calculated) */}
+            {recipe.total_cost > 0 && (
+              <PricingCalculatorCard
+                totalCost={recipe.total_cost}
+                currentPrice={recipe.selling_price}
+                marginPercentage={marginPercentage}
+                suggestedPrice={suggestedPrice}
+                onMarginChange={setMarginPercentage}
+                onSavePrice={handleSavePrice}
+                isSaving={updatePrice.isPending}
               />
+            )}
 
-              {/* Pricing Calculator */}
-              {recipe.total_cost > 0 && (
-                <PricingCalculatorCard
-                  totalCost={recipe.total_cost}
-                  currentPrice={recipe.selling_price}
-                  marginPercentage={marginPercentage}
-                  suggestedPrice={suggestedPrice}
-                  onMarginChange={setMarginPercentage}
-                  onSavePrice={handleSavePrice}
-                  isSaving={updatePrice.isPending}
-                />
-              )}
+            {/* Additional Tools - Tabs for advanced features */}
+            {recipe.total_cost > 0 && (
+              <Card>
+                <CardContent className="p-6">
+                  <Tabs defaultValue="breakdown" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 mb-6">
+                      <TabsTrigger value="breakdown" className="gap-2">
+                        <BarChart3 className="h-4 w-4" />
+                        <span className="hidden sm:inline">Detail</span> Breakdown
+                      </TabsTrigger>
+                      <TabsTrigger value="comparison" className="gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        <span className="hidden sm:inline">Bandingkan</span> Produk
+                      </TabsTrigger>
+                      <TabsTrigger value="scenario" className="gap-2">
+                        <Calculator className="h-4 w-4" />
+                        <span className="hidden sm:inline">Simulasi</span> Skenario
+                      </TabsTrigger>
+                    </TabsList>
 
-              {/* Product Comparison */}
-              {comparison && comparison.length > 0 && (
-                <ProductComparisonCard comparison={comparison} />
-              )}
-            </TabsContent>
+                    <TabsContent value="breakdown" className="mt-0">
+                      <HppBreakdownVisual recipe={recipe} />
+                    </TabsContent>
 
-            <TabsContent value="breakdown" className="mt-6">
-              <HppBreakdownVisual recipe={recipe} />
-            </TabsContent>
+                    <TabsContent value="comparison" className="mt-0">
+                      {comparison && comparison.length > 0 ? (
+                        <ProductComparisonCard comparison={comparison} />
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <p>Belum ada produk lain untuk dibandingkan</p>
+                          <p className="text-sm mt-2">Tambahkan lebih banyak resep untuk melihat perbandingan</p>
+                        </div>
+                      )}
+                    </TabsContent>
 
-            <TabsContent value="scenario" className="mt-6">
-              <HppScenarioPlanner recipe={recipe} />
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {/* Alerts */}
-        {alerts && alerts.length > 0 && (
-          <HppAlertsCard alerts={alerts} onMarkAsRead={handleMarkAlertAsRead} />
+                    <TabsContent value="scenario" className="mt-0">
+                      <HppScenarioPlanner recipe={recipe} />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
       </div>
     </TooltipProvider>

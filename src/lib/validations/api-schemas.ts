@@ -213,11 +213,6 @@ export const HPPAutomationSchema = z.object({
   force: z.boolean().default(false),
 })
 
-export const HPPSnapshotSchema = z.object({
-  recipe_ids: z.array(UUIDSchema).optional(),
-  user_id: UUIDSchema.optional(),
-})
-
 // ============================================
 // AI Recipe Generation Schemas
 // ============================================
@@ -295,7 +290,6 @@ export const APISchemas = {
   
   // HPP
   HPPAutomation: HPPAutomationSchema,
-  HPPSnapshot: HPPSnapshotSchema,
   
   // AI
   AIRecipeGeneration: AIRecipeGenerationSchema,
@@ -335,7 +329,6 @@ export type CreateSupplierInput = z.infer<typeof CreateSupplierSchema>
 export type UpdateSupplierInput = z.infer<typeof UpdateSupplierSchema>
 
 export type HPPAutomationInput = z.infer<typeof HPPAutomationSchema>
-export type HPPSnapshotInput = z.infer<typeof HPPSnapshotSchema>
 
 export type AIRecipeGenerationInput = z.infer<typeof AIRecipeGenerationSchema>
 export type AutomationTaskInput = z.infer<typeof AutomationTaskSchema>

@@ -103,11 +103,12 @@ export class RecipeRecommendationService {
           name: data.recipe.name,
           category: data.recipe.category,
           servings: 1, // Default
-          price: data.recipe.price || 0,
-          hpp_cost: 0, // Would need to calculate
-          margin: 0, // Would need to calculate
+          selling_price: data.recipe.selling_price || 0,
+          cost_per_unit: data.recipe.cost_per_unit || null,
+          margin_percentage: data.recipe.margin_percentage || null,
           is_available: true, // Would need to check
-          estimated_prep_time: 0 // Would need to calculate
+          prep_time: data.recipe.prep_time || null,
+          cook_time: data.recipe.cook_time || null
         } as RecipeOption))
 
       return recommendations

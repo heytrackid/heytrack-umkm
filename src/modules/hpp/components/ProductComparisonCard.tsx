@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, FileSpreadsheet, TrendingDown } from 'lucide-react'
+import { Info, BarChart3, TrendingUp, CheckCircle, AlertTriangle, Lightbulb, ArrowRight, TrendingDown } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
@@ -26,27 +26,7 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
   const router = useRouter()
   const { toast } = useToast()
 
-  const handleExport = async () => {
-    try {
-      const response = await fetch('/api/hpp/export?format=excel')
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `hpp-comparison-${new Date().toISOString().split('T')[0]}.xlsx`
-      a.click()
-      toast({
-        title: 'Berhasil',
-        description: 'Laporan berhasil didownload'
-      })
-    } catch {
-      toast({
-        title: 'Error',
-        description: 'Gagal download laporan',
-        variant: 'destructive'
-      })
-    }
-  }
+
 
   return (
     <Card>
@@ -97,15 +77,15 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                   <div
                     key={item.id}
                     className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md ${isGood ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
-                        isWarning ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                          'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                      isWarning ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+                        'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                       }`}
                   >
                     {/* Rank Badge */}
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${index === 0 ? 'bg-yellow-400 text-yellow-900' :
-                        index === 1 ? 'bg-gray-300 text-gray-700' :
-                          index === 2 ? 'bg-orange-400 text-orange-900' :
-                            'bg-gray-200 text-gray-600'
+                      index === 1 ? 'bg-gray-300 text-gray-700' :
+                        index === 2 ? 'bg-orange-400 text-orange-900' :
+                          'bg-gray-200 text-gray-600'
                       }`}>
                       {index + 1}
                     </div>
@@ -126,8 +106,8 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
                     {/* Status Badge */}
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
                       <Badge className={`${isGood ? 'bg-green-600' :
-                          isWarning ? 'bg-yellow-600' :
-                            'bg-red-600'
+                        isWarning ? 'bg-yellow-600' :
+                          'bg-red-600'
                         } gap-1`}>
                         {isGood ? (
                           <>
@@ -240,14 +220,6 @@ export const ProductComparisonCard = ({ comparison }: ProductComparisonCardProps
           >
             <BarChart3 className="h-4 w-4 mr-2" />
             Analisis Detail
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExport}
-          >
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Export Excel
           </Button>
         </div>
       </CardContent>

@@ -30,16 +30,16 @@ const calculatorBreadcrumbs = [
 
 // Extended type for calculator display
 interface HppCalculationExtended extends HppCalculation {
-  costPerUnit: number
-  wacAdjustment: number
-  productionQuantity: number
-  materialBreakdown: Array<{
-    ingredientId: string
-    ingredientName: string
+  cost_per_unit: number
+  wac_adjustment: number
+  production_quantity: number
+  material_breakdown: Array<{
+    ingredient_id: string
+    ingredient_name: string
     quantity: number
     unit: string
-    unitPrice: number
-    totalCost: number
+    unit_price: number
+    total_cost: number
   }>
 }
 
@@ -192,10 +192,10 @@ export default function HppCalculatorPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {formatCurrency(calculation.totalHpp)}
+                  {formatCurrency(calculation.total_hpp)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  untuk {calculation.productionQuantity} porsi
+                  untuk {calculation.production_quantity} porsi
                 </p>
               </CardContent>
             </Card>
@@ -209,7 +209,7 @@ export default function HppCalculatorPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
-                  {formatCurrency(calculation.costPerUnit)}
+                  {formatCurrency(calculation.cost_per_unit)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   per porsi
@@ -225,8 +225,8 @@ export default function HppCalculatorPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-3xl font-bold ${calculation.wacAdjustment >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {calculation.wacAdjustment >= 0 ? '+' : ''}{formatCurrency(calculation.wacAdjustment)}
+                <div className={`text-3xl font-bold ${(calculation.wac_adjustment ?? 0) >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {(calculation.wac_adjustment ?? 0) >= 0 ? '+' : ''}{formatCurrency(calculation.wac_adjustment ?? 0)}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   penyesuaian inventory
@@ -247,26 +247,26 @@ export default function HppCalculatorPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <span className="font-medium">Biaya Material</span>
-                  <span className="font-semibold">{formatCurrency(calculation.materialCost)}</span>
+                  <span className="font-semibold">{formatCurrency(calculation.material_cost)}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <span className="font-medium">Biaya Tenaga Kerja</span>
-                  <span className="font-semibold">{formatCurrency(calculation.laborCost)}</span>
+                  <span className="font-semibold">{formatCurrency(calculation.labor_cost)}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <span className="font-medium">Biaya Overhead</span>
-                  <span className="font-semibold">{formatCurrency(calculation.overheadCost)}</span>
+                  <span className="font-semibold">{formatCurrency(calculation.overhead_cost)}</span>
                 </div>
-                {calculation.wacAdjustment !== 0 && (
+                {(calculation.wac_adjustment ?? 0) !== 0 && (
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="font-medium">WAC Adjustment</span>
-                    <span className="font-semibold">{formatCurrency(calculation.wacAdjustment)}</span>
+                    <span className="font-semibold">{formatCurrency(calculation.wac_adjustment ?? 0)}</span>
                   </div>
                 )}
                 <Separator />
                 <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
                   <span className="font-bold text-lg">Total HPP</span>
-                  <span className="font-bold text-lg">{formatCurrency(calculation.totalHpp)}</span>
+                  <span className="font-bold text-lg">{formatCurrency(calculation.total_hpp)}</span>
                 </div>
               </div>
 
@@ -277,16 +277,16 @@ export default function HppCalculatorPage() {
                   Breakdown Bahan Baku
                 </h4>
                 <div className="space-y-2">
-                  {calculation.materialBreakdown.map((item, index) => (
+                  {calculation.material_breakdown.map((item, index) => (
                     <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
                       <div>
-                        <div className="font-medium">{item.ingredientName}</div>
+                        <div className="font-medium">{item.ingredient_name}</div>
                         <div className="text-sm text-muted-foreground">
-                          {item.quantity} {item.unit} × {formatCurrency(item.unitPrice)}
+                          {item.quantity} {item.unit} × {formatCurrency(item.unit_price)}
                         </div>
                       </div>
                       <Badge variant="secondary">
-                        {formatCurrency(item.totalCost)}
+                        {formatCurrency(item.total_cost)}
                       </Badge>
                     </div>
                   ))}

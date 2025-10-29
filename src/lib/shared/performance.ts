@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { logger } from '@/lib/logger'
 
+// Log performance metrics
+export function logPerformance(metric: string, value: number) {
+  logger.info({ metric, value }, 'Performance metric')
+}
+
 // Performance monitoring types
 export interface PerformanceMetric {
   name: string

@@ -52,7 +52,7 @@ export default function EnhancedOrderForm({
     const [formData, setFormData] = useState<OrderFormData>({
         customer_name: '',
         customer_phone: '',
-        customer_email: '',
+        // customer_email: '', // Field doesn't exist in DB
         customer_address: '',
         delivery_date: '',
         delivery_time: '10:00',
@@ -72,7 +72,7 @@ export default function EnhancedOrderForm({
             setFormData({
                 customer_name: order.customer_name,
                 customer_phone: order.customer_phone || '',
-                customer_email: order.customer_email || '',
+                // customer_email: order.customer_email || '', // Field doesn't exist in DB
                 customer_address: order.customer_address || '',
                 delivery_date: order.delivery_date?.split('T')[0] || '',
                 delivery_time: order.delivery_time || '10:00',
@@ -80,10 +80,13 @@ export default function EnhancedOrderForm({
                 notes: order.notes || '',
                 order_items: order.order_items?.map(item => ({
                     recipe_id: item.recipe_id,
-                    product_name: item.product_name,
+                    product_name: item.product_name || '',
                     quantity: item.quantity,
-                    price: item.price,
-                    notes: item.notes
+                    unit_price: item.unit_price,
+                    total_price: item.total_price,
+                    special_requests: item.special_requests || '',
+                    order_id: item.order_id,
+                    user_id: item.user_id
                 })) || []
             })
             setCurrentStep(3) // Skip to items if editing
@@ -164,8 +167,11 @@ export default function EnhancedOrderForm({
                     recipe_id: recipe.id,
                     product_name: recipe.name,
                     quantity: 1,
-                    price: recipe.price || 0,
-                    notes: ''
+                    unit_price: recipe.selling_price || 0,
+                    total_price: recipe.selling_price || 0,
+                    special_requests: '',
+                    order_id: '', // Will be set when order is created
+                    user_id: '' // Will be set when order is created
                 }]
             }))
         }
@@ -250,19 +256,7 @@ export default function EnhancedOrderForm({
                     />
                 </div>
 
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        Email (Opsional)
-                    </Label>
-                    <Input
-                        type="email"
-                        value={formData.customer_email}
-                        onChange={(e) => handleInputChange('customer_email', e.target.value)}
-                        placeholder="email@example.com"
-                        className="text-base"
-                    />
-                </div>
+                {/* Email field removed - not in database schema */}
 
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2">
@@ -414,7 +408,7 @@ export default function EnhancedOrderForm({
                                         )}
                                     </div>
                                     <div className="text-right">
-                                        <p className="font-medium">{formatCurrency(recipe.price || 0)}</p>
+                                        <p className="font-medium">{formatCurrency(recipe.selling_price || 0)}</p>
                                         <Plus className="h-4 w-4 text-primary ml-auto" />
                                     </div>
                                 </button>
@@ -479,7 +473,7 @@ export default function EnhancedOrderForm({
                                         </div>
                                         <div className="text-right">
                                             <p className="font-bold text-lg">
-                                                {formatCurrency(item.price * item.quantity)}
+                                                {formatCurrency(item.unit_price * item.quantity)}
                                             </p>
                                             <Button
                                                 size="sm"

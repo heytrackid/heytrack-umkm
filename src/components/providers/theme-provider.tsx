@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode } from 'react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
 
 interface ThemeProviderProps {

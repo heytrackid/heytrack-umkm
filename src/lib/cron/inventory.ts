@@ -7,8 +7,8 @@
 import 'server-only'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { cronLogger } from '@/lib/logger'
-import { inventoryServices } from '@/lib/business-services/utils'
-import type { ReorderSummary } from '@/lib/business-services/types'
+// import { inventoryServices } from '@/lib/business-services/utils'
+// import type { ReorderSummary } from '@/lib/business-services/types'
 import { SmartNotificationSystem } from '@/lib/communications/notifications'
 import type { InventoryReorderSummary, NotificationAlert } from './types'
 import type { Database } from '@/types/supabase-generated'
@@ -25,10 +25,24 @@ export class InventoryCronJobs {
     try {
       cronLogger.info({}, 'Running inventory reorder check')
 
-      const reorderDetails: ReorderSummary = await inventoryServices.checkReorderNeeds()
+      const supabase = createServiceRoleClient()
+      
+      // Get ingredients that need reordering
+      const { data: ingredients, error } = await supabase
+        .from('ingredients')
+        .select('*')
+        .lte('current_stock', supabase.raw('minimum_stock'))
+      
+      if (error) {
+        throw error
+      }
+      
+      const totalItems = ingredients?.length || 0
+      const criticalItems = ingredients?.filter(i => i.current_stock <= (i.minimum_stock * 0.5)).length || 0
+      
       const summary: InventoryReorderSummary = {
-        total_alerts: reorderDetails.totalItems,
-        critical_items: reorderDetails.criticalItems,
+        total_alerts: totalItems,
+        critical_items: criticalItems,
         auto_orders_generated: 0
       }
 

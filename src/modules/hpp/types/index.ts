@@ -11,40 +11,29 @@ export type HppCalculationInsert = Database['public']['Tables']['hpp_calculation
 export type HppCalculationUpdate = Database['public']['Tables']['hpp_calculations']['Update']
 
 export interface HppCalculationResult {
-  recipeId: string
-  materialCost: number
-  laborCost: number
-  overheadCost: number
-  totalHpp: number
-  costPerUnit: number
-  wacAdjustment: number
-  productionQuantity: number
-  materialBreakdown: MaterialBreakdown[]
+  recipe_id: string // Use snake_case for consistency with DB
+  material_cost: number
+  labor_cost: number
+  overhead_cost: number
+  total_hpp: number
+  cost_per_unit: number
+  wac_adjustment: number
+  production_quantity: number
+  material_breakdown: MaterialBreakdown[]
 }
 
 export interface MaterialBreakdown {
-  ingredientId: string
-  ingredientName: string
+  ingredient_id: string
+  ingredient_name: string
   quantity: number
   unit: string
-  unitPrice: number
-  totalCost: number
+  unit_price: number
+  total_cost: number
 }
 
-// Use generated types from Supabase
-export type HppSnapshot = Database['public']['Tables']['hpp_snapshots']['Row']
-export type HppSnapshotInsert = Database['public']['Tables']['hpp_snapshots']['Insert']
-export type HppSnapshotUpdate = Database['public']['Tables']['hpp_snapshots']['Update']
 
-// Use generated types from Supabase
-export type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']
-export type HppAlertInsert = Database['public']['Tables']['hpp_alerts']['Insert']
-export type HppAlertUpdate = Database['public']['Tables']['hpp_alerts']['Update']
 
-// Extended type with recipe name for UI
-export interface HppAlertWithRecipe extends HppAlert {
-  recipe_name?: string
-}
+
 
 export interface HppOverview {
   totalRecipes: number

@@ -13,6 +13,12 @@ export async function PATCH(
   try {
     const supabase = await createClient()
     const { id: notificationId } = params
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     const body = await request.json()
     const { is_read, is_dismissed } = body
@@ -45,6 +51,7 @@ export async function PATCH(
       .from('notifications')
       .update(updateData)
       .eq('id', notificationId)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -61,8 +68,8 @@ export async function PATCH(
 
     return NextResponse.json(notification)
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in notification update API')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in PATCH /api/notifications/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

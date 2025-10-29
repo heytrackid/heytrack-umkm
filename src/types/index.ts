@@ -79,9 +79,8 @@ export type {
   RevenueCategory,
   SystemAlert
 } from './features/analytics'
-export * from './features/export'
+
 export * from './features/notifications'
-export * from './features/sync'
 
 // ============================================================================
 // UI TYPES (Interface)

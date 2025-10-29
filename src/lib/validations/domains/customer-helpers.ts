@@ -4,7 +4,10 @@
  */
 
 import { z } from 'zod'
-import { CustomerInsertSchema, CustomerUpdateSchema, type CustomerInsert, type CustomerUpdate } from './customer'
+import { CustomerInsertSchema, type CustomerInsert, type CustomerUpdate } from './customer'
+
+// Re-export for convenience
+export { CustomerUpdateSchema } from './customer'
 
 // Custom validation for Indonesian phone numbers
 export const indonesianPhoneValidation = (phone: string): boolean => {

@@ -1,7 +1,7 @@
 // Template Preview Component - Lazy Loaded
 // Preview dialog for WhatsApp templates
 
-import { Button } from '@/components/ui/button'
+// import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import {

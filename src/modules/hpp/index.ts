@@ -10,19 +10,16 @@ export { HppCostTrendsChart } from './components/HppCostTrendsChart'
 // export { RecentSnapshotsTable } from './components/RecentSnapshotsTable' // File doesn't exist
 
 // Services
-// HppCalculatorService moved to @/services/hpp/HppCalculatorService (consolidated)
-export { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
-export { HppExportService } from './services/HppExportService'
-export { HppSnapshotService } from './services/HppSnapshotService'
-export { HppAlertService } from './services/HppAlertService'
-export { HppSnapshotAutomation } from './services/HppSnapshotAutomation'
+// NOTE: Server-only services are NOT exported from this barrel file
+// to prevent client components from accidentally importing them.
+// Import directly from the service file in API routes/server components:
+// - import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 // Hooks
 export { useUnifiedHpp } from './hooks/useUnifiedHpp'
 export { useHppOverview } from './hooks/useHppOverview'
 export { useHppCalculatorWorker } from './hooks/useHppCalculatorWorker'
 export { useHppWorker } from './hooks/useHppWorker'
-export { useInfiniteHppAlerts } from './hooks/useInfiniteHppAlerts'
 
 // Types
 export type * from './types'

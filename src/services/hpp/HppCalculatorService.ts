@@ -19,21 +19,21 @@ type Production = Database['public']['Tables']['productions']['Row']
 type StockTransaction = Database['public']['Tables']['stock_transactions']['Row']
 
 export interface HppCalculationResult {
-  recipeId: string
-  materialCost: number
-  laborCost: number
-  overheadCost: number
-  totalHpp: number
-  costPerUnit: number
-  wacAdjustment: number
-  productionQuantity: number
-  materialBreakdown: Array<{
-    ingredientId: string
-    ingredientName: string
+  recipe_id: string // Use snake_case for consistency with DB
+  material_cost: number
+  labor_cost: number
+  overhead_cost: number
+  total_hpp: number
+  cost_per_unit: number
+  wac_adjustment: number
+  production_quantity: number
+  material_breakdown: Array<{
+    ingredient_id: string
+    ingredient_name: string
     quantity: number
     unit: string
-    unitPrice: number
-    totalCost: number
+    unit_price: number
+    total_cost: number
   }>
 }
 
@@ -87,43 +87,43 @@ export class HppCalculatorService {
       const recipeData = recipe as unknown as RecipeWithIngredients
 
       // Calculate material costs using WAC when available
-      const materialBreakdown: HppCalculationResult['materialBreakdown'] = []
-      let totalMaterialCost = 0
+      const material_breakdown: HppCalculationResult['material_breakdown'] = []
+      let total_material_cost = 0
 
       const recipeIngredients = recipeData.recipe_ingredients || []
 
       for (const ri of recipeIngredients) {
         const ingredient = ri.ingredients
         if (!ingredient) {
-          this.logger.warn({ ingredientId: ri.ingredient_id }, 'Ingredient not found for recipe ingredient')
+          this.logger.warn({ ingredient_id: ri.ingredient_id }, 'Ingredient not found for recipe ingredient')
           continue
         }
 
         const quantity = Number(ri.quantity)
         // Use WAC if available, otherwise use current price
-        const unitPrice = Number(ingredient.weighted_average_cost || ingredient.price_per_unit || 0)
-        const totalCost = quantity * unitPrice
+        const unit_price = Number(ingredient.weighted_average_cost || ingredient.price_per_unit || 0)
+        const total_cost = quantity * unit_price
 
-        materialBreakdown.push({
-          ingredientId: ingredient.id,
-          ingredientName: ingredient.name,
+        material_breakdown.push({
+          ingredient_id: ingredient.id,
+          ingredient_name: ingredient.name,
           quantity,
           unit: ri.unit,
-          unitPrice,
-          totalCost
+          unit_price,
+          total_cost
         })
 
-        totalMaterialCost += totalCost
+        total_material_cost += total_cost
       }
 
       // Calculate labor cost from recent productions
-      const laborCost = await this.calculateLaborCost(supabase, recipeId, userId)
+      const labor_cost = await this.calculateLaborCost(supabase, recipeId, userId)
 
       // Calculate overhead cost with production-based allocation
-      const overheadCost = await this.calculateOverheadCost(supabase, recipeId, userId)
+      const overhead_cost = await this.calculateOverheadCost(supabase, recipeId, userId)
 
       // Apply WAC adjustment based on recipe quantities
-      const wacAdjustment = await this.calculateWacAdjustment(
+      const wac_adjustment = await this.calculateWacAdjustment(
         supabase,
         recipeId,
         userId,
@@ -131,26 +131,26 @@ export class HppCalculatorService {
       )
 
       // Calculate total HPP
-      const totalHpp = totalMaterialCost + laborCost + overheadCost + wacAdjustment
+      const total_hpp = total_material_cost + labor_cost + overhead_cost + wac_adjustment
       const servings = recipeData.servings || 1
-      const costPerUnit = servings > 0 ? totalHpp / servings : totalHpp
+      const cost_per_unit = servings > 0 ? total_hpp / servings : total_hpp
 
       const result: HppCalculationResult = {
-        recipeId,
-        materialCost: totalMaterialCost,
-        laborCost,
-        overheadCost,
-        totalHpp,
-        costPerUnit,
-        wacAdjustment,
-        productionQuantity: servings,
-        materialBreakdown
+        recipe_id: recipeId,
+        material_cost: total_material_cost,
+        labor_cost,
+        overhead_cost,
+        total_hpp,
+        cost_per_unit,
+        wac_adjustment,
+        production_quantity: servings,
+        material_breakdown
       }
 
       // Save calculation to database
       await this.saveHppCalculation(supabase, result, userId)
 
-      this.logger.info({ recipeId, totalHpp, costPerUnit }, 'HPP calculated successfully')
+      this.logger.info({ recipe_id: recipeId, total_hpp, cost_per_unit }, 'HPP calculated successfully')
       return result
 
     } catch (error: unknown) {
@@ -391,17 +391,17 @@ export class HppCalculatorService {
   ): Promise<void> {
     try {
       const calculationData = {
-        recipe_id: result.recipeId,
+        recipe_id: result.recipe_id,
         user_id: userId,
         calculation_date: new Date().toISOString().split('T')[0],
-        material_cost: result.materialCost,
-        labor_cost: result.laborCost,
-        overhead_cost: result.overheadCost,
-        total_hpp: result.totalHpp,
-        cost_per_unit: result.costPerUnit,
-        wac_adjustment: result.wacAdjustment,
-        production_quantity: result.productionQuantity,
-        notes: `Auto-calculated HPP for ${result.productionQuantity} servings`
+        material_cost: result.material_cost,
+        labor_cost: result.labor_cost,
+        overhead_cost: result.overhead_cost,
+        total_hpp: result.total_hpp,
+        cost_per_unit: result.cost_per_unit,
+        wac_adjustment: result.wac_adjustment,
+        production_quantity: result.production_quantity,
+        notes: `Auto-calculated HPP for ${result.production_quantity} servings`
       }
 
       const { error } = await supabase
@@ -415,11 +415,11 @@ export class HppCalculatorService {
       // Update recipe with latest cost
       await supabase
         .from('recipes')
-        .update({ cost_per_unit: result.costPerUnit })
-        .eq('id', result.recipeId)
+        .update({ cost_per_unit: result.cost_per_unit })
+        .eq('id', result.recipe_id)
         .eq('user_id', userId)
 
-      this.logger.info({ recipeId: result.recipeId }, 'HPP calculation saved')
+      this.logger.info({ recipe_id: result.recipe_id }, 'HPP calculation saved')
 
     } catch (error: unknown) {
       this.logger.error({ error }, 'Failed to save HPP calculation')

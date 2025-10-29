@@ -46,13 +46,13 @@ export type ScreenSize = 'mobile' | 'tablet' | 'desktop';
 export type ColumnPriority = 'high' | 'medium' | 'low';
 
 // Responsive column configuration
-export interface ResponsiveColumn {
+export interface ResponsiveColumn<T = unknown> {
   key: string;
   label: string;
   priority: ColumnPriority;
   hideOnMobile?: boolean;
   minWidth?: string;
-  render?: (value: unknown, item: unknown) => ReactNode;
+  render?: <TItem = T>(value: unknown, item: TItem) => ReactNode;
 }
 
 // Form field responsive configuration
@@ -69,7 +69,7 @@ export interface ResponsiveFormField {
     minLength?: number;
     maxLength?: number;
     pattern?: string;
-    custom?: (value: unknown) => string | undefined;
+    custom?: <T = unknown>(value: T) => string | undefined;
   };
 }
 

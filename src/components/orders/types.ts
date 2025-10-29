@@ -19,7 +19,6 @@ export type Priority =
 export interface OrderFormData {
   customer_name: string
   customer_phone: string
-  customer_email?: string
   customer_address?: string
   delivery_date: string
   delivery_time: string

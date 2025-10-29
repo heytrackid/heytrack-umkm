@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 
 type OrderUpdate = Database['public']['Tables']['orders']['Update']
@@ -10,22 +11,24 @@ type OrderItemPayload = Omit<OrderItemInsert, 'order_id' | 'user_id'> & { id?: s
 interface OrderUpdateRequest extends Partial<OrderUpdate> {
   order_items?: OrderItemPayload[]
 }
+
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
+
 // GET /api/orders/[id] - Get single order
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params
   try {
+    const { id } = await context.params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error fetching order:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      apiLogger.error({ error: authError }, 'Auth error')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { data, error } = await supabase
@@ -49,44 +52,32 @@ export async function GET(
 
     if (error || !data) {
       if (error?.code === 'PGRST116' || !data) {
-        return NextResponse.json(
-          { error: 'Order not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
       }
-      apiLogger.error({ error }, 'Error fetching order:')
-      return NextResponse.json(
-        { error: 'Failed to fetch order' },
-        { status: 500 }
-      )
+      apiLogger.error({ error }, 'Error fetching order')
+      return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 })
     }
 
     return NextResponse.json(data)
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in GET /api/orders/[id]:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in GET /api/orders/[id]')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // PUT /api/orders/[id] - Update order
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params
   try {
+    const { id } = await context.params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error updating order:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      apiLogger.error({ error: authError }, 'Auth error')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json() as OrderUpdateRequest
@@ -94,7 +85,7 @@ export async function PUT(
     // Extract order items from body if present
     const { order_items, id: _ignoredId, user_id: _ignoredUserId, ...orderData } = body
     
-    // Update main order data using Supabase generated types
+    // Update main order data
     const updatePayload: OrderUpdate = {
       ...(orderData as OrderUpdate),
       updated_at: new Date().toISOString()
@@ -110,16 +101,10 @@ export async function PUT(
     
     if (error || !data) {
       if (error?.code === 'PGRST116' || !data) {
-        return NextResponse.json(
-          { error: 'Order not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
       }
-      apiLogger.error({ error }, 'Error updating order:')
-      return NextResponse.json(
-        { error: 'Failed to update order' },
-        { status: 500 }
-      )
+      apiLogger.error({ error }, 'Error updating order')
+      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
     }
 
     // Update order items if provided
@@ -132,11 +117,8 @@ export async function PUT(
         .eq('user_id', user.id)
 
       if (deleteError) {
-        apiLogger.error({ error: deleteError }, 'Error clearing order items:')
-        return NextResponse.json(
-          { error: 'Failed to update order items' },
-          { status: 500 }
-        )
+        apiLogger.error({ error: deleteError }, 'Error clearing order items')
+        return NextResponse.json({ error: 'Failed to update order items' }, { status: 500 })
       }
       
       // Insert new items
@@ -156,41 +138,33 @@ export async function PUT(
           .insert(itemsToInsert)
         
         if (itemsError) {
-          apiLogger.error({ error: itemsError }, 'Error updating order items:')
-          return NextResponse.json(
-            { error: 'Failed to update order items' },
-            { status: 500 }
-          )
+          apiLogger.error({ error: itemsError }, 'Error updating order items')
+          return NextResponse.json({ error: 'Failed to update order items' }, { status: 500 })
         }
       }
     }
 
+    cacheInvalidation.orders()
     return NextResponse.json(data)
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in PUT /api/orders/[id]:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in PUT /api/orders/[id]')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // DELETE /api/orders/[id] - Delete order
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params
   try {
+    const { id } = await context.params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error deleting order:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      apiLogger.error({ error: authError }, 'Auth error')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Ensure order belongs to user before deleting
@@ -203,16 +177,10 @@ export async function DELETE(
 
     if (fetchError || !existingOrder) {
       if (fetchError?.code === 'PGRST116' || !existingOrder) {
-        return NextResponse.json(
-          { error: 'Order not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
       }
-      apiLogger.error({ error: fetchError }, 'Error verifying order ownership:')
-      return NextResponse.json(
-        { error: 'Failed to delete order' },
-        { status: 500 }
-      )
+      apiLogger.error({ error: fetchError }, 'Error verifying order ownership')
+      return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
     }
     
     // Delete order items first (cascade should handle this, but being explicit)
@@ -223,11 +191,8 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (itemsError) {
-      apiLogger.error({ error: itemsError }, 'Error deleting order items:')
-      return NextResponse.json(
-        { error: 'Failed to delete order' },
-        { status: 500 }
-      )
+      apiLogger.error({ error: itemsError }, 'Error deleting order items')
+      return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
     }
     
     // Delete main order
@@ -238,19 +203,14 @@ export async function DELETE(
       .eq('user_id', user.id)
     
     if (error) {
-      apiLogger.error({ error }, 'Error deleting order:')
-      return NextResponse.json(
-        { error: 'Failed to delete order' },
-        { status: 500 }
-      )
+      apiLogger.error({ error }, 'Error deleting order')
+      return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
     }
 
+    cacheInvalidation.orders()
     return NextResponse.json({ message: 'Order deleted successfully' })
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in DELETE /api/orders/[id]:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in DELETE /api/orders/[id]')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

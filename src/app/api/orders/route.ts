@@ -5,6 +5,7 @@ import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
 type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
@@ -12,8 +13,9 @@ type OrderInsert = Database['public']['Tables']['orders']['Insert']
 type OrderItemInsert = Database['public']['Tables']['order_items']['Insert']
 
 type OrdersTable = Database['public']['Tables']['orders']
+
 // GET /api/orders - Get all orders
-export async function GET(request: NextRequest) {
+async function GET(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -123,7 +125,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/orders - Create new order with income tracking
-export async function POST(request: NextRequest) {
+async function POST(request: NextRequest) {
   try {
     // Create authenticated Supabase client
     const supabase = await createClient()
@@ -139,6 +141,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // The request body is already sanitized by the security middleware
     const body = await request.json()
 
     // Validate request body
@@ -298,3 +301,10 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

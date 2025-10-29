@@ -7,16 +7,19 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SwipeActions } from '@/components/ui/mobile-gestures'
 import { TablePaginationControls } from '@/components/ui/table-pagination-controls'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { OrderStatusBadge, OrderProgress } from '@/components/orders/OrderStatusBadge'
 import { useResponsive } from '@/hooks/useResponsive'
 import { useCurrency } from '@/hooks/useCurrency'
 import {
-    Clock,
-    DollarSign,
-    Edit,
-    Eye,
-    Package,
-    Phone,
-    Trash2
+  Clock,
+  DollarSign,
+  Edit,
+  Eye,
+  Package,
+  Phone,
+  Trash2,
+  Plus
 } from 'lucide-react'
 import type { Order, OrderStatus } from './types'
 import { getPaymentInfo, getPriorityInfo, getStatusInfo } from './utils'
@@ -41,7 +44,7 @@ interface OrdersListProps {
 const OrdersList = memo(({
   orders,
   onViewOrder,
-  onEditOrder, 
+  onEditOrder,
   onDeleteOrder,
   onUpdateStatus,
   loading = false
@@ -92,15 +95,16 @@ const OrdersList = memo(({
 
   if (orders.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-medium mb-2">Belum ada pesanan</h3>
-          <p className="text-muted-foreground">
-            Pesanan akan muncul di sini setelah pelanggan membuat order
-          </p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        {...EmptyStatePresets.orders}
+        actions={[
+          {
+            label: 'Buat Order Pertama',
+            href: '/orders/new',
+            icon: Plus
+          }
+        ]}
+      />
     )
   }
 
@@ -136,13 +140,19 @@ const OrdersList = memo(({
             <Card className="hover: transition-shadow">
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-3">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{order.order_no}</h4>
                     <p className="text-sm text-muted-foreground">{order.customer_name}</p>
                   </div>
-                  <Badge className={getStatusInfo(order.status).color}>
-                    {getStatusInfo(order.status).label}
-                  </Badge>
+                  <OrderStatusBadge
+                    status={order.status as any}
+                    compact
+                  />
+                </div>
+
+                {/* Progress indicator */}
+                <div className="mb-3">
+                  <OrderProgress currentStatus={order.status as any} />
                 </div>
 
                 <div className="space-y-2 text-sm">
@@ -150,7 +160,7 @@ const OrdersList = memo(({
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>{new Date(order.delivery_date).toLocaleDateString('id-ID')}</span>
                   </div>
-                  
+
                   {order.customer_phone && (
                     <div className="flex items-center gap-2">
                       <Phone className="h-4 w-4 text-muted-foreground" />
@@ -286,9 +296,9 @@ const OrdersList = memo(({
                         <Button size="sm" variant="ghost" onClick={() => onEditOrder(order)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => onDeleteOrder(order.id)}
                           className="text-red-500 hover:text-red-700"
                         >
@@ -321,12 +331,12 @@ const OrdersList = memo(({
       </CardContent>
     </Card>
   )
-}, (prevProps, nextProps) => 
-  // Custom comparison to prevent unnecessary re-renders
-   (
-    prevProps.orders === nextProps.orders &&
-    prevProps.loading === nextProps.loading
-  )
+}, (prevProps, nextProps) =>
+// Custom comparison to prevent unnecessary re-renders
+(
+  prevProps.orders === nextProps.orders &&
+  prevProps.loading === nextProps.loading
+)
 )
 
 export default OrdersList

@@ -305,7 +305,6 @@ export const UMKM_ID = {
     netProfit: "Keuntungan Bersih",
     topProducts: "Produk Terlaris",
     topCustomers: "Pelanggan Terbaik",
-    exportExcel: "Unduh Excel",
     exportPdf: "Unduh PDF",
     print: "Cetak Laporan",
   },

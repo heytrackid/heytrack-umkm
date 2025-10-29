@@ -15,6 +15,9 @@ import {
   ActionButtons
 } from '@/components/shared'
 
+// UX components
+import { ErrorMessage } from '@/components/ui/error-message'
+
 // Import modular components
 import {
   OrdersList,
@@ -164,7 +167,13 @@ export default function OrdersPage() {
       />
 
       {/* Error Display */}
-      {error && <ErrorCard error={error} onRetry={handleRefresh} />}
+      {error && (
+        <ErrorMessage
+          variant="card"
+          error={error}
+          onRetry={handleRefresh}
+        />
+      )}
 
       {/* Orders List */}
       <OrdersList

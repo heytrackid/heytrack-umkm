@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import {
   ChevronLeft,
   ChevronRight,
@@ -86,21 +87,16 @@ export default function CustomersTable({
 
   if (customers.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className={`font-medium mb-2 ${isMobile ? 'text-base' : 'text-lg'}`}>
-            Belum Ada Pelanggan
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            Mulai tambahkan pelanggan pertama Anda
-          </p>
-          <Button onClick={onAddNew}>
-            <Plus className="h-4 w-4 mr-2" />
-            Tambah Pelanggan
-          </Button>
-        </CardContent>
-      </Card>
+      <EmptyState
+        {...EmptyStatePresets.customers}
+        actions={[
+          {
+            label: 'Tambah Customer Pertama',
+            onClick: onAddNew,
+            icon: Plus
+          }
+        ]}
+      />
     )
   }
 

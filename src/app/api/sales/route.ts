@@ -1,10 +1,16 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage } from '@/lib/type-guards'
-import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations';
-import { prepareInsert } from '@/lib/supabase/insert-helpers';
+import { apiLogger } from '@/lib/logger'
+import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/lib/validations'
+import type { Database } from '@/types/supabase-generated'
+import { withSecurity, SecurityPresets } from '@/utils/security'
 
-export async function GET(request: NextRequest) {
+// Note: 'sales' table doesn't exist - sales data is tracked through orders and order_items
+// type Sale = Database['public']['Tables']['sales']['Row']
+
+// Define the original GET function
+async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
 
   // Validate query parameters
@@ -43,7 +49,13 @@ export async function GET(request: NextRequest) {
   const { start_date, end_date, recipe_id } = salesQueryValidation.data
 
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
@@ -54,6 +66,7 @@ export async function GET(request: NextRequest) {
         *
       `)
       .eq('record_type', 'INCOME')
+      .eq('user_id', user.id)
       .range(offset, offset + limit - 1)
 
     // Add filters
@@ -83,7 +96,7 @@ export async function GET(request: NextRequest) {
     if (error) {throw error;}
 
     // Get total count
-    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME')
+    let countQuery = supabase.from('financial_records').select('*', { count: 'exact', head: true }).eq('record_type', 'INCOME').eq('user_id', user.id)
 
     // Apply same filters to count query
     if (search) {
@@ -109,16 +122,26 @@ export async function GET(request: NextRequest) {
         total: count || 0,
         totalPages: Math.ceil((count || 0) / limit)
       }
-    });
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    })
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in GET /api/sales')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
-export async function POST(request: Request) {
+// Define the original POST function
+async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const body = await request.json();
+    const supabase = await createClient()
+    
+    // Authenticate user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    // The request body is already sanitized by the security middleware
+    const body = await request.json()
 
     // Validate request body
     const validation = SalesInsertSchema.safeParse(body)
@@ -134,23 +157,33 @@ export async function POST(request: Request) {
 
     const validatedData = validation.data
 
-    const insertPayload = prepareInsert('financial_records', {
+    const insertPayload: Database['public']['Tables']['financial_records']['Insert'] = {
       ...validatedData,
-      type: 'INCOME'
-    })
+      type: 'INCOME',
+      user_id: user.id
+    }
 
     const { data: sale, error } = await supabase
       .from('financial_records')
       .insert(insertPayload)
-      .select(`
-        *
-      `)
-      .single();
+      .select('*')
+      .single()
 
-    if (error) {throw error;}
+    if (error) {
+      apiLogger.error({ error }, 'Error creating sale')
+      return NextResponse.json({ error: 'Failed to create sale' }, { status: 500 })
+    }
 
-    return NextResponse.json(sale, { status: 201 });
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+    return NextResponse.json(sale, { status: 201 })
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in POST /api/sales')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
+
+// Apply security middleware with enhanced security configuration
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPOST as POST }

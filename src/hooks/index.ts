@@ -49,7 +49,6 @@ export { useDashboardStats, useWeeklySales, useTopProducts } from './api/useDash
 
 // HPP Hooks
 export { useHppOverview } from '@/modules/hpp/hooks/useHppOverview'
-export { useInfiniteHppAlerts } from '@/modules/hpp/hooks/useInfiniteHppAlerts'
 export { useHppWorker } from '@/modules/hpp/hooks/useHppWorker'
 
 // Inventory Hooks
@@ -60,5 +59,4 @@ export { useReorderManagement, usePurchaseOrderGenerator } from './useReorderMan
 // export { useHPPAutomation, useRecipeHPPAnalysis } from './useHPPAutomation'
 
 // Performance Hooks
-export { useServiceWorker } from './useServiceWorker'
 export { usePerformanceMonitoring } from './usePerformanceMonitoring'

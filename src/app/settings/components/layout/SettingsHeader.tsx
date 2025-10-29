@@ -10,16 +10,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
 import { RotateCcw, Save } from 'lucide-react'
-import dynamic from 'next/dynamic'
 
-// Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(
-  () => import(/* webpackChunkName: "excel-export-button" */ '@/components/export/ExcelExportButton'),
-  {
-    ssr: false,
-    loading: () => <div className="h-10 w-32 bg-gray-200 animate-pulse rounded" />
-  }
-)
 
 interface SettingsHeaderProps {
   isUnsavedChanges: boolean
@@ -52,7 +43,6 @@ export const SettingsHeader = ({ isUnsavedChanges, isSaving, onSave, onReset }: 
         <p className="text-sm md:text-base text-muted-foreground">Kelola konfigurasi aplikasi Anda</p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <ExcelExportButton variant="outline" className="hidden sm:inline-flex" />
         {isUnsavedChanges && (
           <Badge variant="outline" className="text-orange-600 border-orange-600 text-xs md:text-sm">
             Perubahan belum disimpan

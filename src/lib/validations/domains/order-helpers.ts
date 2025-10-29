@@ -4,7 +4,10 @@
  */
 
 import { z } from 'zod'
-import { OrderInsertSchema, OrderUpdateSchema, type OrderInsert, type OrderUpdate } from './order'
+import { OrderInsertSchema, type OrderInsert, type OrderUpdate } from './order'
+
+// Re-export for convenience
+export { OrderUpdateSchema } from './order'
 
 // Enhanced order validation with business rules
 export const EnhancedOrderInsertSchema = OrderInsertSchema

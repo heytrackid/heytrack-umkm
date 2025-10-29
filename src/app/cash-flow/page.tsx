@@ -53,8 +53,7 @@ export default function CashFlowPage() {
     setTransactionType,
     fetchCashFlowData,
     handleAddTransaction,
-    handleDeleteTransaction,
-    exportReport
+    handleDeleteTransaction
   } = useEnhancedCashFlow()
 
   // Loading state
@@ -129,20 +128,7 @@ export default function CashFlowPage() {
               Tambah Transaksi
             </Button>
 
-            <Button
-              variant="outline"
-              onClick={() => exportReport('csv')}
-              className={isMobile ? 'w-full' : ''}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Ekspor
-            </Button>
           </div>
-          {isMobile && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Format CSV – bisa dibuka di Excel
-            </p>
-          )}
         </div>
 
         {/* Enhanced Transaction Form Dialog */}

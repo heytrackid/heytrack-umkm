@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { Database } from '@/types/supabase-generated'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 
 // Use production_batches table (not productions)
 type ProductionBatch = Database['public']['Tables']['production_batches']['Row']
@@ -398,21 +399,17 @@ export const EnhancedProductionPage = () => {
 
                 <TabsContent value="active" className="space-y-4">
                     {filteredProductions.filter(p => p.status === 'PLANNED' || p.status === 'IN_PROGRESS').length === 0 ? (
-                        <Card>
-                            <CardContent className="py-16">
-                                <div className="text-center">
-                                    <Factory className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                                    <h3 className="text-lg font-semibold mb-2">Tidak Ada Produksi Aktif</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        Buat batch produksi baru untuk memulai
-                                    </p>
-                                    <Button>
-                                        <Plus className="h-4 w-4 mr-2" />
-                                        Buat Batch Baru
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <EmptyState
+                            {...EmptyStatePresets.production}
+                            actions={[
+                                {
+                                    label: 'Buat Batch Produksi',
+                                    onClick: () => { },
+                                    icon: Plus
+                                }
+                            ]}
+                            compact
+                        />
                     ) : (
                         <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                             {filteredProductions

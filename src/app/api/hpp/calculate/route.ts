@@ -79,37 +79,15 @@ export async function POST(request: NextRequest) {
     const hppService = new HppCalculatorService()
     const calculation = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
 
-    const materialCost = calculation.materialCost
-    const operationalCost = calculation.overheadCost + calculation.laborCost
-    const totalHpp = calculation.totalHpp
-    const costPerUnit = calculation.costPerUnit
-    const servings = calculation.productionQuantity
+    const materialCost = calculation.material_cost
+    const operationalCost = calculation.overhead_cost + calculation.labor_cost
+    const totalHpp = calculation.total_hpp
+    const costPerUnit = calculation.cost_per_unit
+    // const servings = calculation.production_quantity
 
     // Calculation already saved by service
-
-    // Create snapshot
-    const snapshotPayload = prepareInsert('hpp_snapshots', {
-      recipe_id: recipeId,
-      user_id: user.id,
-      snapshot_date: new Date().toISOString(),
-      hpp_value: costPerUnit,
-      material_cost: materialCost,
-      operational_cost: operationalCost,
-      cost_breakdown: {
-        ingredients: calculation.materialBreakdown.map(item => ({
-          name: item.ingredientName,
-          quantity: item.quantity,
-          unit: item.unit,
-          unit_price: item.unitPrice,
-          total: item.totalCost
-        })),
-        operational: operationalCost
-      }
-    })
-
-    await supabase
-      .from('hpp_snapshots')
-      .insert(snapshotPayload)
+    
+    // Snapshot feature removed - no longer creating snapshots
 
     // Invalidate cache
     await cacheInvalidation.hpp()
@@ -126,12 +104,12 @@ export async function POST(request: NextRequest) {
       calculation: {
         recipe_id: recipeId,
         material_cost: materialCost,
-        labor_cost: calculation.laborCost,
-        overhead_cost: calculation.overheadCost,
-        wac_adjustment: calculation.wacAdjustment,
+        labor_cost: calculation.labor_cost,
+        overhead_cost: calculation.overhead_cost,
+        wac_adjustment: calculation.wac_adjustment,
         total_hpp: totalHpp,
         cost_per_unit: costPerUnit,
-        ingredients_count: calculation.materialBreakdown.length
+        ingredients_count: calculation.material_breakdown.length
       }
     })
 

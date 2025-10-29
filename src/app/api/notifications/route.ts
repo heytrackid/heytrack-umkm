@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('notifications')
       .select('id, title, message, category, severity, is_read, is_dismissed, created_at, metadata')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -44,9 +45,6 @@ export async function GET(request: NextRequest) {
 
     // Only show non-dismissed notifications
     query = query.eq('is_dismissed', false)
-
-    // Optional: filter by user if notifications are user-specific
-    // For now, show all notifications (global inventory alerts)
 
     const { data: notifications, error } = await query
 

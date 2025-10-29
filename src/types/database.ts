@@ -43,12 +43,9 @@ export type RecipesTable = TablesMap['recipes']
 export type StockTransactionsTable = TablesMap['stock_transactions']
 export type SupplierIngredientsTable = TablesMap['supplier_ingredients']
 export type SuppliersTable = TablesMap['suppliers']
-export type SyncEventsTable = TablesMap['sync_events']
-export type SystemMetricsTable = TablesMap['system_metrics']
 export type UsageAnalyticsTable = TablesMap['usage_analytics']
 
 export type OrderSummaryView = ViewsMap['order_summary']
-export type RecentSyncEventsView = ViewsMap['recent_sync_events']
 export type RecipeAvailabilityView = ViewsMap['recipe_availability']
 
 export type OrderStatus = EnumsMap['order_status']

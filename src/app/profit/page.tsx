@@ -16,7 +16,7 @@ import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import { Download, Loader2, AlertCircle } from 'lucide-react'
 import { StatsSkeleton } from '@/components/ui'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { useProfitData, useProductChartData } from './components'
 

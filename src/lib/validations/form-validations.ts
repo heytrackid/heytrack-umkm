@@ -6,9 +6,6 @@ import {
   UUIDSchema,
   EmailSchema,
   PhoneSchema,
-  DateStringSchema,
-  PositiveNumberSchema,
-  NonNegativeNumberSchema,
   indonesianName,
   optionalString,
   positiveNumber,
@@ -306,11 +303,13 @@ export type OperationalCostForm = z.infer<typeof OperationalCostFormSchema>
 export function validateOrderData(data: Record<string, unknown>): string[] {
   const errors: string[] = []
 
-  if (!data.customer_name?.trim()) {
+  const customerName = data.customer_name
+  if (typeof customerName === 'string' && !customerName.trim()) {
     errors.push('Nama pelanggan harus diisi')
   }
 
-  if (!data.customer_phone?.trim()) {
+  const customerPhone = data.customer_phone
+  if (typeof customerPhone === 'string' && !customerPhone.trim()) {
     errors.push('Nomor telepon harus diisi')
   }
 
@@ -318,7 +317,8 @@ export function validateOrderData(data: Record<string, unknown>): string[] {
     errors.push('Tanggal pengiriman harus diisi')
   }
 
-  if (!data.order_items || data.order_items.length === 0) {
+  const orderItems = data.order_items
+  if (!orderItems || (Array.isArray(orderItems) && orderItems.length === 0)) {
     errors.push('Minimal harus ada 1 item pesanan')
   }
 

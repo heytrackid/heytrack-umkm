@@ -48,6 +48,8 @@ import { EnhancedEmptyState } from './EnhancedEmptyState'
 import { MobileRecipeCard } from './MobileRecipeCard'
 import { RecipeStatsCards } from './RecipeStatsCards'
 import { DeleteModal } from '@/components/ui'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { ErrorMessage } from '@/components/ui/error-message'
 
 // Hooks
 import { useRecipes } from '@/hooks/supabase/entities'
@@ -195,7 +197,24 @@ export const EnhancedRecipesPage = () => {
 
     // Empty state
     if (!loading && (!recipes || recipes.length === 0)) {
-        return <EnhancedEmptyState onAdd={() => router.push('/recipes/new')} />
+        return (
+            <EmptyState
+                {...EmptyStatePresets.recipes}
+                actions={[
+                    {
+                        label: 'Buat Resep Baru',
+                        onClick: () => router.push('/recipes/new'),
+                        icon: Plus
+                    },
+                    {
+                        label: 'Gunakan AI Generator',
+                        onClick: () => router.push('/recipes/ai-generator'),
+                        variant: 'outline',
+                        icon: Sparkles
+                    }
+                ]}
+            />
+        )
     }
 
     return (

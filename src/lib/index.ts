@@ -228,19 +228,13 @@ export {
 // ============================================================================
 
 export {
-  HPPCalculator,
-  HPPAlertDetector,
-  HPPSnapshotManager,
-  HPPUtils,
+  // HPPCalculator,
+  // HPPUtils,
 }
 
 // HPP functions moved to modules/hpp
 // export {
 //   calculateHPP,
-//   detectHPPAlerts,
-//   takeSnapshot,
-//   getSnapshots,
-//   compareSnapshots,
 // } from './hpp/'
 
 export {

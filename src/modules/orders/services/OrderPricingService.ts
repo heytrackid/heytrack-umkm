@@ -116,7 +116,7 @@ export class OrderPricingService {
               // If no HPP exists, try to calculate it
               try {
                 const hppResult = await hppCalculator.calculateRecipeHpp(supabase, recipe.id, recipe.user_id)
-                estimated_cost = hppResult.costPerUnit
+                estimated_cost = hppResult.cost_per_unit
                 dbLogger.info({ 
                   recipeId: recipe.id, 
                   hpp: estimated_cost 

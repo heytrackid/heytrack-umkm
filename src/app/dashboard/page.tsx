@@ -26,14 +26,7 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 
-// Dynamic import to reduce bundle size
-const ExcelExportButton = dynamic(
-  () => import(/* webpackChunkName: "excel-export-button" */ '@/components/export/ExcelExportButton'),
-  {
-    ssr: false,
-    loading: () => <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
-  }
-)
+
 
 const StatsCardsSection = dynamic(
   () => import(/* webpackChunkName: "dashboard-stats-cards" */ './components/StatsCardsSection'),
@@ -213,9 +206,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <ExcelExportButton size="sm" variant="outline" />
-            </div>
+
           </div>
         )}
 

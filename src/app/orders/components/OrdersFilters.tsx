@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -16,7 +15,7 @@ interface OrdersFiltersProps {
   dateTo: string
   setDateTo: (value: string) => void
   statusConfig: Record<string, { label: string; color: string }>
-  t: unknown
+  _t?: unknown
 }
 
 export default function OrdersFilters({
@@ -28,8 +27,8 @@ export default function OrdersFilters({
   setDateFrom,
   dateTo,
   setDateTo,
-  statusConfig,
-  t
+  statusConfig
+  // _t not used
 }: OrdersFiltersProps) {
   return (
     <Card>
@@ -46,7 +45,7 @@ export default function OrdersFilters({
               />
             </div>
           </div>
-          
+
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="" />
@@ -60,7 +59,7 @@ export default function OrdersFilters({
               ))}
             </SelectContent>
           </Select>
-          
+
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <Input

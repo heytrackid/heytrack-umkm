@@ -3,6 +3,7 @@
 
 import { z } from 'zod'
 import { apiLogger } from '@/lib/logger'
+import { InputSanitizer } from '@/utils/security'
 
 // Base validation utilities
 export const requiredString = z.string().min(1, 'validation.fieldRequired')
@@ -121,7 +122,8 @@ export function zodErrorsToFieldErrors(errors: z.ZodIssue[]): Record<string, str
   errors.forEach((error) => {
     const fieldName = error.path.join('.')
     if (!fieldErrors[fieldName]) {
-      fieldErrors[fieldName] = error.message
+      // Sanitize error messages to prevent XSS
+      fieldErrors[fieldName] = InputSanitizer.sanitizeHtml(error.message)
     }
   })
 

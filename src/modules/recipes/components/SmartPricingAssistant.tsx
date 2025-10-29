@@ -407,7 +407,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
                 </div>
                 <div className="flex justify-between items-center py-2 border-b">
                   <span>Overhead (15%)</span>
-                  <span className="font-medium">{formatCurrency(analysis.breakdown.overheadCost)}</span>
+                  <span className="font-medium">{formatCurrency(analysis.breakdown.overhead_cost)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b font-bold text-lg">
                   <span>Total HPP</span>

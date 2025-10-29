@@ -26,8 +26,7 @@ export class GeneralCronJobs {
       const results = await Promise.allSettled([
         InventoryCronJobs.checkInventoryReorder(),
         FinancialCronJobs.checkFinancialAlerts(),
-        OrderCronJobs.checkOrderDeadlines(),
-        HPPCronJobs.detectHPPAlertsForAllUsers()
+        OrderCronJobs.checkOrderDeadlines()
       ])
 
       const summary: AutomationEngineResult = {

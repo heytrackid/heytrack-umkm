@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { useSupabaseCRUD } from '@/hooks/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -19,9 +18,7 @@ import {
 import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
 import type { Database } from '@/types/supabase-generated'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeInsert = Database['public']['Tables']['recipes']['Insert']
-type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 interface RecipeFormPageProps {
@@ -40,11 +37,9 @@ interface RecipeIngredientForm {
 export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
-    const { read, create, update } = useSupabaseCRUD('recipes')
-    const { data: ingredients } = useSupabaseCRUD('ingredients')
-    const recipeIngredientsCRUD = useSupabaseCRUD('recipe_ingredients')
 
     const [loading, setLoading] = useState(false)
+    const [ingredients, setIngredients] = useState<Ingredient[]>([])
     const [formData, setFormData] = useState<Partial<RecipeInsert>>({
         name: '',
         description: '',
@@ -58,27 +53,43 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
     const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredientForm[]>([])
 
     useEffect(() => {
+        loadIngredients()
         if (mode === 'edit' && recipeId) {
             loadRecipe()
         }
     }, [mode, recipeId])
+
+    const loadIngredients = async () => {
+        try {
+            const response = await fetch('/api/ingredients')
+            if (response.ok) {
+                const data = await response.json()
+                setIngredients(data)
+            }
+        } catch (error: unknown) {
+            console.error('Failed to load ingredients:', error)
+        }
+    }
 
     const loadRecipe = async () => {
         if (!recipeId) return
 
         try {
             setLoading(true)
-            const recipe = await read(recipeId)
+
+            // Fetch recipe with ingredients from API
+            const response = await fetch(`/api/recipes/${recipeId}`)
+            if (!response.ok) {
+                throw new Error('Gagal memuat resep')
+            }
+
+            const recipe = await response.json()
             setFormData(recipe)
 
-            // Load recipe ingredients
-            const { data: ingredientsData } = await recipeIngredientsCRUD.read()
-            const filtered = ingredientsData?.filter(
-                (ri: RecipeIngredient) => ri.recipe_id === recipeId
-            )
-            if (filtered) {
+            // Load recipe ingredients from the response
+            if (recipe.recipe_ingredients && Array.isArray(recipe.recipe_ingredients)) {
                 setRecipeIngredients(
-                    filtered.map((ri: RecipeIngredient) => ({
+                    recipe.recipe_ingredients.map((ri: any) => ({
                         id: ri.id,
                         ingredient_id: ri.ingredient_id,
                         quantity: ri.quantity,
@@ -112,51 +123,88 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
             return
         }
 
+        // Validate ingredients
+        if (recipeIngredients.length === 0) {
+            toast({
+                title: 'Validasi Error',
+                description: 'Resep harus memiliki minimal 1 bahan',
+                variant: 'destructive',
+            })
+            return
+        }
+
+        // Validate each ingredient
+        for (const ri of recipeIngredients) {
+            if (!ri.ingredient_id || ri.quantity <= 0) {
+                toast({
+                    title: 'Validasi Error',
+                    description: 'Semua bahan harus dipilih dan memiliki jumlah yang valid',
+                    variant: 'destructive',
+                })
+                return
+            }
+        }
+
         try {
             setLoading(true)
 
-            let savedRecipeId = recipeId
-
             if (mode === 'create') {
-                const newRecipe = await create(formData as RecipeInsert)
-                savedRecipeId = newRecipe.id
+                // Use API route for create (handles ingredients atomically)
+                const response = await fetch('/api/recipes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...formData,
+                        recipe_ingredients: recipeIngredients.map(ri => ({
+                            ingredient_id: ri.ingredient_id,
+                            quantity: ri.quantity,
+                            unit: ri.unit,
+                            notes: ri.notes,
+                        })),
+                    }),
+                })
+
+                if (!response.ok) {
+                    const error = await response.json()
+                    throw new Error(error.error || 'Gagal membuat resep')
+                }
+
+                const newRecipe = await response.json()
+
+                toast({
+                    title: 'Resep dibuat',
+                    description: `${formData.name} berhasil dibuat dengan ${recipeIngredients.length} bahan`,
+                })
+
+                router.push(`/recipes/${newRecipe.id}`)
             } else if (recipeId) {
-                await update(recipeId, formData)
-            }
+                // Use API route for update (handles ingredients atomically)
+                const response = await fetch(`/api/recipes/${recipeId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...formData,
+                        recipe_ingredients: recipeIngredients.map(ri => ({
+                            ingredient_id: ri.ingredient_id,
+                            quantity: ri.quantity,
+                            unit: ri.unit,
+                            notes: ri.notes,
+                        })),
+                    }),
+                })
 
-            // Save recipe ingredients
-            if (savedRecipeId) {
-                // Delete existing ingredients if editing
-                if (mode === 'edit') {
-                    const { data: existingIngredients } = await recipeIngredientsCRUD.read()
-                    const toDelete = existingIngredients?.filter(
-                        (ri: RecipeIngredient) => ri.recipe_id === savedRecipeId
-                    )
-                    if (toDelete) {
-                        for (const ri of toDelete) {
-                            await recipeIngredientsCRUD.delete(ri.id)
-                        }
-                    }
+                if (!response.ok) {
+                    const error = await response.json()
+                    throw new Error(error.error || 'Gagal memperbarui resep')
                 }
 
-                // Create new ingredients
-                for (const ri of recipeIngredients) {
-                    await recipeIngredientsCRUD.create({
-                        recipe_id: savedRecipeId,
-                        ingredient_id: ri.ingredient_id,
-                        quantity: ri.quantity,
-                        unit: ri.unit,
-                        notes: ri.notes,
-                    })
-                }
+                toast({
+                    title: 'Resep diperbarui',
+                    description: `${formData.name} berhasil diperbarui dengan ${recipeIngredients.length} bahan`,
+                })
+
+                router.push(`/recipes/${recipeId}`)
             }
-
-            toast({
-                title: mode === 'create' ? 'Resep dibuat' : 'Resep diperbarui',
-                description: `${formData.name} berhasil ${mode === 'create' ? 'dibuat' : 'diperbarui'}`,
-            })
-
-            router.push(savedRecipeId ? `/recipes/${savedRecipeId}` : '/recipes')
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal menyimpan resep'
             toast({
@@ -359,7 +407,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                                                 <SelectValue placeholder="Pilih bahan" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {ingredients.data?.map((ing: Ingredient) => (
+                                                {ingredients.map((ing) => (
                                                     <SelectItem key={ing.id} value={ing.id}>
                                                         {ing.name}
                                                     </SelectItem>

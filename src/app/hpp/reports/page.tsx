@@ -27,7 +27,7 @@ import { useToast } from '@/hooks/use-toast'
 import { dbLogger } from '@/lib/logger'
 import { useResponsive } from '@/hooks/useResponsive'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
-import { HppCostTrendsChart, HppExportService } from '@/modules/hpp'
+import { HppCostTrendsChart } from '@/modules/hpp'
 import type { HppExportFormat, HppExportMetric } from '@/modules/hpp'
 
 type ExportFormat = HppExportFormat
@@ -174,23 +174,9 @@ export default function HppReportsPage() {
     try {
       void setGenerating(true)
       toast({
-        title: 'Export Started',
-        description: `Preparing ${format.toUpperCase()} export...`,
-      })
-
-      const exportService = new HppExportService()
-      const result = await exportService.exportHppData({
-        format,
-        dateRange: config.dateRange,
-        metrics: config.metrics
-      })
-
-      // Download file
-      HppExportService.downloadFile(result.data, result.filename, result.mimeType)
-
-      toast({
-        title: 'Export Complete',
-        description: `File downloaded: ${result.filename}`,
+        title: 'Export Not Available',
+        description: 'Export feature has been removed',
+        variant: 'destructive'
       })
 
     } catch (err: unknown) {
@@ -232,9 +218,9 @@ export default function HppReportsPage() {
           description="Generate laporan mendalam mengenai biaya produksi, tren HPP, dan performa resep"
           breadcrumbs={reportsBreadcrumbs}
         />
-        
+
         {/* Stats Cards */}
-        <SharedStatsCards 
+        <SharedStatsCards
           stats={[
             {
               title: "Total Reports",

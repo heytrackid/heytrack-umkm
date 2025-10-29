@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
 import AppLayout from '@/components/layout/app-layout';
 import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui'
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';

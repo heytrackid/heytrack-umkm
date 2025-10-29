@@ -4,7 +4,10 @@
  */
 
 import { z } from 'zod'
-import { RecipeInsertSchema, RecipeUpdateSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+import { RecipeInsertSchema, type RecipeInsert, type RecipeUpdate } from './recipe'
+
+// Re-export for convenience
+export { RecipeUpdateSchema } from './recipe'
 
 // Enhanced recipe validation with business rules
 export const EnhancedRecipeInsertSchema = RecipeInsertSchema

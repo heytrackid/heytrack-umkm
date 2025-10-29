@@ -31,13 +31,14 @@ export interface LoadingProps {
 /**
  * Column definition for data tables
  * @template T - The type of data in the table rows
+ * @template TValue - The type of the value for this column
  */
-export interface ColumnDef<T> {
+export interface ColumnDef<T, TValue = unknown> {
     id: string;
     header: string;
     accessorKey?: keyof T;
-    accessorFn?: (row: T) => unknown;
-    cell?: (value: unknown, row: T) => ReactNode;
+    accessorFn?: (row: T) => TValue;
+    cell?: (value: TValue, row: T) => ReactNode;
     sortable?: boolean;
     width?: string | number;
 }

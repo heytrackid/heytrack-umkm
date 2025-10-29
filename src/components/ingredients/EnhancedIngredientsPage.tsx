@@ -14,6 +14,10 @@ import { EnhancedEmptyState } from './EnhancedEmptyState'
 import { StockBadge } from './StockBadge'
 import { MobileIngredientList } from './MobileIngredientCard'
 
+// UX Components
+import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
+import { ErrorMessage } from '@/components/ui/error-message'
+
 // UI Components
 import { DeleteModal } from '@/components/ui'
 import { Button } from '@/components/ui/button'
@@ -134,7 +138,18 @@ export const EnhancedIngredientsPage = () => {
 
     // Empty state
     if (!loading && (!ingredients || ingredients.length === 0)) {
-        return <EnhancedEmptyState onAdd={() => router.push('/ingredients/new')} />
+        return (
+            <EmptyState
+                {...EmptyStatePresets.ingredients}
+                actions={[
+                    {
+                        label: 'Tambah Bahan Baru',
+                        onClick: () => router.push('/ingredients/new'),
+                        icon: ShoppingCart
+                    }
+                ]}
+            />
+        )
     }
 
     return (

@@ -101,26 +101,4 @@ export const HPP_CONFIG = {
   },
 } as const
 
-/**
- * Alert severity levels based on cost changes
- */
-export const HPP_ALERT_SEVERITY = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-  CRITICAL: 'critical',
-} as const
 
-/**
- * Alert types for HPP monitoring
- */
-export const HPP_ALERT_TYPES = {
-  PRICE_INCREASE: 'price_increase',
-  LOW_MARGIN: 'low_margin',
-  COST_SPIKE: 'cost_spike',
-  NEGATIVE_MARGIN: 'negative_margin',
-  WAC_OUTDATED: 'wac_outdated',
-} as const
-
-export type HppAlertSeverity = typeof HPP_ALERT_SEVERITY[keyof typeof HPP_ALERT_SEVERITY]
-export type HppAlertType = typeof HPP_ALERT_TYPES[keyof typeof HPP_ALERT_TYPES]

@@ -17,7 +17,6 @@ import type {
   RecipeWithHpp,
   HppOverview,
   HppComparison,
-  HppAlertWithRecipe,
 } from '@/modules/hpp/types'
 
 interface RecipeIngredientRecord {
@@ -44,10 +43,6 @@ interface HppComparisonResponse {
   recipes: HppComparison[]
 }
 
-interface HppAlertsResponse {
-  alerts: HppAlertWithRecipe[]
-}
-
 // Extended type for UI with calculated fields
 export type RecipeWithCosts = RecipeDetailResponse & RecipeWithHpp & {
   ingredients: RecipeIngredientWithPrice[]
@@ -60,14 +55,12 @@ export interface UseUnifiedHppReturn {
   overview: HppOverview | undefined
   recipe: RecipeWithCosts | null
   comparison: HppComparison[]
-  alerts: HppAlertWithRecipe[]
   isLoading: boolean
   recipeLoading: boolean
   selectedRecipeId: string
   setSelectedRecipeId: (id: string) => void
   calculateHpp: UseMutationResult<unknown, unknown, string, unknown>
   updatePrice: UseMutationResult<unknown, unknown, { recipeId: string; price: number; margin: number }, unknown>
-  markAlertAsRead: UseMutationResult<unknown, unknown, string, unknown>
 }
 
 // Type guard for recipe ingredient structure
@@ -85,9 +78,7 @@ function isHppComparisonResponse(payload: unknown): payload is HppComparisonResp
   return typeof payload === 'object' && payload !== null && Array.isArray((payload as HppComparisonResponse).recipes)
 }
 
-function isHppAlertsResponse(payload: unknown): payload is HppAlertsResponse {
-  return typeof payload === 'object' && payload !== null && Array.isArray((payload as HppAlertsResponse).alerts)
-}
+
 
 export function useUnifiedHpp(): UseUnifiedHppReturn {
   const { toast } = useToast()
@@ -213,21 +204,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     refetchOnWindowFocus: false
   })
 
-  // Fetch alerts
-  const { data: alertsData } = useQuery<HppAlertWithRecipe[]>({
-    queryKey: ['hpp-alerts'],
-    queryFn: async (): Promise<HppAlertWithRecipe[]> => {
-      const response = await fetch('/api/hpp/alerts?limit=5&is_read=false')
-      if (!response.ok) {throw new Error('Failed to fetch alerts')}
-      const payload = await response.json() as HppAlertsResponse | HppAlertWithRecipe[] | null
-      if (!payload) { return [] }
-      if (Array.isArray(payload)) { return payload }
-      if (isHppAlertsResponse(payload)) { return payload.alerts }
-      return []
-    },
-    staleTime: 30 * 1000, // 30 seconds (alerts should be fresher)
-    refetchOnWindowFocus: false
-  })
+
 
   // Calculate HPP
   const calculateHpp = useMutation<unknown, unknown, string>({
@@ -299,33 +276,17 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
     }
   })
 
-  // Mark alert as read
-  const markAlertAsRead = useMutation<unknown, unknown, string>({
-    mutationFn: async (alertId: string) => {
-      const response = await fetch(`/api/hpp/alerts/${alertId}/read`, {
-        method: 'PATCH'
-      })
-      if (!response.ok) {throw new Error('Failed to mark alert as read')}
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['hpp-alerts'] })
-      queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
-    }
-  })
 
   return {
     recipes: recipesData ?? [],
     overview: overviewData,
     recipe: (recipeData ?? null) as RecipeWithCosts | null,
     comparison: comparisonData ?? [],
-    alerts: alertsData ?? [],
     isLoading: recipesLoading || overviewLoading,
     recipeLoading,
     selectedRecipeId,
     setSelectedRecipeId,
     calculateHpp,
-    updatePrice,
-    markAlertAsRead
+    updatePrice
   } satisfies UseUnifiedHppReturn
 }

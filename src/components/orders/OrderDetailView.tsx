@@ -227,20 +227,7 @@ export default function OrderDetailView({
                                 </div>
                             )}
 
-                            {order.customer_email && (
-                                <div className="flex items-start gap-3">
-                                    <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Email</p>
-                                        <a
-                                            href={`mailto:${order.customer_email}`}
-                                            className="font-medium text-primary hover:underline"
-                                        >
-                                            {order.customer_email}
-                                        </a>
-                                    </div>
-                                </div>
-                            )}
+                            {/* Email field removed - not in database schema */}
 
                             {order.customer_address && (
                                 <div className="flex items-start gap-3">
@@ -334,10 +321,10 @@ export default function OrderDetailView({
                                     </div>
                                     <div className="text-right">
                                         <p className="text-sm text-muted-foreground">
-                                            {formatCurrency(item.price)} / item
+                                            {formatCurrency(item.unit_price)} / item
                                         </p>
                                         <p className="font-bold">
-                                            {formatCurrency(item.price * item.quantity)}
+                                            {formatCurrency(item.unit_price * item.quantity)}
                                         </p>
                                     </div>
                                 </div>

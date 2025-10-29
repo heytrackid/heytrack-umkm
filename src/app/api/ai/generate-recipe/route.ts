@@ -34,7 +34,7 @@ interface RecipeIngredient {
 //   storage?: string
 //   shelf_life?: string
 // }
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const maxDuration = 60
 
 /**

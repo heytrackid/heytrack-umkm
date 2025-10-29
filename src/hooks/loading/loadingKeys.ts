@@ -23,8 +23,7 @@ export const LOADING_KEYS = {
   DELETE_ORDER: 'delete_order',
   DELETE_CUSTOMER: 'delete_customer',
 
-  // Export Operations
-  EXPORT_EXCEL: 'export_excel',
+
 
   // HPP Calculations
   CALCULATE_HPP: 'calculate_hpp',

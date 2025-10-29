@@ -86,7 +86,7 @@ export const MethodComparisonCard = ({ calculationResult, formatCurrency, select
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">
-                    {formatCurrency(alternative.costPerUnit)}
+                    {formatCurrency(alternative.cost_per_unit)}
                   </p>
                   <p className="text-xs text-gray-500">per porsi</p>
                 </div>

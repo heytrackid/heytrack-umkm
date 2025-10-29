@@ -1,113 +1,90 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
+import { cacheInvalidation } from '@/lib/cache'
+import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import type { Database } from '@/types/supabase-generated'
+
+type RouteContext = {
+  params: Promise<{ id: string }>
+}
 
 // GET /api/recipes/[id] - Get single recipe with ingredients
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params
   try {
+    const { id } = await context.params
     const supabase = await createClient()
-    
+
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
+      apiLogger.error({ error: authError }, 'Auth error')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // ✅ OPTIMIZED: Use specific fields
     const { data: recipe, error } = await supabase
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('created_by', user.id)
       .single()
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: 'Recipe not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
-      apiLogger.error({ error }, 'Error fetching recipe:')
-      return NextResponse.json(
-        { error: 'Failed to fetch recipe' },
-        { status: 500 }
-      )
-    }
-
-    if (!recipe) {
-      return NextResponse.json(
-        { error: 'Recipe not found' },
-        { status: 404 }
-      )
+      throw error
     }
 
     return NextResponse.json(recipe)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/recipes/[id]:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    apiLogger.error({ error }, 'Error in GET /api/recipes/[id]')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// PUT /api/recipes/[id] - Update recipe and its ingredients
+// PUT /api/recipes/[id] - Update recipe with ingredients
 export async function PUT(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
-  const { id } = params
   try {
+    const { id } = await context.params
     const supabase = await createClient()
-    
-    // Get authenticated user for user_id
+
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
+      apiLogger.error({ error: authError }, 'Auth error')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await _request.json()
+    const body = await request.json()
     const { recipe_ingredients, ...recipeData } = body
 
-    // Update the recipe ensuring it belongs to the user
+    // Update recipe
     const { data: recipe, error: recipeError } = await supabase
       .from('recipes')
       .update(recipeData)
       .eq('id', id)
-      .eq('user_id', user.id)
-      .select('id, name, updated_at')
+      .eq('created_by', user.id)
+      .select('id, name')
       .single()
 
     if (recipeError) {
       if (recipeError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: 'Recipe not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
-      apiLogger.error({ error: recipeError }, 'Error updating recipe:')
-      return NextResponse.json(
-        { error: 'Failed to update recipe' },
-        { status: 500 }
-      )
+      apiLogger.error({ error: recipeError }, 'Error updating recipe')
+      return NextResponse.json({ error: 'Failed to update recipe' }, { status: 500 })
     }
 
-    if (!recipe) {
-      return NextResponse.json(
-        { error: 'Recipe not found or unauthorized' },
-        { status: 404 }
-      )
-    }
-
-    // If ingredients are provided, update them
-    if (recipe_ingredients !== undefined) {
-      // Delete existing recipe ingredients
+    // Update ingredients if provided
+    if (recipe_ingredients && Array.isArray(recipe_ingredients)) {
+      // Delete existing ingredients
       const { error: deleteError } = await supabase
         .from('recipe_ingredients')
         .delete()
@@ -115,14 +92,10 @@ export async function PUT(
         .eq('user_id', user.id)
 
       if (deleteError) {
-        apiLogger.error({ error: deleteError }, 'Error deleting existing ingredients:')
-        return NextResponse.json(
-          { error: 'Failed to update recipe ingredients' },
-          { status: 500 }
-        )
+        apiLogger.error({ error: deleteError }, 'Error deleting old ingredients')
       }
 
-      // Add new ingredients if any
+      // Insert new ingredients
       if (recipe_ingredients.length > 0) {
         type RecipeIngredientInput = {
           ingredient_id?: string
@@ -130,117 +103,92 @@ export async function PUT(
           quantity?: number
           qty_per_batch?: number
           unit?: string
+          notes?: string
         }
 
-        const recipeIngredientsToInsert: Database['public']['Tables']['recipe_ingredients']['Insert'][] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => {
-          if (!ingredient || typeof ingredient !== 'object') {
-            throw new Error('Invalid ingredient format')
-          }
-
-          return {
+        const ingredientsToInsert: Database['public']['Tables']['recipe_ingredients']['Insert'][] = 
+          recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
             recipe_id: id,
             ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
             quantity: ingredient.quantity || ingredient.qty_per_batch || 0,
             unit: ingredient.unit || 'g',
+            notes: ingredient.notes,
             user_id: user.id
-          }
-        })
+          }))
 
-        const { error: insertError } = await supabase
+        const { error: ingredientsError } = await supabase
           .from('recipe_ingredients')
-          .insert(recipeIngredientsToInsert)
+          .insert(ingredientsToInsert)
 
-        if (insertError) {
-          apiLogger.error({ error: insertError }, 'Error adding new ingredients:')
+        if (ingredientsError) {
+          apiLogger.error({ error: ingredientsError }, 'Error adding recipe ingredients')
           return NextResponse.json(
-            { error: 'Failed to add recipe ingredients' },
+            { error: 'Failed to update recipe ingredients' },
             { status: 500 }
           )
         }
       }
     }
 
-    // Fetch the complete updated recipe with ingredients
-    // ✅ OPTIMIZED: Use specific fields
+    // Fetch complete recipe for response
     const { data: completeRecipe, error: fetchError } = await supabase
       .from('recipes')
       .select(RECIPE_FIELDS.DETAIL)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('created_by', user.id)
       .single()
 
     if (fetchError) {
-      apiLogger.error({ error: fetchError }, 'Error fetching updated recipe:')
+      apiLogger.error({ error: fetchError }, 'Error fetching complete recipe')
       return NextResponse.json(recipe)
     }
 
-    if (!completeRecipe) {
-      return NextResponse.json(
-        { error: 'Recipe not found after update' },
-        { status: 404 }
-      )
-    }
+    // Invalidate cache
+    cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/recipes/[id]:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    apiLogger.error({ error }, 'Error in PUT /api/recipes/[id]')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// DELETE /api/recipes/[id] - Delete recipe (cascade will delete resep_item)
+// DELETE /api/recipes/[id] - Delete recipe
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
-  const { id } = params
   try {
+    const { id } = await context.params
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
+
     if (authError || !user) {
+      apiLogger.error({ error: authError }, 'Auth error')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if recipe exists and belongs to user first
-    const { error: checkError } = await supabase
-      .from('recipes')
-      .select('id')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (checkError?.code === 'PGRST116') {
-      return NextResponse.json(
-        { error: 'Recipe not found' },
-        { status: 404 }
-      )
-    }
-
-    // Delete the recipe (cascade will handle recipe_ingredients)
+    // Delete recipe (ingredients will be cascade deleted)
     const { error } = await supabase
       .from('recipes')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('created_by', user.id)
 
     if (error) {
-      apiLogger.error({ error }, 'Error deleting recipe:')
-      return NextResponse.json(
-        { error: 'Failed to delete recipe' },
-        { status: 500 }
-      )
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
+      }
+      throw error
     }
+
+    // Invalidate cache
+    cacheInvalidation.recipes()
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in DELETE /api/recipes/[id]:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    apiLogger.error({ error }, 'Error in DELETE /api/recipes/[id]')
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

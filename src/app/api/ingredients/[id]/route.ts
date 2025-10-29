@@ -10,7 +10,7 @@ import type { NextRequest } from 'next/server'
 import type { Database } from '@/types/supabase-generated'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
-type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
+// type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
 
 // GET /api/ingredients/[id] - Get single bahan baku
 export async function GET(

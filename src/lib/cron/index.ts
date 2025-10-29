@@ -39,9 +39,6 @@ export function setupCronJobs(): CronJobInfo[] {
   CronScheduler.registerJob('inventory-alerts', 'hourly', async () => { await InventoryCronJobs.checkInventoryAlerts() })
   CronScheduler.registerJob('financial-alerts', 'daily', async () => { await FinancialCronJobs.checkFinancialAlerts() })
   CronScheduler.registerJob('order-deadlines', 'hourly', async () => { await OrderCronJobs.checkOrderDeadlines() })
-  CronScheduler.registerJob('hpp-snapshots', 'daily', async () => { await HPPCronJobs.createDailyHPPSnapshots() })
-  CronScheduler.registerJob('hpp-alerts', 'every-5-minutes', async () => { await HPPCronJobs.detectHPPAlertsForAllUsers() })
-  CronScheduler.registerJob('cleanup-snapshots', 'weekly', async () => { await HPPCronJobs.archiveOldHPPSnapshots() })
   CronScheduler.registerJob('cleanup-notifications', 'weekly', async () => { await GeneralCronJobs.cleanupOldNotifications() })
 
   return CronScheduler.getJobStatus()

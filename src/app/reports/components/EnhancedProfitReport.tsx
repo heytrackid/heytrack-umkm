@@ -34,7 +34,7 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
+    ChartLegend as Legend,
     ResponsiveContainer
 } from '@/components/charts/LazyCharts'
 

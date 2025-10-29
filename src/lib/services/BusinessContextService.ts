@@ -163,12 +163,7 @@ export class BusinessContextService {
       .order('created_at', { ascending: false })
       .limit(2);
 
-    // Get unread alerts count
-    const { count: alertsCount } = await supabase
-      .from('hpp_alerts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('is_read', false);
+    const alertsCount = 0;
 
     const current = calculations?.[0];
     const previous = calculations?.[1];

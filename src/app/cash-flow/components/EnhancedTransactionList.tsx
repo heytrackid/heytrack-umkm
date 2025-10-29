@@ -112,30 +112,7 @@ export default function EnhancedTransactionList({
         }
     }
 
-    const exportToCSV = () => {
-        const headers = ['Tanggal', 'Deskripsi', 'Kategori', 'Tipe', 'Jumlah']
-        const rows = processedTransactions.map(t => [
-            new Date(t.date).toLocaleDateString('id-ID'),
-            `"${t.description}"`,
-            t.category,
-            t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-            t.amount.toString()
-        ])
 
-        const csvContent = [headers, ...rows]
-            .map(row => row.join(','))
-            .join('\n')
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-        const link = document.createElement('a')
-        const url = URL.createObjectURL(blob)
-        link.setAttribute('href', url)
-        link.setAttribute('download', `transaksi-${new Date().toISOString().split('T')[0]}.csv`)
-        link.style.visibility = 'hidden'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-    }
 
     const filterOptions = [
         { value: 'all' as FilterType, label: 'Semua', count: transactions.length },
@@ -169,17 +146,7 @@ export default function EnhancedTransactionList({
                                 {processedTransactions.length} dari {transactions.length} transaksi
                             </CardDescription>
                         </div>
-                        {processedTransactions.length > 0 && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={exportToCSV}
-                                className="gap-2"
-                            >
-                                <Download className="h-4 w-4" />
-                                Export CSV
-                            </Button>
-                        )}
+
                     </div>
 
                     {/* Filters and Search */}

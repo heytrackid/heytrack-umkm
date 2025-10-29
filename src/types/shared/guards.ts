@@ -15,18 +15,19 @@
  */
 
 import type { ApiError, ApiResponse } from './api';
-import type {
-    CustomersTable,
-    IngredientsTable,
-    IngredientPurchasesTable,
-    OrdersTable,
-    OrderItemsTable,
-    OrderStatus,
-    RecipesTable,
-    RecipeIngredientsTable,
-    SuppliersTable,
-    UserProfilesTable
-} from './database';
+import type { Database } from '@/types/supabase-generated';
+
+// Type aliases from generated types
+type CustomersTable = Database['public']['Tables']['customers'];
+type IngredientsTable = Database['public']['Tables']['ingredients'];
+type IngredientPurchasesTable = Database['public']['Tables']['ingredient_purchases'];
+type OrdersTable = Database['public']['Tables']['orders'];
+type OrderItemsTable = Database['public']['Tables']['order_items'];
+type OrderStatus = Database['public']['Enums']['order_status'];
+type RecipesTable = Database['public']['Tables']['recipes'];
+type RecipeIngredientsTable = Database['public']['Tables']['recipe_ingredients'];
+type SuppliersTable = Database['public']['Tables']['suppliers'];
+type UserProfilesTable = Database['public']['Tables']['user_profiles'];
 
 // Type aliases for easier use in guards
 type Customer = CustomersTable['Row'];

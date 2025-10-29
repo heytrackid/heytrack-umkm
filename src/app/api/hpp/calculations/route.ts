@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
     apiLogger.info({
       userId: user.id,
       recipeId,
-      hppValue: calculationResult.totalHpp
+      hppValue: calculationResult.total_hpp
     }, 'HPP calculation created successfully')
 
     return NextResponse.json({

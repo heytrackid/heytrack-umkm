@@ -98,7 +98,7 @@ export default function NewOrderPage() {
     selectCustomer,
     handleSubmit,
     setActiveTab,
-    setError,
+    // setError, // Not used in this component
 
     // Navigation
     router

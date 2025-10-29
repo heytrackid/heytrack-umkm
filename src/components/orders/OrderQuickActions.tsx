@@ -44,11 +44,12 @@ export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
         }
     }
 
-    const handleEmail = () => {
-        if (order.customer_email) {
-            window.location.href = `mailto:${order.customer_email}`
-        }
-    }
+    // Email functionality removed - field doesn't exist in database
+    // const handleEmail = () => {
+    //     if (order.customer_email) {
+    //         window.location.href = `mailto:${order.customer_email}`
+    //     }
+    // }
 
     const handleWhatsApp = () => {
         if (order.customer_phone) {
@@ -114,38 +115,7 @@ export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
                         </>
                     )}
 
-                    {order.customer_email && (
-                        <>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleEmail}
-                                className="flex items-center gap-2"
-                            >
-                                <Mail className="h-4 w-4" />
-                                Email
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => copyToClipboard(order.customer_email!, 'email')}
-                                className="flex items-center gap-2"
-                            >
-                                {copiedField === 'email' ? (
-                                    <>
-                                        <Check className="h-4 w-4" />
-                                        Tersalin
-                                    </>
-                                ) : (
-                                    <>
-                                        <Copy className="h-4 w-4" />
-                                        Salin Email
-                                    </>
-                                )}
-                            </Button>
-                        </>
-                    )}
+                    {/* Email buttons removed - field doesn't exist in database */}
 
                     {order.customer_address && (
                         <Button

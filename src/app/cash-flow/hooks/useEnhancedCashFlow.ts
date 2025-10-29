@@ -47,7 +47,6 @@ interface UseEnhancedCashFlowReturn {
   fetchCashFlowData: () => Promise<void>
   handleAddTransaction: (formData: TransactionFormData) => Promise<void>
   handleDeleteTransaction: (transaction: Transaction) => Promise<void>
-  exportReport: (format: 'csv' | 'excel') => Promise<void>
   refreshData: () => Promise<void>
 }
 
@@ -106,39 +105,7 @@ function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
     .slice(-30) // Show last 30 data points
 }
 
-// Utility: Export to CSV
-function exportToCSV(data: CashFlowData, filename: string) {
-  const headers = ['Tanggal', 'Deskripsi', 'Kategori', 'Tipe', 'Jumlah']
-  const rows = data.transactions.map(transaction => [
-    new Date(transaction.date).toLocaleDateString('id-ID'),
-    `"${transaction.description.replace(/"/g, '""')}"`, // Escape quotes
-    transaction.category,
-    transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-    transaction.amount.toString()
-  ])
 
-  // Add summary at the end
-  rows.push([])
-  rows.push(['RINGKASAN'])
-  rows.push(['Total Pemasukan', '', '', '', data.summary.total_income.toString()])
-  rows.push(['Total Pengeluaran', '', '', '', data.summary.total_expenses.toString()])
-  rows.push(['Arus Kas Bersih', '', '', '', data.summary.net_cash_flow.toString()])
-
-  const csvContent = [headers, ...rows]
-    .map(row => row.join(','))
-    .join('\n')
-
-  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }) // Add BOM for Excel
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', filename)
-  link.style.visibility = 'hidden'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
 
 // Utility: Calculate comparison with previous period
 function calculateComparison(
@@ -293,25 +260,7 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
     }
   }, [fetchCashFlowData])
 
-  // Handle export report
-  const exportReport = useCallback(async (format: 'csv' | 'excel') => {
-    if (!cashFlowData) return
 
-    try {
-      const filename = `arus-kas-${new Date().toISOString().split('T')[0]}.${format}`
-      
-      if (format === 'csv') {
-        exportToCSV(cashFlowData, filename)
-      } else {
-        // For Excel, we could use a library like exceljs
-        // For now, fallback to CSV
-        exportToCSV(cashFlowData, filename.replace('.excel', '.csv'))
-      }
-    } catch (err) {
-      apiLogger.error({ error: err }, 'Error exporting report')
-      throw new Error('Gagal mengekspor laporan')
-    }
-  }, [cashFlowData])
 
   // Refresh data
   const refreshData = useCallback(async () => {
@@ -360,7 +309,6 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
     fetchCashFlowData,
     handleAddTransaction,
     handleDeleteTransaction,
-    exportReport,
     refreshData
   }
 }
