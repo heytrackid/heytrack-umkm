@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { Database } from '@/types/supabase-generated'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -59,7 +60,7 @@ export default function OrderForm({
         delivery_time: order.delivery_time || '10:00',
         priority: order.priority,
         notes: order.notes || '',
-        order_items: order.order_items?.map(item => ({
+        order_items: (order as OrderWithRelations).items?.map(item => ({
           recipe_id: item.recipe_id,
           product_name: item.product_name || '',
           quantity: item.quantity,
@@ -349,8 +350,8 @@ export default function OrderForm({
                       <Label>Harga</Label>
                       <Input
                         type="number"
-                        value={item.price}
-                        onChange={(e) => updateOrderItem(index, 'price', parseFloat(e.target.value) || 0)}
+                        value={item.unit_price}
+                        onChange={(e) => updateOrderItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
                         min="0"
                       />
                     </div>
@@ -370,8 +371,8 @@ export default function OrderForm({
                   <div className="mt-3">
                     <Label>Catatan (Opsional)</Label>
                     <Input
-                      value={item.notes || ''}
-                      onChange={(e) => updateOrderItem(index, 'notes', e.target.value)}
+                      value={item.special_requests || ''}
+                      onChange={(e) => updateOrderItem(index, 'special_requests', e.target.value)}
                       placeholder=""
                     />
                   </div>

@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         } = validatedData
 
         // 3. Get user's available ingredients from database
-        const { data: ingredients, error: ingredientsError } = await (await supabase)
+        const { data: ingredients, error: ingredientsError } = await supabase
             .from('ingredients')
             .select('id, name, unit, price_per_unit, current_stock')
             .eq('user_id', userId)
@@ -79,6 +79,16 @@ export async function POST(request: NextRequest) {
             apiLogger.error({ error: ingredientsError }, 'Error fetching ingredients:')
         }
 
+        // Type the ingredients properly
+        type IngredientSubset = Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>
+        const typedIngredients: IngredientSubset[] = (ingredients || []).map(ing => ({
+            id: ing.id,
+            name: ing.name,
+            unit: ing.unit,
+            price_per_unit: ing.price_per_unit,
+            current_stock: ing.current_stock
+        }))
+
         // Build the AI prompt
         const prompt = buildRecipePrompt({
             productName,
@@ -86,7 +96,7 @@ export async function POST(request: NextRequest) {
             servings,
             targetPrice,
             dietaryRestrictions,
-            availableIngredients: ingredients || [],
+            availableIngredients: typedIngredients,
             userProvidedIngredients: availableIngredients
         })
 
@@ -97,7 +107,7 @@ export async function POST(request: NextRequest) {
         const recipe = parseRecipeResponse(aiResponse)
 
         // Check for duplicate recipe names
-        const { data: existingRecipes } = await (await supabase)
+        const { data: existingRecipes } = await supabase
             .from('recipes')
             .select('id, name')
             .eq('name', (recipe as Partial<Recipe>).name || '')
@@ -110,7 +120,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Calculate HPP for the generated recipe
-        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, ingredients || [], userId)
+        const hppCalculation = await calculateRecipeHPP(recipe as Recipe, typedIngredients, userId)
 
         return NextResponse.json({
             success: true,
@@ -182,7 +192,7 @@ function buildRecipePrompt(params: {
     servings: number
     targetPrice?: number
     dietaryRestrictions?: string[]
-    availableIngredients: Ingredient[]
+    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
     userProvidedIngredients?: string[]
 }) {
     const {
@@ -526,7 +536,10 @@ function parseRecipeResponse(response: string) {
 /**
  * Find best matching ingredient using fuzzy matching
  */
-function findBestIngredientMatch(searchName: string, ingredients: Ingredient[]): Ingredient | null {
+function findBestIngredientMatch(
+    searchName: string, 
+    ingredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>
+): Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'> | null {
     const search = searchName.toLowerCase().trim()
     
     // 1. Exact match
@@ -544,9 +557,9 @@ function findBestIngredientMatch(searchName: string, ingredients: Ingredient[]):
     
     // 3. Partial word match
     const searchWords = search.split(' ')
-    match = ingredients.find((i: Ingredient) => {
+    match = ingredients.find(i => {
         const nameWords = i.name.toLowerCase().split(' ')
-        return searchWords.some((sw: string) => nameWords.some((nw: string) => nw.includes(sw) || sw.includes(nw)))
+        return searchWords.some(sw => nameWords.some(nw => nw.includes(sw) || sw.includes(nw)))
     })
     
     return match || null
@@ -555,7 +568,11 @@ function findBestIngredientMatch(searchName: string, ingredients: Ingredient[]):
 /**
  * Calculate HPP for the generated recipe
  */
-async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredient[], userId: string) {
+async function calculateRecipeHPP(
+    recipe: Recipe, 
+    availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>, 
+    userId: string
+) {
     let totalMaterialCost = 0
     const ingredientBreakdown: Array<{
         name: string
@@ -566,7 +583,7 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
         percentage: number
     }> = []
     
-    const supabase = createClient()
+    const supabaseClient = await createClient()
 
     const recipeIngredients = (recipe as any).ingredients as RecipeIngredient[] || []
     for (const recipeIng of recipeIngredients) {
@@ -611,7 +628,7 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
 
     // Fetch actual operational costs from database
     const today = new Date().toISOString().split('T')[0]
-    const { data: opCosts } = await (await supabase)
+    const { data: opCosts } = await supabaseClient
         .from('expenses')
         .select('amount')
         .eq('user_id', userId)
@@ -623,12 +640,13 @@ async function calculateRecipeHPP(recipe: Recipe, availableIngredients: Ingredie
     // Estimate operational cost per unit
     // Assume daily production of 50 units (can be configured)
     const estimatedDailyProduction = 50
+    const recipeServings = recipe.servings ?? 1
     const operationalCostPerBatch = dailyOpCost > 0 
-        ? (dailyOpCost / estimatedDailyProduction) * recipe.servings
+        ? (dailyOpCost / estimatedDailyProduction) * recipeServings
         : totalMaterialCost * 0.3 // Fallback to 30% if no data
 
     const totalHPP = totalMaterialCost + operationalCostPerBatch
-    const servings = recipe.servings || 1
+    const servings = recipe.servings ?? 1
     const hppPerUnit = totalHPP / servings
 
     return {

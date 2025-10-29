@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { SupplierInsertSchema } from '@/lib/validations/domains/supplier'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
-import { prepareInsert } from '@/lib/supabase/insert-helpers'
 import type { Database } from '@/types/supabase-generated'
 
 type Supplier = Database['public']['Tables']['suppliers']['Row']
@@ -43,10 +42,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('suppliers')
-      .select<keyof Supplier>(`
-        id, name, contact_person, email, phone, address, 
-        notes, is_active, created_at, updated_at
-      `)
+      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .eq('user_id', user.id)
       .range(offset, offset + limit - 1)
 
@@ -119,10 +115,7 @@ export async function POST(request: Request) {
     const { data: supplier, error } = await supabase
       .from('suppliers')
       .insert(insertPayload)
-      .select<keyof Supplier>(`
-        id, name, contact_person, email, phone, address, 
-        notes, is_active, created_at, updated_at
-      `)
+      .select('id, name, contact_person, email, phone, address, notes, is_active, created_at, updated_at')
       .single()
 
     if (error) {

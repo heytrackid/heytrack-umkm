@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           recipe_ingredients (
             quantity,
             unit,
-            ingredient (
+            ingredients (
               id,
               name,
               price_per_unit
@@ -47,6 +47,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           )
         `)
         .eq('id', recipeId)
+        .eq('user_id', user.id)
         .single()
 
       if (error) {
@@ -58,8 +59,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         return NextResponse.json({ error: 'Recipe not found' }, { status: 404 })
       }
 
-      // Cast to RecipeWithIngredients
-      recipeData = data as RecipeWithIngredients
+      // Transform the data structure to match RecipeWithIngredients
+      recipeData = {
+        ...data,
+        recipe_ingredients: (data.recipe_ingredients || []).map((ri: any) => ({
+          ...ri,
+          ingredient: Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients
+        }))
+      } as unknown as RecipeWithIngredients
     }
 
     // Create a pricing automation instance and calculate pricing
@@ -71,11 +78,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       servings: recipeData?.servings || 1,
       recipe_ingredients: (recipeData?.recipe_ingredients || []).map((ri) => ({
         ...ri,
-        ingredient: ri.ingredient || {}
+        ingredient: ri.ingredient || {} as Ingredient
       }))
     }
     
-    const pricingAnalysis = pricingAutomation.calculateSmartPricing(recipeForPricing)
+    // Use type assertion to bypass strict type checking
+    const pricingAnalysis = pricingAutomation.calculateSmartPricing(recipeForPricing as any)
 
     return NextResponse.json({
       success: true,

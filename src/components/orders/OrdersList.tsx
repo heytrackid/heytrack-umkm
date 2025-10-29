@@ -1,6 +1,7 @@
 'use client'
 
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -238,7 +239,7 @@ const OrdersList = memo(({
                       <div>
                         <div className="font-medium">{order.order_no}</div>
                         <div className="text-sm text-muted-foreground">
-                          {order.order_items?.length || 0} item
+                          {(order as OrderWithRelations).items?.length || 0} item
                         </div>
                       </div>
                     </td>

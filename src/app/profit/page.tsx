@@ -20,8 +20,16 @@ import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { useProfitData, useProductChartData } from './components'
 
-// Import lightweight components normally
-import { ProfitFilters, ProfitSummaryCards, ProfitInfoCard } from './components'
+// Import lightweight components normally (tables, filters, cards)
+import {
+  ProfitFilters,
+  ProfitSummaryCards,
+  ProfitInfoCard,
+  ProductProfitabilityTable,
+  IngredientCostsTable,
+  OperatingExpenses,
+  ProfitBreakdown
+} from './components'
 
 // Only lazy load HEAVY chart components
 const ProductProfitabilityChart = dynamic(
@@ -30,116 +38,14 @@ const ProductProfitabilityChart = dynamic(
     loading: () => (
       <Card>
         <CardContent className="p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-1/4" />
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="h-10 bg-muted rounded" />
-              <div className="h-10 bg-muted rounded" />
-              <div className="h-10 bg-muted rounded" />
-              <div className="h-10 bg-muted rounded" />
-            </div>
+          <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
     )
   }
 )
-
-const ProductProfitabilityChart = dynamic(() => import('./components').then(mod => ({ default: mod.ProductProfitabilityChart })), {
-  loading: () => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
-
-const ProductProfitabilityTable = dynamic(() => import('./components').then(mod => ({ default: mod.ProductProfitabilityTable })), {
-  loading: () => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/3" />
-          <div className="space-y-2">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="h-12 bg-muted rounded" />
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
-
-const IngredientCostsTable = dynamic(() => import('./components').then(mod => ({ default: mod.IngredientCostsTable })), {
-  loading: () => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4" />
-          <div className="space-y-2">
-            {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="h-12 bg-muted rounded" />
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
-
-const OperatingExpenses = dynamic(() => import('./components').then(mod => ({ default: mod.OperatingExpenses })), {
-  loading: () => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/3" />
-          <div className="space-y-2">
-            {Array.from({ length: 4 }, (_, i) => (
-              <div key={i} className="h-10 bg-muted rounded" />
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
-
-const ProfitBreakdown = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitBreakdown })), {
-  loading: () => (
-    <Card>
-      <CardContent className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4" />
-          <div className="space-y-2">
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="h-6 bg-muted rounded" />
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
-
-const ProfitInfoCard = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitInfoCard })), {
-  loading: () => (
-    <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-      <CardContent className="pt-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/2" />
-          <div className="space-y-2">
-            <div className="h-3 bg-muted rounded" />
-            <div className="h-3 bg-muted rounded w-3/4" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-})
 
 export default function ProfitReportPage() {
   const { formatCurrency } = useSettings()

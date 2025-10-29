@@ -15,36 +15,16 @@ import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import { apiLogger } from '@/lib/logger'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
 
-// Lazy load heavy components
-import dynamic from 'next/dynamic'
-
-// Sprint 1 Components
+// Import components normally (lightweight UI components)
 import { RecipeTemplateSelector } from './RecipeTemplateSelector'
 import { HppEstimator } from './HppEstimator'
 import { SmartIngredientSelector } from './SmartIngredientSelector'
 import { matchIngredientsWithTemplate, saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
 import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
-
-const RecipeGeneratorForm = dynamic(
-  () => import(/* webpackChunkName: "ai-recipe-generator-form" */ './RecipeGeneratorFormEnhanced'),
-  {
-    loading: () => <div className="p-4">Memuat formulir...</div>
-  }
-)
-
-const GeneratedRecipeDisplay = dynamic(
-  () => import(/* webpackChunkName: "ai-recipe-display" */ './GeneratedRecipeDisplay'),
-  {
-    loading: () => <div className="p-4">Memuat tampilan resep...</div>
-  }
-)
-
-const RecipePreviewCard = dynamic(
-  () => import(/* webpackChunkName: "ai-recipe-preview" */ './RecipePreviewCard'),
-  {
-    loading: () => <div className="p-4">Memuat preview...</div>
-  }
-)
+import RecipeGeneratorFormEnhanced from './RecipeGeneratorFormEnhanced'
+import GeneratedRecipeDisplay from './GeneratedRecipeDisplay'
+import RecipePreviewCard from './RecipePreviewCard'
+import RecipeGeneratorForm from './RecipeGeneratorForm'
 
 export default function AIRecipeGeneratorPage() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()

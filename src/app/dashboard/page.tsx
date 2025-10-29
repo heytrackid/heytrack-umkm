@@ -32,30 +32,7 @@ import { Suspense, useEffect, useState } from 'react'
 import StatsCardsSection from './components/StatsCardsSection'
 import RecentOrdersSection from './components/RecentOrdersSection'
 import StockAlertsSection from './components/StockAlertsSection'
-
-const HppDashboardWidget = dynamic(
-  () => import(/* webpackChunkName: "dashboard-hpp-widget" */ './components/HppDashboardWidget'),
-  {
-    loading: () => (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            HPP & Costing Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="h-16 bg-gray-200 rounded" />
-              <div className="h-16 bg-gray-200 rounded" />
-            </div>
-            <div className="h-32 bg-gray-200 rounded" />
-          </div>
-        </CardContent>
-      </Card>
-    )
-  })
+import HppDashboardWidget from './components/HppDashboardWidget'
 
 // Sample data removed - now using real data from API
 // const sampleStats = {

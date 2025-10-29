@@ -11,12 +11,14 @@ import type {
   OrderFilters,
   OrderSummary,
   OrderTotalsBreakdown,
-  InvoiceData
+  InvoiceData,
+  OrderStatus
 } from '@/app/orders/types/orders.types'
 import {
   DEFAULT_ORDERS_CONFIG,
   calculateOrderTotals,
-  type OrdersModuleConfig
+  type OrdersModuleConfig,
+  type OrderPriority
 } from '../config/orders.config'
 import { formatCurrency, parseCurrencyString } from '@/lib/currency'
 
@@ -302,21 +304,30 @@ export function useOrderCurrency(currency?: string) {
 // Invoice generation hook
 export function useInvoiceGeneration() {
   const generateInvoice = (order: Order, companyInfo?: InvoiceData['company_info']): InvoiceData => {
+    // Calculate subtotal from total_amount and discount
+    const discountAmount = order.discount ?? 0
+    const totalAmount = order.total_amount ?? 0
+    const taxAmount = order.tax_amount ?? 0
+    const shippingAmount = order.delivery_fee ?? 0
+    const itemsSubtotal = totalAmount - taxAmount - shippingAmount + discountAmount
+    
     const totalsBreakdown: OrderTotalsBreakdown = {
-      items_subtotal: order.subtotal,
-      discount_amount: order.discount_amount,
-      taxable_amount: order.subtotal - order.discount_amount,
-      tax_amount: order.tax_amount,
-      shipping_amount: order.shipping_amount,
-      total_amount: order.total_amount,
-      currency: order.currency,
-      tax_rate: order.tax_rate,
-      tax_inclusive: order.tax_inclusive
+      items_subtotal: itemsSubtotal,
+      discount_amount: discountAmount,
+      taxable_amount: itemsSubtotal - discountAmount,
+      tax_amount: taxAmount,
+      shipping_amount: shippingAmount,
+      total_amount: totalAmount,
+      currency: (order as any).currency ?? 'IDR',
+      tax_rate: (order as any).tax_rate ?? 0,
+      tax_inclusive: (order as any).tax_inclusive ?? false
     }
 
-    const paymentTerms = `Payment due within ${order.payment_terms_days} days`
-    const dueDate = new Date(order.order_date)
-    dueDate.setDate(dueDate.getDate() + order.payment_terms_days)
+    // Default payment terms (30 days) since field doesn't exist in DB
+    const paymentTermsDays = 30
+    const paymentTerms = `Payment due within ${paymentTermsDays} days`
+    const dueDate = new Date(order.order_date ?? new Date())
+    dueDate.setDate(dueDate.getDate() + paymentTermsDays)
 
     return {
       order,
@@ -325,7 +336,7 @@ export function useInvoiceGeneration() {
       payment_terms: paymentTerms,
       due_date: dueDate.toISOString().split('T')[0],
       invoice_number: order.order_no || `INV-${order.id.slice(-8)}`,
-      notes: order.notes
+      notes: order.notes ?? undefined
     }
   }
 

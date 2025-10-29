@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -296,21 +297,21 @@ export default function OrderDetailView({
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Package className="h-5 w-5" />
-                        Item Pesanan ({order.order_items?.length || 0})
+                        Item Pesanan ({(order as OrderWithRelations).items?.length || 0})
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-3">
-                        {order.order_items?.map((item) => (
+                        {(order as OrderWithRelations).items?.map(item => (
                             <div key={item.id} className="border rounded-lg p-4">
                                 <div className="flex justify-between items-start gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-start justify-between">
                                             <div>
                                                 <h4 className="font-medium">{item.product_name}</h4>
-                                                {item.notes && (
+                                                {item.special_requests && (
                                                     <p className="text-sm text-muted-foreground mt-1">
-                                                        {item.notes}
+                                                        {item.special_requests}
                                                     </p>
                                                 )}
                                             </div>

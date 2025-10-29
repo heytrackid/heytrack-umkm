@@ -42,7 +42,7 @@ const COST_CATEGORIES = [
 export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
-    const { read, create, update } = useSupabaseCRUD('operational_costs')
+    const { create, update } = useSupabaseCRUD('operational_costs')
 
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState<Partial<OperationalCostInsert>>({

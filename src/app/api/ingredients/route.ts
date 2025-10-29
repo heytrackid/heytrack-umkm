@@ -2,7 +2,6 @@ import {
   createSuccessResponse,
   createErrorResponse,
   handleAPIError,
-  withValidation,
   withQueryValidation,
   PaginationSchema,
   calculateOffset,
@@ -97,7 +96,8 @@ async function POST(request: NextRequest) {
     // Validate request body
     const validation = IngredientInsertSchema.safeParse(body)
     if (!validation.success) {
-      return createErrorResponse('Invalid request data', 400, validation.error.issues)
+      const errorMessages = validation.error.issues.map(issue => issue.message)
+      return createErrorResponse('Invalid request data', 400, errorMessages)
     }
 
     const validatedData = validation.data
@@ -136,8 +136,8 @@ async function POST(request: NextRequest) {
 }
 
 // Apply security middleware with enhanced security configuration
-const securedGET = withSecurity(GET, SecurityPresets.enhanced())
-const securedPOST = withSecurity(POST, SecurityPresets.enhanced())
+const securedGET = withSecurity(GET as any, SecurityPresets.enhanced())
+const securedPOST = withSecurity(POST as any, SecurityPresets.enhanced())
 
 // Export secured handlers
 export { securedGET as GET, securedPOST as POST }

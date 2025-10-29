@@ -118,9 +118,12 @@ export default function EnhancedCashFlowChart({
 
     const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
         if (active && payload && payload.length) {
+            const data = payload[0]?.payload as ChartDataPoint | undefined
+            if (!data) return null
+
             return (
                 <div className="bg-background border rounded-lg p-3 shadow-lg">
-                    <p className="font-semibold mb-2">{payload[0].payload.date}</p>
+                    <p className="font-semibold mb-2">{data.date}</p>
                     <div className="space-y-1.5 text-sm">
                         <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-2">
@@ -128,7 +131,7 @@ export default function EnhancedCashFlowChart({
                                 <span>Pemasukan</span>
                             </div>
                             <span className="font-semibold text-green-600">
-                                Rp {payload[0].value ? payload[0].value.toLocaleString('id-ID') : 0}
+                                Rp {data.income.toLocaleString('id-ID')}
                             </span>
                         </div>
                         <div className="flex items-center justify-between gap-4">
@@ -137,7 +140,7 @@ export default function EnhancedCashFlowChart({
                                 <span>Pengeluaran</span>
                             </div>
                             <span className="font-semibold text-red-600">
-                                Rp {payload[1].value ? payload[1].value.toLocaleString('id-ID') : 0}
+                                Rp {data.expense.toLocaleString('id-ID')}
                             </span>
                         </div>
                         <div className="flex items-center justify-between gap-4 pt-1 border-t">

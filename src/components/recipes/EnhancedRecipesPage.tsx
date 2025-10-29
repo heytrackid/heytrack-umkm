@@ -57,7 +57,7 @@ import { useSupabaseCRUD } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
 
 // Components
-import { Pagination } from '@/components/ui/pagination'
+import { SimplePagination } from '@/components/ui/simple-pagination'
 
 // Types
 import type { Database } from '@/types/supabase-generated'

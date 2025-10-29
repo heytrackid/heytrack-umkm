@@ -31,9 +31,11 @@ interface UseSupabaseCRUDReturn<Row, Insert, Update> {
   loading: boolean
   error: Error | null
   refetch: () => Promise<void>
+  read: (id: string) => Promise<Row | null>
   remove: (id: string) => Promise<void>
   create: (data: Partial<Insert>) => Promise<Row | null>
   update: (id: string, data: Partial<Update>) => Promise<Row | null>
+  clearError: () => void
 }
 
 export function useSupabaseCRUD<TTable extends string>(
@@ -99,6 +101,36 @@ export function useSupabaseCRUD<TTable extends string>(
       setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
       void setLoading(false)
+    }
+  }
+
+  const read = async (id: string): Promise<TableRow<TTable> | null> => {
+    try {
+      const supabase = createClient()
+      
+      // Get authenticated user for RLS
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data: result, error: readError } = await supabase
+        .from(table)
+        .select(options?.select || '*')
+        .eq('id' as never, id as never)
+        .eq('user_id' as never, user.id as never) // RLS filter
+        .single()
+
+      if (readError) {
+        console.error(`[useSupabaseCRUD] Read error:`, readError)
+        throw readError
+      }
+
+      return result as unknown as TableRow<TTable>
+    } catch (err) {
+      console.error(`[useSupabaseCRUD] Error in read:`, err)
+      setError(err instanceof Error ? err : new Error('Read failed'))
+      throw err
     }
   }
 
@@ -202,6 +234,10 @@ export function useSupabaseCRUD<TTable extends string>(
     }
   }
 
+  const clearError = () => {
+    setError(null)
+  }
+
   useEffect(() => {
     void fetchData()
   }, [table, JSON.stringify(options)])
@@ -211,8 +247,10 @@ export function useSupabaseCRUD<TTable extends string>(
     loading,
     error,
     refetch: fetchData,
+    read,
     remove,
     create,
-    update
+    update,
+    clearError
   }
 }

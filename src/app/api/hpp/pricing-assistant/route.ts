@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate pricing recommendation using service
-    const recommendation = await PricingAssistantService.generatePricingRecommendation(recipeId)
+    const recommendation = await PricingAssistantService.generatePricingRecommendation(recipeId, user.id)
 
     apiLogger.info({
       userId: user.id,

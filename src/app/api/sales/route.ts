@@ -157,8 +157,13 @@ async function POST(request: NextRequest) {
 
     const validatedData = validation.data
 
+    // Map sales data to financial_records structure
     const insertPayload: Database['public']['Tables']['financial_records']['Insert'] = {
-      ...validatedData,
+      amount: validatedData.total_amount,
+      category: 'Sales',
+      description: `Sale of recipe ${validatedData.recipe_id}${validatedData.customer_name ? ` to ${validatedData.customer_name}` : ''}`,
+      date: validatedData.date,
+      reference: validatedData.recipe_id,
       type: 'INCOME',
       user_id: user.id
     }

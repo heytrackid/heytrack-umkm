@@ -28,10 +28,7 @@ export async function GET(
     
     const { data, error } = await supabase
       .from('customers')
-      .select<keyof Customer>(`
-        id, name, email, phone, address, customer_type, discount_percentage, 
-        notes, is_active, loyalty_points, favorite_items, created_at, updated_at, user_id
-      `)
+      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, favorite_items, created_at, updated_at, user_id')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -85,10 +82,7 @@ export async function PUT(
       .update(validation.data)
       .eq('id', id)
       .eq('user_id', user.id)
-      .select<keyof Customer>(`
-        id, name, email, phone, address, customer_type, discount_percentage, 
-        notes, is_active, loyalty_points, updated_at
-      `)
+      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at')
       .single()
     
     if (error) {

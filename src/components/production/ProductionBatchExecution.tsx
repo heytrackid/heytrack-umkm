@@ -13,36 +13,11 @@ import { apiLogger } from '@/lib/logger'
 import { productionDataIntegration } from '@/services/production/ProductionDataIntegration'
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 
-// Lazy load all production components
-import dynamic from 'next/dynamic'
-
-const ProductionOverview = dynamic(
-  () => import(/* webpackChunkName: "production-overview" */ './components/ProductionOverview'),
-  {
-    loading: () => <div>Loading overview...</div>
-  }
-)
-
-const ActiveBatchesList = dynamic(
-  () => import(/* webpackChunkName: "production-batches-list" */ './components/ActiveBatchesList'),
-  {
-    loading: () => <div>Loading batches...</div>
-  }
-)
-
-const BatchDetails = dynamic(
-  () => import(/* webpackChunkName: "production-batch-details" */ './components/BatchDetails'),
-  {
-    loading: () => <div>Loading details...</div>
-  }
-)
-
-const CompletedBatches = dynamic(
-  () => import(/* webpackChunkName: "production-completed-batches" */ './components/CompletedBatches'),
-  {
-    loading: () => <div>Loading completed...</div>
-  }
-)
+// Import production components normally (lightweight UI components)
+import ProductionOverview from './components/ProductionOverview'
+import ActiveBatchesList from './components/ActiveBatchesList'
+import BatchDetails from './components/BatchDetails'
+import CompletedBatches from './components/CompletedBatches'
 
 import type {
   ProductionBatchExecutionProps,

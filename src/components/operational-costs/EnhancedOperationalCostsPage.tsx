@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
 import { useResponsive } from '@/hooks/useResponsive'
-import { useSupabaseCRUD } from '@/hooks/supabase'
+import { useSupabaseCRUD, useSupabaseQuery } from '@/hooks/supabase'
 import { usePagination } from '@/hooks/usePagination'
 // UI Components
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Pagination } from '@/components/ui/pagination'
+import { SimplePagination } from '@/components/ui/simple-pagination'
 import {
     Select,
     SelectContent,
@@ -67,13 +67,13 @@ export const EnhancedOperationalCostsPage = () => {
     const router = useRouter()
     const { formatCurrency } = useSettings()
 
-    // Use entity hook for fetching data
-    const { data: costs, loading, refetch } = useSupabaseCRUD('operational_costs', {
+    // Use query hook for fetching data
+    const { data: costs, loading, refetch } = useSupabaseQuery('operational_costs', {
         orderBy: { column: 'created_at', ascending: false },
     })
 
     // Use CRUD hook for operations
-    const { delete: deleteCost } = useSupabaseCRUD('operational_costs')
+    const { remove: deleteCost } = useSupabaseCRUD('operational_costs')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
 

@@ -43,7 +43,7 @@ export function RouteLoader({ loader, fallback, props }: RouteLoaderProps) {
 /**
  * Create lazy route component
  */
-export function createLazyRoute<TProps = Record<string, unknown>>(
+export function createLazyRoute<TProps extends Record<string, any> = Record<string, unknown>>(
   loader: () => Promise<{ default: ComponentType<TProps> }>,
   fallback?: ReactNode
 ) {
@@ -52,7 +52,7 @@ export function createLazyRoute<TProps = Record<string, unknown>>(
   return function LazyRoute(props: TProps) {
     return (
       <Suspense fallback={fallback || <DefaultFallback />}>
-        <LazyComponent {...props} />
+        <LazyComponent {...(props as any)} />
       </Suspense>
     )
   }

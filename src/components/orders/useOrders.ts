@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { generateOrderNo } from './utils'
 import { apiLogger } from '@/lib/logger'
 
@@ -91,7 +92,7 @@ export function useOrders() {
         status: 'PENDING' as OrderStatus,
         payment_status: 'UNPAID' as const,
         total_amount: orderData.order_items.reduce((sum, item) => 
-          sum + (item.quantity * item.price), 0
+          sum + (item.quantity * item.unit_price), 0
         )
       }
 
@@ -131,7 +132,7 @@ export function useOrders() {
       const updatedData = {
         ...orderData,
         total_amount: orderData.order_items.reduce((sum, item) => 
-          sum + (item.quantity * item.price), 0
+          sum + (item.quantity * item.unit_price), 0
         )
       }
 
@@ -188,7 +189,7 @@ export function useOrders() {
         try {
           const inventoryAction = variables.newStatus === 'DELIVERED' ? 'order_completed' : 'order_cancelled'
           const order = orders.find(o => o.id === variables.orderId)
-          const orderItems = order?.order_items || []
+          const orderItems = (order as OrderWithRelations | undefined)?.items || []
 
           if (orderItems.length > 0) {
             await fetch('/api/inventory/auto-update', {

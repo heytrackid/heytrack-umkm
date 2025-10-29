@@ -20,38 +20,13 @@ import {
   Calendar,
   Download
 } from 'lucide-react'
-import dynamic from 'next/dynamic'
 import { useState, type ReactNode } from 'react'
 
-
-
-const SalesReport = dynamic(
-  () => import(/* webpackChunkName: "report-sales" */ './SalesReport'),
-  {
-    loading: () => <StatsCardSkeleton />
-  }
-)
-
-const InventoryReport = dynamic(
-  () => import(/* webpackChunkName: "report-inventory" */ './InventoryReport'),
-  {
-    loading: () => <StatsCardSkeleton />
-  }
-)
-
-const FinancialReport = dynamic(
-  () => import(/* webpackChunkName: "report-financial" */ './FinancialReport'),
-  {
-    loading: () => <StatsCardSkeleton />
-  }
-)
-
-const EnhancedProfitReport = dynamic(
-  () => import(/* webpackChunkName: "report-profit" */ './EnhancedProfitReport'),
-  {
-    loading: () => <StatsCardSkeleton />
-  }
-)
+// Import report components normally (lightweight UI components)
+import SalesReport from './SalesReport'
+import InventoryReport from './InventoryReport'
+import FinancialReport from './FinancialReport'
+import EnhancedProfitReport from './EnhancedProfitReport'
 
 interface ReportsLayoutProps {
   children?: ReactNode

@@ -2,6 +2,7 @@
 'use client'
 
 import { memo } from 'react'
+import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -109,7 +110,7 @@ const OrderSummaryCard = memo(({
                     <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Package className="h-4 w-4" />
-                            <span>{order.order_items?.length || 0} item</span>
+                            <span>{(order as OrderWithRelations).items?.length || 0} item</span>
                         </div>
                         <div className="text-right">
                             <div className="font-bold text-lg">

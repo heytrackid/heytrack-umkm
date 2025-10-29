@@ -4,7 +4,6 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { prepareInsert } from '@/lib/supabase/insert-helpers'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
@@ -80,10 +79,8 @@ export async function POST(request: NextRequest) {
     const calculation = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
 
     const materialCost = calculation.material_cost
-    const operationalCost = calculation.overhead_cost + calculation.labor_cost
     const totalHpp = calculation.total_hpp
     const costPerUnit = calculation.cost_per_unit
-    // const servings = calculation.production_quantity
 
     // Calculation already saved by service
     

@@ -55,7 +55,7 @@ export default function EditIngredientPage() {
                     .from('ingredients')
                     .select('*')
                     .eq('id', id)
-                    .single()
+                    .single<Ingredient>()
 
                 if (error) throw error
 

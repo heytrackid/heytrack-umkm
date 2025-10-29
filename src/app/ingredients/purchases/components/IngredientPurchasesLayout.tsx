@@ -19,29 +19,10 @@ import { apiLogger } from '@/lib/logger'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 
-// Lazy load components
-import dynamic from 'next/dynamic'
-
-const PurchaseStats = dynamic(
-  () => import(/* webpackChunkName: "purchase-stats" */ './PurchaseStats'),
-  {
-    loading: () => <div>Loading stats...</div>
-  }
-)
-
-const PurchaseForm = dynamic(
-  () => import(/* webpackChunkName: "purchase-form" */ './PurchaseForm'),
-  {
-    loading: () => <div>Loading form...</div>
-  }
-)
-
-const PurchasesTable = dynamic(
-  () => import(/* webpackChunkName: "purchases-table" */ './PurchasesTable'),
-  {
-    loading: () => <div>Loading table...</div>
-  }
-)
+// Import components normally (lightweight UI components)
+import PurchaseStats from './PurchaseStats'
+import PurchaseForm from './PurchaseForm'
+import PurchasesTable from './PurchasesTable'
 
 import type { IngredientPurchase, AvailableIngredient } from './types'
 

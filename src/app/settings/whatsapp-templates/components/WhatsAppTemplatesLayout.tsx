@@ -21,30 +21,11 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { uiLogger } from '@/lib/logger'
 
-// Lazy load components
-import dynamic from 'next/dynamic'
+// Import components normally (lightweight UI components)
 import { TEMPLATE_CATEGORIES, type WhatsAppTemplate } from './types'
-
-const TemplatesTable = dynamic(
-  () => import(/* webpackChunkName: "whatsapp-templates-table" */ './TemplatesTable'),
-  {
-    loading: () => <div className="p-4">Loading templates...</div>
-  }
-)
-
-const TemplateForm = dynamic(
-  () => import(/* webpackChunkName: "whatsapp-template-form" */ './TemplateForm'),
-  {
-    loading: () => <div className="p-4">Loading form...</div>
-  }
-)
-
-const TemplatePreview = dynamic(
-  () => import(/* webpackChunkName: "whatsapp-template-preview" */ './TemplatePreview'),
-  {
-    loading: () => <div className="p-4">Loading preview...</div>
-  }
-)
+import TemplatesTable from './TemplatesTable'
+import TemplateForm from './TemplateForm'
+import TemplatePreview from './TemplatePreview'
 
 export default function WhatsAppTemplatesPage() {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>([])

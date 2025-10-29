@@ -36,14 +36,15 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       name: initialData?.name || '',
       description: initialData?.description || '',
       servings: initialData?.servings || 1,
-      prep_time: initialData?.prep_time || 30,
-      cook_time: initialData?.cook_time || 0,
-      instructions: initialData?.instructions || '',
-      difficulty: initialData?.difficulty || 'Easy',
+      preparation_time: initialData?.prep_time || 30,
+      cooking_time: initialData?.cook_time || 0,
+      instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions || [],
+      difficulty: (initialData?.difficulty as 'EASY' | 'MEDIUM' | 'HARD') || 'MEDIUM',
       category: initialData?.category || '',
       is_active: initialData?.is_active ?? true,
+      is_available: initialData?.is_active ?? true,
       selling_price: initialData?.selling_price || 0,
-      ...initialData
+      ingredients: []
     }
   })
 
@@ -109,24 +110,24 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
             <FormField
               label="Waktu Persiapan (menit)"
               required
-              error={form.formState.errors.prep_time?.message}
+              error={form.formState.errors.preparation_time?.message}
             >
               <Input
                 type="number"
                 min="1"
                 max="1440"
-                {...form.register('prep_time', { valueAsNumber: true })}
+                {...form.register('preparation_time', { valueAsNumber: true })}
               />
             </FormField>
 
             <FormField
               label="Waktu Memasak (menit)"
-              error={form.formState.errors.cook_time?.message}
+              error={form.formState.errors.cooking_time?.message}
             >
               <Input
                 type="number"
                 min="0"
-                {...form.register('cook_time', { valueAsNumber: true })}
+                {...form.register('cooking_time', { valueAsNumber: true })}
               />
             </FormField>
 
@@ -137,7 +138,7 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
               <Select
                 value={form.watch('difficulty')}
                 onValueChange={(value) => {
-                  form.setValue('difficulty', value)
+                  form.setValue('difficulty', value as 'EASY' | 'MEDIUM' | 'HARD')
                 }}
               >
                 <SelectTrigger>

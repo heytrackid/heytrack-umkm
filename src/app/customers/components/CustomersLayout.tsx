@@ -7,9 +7,8 @@ import { useState, useMemo, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Pagination } from '@/components/ui/pagination'
+import { SimplePagination } from '@/components/ui/simple-pagination'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { LOADING_KEYS, useLoading } from '@/hooks/loading'
 import { useResponsive } from '@/hooks/useResponsive'
@@ -319,14 +318,19 @@ export default function CustomersLayout() {
 
         {/* Pagination */}
         {currentView === 'list' && filteredCustomers.length > 0 && (
-          <Pagination
-            currentPage={pagination.page}
+          <SimplePagination
+            page={pagination.page}
+            pageSize={pagination.pageSize}
             totalPages={pagination.totalPages}
             totalItems={filteredCustomers.length}
-            pageSize={pagination.pageSize}
+            startIndex={pagination.startIndex}
+            endIndex={pagination.endIndex}
             onPageChange={pagination.setPage}
             onPageSizeChange={handlePageSizeChange}
+            canNextPage={pagination.page < pagination.totalPages}
+            canPrevPage={pagination.page > 1}
             pageSizeOptions={[12, 24, 48, 96]}
+            itemLabel="pelanggan"
           />
         )}
 

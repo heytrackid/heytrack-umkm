@@ -27,7 +27,7 @@ export async function PATCH(
       .eq('user_id', user.id)
       .select(`
         *,
-        recipe:recipes(name, unit)
+        recipe:recipes(name)
       `)
       .single()
 
@@ -45,7 +45,7 @@ export async function PATCH(
       batch_number: batch.id.slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
-      unit: Array.isArray(batch.recipe) ? batch.recipe[0]?.unit : batch.recipe?.unit || 'pcs'
+      unit: 'pcs' // Default unit since recipes table doesn't have unit field
     }
 
     return NextResponse.json(mappedBatch)

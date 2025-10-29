@@ -1,7 +1,7 @@
 // Template Form Component - Lazy Loaded
 // Form dialog for creating and editing WhatsApp templates
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -133,7 +133,7 @@ export default function TemplateForm({
   return (
     <Dialog open={showDialog} onOpenChange={(open) => {
       onOpenChange(open)
-      if (!open) {resetForm()}
+      if (!open) { resetForm() }
     }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

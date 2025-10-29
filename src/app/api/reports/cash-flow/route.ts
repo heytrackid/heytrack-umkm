@@ -331,11 +331,14 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
     return null
   }
 
-  const prevIncome = prevTransactions.filter((t: FinancialRecordPartial) => t.category === 'Revenue')
-  const prevExpenses = prevTransactions.filter((t: FinancialRecordPartial) => t.category !== 'Revenue')
+  // Type for the limited query result
+  type LimitedRecord = { category: string; amount: number }
+  
+  const prevIncome = prevTransactions.filter((t: LimitedRecord) => t.category === 'Revenue')
+  const prevExpenses = prevTransactions.filter((t: LimitedRecord) => t.category !== 'Revenue')
 
-  const prevTotalIncome = prevIncome.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
-  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: FinancialRecordPartial) => sum + safeParseAmount(t.amount), 0)
+  const prevTotalIncome = prevIncome.reduce((sum: number, t: LimitedRecord) => sum + safeParseAmount(t.amount), 0)
+  const prevTotalExpenses = prevExpenses.reduce((sum: number, t: LimitedRecord) => sum + safeParseAmount(t.amount), 0)
   const prevNetCashFlow = prevTotalIncome - prevTotalExpenses
 
   return {

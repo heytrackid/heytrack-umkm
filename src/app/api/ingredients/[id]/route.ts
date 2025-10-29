@@ -34,7 +34,7 @@ export async function GET(
 
     const { data, error } = await supabase
       .from('ingredients')
-      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, created_at, updated_at, user_id')
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, description, supplier, created_at, updated_at, user_id')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
@@ -91,7 +91,7 @@ export async function PUT(
       .update(validatedData)
       .eq('id', id)
       .eq('user_id', user.id)
-      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, supplier_id, notes, updated_at')
+      .select('id, name, category, unit, current_stock, min_stock, weighted_average_cost, description, supplier, updated_at')
       .single()
 
     if (error) {
