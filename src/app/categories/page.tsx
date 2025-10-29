@@ -89,61 +89,51 @@ export default function CategoriesPage() {
         </Breadcrumb>
 
         {currentView === 'list' ? (
-          <Suspense fallback={
-            <div className="space-y-6">
-              <div className="h-24 bg-gray-100 animate-pulse rounded-lg" />
-              <div className="h-12 bg-gray-100 animate-pulse rounded-lg" />
-              <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
-            </div>
-          }>
-            <CategoryList
-              categories={categories}
-              filteredCategories={filteredCategories}
-              paginatedCategories={paginatedCategories}
-              selectedItems={selectedItems}
-              searchTerm={searchTerm}
-              isMobile={isMobile}
-              isLoading={isLoading}
-              currentPage={currentPage}
-              totalPages={paginationInfo.totalPages}
-              pageSize={pageSize}
-              paginationInfo={{
-                startItem: paginationInfo.startItem,
-                endItem: paginationInfo.endItem,
-                totalItems: paginationInfo.totalItems
-              }}
-              onAddNew={() => setCurrentView('add')}
-              onSearchChange={setSearchTerm}
-              onSelectAll={handleSelectAll}
-              onSelectItem={handleSelectItem}
-              onEdit={handleEditCategory}
-              onDelete={handleDeleteCategory}
-              onView={handleViewCategory}
-              onPageChange={setCurrentPage}
-              onPageSizeChange={setPageSize}
-              onBulkEdit={handleBulkEdit}
-              onBulkDelete={handleBulkDelete}
-              onClearSelection={() => handleSelectAll()}
-            />
-          </Suspense>
+          // No Suspense - CategoryList handles its own loading state
+          <CategoryList
+            categories={categories}
+            filteredCategories={filteredCategories}
+            paginatedCategories={paginatedCategories}
+            selectedItems={selectedItems}
+            searchTerm={searchTerm}
+            isMobile={isMobile}
+            isLoading={isLoading}
+            currentPage={currentPage}
+            totalPages={paginationInfo.totalPages}
+            pageSize={pageSize}
+            paginationInfo={{
+              startItem: paginationInfo.startItem,
+              endItem: paginationInfo.endItem,
+              totalItems: paginationInfo.totalItems
+            }}
+            onAddNew={() => setCurrentView('add')}
+            onSearchChange={setSearchTerm}
+            onSelectAll={handleSelectAll}
+            onSelectItem={handleSelectItem}
+            onEdit={handleEditCategory}
+            onDelete={handleDeleteCategory}
+            onView={handleViewCategory}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            onBulkEdit={handleBulkEdit}
+            onBulkDelete={handleBulkDelete}
+            onClearSelection={() => handleSelectAll()}
+          />
         ) : (
-          <Suspense fallback={
-            <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
-          }>
-            <CategoryForm
-              category={formData}
-              currentView={currentView}
-              isMobile={isMobile}
-              onCategoryChange={setFormData}
-              onSave={handleSaveCategory}
-              onCancel={() => {
-                resetForm()
-                void setCurrentView('list')
-              }}
-            />
-          </Suspense>
+          // No Suspense - CategoryForm handles its own loading state
+          <CategoryForm
+            category={formData}
+            currentView={currentView}
+            isMobile={isMobile}
+            onCategoryChange={setFormData}
+            onSave={handleSaveCategory}
+            onCancel={() => {
+              resetForm()
+              void setCurrentView('list')
+            }}
+          />
         )}
       </div>
-    </AppLayout>
+    </AppLayout >
   )
 }

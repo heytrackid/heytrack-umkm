@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
 import { useIngredients } from '@/hooks'
 import { useSupabaseCRUD } from '@/hooks/supabase'
+import { usePagination } from '@/hooks/usePagination'
 import { useToast } from '@/hooks/use-toast'
 import { useMobile } from '@/hooks/useResponsive'
 import type { Database } from '@/types/supabase-generated'
@@ -24,6 +25,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Pagination } from '@/components/ui/pagination'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -67,8 +69,7 @@ export const EnhancedIngredientsPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [stockFilter, setStockFilter] = useState<StockFilter>('all')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
-
-
+    const [pageSize, setPageSize] = useState(12)
 
     // Filter and sort data
     const filteredData = useMemo(() => {
@@ -99,6 +100,23 @@ export const EnhancedIngredientsPage = () => {
             return matchesSearch && matchesStock && matchesCategory
         }).sort((a, b) => a.name.localeCompare(b.name))
     }, [ingredients, searchTerm, stockFilter, categoryFilter])
+
+    // Pagination
+    const pagination = usePagination({
+        initialPageSize: pageSize,
+        totalItems: filteredData.length,
+    })
+
+    // Get paginated data
+    const paginatedData = useMemo(() => {
+        return filteredData.slice(pagination.startIndex, pagination.endIndex)
+    }, [filteredData, pagination.startIndex, pagination.endIndex])
+
+    // Update page size
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize)
+        pagination.setPageSize(newSize)
+    }
 
     // Handlers
     const handleEdit = (ingredient: Ingredient) => {
@@ -230,7 +248,7 @@ export const EnhancedIngredientsPage = () => {
             {/* Data Display */}
             {isMobile ? (
                 <MobileIngredientList
-                    ingredients={filteredData}
+                    ingredients={paginatedData}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onQuickBuy={handleQuickBuy}
@@ -251,7 +269,7 @@ export const EnhancedIngredientsPage = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredData.map((item) => {
+                                    {paginatedData.map((item) => {
                                         const currentStock = item.current_stock ?? 0
                                         const minStock = item.min_stock ?? 0
                                         const totalValue = currentStock * item.price_per_unit
@@ -375,6 +393,19 @@ export const EnhancedIngredientsPage = () => {
                         )}
                     </CardContent>
                 </Card>
+            )}
+
+            {/* Pagination */}
+            {filteredData.length > 0 && (
+                <Pagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    totalItems={filteredData.length}
+                    pageSize={pagination.pageSize}
+                    onPageChange={pagination.setPage}
+                    onPageSizeChange={handlePageSizeChange}
+                    pageSizeOptions={[12, 24, 48, 96]}
+                />
             )}
 
             {/* Delete Modal */}

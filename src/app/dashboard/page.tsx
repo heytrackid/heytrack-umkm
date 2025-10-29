@@ -28,32 +28,10 @@ import { Suspense, useEffect, useState } from 'react'
 
 
 
-const StatsCardsSection = dynamic(
-  () => import(/* webpackChunkName: "dashboard-stats-cards" */ './components/StatsCardsSection'),
-  {
-    loading: () => (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <StatsCardSkeleton key={i} />
-        ))}
-      </div>
-    ),
-  }
-)
-
-const RecentOrdersSection = dynamic(
-  () => import(/* webpackChunkName: "dashboard-recent-orders" */ './components/RecentOrdersSection'),
-  {
-    loading: () => <RecentOrdersSkeleton />
-  }
-)
-
-const StockAlertsSection = dynamic(
-  () => import(/* webpackChunkName: "dashboard-stock-alerts" */ './components/StockAlertsSection'),
-  {
-    loading: () => <StockAlertSkeleton />
-  }
-)
+// Import lightweight components normally - no need for lazy loading
+import StatsCardsSection from './components/StatsCardsSection'
+import RecentOrdersSection from './components/RecentOrdersSection'
+import StockAlertsSection from './components/StockAlertsSection'
 
 const HppDashboardWidget = dynamic(
   () => import(/* webpackChunkName: "dashboard-hpp-widget" */ './components/HppDashboardWidget'),

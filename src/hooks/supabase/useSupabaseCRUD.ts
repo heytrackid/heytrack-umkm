@@ -54,7 +54,16 @@ export function useSupabaseCRUD<TTable extends string>(
       void setError(null)
 
       const supabase = createClient()
+      
+      // Get authenticated user for RLS
+      const { data: { user } } = await supabase.auth.getUser()
+      
       let query = supabase.from(table).select(options?.select || '*')
+
+      // Apply user_id filter for RLS (if user is authenticated)
+      if (user) {
+        query = query.eq('user_id' as never, user.id as never)
+      }
 
       // Apply filters
       if (options?.filter) {
@@ -78,10 +87,15 @@ export function useSupabaseCRUD<TTable extends string>(
 
       const { data: result, error: queryError } = await query
 
-      if (queryError) {throw queryError}
+      if (queryError) {
+        console.error(`[useSupabaseCRUD] Error fetching from ${table}:`, queryError)
+        throw queryError
+      }
 
+      console.log(`[useSupabaseCRUD] Fetched ${result?.length || 0} rows from ${table}`)
       void setData((result as unknown as TableRow<TTable>[]) ?? null)
     } catch (err) {
+      console.error(`[useSupabaseCRUD] Error in fetchData:`, err)
       setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
       void setLoading(false)
@@ -91,16 +105,28 @@ export function useSupabaseCRUD<TTable extends string>(
   const remove = async (id: string) => {
     try {
       const supabase = createClient()
+      
+      // Get authenticated user for RLS
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
       const { error: deleteError } = await supabase
         .from(table)
         .delete()
-        .eq('id', id)
+        .eq('id' as never, id as never)
+        .eq('user_id' as never, user.id as never) // RLS filter
 
-      if (deleteError) {throw deleteError}
+      if (deleteError) {
+        console.error(`[useSupabaseCRUD] Delete error:`, deleteError)
+        throw deleteError
+      }
 
       // Refresh data after delete
       await fetchData()
     } catch (err) {
+      console.error(`[useSupabaseCRUD] Error in remove:`, err)
       setError(err instanceof Error ? err : new Error('Delete failed'))
       throw err
     }
@@ -109,18 +135,35 @@ export function useSupabaseCRUD<TTable extends string>(
   const create = async (newData: Partial<TableInsert<TTable>>): Promise<TableRow<TTable> | null> => {
     try {
       const supabase = createClient()
+      
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      // Add user_id to the data
+      const dataWithUser = {
+        ...newData,
+        user_id: user.id
+      }
+
       const { data: result, error: createError } = await supabase
         .from(table)
-        .insert(newData as never)
+        .insert(dataWithUser as never)
         .select()
         .single()
 
-      if (createError) {throw createError}
+      if (createError) {
+        console.error(`[useSupabaseCRUD] Create error:`, createError)
+        throw createError
+      }
 
       // Refresh data after create
       await fetchData()
       return result as unknown as TableRow<TTable>
     } catch (err) {
+      console.error(`[useSupabaseCRUD] Error in create:`, err)
       setError(err instanceof Error ? err : new Error('Create failed'))
       throw err
     }
@@ -129,19 +172,31 @@ export function useSupabaseCRUD<TTable extends string>(
   const update = async (id: string, updateData: Partial<TableUpdate<TTable>>): Promise<TableRow<TTable> | null> => {
     try {
       const supabase = createClient()
+      
+      // Get authenticated user for RLS
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
       const { data: result, error: updateError } = await supabase
         .from(table)
         .update(updateData as never)
         .eq('id', id as never)
+        .eq('user_id' as never, user.id as never) // RLS filter
         .select()
         .single()
 
-      if (updateError) {throw updateError}
+      if (updateError) {
+        console.error(`[useSupabaseCRUD] Update error:`, updateError)
+        throw updateError
+      }
 
       // Refresh data after update
       await fetchData()
       return result as unknown as TableRow<TTable>
     } catch (err) {
+      console.error(`[useSupabaseCRUD] Error in update:`, err)
       setError(err instanceof Error ? err : new Error('Update failed'))
       throw err
     }

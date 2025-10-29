@@ -30,46 +30,13 @@ import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 // Import hooks
 import { useOrderLogic } from './hooks/useOrderLogic'
 
-// ============= DYNAMIC IMPORTS (CODE SPLITTING) =============
-const OrderCustomerStep = dynamic(
-  () => import(/* webpackChunkName: "order-customer-step" */ './_components/OrderCustomerStep'),
-  {
-    loading: () => <StepSkeleton />,
-    ssr: false
-  }
-)
-
-const OrderItemsStep = dynamic(
-  () => import(/* webpackChunkName: "order-items-step" */ './_components/OrderItemsStep'),
-  {
-    loading: () => <StepSkeleton />,
-    ssr: false
-  }
-)
-
-const OrderDeliveryStep = dynamic(
-  () => import(/* webpackChunkName: "order-delivery-step" */ './_components/OrderDeliveryStep'),
-  {
-    loading: () => <StepSkeleton />,
-    ssr: false
-  }
-)
-
-const OrderPaymentStep = dynamic(
-  () => import(/* webpackChunkName: "order-payment-step" */ './_components/OrderPaymentStep'),
-  {
-    loading: () => <OrderFormSkeleton />,
-    ssr: false
-  }
-)
-
-const OrderSummary = dynamic(
-  () => import(/* webpackChunkName: "order-summary" */ './_components/OrderSummary'),
-  {
-    loading: () => <OrderFormSkeleton />,
-    ssr: false
-  }
-)
+// ============= IMPORTS (No lazy loading for form steps) =============
+// Form steps are lightweight, no need for code splitting
+import OrderCustomerStep from './_components/OrderCustomerStep'
+import OrderItemsStep from './_components/OrderItemsStep'
+import OrderDeliveryStep from './_components/OrderDeliveryStep'
+import OrderPaymentStep from './_components/OrderPaymentStep'
+import OrderSummary from './_components/OrderSummary'
 
 // ============= MAIN PAGE COMPONENT =============
 

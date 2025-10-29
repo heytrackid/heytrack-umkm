@@ -4,6 +4,7 @@ import { SettingsProvider } from '@/contexts/settings-context';
 import { PreloadingProvider } from '@/providers/PreloadingProvider';
 import QueryProvider from '@/providers/QueryProvider';
 import { Analytics } from '@vercel/analytics/next';
+import { PerformanceMonitor } from '@/lib/performance';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
@@ -92,7 +93,8 @@ export default function RootLayout({
                   },
                 }}
               />
-              {/* Web Vitals Reporter disabled during build to avoid overhead; enable when analytics endpoint is ready */}
+              {/* Performance Monitoring */}
+              {process.env.NODE_ENV === 'production' && <PerformanceMonitor />}
             </SettingsProvider>
           </QueryProvider>
         </ThemeProvider>

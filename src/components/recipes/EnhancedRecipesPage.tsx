@@ -54,6 +54,10 @@ import { ErrorMessage } from '@/components/ui/error-message'
 // Hooks
 import { useRecipes } from '@/hooks/supabase/entities'
 import { useSupabaseCRUD } from '@/hooks/supabase'
+import { usePagination } from '@/hooks/usePagination'
+
+// Components
+import { Pagination } from '@/components/ui/pagination'
 
 // Types
 import type { Database } from '@/types/supabase-generated'
@@ -78,6 +82,7 @@ export const EnhancedRecipesPage = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
     const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all')
+    const [pageSize, setPageSize] = useState(12)
 
     // Filter and sort data
     const filteredData = useMemo(() => {
@@ -104,6 +109,23 @@ export const EnhancedRecipesPage = () => {
             })
             .sort((a, b) => a.name.localeCompare(b.name))
     }, [recipes, searchTerm, categoryFilter, difficultyFilter])
+
+    // Pagination
+    const pagination = usePagination({
+        initialPageSize: pageSize,
+        totalItems: filteredData.length,
+    })
+
+    // Get paginated data
+    const paginatedData = useMemo(() => {
+        return filteredData.slice(pagination.startIndex, pagination.endIndex)
+    }, [filteredData, pagination.startIndex, pagination.endIndex])
+
+    // Update page size
+    const handlePageSizeChange = (newSize: number) => {
+        setPageSize(newSize)
+        pagination.setPageSize(newSize)
+    }
 
     // Handlers
     const handleView = (recipe: Recipe) => {
@@ -319,7 +341,7 @@ export const EnhancedRecipesPage = () => {
             {/* Results Count */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                    Menampilkan {filteredData.length} dari {recipes?.length || 0} resep
+                    Ditemukan {filteredData.length} resep
                 </p>
             </div>
 
@@ -360,7 +382,7 @@ export const EnhancedRecipesPage = () => {
                 </Card>
             ) : isMobile ? (
                 <div className="space-y-3">
-                    {filteredData.map((recipe) => (
+                    {paginatedData.map((recipe) => (
                         <MobileRecipeCard
                             key={recipe.id}
                             recipe={recipe}
@@ -376,7 +398,7 @@ export const EnhancedRecipesPage = () => {
                 </div>
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredData.map((recipe) => (
+                    {paginatedData.map((recipe) => (
                         <Card
                             key={recipe.id}
                             className="hover:shadow-md transition-shadow cursor-pointer"
@@ -461,6 +483,19 @@ export const EnhancedRecipesPage = () => {
                         </Card>
                     ))}
                 </div>
+            )}
+
+            {/* Pagination */}
+            {filteredData.length > 0 && (
+                <Pagination
+                    currentPage={pagination.page}
+                    totalPages={pagination.totalPages}
+                    totalItems={filteredData.length}
+                    pageSize={pagination.pageSize}
+                    onPageChange={pagination.setPage}
+                    onPageSizeChange={handlePageSizeChange}
+                    pageSizeOptions={[12, 24, 48, 96]}
+                />
             )}
 
             {/* Delete Confirmation Modal */}

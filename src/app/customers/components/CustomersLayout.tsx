@@ -7,11 +7,13 @@ import { useState, useMemo, useEffect } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Pagination } from '@/components/ui/pagination'
 import { CustomersTableSkeleton } from '@/components/ui/skeletons/table-skeletons'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { useSettings } from '@/contexts/settings-context'
 import { LOADING_KEYS, useLoading } from '@/hooks/loading'
 import { useResponsive } from '@/hooks/useResponsive'
+import { usePagination } from '@/hooks/usePagination'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
@@ -23,30 +25,10 @@ import { PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui/page-breadcr
 import { PageHeader, PageActions } from '@/components/ui/page-patterns'
 import { Plus, RefreshCw, Users } from 'lucide-react'
 
-// Lazy load components
-import dynamic from 'next/dynamic'
-
-const CustomersTable = dynamic(
-  () => import(/* webpackChunkName: "customers-table" */ './CustomersTable'),
-  {
-    loading: () => <CustomersTableSkeleton rows={10} />,
-    ssr: false
-  }
-)
-
-const CustomerStats = dynamic(
-  () => import(/* webpackChunkName: "customer-stats" */ './CustomerStats'),
-  {
-    loading: () => <StatsCardSkeleton />
-  }
-)
-
-const CustomerSearchFilters = dynamic(
-  () => import(/* webpackChunkName: "customer-search-filters" */ './CustomerSearchFilters'),
-  {
-    loading: () => <div>Loading search...</div>
-  }
-)
+// Import components normally - they're lightweight
+import CustomersTable from './CustomersTable'
+import CustomerStats from './CustomerStats'
+import CustomerSearchFilters from './CustomerSearchFilters'
 
 import type { Customer } from './types'
 import type { Database } from '@/types/supabase-generated'
@@ -61,6 +43,7 @@ export default function CustomersLayout() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [pageSize, setPageSize] = useState(12)
   const { setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
@@ -69,23 +52,10 @@ export default function CustomersLayout() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
 
-  // Handle auth errors
+  // Fetch customers on mount - auth is handled by middleware
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      toast({
-        title: 'Sesi berakhir',
-        description: 'Sesi Anda telah berakhir. Silakan login kembali.',
-        variant: 'destructive',
-      })
-      void router.push('/auth/login')
-    }
-  }, [isAuthLoading, isAuthenticated, router, toast])
-
-  useEffect(() => {
-    if (!isAuthLoading && isAuthenticated) {
-      void fetchCustomers()
-    }
-  }, [isAuthLoading, isAuthenticated])
+    void fetchCustomers()
+  }, [])
 
   const fetchCustomers = async () => {
     try {
@@ -123,6 +93,23 @@ export default function CustomersLayout() {
       customer.phone?.includes(debouncedSearchTerm)
     ), [customers, debouncedSearchTerm]
   )
+
+  // Pagination
+  const pagination = usePagination({
+    initialPageSize: pageSize,
+    totalItems: filteredCustomers.length,
+  })
+
+  // Get paginated data
+  const paginatedCustomers = useMemo(() => {
+    return filteredCustomers.slice(pagination.startIndex, pagination.endIndex)
+  }, [filteredCustomers, pagination.startIndex, pagination.endIndex])
+
+  // Update page size
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize)
+    pagination.setPageSize(newSize)
+  }
 
   // Bulk action handlers
   const handleSelectAll = () => {
@@ -226,26 +213,7 @@ export default function CustomersLayout() {
     void router.push(`/customers/${customer.id}`)
   }
 
-  // Show loading state while auth is initializing
-  if (isAuthLoading) {
-    return (
-      <AppLayout>
-        <div className="space-y-6">
-          <PageBreadcrumb items={BreadcrumbPatterns.customers} />
-          <PageHeader
-            title="Data Pelanggan"
-            description="Kelola database pelanggan dan riwayat pembelian"
-          />
-          <div className="grid gap-4 md:grid-cols-3">
-            {Array.from({ length: 3 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
-          </div>
-          <CustomersTableSkeleton rows={5} />
-        </div>
-      </AppLayout>
-    )
-  }
+  // Remove redundant auth loading state - handled by middleware
 
   return (
     <AppLayout>
@@ -314,7 +282,7 @@ export default function CustomersLayout() {
               <CustomersTableSkeleton rows={5} />
             ) : (
               <CustomersTable
-                customers={filteredCustomers}
+                customers={paginatedCustomers}
                 selectedItems={selectedItems}
                 onSelectItem={handleSelectItem}
                 onSelectAll={handleSelectAll}
@@ -347,6 +315,19 @@ export default function CustomersLayout() {
               Back to List
             </Button>
           </div>
+        )}
+
+        {/* Pagination */}
+        {currentView === 'list' && filteredCustomers.length > 0 && (
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            totalItems={filteredCustomers.length}
+            pageSize={pagination.pageSize}
+            onPageChange={pagination.setPage}
+            onPageSizeChange={handlePageSizeChange}
+            pageSizeOptions={[12, 24, 48, 96]}
+          />
         )}
 
         {/* Info Card */}

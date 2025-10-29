@@ -1,114 +1,142 @@
-import type { ComponentProps } from 'react'
+import { Button } from '@/components/ui/button'
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreHorizontalIcon,
-} from"lucide-react"
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 
-import { cn } from"@/lib/utils"
-import type { Button} from "@/components/ui/button";
-import { buttonVariants } from"@/components/ui/button"
+interface PaginationProps {
+    page: number
+    pageSize: number
+    totalPages: number
+    totalItems: number
+    startIndex: number
+    endIndex: number
+    onPageChange: (page: number) => void
+    onPageSizeChange: (size: number) => void
+    canNextPage: boolean
+    canPrevPage: boolean
+    pageSizeOptions?: number[]
+    showPageSizeSelector?: boolean
+    showFirstLast?: boolean
+    itemLabel?: string
+}
 
-const Pagination = ({ className, ...props }: ComponentProps<'nav'>) => (
-    <nav
-      role="navigation"
-      aria-label="pagination"
-      data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
-      {...props}
-    />
-  )
+export function Pagination({
+    page,
+    pageSize,
+    totalPages,
+    totalItems,
+    startIndex,
+    endIndex,
+    onPageChange,
+    onPageSizeChange,
+    canNextPage,
+    canPrevPage,
+    pageSizeOptions = [10, 20, 50, 100],
+    showPageSizeSelector = true,
+    showFirstLast = false,
+    itemLabel = 'item',
+}: PaginationProps) {
+    if (totalPages <= 1 && !showPageSizeSelector) {
+        return null
+    }
 
-const PaginationContent = ({
-  className,
-  ...props
-}: ComponentProps<'ul'>) => (
-    <ul
-      data-slot="pagination-content"
-      className={cn("flex flex-row items-center gap-1", className)}
-      {...props}
-    />
-  )
+    const displayStart = Math.min(startIndex + 1, totalItems)
+    const displayEnd = Math.min(endIndex, totalItems)
 
-const PaginationItem = ({ ...props }: ComponentProps<'li'>) => <li data-slot="pagination-item" {...props} />
+    return (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t bg-muted/30">
+            {/* Info Text */}
+            <div className="text-sm text-muted-foreground">
+                Menampilkan {displayStart} - {displayEnd} dari {totalItems} {itemLabel}
+            </div>
 
-type PaginationLinkProps = {
-  isActive?: boolean
-} & Pick<ComponentProps<typeof Button>,"size"> &
-  ComponentProps<'a'>
+            <div className="flex items-center gap-4">
+                {/* Page Size Selector */}
+                {showPageSizeSelector && (
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">
+                            Tampilkan:
+                        </span>
+                        <Select
+                            value={pageSize.toString()}
+                            onValueChange={(value) => onPageSizeChange(Number(value))}
+                        >
+                            <SelectTrigger className="w-20 h-9">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {pageSizeOptions.map((size) => (
+                                    <SelectItem key={size} value={size.toString()}>
+                                        {size}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                )}
 
-const PaginationLink = ({
-  className,
-  isActive,
-  size ="icon",
-  ...props
-}: PaginationLinkProps) => (
-    <a
-      aria-current={isActive ?"page" : undefined}
-      data-slot="pagination-link"
-      data-active={isActive}
-      className={cn(
-        buttonVariants({
-          variant: isActive ?"outline" :"ghost",
-          size,
-        }),
-        className
-      )}
-      {...props}
-    />
-  )
+                {/* Page Navigation */}
+                {totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                        {showFirstLast && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onPageChange(1)}
+                                disabled={!canPrevPage}
+                                className="h-9 w-9 p-0"
+                            >
+                                <ChevronsLeft className="h-4 w-4" />
+                                <span className="sr-only">Halaman pertama</span>
+                            </Button>
+                        )}
 
-const PaginationPrevious = ({
-  className,
-  ...props
-}: ComponentProps<typeof PaginationLink>) => (
-    <PaginationLink
-      aria-label="Go to previous page"
-      size="default"
-      className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
-      {...props}
-    >
-      <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
-    </PaginationLink>
-  )
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onPageChange(page - 1)}
+                            disabled={!canPrevPage}
+                            className="h-9 w-9 p-0"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                            <span className="sr-only">Halaman sebelumnya</span>
+                        </Button>
 
-const PaginationNext = ({
-  className,
-  ...props
-}: ComponentProps<typeof PaginationLink>) => (
-    <PaginationLink
-      aria-label="Go to next page"
-      size="default"
-      className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
-      {...props}
-    >
-      <span className="hidden sm:block">Next</span>
-      <ChevronRightIcon />
-    </PaginationLink>
-  )
+                        <span className="text-sm font-medium whitespace-nowrap px-2">
+                            Halaman {page} dari {totalPages}
+                        </span>
 
-const PaginationEllipsis = ({
-  className,
-  ...props
-}: ComponentProps<'span'>) => (
-    <span
-      aria-hidden
-      data-slot="pagination-ellipsis"
-      className={cn("flex size-9 items-center justify-center", className)}
-      {...props}
-    >
-      <MoreHorizontalIcon className="size-4" />
-      <span className="sr-only">More pages</span>
-    </span>
-  )
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onPageChange(page + 1)}
+                            disabled={!canNextPage}
+                            className="h-9 w-9 p-0"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                            <span className="sr-only">Halaman selanjutnya</span>
+                        </Button>
 
-export {
-  Pagination,
-  PaginationContent,
-  PaginationLink,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationEllipsis,
+                        {showFirstLast && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onPageChange(totalPages)}
+                                disabled={!canNextPage}
+                                className="h-9 w-9 p-0"
+                            >
+                                <ChevronsRight className="h-4 w-4" />
+                                <span className="sr-only">Halaman terakhir</span>
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
 }

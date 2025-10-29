@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { PaginationQuerySchema } from '@/lib/validations'
+import { createPaginationMeta } from '@/lib/validations/pagination'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
@@ -51,7 +52,30 @@ async function GET(request: NextRequest) {
 
     // Wrap database query with caching
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
-    const recipes = await withCache(async () => {
+    const result = await withCache(async () => {
+      // Get total count
+      let countQuery = supabase
+        .from('recipes')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', user.id)
+
+      if (search) {
+        countQuery = countQuery.ilike('name', `%${search}%`)
+      }
+      if (category) {
+        countQuery = countQuery.ilike('category', `%${category}%`)
+      }
+      if (status) {
+        countQuery = countQuery.eq('status', status)
+      }
+
+      const { count, error: countError } = await countQuery
+
+      if (countError) {
+        throw new Error(`Database error: ${countError.message}`)
+      }
+
+      // Get paginated data
       let query = supabase
         .from('recipes')
         .select(RECIPE_FIELDS.DETAIL) // Specific fields for better performance
@@ -87,7 +111,10 @@ async function GET(request: NextRequest) {
         throw new Error(`Database error: ${error.message}`)
       }
 
-      return recipes
+      return {
+        data: recipes || [],
+        meta: createPaginationMeta(page, limit, count || 0)
+      }
     }, cacheKey, 10 * 60 * 1000) // Cache for 10 minutes
 
     apiLogger.info({
@@ -96,10 +123,11 @@ async function GET(request: NextRequest) {
       page,
       limit,
       search: search || '',
-      resultCount: recipes?.length || 0
+      resultCount: result.data.length,
+      total: result.meta.total
     }, 'Recipes fetched (cached)')
 
-    return NextResponse.json(recipes)
+    return NextResponse.json(result)
 
   } catch (err: unknown) {
     apiLogger.error({ err }, 'Error in GET /api/recipes:')

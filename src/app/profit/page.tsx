@@ -20,9 +20,12 @@ import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { useProfitData, useProductChartData } from './components'
 
-// Lazy load heavy components
-const ProfitFilters = dynamic(
-  () => import(/* webpackChunkName: "profit-filters" */ './components').then(mod => ({ default: mod.ProfitFilters })),
+// Import lightweight components normally
+import { ProfitFilters, ProfitSummaryCards, ProfitInfoCard } from './components'
+
+// Only lazy load HEAVY chart components
+const ProductProfitabilityChart = dynamic(
+  () => import(/* webpackChunkName: "profit-chart" */ './components').then(mod => ({ default: mod.ProductProfitabilityChart })),
   {
     loading: () => (
       <Card>
@@ -41,10 +44,6 @@ const ProfitFilters = dynamic(
     )
   }
 )
-
-const ProfitSummaryCards = dynamic(() => import('./components').then(mod => ({ default: mod.ProfitSummaryCards })), {
-  loading: () => <StatsSkeleton count={4} />
-})
 
 const ProductProfitabilityChart = dynamic(() => import('./components').then(mod => ({ default: mod.ProductProfitabilityChart })), {
   loading: () => (

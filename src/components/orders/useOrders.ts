@@ -30,8 +30,11 @@ export function useOrders() {
       }
       return response.json() as Promise<Order[]>
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
+    refetchOnWindowFocus: false, // Don't refetch on tab switch
+    refetchOnMount: false, // Don't refetch on component mount if data is fresh
+    refetchOnReconnect: true, // Refetch when internet reconnects
   })
 
   const error = queryError ? (queryError as Error).message : null

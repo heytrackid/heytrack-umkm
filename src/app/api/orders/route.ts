@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { OrderInsertSchema } from '@/lib/validations/domains/order'
 import { PaginationQuerySchema } from '@/lib/validations/domains/common'
+import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Database } from '@/types/supabase-generated'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
@@ -51,6 +52,30 @@ async function GET(request: NextRequest) {
 
     const { page, limit, search, sort_by, sort_order } = queryValidation.data
     const status = searchParams.get('status') // Status filter is separate from pagination
+
+    // Get total count
+    let countQuery = supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+
+    if (search) {
+      countQuery = countQuery.or(`order_no.ilike.%${search}%,customer_name.ilike.%${search}%`)
+    }
+
+    if (status) {
+      countQuery = countQuery.eq('status', status as Database['public']['Enums']['order_status'])
+    }
+
+    const { count, error: countError } = await countQuery
+
+    if (countError) {
+      apiLogger.error({ error: countError }, 'Error counting orders:')
+      return NextResponse.json(
+        { error: 'Failed to count orders' },
+        { status: 500 }
+      )
+    }
 
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let query = supabase
@@ -114,7 +139,10 @@ async function GET(request: NextRequest) {
       items: (order as OrderWithItems).order_items || []
     }))
 
-    return NextResponse.json(mappedData)
+    return NextResponse.json({
+      data: mappedData,
+      meta: createPaginationMeta(page, limit, count || 0)
+    })
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in GET /api/orders:')
     return NextResponse.json(
