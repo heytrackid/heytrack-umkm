@@ -97,57 +97,57 @@ export const ActionButtons = ({
   variant = 'ghost',
   showLabels = false
 }: ActionButtonsProps) => (
-    <div className="flex gap-1">
-      {onView && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onView}
-          title="Lihat Detail"
-        >
-          <Eye className="h-4 w-4" />
-          {showLabels && <span className="ml-1">Lihat</span>}
-        </Button>
-      )}
+  <div className="flex gap-1">
+    {onView && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onView}
+        title="Lihat Detail"
+      >
+        <Eye className="h-4 w-4" />
+        {showLabels && <span className="ml-1">Lihat</span>}
+      </Button>
+    )}
 
-      {onEdit && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onEdit}
-          title="Edit"
-        >
-          <Pencil className="h-4 w-4" />
-          {showLabels && <span className="ml-1">Edit</span>}
-        </Button>
-      )}
+    {onEdit && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onEdit}
+        title="Edit"
+      >
+        <Pencil className="h-4 w-4" />
+        {showLabels && <span className="ml-1">Ubah</span>}
+      </Button>
+    )}
 
-      {onDelete && (
-        <Button
-          variant="ghost"
-          size={size}
-          onClick={onDelete}
-          title="Hapus"
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <Trash2 className="h-4 w-4" />
-          {showLabels && <span className="ml-1">Hapus</span>}
-        </Button>
-      )}
+    {onDelete && (
+      <Button
+        variant="ghost"
+        size={size}
+        onClick={onDelete}
+        title="Hapus"
+        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+      >
+        <Trash2 className="h-4 w-4" />
+        {showLabels && <span className="ml-1">Hapus</span>}
+      </Button>
+    )}
 
-      {onMore && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onMore}
-          title="More Actions"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-          {showLabels && <span className="ml-1">More</span>}
-        </Button>
-      )}
-    </div>
-  )
+    {onMore && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onMore}
+        title="More Actions"
+      >
+        <MoreHorizontal className="h-4 w-4" />
+        {showLabels && <span className="ml-1">More</span>}
+      </Button>
+    )}
+  </div>
+)
 
 // Quick action buttons for common operations
 export const QuickActions = {

@@ -57,8 +57,8 @@ const RecipePreviewCard = memo(({
         <CardContent className="py-16">
           <div className="text-center space-y-6">
             <div className="relative">
-              <div className="h-24 w-24 mx-auto bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl flex items-center justify-center">
-                <ChefHat className="h-12 w-12 text-purple-500" />
+              <div className="h-24 w-24 mx-auto bg-muted rounded-2xl flex items-center justify-center">
+                <ChefHat className="h-12 w-12 text-foreground" />
               </div>
               <div className="absolute -top-2 -right-2 h-8 w-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-lg">✨</span>
@@ -109,8 +109,8 @@ const RecipePreviewCard = memo(({
   void availableIngredients
 
   return (
-    <Card className="border-2 border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-950/20 dark:to-pink-950/20">
-      <CardHeader className="bg-gradient-to-r from-purple-100/50 to-pink-100/50 dark:from-purple-900/20 dark:to-pink-900/20">
+    <Card>
+      <CardHeader className="bg-card">
         <CardTitle className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
             <ChefHat className="h-4 w-4 text-white" />
@@ -120,8 +120,8 @@ const RecipePreviewCard = memo(({
       </CardHeader>
       <CardContent className="space-y-5 pt-6">
         {/* Product Info */}
-        <div className="p-4 bg-white dark:bg-gray-900 rounded-xl border-2 border-purple-100 dark:border-purple-900">
-          <h3 className="font-bold text-xl mb-1 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <div className="p-4 bg-background rounded-xl border">
+          <h3 className="font-bold text-xl mb-1">
             {productName || 'Nama Produk'}
           </h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -149,7 +149,7 @@ const RecipePreviewCard = memo(({
               </span>
             ))}
             {ingredients.length > 6 && (
-              <span className="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-medium">
+              <span className="text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-full font-medium">
                 +{ingredients.length - 6} lainnya
               </span>
             )}

@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
-import { HppCalculatorService } from './HppCalculatorService'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 /**
  * Service for automating HPP snapshot creation
@@ -17,7 +17,7 @@ export class HppSnapshotAutomation {
   async createSnapshot(recipeId: string, userId: string): Promise<void> {
     try {
       // Calculate current HPP
-      const hppResult = await this.hppCalculator.calculateRecipeHpp(recipeId)
+      const hppResult = await this.hppCalculator.calculateRecipeHpp(this.supabase, recipeId, userId)
 
       // Get previous snapshot for comparison
       const { data: previousSnapshot } = await this.supabase

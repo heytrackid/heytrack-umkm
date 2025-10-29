@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
       app_settings: {
@@ -572,6 +577,60 @@ export type Database = {
           },
         ]
       }
+      hpp_history: {
+        Row: {
+          change_percentage: number | null
+          change_reason: string | null
+          created_at: string | null
+          hpp_value: number
+          id: string
+          ingredient_cost: number
+          operational_cost: number
+          recipe_id: string
+          recorded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          change_percentage?: number | null
+          change_reason?: string | null
+          created_at?: string | null
+          hpp_value: number
+          id?: string
+          ingredient_cost: number
+          operational_cost: number
+          recipe_id: string
+          recorded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          change_percentage?: number | null
+          change_reason?: string | null
+          created_at?: string | null
+          hpp_value?: number
+          id?: string
+          ingredient_cost?: number
+          operational_cost?: number
+          recipe_id?: string
+          recorded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hpp_history_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipe_availability"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hpp_history_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hpp_recommendations: {
         Row: {
           created_at: string | null
@@ -821,10 +880,13 @@ export type Database = {
           created_by: string | null
           current_stock: number | null
           description: string | null
+          expiry_date: string | null
           id: string
           is_active: boolean | null
           last_ordered_at: string | null
+          last_purchase_date: string | null
           lead_time: number | null
+          lead_time_days: number | null
           max_stock: number | null
           min_stock: number | null
           name: string
@@ -832,6 +894,7 @@ export type Database = {
           reorder_point: number | null
           supplier: string | null
           supplier_contact: string | null
+          tags: string[] | null
           unit: string
           updated_at: string | null
           updated_by: string | null
@@ -846,10 +909,13 @@ export type Database = {
           created_by?: string | null
           current_stock?: number | null
           description?: string | null
+          expiry_date?: string | null
           id?: string
           is_active?: boolean | null
           last_ordered_at?: string | null
+          last_purchase_date?: string | null
           lead_time?: number | null
+          lead_time_days?: number | null
           max_stock?: number | null
           min_stock?: number | null
           name: string
@@ -857,6 +923,7 @@ export type Database = {
           reorder_point?: number | null
           supplier?: string | null
           supplier_contact?: string | null
+          tags?: string[] | null
           unit: string
           updated_at?: string | null
           updated_by?: string | null
@@ -871,10 +938,13 @@ export type Database = {
           created_by?: string | null
           current_stock?: number | null
           description?: string | null
+          expiry_date?: string | null
           id?: string
           is_active?: boolean | null
           last_ordered_at?: string | null
+          last_purchase_date?: string | null
           lead_time?: number | null
+          lead_time_days?: number | null
           max_stock?: number | null
           min_stock?: number | null
           name?: string
@@ -882,6 +952,7 @@ export type Database = {
           reorder_point?: number | null
           supplier?: string | null
           supplier_contact?: string | null
+          tags?: string[] | null
           unit?: string
           updated_at?: string | null
           updated_by?: string | null
@@ -1687,6 +1758,7 @@ export type Database = {
           margin_percentage: number | null
           name: string
           prep_time: number | null
+          previous_cost: number | null
           rating: number | null
           seasonal: boolean | null
           selling_price: number | null
@@ -1714,6 +1786,7 @@ export type Database = {
           margin_percentage?: number | null
           name: string
           prep_time?: number | null
+          previous_cost?: number | null
           rating?: number | null
           seasonal?: boolean | null
           selling_price?: number | null
@@ -1741,6 +1814,7 @@ export type Database = {
           margin_percentage?: number | null
           name?: string
           prep_time?: number | null
+          previous_cost?: number | null
           rating?: number | null
           seasonal?: boolean | null
           selling_price?: number | null
@@ -2306,14 +2380,6 @@ export type Database = {
       }
     }
     Functions: {
-      analyze_inventory_needs: {
-        Args: never
-        Returns: {
-          ingredient_id: string
-          needed_quantity: number
-          priority: string
-        }[]
-      }
       calculate_ingredient_wac: {
         Args: { p_ingredient_id: string }
         Returns: number
@@ -2328,9 +2394,13 @@ export type Database = {
         }[]
       }
       cleanup_expired_context_cache: { Args: never; Returns: undefined }
-      consume_ingredients_for_order: {
-        Args: { order_uuid: string }
-        Returns: undefined
+      decrement_ingredient_stock: {
+        Args: { p_ingredient_id: string; p_quantity: number }
+        Returns: {
+          current_stock: number
+          id: string
+          updated_at: string
+        }[]
       }
       get_dashboard_stats: { Args: never; Returns: Json }
       get_foreign_key_constraints: {
@@ -2343,7 +2413,6 @@ export type Database = {
           table_name: string
         }[]
       }
-      get_sync_dashboard_data: { Args: never; Returns: Json }
       get_table_sizes: {
         Args: never
         Returns: {
@@ -2358,6 +2427,14 @@ export type Database = {
         Args: { user_uuid?: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      increment_ingredient_stock: {
+        Args: { p_ingredient_id: string; p_quantity: number }
+        Returns: {
+          current_stock: number
+          id: string
+          updated_at: string
+        }[]
+      }
       log_sync_event: {
         Args: {
           entity_id?: string
@@ -2367,33 +2444,8 @@ export type Database = {
         }
         Returns: string
       }
-      optimize_production_schedule: {
-        Args: { max_duration_hours?: number; target_date: string }
-        Returns: {
-          estimated_duration: number
-          ingredient_availability: boolean
-          priority_score: number
-          profit_potential: number
-          recipe_id: string
-          recipe_name: string
-          suggested_quantity: number
-        }[]
-      }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
-      test_confirm_order:
-        | { Args: { p_order_id: string }; Returns: Json }
-        | { Args: never; Returns: undefined }
-      test_create_order:
-        | { Args: never; Returns: string }
-        | {
-            Args: { p_customer_name?: string; p_customer_phone?: string }
-            Returns: Json
-          }
-      update_customer_analytics: {
-        Args: { customer_uuid: string }
-        Returns: undefined
-      }
       user_has_business_unit_access: {
         Args: {
           business_unit_val: Database["public"]["Enums"]["business_unit"]

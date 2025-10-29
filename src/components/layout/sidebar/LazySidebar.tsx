@@ -30,27 +30,25 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
 
   return (
     <>
-      {/* Mobile overlay with smooth fade */}
+      {/* Mobile overlay - instant */}
       <div
         className={cn(
           "fixed inset-0 bg-black/50 z-40 lg:hidden",
-          "transition-opacity duration-300 ease-in-out",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={onToggle}
       />
 
-      {/* Sidebar with smooth slide animation */}
+      {/* Sidebar - instant, no animation */}
       <aside className={cn(
         "fixed inset-y-0 left-0 z-50 flex flex-col",
         "bg-background",
         "border-r border-border",
-        "transform transition-transform duration-300 ease-out",
         "lg:translate-x-0 lg:static lg:inset-0",
         "overflow-hidden",
         // Fixed width for consistency
         "w-80 lg:w-72",
-        // Smooth animation
+        // Instant show/hide
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
         {/* Header */}
@@ -72,7 +70,7 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
         <SidebarFooter />
       </aside>
 
-      {/* Mobile toggle button with smooth transitions */}
+      {/* Mobile toggle button - instant */}
       {!isMobile && (
         <button
           onClick={onToggle}
@@ -81,7 +79,6 @@ export default function LazySidebar({ isOpen, onToggle, isMobile }: LazySidebarP
             "p-3 rounded-lg shadow-lg",
             "bg-primary text-primary-foreground",
             "hover:bg-primary/90",
-            "transition-all duration-200 ease-out",
             "active:scale-95",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           )}

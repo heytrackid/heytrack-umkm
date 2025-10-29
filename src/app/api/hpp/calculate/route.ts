@@ -4,6 +4,8 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 import { prepareInsert, prepareUpdate } from '@/lib/supabase/insert-helpers'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
@@ -77,60 +79,17 @@ export async function POST(request: NextRequest) {
       throw new Error('Recipe not found')
     }
 
-    // Calculate material cost
-    let materialCost = 0
-    const ingredients = recipe.recipe_ingredients || []
+    // Use consolidated HPP Calculator Service
+    const hppService = new HppCalculatorService()
+    const calculation = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
 
-    for (const ri of ingredients) {
-      const ingredient = ri.ingredients
-      if (ingredient) {
-        // Use WAC if available, otherwise use current price
-        const unitPrice = Number(ingredient.weighted_average_cost || ingredient.price_per_unit || 0)
-        materialCost += ri.quantity * unitPrice
-      }
-    }
+    const materialCost = calculation.materialCost
+    const operationalCost = calculation.overheadCost + calculation.laborCost
+    const totalHpp = calculation.totalHpp
+    const costPerUnit = calculation.costPerUnit
+    const servings = calculation.productionQuantity
 
-    // Get operational costs (default 15% of material cost or fixed amount)
-    const operationalCost = Math.max(materialCost * 0.15, 2500)
-
-    // Calculate total HPP
-    const totalHpp = materialCost + operationalCost
-    const servings = recipe.servings || 1
-    const costPerUnit = servings > 0 ? totalHpp / servings : totalHpp
-
-    // Save calculation
-    const calculationPayload = prepareInsert('hpp_calculations', {
-      recipe_id: recipeId,
-      user_id: user.id,
-      material_cost: materialCost,
-      overhead_cost: operationalCost,
-      labor_cost: 0,
-      total_hpp: totalHpp,
-      cost_per_unit: costPerUnit,
-      production_quantity: servings,
-      calculation_date: new Date().toISOString().split('T')[0]
-    })
-
-    const { data: calculation, error: calcError } = await supabase
-      .from('hpp_calculations')
-      .insert(calculationPayload)
-      .select()
-      .single()
-
-    if (calcError || !calculation) {
-      throw calcError || new Error('Failed to create calculation')
-    }
-
-    // Update recipe with cost
-    const recipeUpdate = prepareUpdate('recipes', {
-      cost_per_unit: costPerUnit
-    })
-
-    await supabase
-      .from('recipes')
-      .update(recipeUpdate)
-      .eq('id', recipeId)
-      .eq('user_id', user.id)
+    // Calculation already saved by service
 
     // Create snapshot
     const snapshotPayload = prepareInsert('hpp_snapshots', {
@@ -141,17 +100,13 @@ export async function POST(request: NextRequest) {
       material_cost: materialCost,
       operational_cost: operationalCost,
       cost_breakdown: {
-        ingredients: ingredients.map(ri => {
-          const ingredient = ri.ingredients
-          const unitPrice = Number(ingredient?.weighted_average_cost || ingredient?.price_per_unit || 0)
-          return {
-            name: ingredient?.name || 'Unknown',
-            quantity: ri.quantity,
-            unit: ri.unit,
-            unit_price: unitPrice,
-            total: ri.quantity * unitPrice
-          }
-        }),
+        ingredients: calculation.materialBreakdown.map(item => ({
+          name: item.ingredientName,
+          quantity: item.quantity,
+          unit: item.unit,
+          unit_price: item.unitPrice,
+          total: item.totalCost
+        })),
         operational: operationalCost
       }
     })
@@ -173,13 +128,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       calculation: {
-        id: calculation.id,
         recipe_id: recipeId,
         material_cost: materialCost,
-        operational_cost: operationalCost,
+        labor_cost: calculation.laborCost,
+        overhead_cost: calculation.overheadCost,
+        wac_adjustment: calculation.wacAdjustment,
         total_hpp: totalHpp,
         cost_per_unit: costPerUnit,
-        ingredients_count: ingredients.length
+        ingredients_count: calculation.materialBreakdown.length
       }
     })
 

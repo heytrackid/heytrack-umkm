@@ -124,6 +124,25 @@ export const useSidebarLogic = () => {
       ]
     },
     {
+      title: "🤖 Asisten AI",
+      description: "Bantuan cerdas untuk bisnis",
+      isCollapsible: true,
+      items: [
+        {
+          name: "Chat AI",
+          href: '/ai-chatbot',
+          icon: Bot,
+          description: "Tanya apa saja tentang bisnis"
+        },
+        {
+          name: "Generator Resep",
+          href: '/recipes/ai-generator',
+          icon: Sparkles,
+          description: "Buat resep baru dengan AI"
+        }
+      ]
+    },
+    {
       title: "1️⃣ Setup Awal",
       description: "Langkah pertama: Siapkan data dasar",
       isWorkflow: true,
@@ -145,14 +164,6 @@ export const useSidebarLogic = () => {
           stepNumber: 2,
           description: "Buat resep dengan komposisi bahan"
         },
-        {
-          name: "3. Biaya & Harga",
-          href: '/hpp',
-          icon: Calculator,
-          isSimple: true,
-          stepNumber: 3,
-          description: "Hitung biaya dan tentukan harga jual"
-        },
       ]
     },
     {
@@ -162,35 +173,35 @@ export const useSidebarLogic = () => {
       isCollapsible: true,
       items: [
         {
-          name: "4. Pelanggan",
+          name: "3. Pelanggan",
           href: '/customers',
           icon: Users,
           isSimple: true,
-          stepNumber: 4,
+          stepNumber: 3,
           description: "Kelola data pelanggan"
         },
         {
-          name: "5. Pesanan",
+          name: "4. Pesanan",
           href: '/orders',
           icon: ShoppingCart,
           isSimple: true,
-          stepNumber: 5,
+          stepNumber: 4,
           description: "Terima dan kelola pesanan"
         },
         {
-          name: "6. Produksi",
+          name: "5. Produksi",
           href: '/production',
           icon: Factory,
           isSimple: true,
-          stepNumber: 6,
+          stepNumber: 5,
           description: "Track batch produksi"
         },
         {
-          name: "7. Biaya Operasional",
+          name: "6. Biaya Operasional",
           href: '/operational-costs',
           icon: Receipt,
           isSimple: true,
-          stepNumber: 7,
+          stepNumber: 6,
           description: "Catat biaya harian (listrik, gas, dll)"
         },
       ]
@@ -202,47 +213,36 @@ export const useSidebarLogic = () => {
       isCollapsible: true,
       items: [
         {
+          name: "7. Biaya & Harga (HPP)",
+          href: '/hpp',
+          icon: Calculator,
+          isSimple: true,
+          stepNumber: 7,
+          description: "Hitung biaya dan tentukan harga jual"
+        },
+        {
           name: "8. Arus Kas",
           href: '/cash-flow',
           icon: DollarSign,
           isSimple: true,
-          stepNumber: 7,
+          stepNumber: 8,
           description: "Lihat uang masuk dan keluar"
         },
         {
-          name: "8. Laba Rugi",
+          name: "9. Laba Rugi",
           href: '/profit',
           icon: TrendingUp,
           isSimple: true,
-          stepNumber: 8,
+          stepNumber: 9,
           description: "Analisis untung rugi bisnis"
         },
         {
-          name: "9. Laporan Lengkap",
+          name: "10. Laporan Lengkap",
           href: '/reports',
           icon: FileText,
           isSimple: true,
-          stepNumber: 9,
+          stepNumber: 10,
           description: "Semua laporan dan analytics"
-        }
-      ]
-    },
-    {
-      title: "🤖 Asisten AI",
-      description: "Bantuan cerdas untuk bisnis",
-      isCollapsible: true,
-      items: [
-        {
-          name: "Chat AI",
-          href: '/ai-chatbot',
-          icon: Bot,
-          description: "Tanya apa saja tentang bisnis"
-        },
-        {
-          name: "Generator Resep",
-          href: '/recipes/ai-generator',
-          icon: Sparkles,
-          description: "Buat resep baru dengan AI"
         }
       ]
     },

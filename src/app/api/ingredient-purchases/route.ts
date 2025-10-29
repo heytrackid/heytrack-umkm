@@ -73,8 +73,8 @@ export async function GET(request: NextRequest) {
         }
 
         return NextResponse.json(purchases)
-    } catch (err: unknown) {
-        apiLogger.error({ err }, 'Error in GET /api/ingredient-purchases:')
+    } catch (error: unknown) {
+        apiLogger.error({ error }, 'Error in GET /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -202,7 +202,9 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // 3. Update ingredient stock
+        // 3. Update ingredient stock (atomic operation to prevent race condition)
+        // TODO: Create PostgreSQL function for atomic increment
+        // For now, use optimistic locking with current_stock check
         const newStock = (ingredientData.current_stock || 0) + qtyBeli
 
         const stockUpdate: Database['public']['Tables']['ingredients']['Update'] = {
@@ -212,10 +214,13 @@ export async function POST(request: NextRequest) {
         const { error: stockError } = await safeUpdate(supabase as any, 'ingredients', stockUpdate)
             .eq('id', validatedData.ingredient_id)
             .eq('user_id', user.id)
+            // Add optimistic lock: only update if current_stock hasn't changed
+            .eq('current_stock', ingredientData.current_stock)
 
         if (stockError) {
-            apiLogger.error({ error: stockError }, 'Error updating stock:')
-            // Note: Purchase is already created, just log the error
+            apiLogger.error({ error: stockError }, 'Error updating stock (possible race condition):')
+            // Note: Purchase is already created, stock update failed
+            // Consider implementing retry logic or queue-based updates
         }
 
         // 4. Create stock ledger entry
@@ -233,8 +238,8 @@ export async function POST(request: NextRequest) {
         await safeInsert(supabase as any, 'inventory_stock_logs', stockLog).select()
 
         return NextResponse.json(purchase, { status: 201 })
-    } catch (err: unknown) {
-        apiLogger.error({ err }, 'Error in POST /api/ingredient-purchases:')
+    } catch (error: unknown) {
+        apiLogger.error({ error }, 'Error in POST /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -303,9 +308,11 @@ export async function DELETE(request: NextRequest) {
                 current_stock: newStock
             }
 
+            // Use optimistic locking to prevent race condition
             await safeUpdate(supabase as any, 'ingredients', stockUpdate)
                 .eq('id', purchaseData.ingredient_id)
                 .eq('user_id', user.id)
+                .eq('current_stock', ingredientDeleteData.current_stock)
         }
 
         // 2. Create stock ledger entry for reversal
@@ -342,8 +349,8 @@ export async function DELETE(request: NextRequest) {
         // In a production system, you might want to add a reference field
 
         return NextResponse.json({ message: 'Purchase deleted successfully' })
-    } catch (err: unknown) {
-        apiLogger.error({ err }, 'Error in DELETE /api/ingredient-purchases:')
+    } catch (error: unknown) {
+        apiLogger.error({ error }, 'Error in DELETE /api/ingredient-purchases:')
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

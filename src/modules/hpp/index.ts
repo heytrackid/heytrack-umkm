@@ -10,7 +10,8 @@ export { HppCostTrendsChart } from './components/HppCostTrendsChart'
 // export { RecentSnapshotsTable } from './components/RecentSnapshotsTable' // File doesn't exist
 
 // Services
-export { HppCalculatorService } from './services/HppCalculatorService'
+// HppCalculatorService moved to @/services/hpp/HppCalculatorService (consolidated)
+export { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 export { HppExportService } from './services/HppExportService'
 export { HppSnapshotService } from './services/HppSnapshotService'
 export { HppAlertService } from './services/HppAlertService'

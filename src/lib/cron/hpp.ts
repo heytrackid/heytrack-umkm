@@ -7,7 +7,7 @@ import { cronLogger } from '@/lib/logger'
 import type { AutomationEngineResult } from './types'
 import { HppSnapshotService } from '@/modules/hpp/services/HppSnapshotService'
 import { HppAlertService } from '@/modules/hpp/services/HppAlertService'
-import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 export class HPPCronJobs {
   /**
@@ -140,13 +140,15 @@ export class HPPCronJobs {
   /**
    * Recalculate HPP for specific recipe
    */
-  static async recalculateRecipeHPP(recipeId: string): Promise<AutomationEngineResult> {
+  static async recalculateRecipeHPP(recipeId: string, userId: string): Promise<AutomationEngineResult> {
     const startTime = Date.now()
-    cronLogger.info({ recipeId }, 'Starting HPP recalculation for recipe')
+    cronLogger.info({ recipeId, userId }, 'Starting HPP recalculation for recipe')
 
     try {
+      const { createClient } = await import('@/utils/supabase/server')
+      const supabase = await createClient()
       const calculatorService = new HppCalculatorService()
-      const result = await calculatorService.calculateRecipeHpp(recipeId)
+      const result = await calculatorService.calculateRecipeHpp(supabase, recipeId, userId)
       
       const duration = Date.now() - startTime
       

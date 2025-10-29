@@ -36,12 +36,12 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
 
+    // Query operational_costs table (for HPP-related costs)
     let query = supabase
-      .from('expenses')
-      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, created_at, updated_at')
+      .from('operational_costs')
+      .select('id, description, category, amount, date, supplier, payment_method, recurring, frequency, is_active, notes, created_at, updated_at')
       .eq('user_id', user.id)
-      .neq('category', 'Revenue')
-      .order('expense_date', { ascending: false })
+      .order('date', { ascending: false })
 
     if (startDate) {
       query = query.gte('expense_date', startDate)
@@ -110,10 +110,10 @@ export async function GET(request: NextRequest) {
       }
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in GET /api/operational-costs:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in GET /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(err) },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -186,10 +186,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 })
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in POST /api/operational-costs:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in POST /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(err) },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -277,10 +277,10 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(data)
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in PUT /api/operational-costs:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in PUT /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(err) },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -317,13 +317,12 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete with safety check: only delete non-Revenue records
+    // Delete operational cost
     const { data, error } = await supabase
-      .from('expenses')
+      .from('operational_costs')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)
-      .neq('category', 'Revenue')
       .select('id')
       .single()
 
@@ -344,10 +343,10 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in DELETE /api/operational-costs:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in DELETE /api/operational-costs:')
     return NextResponse.json(
-      { error: getErrorMessage(err) },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

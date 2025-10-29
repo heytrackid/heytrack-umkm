@@ -58,6 +58,7 @@ export interface AvailableIngredient {
   current_stock: number
   unit: string
   price_per_unit: number
+  minimum_stock?: number
 }
 
 export const PRODUCT_TYPES = [

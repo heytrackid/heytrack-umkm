@@ -13,6 +13,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CalendarIcon, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { uiLogger } from '@/lib/logger'
 import { id as idLocale } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -49,7 +50,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                 setRecipes(data)
             }
         } catch (error) {
-            console.error('Error fetching recipes:', error)
+            uiLogger.error({ error }, 'Error fetching recipes')
             toast.error('Gagal memuat daftar resep')
         } finally {
             setLoadingRecipes(false)
@@ -93,7 +94,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             onOpenChange(false)
             resetForm()
         } catch (error) {
-            console.error('Error creating production batch:', error)
+            uiLogger.error({ error }, 'Error creating production batch')
             toast.error(error instanceof Error ? error.message : 'Gagal membuat batch produksi')
         } finally {
             setLoading(false)

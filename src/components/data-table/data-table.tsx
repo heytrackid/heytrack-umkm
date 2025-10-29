@@ -4,7 +4,8 @@ import { useState } from 'react'
 import type {
   ColumnDef,
   SortingState,
-  VisibilityState} from '@tanstack/react-table';
+  VisibilityState
+} from '@tanstack/react-table';
 import {
   flexRender,
   getCoreRowModel,
@@ -164,7 +165,7 @@ export const DataTable = <TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  Loading...
+                  Memuat...
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
@@ -187,7 +188,7 @@ export const DataTable = <TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  No results found
+                  Tidak ada hasil
                 </TableCell>
               </TableRow>
             )}

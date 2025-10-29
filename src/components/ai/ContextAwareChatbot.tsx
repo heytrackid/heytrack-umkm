@@ -9,7 +9,6 @@ import { useContextAwareChat } from '@/hooks/useContextAwareChat'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import {
   MessageCircle,
@@ -49,7 +48,11 @@ export const ContextAwareChatbot = () => {
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+      // Smooth scroll to bottom
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
     }
   }, [messages])
 
@@ -71,7 +74,7 @@ export const ContextAwareChatbot = () => {
   return (
     <Card className={`w-full flex flex-col transition-all duration-300 ${isExpanded ? 'h-[calc(100vh-8rem)]' : 'h-[600px]'
       }`}>
-      <CardHeader className="border-b bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+      <CardHeader className="flex-shrink-0 border-b bg-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
@@ -124,10 +127,10 @@ export const ContextAwareChatbot = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
+      <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
         {/* Sessions Sidebar */}
         {showSessions && (
-          <div className="border-b p-4 bg-gradient-to-br from-muted/50 to-muted/30">
+          <div className="flex-shrink-0 border-b p-4 bg-muted/30">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold flex items-center gap-2">
                 <History className="h-4 w-4" />
@@ -168,59 +171,73 @@ export const ContextAwareChatbot = () => {
           </div>
         )}
 
-        {/* Messages Area */}
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+        {/* Messages Area - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-4 scroll-smooth" ref={scrollRef}>
           {messages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center p-8">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 flex items-center justify-center mb-4">
-                <Bot className="h-10 w-10 text-purple-600 dark:text-purple-400" />
+            <div className="flex flex-col items-center justify-center min-h-full text-center p-8">
+              <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-4">
+                <Bot className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-2">
-                Halo! Ada yang bisa saya bantu? 👋
+                Halo! Mau konsultasi bisnis kuliner? 👋
               </h3>
               <p className="text-sm text-muted-foreground mb-6 max-w-md">
-                Saya AI Assistant yang memahami konteks bisnis Anda. Tanya apa saja tentang stok, resep, HPP, atau laporan keuangan.
+                Aku AI Assistant yang ngerti bisnis kamu! Tanya apa aja - dari cek stok, analisis profit, sampai strategi marketing & pricing. Yuk ngobrol! 😊
               </p>
               <div className="grid grid-cols-1 gap-2 w-full max-w-md">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="justify-start text-left h-auto py-3 hover:bg-purple-50 dark:hover:bg-purple-950/20"
-                  onClick={() => setInput('Berapa stok tepung saat ini?')}
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg">📦</span>
-                    <div>
-                      <div className="font-medium text-sm">Cek Stok Bahan</div>
-                      <div className="text-xs text-muted-foreground">Berapa stok tepung saat ini?</div>
-                    </div>
-                  </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="justify-start text-left h-auto py-3 hover:bg-purple-50 dark:hover:bg-purple-950/20"
-                  onClick={() => setInput('Resep apa yang bisa dibuat dengan bahan yang ada?')}
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg">👨‍🍳</span>
-                    <div>
-                      <div className="font-medium text-sm">Rekomendasi Resep</div>
-                      <div className="text-xs text-muted-foreground">Resep apa yang bisa dibuat?</div>
-                    </div>
-                  </div>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="justify-start text-left h-auto py-3 hover:bg-purple-50 dark:hover:bg-purple-950/20"
-                  onClick={() => setInput('Bagaimana profit bulan ini?')}
+                  className="justify-start text-left h-auto py-3 hover:bg-muted"
+                  onClick={() => setInput('Produk mana yang paling menguntungkan?')}
                 >
                   <div className="flex items-start gap-2">
                     <span className="text-lg">💰</span>
                     <div>
-                      <div className="font-medium text-sm">Analisis Keuangan</div>
-                      <div className="text-xs text-muted-foreground">Bagaimana profit bulan ini?</div>
+                      <div className="font-medium text-sm">Analisis Profit</div>
+                      <div className="text-xs text-muted-foreground">Produk mana yang paling cuan?</div>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start text-left h-auto py-3 hover:bg-muted"
+                  onClick={() => setInput('Gimana cara ningkatin penjualan?')}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🚀</span>
+                    <div>
+                      <div className="font-medium text-sm">Strategi Marketing</div>
+                      <div className="text-xs text-muted-foreground">Tips boost penjualan</div>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start text-left h-auto py-3 hover:bg-muted"
+                  onClick={() => setInput('Harga jual yang pas berapa ya?')}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🎯</span>
+                    <div>
+                      <div className="font-medium text-sm">Strategi Pricing</div>
+                      <div className="text-xs text-muted-foreground">Tentukan harga optimal</div>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="justify-start text-left h-auto py-3 hover:bg-muted"
+                  onClick={() => setInput('Kasih ide promo yang menarik dong!')}
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🎁</span>
+                    <div>
+                      <div className="font-medium text-sm">Ide Promosi</div>
+                      <div className="text-xs text-muted-foreground">Promo yang bikin laris</div>
                     </div>
                   </div>
                 </Button>
@@ -241,7 +258,7 @@ export const ContextAwareChatbot = () => {
 
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-3 ${message.role === 'user'
-                      ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : 'bg-muted'
                       }`}
                   >
@@ -273,8 +290,8 @@ export const ContextAwareChatbot = () => {
                   </div>
 
                   {message.role === 'user' && (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-                      <User className="h-4 w-4 text-white" />
+                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <User className="h-4 w-4 text-primary-foreground" />
                     </div>
                   )}
                 </div>
@@ -287,20 +304,20 @@ export const ContextAwareChatbot = () => {
                   </div>
                   <div className="bg-muted rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="h-2 w-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="h-2 w-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="h-2 w-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 </div>
               )}
             </div>
           )}
-        </ScrollArea>
+        </div>
 
         {/* Error Display */}
         {error && (
-          <div className="px-4 py-3 bg-destructive/10 border-t border-destructive/20">
+          <div className="flex-shrink-0 px-4 py-3 bg-destructive/10 border-t border-destructive/20">
             <div className="flex items-center gap-2 text-sm">
               <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
               <span className="text-destructive flex-1">{error}</span>
@@ -317,20 +334,19 @@ export const ContextAwareChatbot = () => {
         )}
 
         {/* Input Area */}
-        <div className="border-t p-4 bg-gradient-to-r from-purple-50/50 to-pink-50/50 dark:from-purple-950/10 dark:to-pink-950/10">
+        <div className="flex-shrink-0 border-t p-4 bg-card">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ketik pertanyaan Anda di sini..."
+              placeholder="Tanya apa aja... strategi marketing, pricing, atau analisis profit 💬"
               disabled={isLoading}
               className="flex-1 bg-background"
             />
             <Button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -341,9 +357,11 @@ export const ContextAwareChatbot = () => {
           </form>
 
           <div className="flex items-start gap-2 mt-3 text-xs text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-purple-500" />
+            <div className="h-3.5 w-3.5 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mt-0.5 flex-shrink-0">
+              <Sparkles className="h-2 w-2 text-white" />
+            </div>
             <p>
-              Saya mengingat konteks percakapan. Anda bisa bertanya follow-up seperti "harganya berapa?" atau "bagaimana cara membuatnya?"
+              Aku inget semua obrolan kita kok! Jadi bisa tanya follow-up kayak "terus gimana?" atau "kasih contohnya dong" 😊
             </p>
           </div>
         </div>

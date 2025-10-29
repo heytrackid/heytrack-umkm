@@ -45,6 +45,7 @@ import {
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type StockFilter = 'all' | 'normal' | 'low' | 'out'
+type CategoryFilter = 'all' | 'Bahan Kering' | 'Bahan Basah' | 'Bumbu' | 'Protein' | 'Sayuran' | 'Buah' | 'Dairy' | 'Kemasan' | 'Lainnya'
 
 export const EnhancedIngredientsPage = () => {
     const router = useRouter()
@@ -61,6 +62,7 @@ export const EnhancedIngredientsPage = () => {
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
     const [stockFilter, setStockFilter] = useState<StockFilter>('all')
+    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
 
 
 
@@ -86,9 +88,13 @@ export const EnhancedIngredientsPage = () => {
                 matchesStock = currentStock > minStock
             }
 
-            return matchesSearch && matchesStock
+            // Category filter
+            const matchesCategory = categoryFilter === 'all' ||
+                (item.category || 'Lainnya') === categoryFilter
+
+            return matchesSearch && matchesStock && matchesCategory
         }).sort((a, b) => a.name.localeCompare(b.name))
-    }, [ingredients, searchTerm, stockFilter])
+    }, [ingredients, searchTerm, stockFilter, categoryFilter])
 
     // Handlers
     const handleEdit = (ingredient: Ingredient) => {
@@ -121,9 +127,10 @@ export const EnhancedIngredientsPage = () => {
     const clearFilters = () => {
         setSearchTerm('')
         setStockFilter('all')
+        setCategoryFilter('all')
     }
 
-    const hasActiveFilters = searchTerm || stockFilter !== 'all'
+    const hasActiveFilters = searchTerm || stockFilter !== 'all' || categoryFilter !== 'all'
 
     // Empty state
     if (!loading && (!ingredients || ingredients.length === 0)) {
@@ -135,43 +142,60 @@ export const EnhancedIngredientsPage = () => {
             {/* Search and Filter Bar */}
             <Card>
                 <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        {/* Search */}
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Cari bahan baku..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-9"
-                            />
+                    <div className="flex flex-col gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            {/* Search */}
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Cari bahan baku..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9"
+                                />
+                            </div>
+
+                            {/* Stock Filter */}
+                            <Select value={stockFilter} onValueChange={(v) => setStockFilter(v as StockFilter)}>
+                                <SelectTrigger className="w-full sm:w-[180px]">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Stok</SelectItem>
+                                    <SelectItem value="normal">Stok Normal</SelectItem>
+                                    <SelectItem value="low">Stok Rendah</SelectItem>
+                                    <SelectItem value="out">Stok Habis</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            {/* Clear Filters */}
+                            {hasActiveFilters && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={clearFilters}
+                                    className="shrink-0"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
                         </div>
 
-                        {/* Stock Filter */}
-                        <Select value={stockFilter} onValueChange={(v) => setStockFilter(v as StockFilter)}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <Filter className="h-4 w-4 mr-2" />
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Semua Stok</SelectItem>
-                                <SelectItem value="normal">Stok Normal</SelectItem>
-                                <SelectItem value="low">Stok Rendah</SelectItem>
-                                <SelectItem value="out">Stok Habis</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        {/* Clear Filters */}
-                        {hasActiveFilters && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={clearFilters}
-                                className="shrink-0"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        )}
+                        {/* Category Filter */}
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                            {(['all', 'Bahan Kering', 'Bahan Basah', 'Bumbu', 'Protein', 'Sayuran', 'Buah', 'Dairy', 'Kemasan', 'Lainnya'] as CategoryFilter[]).map((cat) => (
+                                <Button
+                                    key={cat}
+                                    variant={categoryFilter === cat ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setCategoryFilter(cat)}
+                                    className="whitespace-nowrap"
+                                >
+                                    {cat === 'all' ? 'Semua Kategori' : cat}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Results Count */}
@@ -219,7 +243,14 @@ export const EnhancedIngredientsPage = () => {
                                         return (
                                             <tr key={item.id} className="border-b hover:bg-muted/30 transition-colors">
                                                 <td className="p-4">
-                                                    <div className="font-medium">{item.name}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="font-medium">{item.name}</div>
+                                                        {item.category && (
+                                                            <Badge variant="outline" className="text-xs">
+                                                                {item.category}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                     {item.description && (
                                                         <div className="text-xs text-muted-foreground mt-0.5">
                                                             {item.description}
@@ -231,13 +262,40 @@ export const EnhancedIngredientsPage = () => {
                                                     {formatCurrency(item.price_per_unit)}
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className="flex justify-center">
+                                                    <div className="flex flex-col items-center gap-1">
                                                         <StockBadge
                                                             currentStock={currentStock}
                                                             minStock={minStock}
                                                             unit={item.unit}
                                                             compact
                                                         />
+                                                        {(() => {
+                                                            if (!item.expiry_date) return null
+                                                            const expiryDate = new Date(item.expiry_date)
+                                                            const today = new Date()
+                                                            const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+                                                            if (daysUntilExpiry <= 0) {
+                                                                return (
+                                                                    <Badge variant="destructive" className="text-xs">
+                                                                        Expired
+                                                                    </Badge>
+                                                                )
+                                                            } else if (daysUntilExpiry <= 7) {
+                                                                return (
+                                                                    <Badge variant="destructive" className="text-xs">
+                                                                        {daysUntilExpiry} hari lagi
+                                                                    </Badge>
+                                                                )
+                                                            } else if (daysUntilExpiry <= 14) {
+                                                                return (
+                                                                    <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
+                                                                        {daysUntilExpiry} hari lagi
+                                                                    </Badge>
+                                                                )
+                                                            }
+                                                            return null
+                                                        })()}
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-right text-sm font-semibold">
@@ -258,12 +316,14 @@ export const EnhancedIngredientsPage = () => {
                                                                     <Edit className="h-4 w-4 mr-2" />
                                                                     Edit
                                                                 </DropdownMenuItem>
-                                                                {currentStock <= minStock && (
-                                                                    <DropdownMenuItem onClick={() => handleQuickBuy(item)}>
-                                                                        <ShoppingCart className="h-4 w-4 mr-2" />
-                                                                        Beli Sekarang
-                                                                    </DropdownMenuItem>
-                                                                )}
+                                                                <DropdownMenuItem
+                                                                    onClick={() => handleQuickBuy(item)}
+                                                                    disabled={currentStock > minStock}
+                                                                    className={currentStock <= minStock ? 'bg-green-50 text-green-700 focus:bg-green-100 focus:text-green-800' : ''}
+                                                                >
+                                                                    <ShoppingCart className="h-4 w-4 mr-2" />
+                                                                    {currentStock <= minStock ? 'Quick Reorder' : 'Stok Cukup'}
+                                                                </DropdownMenuItem>
                                                                 <DropdownMenuSeparator />
                                                                 <DropdownMenuItem
                                                                     onClick={() => handleDelete(item)}

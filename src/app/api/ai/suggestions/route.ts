@@ -1,52 +1,41 @@
-// API Route: Dynamic Chat Suggestions
-
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
-import { BusinessContextService } from '@/lib/services/BusinessContextService';
-import { SuggestionEngine } from '@/lib/services/SuggestionEngine';
-import { logger } from '@/lib/logger';
-import type { Database } from '@/types/supabase-generated';
-
 /**
- * GET /api/ai/suggestions - Get dynamic chat suggestions
+ * AI Chat Suggestions API
  */
+
+import { type NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
+import { BusinessContextService } from '@/lib/services/BusinessContextService'
+import { SuggestionEngine } from '@/lib/services/SuggestionEngine'
+import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
+
+export const runtime = 'nodejs'
+
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createClient()
+
+    // Get authenticated user
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (authError || !user) {
+      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
     }
 
-    const {searchParams} = request.nextUrl;
-    const currentPage = searchParams.get('page') || undefined;
-    const maxSuggestions = parseInt(
-      searchParams.get('limit') || '4'
-    );
+    // Get query params
+    const { searchParams } = new URL(request.url)
+    const currentPage = searchParams.get('page') || undefined
 
     // Load business context
-    const context = await BusinessContextService.loadContext(
-      user.id,
-      currentPage
-    );
+    const context = await BusinessContextService.loadContext(user.id, currentPage)
 
     // Generate suggestions
-    const suggestions = SuggestionEngine.generateSuggestions(
-      context,
-      maxSuggestions
-    );
+    const suggestions = SuggestionEngine.generateSuggestions(context)
 
-    return NextResponse.json({ suggestions });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Failed to generate suggestions: ${errorMessage}`);
-    return NextResponse.json(
-      { error: 'Failed to generate suggestions' },
-      { status: 500 }
-    );
+    return NextResponse.json({ suggestions })
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
 }

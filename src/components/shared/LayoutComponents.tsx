@@ -446,7 +446,7 @@ export const DataView = ({
         ) : (
           emptyState || (
             <div className="text-center py-12 text-muted-foreground">
-              No data available
+              Tidak ada data tersedia
             </div>
           )
         )}

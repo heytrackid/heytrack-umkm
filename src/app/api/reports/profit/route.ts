@@ -143,10 +143,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response)
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error generating profit report:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error generating profit report:')
     return NextResponse.json(
-      { error: 'Internal server error', details: err instanceof Error ? err.message : String(err) },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

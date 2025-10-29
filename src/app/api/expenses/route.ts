@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { FinancialRecordInsertSchema } from '@/lib/validations/domains/finance'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
 import { apiLogger } from '@/lib/logger'
-import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/api-validations'
+import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { formatCurrency } from '@/lib/currency'
 import { safeInsert } from '@/lib/supabase/type-helpers'
@@ -144,9 +144,9 @@ export async function GET(request: NextRequest) {
         categoryBreakdown
       }
     })
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error fetching expenses:')
-    const message = err instanceof Error ? err.message : 'Failed to fetch expenses'
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error fetching expenses:')
+    const message = error instanceof Error ? error.message : 'Failed to fetch expenses'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
@@ -207,9 +207,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(expense, { status: 201 })
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error creating expense:')
-    const message = err instanceof Error ? err.message : 'Failed to create expense'
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error creating expense:')
+    const message = error instanceof Error ? error.message : 'Failed to create expense'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

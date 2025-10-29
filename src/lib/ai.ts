@@ -319,24 +319,305 @@ Focus on Indonesian food business terminology.`
   }
 
   /**
-   * Fallback analysis when AI processing fails
+   * Classify user intent with confidence scoring
+   */
+  static classifyIntent(query: string): { intent: string; confidence: number; category: string } {
+    const lowerQuery = query.toLowerCase()
+    
+    // Intent patterns with confidence scores
+    const intentPatterns = [
+      // Inventory & Stock
+      { pattern: /stok|persediaan|inventory|sisa|tersedia/i, intent: 'check_inventory', confidence: 0.95, category: 'inventory' },
+      { pattern: /restock|isi ulang|beli bahan/i, intent: 'restock_planning', confidence: 0.9, category: 'inventory' },
+      
+      // HPP & Costing
+      { pattern: /hpp|harga pokok|biaya produksi|cost of goods/i, intent: 'analyze_hpp', confidence: 0.95, category: 'costing' },
+      { pattern: /biaya|cost|pengeluaran|expense/i, intent: 'cost_analysis', confidence: 0.85, category: 'costing' },
+      
+      // Profitability
+      { pattern: /profit|untung|laba|margin|keuntungan/i, intent: 'analyze_profit', confidence: 0.95, category: 'financial' },
+      { pattern: /rugi|loss|merugi/i, intent: 'loss_analysis', confidence: 0.9, category: 'financial' },
+      { pattern: /revenue|pendapatan|pemasukan|omzet/i, intent: 'revenue_analysis', confidence: 0.9, category: 'financial' },
+      
+      // Pricing Strategy
+      { pattern: /harga jual|pricing|tentukan harga|harga yang pas/i, intent: 'pricing_strategy', confidence: 0.95, category: 'strategy' },
+      { pattern: /naik.*harga|turun.*harga|ubah.*harga/i, intent: 'price_adjustment', confidence: 0.9, category: 'strategy' },
+      
+      // Marketing & Sales
+      { pattern: /marketing|promosi|promo|iklan|advertis/i, intent: 'marketing_strategy', confidence: 0.95, category: 'marketing' },
+      { pattern: /penjualan|jualan|sales|laku|terjual/i, intent: 'sales_analysis', confidence: 0.9, category: 'marketing' },
+      { pattern: /ningkatin|boost|tingkatkan|naikin.*penjualan/i, intent: 'sales_boost', confidence: 0.95, category: 'marketing' },
+      { pattern: /customer|pelanggan|pembeli/i, intent: 'customer_management', confidence: 0.85, category: 'marketing' },
+      
+      // Recipe & Product
+      { pattern: /resep|recipe|formula/i, intent: 'recipe_query', confidence: 0.9, category: 'product' },
+      { pattern: /produk|product|menu/i, intent: 'product_query', confidence: 0.85, category: 'product' },
+      { pattern: /menguntungkan|paling cuan|profitable/i, intent: 'profitability_ranking', confidence: 0.95, category: 'product' },
+      
+      // Orders
+      { pattern: /pesanan|order|orderan/i, intent: 'order_management', confidence: 0.9, category: 'operations' },
+      { pattern: /produksi|production|batch/i, intent: 'production_planning', confidence: 0.9, category: 'operations' },
+      
+      // Strategy & Advice
+      { pattern: /strategi|strategy|cara|tips|saran|rekomendasi|advice/i, intent: 'strategy_advice', confidence: 0.9, category: 'strategy' },
+      { pattern: /gimana|bagaimana|how to/i, intent: 'how_to_question', confidence: 0.85, category: 'strategy' },
+      { pattern: /kenapa|why|penyebab|alasan/i, intent: 'root_cause_analysis', confidence: 0.9, category: 'strategy' },
+      
+      // Comparison
+      { pattern: /bandingkan|compare|vs|versus|lebih baik/i, intent: 'comparison', confidence: 0.9, category: 'analysis' },
+      { pattern: /mana yang|which|pilih/i, intent: 'recommendation_request', confidence: 0.85, category: 'analysis' },
+      
+      // Reporting
+      { pattern: /laporan|report|analisis|analysis/i, intent: 'report_request', confidence: 0.85, category: 'reporting' },
+      { pattern: /trend|tren|perkembangan/i, intent: 'trend_analysis', confidence: 0.9, category: 'reporting' },
+    ]
+    
+    // Find matching patterns
+    for (const { pattern, intent, confidence, category } of intentPatterns) {
+      if (pattern.test(lowerQuery)) {
+        return { intent, confidence, category }
+      }
+    }
+    
+    // Default fallback
+    return { 
+      intent: 'general_question', 
+      confidence: 0.6, 
+      category: 'general' 
+    }
+  }
+
+  /**
+   * Extract business entities from query
+   */
+  static extractEntities(query: string): {
+    products: string[]
+    ingredients: string[]
+    numbers: number[]
+    currencies: string[]
+    dates: string[]
+    percentages: number[]
+    timeframes: string[]
+  } {
+    const lowerQuery = query.toLowerCase()
+    
+    // Extract numbers
+    const numbers = (query.match(/\d+/g) || []).map(n => parseInt(n))
+    
+    // Extract currencies
+    const currencies = query.match(/rp\.?\s*\d+[\d.,]*/gi) || []
+    
+    // Extract percentages
+    const percentages = (query.match(/\d+%/g) || []).map(p => parseInt(p))
+    
+    // Extract dates (simple patterns)
+    const dates = query.match(/\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|hari ini|kemarin|besok|minggu ini|bulan ini/gi) || []
+    
+    // Extract timeframes
+    const timeframes = []
+    if (/hari ini|today/i.test(query)) timeframes.push('today')
+    if (/kemarin|yesterday/i.test(query)) timeframes.push('yesterday')
+    if (/minggu ini|this week/i.test(query)) timeframes.push('this_week')
+    if (/bulan ini|this month/i.test(query)) timeframes.push('this_month')
+    if (/tahun ini|this year/i.test(query)) timeframes.push('this_year')
+    
+    // Common product names (can be expanded)
+    const productKeywords = ['brownies', 'cookies', 'cake', 'kue', 'roti', 'pastry']
+    const products = productKeywords.filter(p => lowerQuery.includes(p))
+    
+    // Common ingredient names (can be expanded)
+    const ingredientKeywords = ['tepung', 'gula', 'telur', 'mentega', 'coklat', 'susu', 'flour', 'sugar', 'butter', 'chocolate']
+    const ingredients = ingredientKeywords.filter(i => lowerQuery.includes(i))
+    
+    return {
+      products,
+      ingredients,
+      numbers,
+      currencies,
+      dates,
+      percentages,
+      timeframes
+    }
+  }
+
+  /**
+   * Detect sentiment with nuanced scoring
+   */
+  static analyzeSentiment(query: string): {
+    sentiment: 'positive' | 'negative' | 'neutral'
+    score: number // -1 to 1
+    confidence: number
+  } {
+    const lowerQuery = query.toLowerCase()
+    
+    // Sentiment lexicon
+    const positiveWords = [
+      'bagus', 'baik', 'untung', 'naik', 'meningkat', 'sukses', 'berhasil', 
+      'mantap', 'oke', 'sip', 'hebat', 'luar biasa', 'sempurna', 'excellent',
+      'profit', 'laba', 'cuan', 'laris', 'ramai', 'banyak'
+    ]
+    
+    const negativeWords = [
+      'buruk', 'jelek', 'rugi', 'turun', 'menurun', 'gagal', 'masalah', 
+      'susah', 'sulit', 'sepi', 'sedikit', 'kurang', 'loss', 'merugi',
+      'mahal', 'boros', 'waste', 'habis', 'kosong'
+    ]
+    
+    let positiveCount = 0
+    let negativeCount = 0
+    
+    positiveWords.forEach(word => {
+      if (lowerQuery.includes(word)) positiveCount++
+    })
+    
+    negativeWords.forEach(word => {
+      if (lowerQuery.includes(word)) negativeCount++
+    })
+    
+    // Calculate score
+    const totalWords = positiveCount + negativeCount
+    let score = 0
+    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
+    let confidence = 0.5
+    
+    if (totalWords > 0) {
+      score = (positiveCount - negativeCount) / totalWords
+      confidence = Math.min(totalWords / 3, 1) // More words = higher confidence
+      
+      if (score > 0.2) sentiment = 'positive'
+      else if (score < -0.2) sentiment = 'negative'
+    }
+    
+    return { sentiment, score, confidence }
+  }
+
+  /**
+   * Fallback analysis when AI processing fails - ENHANCED NLP
    */
   private static fallbackAnalysis(query: string): NLPAnalysis {
-    // Simple regex-based fallback
+    const lowerQuery = query.toLowerCase()
+    
+    // Extract numbers
     const numbers = query.match(/\d+/g)?.map(n => parseInt(n)) || []
-    const hasQuestions = /\?|apa|bagaimana|kenapa|kapan|dimana|siapa/i.test(query)
-
+    
+    // Extract currencies (Rupiah)
+    const currencies = query.match(/rp\.?\s*\d+[\d.,]*/gi) || []
+    
+    // Detect question words
+    const questionWords = {
+      'apa': 'what',
+      'bagaimana': 'how',
+      'gimana': 'how',
+      'kenapa': 'why',
+      'kapan': 'when',
+      'dimana': 'where',
+      'siapa': 'who',
+      'berapa': 'how_much'
+    }
+    
+    let questionType = null
+    for (const [indo, eng] of Object.entries(questionWords)) {
+      if (lowerQuery.includes(indo)) {
+        questionType = eng
+        break
+      }
+    }
+    
+    // Intent detection with confidence scoring
+    const intents = []
+    
+    // Business intents
+    if (/stok|persediaan|inventory/i.test(query)) {
+      intents.push({ intent: 'check_inventory', confidence: 0.9, entities: { numbers } })
+    }
+    if (/hpp|biaya|cost|harga pokok/i.test(query)) {
+      intents.push({ intent: 'analyze_hpp', confidence: 0.9, entities: { numbers } })
+    }
+    if (/profit|untung|laba|rugi/i.test(query)) {
+      intents.push({ intent: 'analyze_profit', confidence: 0.9, entities: { numbers } })
+    }
+    if (/resep|recipe|produk/i.test(query)) {
+      intents.push({ intent: 'recipe_query', confidence: 0.85, entities: { numbers } })
+    }
+    if (/harga|price|pricing/i.test(query)) {
+      intents.push({ intent: 'pricing_strategy', confidence: 0.85, entities: { currencies } })
+    }
+    if (/strategi|cara|tips|saran|rekomendasi/i.test(query)) {
+      intents.push({ intent: 'strategy_advice', confidence: 0.8, entities: {} })
+    }
+    if (/marketing|promosi|promo|jualan|penjualan/i.test(query)) {
+      intents.push({ intent: 'marketing_strategy', confidence: 0.85, entities: {} })
+    }
+    if (/pesanan|order|orderan/i.test(query)) {
+      intents.push({ intent: 'order_management', confidence: 0.85, entities: { numbers } })
+    }
+    if (/bahan|ingredient/i.test(query)) {
+      intents.push({ intent: 'ingredient_query', confidence: 0.85, entities: { numbers } })
+    }
+    if (/laporan|report|analisis/i.test(query)) {
+      intents.push({ intent: 'report_request', confidence: 0.8, entities: {} })
+    }
+    
+    // Action intents
+    if (/tambah|buat|create|add/i.test(query)) {
+      intents.push({ intent: 'create_action', confidence: 0.75, entities: {} })
+    }
+    if (/ubah|edit|update|ganti/i.test(query)) {
+      intents.push({ intent: 'update_action', confidence: 0.75, entities: {} })
+    }
+    if (/hapus|delete|remove/i.test(query)) {
+      intents.push({ intent: 'delete_action', confidence: 0.75, entities: {} })
+    }
+    
+    // Sentiment analysis
+    let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral'
+    const positiveWords = ['bagus', 'baik', 'untung', 'naik', 'meningkat', 'sukses', 'berhasil', 'mantap', 'oke', 'sip']
+    const negativeWords = ['buruk', 'jelek', 'rugi', 'turun', 'menurun', 'gagal', 'masalah', 'susah', 'sulit']
+    
+    const hasPositive = positiveWords.some(word => lowerQuery.includes(word))
+    const hasNegative = negativeWords.some(word => lowerQuery.includes(word))
+    
+    if (hasPositive && !hasNegative) sentiment = 'positive'
+    else if (hasNegative && !hasPositive) sentiment = 'negative'
+    
+    // Complexity detection
+    let complexity: 'simple' | 'medium' | 'complex' = 'simple'
+    if (intents.length > 2) complexity = 'complex'
+    else if (intents.length === 2 || numbers.length > 2) complexity = 'medium'
+    
+    // Context detection
+    const contexts = []
+    if (/resep|recipe/i.test(query)) contexts.push('recipes')
+    if (/bahan|ingredient/i.test(query)) contexts.push('ingredients')
+    if (/hpp|cost/i.test(query)) contexts.push('hpp')
+    if (/pesanan|order/i.test(query)) contexts.push('orders')
+    if (/profit|laba/i.test(query)) contexts.push('financial')
+    if (/marketing|promosi/i.test(query)) contexts.push('marketing')
+    if (/strategi|strategy/i.test(query)) contexts.push('strategy')
+    if (contexts.length === 0) contexts.push('general')
+    
+    // Primary intent (highest confidence)
+    const primaryIntent = intents.length > 0 
+      ? intents.sort((a, b) => b.confidence - a.confidence)[0].intent
+      : (questionType ? 'question' : 'statement')
+    
     return {
-      intents: [{
-        intent: hasQuestions ? 'question' : 'statement',
+      intents: intents.length > 0 ? intents : [{
+        intent: questionType ? 'question' : 'statement',
         confidence: 0.7,
-        entities: { originalQuery: query, numbers }
+        entities: { originalQuery: query, numbers, questionType }
       }],
-      primaryIntent: hasQuestions ? 'question' : 'statement',
-      entities: { originalQuery: query, numbers },
-      sentiment: 'neutral',
-      complexity: 'simple',
-      context: ['general']
+      primaryIntent,
+      entities: { 
+        originalQuery: query, 
+        numbers,
+        currencies,
+        questionType,
+        hasQuestion: !!questionType
+      },
+      sentiment,
+      complexity,
+      context: contexts
     }
   }
 }

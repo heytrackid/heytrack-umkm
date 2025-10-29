@@ -1,150 +1,126 @@
 /**
- * HPP (Harga Pokok Produksi) Configuration
+ * HPP (Harga Pokok Produksi) Configuration Constants
  * 
- * Centralized configuration for HPP calculation defaults and thresholds.
- * These values are used as fallbacks when actual data is not available.
+ * Centralized configuration for HPP calculations to avoid magic numbers
+ * and make business logic more maintainable.
  */
 
 export const HPP_CONFIG = {
   /**
-   * Default labor cost per serving when no production history exists
-   * Unit: IDR (Indonesian Rupiah)
+   * Default labor cost per serving when no production data is available
+   * Used as fallback in HPP calculations
    */
-  DEFAULT_LABOR_COST_PER_SERVING: 5000,
+  DEFAULT_LABOR_COST_PER_SERVING: 5000, // IDR
 
   /**
-   * Default overhead cost per serving when no operational costs are defined
-   * Unit: IDR (Indonesian Rupiah)
+   * Default overhead cost per serving
+   * Used when operational costs cannot be calculated
    */
-  DEFAULT_OVERHEAD_PER_SERVING: 2000,
+  DEFAULT_OVERHEAD_PER_SERVING: 2500, // IDR
 
   /**
-   * Fallback recipe count for overhead allocation when recipe count query fails
-   * Used to divide total overhead costs equally
+   * Minimum operational cost percentage of material cost
+   * Ensures operational costs are at least 15% of ingredient costs
+   */
+  MIN_OPERATIONAL_COST_PERCENTAGE: 0.15, // 15%
+
+  /**
+   * Default operational cost percentage when no data available
+   * Applied to ingredient costs to estimate operational overhead
+   */
+  DEFAULT_OPERATIONAL_COST_PERCENTAGE: 0.15, // 15%
+
+  /**
+   * Fallback recipe count for overhead distribution
+   * Used when recipe count cannot be determined
    */
   FALLBACK_RECIPE_COUNT: 10,
 
   /**
-   * Number of recent stock transactions to consider for WAC calculation
-   * Higher number = more historical data, but slower calculation
+   * Number of recent transactions to consider for WAC calculation
+   * Limits the lookback window for weighted average cost
    */
   WAC_LOOKBACK_TRANSACTIONS: 50,
 
   /**
-   * Number of recent production batches to consider for labor cost calculation
+   * Price increase threshold for alerts (percentage)
+   * Triggers alert when HPP increases by more than this amount
    */
-  LABOR_COST_LOOKBACK_BATCHES: 10,
+  PRICE_INCREASE_THRESHOLD: 0.10, // 10%
 
   /**
-   * Alert thresholds for HPP monitoring
+   * Low margin threshold (percentage)
+   * Warns when profit margin falls below this level
+   */
+  MARGIN_LOW_THRESHOLD: 0.20, // 20%
+
+  /**
+   * Cost spike threshold (percentage)
+   * Detects sudden cost increases that may need attention
+   */
+  COST_SPIKE_THRESHOLD: 0.15, // 15%
+
+  /**
+   * Minimum margin for sustainable business (percentage)
+   * Recommended minimum profit margin
+   */
+  RECOMMENDED_MIN_MARGIN: 0.30, // 30%
+
+  /**
+   * Target margin for healthy business (percentage)
+   * Ideal profit margin to aim for
+   */
+  RECOMMENDED_TARGET_MARGIN: 0.40, // 40%
+
+  /**
+   * Days to keep HPP snapshots for trend analysis
+   */
+  SNAPSHOT_RETENTION_DAYS: 90,
+
+  /**
+   * Maximum age of WAC data before recalculation (days)
+   */
+  WAC_MAX_AGE_DAYS: 30,
+
+  /**
+   * Alert thresholds
    */
   ALERTS: {
-    /**
-     * Threshold for price increase alert (10% = 0.10)
-     * Triggers when HPP increases by more than this percentage
-     */
-    PRICE_INCREASE_THRESHOLD: 0.10,
-
-    /**
-     * Threshold for critical price increase (20% = 0.20)
-     * Triggers HIGH severity alert
-     */
-    PRICE_INCREASE_CRITICAL: 0.20,
-
-    /**
-     * Threshold for low margin warning (20% = 0.20)
-     * Triggers when profit margin falls below this percentage
-     */
-    MARGIN_LOW_THRESHOLD: 0.20,
-
-    /**
-     * Threshold for critical low margin (10% = 0.10)
-     * Triggers CRITICAL severity alert
-     */
-    MARGIN_CRITICAL_THRESHOLD: 0.10,
-
-    /**
-     * Threshold for cost spike detection (15% = 0.15)
-     * Triggers when material costs spike suddenly
-     */
-    COST_SPIKE_THRESHOLD: 0.15,
+    PRICE_INCREASE_THRESHOLD: 0.10, // 10%
+    PRICE_INCREASE_CRITICAL: 0.20, // 20%
+    MARGIN_LOW_THRESHOLD: 0.20, // 20%
+    MARGIN_CRITICAL_THRESHOLD: 0.10, // 10%
+    COST_SPIKE_THRESHOLD: 0.15, // 15%
   },
 
   /**
    * Snapshot configuration
    */
   SNAPSHOTS: {
-    /**
-     * Number of days to retain snapshots before archival
-     */
     RETENTION_DAYS: 90,
-
-    /**
-     * Whether to create snapshots automatically via cron job
-     */
-    AUTO_CREATE_ENABLED: true,
-
-    /**
-     * Cron schedule for daily snapshots (midnight)
-     */
-    CRON_SCHEDULE: '0 0 * * *',
-  },
-
-  /**
-   * Calculation configuration
-   */
-  CALCULATION: {
-    /**
-     * Minimum number of ingredients required for a recipe
-     */
-    MIN_INGREDIENTS: 1,
-
-    /**
-     * Minimum servings for a recipe
-     */
-    MIN_SERVINGS: 1,
-
-    /**
-     * Whether to include WAC adjustment in HPP calculation
-     */
-    INCLUDE_WAC_ADJUSTMENT: true,
-
-    /**
-     * Whether to save calculations to database automatically
-     */
-    AUTO_SAVE_CALCULATIONS: true,
   },
 } as const
 
 /**
- * Type-safe access to HPP configuration
+ * Alert severity levels based on cost changes
  */
-export type HppConfig = typeof HPP_CONFIG
+export const HPP_ALERT_SEVERITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+} as const
 
 /**
- * Helper function to get alert severity based on percentage change
+ * Alert types for HPP monitoring
  */
-export function getAlertSeverity(percentageChange: number): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-  if (percentageChange >= HPP_CONFIG.ALERTS.PRICE_INCREASE_CRITICAL) {
-    return 'CRITICAL'
-  }
-  if (percentageChange >= HPP_CONFIG.ALERTS.PRICE_INCREASE_THRESHOLD) {
-    return 'HIGH'
-  }
-  if (percentageChange >= 0.05) {
-    return 'MEDIUM'
-  }
-  return 'LOW'
-}
+export const HPP_ALERT_TYPES = {
+  PRICE_INCREASE: 'price_increase',
+  LOW_MARGIN: 'low_margin',
+  COST_SPIKE: 'cost_spike',
+  NEGATIVE_MARGIN: 'negative_margin',
+  WAC_OUTDATED: 'wac_outdated',
+} as const
 
-/**
- * Helper function to format HPP value as IDR currency
- */
-export function formatHppValue(value: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
+export type HppAlertSeverity = typeof HPP_ALERT_SEVERITY[keyof typeof HPP_ALERT_SEVERITY]
+export type HppAlertType = typeof HPP_ALERT_TYPES[keyof typeof HPP_ALERT_TYPES]

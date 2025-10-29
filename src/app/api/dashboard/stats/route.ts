@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { DateRangeQuerySchema } from '@/lib/validations/api-validations'
+import { DateRangeQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { safeParseAmount, safeString, safeParseInt, safeTimestamp, isInArray } from '@/lib/api-helpers'
 import { getErrorMessage } from '@/lib/type-guards'

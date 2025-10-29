@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import type { HppCalculation } from '@/modules/hpp/types'
+import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 
 // Extended type for UI with calculated fields
 interface RecipeWithCosts extends Recipe {
@@ -21,6 +22,22 @@ interface RecipeWithCosts extends Recipe {
   total_cost: number
 }
 
+// Type guard for recipe ingredient structure
+function isValidRecipeIngredient(ri: unknown): ri is {
+  ingredient_id: string
+  ingredients?: {
+    name?: string
+    weighted_average_cost?: number
+    price_per_unit?: number
+  }
+  quantity?: number
+  unit?: string
+} {
+  if (!ri || typeof ri !== 'object') return false
+  const ingredient = ri as { ingredient_id?: string }
+  return typeof ingredient.ingredient_id === 'string'
+}
+
 export function useUnifiedHpp() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -32,7 +49,14 @@ export function useUnifiedHpp() {
     queryFn: async () => {
       const response = await fetch('/api/recipes?limit=100')
       if (!response.ok) {throw new Error('Failed to fetch recipes')}
-      return response.json()
+      const data = await response.json()
+      apiLogger.info({ 
+        dataType: typeof data, 
+        isArray: Array.isArray(data),
+        hasRecipesKey: data?.recipes !== undefined,
+        count: Array.isArray(data) ? data.length : (data?.recipes?.length || 0)
+      }, 'HPP: Recipes data fetched')
+      return data
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false
@@ -60,29 +84,36 @@ export function useUnifiedHpp() {
       if (!response.ok) {throw new Error('Failed to fetch recipe')}
       const data: Recipe = await response.json()
       
-      // Calculate total cost from ingredients
+      // Calculate total cost from ingredients with type safety
       let ingredientCost = 0
-      if (data.recipe_ingredients) {
-        ingredientCost = data.recipe_ingredients.reduce((sum: number, ri: { quantity?: number; ingredients?: { weighted_average_cost?: number; price_per_unit?: number } }) => {
-          const quantity = ri.quantity || 0
-          // Use WAC if available, otherwise use current price
-          const unitPrice = ri.ingredients?.weighted_average_cost || ri.ingredients?.price_per_unit || 0
-          return sum + (quantity * unitPrice)
-        }, 0)
+      if (data.recipe_ingredients && Array.isArray(data.recipe_ingredients)) {
+        ingredientCost = data.recipe_ingredients
+          .filter(isValidRecipeIngredient)
+          .reduce((sum: number, ri) => {
+            const quantity = ri.quantity || 0
+            // Use WAC if available, otherwise use current price
+            const unitPrice = ri.ingredients?.weighted_average_cost || ri.ingredients?.price_per_unit || 0
+            return sum + (quantity * unitPrice)
+          }, 0)
       }
       
-      // Get operational costs (15% of material cost or minimum 2500)
-      const operationalCost = Math.max(ingredientCost * 0.15, 2500)
+      // Get operational costs using configured percentage and minimum
+      const operationalCost = Math.max(
+        ingredientCost * HPP_CONFIG.MIN_OPERATIONAL_COST_PERCENTAGE,
+        HPP_CONFIG.DEFAULT_OVERHEAD_PER_SERVING
+      )
       
       return {
         ...data,
-        ingredients: data.recipe_ingredients?.map((ri: { ingredient_id: string; ingredients?: { name?: string; weighted_average_cost?: number; price_per_unit?: number }; quantity?: number; unit?: string }) => ({
-          id: ri.ingredient_id,
-          name: ri.ingredients?.name || 'Unknown',
-          quantity: ri.quantity || 0,
-          unit: ri.unit || 'unit',
-          unit_price: ri.ingredients?.weighted_average_cost || ri.ingredients?.price_per_unit || 0
-        })) || [],
+        ingredients: (data.recipe_ingredients || [])
+          .filter(isValidRecipeIngredient)
+          .map((ri) => ({
+            id: ri.ingredient_id,
+            name: ri.ingredients?.name || 'Unknown',
+            quantity: ri.quantity || 0,
+            unit: ri.unit || 'unit',
+            unit_price: ri.ingredients?.weighted_average_cost || ri.ingredients?.price_per_unit || 0
+          })),
         operational_costs: operationalCost,
         total_cost: ingredientCost + operationalCost
       }
@@ -128,8 +159,9 @@ export function useUnifiedHpp() {
       if (!response.ok) {throw new Error('Failed to calculate HPP')}
       return response.json()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipe-detail'] })
+    onSuccess: (data, recipeId) => {
+      // Granular cache invalidation - only invalidate affected recipe
+      queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
       queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
       queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
       
@@ -139,7 +171,7 @@ export function useUnifiedHpp() {
       })
     },
     onError: (error) => {
-      apiLogger.error({ err: error }, 'Failed to calculate HPP')
+      apiLogger.error({ error }, 'Failed to calculate HPP')
       toast({
         title: 'Error',
         description: 'Gagal menghitung biaya produksi',
@@ -163,8 +195,9 @@ export function useUnifiedHpp() {
       if (!response.ok) {throw new Error('Failed to update price')}
       return response.json()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recipe-detail'] })
+    onSuccess: (data, { recipeId }) => {
+      // Granular cache invalidation - only invalidate affected recipe
+      queryClient.invalidateQueries({ queryKey: ['recipe-detail', recipeId] })
       queryClient.invalidateQueries({ queryKey: ['recipes-list'] })
       queryClient.invalidateQueries({ queryKey: ['hpp-overview'] })
       queryClient.invalidateQueries({ queryKey: ['hpp-comparison'] })
@@ -175,7 +208,7 @@ export function useUnifiedHpp() {
       })
     },
     onError: (error) => {
-      apiLogger.error({ err: error }, 'Failed to update price')
+      apiLogger.error({ error }, 'Failed to update price')
       toast({
         title: 'Error',
         description: 'Gagal menyimpan harga jual',
@@ -201,7 +234,7 @@ export function useUnifiedHpp() {
 
   return {
     // Data
-    recipes: recipesData?.recipes || [],
+    recipes: Array.isArray(recipesData) ? recipesData : (recipesData?.recipes || []),
     overview: overviewData,
     recipe: recipeData,
     comparison: comparisonData?.recipes || [],

@@ -458,7 +458,7 @@ export default function ProductionTimeline({
                 <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium mb-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Scheduling Warnings
+                    Peringatan Penjadwalan
                   </div>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     {schedulingResult.warnings.map((warning, index: number) => (

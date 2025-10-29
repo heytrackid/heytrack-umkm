@@ -1,7 +1,7 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
-import { HppCalculatorService } from '@/modules/hpp'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 

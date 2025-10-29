@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
-import { PaginationQuerySchema } from '@/lib/validations/api-validations'
+import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
-import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
@@ -153,9 +153,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate HPP using service
+    // Calculate HPP using consolidated service
     const hppService = new HppCalculatorService()
-    const calculationResult = await hppService.calculateRecipeHpp(recipeId)
+    const calculationResult = await hppService.calculateRecipeHpp(supabase, recipeId, user.id)
 
     // Invalidate cache
     await cacheInvalidation.hpp()

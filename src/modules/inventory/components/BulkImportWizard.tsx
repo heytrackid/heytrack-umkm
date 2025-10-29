@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
+import { uiLogger } from '@/lib/logger'
 import {
     Upload,
     FileText,
@@ -122,7 +123,7 @@ export function BulkImportWizard({ onImport, onCancel }: BulkImportWizardProps) 
             setParsedData(parsedData)
             setCurrentStep('review')
         } catch (error) {
-            console.error('Failed to parse file:', error)
+            uiLogger.error({ error }, 'Failed to parse file')
             // Handle error - show toast or error message
             setCurrentStep('upload')
         }
@@ -150,7 +151,7 @@ export function BulkImportWizard({ onImport, onCancel }: BulkImportWizardProps) 
             })
             setCurrentStep('complete')
         } catch (error) {
-            console.error('Import failed:', error)
+            uiLogger.error({ error }, 'Import failed')
         } finally {
             setImporting(false)
         }

@@ -23,7 +23,7 @@ const SidebarItem = ({
   // Use consistent className for both variants to avoid hydration mismatch
   const baseClasses = cn(
     "group flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg",
-    "transition-colors cursor-pointer",
+    "cursor-pointer",
     isActive
       ? "bg-primary text-primary-foreground shadow-sm"
       : "text-muted-foreground hover:bg-muted hover:text-foreground",

@@ -101,7 +101,7 @@ export default function BatchDetails({
                   <div className="flex gap-1">
                     {check.completed ? (
                       <Badge variant={check.passed ? "default" : "destructive"} className="text-xs">
-                        {check.passed ? 'PASSED' : 'FAILED'}
+                        {check.passed ? 'LULUS' : 'GAGAL'}
                       </Badge>
                     ) : (
                       <>

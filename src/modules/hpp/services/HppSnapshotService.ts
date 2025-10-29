@@ -161,7 +161,7 @@ export class HppSnapshotService {
   }
 
   /**
-   * Archive old snapshots (older than 90 days)
+   * Archive old snapshots (older than configured retention days)
    */
   async archiveOldSnapshots(): Promise<number> {
     try {
@@ -170,7 +170,7 @@ export class HppSnapshotService {
       const supabase = createServiceRoleClient()
 
       const cutoffDate = new Date()
-      cutoffDate.setDate(cutoffDate.getDate() - HPP_CONFIG.SNAPSHOTS.RETENTION_DAYS)
+      cutoffDate.setDate(cutoffDate.getDate() - HPP_CONFIG.SNAPSHOT_RETENTION_DAYS)
       const cutoffDateStr = cutoffDate.toISOString().split('T')[0]
 
       const { data, error } = await supabase
@@ -184,7 +184,7 @@ export class HppSnapshotService {
       }
 
       const archivedCount = data?.length || 0
-      this.logger.info({ archivedCount }, 'Old HPP snapshots archived')
+      this.logger.info({ archivedCount, cutoffDate: cutoffDateStr }, 'Old HPP snapshots archived')
       return archivedCount
 
     } catch (err: unknown) {

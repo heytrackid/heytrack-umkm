@@ -33,30 +33,47 @@ export {
 
 // API validations - export commonly used schemas
 export {
-  // Form schemas
+  // Form schemas (from domain schemas)
   IngredientFormSchema,
   OrderFormSchema,
   RecipeFormSchema,
   CustomerFormSchema,
+  SupplierFormSchema,
 
-  // Query schemas
+  // Query schemas (from domains/common)
   PaginationQuerySchema,
   DateRangeQuerySchema,
-  PaginationSchema,
-  DateRangeSchema,
 
-  // HPP schemas
+  // HPP schemas (from domains/common)
   HPPExportQuerySchema,
   HPPComparisonQuerySchema,
   HPPAnalysisQuerySchema,
 
-  // Other schemas
+  // Other schemas (from domains/common)
   IdParamSchema,
   ReportQuerySchema,
   SalesQuerySchema,
+} from './domains'
+
+// API-specific schemas (from api-validations)
+export {
   FileUploadSchema,
   ImageUploadSchema,
-} from './domains'
+  UserProfileSettingsSchema,
+  BusinessInfoSettingsSchema,
+  NotificationSettingsSchema,
+  RegionalSettingsSchema,
+  SecuritySettingsSchema,
+  ThemeSettingsSchema,
+  AppSettingsSchema,
+  HPPCalculationInputSchema,
+  CurrencyFormatSchema,
+  InventoryCalculationSchema,
+  SalesCalculationSchema,
+  ReportGenerationSchema,
+  CronJobConfigSchema,
+  WebhookPayloadSchema,
+} from './api-validations'
 
 // Domain-specific exports
 export {

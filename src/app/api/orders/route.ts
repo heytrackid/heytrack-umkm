@@ -92,8 +92,8 @@ export async function GET(request: NextRequest) {
     }))
 
     return NextResponse.json(mappedData)
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in GET /api/orders:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in GET /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -240,12 +240,22 @@ export async function POST(request: NextRequest) {
 
       if (itemsError) {
         apiLogger.error({ error: itemsError }, 'Error creating order items:')
-        // Rollback order creation if items fail
+        
+        // Complete rollback: delete order AND financial record
         await supabase
           .from('orders')
           .delete()
           .eq('id', createdOrder.id)
           .eq('user_id', user.id)
+        
+        // Also rollback financial record if it was created
+        if (incomeRecordId) {
+          await supabase
+            .from('financial_records')
+            .delete()
+            .eq('id', incomeRecordId)
+            .eq('user_id', user.id)
+        }
 
         return NextResponse.json(
           { error: 'Failed to create order items' },
@@ -259,8 +269,8 @@ export async function POST(request: NextRequest) {
       ...createdOrder,
       income_recorded: !!incomeRecordId
     }, { status: 201 })
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in POST /api/orders:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in POST /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

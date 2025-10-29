@@ -34,7 +34,7 @@ export default function MiniChart(props: MiniChartProps) {
         className={`flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded ${className}`}
         style={{ height }}
       >
-        <span className="text-xs text-gray-400">No data</span>
+        <span className="text-xs text-gray-400">Tidak ada data</span>
       </div>
     )
   }

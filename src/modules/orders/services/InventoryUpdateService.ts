@@ -93,7 +93,7 @@ export class InventoryUpdateService {
               .eq('id', ingredient.id)
 
             if (updateError) {
-              dbLogger.error({ err: updateError }, 'Error updating ingredient stock')
+              dbLogger.error({ error: updateError }, 'Error updating ingredient stock')
             }
 
             // Create stock transaction record
@@ -119,8 +119,8 @@ export class InventoryUpdateService {
           }
         }
       }
-    } catch (err: unknown) {
-      dbLogger.error({ error: err }, 'Error updating inventory for order')
+    } catch (error: unknown) {
+      dbLogger.error({ error }, 'Error updating inventory for order')
       throw new Error('Failed to update inventory')
     }
   }

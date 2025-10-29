@@ -12,22 +12,22 @@ export interface LoadingButtonProps extends ComponentProps<typeof Button> {
 
 export const LoadingButton = forwardRef<HTMLButtonElement, LoadingButtonProps>(
   ({ loading, loadingText, children, disabled, className, ...props }, ref) => (
-      <Button
-        ref={ref}
-        disabled={disabled || loading}
-        className={cn(className)}
-        {...props}
-      >
-        {loading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {loadingText || 'Loading...'}
-          </>
-        ) : (
-          children
-        )}
-      </Button>
-    )
+    <Button
+      ref={ref}
+      disabled={disabled || loading}
+      className={cn(className)}
+      {...props}
+    >
+      {loading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {loadingText || 'Memuat...'}
+        </>
+      ) : (
+        children
+      )}
+    </Button>
+  )
 )
 
 LoadingButton.displayName = 'LoadingButton'

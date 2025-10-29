@@ -100,8 +100,8 @@ export default function RecipeGeneratorFormEnhanced({
   }
 
   return (
-    <Card className="border-2 border-purple-100 dark:border-purple-900">
-      <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20">
+    <Card>
+      <CardHeader className="bg-card">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
             <ChefHat className="h-5 w-5 text-white" />
@@ -265,7 +265,7 @@ export default function RecipeGeneratorFormEnhanced({
         )}
 
         {/* AI Logic Indicator */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl p-4">
+        <div className="bg-muted/50 border rounded-xl p-4">
           <div className="flex items-start gap-3">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
               <Sparkles className="h-4 w-4 text-white" />
@@ -286,7 +286,7 @@ export default function RecipeGeneratorFormEnhanced({
         <Button
           onClick={onGenerate}
           disabled={loading || !productName || !servings}
-          className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 shadow-lg hover:shadow-xl transition-all"
+          className="w-full shadow-lg hover:shadow-xl transition-all"
           size="lg"
         >
           {loading ? (

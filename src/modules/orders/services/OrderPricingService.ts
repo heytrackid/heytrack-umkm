@@ -2,7 +2,7 @@ import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 import { ORDER_CONFIG } from '@/lib/constants'
-import { HppCalculatorService } from '@/modules/hpp/services/HppCalculatorService'
+import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 import type { OrderItemCalculation, OrderPricing } from '../types'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']

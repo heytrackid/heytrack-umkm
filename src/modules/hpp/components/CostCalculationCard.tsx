@@ -5,8 +5,9 @@ import type { Database } from '@/types/supabase-generated'
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type Recipe = Database['public']['Tables']['recipes']['Row']
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, AlertTriangle, Calculator, ShoppingBag, Zap } from 'lucide-react'
+import { Loader2, AlertTriangle, Calculator, ShoppingBag, Zap, TrendingUp, TrendingDown } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 
 // Extended type for cost calculation display
@@ -22,6 +23,7 @@ interface RecipeForCost {
     ingredients: IngredientForCost[]
     operational_costs: number
     total_cost: number
+    previous_cost?: number // For showing change
 }
 
 interface CostCalculationCardProps {
@@ -34,6 +36,13 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
     const { formatCurrency } = useCurrency()
     const hasIngredientsWithoutPrice = recipe.ingredients.some((i) => i.unit_price === 0)
     const ingredientsCost = recipe.ingredients.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0)
+
+    // Calculate HPP change
+    const hppChange = recipe.previous_cost ? recipe.total_cost - recipe.previous_cost : 0
+    const changePercentage = recipe.previous_cost && recipe.previous_cost > 0
+        ? (hppChange / recipe.previous_cost) * 100
+        : 0
+    const hasSignificantChange = Math.abs(changePercentage) >= 5 // 5% threshold
 
     return (
         <Card>
@@ -126,10 +135,30 @@ export const CostCalculationCard = ({ recipe, onRecalculate, isCalculating }: Co
                         <div>
                             <span className="text-base font-semibold">Total Biaya Produksi</span>
                             <p className="text-xs text-muted-foreground mt-0.5">Per 1 porsi/unit</p>
+                            {recipe.previous_cost && recipe.previous_cost > 0 && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Sebelumnya: {formatCurrency(recipe.previous_cost)}
+                                </p>
+                            )}
                         </div>
-                        <span className="text-2xl font-bold text-blue-600">
-                            {formatCurrency(recipe.total_cost)}
-                        </span>
+                        <div className="text-right">
+                            <div className="text-2xl font-bold text-blue-600">
+                                {formatCurrency(recipe.total_cost)}
+                            </div>
+                            {hasSignificantChange && (
+                                <Badge
+                                    variant={hppChange > 0 ? 'destructive' : 'default'}
+                                    className="mt-2"
+                                >
+                                    {hppChange > 0 ? (
+                                        <TrendingUp className="h-3 w-3 mr-1" />
+                                    ) : (
+                                        <TrendingDown className="h-3 w-3 mr-1" />
+                                    )}
+                                    {hppChange > 0 ? '+' : ''}{changePercentage.toFixed(1)}%
+                                </Badge>
+                            )}
+                        </div>
                     </div>
                 </div>
 

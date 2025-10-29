@@ -39,7 +39,7 @@ export class WacEngineService {
         .select('*')
         .eq('ingredient_id', ingredientId)
         .eq('type', 'PURCHASE')
-        .order('transaction_date', { ascending: true })
+        .order('created_at', { ascending: true })
 
       if (error) {
         throw new Error(`Failed to fetch transactions: ${error.message}`)
@@ -57,7 +57,7 @@ export class WacEngineService {
       for (const transaction of transactions) {
         const quantity = Number(transaction.quantity)
         const unitPrice = Number(transaction.unit_price)
-        const totalValue = Number(transaction.total_value) || (quantity * unitPrice)
+        const totalValue = Number(transaction.total_price) || (quantity * unitPrice)
 
         // Add to running totals
         runningQuantity += quantity
@@ -247,11 +247,11 @@ export class WacEngineService {
 
       const { data: transactions, error } = await this.supabase
         .from('stock_transactions')
-        .select('id, transaction_date, unit_price, quantity, total_value')
+        .select('id, created_at, unit_price, quantity, total_price')
         .eq('ingredient_id', ingredientId)
         .eq('type', 'PURCHASE')
-        .gte('transaction_date', startDate.toISOString().split('T')[0])
-        .order('transaction_date', { ascending: true })
+        .gte('created_at', startDate.toISOString().split('T')[0])
+        .order('created_at', { ascending: true })
 
       if (error) {
         throw new Error(`Failed to fetch WAC history: ${error.message}`)
@@ -273,7 +273,7 @@ export class WacEngineService {
 
       for (const transaction of transactions) {
         const quantity = Number(transaction.quantity)
-        const totalValue = Number(transaction.total_value) || (quantity * Number(transaction.unit_price))
+        const totalValue = Number(transaction.total_price) || (quantity * Number(transaction.unit_price))
 
         runningQuantity += quantity
         runningValue += totalValue
@@ -281,7 +281,7 @@ export class WacEngineService {
         const wac = runningQuantity > 0 ? runningValue / runningQuantity : 0
 
         history.push({
-          date: transaction.transaction_date,
+          date: transaction.created_at,
           wac,
           transactionId: transaction.id
         })

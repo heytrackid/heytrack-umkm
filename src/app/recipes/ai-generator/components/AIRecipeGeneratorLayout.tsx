@@ -10,34 +10,39 @@ import { ChefHat, Sparkles, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
-
-type Ingredient = Database['public']['Tables']['ingredients']['Row']
 
 // Lazy load heavy components
 import dynamic from 'next/dynamic'
 
+// Sprint 1 Components
+import { RecipeTemplateSelector } from './RecipeTemplateSelector'
+import { HppEstimator } from './HppEstimator'
+import { SmartIngredientSelector } from './SmartIngredientSelector'
+import { matchIngredientsWithTemplate, saveDraft, loadDraft, clearDraft } from '@/lib/utils/recipe-helpers'
+import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
+
 const RecipeGeneratorForm = dynamic(
   () => import(/* webpackChunkName: "ai-recipe-generator-form" */ './RecipeGeneratorFormEnhanced'),
   {
-    loading: () => <div className="p-4">Loading form...</div>
+    loading: () => <div className="p-4">Memuat formulir...</div>
   }
 )
 
 const GeneratedRecipeDisplay = dynamic(
   () => import(/* webpackChunkName: "ai-recipe-display" */ './GeneratedRecipeDisplay'),
   {
-    loading: () => <div className="p-4">Loading recipe display...</div>
+    loading: () => <div className="p-4">Memuat tampilan resep...</div>
   }
 )
 
 const RecipePreviewCard = dynamic(
   () => import(/* webpackChunkName: "ai-recipe-preview" */ './RecipePreviewCard'),
   {
-    loading: () => <div className="p-4">Loading preview...</div>
+    loading: () => <div className="p-4">Memuat preview...</div>
   }
 )
 
@@ -62,6 +67,9 @@ export default function AIRecipeGeneratorPage() {
   // Mode state (quick vs complete)
   const [mode, setMode] = useState<'quick' | 'complete'>('quick')
 
+  // Sprint 1: Template state
+  const [selectedTemplate, setSelectedTemplate] = useState<RecipeTemplate | null>(null)
+
   // Handle auth errors
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -73,6 +81,41 @@ export default function AIRecipeGeneratorPage() {
       void router.push('/auth/login')
     }
   }, [isAuthLoading, isAuthenticated, router, toast])
+
+  // Sprint 1: Load draft on mount
+  useEffect(() => {
+    const draft = loadDraft()
+    if (draft) {
+      toast({
+        title: '📝 Draft ditemukan!',
+        description: 'Mau lanjutin draft sebelumnya?',
+        action: (
+          <Button size="sm" onClick={() => {
+            setProductName(draft.productName)
+            setProductType(draft.productType)
+            setServings(draft.servings)
+            setSelectedIngredients(draft.selectedIngredients)
+            if (draft.targetPrice) setTargetPrice(draft.targetPrice)
+          }}>
+            Restore
+          </Button>
+        )
+      })
+    }
+  }, [])
+
+  // Sprint 1: Auto-save draft
+  useEffect(() => {
+    if (productName || selectedIngredients.length > 0) {
+      saveDraft({
+        productName,
+        productType,
+        servings,
+        selectedIngredients,
+        targetPrice
+      })
+    }
+  }, [productName, productType, servings, selectedIngredients, targetPrice])
 
   useEffect(() => {
     void fetchIngredients()
@@ -88,6 +131,26 @@ export default function AIRecipeGeneratorPage() {
     if (!error && data) {
       void setAvailableIngredients(data)
     }
+  }
+
+  // Sprint 1: Handle template selection
+  const handleTemplateSelect = (template: RecipeTemplate) => {
+    setSelectedTemplate(template)
+    setProductName(template.name)
+    setProductType(template.type)
+    setServings(template.servings)
+
+    // Auto-match ingredients
+    const matchedIds = matchIngredientsWithTemplate(
+      availableIngredients,
+      template.ingredients
+    )
+    setSelectedIngredients(matchedIds)
+
+    toast({
+      title: '✨ Template dimuat!',
+      description: `${template.name} siap untuk di-generate`,
+    })
   }
 
   const handleGenerate = async () => {
@@ -139,7 +202,7 @@ export default function AIRecipeGeneratorPage() {
         title: '✨ Resep berhasil dibuat!',
         description: 'AI telah meracik resep profesional untuk Anda',
       })
-    } catch (err: unknown) {
+    } catch (error: unknown) {
       apiLogger.error({ error }, 'Error generating recipe:')
       toast({
         title: 'Gagal generate resep',
@@ -178,7 +241,7 @@ export default function AIRecipeGeneratorPage() {
           storage_instructions: generatedRecipe.storage,
           shelf_life: generatedRecipe.shelf_life,
           is_active: true
-        })
+        } as any)
         .select()
         .single()
 
@@ -191,7 +254,7 @@ export default function AIRecipeGeneratorPage() {
         )
 
         return {
-          recipe_id: recipe.id,
+          recipe_id: (recipe as any).id,
           ingredient_id: ingredient?.id,
           quantity: ing.quantity,
           unit: ing.unit,
@@ -201,7 +264,7 @@ export default function AIRecipeGeneratorPage() {
 
       const { error: ingredientsError } = await supabase
         .from('recipe_ingredients')
-        .insert(recipeIngredients)
+        .insert(recipeIngredients as any)
 
       if (ingredientsError) { throw ingredientsError }
 
@@ -210,14 +273,16 @@ export default function AIRecipeGeneratorPage() {
         description: 'Resep sudah tersimpan di database Anda',
       })
 
-      // Reset form
+      // Reset form & clear draft
       void setGeneratedRecipe(null)
       void setProductName('')
       void setServings(2)
       void setTargetPrice('')
       void setSelectedIngredients([])
+      void setSelectedTemplate(null)
+      clearDraft() // Sprint 1: Clear saved draft
 
-    } catch (err: unknown) {
+    } catch (error: unknown) {
       apiLogger.error({ error }, 'Error saving recipe:')
       toast({
         title: 'Gagal menyimpan resep',
@@ -256,26 +321,26 @@ export default function AIRecipeGeneratorPage() {
         {/* Header with Mode Toggle */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
               <Sparkles className="h-7 w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                AI Recipe Generator
+              <h1 className="text-3xl font-bold">
+                Generator Resep AI
               </h1>
               <p className="text-muted-foreground text-sm mt-1">
-                ✨ Generate resep UMKM profesional dengan AI dalam hitungan detik
+                ✨ Buat resep UMKM profesional dengan AI dalam hitungan detik
               </p>
             </div>
           </div>
 
           {/* Mode Toggle */}
-          <div className="flex gap-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-1.5 rounded-xl border border-purple-200 dark:border-purple-800">
+          <div className="flex gap-2 bg-muted/50 p-1.5 rounded-xl border">
             <button
               onClick={() => setMode('quick')}
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'quick'
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-black/20'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
               <Zap className="h-4 w-4" />
@@ -284,8 +349,8 @@ export default function AIRecipeGeneratorPage() {
             <button
               onClick={() => setMode('complete')}
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'complete'
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-white/50 dark:hover:bg-black/20'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
               <ChefHat className="h-4 w-4" />
@@ -294,35 +359,69 @@ export default function AIRecipeGeneratorPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Input Form - Enhanced */}
-          <RecipeGeneratorForm
-            productName={productName}
-            setProductName={setProductName}
-            productType={productType}
-            setProductType={setProductType}
-            servings={servings}
-            setServings={setServings}
-            targetPrice={targetPrice}
-            setTargetPrice={setTargetPrice}
-            dietaryRestrictions={dietaryRestrictions}
-            setDietaryRestrictions={setDietaryRestrictions}
-            selectedIngredients={selectedIngredients}
-            setSelectedIngredients={setSelectedIngredients}
-            availableIngredients={availableIngredients}
-            loading={loading}
-            onGenerate={handleGenerate}
-            mode={mode}
+        {/* Sprint 1: Template Selector */}
+        {!generatedRecipe && (
+          <RecipeTemplateSelector
+            onSelectTemplate={handleTemplateSelect}
+            selectedTemplateId={selectedTemplate?.id}
           />
+        )}
 
-          {/* Right Side - Preview or Result */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Left Column: Form & Ingredients */}
           <div className="space-y-6">
+            {/* Input Form - Enhanced */}
+            <RecipeGeneratorForm
+              productName={productName}
+              setProductName={setProductName}
+              productType={productType}
+              setProductType={setProductType}
+              servings={servings}
+              setServings={setServings}
+              targetPrice={targetPrice}
+              setTargetPrice={setTargetPrice}
+              dietaryRestrictions={dietaryRestrictions}
+              setDietaryRestrictions={setDietaryRestrictions}
+              selectedIngredients={selectedIngredients}
+              setSelectedIngredients={setSelectedIngredients}
+              availableIngredients={availableIngredients}
+              loading={loading}
+              onGenerate={handleGenerate}
+              mode={mode}
+            />
+
+            {/* Sprint 1: Smart Ingredient Selector */}
+            {!generatedRecipe && (
+              <SmartIngredientSelector
+                availableIngredients={availableIngredients}
+                selectedIngredients={selectedIngredients}
+                onSelectionChange={setSelectedIngredients}
+                productType={productType}
+              />
+            )}
+          </div>
+
+          {/* Right Column: HPP Estimator & Preview */}
+          <div className="space-y-6">
+            {/* Sprint 1: HPP Estimator */}
+            {!generatedRecipe && !loading && (
+              <HppEstimator
+                selectedIngredients={availableIngredients
+                  .filter(ing => selectedIngredients.includes(ing.id))
+                  .map(ing => ({
+                    ...ing,
+                    minimum_stock: ing.minimum_stock || 0
+                  }))}
+                servings={servings}
+                targetPrice={targetPrice ? parseFloat(targetPrice) : undefined}
+              />
+            )}
             {loading && (
               <Card className="border-2 border-purple-200 dark:border-purple-800">
                 <CardContent className="py-16">
                   <div className="text-center space-y-6">
                     <div className="relative">
-                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 flex items-center justify-center mx-auto shadow-xl">
+                      <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto shadow-xl">
                         <ChefHat className="h-10 w-10 text-white animate-bounce" />
                       </div>
                       <div className="absolute inset-0 h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mx-auto animate-ping opacity-20" />

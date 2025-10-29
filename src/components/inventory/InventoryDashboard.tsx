@@ -29,7 +29,7 @@ export const InventoryDashboard = () => {
           </div>
           <Button disabled>
             <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-            Loading...
+            Memuat...
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -162,8 +162,8 @@ export const InventoryDashboard = () => {
                         <Badge
                           variant={
                             suggestion.priority === 'urgent' ? 'destructive' :
-                            suggestion.priority === 'high' ? 'destructive' :
-                            suggestion.priority === 'medium' ? 'secondary' : 'outline'
+                              suggestion.priority === 'high' ? 'destructive' :
+                                suggestion.priority === 'medium' ? 'secondary' : 'outline'
                           }
                           className="text-xs"
                         >

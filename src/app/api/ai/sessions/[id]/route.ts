@@ -1,120 +1,77 @@
-// API Route: Individual Chat Session Management
-
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
-import { ChatSessionService } from '@/lib/services/ChatSessionService';
-import { logger } from '@/lib/logger';
-import type { Database } from '@/types/supabase-generated';
-
-type ChatSession = Database['public']['Tables']['chat_sessions']['Row'];
-type ChatMessage = Database['public']['Tables']['chat_messages']['Row'];
-
 /**
- * GET /api/ai/sessions/[id] - Get session with messages
+ * AI Chat Sessions API - Get/Delete specific session
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: sessionId } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+import { type NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
+import { ChatSessionService } from '@/lib/services/ChatSessionService'
+import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
+import { apiLogger } from '@/lib/logger'
 
-    const session = await ChatSessionService.getSession(sessionId, user.id);
-    const messages = await ChatSessionService.getMessages(sessionId, user.id);
+export const runtime = 'nodejs'
 
-    return NextResponse.json({
-      session,
-      messages,
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Failed to get session: ${errorMessage}`);
-    
-    if (error instanceof Error && error.message.includes('not found')) {
-      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
-    }
-
-    return NextResponse.json(
-      { error: 'Failed to get session' },
-      { status: 500 }
-    );
+interface RouteParams {
+  params: {
+    id: string
   }
 }
 
-/**
- * PATCH /api/ai/sessions/[id] - Update session title
- */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id: sessionId } = await params;
-    const supabase = await createClient();
+    const supabase = await createClient()
+
+    // Get authenticated user
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (authError || !user) {
+      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
     }
 
-    const body = await request.json();
-    const { title } = body;
+    const sessionId = params.id
 
-    if (!title || typeof title !== 'string') {
-      return NextResponse.json({ error: 'Invalid title' }, { status: 400 });
-    }
+    // Get session and messages
+    const [session, messages] = await Promise.all([
+      ChatSessionService.getSession(sessionId, user.id),
+      ChatSessionService.getMessages(sessionId, user.id),
+    ])
 
-    await ChatSessionService.updateSessionTitle(sessionId, user.id, title);
+    apiLogger.info(
+      { userId: user.id, sessionId, messageCount: messages.length },
+      'Session loaded'
+    )
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Failed to update session: ${errorMessage}`);
-    return NextResponse.json(
-      { error: 'Failed to update session' },
-      { status: 500 }
-    );
+    return NextResponse.json({ session, messages })
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
 }
 
-/**
- * DELETE /api/ai/sessions/[id] - Delete session
- */
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id: sessionId } = await params;
-    const supabase = await createClient();
+    const supabase = await createClient()
+
+    // Get authenticated user
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (authError || !user) {
+      throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
     }
 
-    await ChatSessionService.deleteSession(sessionId, user.id);
+    const sessionId = params.id
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error(`Failed to delete session: ${errorMessage}`);
-    return NextResponse.json(
-      { error: 'Failed to delete session' },
-      { status: 500 }
-    );
+    // Delete session
+    await ChatSessionService.deleteSession(sessionId, user.id)
+
+    apiLogger.info({ userId: user.id, sessionId }, 'Session deleted')
+
+    return NextResponse.json({ message: 'Session deleted successfully' })
+  } catch (error: unknown) {
+    return handleAPIError(error)
   }
 }
