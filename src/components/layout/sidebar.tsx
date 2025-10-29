@@ -116,9 +116,16 @@ interface SidebarProps {
   isOpen?: boolean
   onToggle?: () => void
   isMobile?: boolean
+  isCollapsed?: boolean
+  onCollapse?: () => void
 }
 
-const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) => {
+const Sidebar = ({
+  onToggle,
+  isMobile = false,
+  isCollapsed = false,
+  onCollapse
+}: SidebarProps) => {
   const pathname = usePathname()
   const sections = useMemo(() => NAV_SECTIONS, [])
 
@@ -148,10 +155,17 @@ const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) =
       {/* Header */}
       <div className="border-b border-border px-4 py-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-foreground">HeyTrack</h2>
-            <p className="text-xs text-muted-foreground">UMKM Management</p>
-          </div>
+          {!isCollapsed && (
+            <div className="transition-opacity duration-200">
+              <h2 className="text-lg font-bold text-foreground">HeyTrack</h2>
+              <p className="text-xs text-muted-foreground">UMKM Management</p>
+            </div>
+          )}
+          {isCollapsed && (
+            <div className="w-full flex justify-center">
+              <LayoutDashboard className="h-6 w-6 text-primary" />
+            </div>
+          )}
           {isMobile && onToggle && (
             <button
               onClick={onToggle}
@@ -165,7 +179,7 @@ const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) =
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto px-3 py-4">
+      <div className="flex-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
         <div className="space-y-1">
           {sections.map((section) => {
             const isExpanded = expandedSections.has(section.title)
@@ -181,29 +195,38 @@ const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) =
                     className={cn(
                       'w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors',
                       'hover:bg-muted',
-                      hasActiveItem && 'text-primary'
+                      hasActiveItem && 'text-primary',
+                      isCollapsed && 'justify-center'
                     )}
+                    title={isCollapsed ? section.title : undefined}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "flex items-center gap-2",
+                      isCollapsed && "justify-center"
+                    )}>
                       <SectionIcon className="h-4 w-4 flex-shrink-0" />
-                      <span>{section.title}</span>
+                      {!isCollapsed && <span>{section.title}</span>}
                     </div>
-                    {isExpanded ? (
+                    {!isCollapsed && (isExpanded ? (
                       <ChevronDown className="h-4 w-4" />
                     ) : (
                       <ChevronRight className="h-4 w-4" />
-                    )}
+                    ))}
                   </button>
                 ) : (
-                  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    {section.title}
+                  <div className={cn(
+                    "px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
+                    isCollapsed && "text-center"
+                  )}>
+                    {!isCollapsed && section.title}
+                    {isCollapsed && <SectionIcon className="h-4 w-4 mx-auto" />}
                   </div>
                 )}
 
                 {/* Section Items */}
-                {(isExpanded || !section.collapsible) && (
+                {(isExpanded || !section.collapsible) && !isCollapsed && (
                   <div className={cn(
-                    'space-y-0.5',
+                    'space-y-0.5 transition-all duration-200',
                     section.collapsible && 'ml-2 pl-4 border-l-2 border-muted'
                   )}>
                     {section.items.map((item) => {
@@ -230,6 +253,34 @@ const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) =
                     })}
                   </div>
                 )}
+
+                {/* Collapsed Mode - Show only icons */}
+                {isCollapsed && (
+                  <div className="space-y-0.5">
+                    {section.items.map((item) => {
+                      const ItemIcon = item.icon
+                      const active = isActive(item.href)
+
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => isMobile && onToggle?.()}
+                          title={item.label}
+                          className={cn(
+                            'flex items-center justify-center px-3 py-2 text-sm rounded-lg transition-colors',
+                            'hover:bg-muted',
+                            active
+                              ? 'bg-primary text-primary-foreground font-medium'
+                              : 'text-muted-foreground'
+                          )}
+                        >
+                          <ItemIcon className="h-4 w-4 flex-shrink-0" />
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )
           })}
@@ -238,11 +289,30 @@ const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) =
 
       {/* Footer */}
       <div className="border-t border-border p-4 space-y-3">
-        <ExportButton />
-        <div className="text-xs text-muted-foreground text-center">
-          <p>© 2025 HeyTrack</p>
-          <p className="mt-1">v1.0.0</p>
-        </div>
+        {!isCollapsed && !isMobile && <ExportButton />}
+        {!isMobile && onCollapse && (
+          <button
+            onClick={onCollapse}
+            className={cn(
+              "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200",
+              "hover:bg-muted hover:text-foreground text-muted-foreground",
+              isCollapsed && "justify-center"
+            )}
+            title={isCollapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+          >
+            <Menu className={cn(
+              "h-4 w-4 flex-shrink-0 transition-transform duration-200",
+              isCollapsed && "rotate-180"
+            )} />
+            {!isCollapsed && <span>Ciutkan</span>}
+          </button>
+        )}
+        {!isCollapsed && (
+          <div className="text-xs text-muted-foreground text-center transition-opacity duration-200">
+            <p>© 2025 HeyTrack</p>
+            <p className="mt-1">v1.0.0</p>
+          </div>
+        )}
       </div>
     </nav>
   )
@@ -256,28 +326,15 @@ const Sidebar = ({ isOpen = false, onToggle, isMobile = false }: SidebarProps) =
   }
 
   return (
-    <>
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-40 w-72 border-r border-border bg-background shadow-sm transition-transform duration-150 ease-out',
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        )}
-      >
-        {content}
-      </aside>
-
-      <button
-        type="button"
-        onClick={onToggle}
-        className={cn(
-          'fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background shadow lg:hidden',
-          isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
-        )}
-        aria-label={isOpen ? 'Tutup menu' : 'Buka menu'}
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-    </>
+    <aside
+      className={cn(
+        'fixed inset-y-0 left-0 z-40 border-r border-border bg-background shadow-sm',
+        'transition-all duration-300 ease-in-out',
+        isCollapsed ? 'w-16' : 'w-72'
+      )}
+    >
+      {content}
+    </aside>
   )
 }
 

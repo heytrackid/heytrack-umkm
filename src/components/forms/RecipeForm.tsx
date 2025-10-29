@@ -10,11 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import {
-    RecipeFormSchema,
-    type RecipeForm as RecipeFormData
+  RecipeFormSchema,
+  type RecipeForm as RecipeFormData
 } from '@/lib/validations/domains/recipe'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Plus, Trash2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
 import type { Database } from '@/types/supabase-generated'
@@ -29,42 +29,23 @@ interface RecipeFormProps {
 
 export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeFormProps) => {
   const { toast } = useToast()
-  
+
   const form = useForm<RecipeFormData>({
     resolver: zodResolver(RecipeFormSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       servings: initialData?.servings || 1,
-      preparation_time: initialData?.preparation_time || 30,
-      cooking_time: initialData?.cooking_time || 0,
-      instructions: initialData?.instructions || [],
-      difficulty: initialData?.difficulty || 'EASY',
+      prep_time: initialData?.prep_time || 30,
+      cook_time: initialData?.cook_time || 0,
+      instructions: initialData?.instructions || '',
+      difficulty: initialData?.difficulty || 'Easy',
       category: initialData?.category || '',
       is_active: initialData?.is_active ?? true,
-      is_available: initialData?.is_available ?? true,
+      selling_price: initialData?.selling_price || 0,
       ...initialData
     }
   })
-
-  const { fields: instructionFields, append: appendInstruction, remove: removeInstruction } = form.watch('instructions') ? {
-    fields: form.watch('instructions').map((instruction: { step_number: number; instruction: string; duration?: number; notes?: string }, index: number) => ({ 
-      id: index.toString(), 
-      value: instruction 
-    })) || [],
-    append: (value: { step_number: number; instruction: string; duration?: number; notes?: string }) => {
-      const current = form.getValues('instructions') || []
-      form.setValue('instructions', [...current, value])
-    },
-    remove: (index: number) => {
-      const current = form.getValues('instructions') || []
-      form.setValue('instructions', current.filter((_: unknown, i: number) => i !== index))
-    }
-  } : { 
-    fields: [], 
-    append: (value: { step_number: number; instruction: string; duration?: number; notes?: string }) => {}, 
-    remove: (index: number) => {} 
-  }
 
   const handleSubmit = async (data: RecipeFormData) => {
     try {
@@ -93,182 +74,127 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       <CardContent>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField 
-              label="Nama Resep" 
-              required 
+            <FormField
+              label="Nama Resep"
+              required
               error={form.formState.errors.name?.message}
             >
-              <Input 
+              <Input
                 {...form.register('name')}
-
               />
             </FormField>
 
-            <FormField 
-              label="Kategori" 
+            <FormField
+              label="Kategori"
               error={form.formState.errors.category?.message}
             >
-              <Input 
+              <Input
                 {...form.register('category')}
-
               />
             </FormField>
 
-            <FormField 
-              label="Jumlah Porsi" 
-              required 
+            <FormField
+              label="Jumlah Porsi"
+              required
               error={form.formState.errors.servings?.message}
             >
-              <Input 
+              <Input
                 type="number"
                 min="1"
                 max="1000"
                 {...form.register('servings', { valueAsNumber: true })}
-
               />
             </FormField>
 
-            <FormField 
-              label="Waktu Persiapan (menit)" 
-              required 
-              error={form.formState.errors.prep_time_minutes?.message}
+            <FormField
+              label="Waktu Persiapan (menit)"
+              required
+              error={form.formState.errors.prep_time?.message}
             >
-              <Input 
+              <Input
                 type="number"
                 min="1"
                 max="1440"
-                {...form.register('prep_time_minutes', { valueAsNumber: true })}
-
+                {...form.register('prep_time', { valueAsNumber: true })}
               />
             </FormField>
 
-            <FormField 
-              label="Waktu Memasak (menit)" 
-              error={form.formState.errors.cook_time_minutes?.message}
+            <FormField
+              label="Waktu Memasak (menit)"
+              error={form.formState.errors.cook_time?.message}
             >
-              <Input 
+              <Input
                 type="number"
                 min="0"
-                {...form.register('cook_time_minutes', { valueAsNumber: true })}
-
+                {...form.register('cook_time', { valueAsNumber: true })}
               />
             </FormField>
 
-            <FormField 
-              label="Level Kesulitan" 
-              error={form.formState.errors.difficulty_level?.message}
+            <FormField
+              label="Level Kesulitan"
+              error={form.formState.errors.difficulty?.message}
             >
-              <Select 
-                value={form.watch('difficulty_level')} 
+              <Select
+                value={form.watch('difficulty')}
                 onValueChange={(value) => {
-                  if (value === 'EASY' || value === 'MEDIUM' || value === 'HARD') {
-                    form.setValue('difficulty_level', value)
-                  }
+                  form.setValue('difficulty', value)
                 }}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="EASY">Mudah</SelectItem>
-                  <SelectItem value="MEDIUM">Sedang</SelectItem>
-                  <SelectItem value="HARD">Sulit</SelectItem>
+                  <SelectItem value="Easy">Mudah</SelectItem>
+                  <SelectItem value="Medium">Sedang</SelectItem>
+                  <SelectItem value="Hard">Sulit</SelectItem>
                 </SelectContent>
               </Select>
             </FormField>
 
-            <FormField 
-              label="Harga Jual (Rp)" 
+            <FormField
+              label="Harga Jual (Rp)"
               error={form.formState.errors.selling_price?.message}
             >
-              <Input 
+              <Input
                 type="number"
                 min="0"
                 step="0.01"
                 {...form.register('selling_price', { valueAsNumber: true })}
-
-              />
-            </FormField>
-
-            <FormField 
-              label="Margin Profit (%)" 
-              error={form.formState.errors.profit_margin?.message}
-            >
-              <Input 
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                {...form.register('profit_margin', { valueAsNumber: true })}
-
               />
             </FormField>
           </div>
 
-          <FormField 
-            label="Deskripsi" 
+          <FormField
+            label="Deskripsi"
             error={form.formState.errors.description?.message}
           >
-            <Textarea 
+            <Textarea
               {...form.register('description')}
-
               rows={3}
             />
           </FormField>
 
-          <FormField 
-            label="Instruksi" 
-            required 
+          <FormField
+            label="Instruksi"
             error={form.formState.errors.instructions?.message}
           >
-            <div className="space-y-2">
-              {fields.map((field, index: number) => (
-                <div key={field.id} className="flex gap-2">
-                  <div className="flex-1">
-                    <Input 
-                      value={field.value}
-                      onChange={(e) => {
-                        const current = form.getValues('instructions')
-                        const updated = [...current]
-                        updated[index] = e.target.value
-                        form.setValue('instructions', updated)
-                      }}
-                      placeholder={`Instruksi ${index + 1}`}
-                    />
-                  </div>
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => remove(index)}
-                    disabled={fields.length <= 1}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
-              <Button 
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => append('')}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah Instruksi
-              </Button>
-            </div>
+            <Textarea
+              {...form.register('instructions')}
+              rows={5}
+              placeholder="Tulis instruksi pembuatan resep..."
+            />
           </FormField>
 
           <div className="flex items-center space-x-2">
-            <Checkbox 
+            <Checkbox
               checked={form.watch('is_active')}
               onCheckedChange={(checked) => form.setValue('is_active', !!checked)}
             />
             <Label>Aktif</Label>
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading || !form.formState.isValid}
             className="w-full"
           >
@@ -280,3 +206,5 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
     </Card>
   )
 })
+
+RecipeForm.displayName = 'RecipeForm'

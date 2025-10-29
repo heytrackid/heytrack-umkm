@@ -46,7 +46,7 @@ export class GlobalExportService {
   private static async fetchRecipes(supabase: any, userId: string) {
     const { data } = await supabase
       .from('recipes')
-      .select('id, name, servings, selling_price, production_cost, is_active, created_at')
+      .select('id, name, servings, selling_price, cost_per_unit, is_active, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
     return data || []
@@ -64,7 +64,7 @@ export class GlobalExportService {
   private static async fetchIngredients(supabase: any, userId: string) {
     const { data } = await supabase
       .from('ingredients')
-      .select('id, name, unit, current_stock, minimum_stock, wac, created_at')
+      .select('id, name, unit, current_stock, min_stock, weighted_average_cost, price_per_unit, created_at')
       .eq('user_id', userId)
       .order('name')
     return data || []
@@ -82,9 +82,9 @@ export class GlobalExportService {
   private static async fetchStockTransactions(supabase: any, userId: string) {
     const { data } = await supabase
       .from('stock_transactions')
-      .select('id, ingredient_id, transaction_type, quantity, unit_price, transaction_date')
+      .select('id, ingredient_id, type, quantity, unit_price, created_at')
       .eq('user_id', userId)
-      .order('transaction_date', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(500)
     return data || []
   }
@@ -110,14 +110,14 @@ export class GlobalExportService {
 
     // Add data
     recipes.forEach(recipe => {
-      const margin = (recipe.selling_price || 0) - (recipe.production_cost || 0)
+      const margin = (recipe.selling_price || 0) - (recipe.cost_per_unit || 0)
       const marginPct = recipe.selling_price ? (margin / recipe.selling_price) * 100 : 0
 
       sheet.addRow({
         name: recipe.name,
         servings: recipe.servings,
         selling_price: recipe.selling_price || 0,
-        production_cost: recipe.production_cost || 0,
+        production_cost: recipe.cost_per_unit || 0,
         margin,
         margin_pct: marginPct,
         status: recipe.is_active ? 'Aktif' : 'Nonaktif',
@@ -191,8 +191,9 @@ export class GlobalExportService {
       { header: 'Nama Bahan', key: 'name', width: 30 },
       { header: 'Satuan', key: 'unit', width: 10 },
       { header: 'Stok Saat Ini', key: 'current_stock', width: 15 },
-      { header: 'Stok Minimum', key: 'minimum_stock', width: 15 },
+      { header: 'Stok Minimum', key: 'min_stock', width: 15 },
       { header: 'WAC', key: 'wac', width: 15 },
+      { header: 'Harga per Unit', key: 'price_per_unit', width: 15 },
       { header: 'Status Stok', key: 'stock_status', width: 15 },
       { header: 'Dibuat', key: 'created_at', width: 15 },
     ]
@@ -200,7 +201,7 @@ export class GlobalExportService {
     this.styleHeader(sheet)
 
     ingredients.forEach(ingredient => {
-      const stockStatus = (ingredient.current_stock || 0) <= (ingredient.minimum_stock || 0) 
+      const stockStatus = (ingredient.current_stock || 0) <= (ingredient.min_stock || 0) 
         ? 'Perlu Restock' 
         : 'Aman'
 
@@ -208,16 +209,18 @@ export class GlobalExportService {
         name: ingredient.name,
         unit: ingredient.unit,
         current_stock: ingredient.current_stock || 0,
-        minimum_stock: ingredient.minimum_stock || 0,
-        wac: ingredient.wac || 0,
+        min_stock: ingredient.min_stock || 0,
+        wac: ingredient.weighted_average_cost || 0,
+        price_per_unit: ingredient.price_per_unit || 0,
         stock_status: stockStatus,
         created_at: ingredient.created_at ? format(new Date(ingredient.created_at), 'dd/MM/yyyy', { locale: localeId }) : '',
       })
     })
 
     sheet.getColumn('current_stock').numFmt = '#,##0.00'
-    sheet.getColumn('minimum_stock').numFmt = '#,##0.00'
+    sheet.getColumn('min_stock').numFmt = '#,##0.00'
     sheet.getColumn('wac').numFmt = '#,##0'
+    sheet.getColumn('price_per_unit').numFmt = '#,##0'
 
     // Conditional formatting for stock status
     sheet.getColumn('stock_status').eachCell((cell, rowNumber) => {
@@ -263,8 +266,8 @@ export class GlobalExportService {
     })
 
     sheet.columns = [
-      { header: 'Tanggal', key: 'transaction_date', width: 15 },
-      { header: 'Tipe', key: 'transaction_type', width: 12 },
+      { header: 'Tanggal', key: 'created_at', width: 15 },
+      { header: 'Tipe', key: 'type', width: 12 },
       { header: 'Jumlah', key: 'quantity', width: 12 },
       { header: 'Harga Satuan', key: 'unit_price', width: 15 },
       { header: 'Total', key: 'total', width: 15 },
@@ -275,8 +278,8 @@ export class GlobalExportService {
     transactions.forEach(tx => {
       const total = (tx.quantity || 0) * (tx.unit_price || 0)
       sheet.addRow({
-        transaction_date: tx.transaction_date ? format(new Date(tx.transaction_date), 'dd/MM/yyyy HH:mm', { locale: localeId }) : '',
-        transaction_type: this.translateTransactionType(tx.transaction_type),
+        created_at: tx.created_at ? format(new Date(tx.created_at), 'dd/MM/yyyy HH:mm', { locale: localeId }) : '',
+        type: this.translateTransactionType(tx.type),
         quantity: tx.quantity || 0,
         unit_price: tx.unit_price || 0,
         total,
@@ -314,7 +317,7 @@ export class GlobalExportService {
     const avgOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0
     const totalIngredients = data.ingredients.length
     const lowStockIngredients = data.ingredients.filter(
-      i => (i.current_stock || 0) <= (i.minimum_stock || 0)
+      i => (i.current_stock || 0) <= (i.min_stock || 0)
     ).length
     const totalCustomers = data.customers.length
 
