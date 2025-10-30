@@ -22,19 +22,19 @@ interface StockLevelVisualizationProps {
 type StockStatus = 'critical' | 'low' | 'normal' | 'good'
 
 const getStockStatus = (current: number, min: number): StockStatus => {
-    if (current <= 0) {return 'critical'}
-    if (current <= min * 0.5) {return 'critical'}
-    if (current <= min) {return 'low'}
-    if (current <= min * 2) {return 'normal'}
+    if (current <= 0) { return 'critical' }
+    if (current <= min * 0.5) { return 'critical' }
+    if (current <= min) { return 'low' }
+    if (current <= min * 2) { return 'normal' }
     return 'good'
 }
 
 const getStockColor = (status: StockStatus) => {
     switch (status) {
-        case 'critical': return 'text-red-600 bg-red-50 border-red-200'
-        case 'low': return 'text-orange-600 bg-orange-50 border-orange-200'
-        case 'normal': return 'text-blue-600 bg-blue-50 border-blue-200'
-        case 'good': return 'text-green-600 bg-green-50 border-green-200'
+        case 'critical': return 'text-destructive bg-destructive/10 border-destructive/20'
+        case 'low': return 'text-gray-700 bg-gray-100 border-gray-200'
+        case 'normal': return 'text-gray-600 bg-gray-50 border-gray-200'
+        case 'good': return 'text-gray-600 bg-gray-50 border-gray-200'
     }
 }
 
@@ -62,7 +62,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
     // Group by status
     const byStatus = ingredients.reduce((acc, ing) => {
         const status = getStockStatus(ing.current_stock ?? 0, ing.min_stock ?? 0)
-        if (!acc[status]) {acc[status] = []}
+        if (!acc[status]) { acc[status] = [] }
         acc[status].push(ing)
         return acc
     }, {} as Record<StockStatus, Ingredient[]>)
@@ -84,60 +84,60 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
         <div className="space-y-4">
             {/* Overview Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="border-2 border-red-200 bg-red-50/50">
+                <Card className="border-2 border-destructive/20 bg-destructive/5">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                            <AlertTriangle className="h-5 w-5 text-destructive" />
                             <Badge variant="destructive" className="text-xs">
                                 Urgent
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-red-600">{criticalCount}</div>
-                        <div className="text-xs text-red-700 mt-1">Stok Kritis</div>
+                        <div className="text-2xl font-bold text-destructive">{criticalCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Stok Kritis</div>
                         {criticalCount > 0 && (
-                            <div className="text-xs text-red-600 mt-2 font-medium">
+                            <div className="text-xs text-destructive mt-2 font-medium">
                                 Nilai: {formatCurrency(criticalValue)}
                             </div>
                         )}
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-orange-200 bg-orange-50/50">
+                <Card className="border-2 border-gray-200 bg-gray-50">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <TrendingDown className="h-5 w-5 text-orange-600" />
-                            <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                            <TrendingDown className="h-5 w-5 text-gray-600" />
+                            <Badge variant="secondary" className="text-xs">
                                 Warning
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-orange-600">{lowCount}</div>
-                        <div className="text-xs text-orange-700 mt-1">Stok Rendah</div>
+                        <div className="text-2xl font-bold text-gray-700">{lowCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Stok Rendah</div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-blue-200 bg-blue-50/50">
+                <Card className="border-2 border-gray-200 bg-gray-50">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <Package className="h-5 w-5 text-blue-600" />
-                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                            <Package className="h-5 w-5 text-gray-600" />
+                            <Badge variant="secondary" className="text-xs">
                                 OK
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-blue-600">{normalCount}</div>
-                        <div className="text-xs text-blue-700 mt-1">Stok Normal</div>
+                        <div className="text-2xl font-bold text-gray-700">{normalCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Stok Normal</div>
                     </CardContent>
                 </Card>
 
-                <Card className="border-2 border-green-200 bg-green-50/50">
+                <Card className="border-2 border-gray-200 bg-gray-50">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <CheckCircle className="h-5 w-5 text-green-600" />
-                            <Badge variant="default" className="text-xs bg-green-600">
+                            <CheckCircle className="h-5 w-5 text-gray-600" />
+                            <Badge variant="secondary" className="text-xs">
                                 Good
                             </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-green-600">{goodCount}</div>
-                        <div className="text-xs text-green-700 mt-1">Stok Baik</div>
+                        <div className="text-2xl font-bold text-gray-700">{goodCount}</div>
+                        <div className="text-xs text-muted-foreground mt-1">Stok Baik</div>
                     </CardContent>
                 </Card>
             </div>
@@ -223,7 +223,7 @@ export const StockLevelVisualization = ({ ingredients }: StockLevelVisualization
             {/* Detailed List by Status */}
             {(['critical', 'low', 'normal', 'good'] as StockStatus[]).map(status => {
                 const items = byStatus[status] || []
-                if (items.length === 0) {return null}
+                if (items.length === 0) { return null }
 
                 const Icon = getStockIcon(status)
                 const colorClass = getStockColor(status)

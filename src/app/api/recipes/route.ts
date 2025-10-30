@@ -9,6 +9,9 @@ import type { Database } from '@/types/supabase-generated'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // GET /api/recipes - Get all recipes with ingredient relationships
 async function GET(request: NextRequest) {
   try {

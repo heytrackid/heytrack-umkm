@@ -5,6 +5,9 @@ import { NotificationPreferencesUpdateSchema } from '@/lib/validations/domains/n
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '@/types/domain/notification-preferences'
 import { isRecord, assertNonNull, getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient()

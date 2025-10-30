@@ -8,6 +8,9 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type WhatsAppTemplateUpdate = Database['public']['Tables']['whatsapp_templates']['Update']
 
 type RouteContext = {

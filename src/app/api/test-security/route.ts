@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // Test route to demonstrate security enhancements
 async function POST(request: NextRequest) {
   try {

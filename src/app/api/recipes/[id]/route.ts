@@ -6,6 +6,9 @@ import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 interface RouteContext {
   params: Promise<{ id: string }>
 }

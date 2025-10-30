@@ -11,9 +11,11 @@ function validateServerEnvironment() {
     throw new Error('Supabase server client should only be created on the server')
   }
 
+  // ✅ FIXED: Allow both nodejs and edge runtime
+  // Vercel Edge Runtime uses 'edge', not 'nodejs'
   const runtime = process.env['NEXT_RUNTIME']
-  if (runtime && runtime !== 'nodejs') {
-    throw new Error(`Supabase server client requires NEXT_RUNTIME to be "nodejs", received "${runtime}"`)
+  if (runtime && runtime !== 'nodejs' && runtime !== 'edge') {
+    throw new Error(`Supabase server client requires NEXT_RUNTIME to be "nodejs" or "edge", received "${runtime}"`)
   }
 
   const missingEnv = REQUIRED_ENV_VARS.filter((key) => !process.env[key])

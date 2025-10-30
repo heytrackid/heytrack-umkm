@@ -6,6 +6,9 @@ import { createClient } from '@/utils/supabase/server';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { logger } from '@/lib/logger';
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 /**
  * GET /api/ai/context - Load business context for AI chat
  */

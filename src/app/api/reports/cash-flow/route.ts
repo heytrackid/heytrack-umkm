@@ -4,6 +4,9 @@ import { apiLogger } from '@/lib/logger'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
 import { isArrayOf, isRecord, safeNumber, getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // Partial type for cash flow queries (only fields we fetch)
 interface FinancialRecordPartial {
   id: string

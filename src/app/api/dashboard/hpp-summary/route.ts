@@ -4,6 +4,9 @@ import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 import { isRecipe, isHppCalculation, isArrayOf, safeNumber, getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 type HppAlert = Database['public']['Tables']['hpp_alerts']['Row']

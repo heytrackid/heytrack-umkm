@@ -19,6 +19,7 @@ import { StatsSkeleton } from '@/components/ui'
 import { Suspense } from 'react'
 import dynamic from 'next/dynamic'
 import { useProfitData, useProductChartData } from './components'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // Import lightweight components normally (tables, filters, cards)
 import {
@@ -132,37 +133,32 @@ export default function ProfitReportPage() {
         </Breadcrumb>
 
         {/* Header - Always visible */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Laporan Laba Riil
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Analisis keuntungan dengan metode WAC (Weighted Average Cost)
-            </p>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => exportReport('csv')}
-              className="flex-1 sm:flex-none"
-              disabled={loading}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              CSV
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => exportReport('xlsx')}
-              className="flex-1 sm:flex-none"
-              disabled={loading}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Excel
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title="Laporan Laba Riil"
+          description="Analisis keuntungan dengan metode WAC (Weighted Average Cost)"
+          action={
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => exportReport('csv')}
+                className="flex-1 sm:flex-none"
+                disabled={loading}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                CSV
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => exportReport('xlsx')}
+                className="flex-1 sm:flex-none"
+                disabled={loading}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Excel
+              </Button>
+            </div>
+          }
+        />
 
         {/* Main Content */}
         {loading ? (

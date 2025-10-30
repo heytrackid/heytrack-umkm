@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { queryLogger } from '@/lib/client-logger'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // Import lightweight components normally - no need for lazy loading
 import StatsCardsSection from './components/StatsCardsSection'
@@ -187,26 +188,25 @@ export default function Dashboard() {
     <AppLayout>
       <div className="space-y-6">
         {/* Header - Always visible */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Beranda
-            </h1>
-            <p className="text-muted-foreground mt-1">
+        <PageHeader
+          title="Beranda"
+          description={
+            <>
               {currentTime.toLocaleDateString('id-ID', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
               })}
-            </p>
-            {user && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Selamat datang kembali, {user.email?.split('@')[0]}! 👋
-              </p>
-            )}
-          </div>
-        </div>
+              {user && (
+                <>
+                  <br />
+                  Selamat datang kembali, {user.email?.split('@')[0]}! 👋
+                </>
+              )}
+            </>
+          }
+        />
 
         {/* Empty State - Show when user has no data */}
         {hasNoData && (

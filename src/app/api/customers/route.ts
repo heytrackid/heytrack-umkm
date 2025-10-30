@@ -6,6 +6,9 @@ import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase/typed-insert'
 import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
   try {

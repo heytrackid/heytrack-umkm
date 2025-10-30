@@ -5,6 +5,9 @@ import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
 import { isRecipeWithIngredients, extractFirst, ensureArray, getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']

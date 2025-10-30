@@ -6,6 +6,9 @@ import { PaginationQuerySchema, SalesInsertSchema, SalesQuerySchema } from '@/li
 import type { Database } from '@/types/supabase-generated'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // Note: 'sales' table doesn't exist - sales data is tracked through orders and order_items
 // type Sale = Database['public']['Tables']['sales']['Row']
 

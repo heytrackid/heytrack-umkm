@@ -87,7 +87,7 @@ export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={handleWhatsApp}
-                                className="flex items-center gap-2 text-green-600 hover:text-green-700"
+                                className="flex items-center gap-2 text-foreground hover:text-primary"
                             >
                                 <MessageSquare className="h-4 w-4" />
                                 WhatsApp

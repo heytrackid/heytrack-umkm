@@ -13,6 +13,9 @@ import {
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest } from 'next/server'
 import { z } from 'zod'
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
 import { isIngredient, assertIngredient, isArrayOf, getErrorMessage } from '@/lib/type-guards'
 import { INGREDIENT_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'

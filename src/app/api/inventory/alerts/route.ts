@@ -3,6 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 import { apiLogger } from '@/lib/logger'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 /**
  * GET /api/inventory/alerts
  * Get active inventory alerts

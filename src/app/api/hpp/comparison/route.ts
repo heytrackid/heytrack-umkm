@@ -3,6 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type Recipe = Database['public']['Tables']['recipes']['Row']
 
 // GET /api/hpp/comparison - Get recipe comparison data

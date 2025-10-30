@@ -17,6 +17,7 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { StatsSkeleton, CardSkeleton } from '@/components/ui'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // Import components directly - no lazy loading for better parallel loading
 import EnhancedTransactionForm from './components/EnhancedTransactionForm'
@@ -108,28 +109,19 @@ export default function CashFlowPage() {
         </Breadcrumb>
 
         {/* Header */}
-        <div className={`flex gap-4 ${isMobile ? 'flex-col' : 'justify-between items-center'}`}>
-          <div>
-            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
-              Arus Kas
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola semua transaksi pemasukan dan pengeluaran
-            </p>
-          </div>
-
-          <div className={`flex gap-2 ${isMobile ? 'flex-col w-full' : ''}`}>
+        <PageHeader
+          title="Arus Kas"
+          description="Kelola semua transaksi pemasukan dan pengeluaran"
+          action={
             <Button
-              className={isMobile ? 'w-full' : ''}
               onClick={() => setIsAddDialogOpen(true)}
               disabled={loading}
             >
               <PlusCircle className="h-4 w-4 mr-2" />
               Tambah Transaksi
             </Button>
-
-          </div>
-        </div>
+          }
+        />
 
         {/* Main Content - Single Suspense boundary for parallel loading */}
         <Suspense fallback={

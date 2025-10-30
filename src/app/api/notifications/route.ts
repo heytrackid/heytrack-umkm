@@ -4,6 +4,9 @@ import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 import { isArrayOf, isRecord, assertNonNull } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type Notification = Database['public']['Tables']['notifications']['Row']
 
 export async function GET(request: NextRequest) {

@@ -7,6 +7,9 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type WhatsAppTemplateInsert = Database['public']['Tables']['whatsapp_templates']['Insert']
 
 export async function GET(request: NextRequest) {

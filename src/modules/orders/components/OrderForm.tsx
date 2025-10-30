@@ -267,7 +267,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         </SwipeableTabsList>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded flex items-center gap-2">
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>
@@ -339,11 +339,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                   }
                 }}
                 required
-                className={`mt-1 ${fieldErrors['customer_name'] ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                 aria-invalid={!!fieldErrors['customer_name']}
               />
               {fieldErrors['customer_name'] && (
-                <div className="flex items-center gap-2 text-sm text-red-600 mt-1">
+                <div className="flex items-center gap-2 text-sm text-destructive mt-1">
                   <AlertCircle className="h-4 w-4" />
                   {fieldErrors['customer_name']}
                 </div>
@@ -402,7 +402,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-medium">Item Pesanan ({orderItems.length})</h3>
               {fieldErrors['items'] && (
-                <div className="flex items-center gap-1 text-sm text-red-600">
+                <div className="flex items-center gap-1 text-sm text-destructive">
                   <AlertCircle className="h-4 w-4" />
                   <span>{fieldErrors['items']}</span>
                 </div>
@@ -465,7 +465,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="text-gray-600 dark:text-gray-400 hover:text-red-700 ml-2 mt-4"
+                          className="text-muted-foreground hover:text-destructive ml-2 mt-4"
                           onClick={() => removeOrderItem(index)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -557,7 +557,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="text-gray-600 dark:text-gray-400 hover:text-red-700"
+                      className="text-muted-foreground hover:text-destructive"
                       onClick={() => removeOrderItem(index)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -694,11 +694,11 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 }}
                 min="0"
                 step="1000"
-                className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                 aria-invalid={!!fieldErrors['paid_amount']}
               />
               {fieldErrors['paid_amount'] && (
-                <div className="flex items-center gap-2 text-sm text-red-600 mt-1">
+                <div className="flex items-center gap-2 text-sm text-destructive mt-1">
                   <AlertCircle className="h-4 w-4" />
                   {fieldErrors['paid_amount']}
                 </div>
@@ -729,12 +729,12 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 <span>Total Tagihan:</span>
                 <span>{formatCurrency(totalAmount)}</span>
               </div>
-              <div className="flex justify-between text-green-600 dark:text-green-400">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Dibayar:</span>
                 <span>{formatCurrency(formData.paid_amount)}</span>
               </div>
               {totalAmount > formData.paid_amount && (
-                <div className="flex justify-between text-orange-600 dark:text-orange-400 font-medium">
+                <div className="flex justify-between text-foreground font-medium">
                   <span>Sisa Belum Dibayar:</span>
                   <span>{formatCurrency(totalAmount - formData.paid_amount)}</span>
                 </div>

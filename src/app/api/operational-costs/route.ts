@@ -5,6 +5,9 @@ import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
 import { apiLogger } from '@/lib/logger'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type ExpensesTable = Database['public']['Tables']['expenses']
 /**
  * GET /api/operational-costs

@@ -3,6 +3,9 @@ import { createClient } from '@/utils/supabase/server'
 import { getErrorMessage, isValidUUID, isRecord, extractFirst, safeString } from '@/lib/type-guards';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }

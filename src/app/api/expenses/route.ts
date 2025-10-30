@@ -9,6 +9,9 @@ import { formatCurrency } from '@/lib/currency'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // Define the original GET function
 async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

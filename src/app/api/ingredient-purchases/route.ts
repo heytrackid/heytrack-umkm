@@ -4,6 +4,9 @@ import { IngredientPurchaseInsertSchema } from '@/lib/validations/database-valid
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
+
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
 /**
  * GET /api/ingredient-purchases
  * List all ingredient purchases with optional filters

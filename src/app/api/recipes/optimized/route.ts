@@ -9,6 +9,9 @@ import { createClient } from '@/utils/supabase/server'
 import type { NextRequest } from 'next/server'
 import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()

@@ -4,6 +4,9 @@ import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
 import { isIngredient, isArrayOf, isRecord, getErrorMessage } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type IngredientInsert = Database['public']['Tables']['ingredients']['Insert']
 
 export async function POST(request: NextRequest) {

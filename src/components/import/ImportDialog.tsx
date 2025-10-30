@@ -140,14 +140,14 @@ export function ImportDialog({
 
                 <div className="space-y-4">
                     {/* Download Template */}
-                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="p-4 bg-muted border border-border rounded-lg">
                         <div className="flex items-start gap-3">
-                            <FileText className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <FileText className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
-                                <h4 className="font-semibold text-blue-900 text-sm mb-1">
+                                <h4 className="font-semibold text-foreground text-sm mb-1">
                                     Template CSV
                                 </h4>
-                                <p className="text-sm text-blue-700 mb-2">
+                                <p className="text-sm text-muted-foreground mb-2">
                                     Download template terlebih dahulu, isi data, lalu upload kembali
                                 </p>
                                 <Button
@@ -206,14 +206,14 @@ export function ImportDialog({
                         <Alert variant={result.success ? 'default' : 'destructive'}>
                             <div className="flex items-start gap-2">
                                 {result.success ? (
-                                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                                    <CheckCircle2 className="w-5 h-5 text-foreground" />
                                 ) : (
-                                    <AlertCircle className="w-5 h-5" />
+                                    <AlertCircle className="w-5 h-5 text-destructive" />
                                 )}
                                 <div className="flex-1">
                                     <AlertDescription>
                                         {result.success ? (
-                                            <span className="text-green-700">
+                                            <span className="text-foreground">
                                                 Berhasil import {result.count} data
                                             </span>
                                         ) : (

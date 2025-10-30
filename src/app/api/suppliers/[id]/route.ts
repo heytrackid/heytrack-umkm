@@ -5,6 +5,9 @@ import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type SupplierUpdate = Database['public']['Tables']['suppliers']['Update']
 
 interface RouteContext {

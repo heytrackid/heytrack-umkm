@@ -25,12 +25,13 @@ const PROTECTED_ROUTES = new Set([
 const AUTH_PAGES = new Set(['/auth/login', '/auth/register'])
 
 // Request validation schemas
+// ✅ Allow null values for headers (some requests don't have all headers)
 const RequestHeadersSchema = z.object({
-  'user-agent': z.string().optional(),
-  'accept': z.string().optional(),
-  'accept-language': z.string().optional(),
-  'content-type': z.string().optional(),
-  'x-forwarded-for': z.string().optional(),
+  'user-agent': z.string().nullable().optional(),
+  'accept': z.string().nullable().optional(),
+  'accept-language': z.string().nullable().optional(),
+  'content-type': z.string().nullable().optional(),
+  'x-forwarded-for': z.string().nullable().optional(),
 })
 
 const UrlValidationSchema = z.object({
@@ -59,12 +60,13 @@ export async function middleware(request: NextRequest) {
       search: request.nextUrl.search,
     })
 
-    // Log suspicious requests but don't block them (only in production)
-    if (!headersValidation.success && process.env.NODE_ENV === 'production') {
-      middlewareLogger.warn({ 
+    // Log suspicious requests but don't block them
+    // Only log in development for debugging (too noisy in production)
+    if (!headersValidation.success && process.env.NODE_ENV === 'development') {
+      middlewareLogger.debug({ 
         url: request.url,
         issues: headersValidation.error.issues,
-      }, 'Suspicious request headers detected')
+      }, 'Request headers validation failed (non-blocking)')
     }
 
     if (!urlValidation.success) {

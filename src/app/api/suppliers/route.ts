@@ -5,6 +5,9 @@ import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Database } from '@/types/supabase-generated'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 
 
 export async function GET(request: NextRequest) {

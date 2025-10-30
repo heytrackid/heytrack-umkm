@@ -214,7 +214,7 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <Users className="h-4 w-4 text-blue-500" />
+                                <Users className="h-4 w-4 text-muted-foreground" />
                                 Total Users
                             </CardTitle>
                         </CardHeader>
@@ -229,7 +229,7 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                     <Card>
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <Database className="h-4 w-4 text-green-500" />
+                                <Database className="h-4 w-4 text-muted-foreground" />
                                 Database Size
                             </CardTitle>
                         </CardHeader>
@@ -359,7 +359,7 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                                                             ? 'text-red-500'
                                                             : log.duration_ms > 500
                                                                 ? 'text-yellow-500'
-                                                                : 'text-green-500'
+                                                                : 'text-muted-foreground'
                                                     }
                                                 >
                                                     {log.duration_ms}ms
@@ -462,7 +462,7 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                         <CardContent>
                             {errorLogs.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                                    <CheckCircle className="h-12 w-12 text-green-500 mb-2" />
+                                    <CheckCircle className="h-12 w-12 text-muted-foreground mb-2" />
                                     <p className="text-sm text-muted-foreground">
                                         No errors in the last 24 hours
                                     </p>

@@ -28,6 +28,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { arrayCalculations } from '@/lib/performance-optimized'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import dynamic from 'next/dynamic'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // ✅ Code Splitting - Lazy load heavy components
 const OrderForm = dynamic(() => import('./OrderForm').then(mod => ({ default: mod.OrderForm })), {
@@ -241,21 +242,16 @@ export default function OrdersPage({ }: OrdersPageProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <ShoppingCart className="h-8 w-8" />
-            Kelola Pesanan
-          </h1>
-          <p className="text-muted-foreground">
-            Kelola pesanan dan penjualan dengan sistem terintegrasi
-          </p>
-        </div>
-        <Button onClick={handleCreateOrder}>
-          <Plus className="h-4 w-4 mr-2" />
-          Pesanan Baru
-        </Button>
-      </div>
+      <PageHeader
+        title="Kelola Pesanan"
+        description="Kelola pesanan dan penjualan dengan sistem terintegrasi"
+        action={
+          <Button onClick={handleCreateOrder}>
+            <Plus className="h-4 w-4 mr-2" />
+            Pesanan Baru
+          </Button>
+        }
+      />
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -310,7 +306,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                 <p className="text-2xl font-bold">{formatCurrency(stats.pending_revenue)}</p>
                 <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
+              <Clock className="h-8 w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>

@@ -10,6 +10,9 @@ import type { NextRequest } from 'next/server'
 import type { Database } from '@/types/supabase-generated'
 import { isValidUUID } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 // type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
 

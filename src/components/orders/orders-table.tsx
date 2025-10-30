@@ -81,24 +81,24 @@ const OrdersTable = ({
 
   // Status configurations
   const statusConfig = {
-    'PENDING': { label: 'Pending', color: 'bg-yellow-100 text-yellow-800', textColor: 'text-yellow-800' },
-    'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-blue-100 text-blue-800', textColor: 'text-blue-800' },
-    'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-orange-100 text-orange-800', textColor: 'text-orange-800' },
-    'READY': { label: 'Siap Diantar', color: 'bg-green-100 text-green-800', textColor: 'text-green-800' },
+    'PENDING': { label: 'Pending', color: 'bg-gray-100 text-gray-700', textColor: 'text-gray-700' },
+    'CONFIRMED': { label: 'Dikonfirmasi', color: 'bg-gray-200 text-gray-800', textColor: 'text-gray-800' },
+    'IN_PROGRESS': { label: 'Sedang Diproses', color: 'bg-gray-200 text-gray-800', textColor: 'text-gray-800' },
+    'READY': { label: 'Siap Diantar', color: 'bg-gray-200 text-gray-800', textColor: 'text-gray-800' },
     'DELIVERED': { label: 'Dikirim', color: 'bg-gray-100 text-gray-800', textColor: 'text-gray-800' },
-    'CANCELLED': { label: 'Dibatalkan', color: 'bg-red-100 text-red-800', textColor: 'text-red-800' }
+    'CANCELLED': { label: 'Dibatalkan', color: 'bg-destructive/10 text-destructive', textColor: 'text-destructive' }
   }
 
   const paymentStatusConfig = {
-    'UNPAID': { label: 'Belum Dibayar', color: 'bg-red-100 text-red-800' },
-    'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-yellow-100 text-yellow-800' },
-    'PAID': { label: 'Lunas', color: 'bg-green-100 text-green-800' }
+    'UNPAID': { label: 'Belum Dibayar', color: 'bg-gray-100 text-gray-700' },
+    'PARTIAL': { label: 'Dibayar Sebagian', color: 'bg-gray-200 text-gray-800' },
+    'PAID': { label: 'Lunas', color: 'bg-gray-200 text-gray-800' }
   }
 
   const priorityConfig = {
-    'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-800' },
-    'normal': { label: 'Normal', color: 'bg-blue-100 text-blue-800' },
-    'high': { label: 'Tinggi', color: 'bg-red-100 text-red-800' }
+    'low': { label: 'Rendah', color: 'bg-gray-100 text-gray-700' },
+    'normal': { label: 'Normal', color: 'bg-gray-200 text-gray-800' },
+    'high': { label: 'Tinggi', color: 'bg-gray-300 text-gray-900' }
   }
 
   // Selection handlers
@@ -213,9 +213,9 @@ const OrdersTable = ({
     <>
       {/* Bulk Actions Bar */}
       {selectedOrders.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
+        <div className="flex items-center justify-between p-4 bg-muted border border-border rounded-lg mb-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-blue-900">
+            <span className="text-sm font-medium">
               {selectedOrders.length} pesanan dipilih
             </span>
           </div>
@@ -320,7 +320,7 @@ const OrdersTable = ({
               orders.map((order) => (
                 <TableRow
                   key={order.id}
-                  className={selectedOrders.includes(order.id) ? 'bg-blue-50' : ''}
+                  className={selectedOrders.includes(order.id) ? 'bg-muted/50' : ''}
                 >
                   <TableCell>
                     <Checkbox

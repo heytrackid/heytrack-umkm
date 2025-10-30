@@ -3,6 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { PricingAssistantService } from '@/modules/orders/services/PricingAssistantService'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // POST /api/hpp/pricing-assistant - Generate pricing recommendation
 export async function POST(request: NextRequest) {
   try {

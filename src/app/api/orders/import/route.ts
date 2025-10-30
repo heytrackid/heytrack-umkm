@@ -5,6 +5,9 @@ import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 import { isRecord, isArrayOf, isCustomer, getErrorMessage, extractFirst } from '@/lib/type-guards'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 type CustomerInsert = Database['public']['Tables']['customers']['Insert']
 type OrderInsert = Database['public']['Tables']['orders']['Insert']
 type OrderItemInsert = Omit<Database['public']['Tables']['order_items']['Insert'], 'order_id'>

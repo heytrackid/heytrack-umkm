@@ -4,6 +4,9 @@ import { PaginationQuerySchema } from '@/lib/validations'
 import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // GET /api/hpp/recommendations - Get HPP recommendations
 export async function GET(request: NextRequest) {
   try {

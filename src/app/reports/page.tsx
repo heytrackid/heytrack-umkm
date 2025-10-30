@@ -10,6 +10,7 @@ import { useEffect } from 'react'
 
 import { ReportsLayout } from './components/ReportsLayout'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 export default function ReportsPage() {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -33,16 +34,10 @@ export default function ReportsPage() {
     return (
       <div className="space-y-6 p-6">
         {/* Header - Always visible */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              Laporan
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Analisis performa bisnis Anda
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Laporan"
+          description="Analisis performa bisnis Anda"
+        />
 
         {/* Stats skeleton */}
         <div className="grid gap-4 md:grid-cols-4">

@@ -35,9 +35,9 @@ import {
     MoreVertical,
     Edit,
     Trash2,
-    Receipt,
     X,
 } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // Feature Components
 import { EnhancedEmptyState } from './EnhancedEmptyState'
@@ -267,25 +267,22 @@ export const EnhancedOperationalCostsPage = () => {
             </div>
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <Receipt className="h-8 w-8" />
-                        Biaya Operasional
-                    </h1>
-                    <p className="text-muted-foreground mt-1">Kelola semua biaya operasional bisnis Anda</p>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                    <Button onClick={handleAdd} className="flex-1 sm:flex-none">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Tambah Biaya
-                    </Button>
-                    <Button variant="outline" onClick={handleQuickSetup} className="flex-1 sm:flex-none">
-                        <Zap className="h-4 w-4 mr-2" />
-                        Setup Cepat
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title="Biaya Operasional"
+                description="Kelola semua biaya operasional bisnis Anda"
+                action={
+                    <div className="flex gap-2">
+                        <Button onClick={handleAdd}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Tambah Biaya
+                        </Button>
+                        <Button variant="outline" onClick={handleQuickSetup}>
+                            <Zap className="h-4 w-4 mr-2" />
+                            Setup Cepat
+                        </Button>
+                    </div>
+                }
+            />
 
             {/* Stats Cards */}
             <OperationalCostStats costs={costs || []} formatCurrency={formatCurrency} calculateMonthlyCost={calculateMonthlyCost} />

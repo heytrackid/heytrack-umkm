@@ -35,11 +35,11 @@ import {
     Trash2,
     Calculator,
     Eye,
-    ChefHat,
     Clock,
     Users,
     X
 } from 'lucide-react'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 // Feature Components
 import { MobileRecipeCard } from './MobileRecipeCard'
@@ -220,31 +220,25 @@ export const EnhancedRecipesPage = () => {
             </div>
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <ChefHat className="h-8 w-8" />
-                        Resep Produk
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Kelola resep dan hitung HPP dengan sistem otomatis
-                    </p>
-                </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                    <Button onClick={() => router.push('/recipes/new')} className="flex-1 sm:flex-none">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Resep Baru
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => router.push('/recipes/ai-generator')}
-                        className="flex-1 sm:flex-none"
-                    >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        AI Generator
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title="Resep Produk"
+                description="Kelola resep dan hitung HPP dengan sistem otomatis"
+                action={
+                    <div className="flex gap-2">
+                        <Button onClick={() => router.push('/recipes/new')}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Resep Baru
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => router.push('/recipes/ai-generator')}
+                        >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            AI Generator
+                        </Button>
+                    </div>
+                }
+            />
 
             {/* Stats Cards */}
             <RecipeStatsCards recipes={recipes || []} />

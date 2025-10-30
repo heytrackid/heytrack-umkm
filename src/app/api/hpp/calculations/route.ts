@@ -5,6 +5,9 @@ import { apiLogger } from '@/lib/logger'
 import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // GET /api/hpp/calculations - Get HPP calculations with pagination and filtering
 export async function GET(request: NextRequest) {
   try {

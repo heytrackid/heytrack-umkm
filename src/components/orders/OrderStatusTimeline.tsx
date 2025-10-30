@@ -59,16 +59,16 @@ export default function OrderStatusTimeline({
     const isCancelled = currentStatus === 'CANCELLED'
 
     const getStatusColor = (index: number) => {
-        if (isCancelled) { return 'text-red-500' }
-        if (index < currentIndex) { return 'text-green-500' }
+        if (isCancelled) { return 'text-destructive' }
+        if (index < currentIndex) { return 'text-foreground' }
         if (index === currentIndex) { return 'text-primary' }
         return 'text-muted-foreground'
     }
 
     const getLineColor = (index: number) => {
-        if (isCancelled) { return 'bg-red-200' }
-        if (index < currentIndex) { return 'bg-green-500' }
-        return 'bg-gray-200'
+        if (isCancelled) { return 'bg-destructive/20' }
+        if (index < currentIndex) { return 'bg-border' }
+        return 'bg-border'
     }
 
     const handleStatusClick = (status: OrderStatus) => {
@@ -105,7 +105,7 @@ export default function OrderStatusTimeline({
                                             className={`flex items-start gap-3 p-3 rounded-lg border-2 transition-all ${isActive
                                                 ? 'border-primary bg-primary/5'
                                                 : isCompleted
-                                                    ? 'border-green-200 bg-green-50'
+                                                    ? 'border-border bg-muted'
                                                     : 'border-gray-200'
                                                 } ${isClickable ? 'cursor-pointer hover:border-primary' : ''}`}
                                             onClick={() => isClickable && handleStatusClick(step.status)}
@@ -191,7 +191,7 @@ export default function OrderStatusTimeline({
                                                 className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${isActive
                                                     ? 'border-primary bg-primary text-white scale-110'
                                                     : isCompleted
-                                                        ? 'border-green-500 bg-green-500 text-white'
+                                                        ? 'border-foreground bg-foreground text-background'
                                                         : 'border-gray-300 bg-white text-gray-400'
                                                     } ${isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
                                             >
@@ -204,7 +204,7 @@ export default function OrderStatusTimeline({
 
                                             {/* Label */}
                                             <div className="mt-3 text-center">
-                                                <p className={`font-medium text-sm ${isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'
+                                                <p className={`font-medium text-sm ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'
                                                     }`}>
                                                     {step.label}
                                                 </p>

@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AlertTriangle,
-  Package,
   Plus,
   ShoppingCart,
   Upload
@@ -23,6 +22,7 @@ import {
   generateIngredientsTemplate
 } from '@/components/import/csv-helpers';
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export default function IngredientsPage() {
   const { data: ingredients, loading, error } = useIngredients({ realtime: true });
@@ -78,31 +78,26 @@ export default function IngredientsPage() {
           <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
           {/* Header - Always visible */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-                <Package className="h-7 w-7 sm:h-8 sm:w-8" />
-                Bahan Baku
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Kelola stok dan harga bahan baku
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" disabled className="flex-1 sm:flex-none">
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </Button>
-              <Button variant="outline" disabled className="flex-1 sm:flex-none">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Pembelian
-              </Button>
-              <Button disabled className="flex-1 sm:flex-none">
-                <Plus className="h-4 w-4 mr-2" />
-                Tambah
-              </Button>
-            </div>
-          </div>
+          <PageHeader
+            title="Bahan Baku"
+            description="Kelola stok dan harga bahan baku"
+            action={
+              <div className="flex gap-2">
+                <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import
+                </Button>
+                <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Pembelian
+                </Button>
+                <Button disabled className="flex-1 sm:flex-none">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tambah
+                </Button>
+              </div>
+            }
+          />
 
           {/* Stats skeleton */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -136,42 +131,37 @@ export default function IngredientsPage() {
         <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-              <Package className="h-7 w-7 sm:h-8 sm:w-8" />
-              Bahan Baku
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Kelola stok dan harga bahan baku
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setImportDialogOpen(true)}
-              className="flex-1 sm:flex-none"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              Import
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/ingredients/purchases')}
-              className="flex-1 sm:flex-none"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Pembelian
-            </Button>
-            <Button
-              onClick={() => setShowAddDialog(true)}
-              className="flex-1 sm:flex-none"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah
-            </Button>
-          </div>
-        </div>
+        <PageHeader
+          title="Bahan Baku"
+          description="Kelola stok dan harga bahan baku"
+          action={
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setImportDialogOpen(true)}
+                className="flex-1 sm:flex-none"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/ingredients/purchases')}
+                className="flex-1 sm:flex-none"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Pembelian
+              </Button>
+              <Button
+                onClick={() => setShowAddDialog(true)}
+                className="flex-1 sm:flex-none"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats Cards */}
         <StatsCards stats={StatCardPatterns.ingredients({

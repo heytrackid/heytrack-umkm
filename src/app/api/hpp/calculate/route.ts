@@ -4,6 +4,9 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
+// ✅ Force Node.js runtime (required for DOMPurify/jsdom)
+export const runtime = 'nodejs'
+
 // POST /api/hpp/calculate - Calculate HPP for a recipe
 export async function POST(request: NextRequest) {
   try {
