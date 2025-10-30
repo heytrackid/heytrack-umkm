@@ -8,10 +8,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useCurrency } from '@/hooks/useCurrency'
-import { 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle, 
+import {
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -76,12 +76,18 @@ export default function AutoSyncFinancialDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
+  // Hydration fix - prevent SSR/client mismatch
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const fetchAutoSyncData = async () => {
     try {
       void setRefreshing(true)
       const response = await fetch('/api/financial/auto-sync')
       const result = await response.json()
-      
+
       if (result.success) {
         void setData(result.data)
         void setError(null)
@@ -101,12 +107,12 @@ export default function AutoSyncFinancialDashboard() {
   }, [])
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 
   const getHealthBadge = (health: string) => {
     switch (health) {
@@ -140,7 +146,8 @@ export default function AutoSyncFinancialDashboard() {
     </TooltipProvider>
   )
 
-  if (loading) {
+  // Prevent hydration mismatch
+  if (!isMounted || loading) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
@@ -167,9 +174,9 @@ export default function AutoSyncFinancialDashboard() {
         <XCircle className="h-4 w-4" />
         <AlertDescription>
           {error || 'Failed to load auto-sync data'}
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="ml-2"
             onClick={fetchAutoSyncData}
           >
@@ -191,8 +198,8 @@ export default function AutoSyncFinancialDashboard() {
             Sinkronisasi otomatis transaksi ke catatan keuangan
           </p>
         </div>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={fetchAutoSyncData}
           disabled={refreshing}
         >
@@ -292,7 +299,7 @@ export default function AutoSyncFinancialDashboard() {
               {data.recommendations.recommendations.map((rec, index: number) => (
                 <Alert key={index} className={rec.includes('✅') ? 'border-green-200 bg-green-50' : ''}>
                   <AlertDescription className="flex items-center">
-                    {rec.includes('✅') ? 
+                    {rec.includes('✅') ?
                       <CheckCircle2 className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" /> :
                       <Info className="h-4 w-4 text-blue-600 mr-2 flex-shrink-0" />
                     }
@@ -359,9 +366,9 @@ export default function AutoSyncFinancialDashboard() {
                 <div key={tx.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                   <div>
                     <p className="text-sm font-medium">
-                      {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' : 
-                       tx.source === 'operational_cost' ? '🏭 Biaya Operasional' :
-                       tx.source === 'order_completion' ? '💰 Penjualan' : tx.source}
+                      {tx.source === 'stock_transaction' ? '📦 Pembelian Bahan' :
+                        tx.source === 'operational_cost' ? '🏭 Biaya Operasional' :
+                          tx.source === 'order_completion' ? '💰 Penjualan' : tx.source}
                     </p>
                     <p className="text-xs text-gray-600">{formatDate(tx.syncedAt)}</p>
                   </div>

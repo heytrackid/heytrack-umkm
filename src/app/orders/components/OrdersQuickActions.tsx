@@ -17,7 +17,7 @@ export default function OrdersQuickActions({ _t: _ }: OrdersQuickActionsProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.href = '/settings/whatsapp-templates'}
+            onClick={() => window.location.href = '/orders/whatsapp-templates'}
             className="flex items-center gap-2"
           >
             <MessageCircle className="h-4 w-4" />

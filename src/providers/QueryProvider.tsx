@@ -8,15 +8,17 @@ const createQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       // Bias towards fewer refetches for better perceived performance
-      staleTime: 5 * 60 * 1000, // 5 minutes default
-      gcTime: 15 * 60 * 1000, // 15 minutes
+      staleTime: 5 * 60 * 1000, // 5 minutes default - data stays fresh longer
+      gcTime: 15 * 60 * 1000, // 15 minutes - keep in cache longer
       retry: 2,
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 20000),
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: true,
+      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      refetchOnMount: false, // Don't refetch when component mounts if data exists
+      refetchOnReconnect: true, // Only refetch when reconnecting to internet
       // Only refetch if data is stale
       refetchInterval: false,
+      // Keep previous data while fetching new data (prevents loading states)
+      placeholderData: (previousData) => previousData,
     },
     mutations: {
       retry: 2,

@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -278,16 +278,16 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
             )}
 
             {/* Detailed Tabs */}
-            <Tabs defaultValue="performance" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="performance">Performance</TabsTrigger>
-                    <TabsTrigger value="database">Database</TabsTrigger>
-                    <TabsTrigger value="errors">Errors</TabsTrigger>
-                    <TabsTrigger value="business">Business</TabsTrigger>
-                </TabsList>
+            <SwipeableTabs defaultValue="performance" className="w-full">
+                <SwipeableTabsList className="grid w-full grid-cols-4">
+                    <SwipeableTabsTrigger value="performance">Performance</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="database">Database</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="errors">Errors</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="business">Business</SwipeableTabsTrigger>
+                </SwipeableTabsList>
 
                 {/* Performance Tab */}
-                <TabsContent value="performance" className="space-y-4">
+                <SwipeableTabsContent value="performance" className="space-y-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -374,10 +374,10 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                             </div>
                         </CardContent>
                     </Card>
-                </TabsContent>
+                </SwipeableTabsContent>
 
                 {/* Database Tab */}
-                <TabsContent value="database" className="space-y-4">
+                <SwipeableTabsContent value="database" className="space-y-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -445,10 +445,10 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                             )}
                         </CardContent>
                     </Card>
-                </TabsContent>
+                </SwipeableTabsContent>
 
                 {/* Errors Tab */}
-                <TabsContent value="errors" className="space-y-4">
+                <SwipeableTabsContent value="errors" className="space-y-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -502,10 +502,10 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                             )}
                         </CardContent>
                     </Card>
-                </TabsContent>
+                </SwipeableTabsContent>
 
                 {/* Business Tab */}
-                <TabsContent value="business" className="space-y-4">
+                <SwipeableTabsContent value="business" className="space-y-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -560,8 +560,8 @@ export default function AdminDashboard({ userId }: AdminDashboardProps) {
                             )}
                         </CardContent>
                     </Card>
-                </TabsContent>
-            </Tabs>
+                </SwipeableTabsContent>
+            </SwipeableTabs>
         </div>
     )
 }

@@ -58,7 +58,18 @@ const NAV_SECTIONS: SidebarSection[] = [
     items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }]
   },
 
-  // 2. Operasional Harian - Core daily operations
+  // 2. AI Assistant - Quick access
+  {
+    title: 'AI Tools',
+    icon: Bot,
+    defaultOpen: false,
+    collapsible: false,
+    items: [
+      { label: 'AI Chatbot', href: '/ai-chatbot', icon: Bot }
+    ]
+  },
+
+  // 3. Operasional Harian - Core daily operations
   {
     title: 'Operasional',
     icon: ShoppingCart,
@@ -71,7 +82,7 @@ const NAV_SECTIONS: SidebarSection[] = [
     ]
   },
 
-  // 3. Inventory & Recipes - Product management
+  // 4. Inventory & Recipes - Product management
   {
     title: 'Produk & Stok',
     icon: Package,
@@ -83,7 +94,7 @@ const NAV_SECTIONS: SidebarSection[] = [
     ]
   },
 
-  // 4. Keuangan - Financial management
+  // 5. Keuangan - Financial management
   {
     title: 'Keuangan',
     icon: DollarSign,
@@ -96,7 +107,7 @@ const NAV_SECTIONS: SidebarSection[] = [
     ]
   },
 
-  // 5. Laporan - Reports
+  // 6. Laporan - Reports
   {
     title: 'Laporan',
     icon: FileText,
@@ -104,17 +115,6 @@ const NAV_SECTIONS: SidebarSection[] = [
     collapsible: false,
     items: [
       { label: 'Laporan', href: '/reports', icon: FileText }
-    ]
-  },
-
-  // 6. AI Assistant - Advanced features
-  {
-    title: 'AI Tools',
-    icon: Bot,
-    defaultOpen: false,
-    collapsible: true,
-    items: [
-      { label: 'AI Chatbot', href: '/ai-chatbot', icon: Bot }
     ]
   },
 

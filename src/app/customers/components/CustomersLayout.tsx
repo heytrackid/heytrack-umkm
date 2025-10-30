@@ -231,22 +231,34 @@ export default function CustomersLayout() {
         <PageBreadcrumb items={BreadcrumbPatterns.customers} />
 
         {/* Header */}
-        <PageHeader
-          title="Data Pelanggan"
-          description="Kelola database pelanggan dan riwayat pembelian"
-          actions={
-            <PageActions
-              onAdd={() => setCurrentView('add')}
-              addText="Tambah Pelanggan"
-              addIcon={Plus}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <Users className="h-7 w-7 sm:h-8 sm:w-8" />
+              Data Pelanggan
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Kelola database pelanggan dan riwayat pembelian
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => fetchCustomers()}
+              className="flex-1 sm:flex-none"
             >
-              <Button>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </PageActions>
-          }
-        />
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              onClick={() => setCurrentView('add')}
+              className="flex-1 sm:flex-none"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Pelanggan
+            </Button>
+          </div>
+        </div>
 
         {/* View Switcher */}
         <div className="flex gap-2 mb-4">

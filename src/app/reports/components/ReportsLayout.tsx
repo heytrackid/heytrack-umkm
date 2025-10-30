@@ -55,15 +55,16 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
         </Breadcrumb>
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <BarChart3 className="h-8 w-8" />
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+              <BarChart3 className="h-7 w-7 sm:h-8 sm:w-8" />
               Laporan
             </h1>
-            <p className="text-muted-foreground">Analisis bisnis dan laporan keuangan</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Analisis bisnis dan laporan keuangan
+            </p>
           </div>
-
         </div>
 
         {/* Date Range Picker */}
@@ -73,7 +74,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
               {/* Quick Presets */}
               <div>
                 <label className="text-sm font-medium mb-2 block">Periode Cepat:</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -97,7 +98,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                       })
                     }}
                   >
-                    7 Hari Terakhir
+                    7 Hari
                   </Button>
                   <Button
                     variant="outline"
@@ -112,7 +113,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                       })
                     }}
                   >
-                    30 Hari Terakhir
+                    30 Hari
                   </Button>
                   <Button
                     variant="outline"
@@ -132,7 +133,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
               </div>
 
               {/* Custom Date Range */}
-              <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex flex-col sm:flex-row gap-4 items-end">
                 <div className="flex-1">
                   <label className="text-sm font-medium mb-2 block">Tanggal Mulai</label>
                   <input
@@ -151,7 +152,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                     className="w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
                   />
                 </div>
-                <Button>
+                <Button className="w-full sm:w-auto">
                   <Calendar className="h-4 w-4 mr-2" />
                   Terapkan
                 </Button>

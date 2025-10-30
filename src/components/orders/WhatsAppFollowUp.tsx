@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -342,13 +342,13 @@ const WhatsAppFollowUp = ({
                 <CardTitle className="text-lg">Kirim via WhatsApp</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="regular" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="regular">WhatsApp Biasa</TabsTrigger>
-                    <TabsTrigger value="business">WhatsApp Business</TabsTrigger>
-                  </TabsList>
+                <SwipeableTabs defaultValue="regular" className="w-full">
+                  <SwipeableTabsList className="grid w-full grid-cols-2">
+                    <SwipeableTabsTrigger value="regular">WhatsApp Biasa</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="business">WhatsApp Business</SwipeableTabsTrigger>
+                  </SwipeableTabsList>
 
-                  <TabsContent value="regular" className="space-y-4">
+                  <SwipeableTabsContent value="regular" className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Buka WhatsApp regular dengan pesan yang sudah disiapkan
                     </div>
@@ -360,9 +360,9 @@ const WhatsAppFollowUp = ({
                       <Send className="h-4 w-4" />
                       Buka WhatsApp
                     </Button>
-                  </TabsContent>
+                  </SwipeableTabsContent>
 
-                  <TabsContent value="business" className="space-y-4">
+                  <SwipeableTabsContent value="business" className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Buka WhatsApp Business dengan pesan yang sudah disiapkan
                     </div>
@@ -374,8 +374,8 @@ const WhatsAppFollowUp = ({
                       <Send className="h-4 w-4" />
                       Buka WhatsApp Business
                     </Button>
-                  </TabsContent>
-                </Tabs>
+                  </SwipeableTabsContent>
+                </SwipeableTabs>
 
                 {/* URL Preview */}
                 <div className="mt-4 space-y-2">

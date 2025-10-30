@@ -40,13 +40,14 @@ Removed unnecessary dynamic imports for lightweight components and kept them onl
 - ✅ After: All imported normally
 - **Reason**: Simple forms and tables, no heavy operations
 
-#### 5. **WhatsApp Templates** (`src/app/settings/whatsapp-templates/components/WhatsAppTemplatesLayout.tsx`)
+#### 5. **WhatsApp Templates** (`src/app/orders/whatsapp-templates/components/WhatsAppTemplatesLayout.tsx`)
 - ❌ Before: All components lazy loaded
   - `TemplatesTable`
   - `TemplateForm`
   - `TemplatePreview`
 - ✅ After: All imported normally
 - **Reason**: Simple CRUD components
+- **Note**: Moved from `/settings` to `/orders` for better organization
 
 #### 6. **AI Recipe Generator** (`src/app/recipes/ai-generator/components/AIRecipeGeneratorLayout.tsx`)
 - ❌ Before: All components lazy loaded

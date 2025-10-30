@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import {
   Download,
   FileText,
@@ -249,16 +249,16 @@ export default function HppReportsPage() {
           ]}
         />
 
-        <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="export">Export</TabsTrigger>
-            <TabsTrigger value="insights">Insights</TabsTrigger>
-          </TabsList>
+        <SwipeableTabs defaultValue="analytics" className="space-y-6">
+          <SwipeableTabsList className={`grid w-full ${isMobile ? 'grid-cols-2' : 'grid-cols-4'}`}>
+            <SwipeableTabsTrigger value="analytics">Analytics</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="reports">Reports</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="export">Export</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="insights">Insights</SwipeableTabsTrigger>
+          </SwipeableTabsList>
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
+          <SwipeableTabsContent value="analytics" className="space-y-6">
             {loading ? (
               <div className="flex justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
@@ -370,10 +370,10 @@ export default function HppReportsPage() {
                 </Card>
               </div>
             ) : null}
-          </TabsContent>
+          </SwipeableTabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-6">
+          <SwipeableTabsContent value="reports" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Report Configuration</CardTitle>
@@ -474,10 +474,10 @@ export default function HppReportsPage() {
                 </Button>
               </CardContent>
             </Card>
-          </TabsContent>
+          </SwipeableTabsContent>
 
           {/* Export Tab */}
-          <TabsContent value="export" className="space-y-6">
+          <SwipeableTabsContent value="export" className="space-y-6">
             <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-4'}`}>
               {formatOptions.map((option) => (
                 <Card key={option.value} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -501,10 +501,10 @@ export default function HppReportsPage() {
                 </Card>
               ))}
             </div>
-          </TabsContent>
+          </SwipeableTabsContent>
 
           {/* Insights Tab */}
-          <TabsContent value="insights" className="space-y-6">
+          <SwipeableTabsContent value="insights" className="space-y-6">
             <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
               <Card>
                 <CardHeader>
@@ -569,8 +569,8 @@ export default function HppReportsPage() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-        </Tabs>
+          </SwipeableTabsContent>
+        </SwipeableTabs>
       </div>
     </AppLayout>
   )

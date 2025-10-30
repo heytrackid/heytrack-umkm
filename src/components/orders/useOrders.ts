@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
-import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { generateOrderNo } from './utils'
-import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
+import { getErrorMessage, isOrder } from '@/lib/type-guards'
 import { cachePresets } from '@/providers/QueryProvider'
-import { clientLogger } from '@/lib/logger/client-logger'
+import { queryLogger } from '@/lib/client-logger'
 
 // Query keys for cache management
 const orderKeys = {
@@ -28,14 +27,41 @@ export function useOrders() {
     queryKey: orderKeys.list(50),
     queryFn: async () => {
       try {
+        queryLogger.info('Fetching orders from API...')
         const response = await fetch('/api/orders?limit=50')
+        
+        queryLogger.info('API response received', { 
+          status: response.status, 
+          ok: response.ok,
+          contentType: response.headers.get('content-type')
+        })
         
         // Handle different HTTP status codes with specific errors
         if (!response.ok) {
-          const errorText = await response.text()
+          let errorMessage = 'Unknown error'
+          let errorDetails = null
           
-          // Log to console for debugging
-          clientLogger.error({ status: response.status, error: errorText }, 'API request failed')
+          try {
+            const contentType = response.headers.get('content-type')
+            if (contentType?.includes('application/json')) {
+              const errorJson = await response.json()
+              errorMessage = errorJson.error || errorJson.message || errorMessage
+              errorDetails = errorJson.details || errorJson
+            } else {
+              errorMessage = await response.text()
+            }
+          } catch (parseError) {
+            queryLogger.error('Failed to parse error response', parseError)
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          }
+          
+          // Log detailed error for debugging
+          queryLogger.error('API request failed', undefined, { 
+            status: response.status, 
+            error: errorMessage,
+            details: errorDetails,
+            url: response.url
+          })
           
           // Throw specific errors based on status code
           if (response.status === 401) {
@@ -48,18 +74,23 @@ export function useOrders() {
             throw new Error('Not found: Orders endpoint not available')
           }
           if (response.status >= 500) {
-            throw new Error('Server error: Please try again later')
+            throw new Error(`Server error: ${errorMessage}`)
           }
           
           // Generic error for other status codes
-          throw new Error(`Request failed with status ${response.status}: ${errorText}`)
+          throw new Error(`Request failed (${response.status}): ${errorMessage}`)
         }
         
         const json = await response.json()
+        queryLogger.info('API response parsed', { 
+          hasData: 'data' in json,
+          isArray: Array.isArray(json),
+          keys: Object.keys(json)
+        })
         
         // ✅ FIX: API returns { data: [...], meta: {...} }
         if (json && typeof json === 'object' && 'data' in json && Array.isArray(json.data)) {
-          clientLogger.info({ count: json.data.length }, 'Orders fetched successfully')
+          queryLogger.info('Orders fetched successfully', { count: json.data.length })
           
           // Map order_items to items for compatibility
           const mappedOrders = json.data.map((order: any) => ({
@@ -72,21 +103,22 @@ export function useOrders() {
         
         // Fallback: if API returns array directly (backward compatibility)
         if (Array.isArray(json)) {
-          clientLogger.info({ count: json.length }, 'Orders fetched (legacy format)')
+          queryLogger.info('Orders fetched (legacy format)', { count: json.length })
           return json as Order[]
         }
         
-        clientLogger.error({ response: json }, 'API returned unexpected format')
-        return [] as Order[]
+        queryLogger.error('API returned unexpected format', undefined, { response: json })
+        throw new Error('API returned unexpected format. Expected { data: [...] } or array.')
         
       } catch (err) {
         // Handle network errors specifically
         if (err instanceof TypeError && err.message.includes('fetch')) {
-          clientLogger.error({ error: err }, 'Network error')
+          queryLogger.error('Network error', err)
           throw new Error('Network error: Please check your internet connection')
         }
         
-        // Re-throw other errors
+        // Log and re-throw other errors
+        queryLogger.error('Error in orders query', err)
         throw err
       }
     },
@@ -144,67 +176,90 @@ export function useOrders() {
   // ✅ Create new order with TanStack Query mutation
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: OrderFormData) => {
-      // Transform OrderFormData to match OrderInsertSchema
-      const totalAmount = orderData.order_items.reduce((sum, item) => 
-        sum + (item.quantity * item.unit_price), 0
-      )
-      
-      const newOrder = {
-        order_no: generateOrderNo(),
-        customer_name: orderData.customer_name,
-        customer_phone: orderData.customer_phone || null,
-        customer_address: orderData.customer_address || null,
-        order_date: new Date().toISOString().split('T')[0],
-        delivery_date: orderData.delivery_date || null,
-        delivery_time: orderData.delivery_time || null,
-        status: 'PENDING' as OrderStatus,
-        payment_status: 'UNPAID' as const,
-        payment_method: null,
-        subtotal: totalAmount,
-        tax_amount: 0,
-        discount_amount: 0,
-        delivery_fee: 0,
-        total_amount: totalAmount,
-        notes: orderData.notes || null,
-        special_instructions: null,
-        items: orderData.order_items.map(item => ({
-          recipe_id: item.recipe_id,
-          product_name: item.product_name || null,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          total_price: item.quantity * item.unit_price,
-          special_requests: null
-        }))
-      }
+      try {
+        // Transform OrderFormData to match OrderInsertSchema
+        const totalAmount = orderData.order_items.reduce((sum, item) => 
+          sum + (item.quantity * item.unit_price), 0
+        )
+        
+        const newOrder = {
+          order_no: generateOrderNo(),
+          customer_name: orderData.customer_name,
+          customer_phone: orderData.customer_phone || null,
+          customer_address: orderData.customer_address || null,
+          order_date: new Date().toISOString().split('T')[0],
+          delivery_date: orderData.delivery_date || null,
+          delivery_time: orderData.delivery_time || null,
+          status: 'PENDING' as OrderStatus,
+          payment_status: 'UNPAID' as const,
+          payment_method: null,
+          subtotal: totalAmount,
+          tax_amount: 0,
+          discount_amount: 0,
+          delivery_fee: 0,
+          total_amount: totalAmount,
+          notes: orderData.notes || null,
+          special_instructions: null,
+          items: orderData.order_items.map(item => ({
+            recipe_id: item.recipe_id,
+            product_name: item.product_name || null,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_price: item.quantity * item.unit_price,
+            special_requests: null
+          }))
+        }
 
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOrder)
-      })
+        queryLogger.info('Creating order...', { orderData: newOrder })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create order')
-      }
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newOrder)
+        })
 
-      const data = await response.json()
-      
-      // Validate the response with type guards
-      if (isOrder(data)) {
+        queryLogger.info('Create order response received', { 
+          status: response.status, 
+          ok: response.ok 
+        })
+
+        if (!response.ok) {
+          let errorMessage = 'Failed to create order'
+          try {
+            const errorData = await response.json()
+            errorMessage = errorData.error || errorData.message || errorMessage
+            queryLogger.error('Create order failed', undefined, { 
+              status: response.status,
+              error: errorData 
+            })
+          } catch {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          }
+          throw new Error(errorMessage)
+        }
+
+        const data = await response.json()
+        queryLogger.info('Order created successfully', { orderId: data.id })
+        
+        // Validate the response with type guards
+        if (isOrder(data)) {
+          return data
+        }
+        
+        queryLogger.warn('API returned unexpected format for created order', { data })
         return data
+      } catch (err) {
+        queryLogger.error('Error in createOrder mutation', err)
+        throw err
       }
-      
-      clientLogger.warn({ data }, 'API returned unexpected format for created order')
-      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      clientLogger.info({}, 'Order created successfully')
+      queryLogger.info('Order created, cache invalidated')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      clientLogger.error({ error: message }, 'Error creating order')
+      queryLogger.error('Create order mutation failed', undefined, { error: message })
     }
   })
 
@@ -254,16 +309,16 @@ export function useOrders() {
         return data
       }
       
-      clientLogger.warn({ data }, 'API returned unexpected format for updated order')
+      queryLogger.warn('API returned unexpected format for updated order', { data })
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      clientLogger.info({}, 'Order updated successfully')
+      queryLogger.info('Order updated successfully')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      clientLogger.error({ error: message }, 'Error updating order')
+      queryLogger.error('Error updating order', undefined, { error: message })
     }
   })
 
@@ -297,7 +352,7 @@ export function useOrders() {
         return data
       }
       
-      clientLogger.warn({ data }, 'API returned unexpected format for order status update')
+      queryLogger.warn('API returned unexpected format for order status update', { data })
       return data
     },
     onSuccess: async (_data, variables) => {
@@ -307,11 +362,11 @@ export function useOrders() {
       // The API route will call InventoryUpdateService which creates stock_transactions
       // Database trigger will automatically update current_stock
       
-      clientLogger.info({ orderId: variables.orderId, status: variables.newStatus }, 'Order status updated')
+      queryLogger.info('Order status updated', { orderId: variables.orderId, status: variables.newStatus })
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      clientLogger.error({ error: message }, 'Error updating order status')
+      queryLogger.error('Error updating order status', undefined, { error: message })
     }
   })
 
@@ -340,11 +395,11 @@ export function useOrders() {
     },
     onSuccess: (orderId) => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      clientLogger.info({ orderId }, 'Order deleted successfully')
+      queryLogger.info('Order deleted successfully', { orderId })
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      clientLogger.error({ error: message }, 'Error deleting order')
+      queryLogger.error('Error deleting order', undefined, { error: message })
     }
   })
 

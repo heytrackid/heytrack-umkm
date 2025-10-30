@@ -13,6 +13,7 @@ import type { Database } from '@/types/supabase-generated'
 // Enhanced Components
 import { StockBadge } from './StockBadge'
 import { MobileIngredientList } from './MobileIngredientCard'
+import { IngredientFormDialog } from './IngredientFormDialog'
 
 // UX Components
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
@@ -39,7 +40,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X } from 'lucide-react'
+import { Edit, Trash2, MoreVertical, ShoppingCart, Search, Filter, X, Plus } from 'lucide-react'
 
 // Toast helpers
 import {
@@ -51,10 +52,14 @@ type Ingredient = Database['public']['Tables']['ingredients']['Row']
 type StockFilter = 'all' | 'normal' | 'low' | 'out'
 type CategoryFilter = 'all' | 'Bahan Kering' | 'Bahan Basah' | 'Bumbu' | 'Protein' | 'Sayuran' | 'Buah' | 'Dairy' | 'Kemasan' | 'Lainnya'
 
-export const EnhancedIngredientsPage = () => {
+interface EnhancedIngredientsPageProps {
+    onAdd?: () => void
+}
+
+export const EnhancedIngredientsPage = ({ onAdd }: EnhancedIngredientsPageProps = {}) => {
     const router = useRouter()
     const { formatCurrency } = useSettings()
-    const { data: ingredients, loading } = useIngredients({ realtime: true })
+    const { data: ingredients, loading, refetch } = useIngredients({ realtime: true })
     const { delete: deleteIngredient } = useSupabaseCRUD('ingredients')
     const { toast } = useToast()
     const { isMobile } = useMobile()
@@ -62,6 +67,8 @@ export const EnhancedIngredientsPage = () => {
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null)
+    const [showFormDialog, setShowFormDialog] = useState(false)
+    const [editingIngredient, setEditingIngredient] = useState<Ingredient | undefined>(undefined)
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
@@ -71,7 +78,7 @@ export const EnhancedIngredientsPage = () => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!ingredients) {return []}
+        if (!ingredients) { return [] }
 
         return ingredients.filter(item => {
             // Search filter
@@ -116,7 +123,17 @@ export const EnhancedIngredientsPage = () => {
 
     // Handlers
     const handleEdit = (ingredient: Ingredient) => {
-        router.push(`/ingredients/${ingredient.id}`)
+        setEditingIngredient(ingredient)
+        setShowFormDialog(true)
+    }
+
+    const handleAdd = () => {
+        if (onAdd) {
+            onAdd()
+        } else {
+            setEditingIngredient(undefined)
+            setShowFormDialog(true)
+        }
     }
 
     const handleDelete = (ingredient: Ingredient) => {
@@ -129,7 +146,7 @@ export const EnhancedIngredientsPage = () => {
     }
 
     const handleConfirmDelete = async () => {
-        if (!selectedIngredient) {return}
+        if (!selectedIngredient) { return }
 
         try {
             await deleteIngredient(selectedIngredient.id)
@@ -153,16 +170,24 @@ export const EnhancedIngredientsPage = () => {
     // Empty state
     if (!loading && (!ingredients || ingredients.length === 0)) {
         return (
-            <EmptyState
-                {...EmptyStatePresets.ingredients}
-                actions={[
-                    {
-                        label: 'Tambah Bahan Baru',
-                        onClick: () => router.push('/ingredients/new'),
-                        icon: ShoppingCart
-                    }
-                ]}
-            />
+            <>
+                <EmptyState
+                    {...EmptyStatePresets.ingredients}
+                    actions={[
+                        {
+                            label: 'Tambah Bahan Baru',
+                            onClick: handleAdd,
+                            icon: Plus
+                        }
+                    ]}
+                />
+                <IngredientFormDialog
+                    open={showFormDialog}
+                    onOpenChange={setShowFormDialog}
+                    ingredient={editingIngredient}
+                    onSuccess={() => refetch?.()}
+                />
+            </>
         )
     }
 
@@ -299,7 +324,7 @@ export const EnhancedIngredientsPage = () => {
                                                             compact
                                                         />
                                                         {(() => {
-                                                            if (!item.expiry_date) {return null}
+                                                            if (!item.expiry_date) { return null }
                                                             const expiryDate = new Date(item.expiry_date)
                                                             const today = new Date()
                                                             const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
@@ -374,17 +399,19 @@ export const EnhancedIngredientsPage = () => {
 
                         {/* Empty filtered state */}
                         {filteredData.length === 0 && (
-                            <div className="p-12 text-center">
-                                <p className="text-muted-foreground">
-                                    Tidak ada bahan baku yang sesuai dengan filter
-                                </p>
-                                <Button
-                                    variant="link"
-                                    onClick={clearFilters}
-                                    className="mt-2"
-                                >
-                                    Hapus filter
-                                </Button>
+                            <div className="p-8">
+                                <EmptyState
+                                    {...EmptyStatePresets.search}
+                                    compact
+                                    actions={[
+                                        {
+                                            label: 'Hapus Filter',
+                                            onClick: clearFilters,
+                                            variant: 'outline',
+                                            icon: X
+                                        }
+                                    ]}
+                                />
                             </div>
                         )}
                     </CardContent>
@@ -416,6 +443,14 @@ export const EnhancedIngredientsPage = () => {
                 entityName="Bahan Baku"
                 itemName={selectedIngredient?.name ?? ''}
                 isLoading={loading}
+            />
+
+            {/* Form Dialog */}
+            <IngredientFormDialog
+                open={showFormDialog}
+                onOpenChange={setShowFormDialog}
+                ingredient={editingIngredient}
+                onSuccess={() => refetch?.()}
             />
         </div>
     )

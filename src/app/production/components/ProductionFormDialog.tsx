@@ -47,11 +47,15 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
             const response = await fetch('/api/recipes')
             if (response.ok) {
                 const data = await response.json()
-                setRecipes(data)
+                // Ensure data is an array
+                setRecipes(Array.isArray(data) ? data : [])
+            } else {
+                setRecipes([])
             }
         } catch (error) {
             uiLogger.error({ error }, 'Error fetching recipes')
             toast.error('Gagal memuat daftar resep')
+            setRecipes([])
         } finally {
             setLoadingRecipes(false)
         }
@@ -141,11 +145,17 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
                                     <SelectValue placeholder="Pilih resep" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {recipes.map((recipe) => (
-                                        <SelectItem key={recipe.id} value={recipe.id}>
-                                            {recipe.name}
-                                        </SelectItem>
-                                    ))}
+                                    {Array.isArray(recipes) && recipes.length > 0 ? (
+                                        recipes.map((recipe) => (
+                                            <SelectItem key={recipe.id} value={recipe.id}>
+                                                {recipe.name}
+                                            </SelectItem>
+                                        ))
+                                    ) : (
+                                        <div className="p-2 text-sm text-muted-foreground text-center">
+                                            Tidak ada resep tersedia
+                                        </div>
+                                    )}
                                 </SelectContent>
                             </Select>
                         )}

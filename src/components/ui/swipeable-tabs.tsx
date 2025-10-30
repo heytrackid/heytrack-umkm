@@ -46,7 +46,6 @@ const SwipeableTabsList = ({
   ...props
 }: SwipeableTabsListProps) => {
   const [isMobile, setIsMobile] = useState(false)
-  const [currentScroll, setCurrentScroll] = useState(0)
   const [isScrollable, setIsScrollable] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const childrenArray = React.Children.toArray(children)
@@ -68,14 +67,12 @@ const SwipeableTabsList = ({
   const scrollLeft = () => {
     if (containerRef.current) {
       containerRef.current.scrollBy({ left: -200, behavior: 'smooth' })
-      setCurrentScroll(prev => Math.max(0, prev - 200))
     }
   }
 
   const scrollRight = () => {
     if (containerRef.current) {
       containerRef.current.scrollBy({ left: 200, behavior: 'smooth' })
-      setCurrentScroll(prev => prev + 200)
     }
   }
 
@@ -95,7 +92,7 @@ const SwipeableTabsList = ({
           <ChevronLeft className="h-4 w-4" />
         </Button>
       )}
-      
+
       <TabsPrimitive.List
         ref={containerRef}
         data-slot="tabs-list"

@@ -75,8 +75,8 @@ export const GlobalSearch = memo(() => {
 
   // Quick actions
   const quickActions: QuickAction[] = [
-    { label: 'Buat Pesanan Baru', icon: ShoppingCart, action: () => router.push('/orders/new') },
-    { label: 'Tambah Bahan Baku', icon: Package, action: () => router.push('/ingredients/new') },
+    { label: 'Buat Pesanan Baru', icon: ShoppingCart, action: () => router.push('/orders') }, // Opens orders page with dialog
+    { label: 'Tambah Bahan Baku', icon: Package, action: () => router.push('/ingredients') }, // Opens ingredients page with dialog
     { label: 'Tambah Pelanggan', icon: Users, action: () => router.push('/customers/new') },
     { label: 'Buat Resep Baru', icon: BookOpen, action: () => router.push('/recipes') },
     { label: 'Lihat Laporan', icon: BarChart3, action: () => router.push('/reports') },

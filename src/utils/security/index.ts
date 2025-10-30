@@ -141,20 +141,30 @@ export class SecurityHeaders {
     }
   }
 
-  static getCSPHeader(): string {
+  // Deprecated: Use getStrictCSP from @/lib/csp instead
+  // Kept for backward compatibility
+  static getCSPHeader(isDev = false): string {
+    console.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
     const policies = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai",
+      isDev 
+        ? "script-src 'self' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com"
+        : "script-src 'self' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com",
+      "style-src 'self' https://fonts.googleapis.com",
+      "img-src 'self' data: https: blob: https://*.supabase.co",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://vitals.vercel-insights.com",
+      "worker-src 'self' blob:",
+      "media-src 'self' https://*.supabase.co",
       "frame-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests"
+      "manifest-src 'self'",
+      "prefetch-src 'self' https://*.supabase.co",
+      "upgrade-insecure-requests",
+      "block-all-mixed-content"
     ]
 
     return policies.join('; ')

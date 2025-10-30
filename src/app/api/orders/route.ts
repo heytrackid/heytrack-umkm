@@ -5,11 +5,10 @@ import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { createPaginationMeta } from '@/lib/validations/pagination'
 import type { Database } from '@/types/supabase-generated'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
-import { apiLogger } from '@/lib/logger'
+import { apiLogger, logError } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
 import { handleAPIError } from '@/lib/errors/api-error-handler'
-import { EnhancedErrorLogger } from '@/lib/errors/error-logger'
 
 type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
@@ -21,6 +20,8 @@ type OrdersTable = Database['public']['Tables']['orders']
 // GET /api/orders - Get all orders
 async function GET(request: NextRequest) {
   try {
+    apiLogger.info({ url: request.url }, 'GET /api/orders - Request received')
+    
     // Create authenticated Supabase client
     const supabase = await createClient()
 
@@ -28,16 +29,17 @@ async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      EnhancedErrorLogger.logApiError(authError, {
+      logError(apiLogger, authError, 'GET /api/orders - Unauthorized', {
         userId: user?.id,
         url: request.url,
-        userAgent: request.headers.get('user-agent') || undefined
-      });
+      })
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    apiLogger.info({ userId: user.id }, 'GET /api/orders - User authenticated')
 
     const { searchParams } = new URL(request.url)
 
@@ -51,11 +53,11 @@ async function GET(request: NextRequest) {
     })
 
     if (!queryValidation.success) {
-      EnhancedErrorLogger.logApiError(new Error('Invalid query parameters'), {
+      logError(apiLogger, new Error('Invalid query parameters'), 'GET /api/orders - Validation failed', {
         userId: user.id,
         url: request.url,
         validationErrors: queryValidation.error.issues
-      });
+      })
       return NextResponse.json(
         { error: 'Invalid query parameters', details: queryValidation.error.issues },
         { status: 400 }
@@ -82,10 +84,10 @@ async function GET(request: NextRequest) {
     const { count, error: countError } = await countQuery
 
     if (countError) {
-      EnhancedErrorLogger.logDatabaseError(countError, {
+      logError(apiLogger, countError, 'GET /api/orders - Failed to count orders', {
         userId: user.id,
         url: request.url
-      });
+      })
       return NextResponse.json(
         { error: 'Failed to count orders' },
         { status: 500 }
@@ -121,10 +123,10 @@ async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      EnhancedErrorLogger.logDatabaseError(error, {
+      logError(apiLogger, error, 'GET /api/orders - Failed to fetch orders', {
         userId: user.id,
         url: request.url
-      });
+      })
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -157,15 +159,22 @@ async function GET(request: NextRequest) {
       items: (order as OrderWithItems).order_items || []
     }))
 
+    apiLogger.info({ 
+      userId: user.id,
+      count: mappedData?.length || 0,
+      totalCount: count || 0,
+      page,
+      limit
+    }, 'GET /api/orders - Success')
+
     return NextResponse.json({
       data: mappedData,
       meta: createPaginationMeta(page, limit, count || 0)
     })
   } catch (error: unknown) {
-    EnhancedErrorLogger.logApiError(error, {
+    logError(apiLogger, error, 'GET /api/orders - Unexpected error', {
       url: request.url,
-      userAgent: request.headers.get('user-agent') || undefined
-    });
+    })
     return handleAPIError(error, 'GET /api/orders');
   }
 }
@@ -173,6 +182,8 @@ async function GET(request: NextRequest) {
 // POST /api/orders - Create new order with income tracking
 async function POST(request: NextRequest) {
   try {
+    apiLogger.info({ url: request.url }, 'POST /api/orders - Request received')
+    
     // Create authenticated Supabase client
     const supabase = await createClient()
 
@@ -180,16 +191,17 @@ async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      EnhancedErrorLogger.logApiError(authError, {
+      logError(apiLogger, authError, 'POST /api/orders - Unauthorized', {
         userId: user?.id,
         url: request.url,
-        userAgent: request.headers.get('user-agent') || undefined
-      });
+      })
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    apiLogger.info({ userId: user.id }, 'POST /api/orders - User authenticated')
 
     // The request body is already sanitized by the security middleware
     const body = await request.json()
@@ -197,11 +209,11 @@ async function POST(request: NextRequest) {
     // Validate request body
     const validation = OrderInsertSchema.safeParse(body)
     if (!validation.success) {
-      EnhancedErrorLogger.logApiError(new Error('Invalid request data'), {
+      logError(apiLogger, new Error('Invalid request data'), 'POST /api/orders - Validation failed', {
         userId: user.id,
         url: request.url,
         validationErrors: validation.error.issues
-      });
+      })
       return NextResponse.json(
         {
           error: 'Invalid request data',
@@ -210,6 +222,12 @@ async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    apiLogger.info({ 
+      userId: user.id,
+      orderNo: validation.data.order_no,
+      itemsCount: validation.data.items?.length || 0
+    }, 'POST /api/orders - Validation passed')
 
     const validatedData = validation.data
     const orderStatus = validatedData.status || 'PENDING'
@@ -234,10 +252,10 @@ async function POST(request: NextRequest) {
         .single()
 
       if (incomeError) {
-        EnhancedErrorLogger.logDatabaseError(incomeError, {
+        logError(apiLogger, incomeError, 'POST /api/orders - Failed to create income record', {
           userId: user.id,
           url: request.url
-        });
+        })
         return NextResponse.json(
           { error: 'Failed to create income record' },
           { status: 500 }
@@ -274,10 +292,10 @@ async function POST(request: NextRequest) {
       .single()
 
     if (orderError) {
-      EnhancedErrorLogger.logDatabaseError(orderError, {
+      logError(apiLogger, orderError, 'POST /api/orders - Failed to create order', {
         userId: user.id,
         url: request.url
-      });
+      })
       // Rollback income record if order creation fails
       if (incomeRecordId) {
         await supabase
@@ -324,10 +342,10 @@ async function POST(request: NextRequest) {
         .insert(orderItems)
 
       if (itemsError) {
-        EnhancedErrorLogger.logDatabaseError(itemsError, {
+        logError(apiLogger, itemsError, 'POST /api/orders - Failed to create order items', {
           userId: user.id,
           url: request.url
-        });
+        })
         
         // Complete rollback: delete order AND financial record
         await supabase
@@ -353,15 +371,21 @@ async function POST(request: NextRequest) {
     }
 
     // Return order data with income tracking info
+    apiLogger.info({ 
+      userId: user.id,
+      orderId: createdOrder.id,
+      orderNo: createdOrder.order_no,
+      incomeRecorded: !!incomeRecordId
+    }, 'POST /api/orders - Success')
+    
     return NextResponse.json({
       ...createdOrder,
       income_recorded: !!incomeRecordId
     }, { status: 201 })
   } catch (error: unknown) {
-    EnhancedErrorLogger.logApiError(error, {
+    logError(apiLogger, error, 'POST /api/orders - Unexpected error', {
       url: request.url,
-      userAgent: request.headers.get('user-agent') || undefined
-    });
+    })
     return handleAPIError(error, 'POST /api/orders');
   }
 }

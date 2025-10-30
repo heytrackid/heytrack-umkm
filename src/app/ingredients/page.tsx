@@ -9,6 +9,7 @@ import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AlertTriangle,
   Package,
@@ -21,6 +22,7 @@ import {
   parseIngredientsCSV,
   generateIngredientsTemplate
 } from '@/components/import/csv-helpers';
+import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog';
 
 export default function IngredientsPage() {
   const { data: ingredients, loading, error } = useIngredients({ realtime: true });
@@ -28,6 +30,7 @@ export default function IngredientsPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Generate template URL
   const templateUrl = useMemo(() => {
@@ -161,7 +164,7 @@ export default function IngredientsPage() {
               Pembelian
             </Button>
             <Button
-              onClick={() => router.push('/ingredients/new')}
+              onClick={() => setShowAddDialog(true)}
               className="flex-1 sm:flex-none"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -199,7 +202,7 @@ export default function IngredientsPage() {
         )}
 
         {/* Main Content */}
-        <IngredientsCRUD />
+        <IngredientsCRUD onAdd={() => setShowAddDialog(true)} />
 
         {/* Import Dialog */}
         <ImportDialog
@@ -242,6 +245,13 @@ export default function IngredientsPage() {
               }
             }
           }}
+        />
+
+        {/* Add/Edit Dialog */}
+        <IngredientFormDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          onSuccess={() => window.location.reload()}
         />
       </div>
     </AppLayout>

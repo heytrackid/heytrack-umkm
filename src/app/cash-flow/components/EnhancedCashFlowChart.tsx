@@ -187,7 +187,7 @@ export default function EnhancedCashFlowChart({
                         <Tooltip content={<CustomTooltip />} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
-                            formatter={(value) => {
+                            formatter={(value: string) => {
                                 const labels: Record<string, string> = {
                                     income: 'Pemasukan',
                                     expense: 'Pengeluaran',
@@ -225,7 +225,7 @@ export default function EnhancedCashFlowChart({
                         <Tooltip content={<CustomTooltip />} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
-                            formatter={(value) => {
+                            formatter={(value: string) => {
                                 const labels: Record<string, string> = {
                                     income: 'Pemasukan',
                                     expense: 'Pengeluaran',
@@ -249,7 +249,7 @@ export default function EnhancedCashFlowChart({
                         <Tooltip content={<CustomTooltip />} />
                         <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
-                            formatter={(value) => {
+                            formatter={(value: string) => {
                                 const labels: Record<string, string> = {
                                     income: 'Pemasukan',
                                     expense: 'Pengeluaran',

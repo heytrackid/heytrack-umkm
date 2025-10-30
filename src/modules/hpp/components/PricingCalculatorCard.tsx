@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Loader2, CheckCircle, TrendingUp, TrendingDown, DollarSign, Lightbulb } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 
@@ -84,13 +84,13 @@ export const PricingCalculatorCard = ({
                 </div>
 
                 {/* Mode Tabs */}
-                <Tabs value={mode} onValueChange={(v) => setMode(v as 'auto' | 'manual')}>
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="auto">Otomatis (Margin)</TabsTrigger>
-                        <TabsTrigger value="manual">Manual</TabsTrigger>
-                    </TabsList>
+                <SwipeableTabs value={mode} onValueChange={(v) => setMode(v as 'auto' | 'manual')}>
+                    <SwipeableTabsList className="grid w-full grid-cols-2">
+                        <SwipeableTabsTrigger value="auto">Otomatis (Margin)</SwipeableTabsTrigger>
+                        <SwipeableTabsTrigger value="manual">Manual</SwipeableTabsTrigger>
+                    </SwipeableTabsList>
 
-                    <TabsContent value="auto" className="space-y-4 mt-4">
+                    <SwipeableTabsContent value="auto" className="space-y-4 mt-4">
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium">Target Margin Keuntungan</span>
@@ -120,9 +120,9 @@ export const PricingCalculatorCard = ({
                                 <span>150%</span>
                             </div>
                         </div>
-                    </TabsContent>
+                    </SwipeableTabsContent>
 
-                    <TabsContent value="manual" className="space-y-4 mt-4">
+                    <SwipeableTabsContent value="manual" className="space-y-4 mt-4">
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium">Masukkan Harga Jual</span>
@@ -150,8 +150,8 @@ export const PricingCalculatorCard = ({
                                 </p>
                             )}
                         </div>
-                    </TabsContent>
-                </Tabs>
+                    </SwipeableTabsContent>
+                </SwipeableTabs>
 
                 {/* Display Price */}
                 <div className="p-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-800">

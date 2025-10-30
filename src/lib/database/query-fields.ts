@@ -96,10 +96,10 @@ export const ORDER_FIELDS = {
  */
 export const INGREDIENT_FIELDS = {
   // List view
-  LIST: 'id, name, unit, price_per_unit, weighted_average_cost, current_stock, minimum_stock, category',
+  LIST: 'id, name, unit, price_per_unit, weighted_average_cost, current_stock, min_stock, category',
   
   // Card view
-  CARD: 'id, name, unit, price_per_unit, weighted_average_cost, current_stock, minimum_stock, category, supplier',
+  CARD: 'id, name, unit, price_per_unit, weighted_average_cost, current_stock, min_stock, category, supplier',
   
   // Full detail
   DETAIL: '*',
@@ -111,7 +111,7 @@ export const INGREDIENT_FIELDS = {
   SELECT: 'id, name, unit',
   
   // For stock alerts
-  STOCK_ALERT: 'id, name, current_stock, minimum_stock, unit',
+  STOCK_ALERT: 'id, name, current_stock, min_stock, unit',
 } as const
 
 /**

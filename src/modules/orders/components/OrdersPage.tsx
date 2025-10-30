@@ -17,7 +17,6 @@ import {
   Eye,
   Filter,
   MessageCircle,
-  Package,
   Plus,
   Search,
   ShoppingCart,
@@ -25,14 +24,26 @@ import {
   XCircle
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { arrayCalculations } from '@/lib/performance-optimized'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import dynamic from 'next/dynamic'
+
+// ✅ Code Splitting - Lazy load heavy components
+const OrderForm = dynamic(() => import('./OrderForm').then(mod => ({ default: mod.OrderForm })), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
+  ssr: false
+})
+
+const OrderDetailView = dynamic(() => import('./OrderDetailView').then(mod => ({ default: mod.OrderDetailView })), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
+  ssr: false
+})
 
 // Types and constants
 import { useCurrency } from '@/hooks/useCurrency'
 import {
-  ORDER_STATUS_CONFIG,
-  PAYMENT_METHOD_CONFIG
+  ORDER_STATUS_CONFIG
 } from '@/modules/orders/constants'
 import type {
   Order,
@@ -78,6 +89,7 @@ interface OrdersPageProps {
 
 export default function OrdersPage({ }: OrdersPageProps) {
   const { formatCurrency } = useCurrency()
+  const queryClient = useQueryClient()
 
   type ActiveView = 'dashboard' | 'list' | 'calendar' | 'analytics'
   const [activeView, setActiveView] = useState<ActiveView>('dashboard')
@@ -92,16 +104,20 @@ export default function OrdersPage({ }: OrdersPageProps) {
   })
 
   // ✅ Use TanStack Query for automatic caching
-  const { data: orders = [], isLoading: loading, error: queryError } = useQuery({
+  const { data: ordersData, isLoading: loading, error: queryError } = useQuery({
     queryKey: ['orders', 'all'],
     queryFn: async () => {
       const response = await fetch('/api/orders')
       if (!response.ok) { throw new Error('Failed to fetch orders') }
-      return response.json() as Promise<Order[]>
+      const data = await response.json()
+      // Ensure we always return an array
+      return Array.isArray(data) ? data : []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
   })
+
+  const orders = Array.isArray(ordersData) ? ordersData : []
 
   const error = queryError ? (queryError).message : null
 
@@ -129,7 +145,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
 
   const getStatusColor = (status: OrderStatus | null) => {
     if (!status) { return 'bg-gray-100 text-gray-800' }
-    const config = ORDER_STATUS_CONFIG[status]
+    const config = ORDER_STATUS_CONFIG[status as keyof typeof ORDER_STATUS_CONFIG]
     if (!config) { return 'bg-gray-100 text-gray-800' }
     return config.color
   }
@@ -146,19 +162,24 @@ export default function OrdersPage({ }: OrdersPageProps) {
     year: 'numeric'
   })
 
+  // Dialog states
+  const [showOrderForm, setShowOrderForm] = useState(false)
+  const [showOrderDetail, setShowOrderDetail] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+
   const handleCreateOrder = () => {
-    // Will implement order form
-    uiLogger.debug('Create order button clicked')
+    setSelectedOrder(null)
+    setShowOrderForm(true)
   }
 
-  const handleEditOrder = (_order: Order) => {
-    // Will open edit form
-    uiLogger.debug('Edit order button clicked')
+  const handleEditOrder = (order: Order) => {
+    setSelectedOrder(order)
+    setShowOrderForm(true)
   }
 
-  const handleViewOrder = (_order: Order) => {
-    // Will open detail view
-    uiLogger.debug('View order button clicked')
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order)
+    setShowOrderDetail(true)
   }
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
@@ -177,7 +198,8 @@ export default function OrdersPage({ }: OrdersPageProps) {
     }
   }
 
-  if (loading) {
+  // Only show loading skeleton on initial load (when no data yet)
+  if (loading && orders.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -301,20 +323,11 @@ export default function OrdersPage({ }: OrdersPageProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.location.href = '/settings/whatsapp-templates'}
+              onClick={() => window.location.href = '/orders/whatsapp-templates'}
               className="flex items-center gap-2"
             >
               <MessageCircle className="h-4 w-4" />
               Kelola Template WhatsApp
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => uiLogger.debug('Export orders button clicked')}
-              className="flex items-center gap-2"
-            >
-              <Package className="h-4 w-4" />
-              Export Data
             </Button>
           </div>
         </CardContent>
@@ -375,23 +388,40 @@ export default function OrdersPage({ }: OrdersPageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {orders.slice(0, 5).map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex-1">
-                        <div className="font-medium">{order.order_no}</div>
-                        <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
-                        <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
+                {orders.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <ShoppingCart className="h-12 w-12 text-gray-400 mb-3" />
+                    <h3 className="font-semibold text-lg mb-1">Belum Ada Pesanan</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Mulai buat pesanan pertama Anda
+                    </p>
+                    <Button
+                      onClick={() => setShowOrderForm(true)}
+                      size="sm"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Buat Pesanan
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {orders.slice(0, 5).map((order) => (
+                      <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium">{order.order_no}</div>
+                          <div className="text-sm text-muted-foreground">{order.customer_name ?? 'N/A'}</div>
+                          <div className="text-xs text-muted-foreground">{order.order_date ? formatDate(order.order_date) : 'N/A'}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
+                          <Badge className={`text-xs ${getStatusColor(order.status)}`}>
+                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
-                        <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                          {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -537,7 +567,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
             ) : (
               <>
                 {orders.map((order) => (
-                  <Card key={order.id} className="hover: transition-shadow">
+                  <Card key={order.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="space-y-1">
@@ -548,10 +578,10 @@ export default function OrdersPage({ }: OrdersPageProps) {
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge className={getStatusColor(order.status)}>
-                            {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
+                            {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
                           </Badge>
                           <Badge className={getPaymentStatusColor(order.payment_status ?? null)}>
-                            {order.payment_status ? PAYMENT_STATUS_LABELS[order.payment_status] : 'N/A'}
+                            {order.payment_status && order.payment_status in PAYMENT_STATUS_LABELS ? PAYMENT_STATUS_LABELS[order.payment_status as keyof typeof PAYMENT_STATUS_LABELS] : 'N/A'}
                           </Badge>
                         </div>
                       </div>
@@ -582,7 +612,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
                         </Button>
-                        {order.status && ORDER_STATUS_CONFIG[order.status]?.nextStatuses && ORDER_STATUS_CONFIG[order.status].nextStatuses.length > 0 && (
+                        {order.status && order.status in ORDER_STATUS_CONFIG && ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG]?.nextStatuses && ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG].nextStatuses.length > 0 && (
                           <Select
                             value={order.status}
                             onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
@@ -592,11 +622,11 @@ export default function OrdersPage({ }: OrdersPageProps) {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value={order.status || 'PENDING'} disabled>
-                                {order.status ? ORDER_STATUS_LABELS[order.status] : 'Status Tidak Diketahui'}
+                                {order.status && order.status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'Status Tidak Diketahui'}
                               </SelectItem>
-                              {ORDER_STATUS_CONFIG[order.status]?.nextStatuses?.map((status: OrderStatus) => (
+                              {ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG]?.nextStatuses?.map((status) => (
                                 <SelectItem key={status} value={status}>
-                                  {ORDER_STATUS_LABELS[status]}
+                                  {status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[status as keyof typeof ORDER_STATUS_LABELS] : status}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -639,6 +669,41 @@ export default function OrdersPage({ }: OrdersPageProps) {
           </Card>
         </SwipeableTabsContent>
       </SwipeableTabs>
+
+      {/* Order Form Dialog */}
+      <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">
+              {selectedOrder ? `Edit Pesanan ${selectedOrder.order_no}` : 'Buat Pesanan Baru'}
+            </DialogTitle>
+          </DialogHeader>
+          <OrderForm
+            order={selectedOrder ? { ...selectedOrder, items: [] } : undefined}
+            onSubmit={async () => {
+              await queryClient.invalidateQueries({ queryKey: ['orders'] })
+              setShowOrderForm(false)
+              setSelectedOrder(null)
+            }}
+            onCancel={() => {
+              setShowOrderForm(false)
+              setSelectedOrder(null)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Detail Dialog */}
+      <Dialog open={showOrderDetail} onOpenChange={setShowOrderDetail}>
+        <DialogContent className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg sm:text-xl">
+              Detail Pesanan {selectedOrder?.order_no}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedOrder && <OrderDetailView order={selectedOrder} />}
+        </DialogContent>
+      </Dialog>
     </div >
   )
 }

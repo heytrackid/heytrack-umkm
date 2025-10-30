@@ -2,7 +2,7 @@
 
 import OrdersTable from '@/components/orders/orders-table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
@@ -21,6 +21,12 @@ export const OrdersTableView = () => {
   const [editingOrder, setEditingOrder] = useState<OrderWithItems | undefined>(undefined)
   const [showOrderForm, setShowOrderForm] = useState(false)
 
+  // Hydration fix - prevent SSR/client mismatch
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   // ✅ Use TanStack Query for orders
   const { data: orders = [], isLoading: loading } = useQuery({
     queryKey: ['orders', 'table'],
@@ -31,12 +37,12 @@ export const OrdersTableView = () => {
         throw new Error(`Failed to fetch orders: ${errorText}`)
       }
       const data = await response.json()
-      
+
       // Validate the response with type guards
       if (isArrayOf(data, isOrder)) {
         return data
       }
-      
+
       uiLogger.warn({ data }, 'API returned unexpected format for orders')
       return []
     },
@@ -97,12 +103,12 @@ export const OrdersTableView = () => {
         throw new Error(`Failed to update status: ${errorText}`)
       }
       const data = await response.json()
-      
+
       // Validate the response with type guards
       if (isOrder(data)) {
         return data
       }
-      
+
       uiLogger.warn({ data }, 'API returned unexpected format for updated order')
       return data
     },
@@ -160,6 +166,18 @@ export const OrdersTableView = () => {
       default:
         uiLogger.warn({ action }, 'Unknown bulk action')
     }
+  }
+
+  // Prevent hydration mismatch
+  if (!isMounted) {
+    return (
+      <div className="border rounded-lg p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4" />
+          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded" />
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -136,7 +136,7 @@ export const ProductProfitabilityChart = ({
                 />
                 <ChartLegend
                   wrapperStyle={{ paddingTop: '10px' }}
-                  formatter={(value) => {
+                  formatter={(value: string) => {
                     const labels: Record<string, string> = {
                       revenue: 'Pendapatan',
                       cogs: 'HPP (COGS)',

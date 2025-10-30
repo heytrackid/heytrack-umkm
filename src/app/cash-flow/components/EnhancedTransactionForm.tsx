@@ -13,8 +13,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-// TabsContent not used in this component
+import { SwipeableTabs, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
+// SwipeableTabsContent not used in this component
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ArrowUpCircle, ArrowDownCircle, AlertCircle, Loader2, Calendar } from 'lucide-react'
 import { incomeCategories, expenseCategories, type TransactionFormData } from '../constants'
@@ -176,22 +176,22 @@ export default function EnhancedTransactionForm({
 
                 <form onSubmit={handleSubmit}>
                     {/* Transaction Type Tabs */}
-                    <Tabs
+                    <SwipeableTabs
                         value={transactionType}
                         onValueChange={(value) => onTransactionTypeChange(value as 'income' | 'expense')}
                         className="mb-4"
                     >
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="income" className="gap-2">
+                        <SwipeableTabsList className="grid w-full grid-cols-2">
+                            <SwipeableTabsTrigger value="income" className="gap-2">
                                 <ArrowUpCircle className="h-4 w-4" />
                                 Pemasukan
-                            </TabsTrigger>
-                            <TabsTrigger value="expense" className="gap-2">
+                            </SwipeableTabsTrigger>
+                            <SwipeableTabsTrigger value="expense" className="gap-2">
                                 <ArrowDownCircle className="h-4 w-4" />
                                 Pengeluaran
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
+                            </SwipeableTabsTrigger>
+                        </SwipeableTabsList>
+                    </SwipeableTabs>
 
                     <div className="space-y-4">
                         {/* Description */}

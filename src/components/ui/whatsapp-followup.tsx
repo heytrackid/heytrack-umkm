@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { apiLogger } from '@/lib/logger'
 import {
   MessageCircle,
@@ -421,13 +421,13 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                 <CardTitle className="text-sm">Kirim Pesan</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs value={whatsappType} onValueChange={(value) => setWhatsappType(value as 'whatsapp' | 'business')}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="whatsapp" className="text-sm">WhatsApp Regular</TabsTrigger>
-                    <TabsTrigger value="business" className="text-sm">WhatsApp Business</TabsTrigger>
-                  </TabsList>
+                <SwipeableTabs value={whatsappType} onValueChange={(value) => setWhatsappType(value as 'whatsapp' | 'business')}>
+                  <SwipeableTabsList className="grid w-full grid-cols-2">
+                    <SwipeableTabsTrigger value="whatsapp" className="text-sm">WhatsApp Regular</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="business" className="text-sm">WhatsApp Business</SwipeableTabsTrigger>
+                  </SwipeableTabsList>
 
-                  <TabsContent value="whatsapp" className="mt-4 space-y-4">
+                  <SwipeableTabsContent value="whatsapp" className="mt-4 space-y-4">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Smartphone className="h-5 w-5 text-blue-600" />
@@ -456,9 +456,9 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TabsContent>
+                  </SwipeableTabsContent>
 
-                  <TabsContent value="business" className="mt-4 space-y-4">
+                  <SwipeableTabsContent value="business" className="mt-4 space-y-4">
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <User className="h-5 w-5 text-green-600" />
@@ -487,8 +487,8 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
-                  </TabsContent>
-                </Tabs>
+                  </SwipeableTabsContent>
+                </SwipeableTabs>
 
                 <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
                   <p className="flex items-center gap-1 mb-1">

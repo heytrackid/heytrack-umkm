@@ -62,8 +62,14 @@ export const ROUTE_PRELOADING_PATTERNS: RoutePreloadingPatterns = {
   // Settings -> likely next routes
   '/settings': {
     immediate: ['/dashboard'],
-    onHover: ['/settings/whatsapp-templates'],
+    onHover: [],
     components: ['settings-tabs'],
+    modals: []
+  },
+  '/orders': {
+    immediate: ['/dashboard'],
+    onHover: ['/orders/whatsapp-templates'],
+    components: ['orders-table'],
     modals: ['whatsapp-templates']
   }
 }

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Home, RefreshCw } from 'lucide-react'
 import { useEffect } from 'react'
-import { uiLogger } from '@/lib/logger'
+import { uiLogger } from '@/lib/client-logger'
 import { captureException } from '@/lib/errors/monitoring-service'
 
 /**
@@ -20,7 +20,7 @@ export default function Error({
 }) {
     useEffect(() => {
         // Log error for debugging
-        uiLogger.error({ error, digest: error.digest }, 'Application error occurred')
+        uiLogger.error('Application error occurred', error, { digest: error.digest })
 
         // Send to error tracking service
         captureException(error, {

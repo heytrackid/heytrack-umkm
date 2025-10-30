@@ -100,6 +100,9 @@ const nextConfig = {
 
   // Security Headers
   async headers() {
+    // Note: CSP with nonce is now handled in middleware.ts for per-request nonce
+    // These are fallback headers for static files and non-middleware routes
+    
     return [
       {
         source: '/(.*)',
@@ -122,25 +125,16 @@ const nextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()',
+          },
+          // Additional security headers
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
           },
           {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https: blob: https://*.supabase.co",
-              "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.openrouter.ai https://fonts.googleapis.com https://vitals.vercel-insights.com",
-              "frame-src 'none'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests",
-              "block-all-mixed-content"
-            ].join('; '),
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
           },
         ],
       },
@@ -151,6 +145,20 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // API routes - no cache, strict security
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
           },
         ],
       },

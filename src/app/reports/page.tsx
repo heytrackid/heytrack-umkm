@@ -31,14 +31,14 @@ export default function ReportsPage() {
   // Show loading state while auth is initializing
   if (isAuthLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         {/* Header - Always visible */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
               Laporan
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Analisis performa bisnis Anda
             </p>
           </div>

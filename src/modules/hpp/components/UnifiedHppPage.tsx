@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, memo } from 'react'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useUnifiedHpp } from '../hooks/useUnifiedHpp'
 import { HppOverviewCard } from './HppOverviewCard'
 import { RecipeSelector } from './RecipeSelector'
@@ -124,27 +124,27 @@ export const UnifiedHppPage = memo(() => {
             {recipe.total_cost > 0 && (
               <Card>
                 <CardContent className="p-6">
-                  <Tabs defaultValue="breakdown" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-6">
-                      <TabsTrigger value="breakdown" className="gap-2">
+                  <SwipeableTabs defaultValue="breakdown" className="w-full">
+                    <SwipeableTabsList className="grid w-full grid-cols-3 mb-6">
+                      <SwipeableTabsTrigger value="breakdown" className="gap-2">
                         <BarChart3 className="h-4 w-4" />
                         <span className="hidden sm:inline">Detail</span> Breakdown
-                      </TabsTrigger>
-                      <TabsTrigger value="comparison" className="gap-2">
+                      </SwipeableTabsTrigger>
+                      <SwipeableTabsTrigger value="comparison" className="gap-2">
                         <TrendingUp className="h-4 w-4" />
                         <span className="hidden sm:inline">Bandingkan</span> Produk
-                      </TabsTrigger>
-                      <TabsTrigger value="scenario" className="gap-2">
+                      </SwipeableTabsTrigger>
+                      <SwipeableTabsTrigger value="scenario" className="gap-2">
                         <Calculator className="h-4 w-4" />
                         <span className="hidden sm:inline">Simulasi</span> Skenario
-                      </TabsTrigger>
-                    </TabsList>
+                      </SwipeableTabsTrigger>
+                    </SwipeableTabsList>
 
-                    <TabsContent value="breakdown" className="mt-0">
+                    <SwipeableTabsContent value="breakdown" className="mt-0">
                       <HppBreakdownVisual recipe={recipe} />
-                    </TabsContent>
+                    </SwipeableTabsContent>
 
-                    <TabsContent value="comparison" className="mt-0">
+                    <SwipeableTabsContent value="comparison" className="mt-0">
                       {comparison && comparison.length > 0 ? (
                         <ProductComparisonCard comparison={comparison} />
                       ) : (
@@ -153,12 +153,12 @@ export const UnifiedHppPage = memo(() => {
                           <p className="text-sm mt-2">Tambahkan lebih banyak resep untuk melihat perbandingan</p>
                         </div>
                       )}
-                    </TabsContent>
+                    </SwipeableTabsContent>
 
-                    <TabsContent value="scenario" className="mt-0">
+                    <SwipeableTabsContent value="scenario" className="mt-0">
                       <HppScenarioPlanner recipe={recipe} />
-                    </TabsContent>
-                  </Tabs>
+                    </SwipeableTabsContent>
+                  </SwipeableTabs>
                 </CardContent>
               </Card>
             )}

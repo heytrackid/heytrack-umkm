@@ -81,7 +81,7 @@ export const EnhancedRecipesPage = () => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!recipes) {return []}
+        if (!recipes) { return [] }
 
         return recipes
             .filter((recipe) => {
@@ -139,7 +139,7 @@ export const EnhancedRecipesPage = () => {
     }
 
     const handleConfirmDelete = async () => {
-        if (!selectedRecipe) {return}
+        if (!selectedRecipe) { return }
 
         try {
             await deleteRecipe(selectedRecipe.id)
@@ -208,28 +208,6 @@ export const EnhancedRecipesPage = () => {
             default:
                 return difficulty
         }
-    }
-
-    // Empty state
-    if (!loading && (!recipes || recipes.length === 0)) {
-        return (
-            <EmptyState
-                {...EmptyStatePresets.recipes}
-                actions={[
-                    {
-                        label: 'Buat Resep Baru',
-                        onClick: () => router.push('/recipes/new'),
-                        icon: Plus
-                    },
-                    {
-                        label: 'Gunakan AI Generator',
-                        onClick: () => router.push('/recipes/ai-generator'),
-                        variant: 'outline',
-                        icon: Sparkles
-                    }
-                ]}
-            />
-        )
     }
 
     return (
@@ -357,22 +335,48 @@ export const EnhancedRecipesPage = () => {
                     ))}
                 </div>
             ) : filteredData.length === 0 ? (
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <ChefHat className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="font-medium mb-2">Tidak ada resep ditemukan</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            {hasActiveFilters
-                                ? 'Coba ubah filter pencarian Anda'
-                                : 'Mulai dengan menambahkan resep pertama'}
-                        </p>
-                        {hasActiveFilters && (
-                            <Button variant="outline" onClick={clearFilters}>
-                                Clear Filter
-                            </Button>
-                        )}
-                    </CardContent>
-                </Card>
+                <>
+                    {/* Empty state - no data at all */}
+                    {!recipes || recipes.length === 0 ? (
+                        <EmptyState
+                            {...EmptyStatePresets.recipes}
+                            actions={[
+                                {
+                                    label: 'Buat Resep Baru',
+                                    onClick: () => router.push('/recipes/new'),
+                                    icon: Plus
+                                },
+                                {
+                                    label: 'Gunakan AI Generator',
+                                    onClick: () => router.push('/recipes/ai-generator'),
+                                    variant: 'outline',
+                                    icon: Sparkles
+                                }
+                            ]}
+                        />
+                    ) : (
+                        /* Empty state - filtered results */
+                        <Card className="border-dashed">
+                            <CardContent className="p-8">
+                                <div className="text-center">
+                                    <div className="rounded-full bg-muted flex items-center justify-center mb-4 w-16 h-16 mx-auto">
+                                        <Search className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="font-semibold text-foreground mb-2 text-lg">
+                                        Tidak Ada Hasil
+                                    </h3>
+                                    <p className="text-muted-foreground mb-6 text-sm">
+                                        Coba gunakan kata kunci yang berbeda atau filter lain.
+                                    </p>
+                                    <Button variant="outline" onClick={clearFilters}>
+                                        <X className="h-4 w-4 mr-2" />
+                                        Hapus Filter
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </>
             ) : isMobile ? (
                 <div className="space-y-3">
                     {paginatedData.map((recipe) => (
@@ -479,21 +483,23 @@ export const EnhancedRecipesPage = () => {
             )}
 
             {/* Pagination */}
-            {filteredData.length > 0 && (
-                <SimplePagination
-                    page={pagination.page}
-                    pageSize={pagination.pageSize}
-                    totalPages={pagination.totalPages}
-                    totalItems={filteredData.length}
-                    startIndex={pagination.startIndex}
-                    endIndex={pagination.endIndex}
-                    onPageChange={pagination.setPage}
-                    onPageSizeChange={handlePageSizeChange}
-                    canNextPage={pagination.canNextPage}
-                    canPrevPage={pagination.canPrevPage}
-                    pageSizeOptions={[12, 24, 48, 96]}
-                />
-            )}
+            {
+                filteredData.length > 0 && (
+                    <SimplePagination
+                        page={pagination.page}
+                        pageSize={pagination.pageSize}
+                        totalPages={pagination.totalPages}
+                        totalItems={filteredData.length}
+                        startIndex={pagination.startIndex}
+                        endIndex={pagination.endIndex}
+                        onPageChange={pagination.setPage}
+                        onPageSizeChange={handlePageSizeChange}
+                        canNextPage={pagination.canNextPage}
+                        canPrevPage={pagination.canPrevPage}
+                        pageSizeOptions={[12, 24, 48, 96]}
+                    />
+                )
+            }
 
             {/* Delete Confirmation Modal */}
             <DeleteModal
@@ -506,6 +512,6 @@ export const EnhancedRecipesPage = () => {
                 entityName="Resep"
                 itemName={selectedRecipe?.name || ''}
             />
-        </div>
+        </div >
     )
 }

@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import {
     Factory,
     Plus,
@@ -200,24 +200,24 @@ export const EnhancedProductionPage = () => {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 p-6">
                 {/* Header - Always visible with disabled buttons */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold flex items-center gap-2">
-                            <Factory className="h-8 w-8" />
+                        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                            <Factory className="h-7 w-7 sm:h-8 sm:w-8" />
                             Production Tracking
                         </h1>
-                        <p className="text-muted-foreground">
+                        <p className="text-sm text-muted-foreground mt-1">
                             Kelola dan monitor produksi batch
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" size={isMobile ? 'sm' : 'default'} disabled>
+                        <Button variant="outline" disabled className="flex-1 sm:flex-none">
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Refresh
                         </Button>
-                        <Button size={isMobile ? 'sm' : 'default'} disabled>
+                        <Button disabled className="flex-1 sm:flex-none">
                             <Plus className="h-4 w-4 mr-2" />
                             Produksi Baru
                         </Button>
@@ -277,26 +277,26 @@ export const EnhancedProductionPage = () => {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 p-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <Factory className="h-8 w-8" />
+                    <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                        <Factory className="h-7 w-7 sm:h-8 sm:w-8" />
                         Production Tracking
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mt-1">
                         Kelola dan monitor produksi batch
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" size={isMobile ? 'sm' : 'default'} onClick={fetchProductions}>
+                    <Button variant="outline" onClick={fetchProductions} className="flex-1 sm:flex-none">
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Refresh
                     </Button>
                     <Button
-                        size={isMobile ? 'sm' : 'default'}
                         onClick={() => setIsFormOpen(true)}
+                        className="flex-1 sm:flex-none"
                     >
                         <Plus className="h-4 w-4 mr-2" />
                         Produksi Baru
@@ -439,20 +439,20 @@ export const EnhancedProductionPage = () => {
             </Card>
 
             {/* Production List */}
-            <Tabs defaultValue="active" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="active">
+            <SwipeableTabs defaultValue="active" className="space-y-4">
+                <SwipeableTabsList>
+                    <SwipeableTabsTrigger value="active">
                         Aktif ({stats.planned + stats.inProgress})
-                    </TabsTrigger>
-                    <TabsTrigger value="completed">
+                    </SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="completed">
                         Selesai ({stats.completed})
-                    </TabsTrigger>
-                    <TabsTrigger value="all">
+                    </SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="all">
                         Semua ({stats.total})
-                    </TabsTrigger>
-                </TabsList>
+                    </SwipeableTabsTrigger>
+                </SwipeableTabsList>
 
-                <TabsContent value="active" className="space-y-4">
+                <SwipeableTabsContent value="active" className="space-y-4">
                     {filteredProductions.filter(p => p.status === 'PLANNED' || p.status === 'IN_PROGRESS').length === 0 ? (
                         <EmptyState
                             {...EmptyStatePresets.production}
@@ -481,9 +481,9 @@ export const EnhancedProductionPage = () => {
                                 ))}
                         </div>
                     )}
-                </TabsContent>
+                </SwipeableTabsContent>
 
-                <TabsContent value="completed" className="space-y-4">
+                <SwipeableTabsContent value="completed" className="space-y-4">
                     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                         {filteredProductions
                             .filter(p => p.status === 'COMPLETED')
@@ -498,9 +498,9 @@ export const EnhancedProductionPage = () => {
                                 />
                             ))}
                     </div>
-                </TabsContent>
+                </SwipeableTabsContent>
 
-                <TabsContent value="all" className="space-y-4">
+                <SwipeableTabsContent value="all" className="space-y-4">
                     <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                         {filteredProductions.map((production) => (
                             <ProductionCard
@@ -513,8 +513,8 @@ export const EnhancedProductionPage = () => {
                             />
                         ))}
                     </div>
-                </TabsContent>
-            </Tabs>
+                </SwipeableTabsContent>
+            </SwipeableTabs>
 
             {/* Summary Card */}
             {stats.completed > 0 && (

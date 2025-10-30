@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSettings } from '@/contexts/settings-context'
 import { useToast } from '@/hooks/use-toast'
@@ -44,6 +44,7 @@ import { EnhancedEmptyState } from './EnhancedEmptyState'
 import { MobileOperationalCostCard } from './MobileOperationalCostCard'
 import { OperationalCostStats } from './OperationalCostStats'
 import { DeleteModal } from '@/components/ui'
+import { OperationalCostFormDialog } from './OperationalCostFormDialog'
 
 // Types
 import type { Database } from '@/types/supabase-generated'
@@ -77,9 +78,17 @@ export const EnhancedOperationalCostsPage = () => {
     const { toast } = useToast()
     const { isMobile } = useResponsive()
 
+    // Hydration fix - prevent SSR/client mismatch
+    const [isMounted, setIsMounted] = useState(false)
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
     // Modal states
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [selectedCost, setSelectedCost] = useState<OperationalCost | null>(null)
+    const [showFormDialog, setShowFormDialog] = useState(false)
+    const [editingCost, setEditingCost] = useState<OperationalCost | undefined>(undefined)
 
     // Filter states
     const [searchTerm, setSearchTerm] = useState('')
@@ -88,7 +97,7 @@ export const EnhancedOperationalCostsPage = () => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!costs) {return []}
+        if (!costs) { return [] }
 
         return costs
             .filter((cost: OperationalCost) => {
@@ -128,7 +137,13 @@ export const EnhancedOperationalCostsPage = () => {
 
     // Handlers
     const handleEdit = (cost: OperationalCost) => {
-        router.push(`/operational-costs/${cost.id}/edit`)
+        setEditingCost(cost)
+        setShowFormDialog(true)
+    }
+
+    const handleAdd = () => {
+        setEditingCost(undefined)
+        setShowFormDialog(true)
     }
 
     const handleDelete = (cost: OperationalCost) => {
@@ -137,7 +152,7 @@ export const EnhancedOperationalCostsPage = () => {
     }
 
     const handleConfirmDelete = async () => {
-        if (!selectedCost) {return}
+        if (!selectedCost) { return }
 
         try {
             await deleteCost(selectedCost.id)
@@ -161,14 +176,14 @@ export const EnhancedOperationalCostsPage = () => {
         const confirmed = window.confirm(
             'Tambahkan template biaya operasional umum?\n\nIni akan menambahkan 8 kategori biaya yang umum digunakan.'
         )
-        if (!confirmed) {return}
+        if (!confirmed) { return }
 
         try {
             const response = await fetch('/api/operational-costs/quick-setup', {
                 method: 'POST',
             })
 
-            if (!response.ok) {throw new Error('Failed to setup')}
+            if (!response.ok) { throw new Error('Failed to setup') }
 
             toast({
                 title: 'Template ditambahkan',
@@ -223,9 +238,23 @@ export const EnhancedOperationalCostsPage = () => {
         return labels[frequency] || frequency
     }
 
-    // Empty state
-    if (!loading && (!costs || costs.length === 0)) {
-        return <EnhancedEmptyState onAdd={() => router.push('/operational-costs/new')} onQuickSetup={handleQuickSetup} />
+    // Prevent hydration mismatch - wait for client mount
+    if (!isMounted) {
+        return (
+            <div className="space-y-6">
+                {/* Breadcrumb */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Dashboard</span>
+                    <span>/</span>
+                    <span className="text-foreground font-medium">Biaya Operasional</span>
+                </div>
+                {/* Loading skeleton */}
+                <div className="animate-pulse space-y-4">
+                    <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded" />
+                    <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded" />
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -247,7 +276,7 @@ export const EnhancedOperationalCostsPage = () => {
                     <p className="text-muted-foreground mt-1">Kelola semua biaya operasional bisnis Anda</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
-                    <Button onClick={() => router.push('/operational-costs/new')} className="flex-1 sm:flex-none">
+                    <Button onClick={handleAdd} className="flex-1 sm:flex-none">
                         <Plus className="h-4 w-4 mr-2" />
                         Tambah Biaya
                     </Button>
@@ -352,20 +381,33 @@ export const EnhancedOperationalCostsPage = () => {
                     ))}
                 </div>
             ) : filteredData.length === 0 ? (
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <Receipt className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="font-medium mb-2">Tidak ada biaya ditemukan</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            {hasActiveFilters ? 'Coba ubah filter pencarian Anda' : 'Mulai dengan menambahkan biaya pertama'}
-                        </p>
-                        {hasActiveFilters && (
-                            <Button variant="outline" onClick={clearFilters}>
-                                Clear Filter
-                            </Button>
-                        )}
-                    </CardContent>
-                </Card>
+                <>
+                    {/* Empty state - no data at all */}
+                    {!costs || costs.length === 0 ? (
+                        <EnhancedEmptyState onAdd={handleAdd} onQuickSetup={handleQuickSetup} />
+                    ) : (
+                        /* Empty state - filtered results */
+                        <Card className="border-dashed">
+                            <CardContent className="p-8">
+                                <div className="text-center">
+                                    <div className="rounded-full bg-muted flex items-center justify-center mb-4 w-16 h-16 mx-auto">
+                                        <Search className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="font-semibold text-foreground mb-2 text-lg">
+                                        Tidak Ada Hasil
+                                    </h3>
+                                    <p className="text-muted-foreground mb-6 text-sm">
+                                        Coba gunakan kata kunci yang berbeda atau filter lain.
+                                    </p>
+                                    <Button variant="outline" onClick={clearFilters}>
+                                        <X className="h-4 w-4 mr-2" />
+                                        Hapus Filter
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+                </>
             ) : isMobile ? (
                 <div className="space-y-3">
                     {paginatedData.map((cost: OperationalCost) => (
@@ -483,6 +525,14 @@ export const EnhancedOperationalCostsPage = () => {
                 onConfirm={handleConfirmDelete}
                 entityName="Biaya Operasional"
                 itemName={selectedCost?.description || ''}
+            />
+
+            {/* Form Dialog */}
+            <OperationalCostFormDialog
+                open={showFormDialog}
+                onOpenChange={setShowFormDialog}
+                cost={editingCost}
+                onSuccess={() => refetch?.()}
             />
         </div>
     )

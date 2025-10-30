@@ -24,7 +24,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { apiLogger } from '@/lib/logger'
+import { queryLogger } from '@/lib/client-logger'
 
 // Import lightweight components normally - no need for lazy loading
 import StatsCardsSection from './components/StatsCardsSection'
@@ -161,7 +161,9 @@ export default function Dashboard() {
   }
 
   if (error) {
-    apiLogger.error({ error }, 'Dashboard data loading error')
+    // Log error using client-safe logger
+    queryLogger.error('Dashboard data loading error', error)
+
     return (
       <AppLayout>
         <div className="p-8 text-center">

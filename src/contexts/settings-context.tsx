@@ -64,29 +64,35 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    // Load settings from localStorage
-    const savedSettings = localStorage.getItem('heytrack-settings')
-    if (savedSettings) {
-      try {
-        const parsed = JSON.parse(savedSettings)
-        const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) || defaultCurrency
-        const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) || defaultLanguage
-        const newSettings: Settings = {
-          currency: parsedCurrency,
-          language: parsedLanguage
+    // Mark as hydrated to prevent hydration mismatch
+    setIsHydrated(true)
+
+    // Load settings from localStorage (client-side only)
+    if (typeof window !== 'undefined') {
+      const savedSettings = localStorage.getItem('heytrack-settings')
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings)
+          const parsedCurrency = currencies.find(c => c.code === parsed?.currency?.code) || defaultCurrency
+          const parsedLanguage = languages.find(l => l.code === parsed?.language?.code) || defaultLanguage
+          const newSettings: Settings = {
+            currency: parsedCurrency,
+            language: parsedLanguage
+          }
+          void setSettings(newSettings)
+          localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
+        } catch (err: unknown) {
+          uiLogger.error({ err }, 'Failed to parse saved settings from localStorage')
+          void setSettings(defaultSettings)
+          localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
         }
-        void setSettings(newSettings)
-        localStorage.setItem('heytrack-settings', JSON.stringify(newSettings))
-      } catch (err: unknown) {
-        uiLogger.error({ err }, 'Failed to parse saved settings from localStorage')
+      } else {
         void setSettings(defaultSettings)
         localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
       }
-    } else {
-      void setSettings(defaultSettings)
-      localStorage.setItem('heytrack-settings', JSON.stringify(defaultSettings))
     }
   }, [])
 

@@ -65,15 +65,6 @@ export {
   NotificationBadge
 } from './NotificationComponents'
 
-// User Components
-export {
-  UserProfileCard,
-  UserManagementTable,
-  PasswordChange,
-  UserPermissions,
-  RoleManagement
-} from './UserComponents'
-
 // Re-export utilities
 export * from '@/lib/shared/utilities'
 export * from '@/lib/shared/constants'

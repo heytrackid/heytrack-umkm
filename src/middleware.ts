@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { middlewareLogger } from '@/lib/logger'
+import { generateNonce, getStrictCSP } from '@/lib/csp'
 
 // Define protected routes as a Set for O(1) lookup performance
 const PROTECTED_ROUTES = new Set([
@@ -39,6 +40,10 @@ const UrlValidationSchema = z.object({
 
 export async function middleware(request: NextRequest) {
   try {
+    // Generate CSP nonce for this request
+    const nonce = generateNonce()
+    const isDev = process.env.NODE_ENV === 'development'
+    
     // Validate request headers (optional, for security monitoring)
     const headersValidation = RequestHeadersSchema.safeParse({
       'user-agent': request.headers.get('user-agent'),
@@ -75,6 +80,12 @@ export async function middleware(request: NextRequest) {
 
     // Update session using the new helper
     let response = await updateSession(request)
+    
+    // Add CSP nonce to request headers for use in components
+    request.headers.set('x-nonce', nonce)
+    
+    // Add strict CSP header to response
+    response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
 
     // Get user from the updated session
     const supabase = createServerClient(
@@ -135,7 +146,10 @@ export async function middleware(request: NextRequest) {
     if (pathname === '/') {
       const url = request.nextUrl.clone()
       url.pathname = user ? '/dashboard' : '/auth/login'
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      // Preserve CSP header on redirect
+      redirectResponse.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
+      return redirectResponse
     }
 
     return response

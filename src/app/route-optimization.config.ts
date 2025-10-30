@@ -14,7 +14,9 @@ export const HEAVY_ROUTES = [
   
   // Settings pages
   '/settings',
-  '/settings/whatsapp-templates',
+  
+  // Orders pages
+  '/orders/whatsapp-templates',
   
   // Feature-rich pages
   '/categories',

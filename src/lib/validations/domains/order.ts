@@ -38,7 +38,7 @@ export const OrderInsertSchema = z.object({
   total_amount: NonNegativeNumberSchema,
   notes: z.string().max(1000).optional().nullable(),
   special_instructions: z.string().max(1000).optional().nullable(),
-  items: z.array(OrderItemInsertSchema).min(1, 'Order must have at least one item'),
+  items: z.array(OrderItemInsertSchema).optional(),
 })
 
 export const OrderUpdateSchema = OrderInsertSchema.partial().omit({ items: true })

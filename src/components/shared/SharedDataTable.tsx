@@ -105,6 +105,12 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
   className = "",
   compact = false
 }: SharedDataTableProps<T>) => {
+  // Hydration fix - prevent SSR/client mismatch
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   // State management
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<Record<string, string>>({})
@@ -253,8 +259,8 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
     }
   }, [currentPage, totalPages, enablePagination])
 
-  // Loading state
-  if (loading) {
+  // Prevent hydration mismatch
+  if (!isMounted || loading) {
     return (
       <Card className={className}>
         <CardContent className="p-6">

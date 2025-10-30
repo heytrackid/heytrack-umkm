@@ -4,7 +4,7 @@ import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
 import type { RecipeWithIngredients } from '@/types/query-results'
-import { isOrder, isRecipe, isArrayOf, extractFirst, ensureArray, getErrorMessage } from '@/lib/type-guards'
+
 
 type Order = Database['public']['Tables']['orders']['Row']
 type OrderItem = Database['public']['Tables']['order_items']['Row']
@@ -94,13 +94,17 @@ export async function GET(request: NextRequest) {
 
     // Transform recipes - handle Supabase join structure
     // Supabase returns ingredient as array, we need to extract first element
-    const recipes: RecipeWithIngredients[] = (recipesRaw ?? []).map((recipe) => ({
-      ...recipe,
-      recipe_ingredients: (recipe.recipe_ingredients ?? []).map((ri) => ({
-        ...ri,
-        ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
-      }))
-    })) as RecipeWithIngredients[]
+    const recipes: RecipeWithIngredients[] = Array.isArray(recipesRaw) 
+      ? recipesRaw.map((recipe) => ({
+          ...recipe,
+          recipe_ingredients: Array.isArray(recipe.recipe_ingredients)
+            ? recipe.recipe_ingredients.map((ri) => ({
+                ...ri,
+                ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
+              }))
+            : []
+        })) as RecipeWithIngredients[]
+      : []
 
     // Get all expenses (non-revenue) in the period for operating costs
     const { data: expenses, error: expensesError } = await supabase

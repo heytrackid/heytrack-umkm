@@ -38,8 +38,6 @@ interface FormState {
 
 export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) => {
   const { formatCurrency } = useCurrency()
-  const [availableRecipes, setAvailableRecipes] = useState<Array<RecipesTable['Row']>>([])
-  const [availableCustomers, setAvailableCustomers] = useState<Customer[]>([])
   const [customerSearch, setCustomerSearch] = useState('')
   const [showNewCustomer, setShowNewCustomer] = useState(false)
 
@@ -96,14 +94,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  // Update local state when data changes
-  useEffect(() => {
-    setAvailableRecipes(recipesData)
-  }, [recipesData])
-
-  useEffect(() => {
-    setAvailableCustomers(customersData)
-  }, [customersData])
+  // Use data directly from query (no need for local state)
+  const availableRecipes = recipesData || []
+  const availableCustomers = customersData || []
 
   const handleInputChange = <K extends keyof FormState>(field: K, value: FormState[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))

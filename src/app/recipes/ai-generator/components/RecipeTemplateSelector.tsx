@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Sparkles, Clock, TrendingUp } from 'lucide-react'
 import {
     RECIPE_CATEGORIES,
@@ -40,18 +40,18 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
                 </p>
             </CardHeader>
             <CardContent>
-                <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-4">
+                <SwipeableTabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SwipeableTabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-4">
                         {RECIPE_CATEGORIES.map(category => (
-                            <TabsTrigger key={category} value={category} className="text-xs">
+                            <SwipeableTabsTrigger key={category} value={category} className="text-xs">
                                 <span className="mr-1">{getCategoryIcon(category)}</span>
                                 {category}
-                            </TabsTrigger>
+                            </SwipeableTabsTrigger>
                         ))}
-                    </TabsList>
+                    </SwipeableTabsList>
 
                     {RECIPE_CATEGORIES.map(category => (
-                        <TabsContent key={category} value={category} className="mt-0">
+                        <SwipeableTabsContent key={category} value={category} className="mt-0">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {getTemplatesByCategory(category).map(template => (
                                     <Button
@@ -96,9 +96,9 @@ export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }:
                                     </Button>
                                 ))}
                             </div>
-                        </TabsContent>
+                        </SwipeableTabsContent>
                     ))}
-                </Tabs>
+                </SwipeableTabs>
 
                 <div className="mt-4 p-3 bg-muted/50 rounded-lg text-sm">
                     <div className="flex items-start gap-2">

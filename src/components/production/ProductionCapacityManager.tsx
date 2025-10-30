@@ -15,7 +15,7 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Progress } from '@/components/ui/progress'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
@@ -289,16 +289,16 @@ export default function ProductionCapacityManager({
       </CardHeader>
 
       <CardContent>
-        <Tabs defaultValue="equipment" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="equipment">Equipment</TabsTrigger>
-            <TabsTrigger value="labor">Labor</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="optimization">Optimization</TabsTrigger>
-          </TabsList>
+        <SwipeableTabs defaultValue="equipment" className="w-full">
+          <SwipeableTabsList className="grid w-full grid-cols-4">
+            <SwipeableTabsTrigger value="equipment">Equipment</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="labor">Labor</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="schedule">Schedule</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="optimization">Optimization</SwipeableTabsTrigger>
+          </SwipeableTabsList>
 
           {/* Equipment Tab */}
-          <TabsContent value="equipment" className="space-y-6">
+          <SwipeableTabsContent value="equipment" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -408,10 +408,10 @@ export default function ProductionCapacityManager({
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </SwipeableTabsContent>
 
           {/* Labor Tab */}
-          <TabsContent value="labor" className="space-y-6">
+          <SwipeableTabsContent value="labor" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -466,10 +466,10 @@ export default function ProductionCapacityManager({
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </SwipeableTabsContent>
 
           {/* Schedule Tab */}
-          <TabsContent value="schedule" className="space-y-6">
+          <SwipeableTabsContent value="schedule" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -550,10 +550,10 @@ export default function ProductionCapacityManager({
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </SwipeableTabsContent>
 
           {/* Optimization Tab */}
-          <TabsContent value="optimization" className="space-y-6">
+          <SwipeableTabsContent value="optimization" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -607,8 +607,8 @@ export default function ProductionCapacityManager({
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </SwipeableTabsContent>
+        </SwipeableTabs>
       </CardContent>
     </Card>
   )

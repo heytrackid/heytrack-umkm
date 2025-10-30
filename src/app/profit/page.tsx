@@ -98,7 +98,20 @@ export default function ProfitReportPage() {
     )
   }
 
-  const { summary, products = [], ingredients = [], operating_expenses = [] } = profitData || {}
+  const {
+    summary = {
+      total_revenue: 0,
+      total_cogs: 0,
+      gross_profit: 0,
+      gross_profit_margin: 0,
+      total_operating_expenses: 0,
+      net_profit: 0,
+      net_profit_margin: 0
+    },
+    products = [],
+    ingredients = [],
+    operating_expenses = []
+  } = profitData || {}
 
   return (
     <AppLayout>
@@ -119,34 +132,34 @@ export default function ProfitReportPage() {
         </Breadcrumb>
 
         {/* Header - Always visible */}
-        <div className={`flex gap-4 ${isMobile ? 'flex-col' : 'justify-between items-center'}`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className={`font-bold text-foreground ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
               Laporan Laba Riil
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-1">
               Analisis keuntungan dengan metode WAC (Weighted Average Cost)
             </p>
           </div>
 
-          <div className={`flex gap-2 ${isMobile ? 'flex-col w-full' : ''}`}>
+          <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={() => exportReport('csv')}
-              className={isMobile ? 'w-full' : ''}
+              className="flex-1 sm:flex-none"
               disabled={loading}
             >
               <Download className="h-4 w-4 mr-2" />
-              Ekspor CSV
+              CSV
             </Button>
             <Button
               variant="outline"
               onClick={() => exportReport('xlsx')}
-              className={isMobile ? 'w-full' : ''}
+              className="flex-1 sm:flex-none"
               disabled={loading}
             >
               <Download className="h-4 w-4 mr-2" />
-              Ekspor Excel
+              Excel
             </Button>
           </div>
         </div>
@@ -316,7 +329,7 @@ export default function ProfitReportPage() {
             {/* Summary Cards */}
             <ProfitSummaryCards
               summary={summary}
-              trends={profitData.trends}
+              trends={profitData?.trends}
               formatCurrency={formatCurrency}
               isMobile={isMobile}
             />

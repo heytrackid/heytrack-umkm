@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { uiLogger } from '@/lib/logger'
@@ -273,15 +273,15 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="pricing" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pricing">💰 Opsi Harga</TabsTrigger>
-          <TabsTrigger value="breakdown">📊 Detail HPP</TabsTrigger>
-          <TabsTrigger value="recommendations">💡 Rekomendasi</TabsTrigger>
-        </TabsList>
+      <SwipeableTabs defaultValue="pricing" className="w-full">
+        <SwipeableTabsList className="grid w-full grid-cols-3">
+          <SwipeableTabsTrigger value="pricing">💰 Opsi Harga</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="breakdown">📊 Detail HPP</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="recommendations">💡 Rekomendasi</SwipeableTabsTrigger>
+        </SwipeableTabsList>
 
         {/* Pricing Options Tab */}
-        <TabsContent value="pricing" className="space-y-4">
+        <SwipeableTabsContent value="pricing" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             {(Object.entries(analysis.pricing) as Array<[PricingTierKey, typeof analysis.pricing.economy]>).map(([tier, data]) => (
               <Card
@@ -393,10 +393,10 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        </SwipeableTabsContent>
 
         {/* Cost Breakdown Tab */}
-        <TabsContent value="breakdown" className="space-y-4">
+        <SwipeableTabsContent value="breakdown" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Detail Biaya Produksi</CardTitle>
@@ -454,10 +454,10 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </SwipeableTabsContent>
 
         {/* Enhanced Recommendations Tab */}
-        <TabsContent value="recommendations" className="space-y-4">
+        <SwipeableTabsContent value="recommendations" className="space-y-4">
           <Card className="border-2 border-purple-200 dark:border-purple-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -598,8 +598,8 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </SwipeableTabsContent>
+      </SwipeableTabs>
     </div>
   )
 }

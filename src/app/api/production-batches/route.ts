@@ -19,7 +19,7 @@ export async function GET() {
       .from('productions')
       .select(`
         *,
-        recipe:recipes(name, unit)
+        recipe:recipes(name)
       `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       }])
       .select(`
         *,
-        recipe:recipes(name, unit)
+        recipe:recipes(name)
       `)
       .single();
 

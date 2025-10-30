@@ -40,85 +40,85 @@ export const EmptyState = ({
   className,
   compact = false
 }: EmptyStateProps) => (
-    <Card className={cn('border-dashed', className)}>
-      <CardContent className={cn(
-        'flex flex-col items-center justify-center text-center',
-        compact ? 'py-8' : 'py-12'
+  <Card className={cn('border-dashed', className)}>
+    <CardContent className={cn(
+      'flex flex-col items-center justify-center text-center',
+      compact ? 'py-8' : 'py-12'
+    )}>
+      {/* Icon/Emoji */}
+      <div className={cn(
+        'rounded-full bg-muted flex items-center justify-center mb-4',
+        compact ? 'w-16 h-16' : 'w-20 h-20'
       )}>
-        {/* Icon/Emoji */}
-        <div className={cn(
-          'rounded-full bg-muted flex items-center justify-center mb-4',
-          compact ? 'w-16 h-16' : 'w-20 h-20'
-        )}>
-          {Icon ? (
-            <Icon className={cn(
-              'text-muted-foreground',
-              compact ? 'w-8 h-8' : 'w-10 h-10'
-            )} />
-          ) : emoji ? (
-            <span className={compact ? 'text-3xl' : 'text-4xl'}>{emoji}</span>
-          ) : null}
-        </div>
+        {Icon ? (
+          <Icon className={cn(
+            'text-muted-foreground',
+            compact ? 'w-8 h-8' : 'w-10 h-10'
+          )} />
+        ) : emoji ? (
+          <span className={compact ? 'text-3xl' : 'text-4xl'}>{emoji}</span>
+        ) : null}
+      </div>
 
-        {/* Title */}
-        <h3 className={cn(
-          'font-semibold text-foreground mb-2',
-          compact ? 'text-lg' : 'text-xl'
-        )}>
-          {title}
-        </h3>
+      {/* Title */}
+      <h3 className={cn(
+        'font-semibold text-foreground mb-2',
+        compact ? 'text-lg' : 'text-xl'
+      )}>
+        {title}
+      </h3>
 
-        {/* Description */}
-        <p className={cn(
-          'text-muted-foreground mb-6 max-w-md',
-          compact ? 'text-sm' : 'text-base'
-        )}>
-          {description}
-        </p>
+      {/* Description */}
+      <p className={cn(
+        'text-muted-foreground mb-6 max-w-md',
+        compact ? 'text-sm' : 'text-base'
+      )}>
+        {description}
+      </p>
 
-        {/* Actions */}
-        {actions.length > 0 && (
-          <div className="flex flex-wrap gap-2 justify-center mb-6">
-            {actions.map((action, index) => {
-              const ActionIcon = action.icon
-              const button = (
-                <Button
-                  key={index}
-                  variant={action.variant || (index === 0 ? 'default' : 'outline')}
-                  onClick={action.onClick}
-                  size={compact ? 'sm' : 'default'}
-                >
-                  {ActionIcon && <ActionIcon className="w-4 h-4 mr-2" />}
-                  {action.label}
-                </Button>
-              )
-
-              return action.href ? (
-                <Link key={index} href={action.href}>
-                  {button}
-                </Link>
-              ) : button
-            })}
-          </div>
-        )}
-
-        {/* Tips */}
-        {tips.length > 0 && !compact && (
-          <div className="w-full max-w-md space-y-2 mt-4 pt-4 border-t">
-            {tips.map((tip, index) => (
-              <div
+      {/* Actions */}
+      {actions.length > 0 && (
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          {actions.map((action, index) => {
+            const ActionIcon = action.icon
+            const button = (
+              <Button
                 key={index}
-                className="flex items-start gap-2 text-left text-sm text-muted-foreground"
+                variant={action.variant || (index === 0 ? 'default' : 'outline')}
+                onClick={action.onClick}
+                size={compact ? 'sm' : 'default'}
               >
-                <span className="text-base flex-shrink-0">{tip.icon}</span>
-                <span>{tip.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+                {ActionIcon && <ActionIcon className="w-4 h-4 mr-2" />}
+                {action.label}
+              </Button>
+            )
+
+            return action.href ? (
+              <Link key={index} href={action.href}>
+                {button}
+              </Link>
+            ) : button
+          })}
+        </div>
+      )}
+
+      {/* Tips */}
+      {tips.length > 0 && !compact && (
+        <div className="w-full max-w-md space-y-2 mt-4 pt-4 border-t">
+          {tips.map((tip, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-2 text-left text-sm text-muted-foreground"
+            >
+              <span className="text-base flex-shrink-0">{tip.icon}</span>
+              <span>{tip.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </CardContent>
+  </Card>
+)
 
 // Preset empty states for common scenarios
 export const EmptyStatePresets = {
@@ -144,12 +144,13 @@ export const EmptyStatePresets = {
   },
   ingredients: {
     emoji: '🥬',
-    title: 'Belum Ada Bahan',
-    description: 'Tambahkan bahan baku untuk mulai mengelola inventory dan menghitung HPP.',
+    title: 'Belum Ada Bahan Baku',
+    description: 'Tambahkan bahan baku untuk mulai mengelola inventory dan menghitung HPP produk Anda.',
     tips: [
       { icon: '💡', text: 'Stok akan otomatis berkurang saat order dikonfirmasi' },
       { icon: '🔔', text: 'Atur minimum stok untuk notifikasi reorder otomatis' },
-      { icon: '💰', text: 'Harga bahan menggunakan WAC (Weighted Average Cost)' }
+      { icon: '💰', text: 'Harga bahan menggunakan WAC (Weighted Average Cost)' },
+      { icon: '📥', text: 'Import CSV untuk menambahkan banyak bahan sekaligus' }
     ]
   },
   customers: {
@@ -190,6 +191,16 @@ export const EmptyStatePresets = {
       { icon: '💡', text: 'HPP dihitung otomatis dari harga bahan + biaya operasional' },
       { icon: '📊', text: 'Gunakan HPP untuk menentukan harga jual yang profitable' },
       { icon: '🔔', text: 'Notifikasi otomatis jika HPP naik signifikan' }
+    ]
+  },
+  operationalCosts: {
+    emoji: '💰',
+    title: 'Belum Ada Biaya Operasional',
+    description: 'Tambahkan biaya operasional untuk perhitungan HPP yang lebih akurat.',
+    tips: [
+      { icon: '💡', text: 'Setup Cepat menambahkan 8 template biaya umum' },
+      { icon: '📊', text: 'Biaya operasional digunakan untuk menghitung HPP' },
+      { icon: '🔔', text: 'Atur biaya berulang untuk tracking otomatis' }
     ]
   },
   search: {
