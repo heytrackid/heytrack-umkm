@@ -12,19 +12,19 @@ import {
 } from '@/components/ui/select'
 import { TrendingUp, TrendingDown, BarChart3, LineChart as LineChartIcon, Download } from 'lucide-react'
 import {
-    LineChart,
+    LazyLineChart,
+    LazyBarChart,
+    LazyAreaChart,
     Line,
-    BarChart,
     Bar,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
+    ChartLegend,
     ResponsiveContainer,
-    Area,
-    AreaChart
-} from 'recharts'
+    Area
+} from '@/components/charts/LazyCharts'
 import { useState } from 'react'
 import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
 
@@ -55,12 +55,12 @@ export default function EnhancedCashFlowChart({
 
     // Calculate trend
     const calculateTrend = () => {
-        if (chartData.length < 2) {return { direction: 'stable', percentage: 0 }}
+        if (chartData.length < 2) { return { direction: 'stable', percentage: 0 } }
 
         const recent = chartData[chartData.length - 1]
         const previous = chartData[chartData.length - 2]
 
-        if (!recent || !previous) {return { direction: 'stable', percentage: 0 }}
+        if (!recent || !previous) { return { direction: 'stable', percentage: 0 } }
 
         const change = recent.net - previous.net
         const percentage = previous.net !== 0 ? (change / Math.abs(previous.net)) * 100 : 0
@@ -110,15 +110,15 @@ export default function EnhancedCashFlowChart({
     }
 
     const formatYAxis = (value: number) => {
-        if (value >= 1000000) {return `${(value / 1000000).toFixed(1)}jt`}
-        if (value >= 1000) {return `${(value / 1000).toFixed(0)}rb`}
+        if (value >= 1000000) { return `${(value / 1000000).toFixed(1)}jt` }
+        if (value >= 1000) { return `${(value / 1000).toFixed(0)}rb` }
         return value.toString()
     }
 
     const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
         if (active && payload?.length) {
             const data = payload[0]?.payload as ChartDataPoint | undefined
-            if (!data) {return null}
+            if (!data) { return null }
 
             return (
                 <div className="bg-background border rounded-lg p-3 shadow-lg">
@@ -180,12 +180,12 @@ export default function EnhancedCashFlowChart({
         switch (chartType) {
             case 'bar':
                 return (
-                    <BarChart {...commonProps}>
+                    <LazyBarChart {...commonProps}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis {...commonAxisProps.xAxis} />
                         <YAxis {...commonAxisProps.yAxis} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend
+                        <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value) => {
                                 const labels: Record<string, string> = {
@@ -199,12 +199,12 @@ export default function EnhancedCashFlowChart({
                         <Bar dataKey="income" fill="#22c55e" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="net" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    </BarChart>
+                    </LazyBarChart>
                 )
 
             case 'area':
                 return (
-                    <AreaChart {...commonProps}>
+                    <LazyAreaChart {...commonProps}>
                         <defs>
                             <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
@@ -223,7 +223,7 @@ export default function EnhancedCashFlowChart({
                         <XAxis {...commonAxisProps.xAxis} />
                         <YAxis {...commonAxisProps.yAxis} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend
+                        <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value) => {
                                 const labels: Record<string, string> = {
@@ -237,17 +237,17 @@ export default function EnhancedCashFlowChart({
                         <Area type="monotone" dataKey="income" stroke="#22c55e" fillOpacity={1} fill="url(#colorIncome)" />
                         <Area type="monotone" dataKey="expense" stroke="#ef4444" fillOpacity={1} fill="url(#colorExpense)" />
                         <Area type="monotone" dataKey="net" stroke="#3b82f6" fillOpacity={1} fill="url(#colorNet)" />
-                    </AreaChart>
+                    </LazyAreaChart>
                 )
 
             default: // line
                 return (
-                    <LineChart {...commonProps}>
+                    <LazyLineChart {...commonProps}>
                         <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                         <XAxis {...commonAxisProps.xAxis} />
                         <YAxis {...commonAxisProps.yAxis} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Legend
+                        <ChartLegend
                             wrapperStyle={{ paddingTop: '20px' }}
                             formatter={(value) => {
                                 const labels: Record<string, string> = {
@@ -282,7 +282,7 @@ export default function EnhancedCashFlowChart({
                             dot={{ fill: '#3b82f6', r: 4 }}
                             activeDot={{ r: 6 }}
                         />
-                    </LineChart>
+                    </LazyLineChart>
                 )
         }
     }

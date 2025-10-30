@@ -25,6 +25,9 @@ export const ORDER_CONFIG = {
   FREE_DELIVERY_THRESHOLD: 500000, // Free delivery threshold amount
   DEFAULT_DELIVERY_FEE: 15000, // Default delivery fee
   MAX_DELIVERY_RADIUS: 10, // 10km radius
+  
+  // HPP Calculation
+  DEFAULT_HPP_PERCENTAGE: 0.7, // 70% of selling price as fallback when real HPP unavailable
 } as const
 
 // Order Status Configuration

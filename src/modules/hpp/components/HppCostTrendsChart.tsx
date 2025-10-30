@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, Legend } from 'recharts'
+import { LazyAreaChart, Area, CartesianGrid, Tooltip, XAxis, YAxis, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
 import clsx from 'clsx'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,18 +27,18 @@ interface HppCostTrendsChartProps {
 }
 
 const generateFallbackData = (): HppCostTrendPoint[] => Array.from({ length: 14 }, (_, idx) => {
-    const baseDate = new Date()
-    baseDate.setDate(baseDate.getDate() - (13 - idx))
-    const averageHpp = 25000 + Math.random() * 8000
-    const spread = 2000 + Math.random() * 2000
-    return {
-      date: baseDate.toISOString().split('T')[0] ?? '',
-      averageHpp,
-      bestHpp: averageHpp - spread,
-      worstHpp: averageHpp + spread,
-      recipeCount: 10 + Math.floor(Math.random() * 8)
-    }
-  })
+  const baseDate = new Date()
+  baseDate.setDate(baseDate.getDate() - (13 - idx))
+  const averageHpp = 25000 + Math.random() * 8000
+  const spread = 2000 + Math.random() * 2000
+  return {
+    date: baseDate.toISOString().split('T')[0] ?? '',
+    averageHpp,
+    bestHpp: averageHpp - spread,
+    worstHpp: averageHpp + spread,
+    recipeCount: 10 + Math.floor(Math.random() * 8)
+  }
+})
 
 export const HppCostTrendsChart = ({
   data,
@@ -51,7 +51,7 @@ export const HppCostTrendsChart = ({
   const resolvedCurrency = currency ?? defaultCurrency
 
   const chartData = useMemo(() => {
-    if (data && data.length > 0) {return data}
+    if (data && data.length > 0) { return data }
     uiLogger.debug('HppCostTrendsChart: using fallback data')
     return generateFallbackData()
   }, [data])
@@ -65,7 +65,7 @@ export const HppCostTrendsChart = ({
       </CardHeader>
       <CardContent className="h-full">
         <ResponsiveContainer width="100%" height={height}>
-          <AreaChart data={chartData} margin={{ top: 16, right: 24, left: 12, bottom: 8 }}>
+          <LazyAreaChart data={chartData} margin={{ top: 16, right: 24, left: 12, bottom: 8 }}>
             <defs>
               <linearGradient id="hppAverage" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
@@ -92,7 +92,7 @@ export const HppCostTrendsChart = ({
               formatter={(value: number, name: string) => [formatCurrencyValue(value), legendLabel(name)]}
               labelFormatter={(value: string) => `Tanggal: ${value}`}
             />
-            {showLegend && <Legend formatter={(value) => legendLabel(value)} />}
+            {showLegend && <ChartLegend formatter={(value) => legendLabel(value)} />}
             <Area
               type="monotone"
               dataKey="bestHpp"
@@ -114,7 +114,7 @@ export const HppCostTrendsChart = ({
               fill="url(#hppWorst)"
               name="HPP Terburuk"
             />
-          </AreaChart>
+          </LazyAreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

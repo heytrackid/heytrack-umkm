@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
 import { isRecord, isArrayOf, isCustomer, getErrorMessage, extractFirst } from '@/lib/type-guards'
 
@@ -240,6 +241,10 @@ export async function POST(request: NextRequest) {
       },
       'Orders imported successfully'
     )
+
+    // Invalidate cache after bulk import
+    await cacheInvalidation.orders()
+    await cacheInvalidation.customers()
 
     return NextResponse.json({
       success: true,

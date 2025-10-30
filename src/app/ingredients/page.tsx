@@ -64,12 +64,17 @@ export default function IngredientsPage() {
   ) || 0;
   const outOfStockCount = ingredients?.filter(i => (i.current_stock || 0) <= 0).length || 0;
 
-  // Show loading state while auth is initializing
-  if (isAuthLoading) {
+  // ✅ FIX: Combine loading states
+  const isLoading = isAuthLoading || loading
+
+  // Show loading state
+  if (isLoading && !ingredients) {
     return (
       <AppLayout>
         <div className="space-y-6 p-6">
           <PageBreadcrumb items={BreadcrumbPatterns.ingredients} />
+
+          {/* Header - Always visible */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
@@ -80,8 +85,43 @@ export default function IngredientsPage() {
                 Kelola stok dan harga bahan baku
               </p>
             </div>
+            <div className="flex gap-2">
+              <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+              <Button variant="outline" disabled className="flex-1 sm:flex-none">
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Pembelian
+              </Button>
+              <Button disabled className="flex-1 sm:flex-none">
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah
+              </Button>
+            </div>
           </div>
-          <StatsCards stats={StatCardPatterns.ingredients({ total: 0, lowStock: 0, outOfStock: 0, totalValue: 0 })} />
+
+          {/* Stats skeleton */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={`skeleton-${i}`} className="p-6 bg-card rounded-lg border">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 bg-muted rounded w-2/3" />
+                  <div className="h-8 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table skeleton */}
+          <div className="border rounded-lg p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-10 bg-muted rounded" />
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={`row-${i}`} className="h-16 bg-muted rounded" />
+              ))}
+            </div>
+          </div>
         </div>
       </AppLayout>
     );
@@ -131,17 +171,15 @@ export default function IngredientsPage() {
         </div>
 
         {/* Stats Cards */}
-        {!loading && (
-          <StatsCards stats={StatCardPatterns.ingredients({
-            total: totalIngredients,
-            lowStock: lowStockCount,
-            outOfStock: outOfStockCount,
-            totalValue
-          })} />
-        )}
+        <StatsCards stats={StatCardPatterns.ingredients({
+          total: totalIngredients,
+          lowStock: lowStockCount,
+          outOfStock: outOfStockCount,
+          totalValue
+        })} />
 
         {/* Alert for Low Stock */}
-        {!loading && (lowStockCount > 0 || outOfStockCount > 0) && (
+        {(lowStockCount > 0 || outOfStockCount > 0) && (
           <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />

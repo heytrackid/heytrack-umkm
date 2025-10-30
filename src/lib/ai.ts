@@ -16,7 +16,7 @@ export class AIClient {
   static async callOpenRouter(
     prompt: string,
     systemPrompt: string,
-    model = 'minimax/minimax-01'
+    model = 'meta-llama/llama-3.3-8b-instruct:free'
   ): Promise<string> {
     const apiKey = process.env['OPENROUTER_API_KEY']
 

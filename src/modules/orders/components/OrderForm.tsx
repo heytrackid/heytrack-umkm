@@ -117,7 +117,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
       customer_phone: customer.phone || '',
       customer_address: customer.address || ''
     }))
-    void setCustomerSearch('')
+    setCustomerSearch('')
   }
 
   const addOrderItem = () => {
@@ -149,7 +149,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         description: firstRecipe.description ?? undefined
       }
     }
-    void setOrderItems(prev => [...prev, newItem])
+    setOrderItems(prev => [...prev, newItem])
   }
 
   const updateOrderItem = <K extends keyof OrderItemWithRecipe>(

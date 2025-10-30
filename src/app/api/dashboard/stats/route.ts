@@ -67,42 +67,74 @@ export async function GET(request: Request) {
 
     const today = new Date().toISOString().split('T')[0]
     
-    // Get orders statistics - only fields needed for calculations
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('id, total_amount, status, order_date, customer_name, created_at')
-      .eq('user_id', user.id)
+    // Calculate yesterday for comparison
+    const yesterdayDate = new Date()
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+    const yesterdayStr = yesterdayDate.toISOString().split('T')[0]
+    
+    // ✅ OPTIMIZED: Fetch all data in parallel to reduce total query time
+    const [
+      ordersResult,
+      todayOrdersResult,
+      yesterdayOrdersResult,
+      customersResult,
+      ingredientsResult,
+      recipesResult,
+      todayExpensesResult
+    ] = await Promise.all([
+      // All orders
+      supabase
+        .from('orders')
+        .select('id, total_amount, status, order_date, customer_name, created_at')
+        .eq('user_id', user.id),
       
-    const { data: todayOrders } = await supabase
-      .from('orders')
-      .select('id, total_amount, status, customer_name, created_at')
-      .eq('user_id', user.id)
-      .eq('order_date', today)
+      // Today's orders
+      supabase
+        .from('orders')
+        .select('id, total_amount, status, customer_name, created_at')
+        .eq('user_id', user.id)
+        .eq('order_date', today),
+      
+      // Yesterday's orders for comparison
+      supabase
+        .from('orders')
+        .select('total_amount')
+        .eq('user_id', user.id)
+        .eq('order_date', yesterdayStr),
+      
+      // Customers
+      supabase
+        .from('customers')
+        .select('id, customer_type')
+        .eq('user_id', user.id),
+      
+      // Ingredients with stock info
+      supabase
+        .from('ingredients')
+        .select('id, name, current_stock, min_stock, reorder_point, category')
+        .eq('user_id', user.id),
+      
+      // Recipes
+      supabase
+        .from('recipes')
+        .select('id, times_made, name')
+        .eq('user_id', user.id),
+      
+      // Today's expenses
+      supabase
+        .from('expenses')  
+        .select('amount')
+        .eq('user_id', user.id)
+        .eq('expense_date', today)
+    ])
     
-    // Get customers statistics - only count and type
-    const { data: customers } = await supabase
-      .from('customers')
-      .select('id, customer_type')
-      .eq('user_id', user.id)
-    
-    // Get ingredients statistics - only stock-related fields
-    const { data: ingredients } = await supabase
-      .from('ingredients')
-      .select('id, current_stock, min_stock, category')
-      .eq('user_id', user.id)
-    
-    // Get recipes count - only needed fields
-    const { data: recipes } = await supabase
-      .from('recipes')
-      .select('id, times_made, name')
-      .eq('user_id', user.id)
-    
-    // Get expenses for today - only amount
-    const { data: todayExpenses } = await supabase
-      .from('expenses')  
-      .select('amount')
-      .eq('user_id', user.id)
-      .eq('expense_date', today)
+    const orders = ordersResult.data
+    const todayOrders = todayOrdersResult.data
+    const yesterdayOrders = yesterdayOrdersResult.data
+    const customers = customersResult.data
+    const ingredients = ingredientsResult.data
+    const recipes = recipesResult.data
+    const todayExpenses = todayExpensesResult.data
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: OrderStats) =>
@@ -131,17 +163,6 @@ export async function GET(request: Request) {
     const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: ExpenseStats) =>
       sum + safeParseAmount(expense.amount), 0) || 0
 
-    // Calculate yesterday for comparison
-    const yesterdayDate = new Date()
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1)
-    const yesterdayStr = yesterdayDate.toISOString().split('T')[0]
-
-    const { data: yesterdayOrders } = await supabase
-      .from('orders')
-      .select('total_amount')
-      .eq('user_id', user.id)
-      .eq('order_date', yesterdayStr)
-
     const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: { total_amount: number | null }) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
     
@@ -151,6 +172,22 @@ export async function GET(request: Request) {
       acc[category] = (acc[category] || 0) + 1
       return acc
     }, {} as Record<string, number>) || {}
+
+    // ✅ Low stock alerts with ingredient details
+    interface IngredientWithName extends IngredientStats {
+      name?: string
+      reorder_point?: number | null
+    }
+    const lowStockAlerts = ingredients?.filter((ingredient: IngredientWithName) => {
+      const currentStock = safeParseAmount(ingredient.current_stock)
+      const reorderPoint = safeParseAmount(ingredient.reorder_point || ingredient.min_stock)
+      return currentStock <= reorderPoint
+    }).map((ingredient: IngredientWithName) => ({
+      id: ingredient.id,
+      name: safeString(ingredient.name, 'Unknown'),
+      currentStock: safeParseAmount(ingredient.current_stock),
+      reorderPoint: safeParseAmount(ingredient.reorder_point || ingredient.min_stock)
+    })) || []
 
     // Recent orders for activity feed
     const recentOrders = orders
@@ -192,6 +229,7 @@ export async function GET(request: Request) {
       inventory: {
         total: totalIngredients,
         lowStock: lowStockItems,
+        lowStockAlerts, // ✅ Add detailed low stock alerts
         categories: Object.keys(categoryBreakdown).length,
         categoryBreakdown
       },

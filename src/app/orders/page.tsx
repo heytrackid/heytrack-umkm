@@ -140,6 +140,7 @@ export default function OrdersPage() {
               variant="outline"
               onClick={() => setImportDialogOpen(true)}
               size={isMobile ? "lg" : "sm"}
+              disabled={loading}
             >
               <Upload className="h-4 w-4 mr-2" />
               Import
@@ -151,50 +152,55 @@ export default function OrdersPage() {
               refreshLabel="Refresh"
               size={isMobile ? "lg" : "md"}
               variant="horizontal"
+              disabled={loading}
             />
           </div>
         }
       />
 
-      {/* Stats */}
-      <SharedStatsCards
-        stats={[
-          {
-            title: 'Total Pesanan',
-            value: stats.totalOrders,
-            icon: <ShoppingCart className="h-8 w-8 text-primary" />
-          },
-          {
-            title: 'Menunggu Proses',
-            value: stats.pendingOrders,
-            icon: <Clock className="h-8 w-8 text-yellow-600" />
-          },
-          {
-            title: 'Selesai',
-            value: stats.completedOrders,
-            icon: <CheckCircle className="h-8 w-8 text-green-600" />
-          },
-          {
-            title: 'Rata-rata Nilai',
-            value: `Rp ${Math.round(stats.averageOrderValue).toLocaleString()}`,
-            icon: <TrendingUp className="h-8 w-8 text-blue-600" />
-          }
-        ]}
-      />
-
-      {/* Filters */}
-      <OrderFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-        onReset={resetFilters}
-      />
-
-      {/* Error Display */}
+      {/* Error Display - Show at top if there's an error */}
       {error && (
         <ErrorMessage
           variant="card"
           error={error}
           onRetry={handleRefresh}
+        />
+      )}
+
+      {/* Stats - Only show when not loading or has data */}
+      {(!loading || orders.length > 0) && (
+        <SharedStatsCards
+          stats={[
+            {
+              title: 'Total Pesanan',
+              value: stats.totalOrders,
+              icon: <ShoppingCart className="h-8 w-8 text-primary" />
+            },
+            {
+              title: 'Menunggu Proses',
+              value: stats.pendingOrders,
+              icon: <Clock className="h-8 w-8 text-yellow-600" />
+            },
+            {
+              title: 'Selesai',
+              value: stats.completedOrders,
+              icon: <CheckCircle className="h-8 w-8 text-green-600" />
+            },
+            {
+              title: 'Rata-rata Nilai',
+              value: `Rp ${Math.round(stats.averageOrderValue).toLocaleString()}`,
+              icon: <TrendingUp className="h-8 w-8 text-blue-600" />
+            }
+          ]}
+        />
+      )}
+
+      {/* Filters - Only show when not loading or has data */}
+      {(!loading || orders.length > 0) && (
+        <OrderFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          onReset={resetFilters}
         />
       )}
 

@@ -201,6 +201,7 @@ export const EnhancedProductionPage = () => {
     if (loading) {
         return (
             <div className="space-y-6">
+                {/* Header - Always visible with disabled buttons */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -211,10 +212,64 @@ export const EnhancedProductionPage = () => {
                             Kelola dan monitor produksi batch
                         </p>
                     </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size={isMobile ? 'sm' : 'default'} disabled>
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Refresh
+                        </Button>
+                        <Button size={isMobile ? 'sm' : 'default'} disabled>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Produksi Baru
+                        </Button>
+                    </div>
                 </div>
-                <div className="grid gap-4 md:grid-cols-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-lg" />
+
+                {/* Stats Cards - Match actual layout: 5 cards */}
+                <div className={`grid gap-4 ${isMobile ? 'grid-cols-2' : 'md:grid-cols-5'}`}>
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <Card key={`skeleton-${i}`}>
+                            <CardContent className="p-6">
+                                <div className="animate-pulse space-y-3">
+                                    <div className="h-4 bg-muted dark:bg-muted/50 rounded w-2/3" />
+                                    <div className="h-8 bg-muted dark:bg-muted/50 rounded w-1/2" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+
+                {/* Filters Skeleton */}
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="animate-pulse space-y-4">
+                            <div className="flex gap-4 flex-wrap">
+                                <div className="flex-1 min-w-[200px] h-10 bg-muted rounded" />
+                                <div className="w-[180px] h-10 bg-muted rounded" />
+                                <div className="w-[180px] h-10 bg-muted rounded" />
+                                <div className="w-10 h-10 bg-muted rounded" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Production Cards Skeleton */}
+                <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
+                    {[1, 2, 3].map(i => (
+                        <Card key={`card-skeleton-${i}`}>
+                            <CardHeader className="pb-3">
+                                <div className="animate-pulse space-y-2">
+                                    <div className="h-5 bg-muted rounded w-1/2" />
+                                    <div className="h-4 bg-muted rounded w-3/4" />
+                                </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <div className="animate-pulse space-y-2">
+                                    <div className="h-4 bg-muted rounded" />
+                                    <div className="h-4 bg-muted rounded w-2/3" />
+                                    <div className="h-10 bg-muted rounded" />
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
                 </div>
             </div>

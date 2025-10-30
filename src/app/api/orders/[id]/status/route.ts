@@ -5,13 +5,17 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { isOrder, isOrderStatus, isRecord, getErrorMessage } from '@/lib/type-guards'
 
+interface RouteContext {
+  params: Promise<{ id: string }>
+}
+
 // PUT /api/orders/[id]/status - Update order status dengan automatic workflow triggers
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const { id: orderId } = params
+    const { id: orderId } = await context.params
 
     const body = await request.json()
     const { status, notes } = body
@@ -170,8 +174,8 @@ export async function PUT(
       message: `Order status updated to ${status}${status === 'DELIVERED' ? ' with automatic workflow processing and income tracking' : ''}`
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in order status update:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error in order status update:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -182,10 +186,10 @@ export async function PUT(
 // GET /api/orders/[id]/status - Get order status history (optional)
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
-    const { id: orderId } = params
+    const { id: orderId } = await context.params
 
     const supabase = createServiceRoleClient()
 
@@ -219,8 +223,8 @@ export async function GET(
       status_info: statusInfo
     })
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error getting order status:')
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Error getting order status:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { BarChart3 } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { LazyBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ChartLegend, ResponsiveContainer } from '@/components/charts/LazyCharts'
 import { type ProfitPeriodType, type ChartDataPoint, profitPeriodOptions } from '../constants'
 
 interface ProductProfitChartProps {
@@ -92,7 +92,7 @@ export const ProductProfitChart = ({
         <CardContent>
           <div className="h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <LazyBarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis
                   dataKey="name"
@@ -137,7 +137,7 @@ export const ProductProfitChart = ({
                     return null
                   }}
                 />
-                <Legend
+                <ChartLegend
                   wrapperStyle={{ paddingTop: '10px' }}
                   formatter={(value) => {
                     const labels: Record<string, string> = {
@@ -163,7 +163,7 @@ export const ProductProfitChart = ({
                   fill="#22c55e"
                   radius={[4, 4, 0, 0]}
                 />
-              </BarChart>
+              </LazyBarChart>
             </ResponsiveContainer>
           </div>
         </CardContent>

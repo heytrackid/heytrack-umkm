@@ -30,21 +30,37 @@ export function useOrders() {
       const response = await fetch('/api/orders?limit=50')
       if (!response.ok) {
         const errorText = await response.text()
+        apiLogger.error({ status: response.status, error: errorText }, 'Failed to fetch orders')
         throw new Error(`Failed to fetch orders: ${errorText}`)
       }
+      
       const json = await response.json()
       
-      // API returns { data: [...], meta: {...} }
-      if (json && typeof json === 'object' && json.data) {
-        if (isArrayOf(json.data, isOrder)) {
-          return json.data as Order[]
-        }
-        apiLogger.warn({ data: json.data }, 'API returned unexpected format for orders')
+      // ✅ FIX: API returns { data: [...], meta: {...} }
+      if (json && typeof json === 'object' && 'data' in json && Array.isArray(json.data)) {
+        apiLogger.info({ count: json.data.length }, 'Orders fetched successfully')
+        
+        // Map order_items to items for compatibility
+        const mappedOrders = json.data.map((order: any) => ({
+          ...order,
+          items: order.order_items || order.items || []
+        }))
+        
+        return mappedOrders as Order[]
       }
       
+      // Fallback: if API returns array directly (backward compatibility)
+      if (Array.isArray(json)) {
+        apiLogger.info({ count: json.length }, 'Orders fetched (legacy format)')
+        return json as Order[]
+      }
+      
+      apiLogger.error({ response: json }, 'API returned unexpected format')
       return [] as Order[]
     },
     ...cachePresets.frequentlyUpdated,
+    retry: 2,
+    retryDelay: 1000,
   })
 
   const orders = ordersResponse || []

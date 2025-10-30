@@ -82,10 +82,13 @@ const OrdersList = memo(({
     return (
       <div className="space-y-4">
         {[...Array(5)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
+          <Card key={`skeleton-${i}`} className="animate-pulse">
             <CardContent className="p-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-gray-200 rounded w-1/2" />
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -93,7 +96,7 @@ const OrdersList = memo(({
     )
   }
 
-  if (orders.length === 0) {
+  if (!loading && orders.length === 0) {
     return (
       <EmptyState
         {...EmptyStatePresets.orders}

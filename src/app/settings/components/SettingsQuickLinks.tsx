@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Bell, Volume2, Layers } from 'lucide-react'
+import { Bell, Volume2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -18,42 +18,30 @@ export const SettingsQuickLinks = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-3">
-          <Link href="/settings/notifications">
-            <Button variant="outline" className="w-full h-auto flex-col items-start p-4 space-y-2">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link href="/settings/notifications" className="block">
+            <Button variant="outline" className="w-full h-auto flex-col items-start p-4 space-y-2 hover:bg-accent transition-colors">
               <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                <span className="font-semibold">Notifikasi</span>
+                <Bell className="h-5 w-5 flex-shrink-0" />
+                <span className="font-semibold text-wrap-mobile">Notifikasi</span>
               </div>
-              <p className="text-sm text-muted-foreground text-left">
+              <p className="text-sm text-muted-foreground text-left text-wrap-mobile">
                 Atur kategori, suara, dan pengelompokan notifikasi
               </p>
             </Button>
           </Link>
 
-          <div className="opacity-50 cursor-not-allowed">
-            <Button variant="outline" className="w-full h-auto flex-col items-start p-4 space-y-2" disabled>
+          <Link href="/settings/notifications" className="block">
+            <Button variant="outline" className="w-full h-auto flex-col items-start p-4 space-y-2 hover:bg-accent transition-colors">
               <div className="flex items-center gap-2">
-                <Volume2 className="h-5 w-5" />
-                <span className="font-semibold">Suara & Tema</span>
+                <Volume2 className="h-5 w-5 flex-shrink-0" />
+                <span className="font-semibold text-wrap-mobile">Suara</span>
               </div>
-              <p className="text-sm text-muted-foreground text-left">
-                Kustomisasi tampilan dan suara aplikasi
+              <p className="text-sm text-muted-foreground text-left text-wrap-mobile">
+                Kustomisasi suara notifikasi dan volume
               </p>
             </Button>
-          </div>
-
-          <div className="opacity-50 cursor-not-allowed">
-            <Button variant="outline" className="w-full h-auto flex-col items-start p-4 space-y-2" disabled>
-              <div className="flex items-center gap-2">
-                <Layers className="h-5 w-5" />
-                <span className="font-semibold">Integrasi</span>
-              </div>
-              <p className="text-sm text-muted-foreground text-left">
-                Hubungkan dengan WhatsApp, Email, dan lainnya
-              </p>
-            </Button>
-          </div>
+          </Link>
         </div>
       </CardContent>
     </Card>

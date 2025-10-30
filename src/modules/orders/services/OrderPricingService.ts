@@ -102,7 +102,7 @@ export class OrderPricingService {
           const total_price = unit_price * item.quantity
           
           // Try to get real HPP calculation
-          let estimated_cost = unit_price * 0.7 // Fallback to 70% estimate
+          let estimated_cost = unit_price * ORDER_CONFIG.DEFAULT_HPP_PERCENTAGE // Fallback estimate
           
           try {
             const latestHpp = await hppCalculator.getLatestHpp(supabase, recipe.id, recipe.user_id)

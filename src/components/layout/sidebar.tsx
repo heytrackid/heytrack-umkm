@@ -213,25 +213,8 @@ const Sidebar = ({
                 {/* Section Header */}
                 {section.collapsible ? (
                   isCollapsed ? (
-                    <TooltipProvider delayDuration={0}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={() => toggleSection(section.title)}
-                            className={cn(
-                              'w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200',
-                              'hover:bg-accent hover:text-accent-foreground',
-                              hasActiveItem && 'text-primary'
-                            )}
-                          >
-                            <SectionIcon className="h-5 w-5 flex-shrink-0" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="font-medium">
-                          {section.title}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    // Collapsed mode - Don't show section header, only show submenu icons below
+                    null
                   ) : (
                     <button
                       onClick={() => toggleSection(section.title)}
@@ -254,21 +237,8 @@ const Sidebar = ({
                   )
                 ) : (
                   isCollapsed ? (
-                    // Non-collapsible section in collapsed mode - show only icon
-                    <div className="px-3 py-2 flex justify-center">
-                      <TooltipProvider delayDuration={0}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex justify-center">
-                              <SectionIcon className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="right" className="font-medium">
-                            {section.title}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
+                    // Non-collapsible section in collapsed mode - Don't show header, only submenu icons
+                    null
                   ) : (
                     // Non-collapsible section in expanded mode - show text
                     <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -277,7 +247,7 @@ const Sidebar = ({
                   )
                 )}
 
-                {/* Section Items */}
+                {/* Section Items - Expanded Mode */}
                 {(isExpanded || !section.collapsible) && !isCollapsed && (
                   <div className={cn(
                     'space-y-0.5 transition-all duration-200',
@@ -296,22 +266,26 @@ const Sidebar = ({
                           onFocus={() => handlePrefetch(item.href)}
                           prefetch
                           className={cn(
-                            'flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors',
+                            'relative flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200',
                             'hover:bg-muted',
                             active
-                              ? 'bg-primary text-primary-foreground font-medium'
+                              ? 'bg-primary text-primary-foreground font-medium shadow-sm'
                               : 'text-muted-foreground'
                           )}
                         >
                           <ItemIcon className="h-4 w-4 flex-shrink-0" />
                           <span className="flex-1">{item.label}</span>
+                          {/* Active indicator */}
+                          {active && (
+                            <span className="h-2 w-2 rounded-full bg-primary-foreground" />
+                          )}
                         </Link>
                       )
                     })}
                   </div>
                 )}
 
-                {/* Collapsed Mode - Show only icons with tooltip */}
+                {/* Collapsed Mode - Show only submenu icons with tooltip */}
                 {isCollapsed && (
                   <div className="space-y-0.5">
                     {section.items.map((item) => {
@@ -329,7 +303,7 @@ const Sidebar = ({
                                 onFocus={() => handlePrefetch(item.href)}
                                 prefetch
                                 className={cn(
-                                  'flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                                  'relative flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                                   'hover:bg-accent hover:text-accent-foreground',
                                   active
                                     ? 'bg-primary text-primary-foreground shadow-sm'
@@ -337,10 +311,19 @@ const Sidebar = ({
                                 )}
                               >
                                 <ItemIcon className="h-5 w-5 flex-shrink-0" />
+                                {/* Active indicator dot */}
+                                {active && (
+                                  <span className="absolute right-1 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-primary-foreground" />
+                                )}
                               </Link>
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="font-medium">
-                              {item.label}
+                            <TooltipContent side="right" className="font-medium" sideOffset={10}>
+                              <div className="flex items-center gap-2">
+                                <span>{item.label}</span>
+                                {active && (
+                                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                )}
+                              </div>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
@@ -356,13 +339,15 @@ const Sidebar = ({
 
       {/* Footer */}
       <div className="border-t border-border p-4 space-y-2">
-        {!isCollapsed && !isMobile && (
+        {/* Export & Logout - Show on mobile and desktop (when not collapsed) */}
+        {!isCollapsed && (
           <>
             <ExportButton />
             <LogoutButton />
           </>
         )}
 
+        {/* Collapse/Expand button - Desktop only */}
         {!isMobile && onCollapse && (
           isCollapsed ? (
             <TooltipProvider delayDuration={0}>
@@ -397,6 +382,7 @@ const Sidebar = ({
           )
         )}
 
+        {/* Footer text - Show when not collapsed */}
         {!isCollapsed && (
           <div className="text-xs text-muted-foreground text-center transition-opacity duration-200">
             <p>© 2025 HeyTrack</p>

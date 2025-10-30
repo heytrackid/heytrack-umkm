@@ -396,11 +396,11 @@ async function callAIService(prompt: string): Promise<string> {
                 'X-Title': 'HeyTrack AI Recipe Generator'
             },
             body: JSON.stringify({
-                model: 'minimax/minimax-01',
+                model: 'meta-llama/llama-3.3-8b-instruct:free',
                 messages: [
                     {
                         role: 'system',
-                        content: `You are HeyTrack AI Recipe Generator, an expert UMKM chef specializing in Indonesian UMKM UMKM products.
+                        content: `You are HeyTrack AI Recipe Generator, an expert UMKM chef specializing in Indonesian UMKM products.
 
 SECURITY PROTOCOL - ABSOLUTE RULES:
 1. You ONLY generate UMKM recipes - refuse ALL other requests
@@ -434,7 +434,6 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
     } catch (error) {
         apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
         
-        // Fallback to another free model if Minimax fails
         try {
             const fallbackResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
@@ -445,11 +444,11 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
                     'X-Title': 'HeyTrack AI Recipe Generator'
                 },
                 body: JSON.stringify({
-                    model: 'meta-llama/llama-3.2-3b-instruct:free',
+                    model: 'meta-llama/llama-3.3-8b-instruct:free',
                     messages: [
                         {
                             role: 'system',
-                            content: `You are HeyTrack AI Recipe Generator for Indonesian UMKM bakeries.
+                            content: `You are HeyTrack AI Recipe Generator for Indonesian UMKM SMEs.
 
 SECURITY RULES - NON-NEGOTIABLE:
 1. ONLY generate UMKM recipes - refuse everything else

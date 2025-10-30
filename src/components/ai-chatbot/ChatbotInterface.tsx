@@ -48,7 +48,22 @@ const ChatbotInterface = ({
   // Initialize chat with greeting
   useEffect(() => {
     if (messages.length === 0) {
-      handleSendMessage('Hello');
+      // Add initial greeting without calling API
+      const greetingMessage: ExtendedChatMessage = {
+        id: `greeting_${Date.now()}`,
+        role: 'assistant' as const,
+        content: `Halo! Saya asisten AI HeyTrack untuk membantu bisnis kuliner Anda 🍰
+
+Saya bisa bantu dengan:
+📊 Analisis profitabilitas & HPP
+💰 Strategi pricing & marketing
+📦 Manajemen stok & inventory
+📈 Insight keuangan & growth strategy
+
+Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
+        timestamp: new Date()
+      };
+      setMessages([greetingMessage]);
     }
   }, []);
 
@@ -72,17 +87,16 @@ const ChatbotInterface = ({
         setMessages(prev => [...prev, userMessage]);
       }
 
-      // Call AI chat API
-      const response = await fetch('/api/ai/chat', {
+      // Call AI chat API with enhanced NLP
+      const response = await fetch('/api/ai/chat-enhanced', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId,
           message: messageToSend,
-          contextId: context?.sessionId,
-          useAI: true
+          session_id: context?.sessionId,
+          currentPage: 'chatbot'
         })
       });
 
@@ -92,10 +106,28 @@ const ChatbotInterface = ({
 
       const result = await response.json();
 
-      if (result.success) {
-        setMessages(prev => [...prev, result.response]);
-        if (result.context) {
-          setContext(result.context);
+      if (result.message) {
+        // Create assistant message with NLP response
+        const assistantMessage: ExtendedChatMessage = {
+          id: `assistant_${Date.now()}`,
+          role: 'assistant' as const,
+          content: result.message,
+          timestamp: new Date(),
+          actions: result.suggestions?.map((s: { text: string; action: string }) => ({
+            type: s.action,
+            label: s.text
+          }))
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Update session context
+        if (result.session_id) {
+          setContext({
+            sessionId: result.session_id,
+            conversationHistory: messages,
+            currentPage: 'chatbot'
+          });
         }
       } else {
         throw new Error(result.error || 'Unknown API error');
@@ -222,13 +254,13 @@ const ChatbotInterface = ({
 
           {/* Message content */}
           <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
-            <div className={`px-4 py-3 rounded-lg w-full break-words overflow-hidden ${isUser
-              ? 'bg-blue-500 text-white'
+            <div className={`px-4 py-3 rounded-2xl w-full break-words overflow-hidden shadow-sm ${isUser
+              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white'
               : isSystem
-                ? 'bg-green-100 text-green-800 border border-green-200'
-                : 'bg-gray-100 text-gray-900'
+                ? 'bg-gradient-to-br from-green-50 to-green-100 text-green-900 border border-green-200'
+                : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 border border-gray-200'
               }`}>
-              <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word prose prose-sm max-w-none">
                 {message.content}
               </div>
 
@@ -287,17 +319,37 @@ const ChatbotInterface = ({
     );
   };
 
-  // Quick action buttons
+  // Quick action buttons with smart suggestions
   const QuickActions = () => (
-    <div className="p-4 bg-gray-50 border-t">
-      <p className="text-xs text-gray-600 mb-2">Aksi Cepat:</p>
+    <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 border-t">
+      <p className="text-xs font-medium text-gray-700 mb-2">💡 Coba tanyakan:</p>
       <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleSendMessage('Bagaimana kondisi stok hari ini?')}
+          onClick={() => handleSendMessage('Resep apa yang paling menguntungkan?')}
           disabled={isLoading}
-          className="text-xs h-8"
+          className="text-xs h-8 bg-white hover:bg-blue-50"
+        >
+          <BarChart3 className="h-3 w-3 mr-1" />
+          Analisis Profit
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleSendMessage('Gimana cara ningkatin penjualan?')}
+          disabled={isLoading}
+          className="text-xs h-8 bg-white hover:bg-purple-50"
+        >
+          <Users className="h-3 w-3 mr-1" />
+          Strategi Marketing
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleSendMessage('Stok bahan apa yang harus direstock?')}
+          disabled={isLoading}
+          className="text-xs h-8 bg-white hover:bg-green-50"
         >
           <Package className="h-3 w-3 mr-1" />
           Cek Stok
@@ -305,22 +357,12 @@ const ChatbotInterface = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleSendMessage('Tampilkan laporan keuangan bulan ini')}
+          onClick={() => handleSendMessage('Harga jual yang pas untuk produk baru berapa?')}
           disabled={isLoading}
-          className="text-xs h-8"
+          className="text-xs h-8 bg-white hover:bg-yellow-50"
         >
           <DollarSign className="h-3 w-3 mr-1" />
-          Laporan
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => handleSendMessage('Berikan saran untuk meningkatkan penjualan')}
-          disabled={isLoading}
-          className="text-xs h-8"
-        >
-          <Users className="h-3 w-3 mr-1" />
-          Saran
+          Pricing Strategy
         </Button>
       </div>
     </div>
@@ -356,7 +398,7 @@ const ChatbotInterface = ({
   }
 
   return (
-    <Card className={`fixed bottom-4 right-4 w-96 h-[600px]  border-2 flex flex-col ${className}`}>
+    <Card className={`fixed bottom-4 right-4 w-96 h-[700px] border-2 flex flex-col ${className}`}>
       {/* Header */}
       <CardHeader className="p-4 bg-gray-700 dark:bg-gray-800 text-white rounded-t-lg flex flex-row items-center justify-between flex-shrink-0">
         <div className="flex items-center space-x-2">
@@ -376,26 +418,29 @@ const ChatbotInterface = ({
         )}
       </CardHeader>
 
-      {/* Messages area */}
-      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <div className="flex-1 overflow-y-auto p-4">
+      {/* Messages area - Scrollable content */}
+      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden min-h-0">
+        <div className="flex-1 overflow-y-auto p-4 min-h-0" style={{ maxHeight: 'calc(100% - 200px)' }}>
           <div className="space-y-4">
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
 
-            {/* Loading indicator */}
+            {/* Loading indicator with AI thinking animation */}
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
+              <div className="flex justify-start mb-4">
+                <div className="flex items-start space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center animate-pulse">
                     <Bot className="h-4 w-4 text-white" />
                   </div>
-                  <div className="bg-gray-100 px-4 py-3 rounded-lg">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-3 rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      </div>
+                      <span className="text-xs text-gray-600 ml-2">AI sedang berpikir...</span>
                     </div>
                   </div>
                 </div>
