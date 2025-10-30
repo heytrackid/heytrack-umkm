@@ -1,7 +1,6 @@
 'use client'
 
 import { type ReactNode, useState, useCallback, useMemo, memo } from 'react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -13,8 +12,6 @@ import {
 import { useResponsive } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
 import {
-  Edit,
-  Eye,
   MoreHorizontal,
   Search,
   SortAsc,
@@ -364,19 +361,19 @@ export const MobileTable = memo(({
       {isMobile && cardMode ? renderCardView() : renderTableView()}
     </div>
   )
-}, (prevProps, nextProps) => 
-  // Custom comparison function for React.memo
-   (
-    prevProps.data === nextProps.data &&
-    prevProps.columns === nextProps.columns &&
-    prevProps.actions === nextProps.actions &&
-    prevProps.loading === nextProps.loading &&
-    prevProps.emptyMessage === nextProps.emptyMessage &&
-    prevProps.searchable === nextProps.searchable &&
-    prevProps.searchPlaceholder === nextProps.searchPlaceholder &&
-    prevProps.sortable === nextProps.sortable &&
-    prevProps.cardMode === nextProps.cardMode
-  )
+}, (prevProps, nextProps) =>
+// Custom comparison function for React.memo
+(
+  prevProps.data === nextProps.data &&
+  prevProps.columns === nextProps.columns &&
+  prevProps.actions === nextProps.actions &&
+  prevProps.loading === nextProps.loading &&
+  prevProps.emptyMessage === nextProps.emptyMessage &&
+  prevProps.searchable === nextProps.searchable &&
+  prevProps.searchPlaceholder === nextProps.searchPlaceholder &&
+  prevProps.sortable === nextProps.sortable &&
+  prevProps.cardMode === nextProps.cardMode
+)
 )
 
 MobileTable.displayName = 'MobileTable'

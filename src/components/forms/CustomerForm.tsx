@@ -12,8 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
-  CustomerFormSchema,
-  type CustomerForm as CustomerFormData
+  CustomerInsertSchema,
+  type CustomerInsertInput as CustomerFormData
 } from '@/lib/validations/domains/customer'
 import { FormField } from './shared/FormField'
 import type { Database } from '@/types/supabase-generated'
@@ -30,7 +30,7 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
   const { toast } = useToast()
 
   const form = useForm<CustomerFormData>({
-    resolver: zodResolver(CustomerFormSchema),
+    resolver: zodResolver(CustomerInsertSchema),
     mode: 'onChange',
     defaultValues: {
       name: initialData?.name || '',

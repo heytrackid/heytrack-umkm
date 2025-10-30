@@ -17,13 +17,12 @@ import {
   DollarSign,
   Edit,
   Eye,
-  Package,
   Phone,
   Trash2,
   Plus
 } from 'lucide-react'
 import type { Order, OrderStatus } from './types'
-import { getPaymentInfo, getPriorityInfo, getStatusInfo } from './utils'
+import { getPaymentInfo, getPriorityInfo } from './utils'
 
 interface OrdersListProps {
   orders: Order[]

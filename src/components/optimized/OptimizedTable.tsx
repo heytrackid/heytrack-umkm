@@ -128,14 +128,14 @@ interface BulkActionsBarProps<T> {
   getPreviewNames: (items: string[]) => string
 }
 
-const BulkActionsBar = memo(<T,>({
+const BulkActionsBar = memo(<_T,>({
   selectedCount,
   selectedItems,
   onClearSelection,
   onBulkEdit,
   onBulkDelete,
   getPreviewNames
-}: BulkActionsBarProps<T>) => {
+}: BulkActionsBarProps<_T>) => {
   if (selectedCount === 0) { return null }
 
   return (
@@ -214,8 +214,8 @@ export const OptimizedTable = memo(<T extends { id: string | number }>({
   onView,
   formatValue,
   emptyStateComponent,
-  title,
-  description
+  title: _title,
+  description: _description
 }: OptimizedTableProps<T>) => {
   const isAllSelected = useMemo(() =>
     selectedItems.length === data.length && data.length > 0,

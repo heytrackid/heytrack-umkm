@@ -9,7 +9,7 @@ interface OrdersQuickActionsProps {
   _t?: unknown
 }
 
-export default function OrdersQuickActions({ _t }: OrdersQuickActionsProps) {
+export default function OrdersQuickActions({ _t: _ }: OrdersQuickActionsProps) {
   return (
     <Card>
       <CardContent className="p-4">

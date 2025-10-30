@@ -11,13 +11,11 @@ import { useMobile } from '@/hooks/useResponsive'
 import type { Database } from '@/types/supabase-generated'
 
 // Enhanced Components
-import { EnhancedEmptyState } from './EnhancedEmptyState'
 import { StockBadge } from './StockBadge'
 import { MobileIngredientList } from './MobileIngredientCard'
 
 // UX Components
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { ErrorMessage } from '@/components/ui/error-message'
 
 // UI Components
 import { DeleteModal } from '@/components/ui'
@@ -397,13 +395,17 @@ export const EnhancedIngredientsPage = () => {
 
             {/* Pagination */}
             {filteredData.length > 0 && (
-                <Pagination
-                    currentPage={pagination.page}
+                <SimplePagination
+                    page={pagination.page}
+                    pageSize={pagination.pageSize}
                     totalPages={pagination.totalPages}
                     totalItems={filteredData.length}
-                    pageSize={pagination.pageSize}
+                    startIndex={pagination.startIndex}
+                    endIndex={pagination.endIndex}
                     onPageChange={pagination.setPage}
                     onPageSizeChange={handlePageSizeChange}
+                    canNextPage={pagination.canNextPage}
+                    canPrevPage={pagination.canPrevPage}
                     pageSizeOptions={[12, 24, 48, 96]}
                 />
             )}

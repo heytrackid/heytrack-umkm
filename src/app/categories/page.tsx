@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, lazy, Suspense } from 'react'
+import { Fragment, lazy } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'

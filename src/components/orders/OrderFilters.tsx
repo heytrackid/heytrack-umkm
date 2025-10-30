@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useResponsive } from '@/hooks/useResponsive'
-import { Search, Filter, X, Calendar } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import type { OrderFilters as OrderFiltersType } from './types'
 
 interface OrderFiltersProps {
@@ -15,10 +14,10 @@ interface OrderFiltersProps {
   onReset: () => void
 }
 
-export default function OrderFilters({ 
-  filters, 
-  onFiltersChange, 
-  onReset 
+export default function OrderFilters({
+  filters,
+  onFiltersChange,
+  onReset
 }: OrderFiltersProps) {
   const { isMobile } = useResponsive()
 
@@ -26,12 +25,12 @@ export default function OrderFilters({
     onFiltersChange({ ...filters, [key]: value })
   }
 
-  const hasActiveFilters = 
-    filters.status !== 'all' || 
-    filters.paymentStatus !== 'all' || 
-    filters.priority !== 'all' || 
-    filters.dateFrom || 
-    filters.dateTo || 
+  const hasActiveFilters =
+    filters.status !== 'all' ||
+    filters.paymentStatus !== 'all' ||
+    filters.priority !== 'all' ||
+    filters.dateFrom ||
+    filters.dateTo ||
     filters.searchTerm
 
   return (

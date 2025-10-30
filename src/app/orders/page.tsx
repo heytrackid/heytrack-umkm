@@ -11,7 +11,6 @@ import { Clock, ShoppingCart, CheckCircle, TrendingUp } from 'lucide-react'
 import {
   PageHeader,
   SharedStatsCards,
-  ErrorCard,
   ActionButtons
 } from '@/components/shared'
 

@@ -27,7 +27,7 @@ interface FinancialChartProps extends ChartProps {
 
 // Chart loading skeleton
 const ChartLoadingSkeleton = ({
-  title,
+  title: _title,
   height = "h-64"
 }: {
   title: string;
@@ -199,7 +199,7 @@ export const loadChartWhenNeeded = async (chartType: string) => {
 }
 
 // Progressive chart enhancement
-export const useChartProgressive = (chartType: string, data: unknown[]) => {
+export const useChartProgressive = (_chartType: string, data: unknown[]) => {
   // Load simple chart first, then enhance with advanced features
   const shouldLoadAdvancedChart = data.length > 50 // Only load advanced features for large datasets
 

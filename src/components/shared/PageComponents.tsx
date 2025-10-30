@@ -1,7 +1,7 @@
 'use client'
 
-import { Fragment, type ReactNode, useState, useEffect, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Fragment, type ReactNode } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -97,51 +97,51 @@ export const PageHeader = ({
   breadcrumbs,
   className = ""
 }: PageHeaderProps) => (
-    <div className={`space-y-6 ${className}`}>
-      {/* Breadcrumbs */}
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <Breadcrumb>
-          <BreadcrumbList>
-            {breadcrumbs.map((item, index) => (
-              <Fragment key={index}>
-                <BreadcrumbItem>
-                  {item.href ? (
-                    <BreadcrumbLink asChild>
-                      <PrefetchLink href={item.href}>
-                        {item.label}
-                      </PrefetchLink>
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                  )}
-                </BreadcrumbItem>
-                {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-              </Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-      )}
+  <div className={`space-y-6 ${className}`}>
+    {/* Breadcrumbs */}
+    {breadcrumbs && breadcrumbs.length > 0 && (
+      <Breadcrumb>
+        <BreadcrumbList>
+          {breadcrumbs.map((item, index) => (
+            <Fragment key={index}>
+              <BreadcrumbItem>
+                {item.href ? (
+                  <BreadcrumbLink asChild>
+                    <PrefetchLink href={item.href}>
+                      {item.label}
+                    </PrefetchLink>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                )}
+              </BreadcrumbItem>
+              {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+            </Fragment>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            {title}
-          </h1>
-          {description && (
-            <p className="text-muted-foreground mt-1">
-              {description}
-            </p>
-          )}
-        </div>
-        {actions && (
-          <div className="flex gap-2">
-            {actions}
-          </div>
+    {/* Header */}
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          {title}
+        </h1>
+        {description && (
+          <p className="text-muted-foreground mt-1">
+            {description}
+          </p>
         )}
       </div>
+      {actions && (
+        <div className="flex gap-2">
+          {actions}
+        </div>
+      )}
     </div>
-  )
+  </div>
+)
 
 /**
  * Shared Stats Cards Component
@@ -150,49 +150,48 @@ export const SharedStatsCards = ({
   stats,
   className = ""
 }: StatsCardsProps) => (
-    <div className={`grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${className}`}>
-      {stats.map((stat, index) => (
-        <Card key={index}>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  {stat.title}
+  <div className={`grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${className}`}>
+    {stats.map((stat, index) => (
+      <Card key={index}>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                {stat.title}
+              </p>
+              <p className="text-2xl font-bold">
+                {stat.value}
+              </p>
+              {stat.subtitle && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stat.subtitle}
                 </p>
-                <p className="text-2xl font-bold">
-                  {stat.value}
-                </p>
-                {stat.subtitle && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stat.subtitle}
-                  </p>
-                )}
-              </div>
-              {stat.icon && (
-                <div className="h-8 w-8 text-muted-foreground">
-                  {stat.icon}
-                </div>
               )}
             </div>
-            {stat.trend && (
-              <div className="mt-4 flex items-center text-xs">
-                <span
-                  className={`font-medium ${
-                    stat.trend.isPositive ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {stat.trend.isPositive ? '+' : ''}{stat.trend.value}%
-                </span>
-                <span className="text-muted-foreground ml-1">
-                  {stat.trend.label}
-                </span>
+            {stat.icon && (
+              <div className="h-8 w-8 text-muted-foreground">
+                {stat.icon}
               </div>
             )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
+          </div>
+          {stat.trend && (
+            <div className="mt-4 flex items-center text-xs">
+              <span
+                className={`font-medium ${stat.trend.isPositive ? 'text-green-600' : 'text-red-600'
+                  }`}
+              >
+                {stat.trend.isPositive ? '+' : ''}{stat.trend.value}%
+              </span>
+              <span className="text-muted-foreground ml-1">
+                {stat.trend.label}
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
 
 /**
  * Shared Error Card Component

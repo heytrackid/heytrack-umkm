@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense, type ReactNode } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 
@@ -28,7 +28,7 @@ export const ProgressiveLoader = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isLoading) {
-        setShowTimeout
+        setShowTimeout(true)
       }
     }, timeout)
 
@@ -38,15 +38,15 @@ export const ProgressiveLoader = ({
     }, Math.random() * 2000 + 500)
 
     return () => {
-      clearTimeout
-      clearTimeout
+      clearTimeout(timer)
+      clearTimeout(loadTimer)
     }
   }, [timeout, isLoading])
 
   const handleRetry = () => {
     void setIsLoading(true)
     void setHasError(false)
-    setShowTimeout
+    setShowTimeout(false)
   }
 
   if (hasError) {
@@ -112,7 +112,7 @@ export const ProgressiveDataTable = ({
 
   const loadMore = async () => {
     void setIsLoadingMore(true)
-    await new Promise(resolve => setTimeout)
+    await new Promise(resolve => setTimeout(resolve, 500))
     void setLoadedPages(prev => prev + 1)
     void setIsLoadingMore(false)
   }
@@ -219,20 +219,20 @@ export const StatsCardSkeleton = () => (
 )
 
 // Virtual table loader for heavy datasets
-const VirtualizedTableLoader = ({ data, ...props }: any) => 
-  // Simulate heavy data processing
-   (
-    <div className="p-4 border rounded-lg bg-muted/50">
-      <p className="text-sm">Optimized view ready for {data?.length || 0} items</p>
-      <Button className="mt-2" variant="outline" size="sm">
-        Load Virtual Table
-      </Button>
-    </div>
-  )
+const VirtualizedTableLoader = ({ data }: any) =>
+// Simulate heavy data processing
+(
+  <div className="p-4 border rounded-lg bg-muted/50">
+    <p className="text-sm">Optimized view ready for {data?.length || 0} items</p>
+    <Button className="mt-2" variant="outline" size="sm">
+      Load Virtual Table
+    </Button>
+  </div>
+)
 
 
 // Simple table view for smaller datasets
-const SimpleTableView = ({ data, columns, ...props }: any) => (
+const SimpleTableView = ({ data, columns }: any) => (
   <div className="overflow-x-auto">
     <table className="w-full border-collapse">
       <thead>

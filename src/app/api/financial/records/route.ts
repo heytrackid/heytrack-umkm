@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import type { Database } from '@/types/supabase-generated'
 
 // Unused types removed
 

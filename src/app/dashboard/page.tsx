@@ -22,7 +22,6 @@ import {
   Target,
   Calculator
 } from 'lucide-react'
-import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 

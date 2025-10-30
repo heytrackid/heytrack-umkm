@@ -19,7 +19,6 @@ import {
     ArrowLeft,
     User,
     Phone,
-    Mail,
     MapPin,
     Calendar,
     Clock,

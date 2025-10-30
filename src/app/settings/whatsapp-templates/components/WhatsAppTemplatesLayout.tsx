@@ -115,7 +115,7 @@ export default function WhatsAppTemplatesPage() {
     void setShowPreview(true)
   }
 
-  const copyTemplate = (template: WhatsAppTemplate) => {
+  const copyTemplate = (_template: WhatsAppTemplate) => {
     // Reset form data for copying
     void setEditingTemplate(null)
     void setShowDialog(true)

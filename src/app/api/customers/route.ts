@@ -91,7 +91,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate request body
-    const validation = CustomerInsertSchema.safeParse(body)
+    const validation = CustomerInsertSchema.safeParse({
+      ...body,
+      user_id: user.id
+    })
+    
     if (!validation.success) {
       return NextResponse.json(
         {
@@ -108,15 +112,13 @@ export async function POST(request: NextRequest) {
     const customerData = typedInsert<'customers'>({
       user_id: user.id,
       name: validatedData.name,
-      email: validatedData.email,
-      phone: validatedData.phone,
-      address: validatedData.address,
-      customer_type: validatedData.customer_type || 'retail',
-      discount_percentage: validatedData.discount_percentage,
-      notes: validatedData.notes,
-      is_active: validatedData.is_active,
-      loyalty_points: validatedData.loyalty_points,
-      favorite_items: validatedData.favorite_items,
+      email: validatedData.email || null,
+      phone: validatedData.phone || null,
+      address: validatedData.address || null,
+      customer_type: validatedData.customer_type || 'regular',
+      discount_percentage: validatedData.discount_percentage || null,
+      notes: validatedData.notes || null,
+      is_active: validatedData.is_active ?? true,
     })
     
     // Insert with proper typing

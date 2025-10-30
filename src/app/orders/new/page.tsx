@@ -1,6 +1,5 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import PrefetchLink from '@/components/ui/prefetch-link'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -24,7 +23,6 @@ import {
   Package,
   AlertCircle
 } from 'lucide-react'
-import { StepSkeleton } from '@/components/ui/StepSkeleton'
 import { OrderFormSkeleton } from '@/components/ui/skeletons/form-skeletons'
 
 // Import hooks

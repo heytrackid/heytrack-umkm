@@ -45,7 +45,6 @@ interface CustomersTableProps {
   onDelete: (customer: CustomersTable['Row']) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
-  isMobile?: boolean
 }
 
 /**
@@ -61,8 +60,7 @@ export default function CustomersTable({
   onEdit,
   onDelete,
   onAddNew,
-  formatCurrency,
-  isMobile = false
+  formatCurrency
 }: CustomersTableProps) {
 
   // Pagination state

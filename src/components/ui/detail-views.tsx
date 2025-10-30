@@ -7,7 +7,6 @@ import type { ComponentType, ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, Edit, Trash2, MoreHorizontal, Download, Share } from 'lucide-react'
 
 // Detail view header with back button and actions
@@ -28,33 +27,33 @@ export const DetailHeader = ({
   actions,
   status
 }: DetailHeaderProps) => (
-    <div className="flex items-start justify-between mb-6">
-      <div className="flex items-start gap-4">
-        {onBack && (
-          <Button variant="ghost" size="sm" onClick={onBack} className="p-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {backLabel}
-          </Button>
-        )}
-
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold">{title}</h1>
-            {status}
-          </div>
-          {subtitle && (
-            <p className="text-muted-foreground">{subtitle}</p>
-          )}
-        </div>
-      </div>
-
-      {actions && (
-        <div className="flex gap-2">
-          {actions}
-        </div>
+  <div className="flex items-start justify-between mb-6">
+    <div className="flex items-start gap-4">
+      {onBack && (
+        <Button variant="ghost" size="sm" onClick={onBack} className="p-2">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          {backLabel}
+        </Button>
       )}
+
+      <div>
+        <div className="flex items-center gap-3 mb-1">
+          <h1 className="text-2xl font-bold">{title}</h1>
+          {status}
+        </div>
+        {subtitle && (
+          <p className="text-muted-foreground">{subtitle}</p>
+        )}
+      </div>
     </div>
-  )
+
+    {actions && (
+      <div className="flex gap-2">
+        {actions}
+      </div>
+    )}
+  </div>
+)
 
 // Detail section with title and content
 interface DetailSectionProps {
@@ -65,16 +64,16 @@ interface DetailSectionProps {
 }
 
 export const DetailSection = ({ title, children, className, actions }: DetailSectionProps) => (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg">{title}</CardTitle>
-        {actions}
-      </CardHeader>
-      <CardContent>
-        {children}
-      </CardContent>
-    </Card>
-  )
+  <Card className={className}>
+    <CardHeader className="flex flex-row items-center justify-between">
+      <CardTitle className="text-lg">{title}</CardTitle>
+      {actions}
+    </CardHeader>
+    <CardContent>
+      {children}
+    </CardContent>
+  </Card>
+)
 
 // Detail field for displaying key-value pairs
 interface DetailFieldProps {
@@ -84,16 +83,16 @@ interface DetailFieldProps {
   copyable?: boolean
 }
 
-export const DetailField = ({ label, value, className, copyable }: DetailFieldProps) => (
-    <div className={`flex justify-between items-start py-2 ${className || ''}`}>
-      <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
-        {label}
-      </span>
-      <span className="text-sm text-gray-900 ml-4 text-right">
-        {value}
-      </span>
-    </div>
-  )
+export const DetailField = ({ label, value, className, copyable: _copyable }: DetailFieldProps) => (
+  <div className={`flex justify-between items-start py-2 ${className || ''}`}>
+    <span className="text-sm font-medium text-gray-600 min-w-0 flex-1">
+      {label}
+    </span>
+    <span className="text-sm text-gray-900 ml-4 text-right">
+      {value}
+    </span>
+  </div>
+)
 
 // Detail grid for multiple fields
 interface DetailGridProps {
@@ -150,47 +149,47 @@ export const DetailActions = ({
   onDownload,
   customActions
 }: DetailActionsProps) => (
-    <div className="flex flex-wrap gap-2 pt-4 border-t">
-      {onEdit && (
-        <Button variant="outline" onClick={onEdit}>
-          <Edit className="h-4 w-4 mr-2" />
-          Edit
-        </Button>
-      )}
+  <div className="flex flex-wrap gap-2 pt-4 border-t">
+    {onEdit && (
+      <Button variant="outline" onClick={onEdit}>
+        <Edit className="h-4 w-4 mr-2" />
+        Edit
+      </Button>
+    )}
 
-      {onDelete && (
-        <Button variant="outline" onClick={onDelete} className="text-red-600 hover:text-red-700">
-          <Trash2 className="h-4 w-4 mr-2" />
-          Hapus
-        </Button>
-      )}
+    {onDelete && (
+      <Button variant="outline" onClick={onDelete} className="text-red-600 hover:text-red-700">
+        <Trash2 className="h-4 w-4 mr-2" />
+        Hapus
+      </Button>
+    )}
 
-      {onDuplicate && (
-        <Button variant="outline" onClick={onDuplicate}>
-          <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-          Duplikat
-        </Button>
-      )}
+    {onDuplicate && (
+      <Button variant="outline" onClick={onDuplicate}>
+        <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+        </svg>
+        Duplikat
+      </Button>
+    )}
 
-      {onShare && (
-        <Button variant="outline" onClick={onShare}>
-          <Share className="h-4 w-4 mr-2" />
-          Bagikan
-        </Button>
-      )}
+    {onShare && (
+      <Button variant="outline" onClick={onShare}>
+        <Share className="h-4 w-4 mr-2" />
+        Bagikan
+      </Button>
+    )}
 
-      {onDownload && (
-        <Button variant="outline" onClick={onDownload}>
-          <Download className="h-4 w-4 mr-2" />
-          Download
-        </Button>
-      )}
+    {onDownload && (
+      <Button variant="outline" onClick={onDownload}>
+        <Download className="h-4 w-4 mr-2" />
+        Download
+      </Button>
+    )}
 
-      {customActions}
-    </div>
-  )
+    {customActions}
+  </div>
+)
 
 // Detail tabs layout
 interface DetailTabsProps {
@@ -205,37 +204,36 @@ interface DetailTabsProps {
 }
 
 export const DetailTabs = ({ tabs, activeTab, onTabChange }: DetailTabsProps) => (
-    <div className="space-y-6">
-      {/* Tab Navigation */}
-      <div className="border-b">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+  <div className="space-y-6">
+    {/* Tab Navigation */}
+    <div className="border-b">
+      <nav className="-mb-px flex space-x-8">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === tab.id
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
-            >
-              {tab.label}
-              {tab.badge && (
-                <Badge variant="secondary" className="text-xs">
-                  {tab.badge}
-                </Badge>
-              )}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      <div>
-        {tabs.find(tab => tab.id === activeTab)?.content}
-      </div>
+          >
+            {tab.label}
+            {tab.badge && (
+              <Badge variant="secondary" className="text-xs">
+                {tab.badge}
+              </Badge>
+            )}
+          </button>
+        ))}
+      </nav>
     </div>
-  )
+
+    {/* Tab Content */}
+    <div>
+      {tabs.find(tab => tab.id === activeTab)?.content}
+    </div>
+  </div>
+)
 
 // Timeline component for activity/history
 interface TimelineItem {

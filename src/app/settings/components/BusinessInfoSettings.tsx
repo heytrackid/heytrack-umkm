@@ -52,7 +52,7 @@ export const BusinessInfoSettings = ({ settings, onSettingChange }: BusinessInfo
     }
   }
 
-  const handleBlur = (field: string) => {
+  const handleBlur = (_field: string) => {
     // Final validation on blur
     try {
       validateBusinessInfoSettings(localSettings)

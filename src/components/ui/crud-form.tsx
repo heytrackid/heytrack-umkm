@@ -53,7 +53,7 @@ export const FormField = (props: FormFieldProps) => {
   } = props;
 
   // Determine if we're using react-hook-form by checking for its props
-  const isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
+  const _isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -82,11 +82,11 @@ export const FormField = (props: FormFieldProps) => {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     let newValue: unknown = e.target.value;
-    
+
     if (type === 'number') {
       newValue = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
     }
-    
+
     if (propOnChange) {
       propOnChange(name, newValue);
     }
@@ -123,8 +123,8 @@ export const FormField = (props: FormFieldProps) => {
     <div className={`${fullWidth ? 'w-full' : ''} mb-4 sm:mb-6`}>
       {/* Label */}
       <div className="flex items-center justify-between mb-2">
-        <label 
-          htmlFor={name} 
+        <label
+          htmlFor={name}
           className="block text-sm font-medium text-gray-700 sm:text-base"
         >
           {label}
@@ -134,7 +134,7 @@ export const FormField = (props: FormFieldProps) => {
           <span className="text-xs text-gray-500 sm:text-sm">{hint}</span>
         )}
       </div>
-      
+
       {/* Input Container */}
       <div className="relative">
         {/* Icon */}
@@ -143,7 +143,7 @@ export const FormField = (props: FormFieldProps) => {
             {icon}
           </div>
         )}
-        
+
         {/* Input Field */}
         {type === 'textarea' ? (
           <textarea
@@ -179,7 +179,7 @@ export const FormField = (props: FormFieldProps) => {
             step={step}
           />
         )}
-        
+
         {/* Password Toggle */}
         {isPassword && (
           <button
@@ -191,14 +191,14 @@ export const FormField = (props: FormFieldProps) => {
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         )}
-        
+
         {/* Success Icon */}
         {hasSuccess && !isPassword && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <Check className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </div>
         )}
-        
+
         {/* Error Icon */}
         {hasError && !isPassword && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -206,7 +206,7 @@ export const FormField = (props: FormFieldProps) => {
           </div>
         )}
       </div>
-      
+
       {/* Help Text */}
       {(error || success) && (
         <div className="mt-2 flex items-start space-x-1">
@@ -228,7 +228,7 @@ export const FormField = (props: FormFieldProps) => {
           )}
         </div>
       )}
-      
+
       {/* Hint Text */}
       {hint && !error && !success && (
         <p id={`${name}-hint`} className="mt-1 text-xs text-gray-500 sm:text-sm">
@@ -246,10 +246,10 @@ interface CrudFormProps {
 }
 
 export const CrudForm = ({ onSubmit, children, className = '' }: CrudFormProps) => (
-    <form onSubmit={onSubmit} className={className}>
-      {children}
-    </form>
-  );
+  <form onSubmit={onSubmit} className={className}>
+    {children}
+  </form>
+);
 
 // Responsive Grid Component
 interface FormGridProps {
@@ -299,24 +299,24 @@ export const FormSection = ({
   children,
   className = '',
 }: FormSectionProps) => (
-    <div className={`space-y-4 sm:space-y-6 ${className}`}>
-      {(title || description) && (
-        <div className="border-b border-gray-200 pb-4">
-          {title && (
-            <h3 className="text-lg font-medium text-gray-900 sm:text-xl">
-              {title}
-            </h3>
-          )}
-          {description && (
-            <p className="mt-1 text-sm text-gray-600 sm:text-base">
-              {description}
-            </p>
-          )}
-        </div>
-      )}
-      {children}
-    </div>
-  );
+  <div className={`space-y-4 sm:space-y-6 ${className}`}>
+    {(title || description) && (
+      <div className="border-b border-gray-200 pb-4">
+        {title && (
+          <h3 className="text-lg font-medium text-gray-900 sm:text-xl">
+            {title}
+          </h3>
+        )}
+        {description && (
+          <p className="mt-1 text-sm text-gray-600 sm:text-base">
+            {description}
+          </p>
+        )}
+      </div>
+    )}
+    {children}
+  </div>
+);
 
 interface FormActionsProps {
   onCancel?: () => void;
@@ -417,7 +417,7 @@ export const ConfirmDialog = ({
   cancelText = 'Cancel',
   type = 'danger',
 }: ConfirmDialogProps) => {
-  if (!isOpen) {return null;}
+  if (!isOpen) { return null; }
 
   const typeStyles = {
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',

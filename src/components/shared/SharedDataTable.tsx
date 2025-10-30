@@ -4,7 +4,6 @@ import { type ReactNode, useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +15,6 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Search,
-  Filter,
   Plus,
   Eye,
   Edit,
@@ -119,13 +117,13 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
 
   // Computed values
   const sanitizedPageSizeOptions = useMemo(() => {
-    if (!enablePagination) {return [Math.max(data.length, 1)]}
-    if (pageSizeOptions && pageSizeOptions.length > 0) {return pageSizeOptions}
+    if (!enablePagination) { return [Math.max(data.length, 1)] }
+    if (pageSizeOptions && pageSizeOptions.length > 0) { return pageSizeOptions }
     return [10, 25, 50, 100]
   }, [enablePagination, pageSizeOptions, data.length])
 
-  const sanitizedInitialPageSize = useMemo(() => {
-    if (!enablePagination) {return Math.max(data.length, 1)}
+  const _sanitizedInitialPageSize = useMemo(() => {
+    if (!enablePagination) { return Math.max(data.length, 1) }
     if (initialPageSize && sanitizedPageSizeOptions.includes(initialPageSize)) {
       return initialPageSize
     }
@@ -144,7 +142,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
 
       // Column filters
       const matchesFilters = Object.entries(filters).every(([key, filterValue]) => {
-        if (!filterValue || filterValue === 'all') {return true}
+        if (!filterValue || filterValue === 'all') { return true }
         const itemValue = getValue(item, key)
         return String(itemValue) === filterValue
       })
@@ -159,15 +157,15 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
         const bVal = getValue(b, sortBy)
 
         if (typeof aVal === 'number' && typeof bVal === 'number') {
-          if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1}
-          if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1}
+          if (aVal < bVal) { return sortOrder === 'asc' ? -1 : 1 }
+          if (aVal > bVal) { return sortOrder === 'asc' ? 1 : -1 }
           return 0
         }
 
         const aText = String(aVal ?? '')
         const bText = String(bVal ?? '')
-        if (aText < bText) {return sortOrder === 'asc' ? -1 : 1}
-        if (aText > bText) {return sortOrder === 'asc' ? 1 : -1}
+        if (aText < bText) { return sortOrder === 'asc' ? -1 : 1 }
+        if (aText > bText) { return sortOrder === 'asc' ? 1 : -1 }
         return 0
       })
     }
@@ -218,7 +216,7 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
   }
 
   function handleExport() {
-    if (!exportable) {return}
+    if (!exportable) { return }
 
     const csvContent = [
       columns.map(col => col.header).join(','),
@@ -367,9 +365,8 @@ export const SharedDataTable = <T extends Record<string, unknown>>({
                     {columns.map(col => (
                       <th
                         key={String(col.key)}
-                        className={`text-left p-3 font-medium text-muted-foreground ${
-                          col.hideOnMobile ? 'hidden lg:table-cell' : ''
-                        } ${col.className || ''}`}
+                        className={`text-left p-3 font-medium text-muted-foreground ${col.hideOnMobile ? 'hidden lg:table-cell' : ''
+                          } ${col.className || ''}`}
                       >
                         {col.sortable ? (
                           <Button

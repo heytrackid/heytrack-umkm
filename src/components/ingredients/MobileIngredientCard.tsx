@@ -12,8 +12,7 @@ import {
     Trash2,
     ChevronDown,
     ChevronUp,
-    ShoppingCart,
-    Package
+    ShoppingCart
 } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
 import { StockBadge, CompactStockIndicator } from './StockBadge'
@@ -39,7 +38,7 @@ interface MobileIngredientCardProps {
  */
 export const MobileIngredientCard = ({
     ingredient,
-    onView,
+    onView: _onView,
     onEdit,
     onDelete,
     onQuickBuy

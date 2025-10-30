@@ -307,7 +307,7 @@ export const apiRequest = async <T>(
         throw err
       }
 
-      if (error instanceof DOMException && error.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         throw new ApiError(
           'Request timeout',
           API_ERROR_CODES.TIMEOUT_ERROR,
@@ -315,7 +315,7 @@ export const apiRequest = async <T>(
         )
       }
 
-      if (error instanceof TypeError && error.message.includes('fetch')) {
+      if (err instanceof TypeError && err.message.includes('fetch')) {
         throw new ApiError(
           'Network error - please check your connection',
           API_ERROR_CODES.NETWORK_ERROR,
@@ -324,7 +324,7 @@ export const apiRequest = async <T>(
       }
 
       throw new ApiError(
-        error instanceof Error ? error.message : 'Unknown error occurred',
+        err instanceof Error ? err.message : 'Unknown error occurred',
         API_ERROR_CODES.UNKNOWN_ERROR,
         HTTP_STATUS.INTERNAL_SERVER_ERROR
       )

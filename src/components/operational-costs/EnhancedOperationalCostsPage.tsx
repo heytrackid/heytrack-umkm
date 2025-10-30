@@ -462,13 +462,17 @@ export const EnhancedOperationalCostsPage = () => {
 
             {/* Pagination */}
             {filteredData.length > 0 && (
-                <Pagination
-                    currentPage={pagination.page}
+                <SimplePagination
+                    page={pagination.page}
+                    pageSize={pagination.pageSize}
                     totalPages={pagination.totalPages}
                     totalItems={filteredData.length}
-                    pageSize={pagination.pageSize}
+                    startIndex={pagination.startIndex}
+                    endIndex={pagination.endIndex}
                     onPageChange={pagination.setPage}
                     onPageSizeChange={handlePageSizeChange}
+                    canNextPage={pagination.canNextPage}
+                    canPrevPage={pagination.canPrevPage}
                     pageSizeOptions={[12, 24, 48, 96]}
                 />
             )}

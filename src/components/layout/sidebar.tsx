@@ -14,19 +14,21 @@ import {
   Factory,
   Calculator,
   Bot,
-  Wand2,
   Settings,
   X,
   ChevronDown,
   ChevronRight,
   TrendingUp,
   DollarSign,
-  FileText,
-  ShoppingBag,
-  BarChart3,
   PanelLeftClose,
   PanelLeftOpen
 } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { ExportButton } from './ExportButton'
 import { LogoutButton } from './LogoutButton'
 
@@ -56,7 +58,7 @@ const NAV_SECTIONS: SidebarSection[] = [
 
   // 2. Operasional Harian - Core daily operations
   {
-    title: 'Operasional Harian',
+    title: 'Operasional',
     icon: ShoppingCart,
     defaultOpen: true,
     collapsible: true,
@@ -74,9 +76,8 @@ const NAV_SECTIONS: SidebarSection[] = [
     defaultOpen: true,
     collapsible: true,
     items: [
-      { label: 'Resep Produk', href: '/recipes', icon: ChefHat },
-      { label: 'Bahan Baku', href: '/ingredients', icon: Package },
-      { label: 'Kategori', href: '/categories', icon: ShoppingBag }
+      { label: 'Resep', href: '/recipes', icon: ChefHat },
+      { label: 'Bahan', href: '/ingredients', icon: Package }
     ]
   },
 
@@ -88,32 +89,18 @@ const NAV_SECTIONS: SidebarSection[] = [
     collapsible: true,
     items: [
       { label: 'Cash Flow', href: '/cash-flow', icon: TrendingUp },
-      { label: 'Laporan Profit', href: '/profit', icon: BarChart3 },
-      { label: 'Biaya Operasional', href: '/operational-costs', icon: FileText }
+      { label: 'HPP & Profit', href: '/hpp', icon: Calculator }
     ]
   },
 
-  // 5. Analisis HPP - Cost analysis
+  // 5. AI Assistant - Advanced features
   {
-    title: 'Analisis HPP',
-    icon: Calculator,
-    defaultOpen: false,
-    collapsible: true,
-    items: [
-      { label: 'HPP Dashboard', href: '/hpp', icon: Calculator },
-      { label: 'Laporan HPP', href: '/reports', icon: FileText }
-    ]
-  },
-
-  // 6. AI Assistant - Advanced features
-  {
-    title: 'AI Assistant',
+    title: 'AI Tools',
     icon: Bot,
     defaultOpen: false,
     collapsible: true,
     items: [
-      { label: 'AI Chatbot', href: '/ai-chatbot', icon: Bot },
-      { label: 'Generator Resep', href: '/recipes/ai-generator', icon: Wand2 }
+      { label: 'AI Chatbot', href: '/ai-chatbot', icon: Bot }
     ]
   },
 
@@ -172,7 +159,7 @@ const Sidebar = ({
   }
 
   const content = (
-    <nav className="flex h-full flex-col bg-background">
+    <nav className="flex h-full flex-col bg-card">
       {/* Header */}
       <div className="border-b border-border px-4 py-4">
         <div className="flex items-center justify-between">
@@ -211,36 +198,66 @@ const Sidebar = ({
               <div key={section.title} className="space-y-1">
                 {/* Section Header */}
                 {section.collapsible ? (
-                  <button
-                    onClick={() => toggleSection(section.title)}
-                    className={cn(
-                      'w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                      'hover:bg-muted',
-                      hasActiveItem && 'text-primary',
-                      isCollapsed && 'justify-center'
-                    )}
-                    title={isCollapsed ? section.title : undefined}
-                  >
-                    <div className={cn(
-                      "flex items-center gap-2",
-                      isCollapsed && "justify-center"
-                    )}>
-                      <SectionIcon className="h-4 w-4 flex-shrink-0" />
-                      {!isCollapsed && <span>{section.title}</span>}
-                    </div>
-                    {!isCollapsed && (isExpanded ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    ))}
-                  </button>
+                  isCollapsed ? (
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => toggleSection(section.title)}
+                            className={cn(
+                              'w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200',
+                              'hover:bg-accent hover:text-accent-foreground',
+                              hasActiveItem && 'text-primary'
+                            )}
+                          >
+                            <SectionIcon className="h-5 w-5 flex-shrink-0" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="font-medium">
+                          {section.title}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ) : (
+                    <button
+                      onClick={() => toggleSection(section.title)}
+                      className={cn(
+                        'w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors',
+                        'hover:bg-muted',
+                        hasActiveItem && 'text-primary'
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <SectionIcon className="h-4 w-4 flex-shrink-0" />
+                        <span>{section.title}</span>
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                  )
                 ) : (
                   <div className={cn(
                     "px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
                     isCollapsed && "text-center"
                   )}>
                     {!isCollapsed && section.title}
-                    {isCollapsed && <SectionIcon className="h-4 w-4 mx-auto" />}
+                    {isCollapsed && (
+                      <TooltipProvider delayDuration={0}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex justify-center">
+                              <SectionIcon className="h-5 w-5" />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="font-medium">
+                            {section.title}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </div>
                 )}
 
@@ -278,7 +295,7 @@ const Sidebar = ({
                   </div>
                 )}
 
-                {/* Collapsed Mode - Show only icons */}
+                {/* Collapsed Mode - Show only icons with tooltip */}
                 {isCollapsed && (
                   <div className="space-y-0.5">
                     {section.items.map((item) => {
@@ -286,24 +303,31 @@ const Sidebar = ({
                       const active = isActive(item.href)
 
                       return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => isMobile && onToggle?.()}
-                          onMouseEnter={() => handlePrefetch(item.href)}
-                          onFocus={() => handlePrefetch(item.href)}
-                          prefetch={true}
-                          title={item.label}
-                          className={cn(
-                            'flex items-center justify-center px-3 py-2 text-sm rounded-lg transition-colors',
-                            'hover:bg-muted',
-                            active
-                              ? 'bg-primary text-primary-foreground font-medium'
-                              : 'text-muted-foreground'
-                          )}
-                        >
-                          <ItemIcon className="h-4 w-4 flex-shrink-0" />
-                        </Link>
+                        <TooltipProvider key={item.href} delayDuration={0}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link
+                                href={item.href}
+                                onClick={() => isMobile && onToggle?.()}
+                                onMouseEnter={() => handlePrefetch(item.href)}
+                                onFocus={() => handlePrefetch(item.href)}
+                                prefetch={true}
+                                className={cn(
+                                  'flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
+                                  'hover:bg-accent hover:text-accent-foreground',
+                                  active
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground'
+                                )}
+                              >
+                                <ItemIcon className="h-5 w-5 flex-shrink-0" />
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="font-medium">
+                              {item.label}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )
                     })}
                   </div>
@@ -324,24 +348,37 @@ const Sidebar = ({
         )}
 
         {!isMobile && onCollapse && (
-          <button
-            onClick={onCollapse}
-            className={cn(
-              "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200",
-              "hover:bg-muted hover:text-foreground text-muted-foreground",
-              isCollapsed && "justify-center"
-            )}
-            title={isCollapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-          >
-            {isCollapsed ? (
-              <PanelLeftOpen className="h-4 w-4 flex-shrink-0" />
-            ) : (
-              <>
-                <PanelLeftClose className="h-4 w-4 flex-shrink-0" />
-                <span>Ciutkan</span>
-              </>
-            )}
-          </button>
+          isCollapsed ? (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onCollapse}
+                    className={cn(
+                      "w-full flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200",
+                      "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                    )}
+                  >
+                    <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-medium">
+                  Perluas sidebar
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <button
+              onClick={onCollapse}
+              className={cn(
+                "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200",
+                "hover:bg-muted hover:text-foreground text-muted-foreground"
+              )}
+            >
+              <PanelLeftClose className="h-4 w-4 flex-shrink-0" />
+              <span>Ciutkan</span>
+            </button>
+          )
         )}
 
         {!isCollapsed && (
@@ -365,7 +402,7 @@ const Sidebar = ({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-40 border-r border-border bg-background shadow-sm',
+        'fixed inset-y-0 left-0 z-40 border-r border-border bg-card shadow-sm',
         'transition-all duration-300 ease-in-out',
         isCollapsed ? 'w-16' : 'w-72'
       )}

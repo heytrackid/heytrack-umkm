@@ -175,7 +175,7 @@ export const FinanceTableWithSuspense = (props: TableProps) => (
 // Virtual Table for Large Datasets
 export const LazyVirtualizedTable = lazy(() =>
   Promise.resolve({
-    default: ({ data, height, ...props }: { data?: unknown[]; height?: number;[key: string]: unknown }) =>
+    default: ({ data, height }: { data?: unknown[]; height?: number;[key: string]: unknown }) =>
       // This would be a virtualized table implementation
       // For now, return a placeholder
       <div style={{ height }}>Virtualized table with {data?.length || 0} items</div>

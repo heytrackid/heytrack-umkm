@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/supabase-generated';
 import { getErrorMessage } from '@/lib/type-guards';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 

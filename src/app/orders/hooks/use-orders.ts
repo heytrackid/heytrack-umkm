@@ -132,7 +132,7 @@ export function useOrderItems(orderId: string) {
 }
 
 // Order payments tracking
-export function useOrderPayments(orderId: string) {
+export function useOrderPayments(_orderId: string) {
   // TODO: Implement when order_payments table is created
   // For now, return empty data structure
   return {
@@ -287,7 +287,7 @@ export function useOrderStatus(orderId: string) {
 export function useOrderCurrency(currency?: string) {
   const defaultCurrency = DEFAULT_ORDERS_CONFIG.currency.default
 
-  const formatAmount = (amount: number, options?: {
+  const formatAmount = (amount: number, _options?: {
     showSymbol?: boolean
     showCode?: boolean
   }) => formatCurrency(amount, { code: currency || defaultCurrency, symbol: '$', name: 'USD', decimals: 2 })
@@ -384,7 +384,7 @@ export function useOrderValidation() {
     return errors
   }
 
-  const validateOrderUpdate = (updateData: UpdateOrderData): string[] => {
+  const validateOrderUpdate = (_updateData: UpdateOrderData): string[] => {
     const errors: string[] = []
 
     // Status transition validation would go here

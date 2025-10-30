@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
     Package,
-    DollarSign,
     Calendar,
     Clock,
     User,
@@ -29,7 +28,7 @@ interface OrderSummaryCardProps {
 const OrderSummaryCard = memo(({
     order,
     onClick,
-    showActions = false
+    showActions: _showActions = false
 }: OrderSummaryCardProps) => {
     const { formatCurrency } = useCurrency()
     const statusInfo = getStatusInfo(order.status)

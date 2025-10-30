@@ -6,7 +6,7 @@
 import { type ReactNode, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Search, X, Filter, SortAsc, SortDesc } from 'lucide-react'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -75,21 +75,21 @@ interface FilterToggleProps {
 }
 
 export const FilterToggle = ({ label, isActive, onToggle, count }: FilterToggleProps) => (
-    <Button
-      variant={isActive ? 'default' : 'outline'}
-      size="sm"
-      onClick={onToggle}
-      className="flex items-center gap-2"
-    >
-      <Filter className="h-3 w-3" />
-      {label}
-      {count !== undefined && count > 0 && (
-        <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-          {count}
-        </Badge>
-      )}
-    </Button>
-  )
+  <Button
+    variant={isActive ? 'default' : 'outline'}
+    size="sm"
+    onClick={onToggle}
+    className="flex items-center gap-2"
+  >
+    <Filter className="h-3 w-3" />
+    {label}
+    {count !== undefined && count > 0 && (
+      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+        {count}
+      </Badge>
+    )}
+  </Button>
+)
 
 // Sort button component
 interface SortButtonProps {
@@ -135,7 +135,7 @@ export const ActiveFilters = ({ filters, onRemoveFilter, filterLabels = {} }: Ac
     value !== null && value !== undefined && value !== '' && value !== false
   )
 
-  if (activeFilters.length === 0) {return null}
+  if (activeFilters.length === 0) { return null }
 
   return (
     <div className="flex flex-wrap gap-2 mb-4">
@@ -185,32 +185,32 @@ export const SearchFilterBar = ({
   actions,
   className
 }: SearchFilterBarProps) => (
-    <Card className={className}>
-      <CardContent className="p-4">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
-            <SearchInput
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={onSearchChange}
-            />
-          </div>
-
-          {filters && (
-            <div className="flex flex-wrap gap-2">
-              {filters}
-            </div>
-          )}
-
-          {actions && (
-            <div className="flex gap-2">
-              {actions}
-            </div>
-          )}
+  <Card className={className}>
+    <CardContent className="p-4">
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex-1">
+          <SearchInput
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onChange={onSearchChange}
+          />
         </div>
-      </CardContent>
-    </Card>
-  )
+
+        {filters && (
+          <div className="flex flex-wrap gap-2">
+            {filters}
+          </div>
+        )}
+
+        {actions && (
+          <div className="flex gap-2">
+            {actions}
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+)
 
 // Bulk actions bar
 interface BulkActionsBarProps {
@@ -221,7 +221,7 @@ interface BulkActionsBarProps {
 }
 
 export const BulkActionsBar = ({ selectedCount, totalCount, actions, onClearSelection }: BulkActionsBarProps) => {
-  if (selectedCount === 0) {return null}
+  if (selectedCount === 0) { return null }
 
   return (
     <Card className="border-blue-200 bg-blue-50">

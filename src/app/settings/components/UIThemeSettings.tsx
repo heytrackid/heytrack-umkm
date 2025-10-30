@@ -20,7 +20,7 @@ interface UIThemeSettingsProps {
  * UI theme settings component
  */
 export const UIThemeSettings = ({ settings, onSettingChange }: UIThemeSettingsProps) => {
-  const { settings: contextSettings, languages, updateLanguage } = useSettings()
+  const { languages, updateLanguage } = useSettings()
 
   return (
     <Card>

@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/modal'
 import { CrudForm, FormActions } from '@/components/ui/crud-form'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Plus } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface CrudModalProps {
   isOpen: boolean
@@ -31,16 +31,16 @@ export const CrudModal = ({
   fullScreenOnMobile = true,
   children
 }: CrudModalProps) => (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      size={size}
-      fullScreenOnMobile={fullScreenOnMobile}
-    >
-      {children}
-    </Modal>
-  )
+  <Modal
+    isOpen={isOpen}
+    onClose={onClose}
+    title={title}
+    size={size}
+    fullScreenOnMobile={fullScreenOnMobile}
+  >
+    {children}
+  </Modal>
+)
 
 interface CreateModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
@@ -136,17 +136,17 @@ export const DeleteModal = ({
   itemName,
   isLoading
 }: DeleteModalProps) => (
-    <ConfirmDialog
-      open={isOpen}
-      onOpenChange={(open) => !open && onClose()}
-      title={`Hapus ${entityName}`}
-      description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
-      onConfirm={onConfirm}
-      confirmText="Ya, Hapus"
-      variant="destructive"
-      loading={isLoading}
-    />
-  )
+  <ConfirmDialog
+    open={isOpen}
+    onOpenChange={(open) => !open && onClose()}
+    title={`Hapus ${entityName}`}
+    description={`Apakah Anda yakin ingin menghapus "${itemName}"? Tindakan ini tidak dapat dibatalkan.`}
+    onConfirm={onConfirm}
+    confirmText="Ya, Hapus"
+    variant="destructive"
+    loading={isLoading}
+  />
+)
 
 interface CrudActionButtonsProps {
   onEdit?: () => void
@@ -164,27 +164,27 @@ export const CrudActionButtons = ({
   size = 'sm',
   variant = 'ghost'
 }: CrudActionButtonsProps) => (
-    <div className="flex gap-1">
-      {onEdit && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onEdit}
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
-      )}
-      {onDelete && (
-        <Button
-          variant={variant}
-          size={size}
-          onClick={onDelete}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  )
+  <div className="flex gap-1">
+    {onEdit && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onEdit}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+    )}
+    {onDelete && (
+      <Button
+        variant={variant}
+        size={size}
+        onClick={onDelete}
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    )}
+  </div>
+)
 
 // Import React for types
 import type React from 'react'

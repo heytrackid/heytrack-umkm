@@ -13,7 +13,6 @@ import { useSettings } from '@/contexts/settings-context'
 import { LOADING_KEYS, useLoading } from '@/hooks/loading'
 import { useResponsive } from '@/hooks/useResponsive'
 import { usePagination } from '@/hooks/usePagination'
-import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { useRouter } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -28,6 +27,7 @@ import { Plus, RefreshCw, Users } from 'lucide-react'
 import CustomersTable from './CustomersTable'
 import CustomerStats from './CustomerStats'
 import CustomerSearchFilters from './CustomerSearchFilters'
+import CustomerForm from './CustomerForm'
 
 import type { Customer } from './types'
 import type { Database } from '@/types/supabase-generated'
@@ -43,12 +43,12 @@ export default function CustomersLayout() {
   const [currentView, setCurrentView] = useState('list') // 'list', 'add', 'edit'
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [pageSize, setPageSize] = useState(12)
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const { setLoading, isLoading } = useLoading({
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
   const [customers, setCustomers] = useState<Array<CustomersTable['Row']>>([])
-  const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
 
   // Fetch customers on mount - auth is handled by middleware
@@ -179,6 +179,7 @@ export default function CustomersLayout() {
   // Individual action handlers
   const handleEditCustomer = (customer: Customer) => {
     apiLogger.info({ customer }, 'Edit customer')
+    setEditingCustomer(customer)
     void setCurrentView('edit')
   }
 
@@ -210,6 +211,17 @@ export default function CustomersLayout() {
 
   const handleViewCustomer = (customer: Customer) => {
     void router.push(`/customers/${customer.id}`)
+  }
+
+  const handleFormSuccess = () => {
+    setCurrentView('list')
+    setEditingCustomer(null)
+    void fetchCustomers()
+  }
+
+  const handleFormCancel = () => {
+    setCurrentView('list')
+    setEditingCustomer(null)
   }
 
   // Remove redundant auth loading state - handled by middleware
@@ -297,23 +309,18 @@ export default function CustomersLayout() {
         )}
 
         {currentView === 'add' && (
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium">Add Customer Form</h3>
-            <p className="text-muted-foreground">Customer creation form would be here</p>
-            <Button onClick={() => setCurrentView('list')} className="mt-4">
-              Back to List
-            </Button>
-          </div>
+          <CustomerForm
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
         )}
 
         {currentView === 'edit' && (
-          <div className="text-center py-8">
-            <h3 className="text-lg font-medium">Edit Customer Form</h3>
-            <p className="text-muted-foreground">Customer edit form would be here</p>
-            <Button onClick={() => setCurrentView('list')} className="mt-4">
-              Back to List
-            </Button>
-          </div>
+          <CustomerForm
+            customer={editingCustomer}
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
         )}
 
         {/* Pagination */}

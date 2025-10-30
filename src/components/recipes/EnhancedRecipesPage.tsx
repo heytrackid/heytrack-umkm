@@ -38,18 +38,14 @@ import {
     ChefHat,
     Clock,
     Users,
-    X,
-    TrendingUp,
-    BarChart3,
+    X
 } from 'lucide-react'
 
 // Feature Components
-import { EnhancedEmptyState } from './EnhancedEmptyState'
 import { MobileRecipeCard } from './MobileRecipeCard'
 import { RecipeStatsCards } from './RecipeStatsCards'
 import { DeleteModal } from '@/components/ui'
 import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
-import { ErrorMessage } from '@/components/ui/error-message'
 
 // Hooks
 import { useRecipes } from '@/hooks/supabase/entities'
@@ -68,7 +64,6 @@ type DifficultyFilter = 'all' | 'easy' | 'medium' | 'hard'
 
 export const EnhancedRecipesPage = () => {
     const router = useRouter()
-    const { formatCurrency } = useSettings()
     const { data: recipes, loading } = useRecipes({ realtime: true })
     const { delete: deleteRecipe } = useSupabaseCRUD('recipes')
     const { toast } = useToast()
@@ -487,13 +482,17 @@ export const EnhancedRecipesPage = () => {
 
             {/* Pagination */}
             {filteredData.length > 0 && (
-                <Pagination
-                    currentPage={pagination.page}
+                <SimplePagination
+                    page={pagination.page}
+                    pageSize={pagination.pageSize}
                     totalPages={pagination.totalPages}
                     totalItems={filteredData.length}
-                    pageSize={pagination.pageSize}
+                    startIndex={pagination.startIndex}
+                    endIndex={pagination.endIndex}
                     onPageChange={pagination.setPage}
                     onPageSizeChange={handlePageSizeChange}
+                    canNextPage={pagination.canNextPage}
+                    canPrevPage={pagination.canPrevPage}
                     pageSizeOptions={[12, 24, 48, 96]}
                 />
             )}

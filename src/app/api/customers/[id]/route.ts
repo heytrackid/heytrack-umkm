@@ -1,12 +1,11 @@
-import { type NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { CustomerUpdateSchema } from '@/lib/validations/database-validations'
-import { getErrorMessage } from '@/lib/type-guards'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
-import type { Database } from '@/types/supabase-generated'
+// API Route: /api/customers/[id]
+// Handles GET, PUT, DELETE operations for individual customer
 
-type Customer = Database['public']['Tables']['customers']['Row']
+import { createClient } from '@/utils/supabase/server'
+import { type NextRequest, NextResponse } from 'next/server'
+import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
+import { apiLogger } from '@/lib/logger'
+import type { Database } from '@/types/supabase-generated'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -20,19 +19,21 @@ export async function GET(
   try {
     const { id } = await context.params
     const supabase = await createClient()
-    
+
+    // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
+
+    // Fetch customer with RLS
     const { data, error } = await supabase
       .from('customers')
-      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, favorite_items, created_at, updated_at, user_id')
+      .select('*')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
-    
+
     if (error) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
@@ -41,14 +42,13 @@ export async function GET(
       return NextResponse.json({ error: 'Failed to fetch customer' }, { status: 500 })
     }
 
-    if (!data) {
-      return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-    }
-
     return NextResponse.json(data)
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in GET /api/customers/[id]')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -60,7 +60,8 @@ export async function PUT(
   try {
     const { id } = await context.params
     const supabase = await createClient()
-    
+
+    // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -69,22 +70,43 @@ export async function PUT(
     const body = await request.json()
 
     // Validate request body
-    const validation = CustomerUpdateSchema.safeParse(body)
+    const validation = CustomerUpdateSchema.safeParse({
+      ...body,
+      user_id: user.id
+    })
+
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: validation.error.issues },
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
         { status: 400 }
       )
     }
 
+    // Prepare update data
+    const updateData: Database['public']['Tables']['customers']['Update'] = {
+      name: validation.data.name,
+      phone: validation.data.phone,
+      email: validation.data.email,
+      address: validation.data.address,
+      customer_type: validation.data.customer_type,
+      discount_percentage: validation.data.discount_percentage,
+      notes: validation.data.notes,
+      is_active: validation.data.is_active,
+      updated_at: new Date().toISOString(),
+    }
+
+    // Update with RLS enforcement
     const { data, error } = await supabase
       .from('customers')
-      .update(validation.data)
+      .update(updateData)
       .eq('id', id)
       .eq('user_id', user.id)
-      .select('id, name, email, phone, address, customer_type, discount_percentage, notes, is_active, loyalty_points, updated_at')
+      .select()
       .single()
-    
+
     if (error) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
@@ -96,11 +118,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Failed to update customer' }, { status: 500 })
     }
 
-    cacheInvalidation.customers()
     return NextResponse.json(data)
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in PUT /api/customers/[id]')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -112,42 +136,54 @@ export async function DELETE(
   try {
     const { id } = await context.params
     const supabase = await createClient()
-    
+
+    // Authenticate
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
+
     // Check if customer has orders
-    const { data: orders } = await supabase
+    const { data: orders, error: ordersError } = await supabase
       .from('orders')
       .select('id')
       .eq('customer_id', id)
       .eq('user_id', user.id)
       .limit(1)
-    
+
+    if (ordersError) {
+      apiLogger.error({ error: ordersError }, 'Error checking customer orders')
+      return NextResponse.json({ error: 'Failed to check customer orders' }, { status: 500 })
+    }
+
     if (orders && orders.length > 0) {
       return NextResponse.json(
-        { error: 'Cannot delete customer with existing orders' },
+        { error: 'Cannot delete customer with existing orders. Please delete orders first.' },
         { status: 409 }
       )
     }
-    
+
+    // Delete with RLS enforcement
     const { error } = await supabase
       .from('customers')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)
-    
+
     if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+      }
       apiLogger.error({ error }, 'Error deleting customer')
       return NextResponse.json({ error: 'Failed to delete customer' }, { status: 500 })
     }
 
-    cacheInvalidation.customers()
     return NextResponse.json({ message: 'Customer deleted successfully' })
   } catch (error: unknown) {
     apiLogger.error({ error }, 'Error in DELETE /api/customers/[id]')
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

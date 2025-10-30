@@ -16,7 +16,7 @@ const LOADING_KEYS = {
 } as const
 
 export function useSettingsManager() {
-  const { settings: contextSettings, updateCurrency, updateLanguage } = useSettings()
+  const { settings: contextSettings } = useSettings()
   const { startLoading, stopLoading, isLoading: isSkeletonLoading } = useLoading()
 
   const mergedDefaults = useMemo(

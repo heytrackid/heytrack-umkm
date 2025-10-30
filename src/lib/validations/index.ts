@@ -37,7 +37,6 @@ export {
   IngredientFormSchema,
   OrderFormSchema,
   RecipeFormSchema,
-  CustomerFormSchema,
   SupplierFormSchema,
 
   // Query schemas (from domains/common)

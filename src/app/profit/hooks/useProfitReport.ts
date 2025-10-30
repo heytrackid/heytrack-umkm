@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useLoading } from '@/hooks/loading/useLoading'
 import { apiLogger } from '@/lib/logger'
 import type {
   ProfitData,

@@ -13,11 +13,7 @@ import {
   X,
   Calendar,
   Download,
-  Upload,
   Settings,
-  Eye,
-  EyeOff,
-  MoreVertical,
   ChevronDown,
   ChevronUp,
   SortAsc,
@@ -193,16 +189,16 @@ interface DateRangePickerProps {
 
 export const DateRangePicker = ({
   value,
-  onChange,
+  onChange: _onChange,
   placeholder = "Pick a date range",
   className = ""
 }: DateRangePickerProps) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const formatRange = () => {
-    if (!value.from && !value.to) {return placeholder}
-    if (value.from && !value.to) {return value.from.toLocaleDateString()}
-    if (!value.from && value.to) {return `Until ${value.to.toLocaleDateString()}`}
+    if (!value.from && !value.to) { return placeholder }
+    if (value.from && !value.to) { return value.from.toLocaleDateString() }
+    if (!value.from && value.to) { return `Until ${value.to.toLocaleDateString()}` }
     return `${value.from?.toLocaleDateString()} - ${value.to?.toLocaleDateString()}`
   }
 
@@ -288,26 +284,26 @@ export const ExportActions = ({
   actions,
   className = ""
 }: ExportActionsProps) => (
-    <div className={cn("flex items-center gap-2", className)}>
-      <Download className="h-4 w-4 text-muted-foreground" />
-      <Select>
-        <SelectTrigger className="w-32">
-          <SelectValue placeholder="Export" />
-        </SelectTrigger>
-        <SelectContent>
-          {actions.map((action) => (
-            <SelectItem
-              key={action.format}
-              value={action.format}
-              onClick={action.onClick}
-            >
-              {action.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  )
+  <div className={cn("flex items-center gap-2", className)}>
+    <Download className="h-4 w-4 text-muted-foreground" />
+    <Select>
+      <SelectTrigger className="w-32">
+        <SelectValue placeholder="Export" />
+      </SelectTrigger>
+      <SelectContent>
+        {actions.map((action) => (
+          <SelectItem
+            key={action.format}
+            value={action.format}
+            onClick={action.onClick}
+          >
+            {action.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+)
 
 // Bulk Actions Component
 interface BulkAction {
@@ -330,7 +326,7 @@ export const BulkActions = ({
   onClearSelection,
   className = ""
 }: BulkActionsProps) => {
-  if (selectedIds.length === 0) {return null}
+  if (selectedIds.length === 0) { return null }
 
   return (
     <Card className={cn("border-blue-200 bg-blue-50", className)}>
@@ -366,44 +362,44 @@ export const BulkActions = ({
 
 // Loading Skeletons
 export const TableSkeleton = ({ rows = 5, columns = 4 }: { rows?: number; columns?: number }) => (
-    <div className="space-y-4">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-4">
-          {Array.from({ length: columns }).map((_, j) => (
-            <Skeleton key={j} className="h-4 flex-1" />
-          ))}
-        </div>
-      ))}
-    </div>
-  )
+  <div className="space-y-4">
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="flex items-center space-x-4">
+        {Array.from({ length: columns }).map((_, j) => (
+          <Skeleton key={j} className="h-4 flex-1" />
+        ))}
+      </div>
+    ))}
+  </div>
+)
 
 export const CardSkeleton = ({ count = 4 }: { count?: number }) => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {Array.from({ length: count }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-6">
-            <Skeleton className="h-4 w-20 mb-2" />
-            <Skeleton className="h-8 w-16" />
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    {Array.from({ length: count }).map((_, i) => (
+      <Card key={i}>
+        <CardContent className="p-6">
+          <Skeleton className="h-4 w-20 mb-2" />
+          <Skeleton className="h-8 w-16" />
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
 
 export const FormSkeleton = ({ fields = 4 }: { fields?: number }) => (
-    <div className="space-y-6">
-      {Array.from({ length: fields }).map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ))}
-      <div className="flex gap-2">
-        <Skeleton className="h-10 w-24" />
-        <Skeleton className="h-10 w-20" />
+  <div className="space-y-6">
+    {Array.from({ length: fields }).map((_, i) => (
+      <div key={i} className="space-y-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-10 w-full" />
       </div>
+    ))}
+    <div className="flex gap-2">
+      <Skeleton className="h-10 w-24" />
+      <Skeleton className="h-10 w-20" />
     </div>
-  )
+  </div>
+)
 
 // Empty States
 interface EmptyStateProps {
@@ -424,25 +420,25 @@ export const EmptyState = ({
   action,
   className = ""
 }: EmptyStateProps) => (
-    <div className={cn("text-center py-12", className)}>
-      {icon && (
-        <div className="mx-auto h-12 w-12 text-muted-foreground mb-4">
-          {icon}
-        </div>
-      )}
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      {description && (
-        <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-          {description}
-        </p>
-      )}
-      {action && (
-        <Button onClick={action.onClick}>
-          {action.label}
-        </Button>
-      )}
-    </div>
-  )
+  <div className={cn("text-center py-12", className)}>
+    {icon && (
+      <div className="mx-auto h-12 w-12 text-muted-foreground mb-4">
+        {icon}
+      </div>
+    )}
+    <h3 className="text-lg font-semibold mb-2">{title}</h3>
+    {description && (
+      <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
+        {description}
+      </p>
+    )}
+    {action && (
+      <Button onClick={action.onClick}>
+        {action.label}
+      </Button>
+    )}
+  </div>
+)
 
 // Quick Actions Menu
 interface QuickAction {
@@ -463,35 +459,35 @@ export const QuickActions = ({
   trigger,
   className = ""
 }: QuickActionsProps) => (
-    <Select>
-      <SelectTrigger className={cn("w-48", className)}>
-        {trigger || (
-          <div className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Quick Actions
-          </div>
-        )}
-      </SelectTrigger>
-      <SelectContent>
-        {actions.map((action) => (
-          <SelectItem
-            key={action.label}
-            value={action.label}
-            onClick={action.onClick}
-          >
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                {action.icon}
-                {action.label}
-              </div>
-              {action.shortcut && (
-                <Badge variant="outline" className="text-xs">
-                  {action.shortcut}
-                </Badge>
-              )}
+  <Select>
+    <SelectTrigger className={cn("w-48", className)}>
+      {trigger || (
+        <div className="flex items-center gap-2">
+          <Settings className="h-4 w-4" />
+          Quick Actions
+        </div>
+      )}
+    </SelectTrigger>
+    <SelectContent>
+      {actions.map((action) => (
+        <SelectItem
+          key={action.label}
+          value={action.label}
+          onClick={action.onClick}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              {action.icon}
+              {action.label}
             </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
+            {action.shortcut && (
+              <Badge variant="outline" className="text-xs">
+                {action.shortcut}
+              </Badge>
+            )}
+          </div>
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+)

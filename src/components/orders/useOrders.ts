@@ -22,14 +22,16 @@ export function useOrders() {
   })
 
   // ✅ Use TanStack Query for automatic caching and refetching
-  const { data: orders = [], isLoading: loading, error: queryError } = useQuery({
+  const { data: ordersResponse, isLoading: loading, error: queryError } = useQuery({
     queryKey: orderKeys.list(50),
     queryFn: async () => {
       const response = await fetch('/api/orders?limit=50')
       if (!response.ok) {
         throw new Error('Failed to fetch orders')
       }
-      return response.json() as Promise<Order[]>
+      const json = await response.json()
+      // API returns { data: [...], meta: {...} }
+      return json.data as Order[]
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
     gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache longer
@@ -38,6 +40,7 @@ export function useOrders() {
     refetchOnReconnect: true, // Refetch when internet reconnects
   })
 
+  const orders = ordersResponse || []
   const error = queryError ? (queryError as Error).message : null
 
   // Manual refetch function
@@ -181,7 +184,7 @@ export function useOrders() {
 
       return response.json()
     },
-    onSuccess: async (data, variables) => {
+    onSuccess: async (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
       
       // Auto-update inventory for status changes that affect stock

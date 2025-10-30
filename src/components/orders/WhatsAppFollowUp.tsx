@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, Send, Edit, Copy, Check } from 'lucide-react';
+import { MessageCircle, Send, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -84,13 +84,13 @@ const WhatsAppFollowUp = ({
     try {
       const orderData = convertOrderData(order);
       const template = templates.find(t => t.id === selectedTemplate);
-      
+
       if (!template) {
         throw new Error('Template not found');
       }
 
       let message = template.template;
-      
+
       // Format order items
       const orderItems = orderData.items.map(item =>
         `• ${item.name} (${item.quantity}x) - ${formatCurrency(item.price * item.quantity)}`
@@ -131,7 +131,7 @@ const WhatsAppFollowUp = ({
     const message = generatedMessage || customMessage;
     const encodedMessage = encodeURIComponent(message);
     const phone = orderData.customer_phone.replace(/\D/g, ''); // Remove non-digits
-    
+
     return {
       whatsapp: `https://wa.me/${phone}?text=${encodedMessage}`,
       business: `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`
@@ -155,15 +155,15 @@ const WhatsAppFollowUp = ({
     const urls = getWhatsAppURLs();
     const url = type === 'whatsapp' ? urls.whatsapp : urls.business;
     const message = generatedMessage || customMessage;
-    
+
     // Open WhatsApp with the message
     window.open(url, '_blank');
-    
+
     // Call callback if provided
     if (onSent) {
       onSent(type, message);
     }
-    
+
     toast.success(`WhatsApp ${type === 'business' ? 'Business' : ''} terbuka!`);
   };
 
@@ -181,7 +181,7 @@ const WhatsAppFollowUp = ({
           WhatsApp Follow-up
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -201,8 +201,8 @@ const WhatsAppFollowUp = ({
                 {/* Template Selection */}
                 <div className="space-y-2">
                   <Label>Pilih Template</Label>
-                  <Select 
-                    value={isCustomTemplate ? 'custom' : selectedTemplate} 
+                  <Select
+                    value={isCustomTemplate ? 'custom' : selectedTemplate}
                     onValueChange={(value) => {
                       if (value === 'custom') {
                         setIsCustomTemplate(true);
@@ -281,10 +281,10 @@ const WhatsAppFollowUp = ({
                   <div><strong>Customer:</strong> {order.customer_name}</div>
                   <div><strong>Phone:</strong> {order.customer_phone}</div>
                   <div><strong>Total:</strong> {formatCurrency(order.total_amount)}</div>
-                  <div><strong>Status:</strong> 
+                  <div><strong>Status:</strong>
                     <Badge className="ml-2" variant={
                       order.status === 'COMPLETED' ? 'default' :
-                      order.status === 'PENDING' ? 'secondary' : 'outline'
+                        order.status === 'PENDING' ? 'secondary' : 'outline'
                     }>
                       {order.status}
                     </Badge>
@@ -321,7 +321,7 @@ const WhatsAppFollowUp = ({
                         {generatedMessage || 'Generating message...'}
                       </div>
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -347,7 +347,7 @@ const WhatsAppFollowUp = ({
                     <TabsTrigger value="regular">WhatsApp Biasa</TabsTrigger>
                     <TabsTrigger value="business">WhatsApp Business</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="regular" className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Buka WhatsApp regular dengan pesan yang sudah disiapkan
@@ -361,7 +361,7 @@ const WhatsAppFollowUp = ({
                       Buka WhatsApp
                     </Button>
                   </TabsContent>
-                  
+
                   <TabsContent value="business" className="space-y-4">
                     <div className="text-sm text-gray-600">
                       Buka WhatsApp Business dengan pesan yang sudah disiapkan

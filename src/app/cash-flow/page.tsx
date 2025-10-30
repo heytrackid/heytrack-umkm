@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useSettings } from '@/contexts/settings-context'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
-import { Download, AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
+import { AlertCircle, PlusCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbList,

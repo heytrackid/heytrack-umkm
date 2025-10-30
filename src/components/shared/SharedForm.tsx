@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useForm, type UseFormReturn, type Path, type DefaultValues } from 'react-hook-form'
+import { useForm, type Path, type DefaultValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type { z } from 'zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -206,17 +206,16 @@ export const SharedModalForm = <T extends Record<string, unknown>>({
   size = 'md',
   ...formProps
 }: SharedModalFormProps<T>) => {
-  if (!isOpen) {return null}
+  if (!isOpen) { return null }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
       <div
-        className={`bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${
-          size === 'sm' ? 'max-w-md' :
-          size === 'md' ? 'max-w-lg' :
-          size === 'lg' ? 'max-w-2xl' :
-          'max-w-4xl'
-        }`}
+        className={`bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${size === 'sm' ? 'max-w-md' :
+            size === 'md' ? 'max-w-lg' :
+              size === 'lg' ? 'max-w-2xl' :
+                'max-w-4xl'
+          }`}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">

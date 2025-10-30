@@ -13,12 +13,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   BarChart3,
-  Calendar,
-  Download
+  Calendar
 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 

@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useResponsive } from '@/hooks/useResponsive'
 import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react'
 import type { Order, OrderFormData, Priority, OrderItem } from './types'
-import { generateOrderNo, calculateOrderTotal } from './utils'
+import { calculateOrderTotal } from './utils'
 import { validateOrderData } from '@/lib/validations/form-validations'
 import { useCurrency } from '@/hooks/useCurrency'
 

@@ -110,7 +110,7 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
         })
     }
 
-    const selectedRecipe = recipes.find(r => r.id === formData.recipe_id)
+    // const selectedRecipe = recipes.find(r => r.id === formData.recipe_id)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

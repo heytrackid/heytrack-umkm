@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 import { successToast } from '@/hooks/use-toast'
 import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
-import type { EnhancedCRUDOptions, BulkUpdateItem } from './types'
+import type { EnhancedCRUDOptions } from './types'
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
 
 type Tables = Database['public']['Tables']
@@ -63,7 +63,7 @@ export function useEnhancedCRUD<
 
       const { data: result, error } = await supabase
         .from(table)
-        .insert(data)
+        .insert(data as never)
         .select('*')
         .single()
 
@@ -92,8 +92,8 @@ export function useEnhancedCRUD<
 
       const { data: result, error } = await supabase
         .from(table)
-        .update(data)
-        .eq('id', id)
+        .update(data as never)
+        .eq('id', id as never)
         .select('*')
         .single()
 
@@ -128,7 +128,7 @@ export function useEnhancedCRUD<
       const { data: existingRecord, error: fetchError } = await supabase
         .from(table)
         .select('*')
-        .eq('id', id)
+        .eq('id', id as never)
         .single()
 
       if (fetchError || !existingRecord) {
@@ -138,7 +138,7 @@ export function useEnhancedCRUD<
       const { error } = await supabase
         .from(table)
         .delete()
-        .eq('id', id)
+        .eq('id', id as never)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))
@@ -155,7 +155,7 @@ export function useEnhancedCRUD<
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
   const bulkCreate = useCallback(async (records: TInsert[]): Promise<TRow[]> => {
-    validateBulkInputs('create', records)
+    validateBulkInputs('create', records as Record<string, unknown>[])
 
     void setLoading(true)
     void setError(null)
@@ -165,7 +165,7 @@ export function useEnhancedCRUD<
 
       const { data: result, error } = await supabase
         .from(table)
-        .insert(records)
+        .insert(records as never)
         .select('*')
 
       if (error) {
@@ -191,7 +191,7 @@ export function useEnhancedCRUD<
   const bulkUpdate = useCallback(async (
     updates: Array<{ id: string; data: TUpdate }>
   ): Promise<TRow[]> => {
-    validateBulkInputs('update', updates)
+    validateBulkInputs('update', updates as Record<string, unknown>[])
 
     void setLoading(true)
     void setError(null)
@@ -203,8 +203,8 @@ export function useEnhancedCRUD<
       for (const update of updates) {
         const { data: result, error } = await supabase
           .from(table)
-          .update(update.data)
-          .eq('id', update.id)
+          .update(update.data as never)
+          .eq('id', update.id as never)
           .select('*')
           .single()
 
@@ -232,7 +232,7 @@ export function useEnhancedCRUD<
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const bulkDelete = useCallback(async (ids: string[]) => {
-    validateBulkInputs('delete', ids)
+    validateBulkInputs('delete', ids as unknown as Record<string, unknown>[])
 
     void setLoading(true)
     void setError(null)
@@ -243,7 +243,7 @@ export function useEnhancedCRUD<
       const { error } = await supabase
         .from(table)
         .delete()
-        .in('id', ids)
+        .in('id', ids as never)
 
       if (error) {
         throw new Error((error instanceof Error ? error.message : String(error)))

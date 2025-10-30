@@ -6,24 +6,18 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Toast } from '@/components/ui/toast'
 import {
   Bell,
-  BellRing,
   CheckCircle,
   AlertTriangle,
   Info,
   X,
   XCircle,
-  Clock,
   User,
   ShoppingCart,
   Package,
   DollarSign,
-  TrendingUp,
-  MessageSquare,
   Settings,
-  AlertCircle,
   Activity
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -249,7 +243,7 @@ export const ToastNotification = ({
     }
   }, [duration, onClose])
 
-  if (!isVisible) {return null}
+  if (!isVisible) { return null }
 
   const getToastStyles = () => {
     switch (type) {
@@ -551,7 +545,7 @@ export const NotificationBadge = ({
   variant = 'default',
   className = ""
 }: NotificationBadgeProps) => {
-  if (count === 0) {return null}
+  if (count === 0) { return null }
 
   const displayCount = count > maxCount ? `${maxCount}+` : count.toString()
 

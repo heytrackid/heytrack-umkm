@@ -588,7 +588,7 @@ export function useProductionCurrency(currency?: string | Currency) {
     ? currencies.find(curr => curr.code === currency) ?? DEFAULT_CURRENCY
     : currency ?? DEFAULT_CURRENCY
 
-  const formatCost = (amount: number, options?: {
+  const formatCost = (amount: number, _options?: {
     showSymbol?: boolean
     showCode?: boolean
   }) => formatCurrency(amount, resolvedCurrency)

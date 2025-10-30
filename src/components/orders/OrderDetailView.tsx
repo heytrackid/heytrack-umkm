@@ -11,7 +11,6 @@ import {
     Edit,
     Trash2,
     Phone,
-    Mail,
     MapPin,
     Calendar,
     Clock,
@@ -19,7 +18,6 @@ import {
     Package,
     DollarSign,
     FileText,
-    CheckCircle2,
     AlertCircle,
     Printer,
     Share2

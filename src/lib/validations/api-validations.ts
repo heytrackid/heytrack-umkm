@@ -27,8 +27,9 @@ export {
 
 // Re-export domain schemas for backward compatibility
 export {
-  CustomerFormSchema,
   CustomerInsertSchema,
+  CustomerUpdateSchema,
+  CustomerQuerySchema
 } from './domains/customer'
 
 export {

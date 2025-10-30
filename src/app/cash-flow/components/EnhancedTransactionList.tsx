@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Receipt, ArrowUpCircle, ArrowDownCircle, Trash2, Search, Filter, Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Receipt, ArrowUpCircle, ArrowDownCircle, Trash2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
     Select,

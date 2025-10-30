@@ -2,7 +2,7 @@
 
 // Shared business logic components and utilities
 
-import { type ReactNode, useState, useMemo } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -16,15 +16,12 @@ import {
   CheckCircle,
   Info,
   DollarSign,
-  Package,
   ShoppingCart,
   Users,
   BarChart3,
-  PieChart,
-  LineChart,
-  Activity
+  LineChart
 } from 'lucide-react'
-import { formatCurrency, formatNumber, getStatusColor, calculatePercentage } from '@/lib/shared/utilities'
+import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
 
 // Inventory Status Components
 import { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
@@ -94,14 +91,14 @@ export const InventoryAlerts = ({
       {alerts.map((alert) => {
         // Map alert_type from database to UI type
         const alertType = alert.alert_type as 'low_stock' | 'out_of_stock' | 'over_stock' | 'expiring' | undefined;
-        const Icon = alertType === 'low_stock' || alertType === 'out_of_stock' || alertType === 'expiring' 
-          ? AlertTriangle 
+        const Icon = alertType === 'low_stock' || alertType === 'out_of_stock' || alertType === 'expiring'
+          ? AlertTriangle
           : Info
-        
+
         // Determine item details - prefer the item object if available, otherwise extract from alert
         const itemName = alert.item?.name || alert.ingredient_name || 'Unknown Item';
         const itemId = alert.item?.id || alert.ingredient_id || '';
-        
+
         return (
           <Alert key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-red-500' :
             alert.severity === 'high' ? 'border-orange-500' :

@@ -39,7 +39,7 @@ export function OrdersListWithPagination() {
     const router = useRouter()
     const { toast } = useToast()
     const { formatCurrency } = useSettings()
-    const supabase = createClient()
+    const _supabase = createClient()
 
     // State
     const [orders, setOrders] = useState<OrderWithItems[]>([])
@@ -252,13 +252,17 @@ export function OrdersListWithPagination() {
 
             {/* Pagination */}
             {orders.length > 0 && (
-                <Pagination
-                    currentPage={pagination.page}
+                <SimplePagination
+                    page={pagination.page}
+                    pageSize={pagination.pageSize}
                     totalPages={pagination.totalPages}
                     totalItems={totalItems}
-                    pageSize={pagination.pageSize}
+                    startIndex={pagination.startIndex}
+                    endIndex={pagination.endIndex}
                     onPageChange={pagination.setPage}
                     onPageSizeChange={pagination.setPageSize}
+                    canNextPage={pagination.canNextPage}
+                    canPrevPage={pagination.canPrevPage}
                     pageSizeOptions={[10, 20, 50]}
                 />
             )}
