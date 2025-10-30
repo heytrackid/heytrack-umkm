@@ -19,7 +19,6 @@ import type { Database } from '@/types/supabase-generated'
 import { PageHeader, SharedStatsCards } from '@/components/shared'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 
-type Recipe = Database['public']['Tables']['recipes']['Row']
 type HppCalculation = Database['public']['Tables']['hpp_calculations']['Row']
 
 const calculatorBreadcrumbs = [
@@ -159,7 +158,7 @@ export default function HppCalculatorPage() {
                     <SelectValue placeholder="Pilih resep..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {recipes.map((recipe) => (
+                    {recipes.map((recipe: { id: string; name: string }) => (
                       <SelectItem key={recipe.id} value={recipe.id}>
                         {recipe.name}
                       </SelectItem>

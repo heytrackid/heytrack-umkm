@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * ProductionCapacityManager
  * Manages production capacity settings, resource allocation, and constraints
@@ -18,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
+import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import {
   Oven,
@@ -35,7 +35,6 @@ import {
   Zap
 } from 'lucide-react'
 import { format } from 'date-fns'
-import { toast } from 'react-hot-toast'
 
 import type {
   ProductionConstraints
@@ -85,6 +84,7 @@ export default function ProductionCapacityManager({
   const [efficiencyMetrics, setEfficiencyMetrics] = useState<EfficiencyMetrics | null>(null)
   const [newBreakStart, setNewBreakStart] = useState('')
   const [newBreakEnd, setNewBreakEnd] = useState('')
+  const { toast } = useToast()
 
   // Load current constraints on mount
   useEffect(() => {
@@ -94,21 +94,25 @@ export default function ProductionCapacityManager({
   // Track changes
   useEffect(() => {
     const hasChanges = JSON.stringify(constraints) !== JSON.stringify(originalConstraints)
-    void setHasChanges(hasChanges)
+    setHasChanges(hasChanges)
   }, [constraints, originalConstraints])
 
   const loadCurrentConstraints = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
       const currentConstraints = await batchSchedulingService.getProductionCapacity()
-      void setConstraints(currentConstraints)
-      void setOriginalConstraints(currentConstraints)
+      setConstraints(currentConstraints)
+      setOriginalConstraints(currentConstraints)
       calculateEfficiencyMetrics(currentConstraints)
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error loading constraints:')
-      toast.error('Failed to load production capacity settings')
+      toast({
+        title: 'Error',
+        description: 'Failed to load production capacity settings',
+        variant: 'destructive'
+      })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -154,16 +158,16 @@ export default function ProductionCapacityManager({
   }
 
   const calculateShiftHours = (constraints: ProductionConstraints): number => {
-    const [startHour, startMin] = constraints.shift_start.split('T').map(Number)
-    const [endHour, endMin] = constraints.shift_end.split('T').map(Number)
+    const [startHour, startMin] = constraints.shift_start.split(':').map(Number)
+    const [endHour, endMin] = constraints.shift_end.split(':').map(Number)
 
     const startMinutes = startHour * 60 + startMin
     const endMinutes = endHour * 60 + endMin
 
     const totalMinutes = endMinutes - startMinutes
     const breakMinutes = constraints.break_times.reduce((sum, br) => {
-      const [brStartHour, brStartMin] = br.start.split('T').map(Number)
-      const [brEndHour, brEndMin] = br.end.split('T').map(Number)
+      const [brStartHour, brStartMin] = br.start.split(':').map(Number)
+      const [brEndHour, brEndMin] = br.end.split(':').map(Number)
       return sum + ((brEndHour * 60 + brEndMin) - (brStartHour * 60 + brStartMin))
     }, 0)
 
@@ -172,23 +176,33 @@ export default function ProductionCapacityManager({
 
   const handleSave = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
       await batchSchedulingService.updateProductionConstraints(constraints)
-      void setOriginalConstraints(constraints)
+      setOriginalConstraints(constraints)
       calculateEfficiencyMetrics(constraints)
       onCapacityUpdate?.(constraints)
-      toast.success('Production capacity updated successfully')
+      toast({
+        title: 'Success',
+        description: 'Production capacity updated successfully'
+      })
     } catch (error: unknown) {
       apiLogger.error({ error }, 'Error saving constraints:')
-      toast.error('Failed to save production capacity settings')
+      toast({
+        title: 'Error',
+        description: 'Failed to save production capacity settings',
+        variant: 'destructive'
+      })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 
   const handleReset = () => {
-    void setConstraints(originalConstraints)
-    toast.success('Changes reset')
+    setConstraints(originalConstraints)
+    toast({
+      title: 'Success',
+      description: 'Changes reset'
+    })
   }
 
   const updateConstraint = <K extends keyof ProductionConstraints>(
@@ -204,8 +218,8 @@ export default function ProductionCapacityManager({
         ...prev,
         break_times: [...prev.break_times, { start: newBreakStart, end: newBreakEnd }]
       }))
-      void setNewBreakStart('')
-      void setNewBreakEnd('')
+      setNewBreakStart('')
+      setNewBreakEnd('')
     }
   }
 

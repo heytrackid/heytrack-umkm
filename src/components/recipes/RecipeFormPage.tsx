@@ -72,7 +72,7 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
     }
 
     const loadRecipe = async () => {
-        if (!recipeId) return
+        if (!recipeId) {return}
 
         try {
             setLoading(true)

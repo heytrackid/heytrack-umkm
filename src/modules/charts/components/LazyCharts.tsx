@@ -79,7 +79,7 @@ export const SmartChartLoader = ({
   return (
     <Suspense fallback={<ChartSkeleton />}>
       <ChartComponent
-        data={data as Record<string, unknown>[]}
+        data={data as Array<Record<string, unknown>>}
         height={height}
         dataKey="value"
         {...props}

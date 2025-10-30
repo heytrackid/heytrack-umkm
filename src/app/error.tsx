@@ -39,7 +39,7 @@ export default function Error({
                         Maaf, terjadi kesalahan yang tidak terduga. Tim kami telah diberitahu dan sedang menangani masalah ini.
                     </p>
 
-                    {process.env.NODE_ENV === 'development' && (
+                    {(
                         <div className="p-3 bg-muted rounded-md">
                             <p className="text-xs font-mono text-destructive break-all">
                                 {error.message}

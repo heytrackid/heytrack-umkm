@@ -14,7 +14,7 @@ export function useSupabaseQuery<T extends keyof Tables>(
   tableName: T,
   options: UseSupabaseQueryOptions<T> = {}
 ) {
-  const [data, setData] = useState<Tables[T]['Row'][]>(options.initial ?? [])
+  const [data, setData] = useState<Array<Tables[T]['Row']>>(options.initial ?? [])
   const [loading, setLoading] = useState(!options.initial)
   const [error, setError] = useState<string | null>(null)
 

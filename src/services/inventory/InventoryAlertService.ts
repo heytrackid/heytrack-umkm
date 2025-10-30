@@ -33,7 +33,7 @@ export class InventoryAlertService {
       }
 
       type InventoryAlertInsert = Database['public']['Tables']['inventory_alerts']['Insert']
-      type PendingInventoryAlert = {
+      interface PendingInventoryAlert {
         ingredient_id: string
         alert_type: InventoryAlertInsert['alert_type']
         severity: InventoryAlertInsert['severity']

@@ -38,7 +38,7 @@ type OrderItemRow = Database['public']['Tables']['order_items']['Row']
 type RecipeRow = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredientRow = Database['public']['Tables']['recipe_ingredients']['Row']
 type IngredientRow = Database['public']['Tables']['ingredients']['Row']
-// StockTransactionInsert already imported from domain types
+type StockTransactionInsert = Database['public']['Tables']['stock_transactions']['Insert']
 type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
 type CustomerUpdate = Database['public']['Tables']['customers']['Update']
@@ -230,6 +230,7 @@ export class OrderWorkflowHandlers {
 
   /**
    * Update inventory stock from completed order
+   * ✅ FIX: Only create stock transaction, let trigger handle stock update
    */
   private static async updateInventoryFromOrder(order: OrderWithRelations, supabase: SupabaseClient<Database>): Promise<void> {
     automationLogger.debug('Updating inventory from order items')
@@ -246,29 +247,11 @@ export class OrderWorkflowHandlers {
         if (!ingredient) {continue}
 
         const usedQuantity = Number(recipeIngredient.quantity ?? 0) * Number(orderItem.quantity ?? 0)
-        const currentStock = Number(ingredient.current_stock ?? 0)
-        const newStock = Math.max(0, currentStock - usedQuantity)
 
-        // Update ingredient stock
-        const ingredientUpdate: IngredientUpdate = {
-          current_stock: newStock,
-          updated_at: new Date().toISOString()
-        }
-
-        const { error: updateError } = await (supabase as any)
-          .from('ingredients')
-          .update(ingredientUpdate)
-          .eq('id', ingredient.id)
-
-        if (updateError) {
-          automationLogger.error({ updateError }, 'Failed to update inventory stock')
-          continue
-        }
-
-        // Create stock transaction record
+        // ✅ FIX: Only create stock transaction - trigger will auto-update current_stock
         const stockTransaction: StockTransactionInsert = {
           ingredient_id: ingredient.id,
-          quantity: -usedQuantity,
+          quantity: usedQuantity, // Positive value, trigger handles the deduction
           reference: `ORDER-${order.order_no}`,
           total_price: usedQuantity * Number(ingredient.price_per_unit ?? 0),
           type: 'USAGE',
@@ -277,7 +260,19 @@ export class OrderWorkflowHandlers {
           notes: `Used for order ${order.order_no} - ${ingredient.name}`
         }
 
-        await (supabase as any).from('stock_transactions').insert(stockTransaction)
+        const { error: transactionError } = await (supabase as any)
+          .from('stock_transactions')
+          .insert(stockTransaction)
+
+        if (transactionError) {
+          automationLogger.error({ transactionError }, 'Failed to create stock transaction')
+          continue
+        }
+
+        automationLogger.debug({ 
+          ingredientId: ingredient.id, 
+          usedQuantity 
+        }, 'Stock transaction created, trigger will update stock')
 
         // Check for low stock alerts
         const minStock = Number(ingredient.min_stock ?? 0)
@@ -308,6 +303,10 @@ export class OrderWorkflowHandlers {
     }
   }
 
+  /**
+   * Restore inventory from cancelled order
+   * ✅ FIX: Only create stock transaction, let trigger handle stock update
+   */
   private static async restoreInventoryFromCancelledOrder(order: OrderWithRelations, supabase: SupabaseClient<Database>): Promise<void> {
     automationLogger.debug('Restoring inventory from cancelled order')
     const transactionUserId = order.user_id ?? 'automation-system'
@@ -322,27 +321,11 @@ export class OrderWorkflowHandlers {
         if (!ingredient) {continue}
 
         const restoredQuantity = Number(recipeIngredient.quantity ?? 0) * Number(orderItem.quantity ?? 0)
-        const currentStock = Number(ingredient.current_stock ?? 0)
-        const newStock = currentStock + restoredQuantity
 
-        const ingredientUpdate: IngredientUpdate = {
-          current_stock: newStock,
-          updated_at: new Date().toISOString()
-        }
-
-        const { error: updateError } = await (supabase as any)
-          .from('ingredients')
-          .update(ingredientUpdate)
-          .eq('id', ingredient.id)
-
-        if (updateError) {
-          automationLogger.error({ updateError }, 'Failed to restore inventory stock from cancelled order')
-          continue
-        }
-
+        // ✅ FIX: Only create stock transaction - trigger will auto-update current_stock
         const stockTransaction: StockTransactionInsert = {
           ingredient_id: ingredient.id,
-          quantity: restoredQuantity,
+          quantity: restoredQuantity, // Positive ADJUSTMENT increases stock
           reference: `ORDER-CANCEL-${order.order_no}`,
           total_price: restoredQuantity * Number(ingredient.price_per_unit ?? 0),
           type: 'ADJUSTMENT',
@@ -351,7 +334,19 @@ export class OrderWorkflowHandlers {
           notes: `Restored from cancelled order ${order.order_no} - ${ingredient.name}`
         }
 
-        await (supabase as any).from('stock_transactions').insert(stockTransaction)
+        const { error: transactionError } = await (supabase as any)
+          .from('stock_transactions')
+          .insert(stockTransaction)
+
+        if (transactionError) {
+          automationLogger.error({ transactionError }, 'Failed to create restoration transaction')
+          continue
+        }
+
+        automationLogger.debug({ 
+          ingredientId: ingredient.id, 
+          restoredQuantity 
+        }, 'Restoration transaction created, trigger will update stock')
       }
     }
   }

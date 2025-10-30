@@ -25,7 +25,7 @@ interface PaginationProps {
     itemLabel?: string
 }
 
-export function Pagination({
+export const Pagination = ({
     page,
     pageSize,
     totalPages,
@@ -40,7 +40,7 @@ export function Pagination({
     showPageSizeSelector = true,
     showFirstLast = false,
     itemLabel = 'item',
-}: PaginationProps) {
+}: PaginationProps) => {
     if (totalPages <= 1 && !showPageSizeSelector) {
         return null
     }

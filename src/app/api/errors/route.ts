@@ -1,7 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/utils/supabase/server'
 import { ErrorLogSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 import { apiLogger } from '@/lib/logger'
+
 interface ErrorRecord {
   id: string
   timestamp: string
@@ -10,6 +12,7 @@ interface ErrorRecord {
   stack?: string
   level: string
   context?: Record<string, unknown>
+  user_id?: string
 }
 
 // Simple in-memory error store (in production, use a real database/service)
@@ -19,12 +22,20 @@ const MAX_ERRORS = 1000 // Keep only last 1000 errors
 
 export async function POST(request: NextRequest) {
   try {
+    // ✅ Add authentication
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Validate request body
     const validatedData = await validateRequestOrRespond(request, ErrorLogSchema)
     if (validatedData instanceof NextResponse) {return validatedData}
     
-    // Create error record
-    const errorRecord = {
+    // Create error record with user context
+    const errorRecord: ErrorRecord = {
       id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       timestamp: validatedData.timestamp || new Date().toISOString(),
       message: validatedData.message,
@@ -32,6 +43,7 @@ export async function POST(request: NextRequest) {
       stack: validatedData.stack,
       level: validatedData.level,
       context: validatedData.context,
+      user_id: user.id, // ✅ Associate with user
     }
     
     // Add to store
@@ -48,7 +60,8 @@ export async function POST(request: NextRequest) {
         id: errorRecord.id,
         message: errorRecord.message,
         url: errorRecord.url,
-        timestamp: errorRecord.timestamp
+        timestamp: errorRecord.timestamp,
+        userId: errorRecord.user_id
       } }, '🔴 Client Error Logged:')
     }
     
@@ -85,25 +98,40 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  // Only allow in development or with proper authentication
-  if (process.env.NODE_ENV !== 'development') {
-    return NextResponse.json(
-      { error: 'Not available in production' },
-      { status: 403 }
-    )
+  try {
+    // ✅ Add authentication
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Only allow in development or with proper authentication
+    if (process.env.NODE_ENV !== 'development') {
+      return NextResponse.json(
+        { error: 'Not available in production' },
+        { status: 403 }
+      )
+    }
+    
+    const url = new URL(request.url)
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100)
+    
+    // ✅ Filter errors by user_id
+    const userErrors = errorStore.filter(err => err.user_id === user.id)
+    const recentErrors = userErrors
+      .slice(-limit)
+      .reverse() // Most recent first
+    
+    return NextResponse.json({
+      errors: recentErrors,
+      total: userErrors.length
+    })
+  } catch (error: unknown) {
+    apiLogger.error({ error }, 'Failed to fetch errors')
+    return NextResponse.json({ error: 'Failed to fetch errors' }, { status: 500 })
   }
-  
-  const url = new URL(request.url)
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100)
-  
-  const recentErrors = errorStore
-    .slice(-limit)
-    .reverse() // Most recent first
-  
-  return NextResponse.json({
-    errors: recentErrors,
-    total: errorStore.length
-  })
 }
 
 function isCriticalError(error: ErrorRecord): boolean {

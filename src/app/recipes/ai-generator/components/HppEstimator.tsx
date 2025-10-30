@@ -23,7 +23,7 @@ interface HppEstimatorProps {
     targetPrice?: number
 }
 
-export function HppEstimator({ selectedIngredients, servings, targetPrice }: HppEstimatorProps) {
+export const HppEstimator = ({ selectedIngredients, servings, targetPrice }: HppEstimatorProps) => {
     const [estimatedHPP, setEstimatedHPP] = useState(0)
     const [materialCost, setMaterialCost] = useState(0)
     const [operationalCost, setOperationalCost] = useState(0)
@@ -63,9 +63,9 @@ export function HppEstimator({ selectedIngredients, servings, targetPrice }: Hpp
     const marginStatus = margin >= 50 ? 'excellent' : margin >= 30 ? 'good' : margin >= 20 ? 'fair' : 'low'
 
     const getMarginColor = () => {
-        if (margin >= 50) return 'text-green-600 bg-green-50 dark:bg-green-900/20'
-        if (margin >= 30) return 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'
-        if (margin >= 20) return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'
+        if (margin >= 50) {return 'text-green-600 bg-green-50 dark:bg-green-900/20'}
+        if (margin >= 30) {return 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'}
+        if (margin >= 20) {return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20'}
         return 'text-red-600 bg-red-50 dark:bg-red-900/20'
     }
 

@@ -57,7 +57,7 @@ export default function EditIngredientPage() {
                     .eq('id', id)
                     .single<Ingredient>()
 
-                if (error) throw error
+                if (error) {throw error}
 
                 if (data) {
                     setIngredient(data)

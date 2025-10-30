@@ -100,9 +100,7 @@ export default function CustomersLayout() {
   })
 
   // Get paginated data
-  const paginatedCustomers = useMemo(() => {
-    return filteredCustomers.slice(pagination.startIndex, pagination.endIndex)
-  }, [filteredCustomers, pagination.startIndex, pagination.endIndex])
+  const paginatedCustomers = useMemo(() => filteredCustomers.slice(pagination.startIndex, pagination.endIndex), [filteredCustomers, pagination.startIndex, pagination.endIndex])
 
   // Update page size
   const handlePageSizeChange = (newSize: number) => {

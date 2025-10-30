@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { PageBreadcrumb } from '@/components/ui/page-breadcrumb';
 import AppLayout from '@/components/layout/app-layout'
 import { useResponsive } from '@/hooks/responsive';
 import { PullToRefresh } from '@/components/ui/mobile-gestures'
-import { Clock, ShoppingCart, CheckCircle, TrendingUp } from 'lucide-react'
+import { Clock, ShoppingCart, CheckCircle, TrendingUp, Upload } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ImportDialog } from '@/components/import'
+import {
+  parseOrdersCSV,
+  generateOrdersTemplate
+} from '@/components/import/csv-helpers'
 
 // Shared components
 import {
@@ -34,6 +40,14 @@ export default function OrdersPage() {
   const { isMobile } = useResponsive()
   const [currentView, setCurrentView] = useState<ViewMode>('list')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
+
+  // Generate template URL
+  const templateUrl = useMemo(() => {
+    const template = generateOrdersTemplate()
+    const blob = new Blob([template], { type: 'text/csv' })
+    return URL.createObjectURL(blob)
+  }, [])
 
   // Use the orders hook for all data management
   const {
@@ -121,14 +135,24 @@ export default function OrdersPage() {
         title="Kelola Pesanan"
         description="Terima dan proses pesanan dari pelanggan"
         actions={
-          <ActionButtons
-            onRefresh={handleRefresh}
-            onAdd={handleAddOrder}
-            addLabel="Tambah Pesanan"
-            refreshLabel="Refresh"
-            size={isMobile ? "lg" : "md"}
-            variant="horizontal"
-          />
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setImportDialogOpen(true)}
+              size={isMobile ? "lg" : "sm"}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+            <ActionButtons
+              onRefresh={handleRefresh}
+              onAdd={handleAddOrder}
+              addLabel="Tambah"
+              refreshLabel="Refresh"
+              size={isMobile ? "lg" : "md"}
+              variant="horizontal"
+            />
+          </div>
         }
       />
 
@@ -232,6 +256,49 @@ export default function OrdersPage() {
         ) : (
           content
         )}
+
+        {/* Import Dialog */}
+        <ImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          title="Import Pesanan"
+          description="Upload file CSV untuk import data pesanan secara massal. Customer akan otomatis dibuat jika belum ada."
+          templateUrl={templateUrl}
+          templateFilename="template-pesanan.csv"
+          parseCSV={parseOrdersCSV}
+          onImport={async (data) => {
+            try {
+              const response = await fetch('/api/orders/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orders: data })
+              })
+
+              const result = await response.json()
+
+              if (!response.ok) {
+                return {
+                  success: false,
+                  error: result.error || 'Import gagal',
+                  details: result.details
+                }
+              }
+
+              // Refresh data
+              await refreshData()
+
+              return {
+                success: true,
+                count: result.ordersCount
+              }
+            } catch (error) {
+              return {
+                success: false,
+                error: 'Terjadi kesalahan saat import'
+              }
+            }
+          }}
+        />
       </div>
     </AppLayout>
   )

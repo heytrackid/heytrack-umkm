@@ -74,7 +74,7 @@ export default function AIRecipeGeneratorPage() {
             setProductType(draft.productType)
             setServings(draft.servings)
             setSelectedIngredients(draft.selectedIngredients)
-            if (draft.targetPrice) setTargetPrice(draft.targetPrice)
+            if (draft.targetPrice) {setTargetPrice(draft.targetPrice)}
           }}>
             Restore
           </Button>

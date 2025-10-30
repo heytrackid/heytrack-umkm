@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Active Batches List Component - Lazy Loaded
 // Displays the list of active and scheduled production batches
 'use client'
@@ -13,12 +12,15 @@ import { format } from 'date-fns'
 import type { ProductionBatch } from '@/services/production/BatchSchedulingService'
 import type { BatchExecutionState, PRODUCTION_STEPS } from './types'
 
+// Define the status type for production batches based on the enum
+type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+
 interface ActiveBatchesListProps {
   batches: ProductionBatch[]
   executionStates: Map<string, BatchExecutionState>
   selectedBatch: string | null
   onBatchSelect: (batchId: string) => void
-  onBatchUpdate?: (batchId: string, status: ProductionBatch['status'], notes?: string) => void
+  onBatchUpdate?: (batchId: string, status: ProductionStatus, notes?: string) => void
   onStartBatch: (batch: ProductionBatch) => void
   onPauseBatch: (batchId: string) => void
   onCompleteBatch: (batchId: string) => void
@@ -34,13 +36,12 @@ export default function ActiveBatchesList({
   onPauseBatch,
   onCompleteBatch
 }: ActiveBatchesListProps) {
-  const getStatusColor = (status: ProductionBatch['status']) => {
+  const getStatusColor = (status: ProductionStatus) => {
     switch (status) {
-      case 'scheduled': return 'bg-gray-500'
-      case 'in_progress': return 'bg-gray-100 dark:bg-gray-8000'
-      case 'completed': return 'bg-gray-100 dark:bg-gray-8000'
-      case 'blocked': return 'bg-gray-100 dark:bg-gray-8000'
-      case 'cancelled': return 'bg-gray-400'
+      case 'PLANNED': return 'bg-gray-500'
+      case 'IN_PROGRESS': return 'bg-blue-500'
+      case 'COMPLETED': return 'bg-green-500'
+      case 'CANCELLED': return 'bg-gray-400'
       default: return 'bg-gray-500'
     }
   }
@@ -51,7 +52,9 @@ export default function ActiveBatchesList({
   }
 
   // Filter batches to show relevant ones
-  const activeBatches = batches.filter(b => ['scheduled', 'in_progress'].includes(b.status))
+  const activeBatches = batches.filter(b => 
+    (b.status === 'PLANNED' || b.status === 'IN_PROGRESS')
+  )
 
   return (
     <Card>
@@ -82,9 +85,11 @@ export default function ActiveBatchesList({
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h4 className="font-semibold">{batch.recipe_name}</h4>
+                        <h4 className="font-semibold">
+                          {batch.recipe_id || 'Unknown Recipe'}
+                        </h4>
                         <p className="text-sm text-muted-foreground">
-                          Quantity: {batch.quantity} | Priority: {batch.priority}/10
+                          Quantity: {batch.quantity || 0} | Status: {batch.status}
                         </p>
                       </div>
                       <Badge className={`${getStatusColor(batch.status)} text-white`}>
@@ -92,7 +97,7 @@ export default function ActiveBatchesList({
                       </Badge>
                     </div>
 
-                    {state && batch.status === 'in_progress' && (
+                    {state && batch.status === 'IN_PROGRESS' && (
                       <>
                         <div className="space-y-2">
                           <div className="flex justify-between text-xs">
@@ -133,7 +138,7 @@ export default function ActiveBatchesList({
                       </>
                     )}
 
-                    {batch.status === 'scheduled' && (
+                    {batch.status === 'PLANNED' && (
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="default"
@@ -149,9 +154,9 @@ export default function ActiveBatchesList({
                       </div>
                     )}
 
-                    {batch.deadline && (
+                    {batch.created_at && (
                       <p className="text-xs text-muted-foreground mt-2">
-                        Deadline: {format(new Date(batch.deadline), 'MMM dd, HH:mm')}
+                        Created: {format(new Date(batch.created_at), 'MMM dd, HH:mm')}
                       </p>
                     )}
                   </div>

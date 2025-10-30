@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/server'
 import { ChatSessionService } from '@/lib/services/ChatSessionService'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { safeNumber } from '@/lib/type-guards'
 
 export const runtime = 'nodejs'
 
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Get query params
     const { searchParams } = new URL(request.url)
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const limit = safeNumber(searchParams.get('limit'), 20)
 
     // List sessions
     const sessions = await ChatSessionService.listSessions(user.id, limit)

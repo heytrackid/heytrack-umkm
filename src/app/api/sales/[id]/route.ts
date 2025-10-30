@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
-import { getErrorMessage } from '@/lib/type-guards';
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 
 export async function GET(
@@ -8,6 +8,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
+  }
+  
   try {
     const supabase = await createClient();
     
@@ -34,8 +40,8 @@ export async function GET(
     }
 
     return NextResponse.json(sale);
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -44,6 +50,12 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
+  }
+  
   try {
     const supabase = await createClient();
     const body = await request.json();
@@ -74,8 +86,8 @@ export async function PUT(
     }
 
     return NextResponse.json(sale);
-  } catch (err: unknown) {
-    return NextResponse.json({ err: getErrorMessage(err) }, { status: 500 });
+  } catch (error: unknown) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -84,6 +96,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid sale ID format' }, { status: 400 });
+  }
+  
   try {
     const supabase = await createClient();
 

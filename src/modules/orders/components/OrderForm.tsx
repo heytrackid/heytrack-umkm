@@ -4,7 +4,7 @@ type Customer = Database['public']['Tables']['customers']['Row']
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useCurrency } from '@/hooks/useCurrency'
 import { AlertCircle, Package, Plus, Trash2 } from 'lucide-react'
@@ -15,6 +15,7 @@ import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '
 import { calculateOrderTotals, generateOrderNo } from '../utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
 import type { RecipesTable } from '@/types/recipes'
+import { safeNumber } from '@/lib/type-guards'
 
 interface FormState {
   customer_name: string
@@ -33,10 +34,7 @@ interface FormState {
   special_instructions: string
 }
 
-const parseNumberInput = (value: string) => {
-  const parsed = Number.parseFloat(value)
-  return Number.isNaN(parsed) ? 0 : parsed
-}
+// Removed: parseNumberInput - now using safeNumber from type-guards
 
 export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, error }: OrderFormProps) => {
   const { formatCurrency } = useCurrency()
@@ -80,7 +78,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     queryKey: ['recipes', 'active'],
     queryFn: async () => {
       const response = await fetch('/api/recipes')
-      if (!response.ok) throw new Error('Failed to fetch recipes')
+      if (!response.ok) { throw new Error('Failed to fetch recipes') }
       const data: Array<RecipesTable['Row']> = await response.json()
       return data.filter(recipe => recipe.is_active)
     },
@@ -92,7 +90,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     queryKey: ['customers', 'all'],
     queryFn: async () => {
       const response = await fetch('/api/customers')
-      if (!response.ok) throw new Error('Failed to fetch customers')
+      if (!response.ok) { throw new Error('Failed to fetch customers') }
       return response.json() as Promise<Customer[]>
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -267,13 +265,13 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
 
   return (
     <form onSubmit={handleSubmit}>
-      <Tabs defaultValue="customer" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-          <TabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</TabsTrigger>
-          <TabsTrigger value="items" className="text-xs sm:text-sm">Item ({orderItems.length})</TabsTrigger>
-          <TabsTrigger value="delivery" className="text-xs sm:text-sm">Pengiriman</TabsTrigger>
-          <TabsTrigger value="payment" className="text-xs sm:text-sm">Pembayaran</TabsTrigger>
-        </TabsList>
+      <SwipeableTabs defaultValue="customer" className="w-full">
+        <SwipeableTabsList>
+          <SwipeableTabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="items" className="text-xs sm:text-sm">Item ({orderItems.length})</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="delivery" className="text-xs sm:text-sm">Pengiriman</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="payment" className="text-xs sm:text-sm">Pembayaran</SwipeableTabsTrigger>
+        </SwipeableTabsList>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded flex items-center gap-2">
@@ -282,7 +280,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
           </div>
         )}
 
-        <TabsContent value="customer" className="space-y-4">
+        <SwipeableTabsContent value="customer" className="space-y-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
             <h3 className="text-lg font-medium">Data Pelanggan</h3>
             <Button
@@ -404,9 +402,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               </select>
             </div>
           </div>
-        </TabsContent>
+        </SwipeableTabsContent>
 
-        <TabsContent value="items" className="space-y-4">
+        <SwipeableTabsContent value="items" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-medium">Item Pesanan ({orderItems.length})</h3>
@@ -583,9 +581,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               </div>
             </div>
           )}
-        </TabsContent>
+        </SwipeableTabsContent>
 
-        <TabsContent value="delivery" className="space-y-4">
+        <SwipeableTabsContent value="delivery" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label htmlFor="deliveryDate" className="text-sm font-medium">Tanggal Pengiriman</Label>
@@ -614,7 +612,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.delivery_fee}
-                onChange={(e) => handleInputChange('delivery_fee', parseNumberInput(e.target.value))}
+                onChange={(e) => handleInputChange('delivery_fee', safeNumber(e.target.value, 0))}
                 min="0"
                 step="1000"
                 className="mt-1"
@@ -641,9 +639,9 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               className="mt-1"
             />
           </div>
-        </TabsContent>
+        </SwipeableTabsContent>
 
-        <TabsContent value="payment" className="space-y-4">
+        <SwipeableTabsContent value="payment" className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label htmlFor="paymentMethod" className="text-sm font-medium">Metode Pembayaran</Label>
@@ -666,7 +664,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.discount}
-                onChange={(e) => handleInputChange('discount', parseNumberInput(e.target.value))}
+                onChange={(e) => handleInputChange('discount', safeNumber(e.target.value, 0))}
                 min="0"
                 className="mt-1"
               />
@@ -678,7 +676,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 type="number"
                 placeholder="0"
                 value={formData.tax_amount}
-                onChange={(e) => handleInputChange('tax_amount', parseNumberInput(e.target.value))}
+                onChange={(e) => handleInputChange('tax_amount', safeNumber(e.target.value, 0))}
                 min="0"
                 max="100"
                 className="mt-1"
@@ -692,7 +690,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 placeholder="0"
                 value={formData.paid_amount}
                 onChange={(e) => {
-                  handleInputChange('paid_amount', parseNumberInput(e.target.value))
+                  handleInputChange('paid_amount', safeNumber(e.target.value, 0))
                   if (fieldErrors['paid_amount']) {
                     setFieldErrors(prev => {
                       const newErrors = { ...prev }
@@ -750,7 +748,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
               )}
             </div>
           </div>
-        </TabsContent>
+        </SwipeableTabsContent>
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t">
           <Button type="button" variant="outline" onClick={onCancel} className="order-2 sm:order-1">
@@ -760,7 +758,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
             {loading ? "Menyimpan..." : order ? "Update Pesanan" : "Simpan Pesanan"}
           </Button>
         </div>
-      </Tabs>
+      </SwipeableTabs>
     </form>
   )
 })

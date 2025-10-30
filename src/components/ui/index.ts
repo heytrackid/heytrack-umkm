@@ -79,6 +79,13 @@ export {
 } from './tabs'
 
 export {
+  SwipeableTabs,
+  SwipeableTabsList,
+  SwipeableTabsTrigger,
+  SwipeableTabsContent
+} from './swipeable-tabs'
+
+export {
   Accordion,
   AccordionContent,
   AccordionItem,

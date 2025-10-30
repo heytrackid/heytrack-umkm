@@ -73,7 +73,7 @@ export const EnhancedOperationalCostsPage = () => {
     })
 
     // Use CRUD hook for operations
-    const { remove: deleteCost } = useSupabaseCRUD('operational_costs')
+    const { delete: deleteCost } = useSupabaseCRUD('operational_costs')
     const { toast } = useToast()
     const { isMobile } = useResponsive()
 
@@ -88,7 +88,7 @@ export const EnhancedOperationalCostsPage = () => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!costs) return []
+        if (!costs) {return []}
 
         return costs
             .filter((cost: OperationalCost) => {
@@ -118,9 +118,7 @@ export const EnhancedOperationalCostsPage = () => {
     })
 
     // Get paginated data
-    const paginatedData = useMemo(() => {
-        return filteredData.slice(pagination.startIndex, pagination.endIndex)
-    }, [filteredData, pagination.startIndex, pagination.endIndex])
+    const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
     const handlePageSizeChange = (newSize: number) => {
@@ -139,7 +137,7 @@ export const EnhancedOperationalCostsPage = () => {
     }
 
     const handleConfirmDelete = async () => {
-        if (!selectedCost) return
+        if (!selectedCost) {return}
 
         try {
             await deleteCost(selectedCost.id)
@@ -163,14 +161,14 @@ export const EnhancedOperationalCostsPage = () => {
         const confirmed = window.confirm(
             'Tambahkan template biaya operasional umum?\n\nIni akan menambahkan 8 kategori biaya yang umum digunakan.'
         )
-        if (!confirmed) return
+        if (!confirmed) {return}
 
         try {
             const response = await fetch('/api/operational-costs/quick-setup', {
                 method: 'POST',
             })
 
-            if (!response.ok) throw new Error('Failed to setup')
+            if (!response.ok) {throw new Error('Failed to setup')}
 
             toast({
                 title: 'Template ditambahkan',
@@ -197,9 +195,7 @@ export const EnhancedOperationalCostsPage = () => {
     const hasActiveFilters = searchTerm || categoryFilter !== 'all'
 
     // Helper functions
-    const getCategoryInfo = (categoryId: string) => {
-        return COST_CATEGORIES.find((c) => c.id === categoryId) || COST_CATEGORIES[7]
-    }
+    const getCategoryInfo = (categoryId: string) => COST_CATEGORIES.find((c) => c.id === categoryId) || COST_CATEGORIES[7]
 
     const calculateMonthlyCost = (cost: OperationalCost) => {
         const amount = cost.amount || 0
@@ -485,8 +481,8 @@ export const EnhancedOperationalCostsPage = () => {
                     setSelectedCost(null)
                 }}
                 onConfirm={handleConfirmDelete}
-                title="Hapus Biaya Operasional"
-                description={`Apakah Anda yakin ingin menghapus biaya "${selectedCost?.description}"? Tindakan ini tidak dapat dibatalkan.`}
+                entityName="Biaya Operasional"
+                itemName={selectedCost?.description || ''}
             />
         </div>
     )

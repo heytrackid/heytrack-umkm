@@ -45,6 +45,7 @@ interface CustomersTableProps {
   onDelete: (customer: CustomersTable['Row']) => void
   onAddNew: () => void
   formatCurrency: (amount: number) => string
+  isMobile: boolean
 }
 
 /**

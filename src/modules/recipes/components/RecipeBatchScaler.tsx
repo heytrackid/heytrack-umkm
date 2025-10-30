@@ -35,7 +35,7 @@ interface RecipeBatchScalerProps {
     }
 }
 
-export function RecipeBatchScaler({ recipe }: RecipeBatchScalerProps) {
+export const RecipeBatchScaler = ({ recipe }: RecipeBatchScalerProps) => {
     const { formatCurrency } = useCurrency()
     const [targetServings, setTargetServings] = useState(recipe.servings)
     const [targetBatches, setTargetBatches] = useState(1)
@@ -61,7 +61,7 @@ export function RecipeBatchScaler({ recipe }: RecipeBatchScalerProps) {
         const issues: string[] = []
 
         recipe.recipe_ingredients?.forEach(ri => {
-            if (!ri.ingredient) return
+            if (!ri.ingredient) {return}
             const needed = ri.quantity * scaleFactor
             const available = ri.ingredient.stock_quantity || 0
 
@@ -269,7 +269,7 @@ export function RecipeBatchScaler({ recipe }: RecipeBatchScalerProps) {
                         </TableHeader>
                         <TableBody>
                             {recipe.recipe_ingredients?.map((ri, idx) => {
-                                if (!ri.ingredient) return null
+                                if (!ri.ingredient) {return null}
 
                                 const originalQty = ri.quantity
                                 const scaledQty = ri.quantity * scaleFactor

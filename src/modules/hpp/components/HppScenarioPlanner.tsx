@@ -38,7 +38,7 @@ interface HppScenarioPlannerProps {
     recipe: RecipeWithCosts
 }
 
-export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
+export const HppScenarioPlanner = ({ recipe }: HppScenarioPlannerProps) => {
     const { formatCurrency } = useCurrency()
     const [scenarios, setScenarios] = useState<Scenario[]>([])
     const [selectedIngredient, setSelectedIngredient] = useState('')
@@ -55,7 +55,7 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
         changePercent: number
     ) => {
         const ingredient = recipe.ingredients.find((item) => item.id === ingredientId)
-        if (!ingredient) return null
+        if (!ingredient) {return null}
 
         const originalCost = ingredient.unit_price * ingredient.quantity
         const multiplier = 1 + (changePercent / 100)
@@ -81,13 +81,13 @@ export function HppScenarioPlanner({ recipe }: HppScenarioPlannerProps) {
     }
 
     const addScenario = () => {
-        if (!selectedIngredient) return
+        if (!selectedIngredient) {return}
 
         const ingredient = recipe.ingredients.find((item) => item.id === selectedIngredient)
-        if (!ingredient) return
+        if (!ingredient) {return}
 
         const impact = calculateScenario(selectedIngredient, changeType, changePercent)
-        if (!impact) return
+        if (!impact) {return}
 
         const newScenario: Scenario = {
             id: Date.now().toString(),

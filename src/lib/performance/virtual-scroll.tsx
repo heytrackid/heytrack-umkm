@@ -57,7 +57,7 @@ export function VirtualScroll<T>({
                             transform: `translateY(${virtualItem.start}px)`
                         }}
                     >
-                        {renderItem(items[virtualItem.index]!, virtualItem.index)}
+                        {renderItem(items[virtualItem.index], virtualItem.index)}
                     </div>
                 ))}
             </div>

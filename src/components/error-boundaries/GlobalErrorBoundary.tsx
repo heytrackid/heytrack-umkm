@@ -94,7 +94,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
                 We encountered an unexpected error. Our team has been notified and is working to fix this issue.
               </p>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {this.state.error && (
                 <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs font-mono">
                   <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
                     Error Details (Development Only)

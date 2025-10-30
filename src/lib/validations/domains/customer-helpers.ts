@@ -124,7 +124,7 @@ export class CustomerValidationHelpers {
     customers.forEach((customer, index) => {
       const result = this.validateInsert(customer)
       if (result.success) {
-        valid.push(result.data!)
+        valid.push(result.data)
       } else {
         invalid.push({
           index,

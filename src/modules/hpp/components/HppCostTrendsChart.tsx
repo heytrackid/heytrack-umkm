@@ -26,8 +26,7 @@ interface HppCostTrendsChartProps {
   currency?: Currency
 }
 
-const generateFallbackData = (): HppCostTrendPoint[] => {
-  return Array.from({ length: 14 }, (_, idx) => {
+const generateFallbackData = (): HppCostTrendPoint[] => Array.from({ length: 14 }, (_, idx) => {
     const baseDate = new Date()
     baseDate.setDate(baseDate.getDate() - (13 - idx))
     const averageHpp = 25000 + Math.random() * 8000
@@ -40,7 +39,6 @@ const generateFallbackData = (): HppCostTrendPoint[] => {
       recipeCount: 10 + Math.floor(Math.random() * 8)
     }
   })
-}
 
 export const HppCostTrendsChart = ({
   data,

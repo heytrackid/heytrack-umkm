@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { Fragment, useState, type ReactNode } from 'react'
@@ -48,7 +47,7 @@ import {
   RefreshCw
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useResponsive } from '@/hooks/useResponsive'
+import { useResponsive } from '@/hooks/responsive'
 
 interface BreadcrumbItem {
   label: string

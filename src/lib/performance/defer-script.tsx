@@ -27,17 +27,17 @@ export function useIdleCallback(callback: () => void, timeout = 2000) {
         if ('requestIdleCallback' in window) {
             const id = window.requestIdleCallback(callback, { timeout })
             return () => window.cancelIdleCallback(id)
-        } else {
+        } 
             const timer = setTimeout(callback, timeout)
             return () => clearTimeout(timer)
-        }
+        
     }, [callback, timeout])
 }
 
 /**
  * Component to defer rendering of non-critical content
  */
-export function DeferredContent({
+export const DeferredContent = ({
     children,
     delay = 1000,
     fallback = null
@@ -45,7 +45,7 @@ export function DeferredContent({
     children: React.ReactNode
     delay?: number
     fallback?: React.ReactNode
-}) {
+}) => {
     const isReady = useDeferredLoad(delay)
 
     if (!isReady) {
@@ -95,7 +95,7 @@ export function useIdlePreload(urls: string[]) {
     const isIdle = useUserIdle()
 
     useEffect(() => {
-        if (!isIdle) return
+        if (!isIdle) {return}
 
         urls.forEach(url => {
             const link = document.createElement('link')

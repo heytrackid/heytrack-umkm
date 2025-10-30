@@ -18,14 +18,13 @@ interface TooltipHelperProps {
  * Helper component untuk menampilkan tooltip dengan icon bantuan
  * Digunakan untuk menjelaskan istilah teknis ke bahasa yang mudah dimengerti UMKM
  */
-export function TooltipHelper({
+export const TooltipHelper = ({
     content,
     children,
     showIcon = true,
     side = "top",
     className = ""
-}: TooltipHelperProps) {
-    return (
+}: TooltipHelperProps) => (
         <TooltipProvider delayDuration={200}>
             <Tooltip>
                 <TooltipTrigger asChild>
@@ -42,12 +41,11 @@ export function TooltipHelper({
             </Tooltip>
         </TooltipProvider>
     )
-}
 
 /**
  * Wrapper untuk label dengan tooltip
  */
-export function LabelWithTooltip({
+export const LabelWithTooltip = ({
     label,
     tooltip,
     required = false,
@@ -57,15 +55,13 @@ export function LabelWithTooltip({
     tooltip: string
     required?: boolean
     className?: string
-}) {
-    return (
+}) => (
         <label className={`text-sm font-medium flex items-center gap-1 ${className}`}>
             {label}
             {required && <span className="text-destructive">*</span>}
             <TooltipHelper content={tooltip} />
         </label>
     )
-}
 
 /**
  * Kamus istilah teknis ke bahasa UMKM

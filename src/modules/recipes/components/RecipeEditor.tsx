@@ -68,12 +68,12 @@ const RECIPE_CATEGORIES = [
     { value: 'other', label: 'Lainnya' },
 ]
 
-export function RecipeEditor({
+export const RecipeEditor = ({
     initialData,
     availableIngredients,
     onSave,
     onCancel
-}: RecipeEditorProps) {
+}: RecipeEditorProps) => {
     const { formatCurrency } = useCurrency()
     const [saving, setSaving] = useState(false)
     const [recipe, setRecipe] = useState<RecipeData>(initialData || {
@@ -100,17 +100,15 @@ export function RecipeEditor({
     })
 
     // Calculate total cost
-    const totalCost = recipe.ingredients.reduce((sum, ing) => {
-        return sum + (ing.quantity * ing.price_per_unit)
-    }, 0)
+    const totalCost = recipe.ingredients.reduce((sum, ing) => sum + (ing.quantity * ing.price_per_unit), 0)
 
     const totalTime = recipe.prep_time_minutes + recipe.cook_time_minutes
 
     const addIngredient = () => {
-        if (!newIngredient.ingredient_id || newIngredient.quantity <= 0) return
+        if (!newIngredient.ingredient_id || newIngredient.quantity <= 0) {return}
 
         const ingredient = availableIngredients.find(i => i.id === newIngredient.ingredient_id)
-        if (!ingredient) return
+        if (!ingredient) {return}
 
         setRecipe({
             ...recipe,
@@ -141,7 +139,7 @@ export function RecipeEditor({
     }
 
     const addStep = () => {
-        if (!newStep.instruction.trim()) return
+        if (!newStep.instruction.trim()) {return}
 
         setRecipe({
             ...recipe,
@@ -174,7 +172,7 @@ export function RecipeEditor({
         const newSteps = [...recipe.steps]
         const targetIndex = direction === 'up' ? index - 1 : index + 1
 
-        if (targetIndex < 0 || targetIndex >= newSteps.length) return
+        if (targetIndex < 0 || targetIndex >= newSteps.length) {return}
 
         [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]]
 

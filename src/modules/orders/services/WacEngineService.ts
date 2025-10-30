@@ -5,7 +5,7 @@ import type { Database } from '@/types/supabase-generated'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Use type instead of interface for consistency
-type WacCalculation = {
+interface WacCalculation {
   ingredientId: string
   currentWac: number
   totalQuantity: number
@@ -13,7 +13,7 @@ type WacCalculation = {
   lastUpdated: string
 }
 
-type WacUpdateResult = {
+interface WacUpdateResult {
   ingredientId: string
   oldWac: number
   newWac: number

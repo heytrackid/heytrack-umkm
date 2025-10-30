@@ -2,14 +2,12 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { Database } from '@/types/supabase-generated'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
 
 // POST /api/hpp/calculate - Calculate HPP for a recipe
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient() as SupabaseClient<Database>
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -32,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get recipe with ingredients
-    type RecipeWithIngredients = {
+    interface RecipeWithIngredients {
       id: string
       name: string
       servings: number | null
@@ -122,7 +120,7 @@ export async function POST(request: NextRequest) {
 // POST /api/hpp/calculate/batch - Calculate HPP for all recipes
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createClient() as SupabaseClient<Database>
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 

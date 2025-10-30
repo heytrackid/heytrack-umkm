@@ -8,6 +8,7 @@ import {
 } from '@/lib/validations'
 import type { NextRequest } from 'next/server'
 import type { Database } from '@/types/supabase-generated'
+import { isValidUUID } from '@/lib/type-guards'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
 // type IngredientUpdate = Database['public']['Tables']['ingredients']['Update']
@@ -19,6 +20,11 @@ export async function GET(
 ) {
   const { id } = params
   try {
+    // Validate UUID format first
+    if (!isValidUUID(id)) {
+      return createErrorResponse('Invalid bahan baku ID format', 400)
+    }
+    
     // Validate ID parameter
     const validation = IdParamSchema.safeParse({ id })
     if (!validation.success) {
@@ -63,6 +69,12 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const { id } = params
+  
+  // Validate UUID format first
+  if (!isValidUUID(id)) {
+    return createErrorResponse('Invalid bahan baku ID format', 400)
+  }
+  
   const validationResult = await withValidation(IngredientUpdateSchema)(request)
 
   if (validationResult instanceof Response) {
@@ -115,6 +127,11 @@ export async function DELETE(
 ) {
   const { id } = params
   try {
+    // Validate UUID format first
+    if (!isValidUUID(id)) {
+      return createErrorResponse('Invalid bahan baku ID format', 400)
+    }
+    
     // Validate ID parameter
     const validation = IdParamSchema.safeParse({ id })
     if (!validation.success) {

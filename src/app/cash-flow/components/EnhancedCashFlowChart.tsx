@@ -23,8 +23,7 @@ import {
     Legend,
     ResponsiveContainer,
     Area,
-    AreaChart,
-    type TooltipProps
+    AreaChart
 } from 'recharts'
 import { useState } from 'react'
 import { type PeriodType, type ChartDataPoint, periodOptions } from '@/app/cash-flow/constants'
@@ -56,12 +55,12 @@ export default function EnhancedCashFlowChart({
 
     // Calculate trend
     const calculateTrend = () => {
-        if (chartData.length < 2) return { direction: 'stable', percentage: 0 }
+        if (chartData.length < 2) {return { direction: 'stable', percentage: 0 }}
 
         const recent = chartData[chartData.length - 1]
         const previous = chartData[chartData.length - 2]
 
-        if (!recent || !previous) return { direction: 'stable', percentage: 0 }
+        if (!recent || !previous) {return { direction: 'stable', percentage: 0 }}
 
         const change = recent.net - previous.net
         const percentage = previous.net !== 0 ? (change / Math.abs(previous.net)) * 100 : 0
@@ -111,15 +110,15 @@ export default function EnhancedCashFlowChart({
     }
 
     const formatYAxis = (value: number) => {
-        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}jt`
-        if (value >= 1000) return `${(value / 1000).toFixed(0)}rb`
+        if (value >= 1000000) {return `${(value / 1000000).toFixed(1)}jt`}
+        if (value >= 1000) {return `${(value / 1000).toFixed(0)}rb`}
         return value.toString()
     }
 
-    const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
-        if (active && payload && payload.length) {
+    const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
+        if (active && payload?.length) {
             const data = payload[0]?.payload as ChartDataPoint | undefined
-            if (!data) return null
+            if (!data) {return null}
 
             return (
                 <div className="bg-background border rounded-lg p-3 shadow-lg">
@@ -148,8 +147,8 @@ export default function EnhancedCashFlowChart({
                                 <div className="h-3 w-3 rounded-full bg-blue-500" />
                                 <span>Net</span>
                             </div>
-                            <span className={`font-semibold ${(payload[2].value as number) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                                Rp {payload[2].value ? payload[2].value.toLocaleString('id-ID') : 0}
+                            <span className={`font-semibold ${(payload[2]?.value as number) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                                Rp {payload[2]?.value ? payload[2].value.toLocaleString('id-ID') : 0}
                             </span>
                         </div>
                     </div>

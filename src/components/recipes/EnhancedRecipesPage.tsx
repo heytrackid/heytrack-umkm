@@ -81,7 +81,7 @@ export const EnhancedRecipesPage = () => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!recipes) return []
+        if (!recipes) {return []}
 
         return recipes
             .filter((recipe) => {
@@ -112,9 +112,7 @@ export const EnhancedRecipesPage = () => {
     })
 
     // Get paginated data
-    const paginatedData = useMemo(() => {
-        return filteredData.slice(pagination.startIndex, pagination.endIndex)
-    }, [filteredData, pagination.startIndex, pagination.endIndex])
+    const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
     const handlePageSizeChange = (newSize: number) => {
@@ -141,7 +139,7 @@ export const EnhancedRecipesPage = () => {
     }
 
     const handleConfirmDelete = async () => {
-        if (!selectedRecipe) return
+        if (!selectedRecipe) {return}
 
         try {
             await deleteRecipe(selectedRecipe.id)
@@ -505,8 +503,8 @@ export const EnhancedRecipesPage = () => {
                     setSelectedRecipe(null)
                 }}
                 onConfirm={handleConfirmDelete}
-                title="Hapus Resep"
-                description={`Apakah Anda yakin ingin menghapus resep "${selectedRecipe?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+                entityName="Resep"
+                itemName={selectedRecipe?.name || ''}
             />
         </div>
     )

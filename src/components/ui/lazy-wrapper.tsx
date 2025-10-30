@@ -129,7 +129,7 @@ export function usePerformanceMonitor(componentName: string) {
 export function logBundleSize() {
   if (typeof window !== 'undefined' && 'performance' in window) {
     // Get navigation timing
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
 
     if (navigation) {
       const loadTime = navigation.loadEventEnd - navigation.fetchStart

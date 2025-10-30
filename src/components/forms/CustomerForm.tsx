@@ -11,17 +11,30 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import {
-  CustomerInsertSchema,
-  type CustomerInsertInput as CustomerFormData
-} from '@/lib/validations/domains/customer'
+import { z } from 'zod'
 import { FormField } from './shared/FormField'
 import type { Database } from '@/types/supabase-generated'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type Customer = Database['public']['Tables']['customers']['Row']
 
+// Form schema without user_id (will be added on submit)
+const CustomerFormSchema = z.object({
+  name: z.string().min(1, 'Nama wajib diisi'),
+  email: z.string().email('Email tidak valid').nullable().optional(),
+  phone: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  customer_type: z.enum(['retail', 'wholesale', 'vip', 'regular']).nullable().optional(),
+  discount_percentage: z.number().min(0).max(100).nullable().optional(),
+  notes: z.string().nullable().optional(),
+  is_active: z.boolean().nullable().optional(),
+  user_id: z.string().uuid(),
+})
+
+type CustomerFormData = z.infer<typeof CustomerFormSchema>
+
 interface CustomerFormComponentProps {
-  initialData?: Partial<CustomerFormData> & Partial<Customer>
+  initialData?: Partial<Customer>
   onSubmit: (data: CustomerFormData) => Promise<void>
   isLoading?: boolean
 }
@@ -30,17 +43,17 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
   const { toast } = useToast()
 
   const form = useForm<CustomerFormData>({
-    resolver: zodResolver(CustomerInsertSchema),
+    resolver: zodResolver(CustomerFormSchema),
     mode: 'onChange',
     defaultValues: {
       name: initialData?.name || '',
-      email: initialData?.email || '',
-      phone: initialData?.phone || '',
-      address: initialData?.address || '',
-      customer_type: initialData?.customer_type || 'REGULAR',
-      loyalty_points: initialData?.loyalty_points || 0,
-      notes: initialData?.notes || '',
+      email: initialData?.email || null,
+      phone: initialData?.phone || null,
+      address: initialData?.address || null,
+      customer_type: (initialData?.customer_type as 'retail' | 'wholesale' | 'vip' | 'regular') || 'regular',
+      notes: initialData?.notes || null,
       is_active: initialData?.is_active !== undefined ? initialData.is_active : true,
+      user_id: initialData?.user_id || '',
     }
   })
 
@@ -54,10 +67,11 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
       if (!initialData) {
         form.reset()
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
       toast({
         title: 'Error',
-        description: 'Gagal menyimpan data customer',
+        description: message || 'Gagal menyimpan data customer',
         variant: 'destructive'
       })
     }
@@ -99,28 +113,18 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
             >
               <Select
                 value={form.watch('customer_type') as string}
-                onValueChange={(value) => form.setValue('customer_type', value)}
+                onValueChange={(value) => form.setValue('customer_type', value as 'retail' | 'wholesale' | 'vip' | 'regular')}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="REGULAR">Regular</SelectItem>
-                  <SelectItem value="VIP">VIP</SelectItem>
-                  <SelectItem value="WHOLESALE">Wholesale</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="vip">VIP</SelectItem>
+                  <SelectItem value="wholesale">Wholesale</SelectItem>
+                  <SelectItem value="retail">Retail</SelectItem>
                 </SelectContent>
               </Select>
-            </FormField>
-
-            <FormField
-              label="Poin Loyalitas"
-              error={form.formState.errors['loyalty_points']?.message as string}
-            >
-              <Input
-                type="number"
-                min="0"
-                {...form.register('loyalty_points', { valueAsNumber: true })}
-              />
             </FormField>
           </div>
 
@@ -140,8 +144,8 @@ export const CustomerForm = ({ initialData, onSubmit, isLoading }: CustomerFormC
 
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={form.watch('is_active')}
-              onCheckedChange={(checked) => form.setValue('is_active', !!checked)}
+              checked={form.watch('is_active') ?? true}
+              onCheckedChange={(checked) => form.setValue('is_active', checked === true)}
             />
             <Label>Aktif</Label>
           </div>

@@ -31,9 +31,9 @@ const OrderSummaryCard = memo(({
     showActions: _showActions = false
 }: OrderSummaryCardProps) => {
     const { formatCurrency } = useCurrency()
-    const statusInfo = getStatusInfo(order.status)
-    const paymentInfo = getPaymentInfo(order.payment_status)
-    const priorityInfo = getPriorityInfo(order.priority)
+    const statusInfo = getStatusInfo((order.status || 'PENDING') as any)
+    const paymentInfo = getPaymentInfo((order.payment_status || 'unpaid') as any)
+    const priorityInfo = getPriorityInfo((order.priority || 'normal') as any)
 
     return (
         <Card
@@ -83,11 +83,11 @@ const OrderSummaryCard = memo(({
                 <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span>
-                        {new Date(order.delivery_date).toLocaleDateString('id-ID', {
+                        {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('id-ID', {
                             weekday: 'short',
                             day: 'numeric',
                             month: 'short'
-                        })}
+                        }) : 'No date set'}
                     </span>
                     {order.delivery_time && (
                         <>
@@ -124,9 +124,9 @@ const OrderSummaryCard = memo(({
             </CardContent>
         </Card>
     )
-}, (prevProps, nextProps) => {
+}, (prevProps, nextProps) => 
     // Custom comparison - only re-render if order data actually changed
-    return (
+     (
         prevProps.order.id === nextProps.order.id &&
         prevProps.order.status === nextProps.order.status &&
         prevProps.order.payment_status === nextProps.order.payment_status &&
@@ -134,7 +134,7 @@ const OrderSummaryCard = memo(({
         prevProps.order.updated_at === nextProps.order.updated_at &&
         prevProps.showActions === nextProps.showActions
     )
-})
+)
 
 OrderSummaryCard.displayName = 'OrderSummaryCard'
 

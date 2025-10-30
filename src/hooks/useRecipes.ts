@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 import type { Database } from '@/types/supabase-generated'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
@@ -26,9 +27,9 @@ export function useRecipes(options?: UseRecipesOptions) {
     queryKey: ['recipes', options],
     queryFn: async () => {
       const params = new URLSearchParams()
-      if (options?.limit) params.set('limit', options.limit.toString())
-      if (options?.offset) params.set('offset', options.offset.toString())
-      if (options?.search) params.set('search', options.search)
+      if (options?.limit) {params.set('limit', options.limit.toString())}
+      if (options?.offset) {params.set('offset', options.offset.toString())}
+      if (options?.search) {params.set('search', options.search)}
       
       const response = await fetch(`/api/recipes?${params}`)
       if (!response.ok) {
@@ -49,7 +50,7 @@ export function useRecipe(id: string | null) {
   return useQuery({
     queryKey: ['recipe', id],
     queryFn: async () => {
-      if (!id) return null
+      if (!id) {return null}
       
       const response = await fetch(`/api/recipes/${id}`)
       if (!response.ok) {
@@ -94,12 +95,13 @@ export function useCreateRecipe() {
         description: 'Resep berhasil dibuat',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to create recipe')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to create recipe')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal membuat resep',
+        description: message || 'Gagal membuat resep',
         variant: 'destructive',
       })
     },
@@ -138,12 +140,13 @@ export function useUpdateRecipe() {
         description: 'Resep berhasil diperbarui',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to update recipe')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to update recipe')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal memperbarui resep',
+        description: message || 'Gagal memperbarui resep',
         variant: 'destructive',
       })
     },
@@ -179,12 +182,13 @@ export function useDeleteRecipe() {
         description: 'Resep berhasil dihapus',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to delete recipe')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to delete recipe')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal menghapus resep',
+        description: message || 'Gagal menghapus resep',
         variant: 'destructive',
       })
     },

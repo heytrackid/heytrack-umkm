@@ -34,7 +34,7 @@ export class ProductionTimeService {
 
       if (error) {throw error}
       
-      const recipes = data as Pick<Recipe, 'id' | 'prep_time' | 'cook_time'>[]
+      const recipes = data as Array<Pick<Recipe, 'id' | 'prep_time' | 'cook_time'>>
 
       let total_prep_time = 0
       let total_cook_time = 0

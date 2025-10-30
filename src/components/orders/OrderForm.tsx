@@ -56,9 +56,9 @@ export default function OrderForm({
         customer_phone: order.customer_phone || '',
         // customer_email: order.customer_email || '', // Field doesn't exist in DB
         customer_address: order.customer_address || '',
-        delivery_date: order.delivery_date?.split('T')[0] || '', // Extract date part
+        delivery_date: order.delivery_date ? order.delivery_date.split('T')[0] : '',
         delivery_time: order.delivery_time || '10:00',
-        priority: order.priority,
+        priority: (order.priority || 'normal') as Priority,
         notes: order.notes || '',
         order_items: (order as OrderWithRelations).items?.map(item => ({
           recipe_id: item.recipe_id,
@@ -68,7 +68,8 @@ export default function OrderForm({
           total_price: item.total_price,
           special_requests: item.special_requests || '',
           order_id: item.order_id,
-          user_id: item.user_id
+          user_id: item.user_id,
+          updated_at: item.updated_at || null
         })) || []
       })
     }

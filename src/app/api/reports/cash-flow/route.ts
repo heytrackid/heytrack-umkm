@@ -1,11 +1,11 @@
-import 'server-only'
-import { createServiceRoleClient } from '@/utils/supabase/service-role'
+import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { safeParseAmount, safeString } from '@/lib/api-helpers'
+import { isArrayOf, isRecord, safeNumber, getErrorMessage } from '@/lib/type-guards'
 
 // Partial type for cash flow queries (only fields we fetch)
-type FinancialRecordPartial = {
+interface FinancialRecordPartial {
   id: string
   date: string | null
   description: string
@@ -57,6 +57,14 @@ interface CategoryBreakdownProcessing {
  */
 export async function GET(request: NextRequest) {
   try {
+    // ✅ CRITICAL FIX: Add authentication
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
 
     // Parse query parameters
@@ -69,12 +77,11 @@ export async function GET(request: NextRequest) {
     const endDate = endDateParam || new Date().toISOString().split('T')[0] // Today
     const period = periodParam || 'daily'
 
-    const supabase = createServiceRoleClient()
-
-    // Get all transactions (income and expenses) within date range
+    // ✅ CRITICAL FIX: Filter by user_id for RLS
     const { data: transactions, error: transError } = await supabase
       .from('financial_records')
       .select('id, date, description, category, amount, reference')
+      .eq('user_id', user.id) // ✅ RLS enforcement
       .gte('date', startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0])
       .lte('date', endDateParam ? endDateParam : new Date().toISOString().split('T')[0])
       .order('date', { ascending: true })
@@ -110,9 +117,10 @@ export async function GET(request: NextRequest) {
     let comparison = null
     if (compare) {
       comparison = await calculateComparison(
-        supabase, 
-        (startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0]) as string, 
-        (endDateParam ? endDateParam : new Date().toISOString().split('T')[0]) as string
+        supabase,
+        user.id, // ✅ Pass user_id
+        (startDateParam ? startDateParam : new Date(new Date().setDate(1)).toISOString().split('T')[0]), 
+        (endDateParam ? endDateParam : new Date().toISOString().split('T')[0])
       )
     }
 
@@ -204,7 +212,7 @@ function groupByPeriod(transactions: FinancialRecordPartial[], period: string) {
       }
     }
 
-    const currentGroup = grouped[key]!
+    const currentGroup = grouped[key]
     const amount = safeParseAmount(transaction.amount)
     if (transaction.category === 'Revenue') {
       currentGroup.income += amount
@@ -257,10 +265,20 @@ function calculateCategoryBreakdown(transactions: FinancialRecordPartial[]) {
   const totalAmount = Object.values(breakdown).reduce((sum: number, cat: CategoryBreakdownProcessing) => sum + cat.total, 0)
   Object.values(breakdown).forEach((cat: CategoryBreakdownProcessing) => {
     cat.percentage = totalAmount > 0 ? (cat.total / totalAmount) * 100 : 0
+    // Convert subcategories record to array
     ;(cat as unknown as CategoryBreakdown).subcategories = Object.values(cat.subcategories)
   })
 
-  return Object.values(breakdown).map(cat => cat as unknown as CategoryBreakdown).sort((a: CategoryBreakdown, b: CategoryBreakdown) => b.total - a.total)
+  return Object.values(breakdown).map((cat: CategoryBreakdownProcessing) => {
+    const result: CategoryBreakdown = {
+      category: cat.category,
+      total: cat.total,
+      count: cat.count,
+      percentage: cat.percentage,
+      subcategories: Object.values(cat.subcategories)
+    }
+    return result
+  }).sort((a: CategoryBreakdown, b: CategoryBreakdown) => b.total - a.total)
 }
 
 // Helper: Group by category for summary
@@ -313,7 +331,7 @@ function calculateTrend(cashFlowByPeriod: PeriodCashFlow[]) {
 }
 
 // Helper: Calculate comparison with previous period
-async function calculateComparison(supabase: ReturnType<typeof createServiceRoleClient>, startDate: string, endDate: string) {
+async function calculateComparison(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, startDate: string, endDate: string) {
   const start = new Date(startDate)
   const end = new Date(endDate)
   const duration = end.getTime() - start.getTime()
@@ -321,9 +339,11 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
   const prevStart = new Date(start.getTime() - duration)
   const prevEnd = new Date(start.getTime() - 1)
 
+  // ✅ CRITICAL FIX: Filter by user_id
   const { data: prevTransactions } = await supabase
     .from('financial_records')
     .select('category, amount')
+    .eq('user_id', userId) // ✅ RLS enforcement
     .gte('date', prevStart.toISOString().split('T')[0])
     .lte('date', prevEnd.toISOString().split('T')[0])
 
@@ -332,7 +352,7 @@ async function calculateComparison(supabase: ReturnType<typeof createServiceRole
   }
 
   // Type for the limited query result
-  type LimitedRecord = { category: string; amount: number }
+  interface LimitedRecord { category: string; amount: number }
   
   const prevIncome = prevTransactions.filter((t: LimitedRecord) => t.category === 'Revenue')
   const prevExpenses = prevTransactions.filter((t: LimitedRecord) => t.category !== 'Revenue')

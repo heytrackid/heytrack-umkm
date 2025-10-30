@@ -116,7 +116,7 @@ export function calculateRecipeCOGS(recipe: RecipeWithIngredients): number {
  * Safe number conversion with fallback
  */
 export function toNumber(value: unknown, fallback = 0): number {
-  if (typeof value === 'number') return value
+  if (typeof value === 'number') {return value}
   if (typeof value === 'string') {
     const parsed = parseFloat(value)
     return isNaN(parsed) ? fallback : parsed
@@ -128,8 +128,8 @@ export function toNumber(value: unknown, fallback = 0): number {
  * Safe date conversion
  */
 export function toDate(value: unknown): Date {
-  if (value instanceof Date) return value
-  if (typeof value === 'string') return new Date(value)
+  if (value instanceof Date) {return value}
+  if (typeof value === 'string') {return new Date(value)}
   return new Date()
 }
 

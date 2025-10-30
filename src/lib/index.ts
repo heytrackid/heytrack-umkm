@@ -201,20 +201,10 @@ export {
 } from './currency'
 
 // ============================================================================
-// SCHEDULING & CRON JOBS
+// SCHEDULING & CRON JOBS - REMOVED
 // ============================================================================
-
-export {
-  CronScheduler,
-  InventoryCronJobs,
-  FinancialCronJobs,
-  OrderCronJobs,
-  HPPCronJobs,
-  GeneralCronJobs,
-  runScheduledJobs,
-  setupCronJobs,
-  getAutomationStatus,
-} from './cron/'
+// Cron jobs have been removed from the codebase
+// Use external schedulers (Vercel Cron, GitHub Actions, etc.) instead
 
 // ============================================================================
 // BUSINESS SERVICES

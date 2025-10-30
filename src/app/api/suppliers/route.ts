@@ -5,7 +5,7 @@ import { PaginationQuerySchema } from '@/lib/validations/domains/common'
 import { getErrorMessage } from '@/lib/type-guards'
 import type { Database } from '@/types/supabase-generated'
 
-type Supplier = Database['public']['Tables']['suppliers']['Row']
+
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

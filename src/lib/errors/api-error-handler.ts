@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
-import { PostgrestError } from '@supabase/supabase-js'
+import type { PostgrestError } from '@supabase/supabase-js'
 
 /**
  * Custom API Error class
@@ -13,7 +13,7 @@ import { PostgrestError } from '@supabase/supabase-js'
 export class APIError extends Error {
   constructor(
     message: string,
-    public statusCode: number = 500,
+    public statusCode = 500,
     public code?: string,
     public details?: unknown
   ) {
@@ -172,7 +172,7 @@ export function validateRequired(
 /**
  * Validate UUID format
  */
-export function validateUUID(id: string, fieldName: string = 'id'): void {
+export function validateUUID(id: string, fieldName = 'id'): void {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   
   if (!uuidRegex.test(id)) {

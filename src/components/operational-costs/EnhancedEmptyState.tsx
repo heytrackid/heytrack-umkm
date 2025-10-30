@@ -9,8 +9,7 @@ interface EnhancedEmptyStateProps {
     onQuickSetup: () => void
 }
 
-export const EnhancedEmptyState = ({ onAdd, onQuickSetup }: EnhancedEmptyStateProps) => {
-    return (
+export const EnhancedEmptyState = ({ onAdd, onQuickSetup }: EnhancedEmptyStateProps) => (
         <div className="space-y-6">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -71,4 +70,3 @@ export const EnhancedEmptyState = ({ onAdd, onQuickSetup }: EnhancedEmptyStatePr
             </Card>
         </div>
     )
-}

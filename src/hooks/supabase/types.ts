@@ -7,7 +7,7 @@ export interface UseSupabaseQueryOptions<T extends keyof Tables> {
   filter?: Partial<Record<keyof Tables[T]['Row'] & string, string | number | boolean | null>>
   orderBy?: { column: keyof Tables[T]['Row'] & string; ascending?: boolean }
   limit?: number
-  initial?: Tables[T]['Row'][]
+  initial?: Array<Tables[T]['Row']>
   refetchOnMount?: boolean
   realtime?: boolean
 }

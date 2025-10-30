@@ -163,7 +163,7 @@ export const ContextAwareChatbot = () => {
                     }}
                   >
                     <MessageCircle className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-                    <span className="truncate text-xs">{session.title}</span>
+                    <span className="truncate-desktop-only text-xs">{session.title}</span>
                   </Button>
                 ))
               )}

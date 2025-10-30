@@ -92,8 +92,8 @@ export function sortBy<T>(
       const aVal = keyFn(a)
       const bVal = keyFn(b)
       
-      if (aVal < bVal) return -1
-      if (aVal > bVal) return 1
+      if (aVal < bVal) {return -1}
+      if (aVal > bVal) {return 1}
     }
     return 0
   })
@@ -141,7 +141,7 @@ export function averageBy<T>(
   array: T[],
   keyFn: (item: T) => number
 ): number {
-  if (array.length === 0) return 0
+  if (array.length === 0) {return 0}
   return sumBy(array, keyFn) / array.length
 }
 
@@ -152,7 +152,7 @@ export function minBy<T>(
   array: T[],
   keyFn: (item: T) => number
 ): T | undefined {
-  if (array.length === 0) return undefined
+  if (array.length === 0) {return undefined}
   
   let min = array[0]
   let minVal = keyFn(min)
@@ -172,7 +172,7 @@ export function maxBy<T>(
   array: T[],
   keyFn: (item: T) => number
 ): T | undefined {
-  if (array.length === 0) return undefined
+  if (array.length === 0) {return undefined}
   
   let max = array[0]
   let maxVal = keyFn(max)

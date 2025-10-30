@@ -5,8 +5,11 @@
   "type": "module",
   "description": "HeyTrack - Comprehensive UMKM Culinary Business Management System with AI Assistant",
   "scripts": {
-    "dev": "NEXT_WEBPACK=1 next dev",
+    "dev": "next dev",
+    "dev:turbo": "next dev --turbo",
     "dev:webpack": "NEXT_WEBPACK=1 next dev",
+    "dev:clean": "rm -rf .next .turbo && next dev",
+    "dev:verbose": "NODE_OPTIONS='--trace-warnings' next dev",
     "build": "next build",
     "build:analyze": "ANALYZE=true next build",
     "build:monitor": "node scripts/bundle-monitor.ts",
@@ -14,6 +17,9 @@
     "lint": "eslint . --ext .ts,.tsx --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next .turbo node_modules/.cache",
+    "clean:all": "rm -rf .next .turbo node_modules pnpm-lock.yaml",
+    "fix:hmr": "./scripts/fix-hmr.sh",
     "supabase:types": "supabase gen types typescript --local > src/types/supabase-generated.ts",
     "supabase:types:remote": "supabase gen types typescript --project-id vrrjoswzmlhkmmcfhicw > src/types/supabase-generated.ts"
   },

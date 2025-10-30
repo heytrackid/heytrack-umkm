@@ -1,12 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { handleAPIError, APIError } from '@/lib/errors/api-error-handler'
 import { apiLogger } from '@/lib/logger'
+import { isValidUUID, isProductionBatch, extractFirst, isRecord, safeString } from '@/lib/type-guards'
 
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = params
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid production batch ID format' }, { status: 400 })
+  }
+  
   try {
     const supabase = await createClient()
     
@@ -17,7 +26,6 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { id } = params
 
     // ✅ Update with RLS (user_id filter)
     const { data: batch, error } = await supabase
@@ -39,12 +47,23 @@ export async function PATCH(
       throw error
     }
 
+    // ✅ V2: Validate production batch with type guard
+    if (!isProductionBatch(batch)) {
+      apiLogger.error({ batch }, 'Invalid production batch structure')
+      throw new APIError('Invalid data structure', 500, 'INVALID_DATA')
+    }
+
+    // ✅ V2: Safe extraction of joined recipe data
+    const recipe = extractFirst(batch.recipe)
+    const recipeName = recipe && isRecord(recipe) ? safeString(recipe.name, 'Unknown') : 'Unknown'
+
     // ✅ Map database columns to expected format
     const mappedBatch = {
       ...batch,
       batch_number: batch.id.slice(0, 8).toUpperCase(),
       planned_date: batch.created_at,
       actual_cost: batch.total_cost,
+      recipe_name: recipeName,
       unit: 'pcs' // Default unit since recipes table doesn't have unit field
     }
 
@@ -58,6 +77,13 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { id } = params
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid production batch ID format' }, { status: 400 })
+  }
+  
   try {
     const supabase = await createClient()
     
@@ -66,8 +92,6 @@ export async function DELETE(
     if (authError || !user) {
       throw new APIError('Unauthorized', 401, 'AUTH_REQUIRED')
     }
-
-    const { id } = params
 
     // ✅ Delete with RLS (user_id filter)
     const { error } = await supabase

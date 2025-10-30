@@ -38,7 +38,7 @@ interface HppBreakdownVisualProps {
     }
 }
 
-export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVisualProps) {
+export const HppBreakdownVisual = ({ recipe, operationalCosts }: HppBreakdownVisualProps) => {
     const { formatCurrency } = useCurrency()
     const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ingredients']))
 
@@ -87,9 +87,7 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
     }, [recipe])
 
     // Calculate costs
-    const ingredientCost = ingredients.reduce((sum, item) => {
-        return sum + item.unit_price * item.quantity
-    }, 0)
+    const ingredientCost = ingredients.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
     const opCosts = operationalCosts || {
         labor: ingredientCost * 0.10,
@@ -109,7 +107,7 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
     // Group ingredients by category
     const ingredientsByCategory = ingredients.reduce((acc, item) => {
         const category = item.category || 'Lainnya'
-        if (!acc[category]) acc[category] = []
+        if (!acc[category]) {acc[category] = []}
         acc[category].push(item)
         return acc
     }, {} as Record<string, IngredientDisplay[]>)
@@ -234,9 +232,7 @@ export function HppBreakdownVisual({ recipe, operationalCosts }: HppBreakdownVis
                 {expandedSections.has('ingredients') && (
                     <CardContent className="space-y-4">
                         {Object.entries(ingredientsByCategory).map(([category, items]) => {
-                            const categoryCost = items.reduce((sum, item) => {
-                                return sum + item.unit_price * item.quantity
-                            }, 0)
+                            const categoryCost = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
                             const categoryPercent = ingredientCost > 0 ? (categoryCost / ingredientCost) * 100 : 0
 
                             return (

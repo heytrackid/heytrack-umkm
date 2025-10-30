@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 
 interface EmptyStateAction {
@@ -30,7 +30,7 @@ interface EmptyStateProps {
   compact?: boolean
 }
 
-export function EmptyState({
+export const EmptyState = ({
   icon: Icon,
   emoji,
   title,
@@ -39,8 +39,7 @@ export function EmptyState({
   tips = [],
   className,
   compact = false
-}: EmptyStateProps) {
-  return (
+}: EmptyStateProps) => (
     <Card className={cn('border-dashed', className)}>
       <CardContent className={cn(
         'flex flex-col items-center justify-center text-center',
@@ -120,7 +119,6 @@ export function EmptyState({
       </CardContent>
     </Card>
   )
-}
 
 // Preset empty states for common scenarios
 export const EmptyStatePresets = {

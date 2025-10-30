@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type TablesMap = Database['public']['Tables']
 type TableKey = keyof TablesMap
@@ -46,7 +47,7 @@ export function useSupabaseCRUD<TTable extends string>(
     orderBy?: { column: keyof TableRow<TTable> & string; ascending?: boolean }
   }
 ): UseSupabaseCRUDReturn<TableRow<TTable>, TableInsert<TTable>, TableUpdate<TTable>> {
-  const [data, setData] = useState<TableRow<TTable>[] | null>(null)
+  const [data, setData] = useState<Array<TableRow<TTable>> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -95,10 +96,10 @@ export function useSupabaseCRUD<TTable extends string>(
       }
 
       console.log(`[useSupabaseCRUD] Fetched ${result?.length || 0} rows from ${table}`)
-      void setData((result as unknown as TableRow<TTable>[]) ?? null)
+      void setData((result as unknown as Array<TableRow<TTable>>) ?? null)
     } catch (err) {
       console.error(`[useSupabaseCRUD] Error in fetchData:`, err)
-      setError(err instanceof Error ? err : new Error('Unknown error'))
+      setError(new Error(getErrorMessage(err)))
     } finally {
       void setLoading(false)
     }
@@ -129,8 +130,9 @@ export function useSupabaseCRUD<TTable extends string>(
       return result as unknown as TableRow<TTable>
     } catch (err) {
       console.error(`[useSupabaseCRUD] Error in read:`, err)
-      setError(err instanceof Error ? err : new Error('Read failed'))
-      throw err
+      const error = new Error(getErrorMessage(err))
+      setError(error)
+      throw error
     }
   }
 
@@ -159,8 +161,9 @@ export function useSupabaseCRUD<TTable extends string>(
       await fetchData()
     } catch (err) {
       console.error(`[useSupabaseCRUD] Error in remove:`, err)
-      setError(err instanceof Error ? err : new Error('Delete failed'))
-      throw err
+      const error = new Error(getErrorMessage(err))
+      setError(error)
+      throw error
     }
   }
 
@@ -196,8 +199,9 @@ export function useSupabaseCRUD<TTable extends string>(
       return result as unknown as TableRow<TTable>
     } catch (err) {
       console.error(`[useSupabaseCRUD] Error in create:`, err)
-      setError(err instanceof Error ? err : new Error('Create failed'))
-      throw err
+      const error = new Error(getErrorMessage(err))
+      setError(error)
+      throw error
     }
   }
 
@@ -229,8 +233,9 @@ export function useSupabaseCRUD<TTable extends string>(
       return result as unknown as TableRow<TTable>
     } catch (err) {
       console.error(`[useSupabaseCRUD] Error in update:`, err)
-      setError(err instanceof Error ? err : new Error('Update failed'))
-      throw err
+      const error = new Error(getErrorMessage(err))
+      setError(error)
+      throw error
     }
   }
 

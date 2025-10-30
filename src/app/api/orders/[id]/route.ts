@@ -1,216 +1,334 @@
-import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { apiLogger } from '@/lib/logger'
-import { cacheInvalidation } from '@/lib/cache'
+import { type NextRequest, NextResponse } from 'next/server'
+import { OrderUpdateSchema } from '@/lib/validations/domains/order'
 import type { Database } from '@/types/supabase-generated'
+import { apiLogger } from '@/lib/logger'
+import { withSecurity, SecurityPresets } from '@/utils/security'
+import { getErrorMessage, isValidUUID, isRecord } from '@/lib/type-guards'
 
-type OrderUpdate = Database['public']['Tables']['orders']['Update']
-type OrderItemInsert = Database['public']['Tables']['order_items']['Insert']
-type OrderItemPayload = Omit<OrderItemInsert, 'order_id' | 'user_id'> & { id?: string }
-
-interface OrderUpdateRequest extends Partial<OrderUpdate> {
-  order_items?: OrderItemPayload[]
-}
-
-type RouteContext = {
+interface RouteContext {
   params: Promise<{ id: string }>
 }
 
+type OrderUpdate = Database['public']['Tables']['orders']['Update']
+type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
+
 // GET /api/orders/[id] - Get single order
-export async function GET(
+async function GET(
   _request: NextRequest,
   context: RouteContext
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
+
+    // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
+    // Fetch order with items
     const { data, error } = await supabase
       .from('orders')
       .select(`
         *,
         order_items (
           id,
+          recipe_id,
           product_name,
           quantity,
           unit_price,
           total_price,
           special_requests,
-          status,
-          recipe_id
+          recipe:recipes (
+            id,
+            name,
+            image_url
+          )
         )
       `)
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
-    if (error || !data) {
-      if (error?.code === 'PGRST116' || !data) {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Order not found' },
+          { status: 404 }
+        )
       }
-      apiLogger.error({ error }, 'Error fetching order')
-      return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 })
+      apiLogger.error({ error }, 'Error fetching order:')
+      return NextResponse.json(
+        { error: 'Failed to fetch order' },
+        { status: 500 }
+      )
+    }
+
+    // ✅ V2: Validate order structure
+    if (!isRecord(data)) {
+      apiLogger.error({ data }, 'Invalid order data structure')
+      return NextResponse.json(
+        { error: 'Invalid data structure' },
+        { status: 500 }
+      )
+    }
+
+    // ✅ V2: Validate order items array
+    if ('order_items' in data && !Array.isArray(data.order_items)) {
+      apiLogger.error({ data }, 'Invalid order_items structure')
+      return NextResponse.json(
+        { error: 'Invalid order items structure' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/orders/[id]')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/orders/[id]:')
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
 // PUT /api/orders/[id] - Update order
-export async function PUT(
+async function PUT(
   request: NextRequest,
   context: RouteContext
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
+
+    // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    const body = await request.json() as OrderUpdateRequest
-    
-    // Extract order items from body if present
-    const { order_items, id: _ignoredId, user_id: _ignoredUserId, ...orderData } = body
-    
-    // Update main order data
-    const updatePayload: OrderUpdate = {
-      ...(orderData as OrderUpdate),
-      updated_at: new Date().toISOString()
+    const body = await request.json()
+
+    // Validate request body
+    const validation = OrderUpdateSchema.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request data',
+          details: validation.error.issues
+        },
+        { status: 400 }
+      )
     }
-    
-    const { data, error } = await supabase
+
+    const validatedData = validation.data
+
+    // Check if order exists and belongs to user
+    const { data: existingOrder, error: checkError } = await supabase
       .from('orders')
-      .update(updatePayload)
+      .select('id, status, financial_record_id')
       .eq('id', id)
       .eq('user_id', user.id)
-      .select('id, order_no, customer_name, status, total_amount, updated_at')
       .single()
-    
-    if (error || !data) {
-      if (error?.code === 'PGRST116' || !data) {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-      }
-      apiLogger.error({ error }, 'Error updating order')
-      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
+
+    if (checkError || !existingOrder) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      )
     }
 
-    // Update order items if provided
-    if (order_items && Array.isArray(order_items)) {
-      // Delete existing items first
-      const { error: deleteError } = await supabase
-        .from('order_items')
-        .delete()
-        .eq('order_id', id)
+    // Update order
+    const updateData: OrderUpdate = {
+      ...validatedData,
+      updated_at: new Date().toISOString()
+    }
+
+    const { data: updatedOrder, error: updateError } = await supabase
+      .from('orders')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (updateError) {
+      apiLogger.error({ error: updateError }, 'Error updating order:')
+      return NextResponse.json(
+        { error: 'Failed to update order' },
+        { status: 500 }
+      )
+    }
+
+    // If status changed to DELIVERED and there's no financial record, create one
+    if (
+      validatedData.status === 'DELIVERED' && 
+      existingOrder.status !== 'DELIVERED' &&
+      !existingOrder.financial_record_id &&
+      updatedOrder.total_amount && 
+      updatedOrder.total_amount > 0
+    ) {
+      const incomeData = {
+        user_id: user.id,
+        type: 'INCOME' as const,
+        category: 'Revenue',
+        amount: updatedOrder.total_amount,
+        date: updatedOrder.delivery_date || updatedOrder.order_date || new Date().toISOString().split('T')[0],
+        reference: `Order #${updatedOrder.order_no}${updatedOrder.customer_name ? ` - ${updatedOrder.customer_name}` : ''}`,
+        description: `Income from order ${updatedOrder.order_no}`
+      }
+
+      const { data: incomeRecord, error: incomeError } = await supabase
+        .from('financial_records')
+        .insert(incomeData)
+        .select('id')
+        .single()
+
+      if (!incomeError && incomeRecord) {
+        // Link financial record to order
+        await supabase
+          .from('orders')
+          .update({ financial_record_id: incomeRecord.id } as OrderUpdate)
+          .eq('id', id)
+          .eq('user_id', user.id)
+      }
+    }
+
+    // If status changed from DELIVERED to something else, update financial record
+    if (
+      existingOrder.status === 'DELIVERED' && 
+      validatedData.status && 
+      validatedData.status !== 'DELIVERED' &&
+      existingOrder.financial_record_id
+    ) {
+      // Mark financial record as cancelled or update reference
+      const updateFinancialData: FinancialRecordUpdate = {
+        description: `Order ${updatedOrder.order_no} - Status changed to ${validatedData.status}`
+      }
+      await supabase
+        .from('financial_records')
+        .update(updateFinancialData)
+        .eq('id', existingOrder.financial_record_id)
         .eq('user_id', user.id)
-
-      if (deleteError) {
-        apiLogger.error({ error: deleteError }, 'Error clearing order items')
-        return NextResponse.json({ error: 'Failed to update order items' }, { status: 500 })
-      }
-      
-      // Insert new items
-      if (order_items.length > 0) {
-        const itemsToInsert: OrderItemInsert[] = order_items.map((item) => {
-          const { id: _omittedId, ...rest } = item
-          return {
-            ...rest,
-            order_id: id,
-            user_id: user.id,
-            updated_at: rest.updated_at ?? new Date().toISOString()
-          }
-        })
-        
-        const { error: itemsError } = await supabase
-          .from('order_items')
-          .insert(itemsToInsert)
-        
-        if (itemsError) {
-          apiLogger.error({ error: itemsError }, 'Error updating order items')
-          return NextResponse.json({ error: 'Failed to update order items' }, { status: 500 })
-        }
-      }
     }
 
-    cacheInvalidation.orders()
-    return NextResponse.json(data)
+    return NextResponse.json(updatedOrder)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/orders/[id]')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/orders/[id]:')
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
 // DELETE /api/orders/[id] - Delete order
-export async function DELETE(
+async function DELETE(
   _request: NextRequest,
   context: RouteContext
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid order ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
+
+    // Validate session
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    // Ensure order belongs to user before deleting
-    const { data: existingOrder, error: fetchError } = await supabase
+    // Check if order exists and get financial_record_id
+    const { data: existingOrder, error: checkError } = await supabase
       .from('orders')
-      .select('id')
+      .select('id, financial_record_id')
       .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
-    if (fetchError || !existingOrder) {
-      if (fetchError?.code === 'PGRST116' || !existingOrder) {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-      }
-      apiLogger.error({ error: fetchError }, 'Error verifying order ownership')
-      return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
+    if (checkError || !existingOrder) {
+      return NextResponse.json(
+        { error: 'Order not found' },
+        { status: 404 }
+      )
     }
-    
+
     // Delete order items first (cascade should handle this, but being explicit)
-    const { error: itemsError } = await supabase
+    await supabase
       .from('order_items')
       .delete()
       .eq('order_id', id)
       .eq('user_id', user.id)
 
-    if (itemsError) {
-      apiLogger.error({ error: itemsError }, 'Error deleting order items')
-      return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
-    }
-    
-    // Delete main order
-    const { error } = await supabase
+    // Delete order
+    const { error: deleteError } = await supabase
       .from('orders')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id)
-    
-    if (error) {
-      apiLogger.error({ error }, 'Error deleting order')
-      return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 })
+
+    if (deleteError) {
+      apiLogger.error({ error: deleteError }, 'Error deleting order:')
+      return NextResponse.json(
+        { error: 'Failed to delete order' },
+        { status: 500 }
+      )
     }
 
-    cacheInvalidation.orders()
+    // Delete associated financial record if exists
+    if (existingOrder.financial_record_id) {
+      await supabase
+        .from('financial_records')
+        .delete()
+        .eq('id', existingOrder.financial_record_id)
+        .eq('user_id', user.id)
+    }
+
     return NextResponse.json({ message: 'Order deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in DELETE /api/orders/[id]')
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/orders/[id]:')
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
+
+// Apply security middleware
+const securedGET = withSecurity(GET, SecurityPresets.enhanced())
+const securedPUT = withSecurity(PUT, SecurityPresets.enhanced())
+const securedDELETE = withSecurity(DELETE, SecurityPresets.enhanced())
+
+// Export secured handlers
+export { securedGET as GET, securedPUT as PUT, securedDELETE as DELETE }

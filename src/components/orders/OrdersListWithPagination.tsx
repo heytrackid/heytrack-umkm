@@ -35,7 +35,7 @@ interface OrderWithItems extends Order {
     }>
 }
 
-export function OrdersListWithPagination() {
+export const OrdersListWithPagination = () => {
     const router = useRouter()
     const { toast } = useToast()
     const { formatCurrency } = useSettings()
@@ -110,7 +110,7 @@ export function OrdersListWithPagination() {
     }
 
     const getStatusBadge = (status: OrderStatus) => {
-        const statusConfig = {
+        const statusConfig: Record<OrderStatus, { label: string; icon: any; className: string }> = {
             PENDING: { label: 'Pending', icon: Clock, className: 'bg-yellow-100 text-yellow-700' },
             CONFIRMED: { label: 'Dikonfirmasi', icon: CheckCircle, className: 'bg-blue-100 text-blue-700' },
             IN_PRODUCTION: { label: 'Produksi', icon: Package, className: 'bg-purple-100 text-purple-700' },
@@ -162,7 +162,7 @@ export function OrdersListWithPagination() {
                         </div>
 
                         {/* Status Filter */}
-                        <Select value={statusFilter} onValueChange={handleStatusFilter}>
+                        <Select value={statusFilter as string} onValueChange={handleStatusFilter}>
                             <SelectTrigger className="w-full sm:w-[180px]">
                                 <SelectValue placeholder="Status" />
                             </SelectTrigger>
@@ -227,7 +227,7 @@ export function OrdersListWithPagination() {
                                         </div>
                                         <div className="text-sm text-muted-foreground space-y-1">
                                             <p>Pelanggan: {order.customer_name}</p>
-                                            <p>Tanggal: {new Date(order.order_date).toLocaleDateString('id-ID')}</p>
+                                            <p>Tanggal: {order.order_date ? new Date(order.order_date).toLocaleDateString('id-ID') : 'No date set'}</p>
                                             {order.delivery_date && (
                                                 <p>Pengiriman: {new Date(order.delivery_date).toLocaleDateString('id-ID')}</p>
                                             )}

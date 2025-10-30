@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent, type InputHTMLAttributes, type ReactNode } from 'react';
 import { Eye, EyeOff, ChevronDown, AlertCircle, Check } from 'lucide-react';
 
-interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onBlur'> {
   label: string;
   name: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'date' | 'datetime-local' | 'tel' | 'url';
@@ -45,7 +45,6 @@ export const FormField = (props: FormFieldProps) => {
     icon,
     fullWidth = true,
     // Extract react-hook-form specific props if present
-    ref: rhfRef,
     onChange: rhfOnChange,
     onBlur: rhfOnBlur,
     value: rhfValue,
@@ -53,7 +52,7 @@ export const FormField = (props: FormFieldProps) => {
   } = props;
 
   // Determine if we're using react-hook-form by checking for its props
-  const _isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
+  const isUsingRHF = rhfOnChange !== undefined || rhfValue !== undefined;
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(false);
 
@@ -103,20 +102,36 @@ export const FormField = (props: FormFieldProps) => {
     setFocused(true);
   };
 
-  // Extract all props including react-hook-form props
-  // Prepare the basic props for the input element
-  const basicInputProps = {
+  // Prepare specific props for each element type to avoid type conflicts
+  const commonInputProps = {
     id: name,
     name,
     placeholder,
     disabled,
-    className: getInputClasses(),
     'aria-invalid': hasError,
     'aria-describedby': error ? `${name}-error` : hint ? `${name}-hint` : undefined,
     onFocus: handleFocus,
     onBlur: handleBlur,
-    onChange: handleChange,
     ...restProps
+  };
+  
+  const inputSpecificProps = {
+    ...commonInputProps,
+    className: getInputClasses(),
+    onChange: handleChange,
+  };
+  
+  const textareaSpecificProps = {
+    ...commonInputProps,
+    className: `${getInputClasses()} resize-vertical min-h-[80px] ${icon ? 'pl-10' : ''}`,
+    rows,
+    onChange: handleChange,
+  };
+  
+  const selectSpecificProps = {
+    ...commonInputProps,
+    className: `${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`,
+    onChange: handleChange,
   };
 
   return (
@@ -147,15 +162,12 @@ export const FormField = (props: FormFieldProps) => {
         {/* Input Field */}
         {type === 'textarea' ? (
           <textarea
-            {...basicInputProps}
-            rows={rows}
-            className={`${getInputClasses()} resize-vertical min-h-[80px] ${icon ? 'pl-10' : ''}`}
+            {...textareaSpecificProps}
           />
         ) : type === 'select' ? (
           <div className="relative">
             <select
-              {...basicInputProps}
-              className={`${getInputClasses()} appearance-none pr-10 ${icon ? 'pl-10' : ''}`}
+              {...selectSpecificProps}
             >
               <option value="" disabled>
                 {placeholder || "Pilih opsi"}
@@ -172,7 +184,7 @@ export const FormField = (props: FormFieldProps) => {
           </div>
         ) : (
           <input
-            {...basicInputProps}
+            {...inputSpecificProps}
             type={isPassword && showPassword ? 'text' : type}
             min={min}
             max={max}

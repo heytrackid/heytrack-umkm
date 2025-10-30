@@ -188,9 +188,9 @@ const RecipePreviewCard = memo(({
       </CardContent>
     </Card>
   )
-}, (prevProps, nextProps) => {
+}, (prevProps, nextProps) => 
   // Custom comparison for better performance
-  return (
+   (
     prevProps.productName === nextProps.productName &&
     prevProps.productType === nextProps.productType &&
     prevProps.servings === nextProps.servings &&
@@ -198,7 +198,7 @@ const RecipePreviewCard = memo(({
     prevProps.selectedIngredients.length === nextProps.selectedIngredients.length &&
     prevProps.selectedIngredients.every((ing, idx) => ing === nextProps.selectedIngredients[idx])
   )
-})
+)
 
 RecipePreviewCard.displayName = 'RecipePreviewCard'
 

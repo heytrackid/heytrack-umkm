@@ -7,6 +7,7 @@ import { createCachedResponse, cachePresets } from '@/lib/api-cache'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import type { NextRequest } from 'next/server'
+import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     // Parse query params
     const {searchParams} = request.nextUrl
     const isActive = searchParams.get('is_active')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = safeNumber(searchParams.get('limit'), 50)
 
     // Build optimized query
     let query = supabase
@@ -87,8 +88,8 @@ export async function GET(request: NextRequest) {
       },
       cacheConfig
     )
-  } catch (err) {
-    dbLogger.error({ err, msg: 'Recipes API error' })
+  } catch (error: unknown) {
+    dbLogger.error({ error: getErrorMessage(error), msg: 'Recipes API error' })
     return createCachedResponse(
       { error: 'Internal server error' },
       cachePresets.realtime

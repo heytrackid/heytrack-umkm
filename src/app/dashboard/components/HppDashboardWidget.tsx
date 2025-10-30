@@ -57,7 +57,7 @@ export default function HppDashboardWidget() {
 
   const loadHppData = async () => {
     try {
-      void setLoading(true)
+      setLoading(true)
 
       // Fetch real data from API
       const response = await fetch('/api/dashboard/hpp-summary')
@@ -67,16 +67,16 @@ export default function HppDashboardWidget() {
       }
 
       const realData: HppDashboardData = await response.json()
-      void setData(realData)
-    } catch (err: unknown) {
-      dbLogger.error({ err }, 'Failed to load HPP dashboard data')
+      setData(realData)
+    } catch (error: unknown) {
+      dbLogger.error({ error }, 'Failed to load HPP dashboard data')
       toast({
         title: 'Error',
         description: 'Failed to load HPP data',
         variant: 'destructive'
       })
     } finally {
-      void setLoading(false)
+      setLoading(false)
     }
   }
 

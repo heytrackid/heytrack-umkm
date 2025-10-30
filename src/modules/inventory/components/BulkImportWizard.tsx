@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { uiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 import {
     Upload,
     FileText,
@@ -36,7 +37,7 @@ interface BulkImportWizardProps {
 
 type Step = 'upload' | 'validate' | 'review' | 'import' | 'complete'
 
-export function BulkImportWizard({ onImport, onCancel }: BulkImportWizardProps) {
+export const BulkImportWizard = ({ onImport, onCancel }: BulkImportWizardProps) => {
     const [currentStep, setCurrentStep] = useState<Step>('upload')
     const [_file, setFile] = useState<File | null>(null)
     const [parsedData, setParsedData] = useState<ImportRow[]>([])
@@ -122,8 +123,9 @@ export function BulkImportWizard({ onImport, onCancel }: BulkImportWizardProps) 
 
             setParsedData(parsedData)
             setCurrentStep('review')
-        } catch (error) {
-            uiLogger.error({ error }, 'Failed to parse file')
+        } catch (error: unknown) {
+            const message = getErrorMessage(error)
+            uiLogger.error({ error: message }, 'Failed to parse file')
             // Handle error - show toast or error message
             setCurrentStep('upload')
         }
@@ -150,8 +152,9 @@ export function BulkImportWizard({ onImport, onCancel }: BulkImportWizardProps) 
                 failed: errorCount
             })
             setCurrentStep('complete')
-        } catch (error) {
-            uiLogger.error({ error }, 'Import failed')
+        } catch (error: unknown) {
+            const message = getErrorMessage(error)
+            uiLogger.error({ error: message }, 'Import failed')
         } finally {
             setImporting(false)
         }

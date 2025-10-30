@@ -415,11 +415,11 @@ Focus on Indonesian food business terminology.`
     
     // Extract timeframes
     const timeframes = []
-    if (/hari ini|today/i.test(query)) timeframes.push('today')
-    if (/kemarin|yesterday/i.test(query)) timeframes.push('yesterday')
-    if (/minggu ini|this week/i.test(query)) timeframes.push('this_week')
-    if (/bulan ini|this month/i.test(query)) timeframes.push('this_month')
-    if (/tahun ini|this year/i.test(query)) timeframes.push('this_year')
+    if (/hari ini|today/i.test(query)) {timeframes.push('today')}
+    if (/kemarin|yesterday/i.test(query)) {timeframes.push('yesterday')}
+    if (/minggu ini|this week/i.test(query)) {timeframes.push('this_week')}
+    if (/bulan ini|this month/i.test(query)) {timeframes.push('this_month')}
+    if (/tahun ini|this year/i.test(query)) {timeframes.push('this_year')}
     
     // Common product names (can be expanded)
     const productKeywords = ['brownies', 'cookies', 'cake', 'kue', 'roti', 'pastry']
@@ -467,11 +467,11 @@ Focus on Indonesian food business terminology.`
     let negativeCount = 0
     
     positiveWords.forEach(word => {
-      if (lowerQuery.includes(word)) positiveCount++
+      if (lowerQuery.includes(word)) {positiveCount++}
     })
     
     negativeWords.forEach(word => {
-      if (lowerQuery.includes(word)) negativeCount++
+      if (lowerQuery.includes(word)) {negativeCount++}
     })
     
     // Calculate score
@@ -484,8 +484,8 @@ Focus on Indonesian food business terminology.`
       score = (positiveCount - negativeCount) / totalWords
       confidence = Math.min(totalWords / 3, 1) // More words = higher confidence
       
-      if (score > 0.2) sentiment = 'positive'
-      else if (score < -0.2) sentiment = 'negative'
+      if (score > 0.2) {sentiment = 'positive'}
+      else if (score < -0.2) {sentiment = 'negative'}
     }
     
     return { sentiment, score, confidence }
@@ -577,24 +577,24 @@ Focus on Indonesian food business terminology.`
     const hasPositive = positiveWords.some(word => lowerQuery.includes(word))
     const hasNegative = negativeWords.some(word => lowerQuery.includes(word))
     
-    if (hasPositive && !hasNegative) sentiment = 'positive'
-    else if (hasNegative && !hasPositive) sentiment = 'negative'
+    if (hasPositive && !hasNegative) {sentiment = 'positive'}
+    else if (hasNegative && !hasPositive) {sentiment = 'negative'}
     
     // Complexity detection
     let complexity: 'simple' | 'medium' | 'complex' = 'simple'
-    if (intents.length > 2) complexity = 'complex'
-    else if (intents.length === 2 || numbers.length > 2) complexity = 'medium'
+    if (intents.length > 2) {complexity = 'complex'}
+    else if (intents.length === 2 || numbers.length > 2) {complexity = 'medium'}
     
     // Context detection
     const contexts = []
-    if (/resep|recipe/i.test(query)) contexts.push('recipes')
-    if (/bahan|ingredient/i.test(query)) contexts.push('ingredients')
-    if (/hpp|cost/i.test(query)) contexts.push('hpp')
-    if (/pesanan|order/i.test(query)) contexts.push('orders')
-    if (/profit|laba/i.test(query)) contexts.push('financial')
-    if (/marketing|promosi/i.test(query)) contexts.push('marketing')
-    if (/strategi|strategy/i.test(query)) contexts.push('strategy')
-    if (contexts.length === 0) contexts.push('general')
+    if (/resep|recipe/i.test(query)) {contexts.push('recipes')}
+    if (/bahan|ingredient/i.test(query)) {contexts.push('ingredients')}
+    if (/hpp|cost/i.test(query)) {contexts.push('hpp')}
+    if (/pesanan|order/i.test(query)) {contexts.push('orders')}
+    if (/profit|laba/i.test(query)) {contexts.push('financial')}
+    if (/marketing|promosi/i.test(query)) {contexts.push('marketing')}
+    if (/strategi|strategy/i.test(query)) {contexts.push('strategy')}
+    if (contexts.length === 0) {contexts.push('general')}
     
     // Primary intent (highest confidence)
     const primaryIntent = intents.length > 0 

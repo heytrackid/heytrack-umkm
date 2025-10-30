@@ -97,10 +97,10 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
           Tambah Pembelian
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <DialogHeader>
-            <DialogTitle>Tambah Pembelian Bahan Baku</DialogTitle>
+            <DialogTitle className="text-wrap-mobile">Tambah Pembelian Bahan Baku</DialogTitle>
             <DialogDescription>
               Input detail pembelian bahan baku baru
             </DialogDescription>

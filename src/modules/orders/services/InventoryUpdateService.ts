@@ -15,7 +15,7 @@ type Ingredient = Database['public']['Tables']['ingredients']['Row']
  */
 type RecipeIngredientsQueryResult = Recipe & {
   recipe_ingredients: Array<RecipeIngredient & {
-    ingredient: Pick<Ingredient, 'id' | 'current_stock'>[]  // Supabase returns arrays
+    ingredient: Array<Pick<Ingredient, 'id' | 'current_stock'>>  // Supabase returns arrays
   }>
 }
 
@@ -23,7 +23,7 @@ type RecipeIngredientsQueryResult = Recipe & {
  * Type guard for recipe ingredients query result
  */
 function isRecipeIngredientsResult(data: unknown): data is RecipeIngredientsQueryResult {
-  if (!data || typeof data !== 'object') return false
+  if (!data || typeof data !== 'object') {return false}
   const recipe = data as RecipeIngredientsQueryResult
   return (
     typeof recipe.id === 'string' &&
@@ -75,42 +75,31 @@ export class InventoryUpdateService {
 
         const typedRecipe = recipe
 
-        // Update ingredient stock
+        // ✅ FIX: Only create stock transaction, let trigger handle stock update
         for (const ri of typedRecipe.recipe_ingredients || []) {
           // Supabase returns arrays for joined data, extract safely
           const ingredient = extractFirst(ri.ingredient)
           if (ingredient) {
             const usedQuantity = ri.quantity * item.quantity
-            const currentStock = ingredient.current_stock ?? 0
-            const newStock = Math.max(0, currentStock - usedQuantity)
 
-            const ingredientUpdate: TablesUpdate<'ingredients'> = {
-              current_stock: newStock,
-              updated_at: new Date().toISOString()
-            }
-
-            const { error: updateError } = await supabase
-              .from('ingredients')
-              .update(ingredientUpdate)
-              .eq('id', ingredient.id)
-
-            if (updateError) {
-              dbLogger.error({ error: updateError }, 'Error updating ingredient stock')
-            }
-
-            // Create stock transaction record
+            // Create stock transaction record - trigger will auto-update current_stock
             const stockTransaction: TablesInsert<'stock_transactions'> = {
               ingredient_id: ingredient.id,
               type: 'USAGE',
-              quantity: -usedQuantity, // Negative for usage
+              quantity: usedQuantity, // Positive value, trigger handles the deduction
               reference: order_id,
               notes: `Used for order production`,
-              user_id: user_id
+              user_id
             }
 
-            await supabase
+            const { error: transactionError } = await supabase
               .from('stock_transactions')
               .insert(stockTransaction)
+
+            if (transactionError) {
+              dbLogger.error({ error: transactionError }, 'Error creating stock transaction')
+              continue
+            }
 
             // Check and create inventory alert if needed (async, don't wait)
             const alertService = new InventoryAlertService()

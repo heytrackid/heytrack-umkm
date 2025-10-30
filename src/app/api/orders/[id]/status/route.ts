@@ -3,9 +3,10 @@ import { triggerWorkflow } from '@/lib/automation-engine'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import { isOrder, isOrderStatus, isRecord, getErrorMessage } from '@/lib/type-guards'
 
-// PATCH /api/orders/[id]/status - Update order status dengan automatic workflow triggers
-export async function PATCH(
+// PUT /api/orders/[id]/status - Update order status dengan automatic workflow triggers
+export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -62,7 +63,7 @@ export async function PATCH(
           type: 'INCOME',
           category: 'Revenue',
           amount: currentOrder.total_amount ?? 0,
-          date: (currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0]) as string,
+          date: (currentOrder.delivery_date || currentOrder.order_date || new Date().toISOString().split('T')[0]),
           reference: `Order #${currentOrder.order_no || ''}${currentOrder.customer_name ? ` - ${  currentOrder.customer_name}` : ''}`,
           description: `Income from order ${currentOrder.order_no || ''}`,
           user_id: currentOrder.user_id
@@ -213,8 +214,8 @@ export async function GET(
     }
 
     return NextResponse.json({
-      order_id: order.id!,
-      order_no: order.order_no!,
+      order_id: order.id,
+      order_no: order.order_no,
       status_info: statusInfo
     })
 

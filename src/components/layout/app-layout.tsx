@@ -143,7 +143,7 @@ const AppLayout = memo(({
           <Sidebar
             isOpen={mobileMenuOpen}
             onToggle={toggleMobileMenu}
-            isMobile={true}
+            isMobile
           />
         </div>
       )}

@@ -35,7 +35,7 @@ export const lazyImports = {
  * Preload critical resources
  */
 export function preloadCriticalResources() {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {return}
 
   // Preload fonts
   const fonts = [
@@ -58,7 +58,7 @@ export function preloadCriticalResources() {
  * Prefetch next page resources
  */
 export function prefetchRoute(route: string) {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {return}
 
   const link = document.createElement('link')
   link.rel = 'prefetch'
@@ -70,7 +70,7 @@ export function prefetchRoute(route: string) {
  * Check if feature should be loaded based on device
  */
 export function shouldLoadFeature(feature: string): boolean {
-  if (typeof window === 'undefined') return false
+  if (typeof window === 'undefined') {return false}
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   const isSlowConnection = 'connection' in navigator && 
@@ -90,11 +90,11 @@ export function shouldLoadFeature(feature: string): boolean {
  * Get optimal image quality based on connection
  */
 export function getOptimalImageQuality(): number {
-  if (typeof window === 'undefined') return 75
+  if (typeof window === 'undefined') {return 75}
 
-  const connection = (navigator as any).connection
+  const {connection} = (navigator as any)
   
-  if (!connection) return 75
+  if (!connection) {return 75}
 
   switch (connection.effectiveType) {
     case '4g':
@@ -112,7 +112,7 @@ export function getOptimalImageQuality(): number {
  * Defer non-critical scripts
  */
 export function deferNonCriticalScripts() {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {return}
 
   // Defer analytics
   setTimeout(() => {
@@ -128,8 +128,8 @@ export function deferNonCriticalScripts() {
  * Remove unused CSS
  */
 export function removeUnusedCSS() {
-  if (typeof window === 'undefined') return
-  if (process.env.NODE_ENV !== 'production') return
+  if (typeof window === 'undefined') {return}
+  if (process.env.NODE_ENV !== 'production') {return}
 
   // This would typically be done at build time with PurgeCSS
   // But we can also do runtime cleanup for dynamic content
@@ -151,7 +151,7 @@ export function removeUnusedCSS() {
  * Optimize third-party scripts
  */
 export function optimizeThirdPartyScripts() {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') {return}
 
   // Delay third-party scripts until page is interactive
   if (document.readyState === 'complete') {
@@ -181,10 +181,10 @@ function loadThirdPartyScripts() {
  * Monitor bundle size in development
  */
 export function monitorBundleSize() {
-  if (typeof window === 'undefined') return
-  if (process.env.NODE_ENV !== 'development') return
+  if (typeof window === 'undefined') {return}
+  if (process.env.NODE_ENV !== 'development') {return}
 
-  const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
+  const resources = performance.getEntriesByType('resource')
   
   const jsResources = resources.filter(r => r.name.endsWith('.js'))
   const cssResources = resources.filter(r => r.name.endsWith('.css'))

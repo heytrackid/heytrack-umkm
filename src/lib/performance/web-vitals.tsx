@@ -9,8 +9,11 @@ import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals'
 export function useWebVitals(onMetric?: (metric: Metric) => void) {
     useEffect(() => {
         const handleMetric = (metric: Metric) => {
-            // Log to console in development
-            if (process.env.NODE_ENV === 'development') {
+            // Log to console in development (check hostname instead of process.env)
+            const isDev = typeof window !== 'undefined' &&
+                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+            if (isDev) {
                 console.log(`[Web Vitals] ${metric.name}:`, metric.value)
             }
 
@@ -94,9 +97,9 @@ export function useLongTaskTracking() {
  */
 export function useResourceTiming() {
     usePerformanceObserver(['resource'], (entries) => {
-        const slowResources = entries.filter((entry: any) => {
-            return entry.duration > 1000 // Resources taking > 1s
-        })
+        const slowResources = entries.filter((entry: any) =>
+            entry.duration > 1000 // Resources taking > 1s
+        )
 
         if (slowResources.length > 0) {
             console.warn('Slow resources detected:', slowResources)
@@ -112,7 +115,7 @@ export function getPerformanceMetrics() {
         return null
     }
 
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
     const paint = performance.getEntriesByType('paint')
 
     return {
@@ -141,7 +144,7 @@ export function getPerformanceMetrics() {
 /**
  * Component to track page performance
  */
-export function PerformanceMonitor() {
+export const PerformanceMonitor = () => {
     useWebVitals()
     useLongTaskTracking()
     useResourceTiming()

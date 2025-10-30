@@ -49,8 +49,8 @@ export async function createOrderWithTransaction(
           .select('id')
           .single()
 
-        if (error) throw error
-        if (!order) throw new Error('Order creation returned no data')
+        if (error) {throw error}
+        if (!order) {throw new Error('Order creation returned no data')}
 
         orderId = order.id
         dbLogger.info({ orderId }, 'Order created')
@@ -73,7 +73,7 @@ export async function createOrderWithTransaction(
     createOperation(
       'create_order_items',
       async () => {
-        if (!orderId) throw new Error('Order ID not available')
+        if (!orderId) {throw new Error('Order ID not available')}
 
         const itemsWithOrderId = data.items.map(item => ({
           ...item,
@@ -86,8 +86,8 @@ export async function createOrderWithTransaction(
           .insert(itemsWithOrderId)
           .select('id')
 
-        if (error) throw error
-        if (!items) throw new Error('Order items creation returned no data')
+        if (error) {throw error}
+        if (!items) {throw new Error('Order items creation returned no data')}
 
         orderItemIds = items.map(item => item.id)
         dbLogger.info({ orderId, itemCount: items.length }, 'Order items created')
@@ -109,7 +109,7 @@ export async function createOrderWithTransaction(
     createOperation(
       'create_financial_record',
       async () => {
-        if (!data.createFinancialRecord || !orderId) return null
+        if (!data.createFinancialRecord || !orderId) {return null}
 
         const financialRecord: FinancialRecordInsert = {
           user_id: userId,
@@ -127,8 +127,8 @@ export async function createOrderWithTransaction(
           .select('id')
           .single()
 
-        if (error) throw error
-        if (!record) throw new Error('Financial record creation returned no data')
+        if (error) {throw error}
+        if (!record) {throw new Error('Financial record creation returned no data')}
 
         financialRecordId = record.id
         dbLogger.info({ orderId, financialRecordId }, 'Financial record created')

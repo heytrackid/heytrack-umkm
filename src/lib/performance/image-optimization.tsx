@@ -20,7 +20,7 @@ interface OptimizedImageProps {
 /**
  * Optimized image component with blur placeholder
  */
-export function OptimizedImage({
+export const OptimizedImage = ({
     src,
     alt,
     width,
@@ -31,7 +31,7 @@ export function OptimizedImage({
     fill = false,
     sizes,
     onLoad
-}: OptimizedImageProps) {
+}: OptimizedImageProps) => {
     const [isLoading, setIsLoading] = useState(true)
 
     return (
@@ -77,7 +77,7 @@ export function generateBlurDataURL(width = 10, height = 10): string {
     canvas.height = height
     const ctx = canvas.getContext('2d')
 
-    if (!ctx) return ''
+    if (!ctx) {return ''}
 
     ctx.fillStyle = '#e5e7eb'
     ctx.fillRect(0, 0, width, height)
@@ -92,7 +92,7 @@ export function useLazyImage(ref: React.RefObject<HTMLElement>) {
     const [isVisible, setIsVisible] = useState(false)
 
     useState(() => {
-        if (!ref.current) return
+        if (!ref.current) {return}
 
         const observer = new IntersectionObserver(
             ([entry]) => {

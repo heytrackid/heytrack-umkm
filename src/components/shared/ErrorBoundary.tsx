@@ -126,7 +126,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                   We're sorry, but something unexpected happened. Our team has been notified and is working on a fix.
                 </p>
 
-                {this.props.showErrorDetails && process.env.NODE_ENV === 'development' && this.state.error && (
+                {this.props.showErrorDetails && this.state.error && (
                   <details className="mt-4 p-4 bg-muted rounded-lg">
                     <summary className="cursor-pointer font-medium text-sm mb-2">
                       Error Details (Development Only)

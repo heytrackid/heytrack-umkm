@@ -11,7 +11,7 @@ type Ingredient = Database['public']['Tables']['ingredients']['Row']
 /**
  * Worker input type based on generated types
  */
-type HppCalculationInput = {
+interface HppCalculationInput {
   ingredients: Array<{
     quantity: RecipeIngredient['quantity']
     price_per_unit: Ingredient['price_per_unit']
@@ -23,7 +23,7 @@ type HppCalculationInput = {
 /**
  * Worker output type
  */
-type HppCalculationResult = {
+interface HppCalculationResult {
   materialCost: number
   operationalCostPerUnit: number
   totalCost: number

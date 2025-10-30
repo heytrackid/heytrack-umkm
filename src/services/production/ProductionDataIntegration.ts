@@ -4,6 +4,7 @@
  */
 
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isRecord, hasKeys } from '@/lib/type-guards'
 
 // Extended types for metrics
 export interface ProductionMetrics {
@@ -28,11 +29,41 @@ export class ProductionDataIntegration {
       if (endDate) {params.append('end_date', endDate)}
 
       const response = await fetch(`/api/production/metrics?${params}`)
-      if (!response.ok) {throw new Error('Failed to fetch metrics')}
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch metrics: ${errorText}`)
+      }
       
-      return await response.json()
+      const data = await response.json()
+      
+      // Validate the response with type guards
+      if (isRecord(data) && hasKeys(data, [
+        'total_batches', 
+        'completed_batches', 
+        'in_progress_batches', 
+        'total_quantity_produced', 
+        'average_completion_time'
+      ])) {
+        return {
+          total_batches: typeof data.total_batches === 'number' ? data.total_batches : 0,
+          completed_batches: typeof data.completed_batches === 'number' ? data.completed_batches : 0,
+          in_progress_batches: typeof data.in_progress_batches === 'number' ? data.in_progress_batches : 0,
+          total_quantity_produced: typeof data.total_quantity_produced === 'number' ? data.total_quantity_produced : 0,
+          average_completion_time: typeof data.average_completion_time === 'number' ? data.average_completion_time : 0
+        }
+      }
+      
+      apiLogger.warn({ data }, 'API returned unexpected format for production metrics')
+      return {
+        total_batches: 0,
+        completed_batches: 0,
+        in_progress_batches: 0,
+        total_quantity_produced: 0,
+        average_completion_time: 0
+      }
     } catch (err) {
-      apiLogger.error({ err }, 'Error fetching production metrics')
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Error fetching production metrics')
       return {
         total_batches: 0,
         completed_batches: 0,
@@ -53,7 +84,8 @@ export class ProductionDataIntegration {
       })
       return response.ok
     } catch (err) {
-      apiLogger.error({ err }, 'Error syncing with inventory')
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Error syncing with inventory')
       return false
     }
   }
@@ -70,7 +102,8 @@ export class ProductionDataIntegration {
       })
       return response.ok
     } catch (err) {
-      apiLogger.error({ err }, 'Error linking batch to order')
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Error linking batch to order')
       return false
     }
   }

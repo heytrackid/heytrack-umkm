@@ -12,6 +12,7 @@ export interface GeneralSettings {
   phone: string
   email: string
   website: string
+  description: string
   taxNumber: string
   currency: string
   timezone: string
@@ -75,6 +76,7 @@ export const DEFAULT_APP_SETTINGS: AppSettingsState = {
     phone: '',
     email: '',
     website: '',
+    description: '',
     taxNumber: '',
     currency: 'IDR',
     timezone: 'Asia/Jakarta',

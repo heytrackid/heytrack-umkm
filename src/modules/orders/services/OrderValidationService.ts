@@ -20,7 +20,7 @@ type RecipeValidationQueryResult = Recipe & {
  * Type guard for recipe validation query result
  */
 function isRecipeValidationResult(data: unknown): data is RecipeValidationQueryResult {
-  if (!data || typeof data !== 'object') return false
+  if (!data || typeof data !== 'object') {return false}
   const recipe = data as RecipeValidationQueryResult
   return (
     typeof recipe.id === 'string' &&

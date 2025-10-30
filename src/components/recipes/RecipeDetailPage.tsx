@@ -287,8 +287,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 <CardContent>
                     {recipe.recipe_ingredients && recipe.recipe_ingredients.length > 0 ? (
                         <div className="space-y-2">
-                            {recipe.recipe_ingredients.map((ri) => {
-                                return (
+                            {recipe.recipe_ingredients.map((ri) => (
                                     <div
                                         key={ri.id}
                                         className="flex items-center justify-between p-3 border rounded-lg"
@@ -300,8 +299,7 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                                             </p>
                                         </div>
                                     </div>
-                                )
-                            })}
+                                ))}
                         </div>
                     ) : (
                         <div className="text-center py-8 text-muted-foreground">
@@ -316,8 +314,8 @@ export const RecipeDetailPage = ({ recipeId }: RecipeDetailPageProps) => {
                 isOpen={isDeleteDialogOpen}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={handleDelete}
-                title="Hapus Resep"
-                description={`Apakah Anda yakin ingin menghapus resep "${recipe.name}"? Tindakan ini tidak dapat dibatalkan.`}
+                entityName="Resep"
+                itemName={recipe.name || ''}
             />
         </div>
     )

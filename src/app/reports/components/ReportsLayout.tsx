@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import {
   BarChart3,
   Calendar
@@ -32,8 +32,8 @@ interface ReportsLayoutProps {
 
 export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
   const [dateRange, setDateRange] = useState({
-    start: new Date(new Date().setDate(1)).toISOString().split('T')[0]!, // First day of month
-    end: new Date().toISOString().split('T')[0]! // Today
+    start: new Date(new Date().setDate(1)).toISOString().split('T')[0], // First day of month
+    end: new Date().toISOString().split('T')[0] // Today
   })
 
   return (
@@ -78,7 +78,7 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const today = new Date().toISOString().split('T')[0]!
+                      const today = new Date().toISOString().split('T')[0]
                       void setDateRange({ start: today, end: today })
                     }}
                   >
@@ -92,8 +92,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                       const start = new Date(end)
                       start.setDate(start.getDate() - 6)
                       setDateRange({
-                        start: start.toISOString().split('T')[0]!,
-                        end: end.toISOString().split('T')[0]!
+                        start: start.toISOString().split('T')[0],
+                        end: end.toISOString().split('T')[0]
                       })
                     }}
                   >
@@ -107,8 +107,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                       const start = new Date(end)
                       start.setDate(start.getDate() - 29)
                       setDateRange({
-                        start: start.toISOString().split('T')[0]!,
-                        end: end.toISOString().split('T')[0]!
+                        start: start.toISOString().split('T')[0],
+                        end: end.toISOString().split('T')[0]
                       })
                     }}
                   >
@@ -121,8 +121,8 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
                       const now = new Date()
                       const start = new Date(now.getFullYear(), now.getMonth(), 1)
                       setDateRange({
-                        start: start.toISOString().split('T')[0]!,
-                        end: now.toISOString().split('T')[0]!
+                        start: start.toISOString().split('T')[0],
+                        end: now.toISOString().split('T')[0]
                       })
                     }}
                   >
@@ -161,30 +161,30 @@ export const ReportsLayout = ({ children }: ReportsLayoutProps) => {
         </Card>
 
         {/* Reports Tabs */}
-        <Tabs defaultValue="profit" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="profit">Profit & Loss</TabsTrigger>
-            <TabsTrigger value="sales">Penjualan</TabsTrigger>
-            <TabsTrigger value="inventory">Inventory</TabsTrigger>
-            <TabsTrigger value="financial">Keuangan</TabsTrigger>
-          </TabsList>
+        <SwipeableTabs defaultValue="profit" className="space-y-4">
+          <SwipeableTabsList>
+            <SwipeableTabsTrigger value="profit">Profit & Loss</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="sales">Penjualan</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="inventory">Inventory</SwipeableTabsTrigger>
+            <SwipeableTabsTrigger value="financial">Keuangan</SwipeableTabsTrigger>
+          </SwipeableTabsList>
 
-          <TabsContent value="profit">
+          <SwipeableTabsContent value="profit">
             <EnhancedProfitReport dateRange={dateRange} />
-          </TabsContent>
+          </SwipeableTabsContent>
 
-          <TabsContent value="sales">
+          <SwipeableTabsContent value="sales">
             <SalesReport dateRange={dateRange} />
-          </TabsContent>
+          </SwipeableTabsContent>
 
-          <TabsContent value="inventory">
+          <SwipeableTabsContent value="inventory">
             <InventoryReport dateRange={dateRange} />
-          </TabsContent>
+          </SwipeableTabsContent>
 
-          <TabsContent value="financial">
+          <SwipeableTabsContent value="financial">
             <FinancialReport dateRange={dateRange} />
-          </TabsContent>
-        </Tabs>
+          </SwipeableTabsContent>
+        </SwipeableTabs>
 
         {children}
       </div>

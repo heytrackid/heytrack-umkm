@@ -1,7 +1,6 @@
-// @ts-nocheck
 'use client'
 
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, BarChart3, Package, DollarSign, Users, MessageCircle, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +10,12 @@ import type { ChatMessage, ChatAction, ChatContext } from '@/lib/ai-chatbot/type
 import DataVisualization from './DataVisualization';
 
 import { apiLogger } from '@/lib/logger'
+
+// Extended message type for UI with additional properties
+interface ExtendedChatMessage extends ChatMessage {
+  actions?: ChatAction[]
+  data?: Record<string, unknown>
+}
 interface ChatbotInterfaceProps {
   userId: string;
   className?: string;
@@ -24,7 +29,7 @@ const ChatbotInterface = ({
   isMinimized = false,
   onToggleMinimize
 }: ChatbotInterfaceProps) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ExtendedChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [context, setContext] = useState<ChatContext | null>(null);
@@ -58,12 +63,11 @@ const ChatbotInterface = ({
     try {
       // Add user message to UI immediately
       if (!message) { // Only add user message if it's not an auto-greeting
-        const userMessage = {
+        const userMessage: ExtendedChatMessage = {
           id: `user_${Date.now()}`,
-          type: 'user' as const,
+          role: 'user' as const,
           content: messageToSend,
-          timestamp: new Date(),
-          contextId: context?.id
+          timestamp: new Date()
         };
         setMessages(prev => [...prev, userMessage]);
       }
@@ -77,7 +81,7 @@ const ChatbotInterface = ({
         body: JSON.stringify({
           userId,
           message: messageToSend,
-          contextId: context?.id,
+          contextId: context?.sessionId,
           useAI: true
         })
       });
@@ -90,24 +94,22 @@ const ChatbotInterface = ({
 
       if (result.success) {
         setMessages(prev => [...prev, result.response]);
-        setContext({
-          ...result.context,
-          conversation: [],
-          activeActions: result.actions || [],
-          memory: {}
-        });
+        if (result.context) {
+          setContext(result.context);
+        }
       } else {
         throw new Error(result.error || 'Unknown API error');
       }
 
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Error sending message:');
-      setMessages(prev => [...prev, {
+      apiLogger.error({ error: err }, 'Error sending message:');
+      const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
-        type: 'assistant',
+        role: 'assistant' as const,
         content: 'Maaf, terjadi kesalahan saat menghubungi AI. Silakan coba lagi.',
         timestamp: new Date()
-      }]);
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -126,8 +128,8 @@ const ChatbotInterface = ({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          actionId: action.id,
-          contextId: context.id,
+          actionId: action.type,
+          contextId: context.sessionId,
           userId
         })
       });
@@ -149,14 +151,17 @@ const ChatbotInterface = ({
           content += `\n\n🤖 **AI Recommendations:**\n${result.aiRecommendations}`;
         }
 
-        const systemMessage: ChatMessage = {
+        const systemMessage: ExtendedChatMessage = {
           id: `system_${Date.now()}`,
-          type: 'system',
+          role: 'system' as const,
           content,
           timestamp: new Date(),
-          contextId: context.id,
           data: {
             ...result,
+            actionType: action.type,
+            aiEnhanced: !!(result.aiRecommendations || result.businessInsights)
+          },
+          metadata: {
             actionType: action.type,
             aiEnhanced: !!(result.aiRecommendations || result.businessInsights)
           }
@@ -168,25 +173,20 @@ const ChatbotInterface = ({
       }
 
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Error executing action:');
-      setMessages(prev => [...prev, {
+      apiLogger.error({ error: err }, 'Error executing action:');
+      const errorMessage: ExtendedChatMessage = {
         id: `error_${Date.now()}`,
-        type: 'assistant',
+        role: 'assistant' as const,
         content: 'Gagal menjalankan aksi AI. Silakan coba lagi.',
         timestamp: new Date()
-      }]);
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Enter key press
-  const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+
 
   // Get icon for action type
   const getActionIcon = (type: string) => {
@@ -201,9 +201,9 @@ const ChatbotInterface = ({
   };
 
   // Message bubble component
-  const MessageBubble = ({ message }: { message: ChatMessage }) => {
-    const isUser = message.type === 'user';
-    const isSystem = message.type === 'system';
+  const MessageBubble = ({ message }: { message: ExtendedChatMessage }) => {
+    const isUser = message.role === 'user';
+    const isSystem = message.role === 'system';
 
     return (
       <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 w-full`}>
@@ -223,10 +223,10 @@ const ChatbotInterface = ({
           {/* Message content */}
           <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 min-w-0 overflow-hidden`}>
             <div className={`px-4 py-3 rounded-lg w-full break-words overflow-hidden ${isUser
-                ? 'bg-blue-500 text-white'
-                : isSystem
-                  ? 'bg-green-100 text-green-800 border border-green-200'
-                  : 'bg-gray-100 text-gray-900'
+              ? 'bg-blue-500 text-white'
+              : isSystem
+                ? 'bg-green-100 text-green-800 border border-green-200'
+                : 'bg-gray-100 text-gray-900'
               }`}>
               <div className="whitespace-pre-wrap text-sm leading-relaxed break-words overflow-wrap-anywhere word-break-break-word">
                 {message.content}
@@ -235,9 +235,9 @@ const ChatbotInterface = ({
               {/* Action buttons */}
               {message.actions && message.actions.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {message.actions.map((action) => (
+                  {message.actions.map((action: ChatAction, index: number) => (
                     <Button
-                      key={action.id}
+                      key={`${action.type}-${index}`}
                       variant="secondary"
                       size="sm"
                       onClick={() => handleActionClick(action)}
@@ -252,20 +252,21 @@ const ChatbotInterface = ({
               )}
 
               {/* Data visualization */}
-              {message.data && (message.type === 'assistant' || message.type === 'system') && (
+              {message.data && (message.role === 'assistant' || message.role === 'system') && (
                 <div className="mt-3">
                   {(() => {
                     // Determine visualization type based on message data structure
-                    if (message.data.profitMargin !== undefined) {
-                      return <DataVisualization type="financial" data={message.data} compact />;
-                    } if (message.data.criticalItems) {
-                      return <DataVisualization type="inventory" data={message.data} compact />;
-                    } if (message.data.topCustomers) {
-                      return <DataVisualization type="customers" data={message.data} compact />;
-                    } if (message.data.topRecipes) {
-                      return <DataVisualization type="products" data={message.data} compact />;
-                    } if (message.data.analysis) {
-                      return <DataVisualization type="analysis" data={message.data} compact />;
+                    const data = message.data as Record<string, unknown>;
+                    if (data.profitMargin !== undefined) {
+                      return <DataVisualization type="financial" data={data} compact />;
+                    } if (data.criticalItems) {
+                      return <DataVisualization type="inventory" data={data} compact />;
+                    } if (data.topCustomers) {
+                      return <DataVisualization type="customers" data={data} compact />;
+                    } if (data.topRecipes) {
+                      return <DataVisualization type="products" data={data} compact />;
+                    } if (data.analysis) {
+                      return <DataVisualization type="analysis" data={data} compact />;
                     }
                     return null;
                   })()}
@@ -415,8 +416,12 @@ const ChatbotInterface = ({
               ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
               disabled={isLoading}
               className="flex-1"
             />

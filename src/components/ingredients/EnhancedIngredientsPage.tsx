@@ -71,7 +71,7 @@ export const EnhancedIngredientsPage = () => {
 
     // Filter and sort data
     const filteredData = useMemo(() => {
-        if (!ingredients) return []
+        if (!ingredients) {return []}
 
         return ingredients.filter(item => {
             // Search filter
@@ -106,9 +106,7 @@ export const EnhancedIngredientsPage = () => {
     })
 
     // Get paginated data
-    const paginatedData = useMemo(() => {
-        return filteredData.slice(pagination.startIndex, pagination.endIndex)
-    }, [filteredData, pagination.startIndex, pagination.endIndex])
+    const paginatedData = useMemo(() => filteredData.slice(pagination.startIndex, pagination.endIndex), [filteredData, pagination.startIndex, pagination.endIndex])
 
     // Update page size
     const handlePageSizeChange = (newSize: number) => {
@@ -131,7 +129,7 @@ export const EnhancedIngredientsPage = () => {
     }
 
     const handleConfirmDelete = async () => {
-        if (!selectedIngredient) return
+        if (!selectedIngredient) {return}
 
         try {
             await deleteIngredient(selectedIngredient.id)
@@ -301,7 +299,7 @@ export const EnhancedIngredientsPage = () => {
                                                             compact
                                                         />
                                                         {(() => {
-                                                            if (!item.expiry_date) return null
+                                                            if (!item.expiry_date) {return null}
                                                             const expiryDate = new Date(item.expiry_date)
                                                             const today = new Date()
                                                             const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
@@ -312,13 +310,13 @@ export const EnhancedIngredientsPage = () => {
                                                                         Expired
                                                                     </Badge>
                                                                 )
-                                                            } else if (daysUntilExpiry <= 7) {
+                                                            } if (daysUntilExpiry <= 7) {
                                                                 return (
                                                                     <Badge variant="destructive" className="text-xs">
                                                                         {daysUntilExpiry} hari lagi
                                                                     </Badge>
                                                                 )
-                                                            } else if (daysUntilExpiry <= 14) {
+                                                            } if (daysUntilExpiry <= 14) {
                                                                 return (
                                                                     <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
                                                                         {daysUntilExpiry} hari lagi

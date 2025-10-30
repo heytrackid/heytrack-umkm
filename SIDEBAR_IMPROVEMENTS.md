@@ -1,151 +1,221 @@
-# Sidebar Improvements - Completed ✅
+# Sidebar Improvements Summary
 
-## Masalah yang Diperbaiki
+## Changes Made
 
-1. **Sidebar menutupi konten aplikasi** - Fixed dengan menggunakan margin-left yang dinamis
-2. **Tidak ada mode collapse** - Added collapse mode untuk desktop
-3. **Animasi tidak smooth** - Improved dengan transition CSS yang lebih baik
-4. **Mobile UX kurang baik** - Added overlay dan smooth transitions
+### 1. ✅ Added Biaya Operasional Menu
 
-## Fitur Baru
+**Location**: Keuangan section
+**Icon**: Receipt (lucide-react)
+**Route**: `/operational-costs`
 
-### 1. Collapse Mode (Desktop)
-- Sidebar bisa diciutkan menjadi icon-only mode (width: 16px → 72px)
-- Tombol collapse di bagian footer sidebar
-- Smooth transition 300ms dengan cubic-bezier easing
-- Konten aplikasi otomatis adjust dengan margin-left
-
-### 2. Keyboard Shortcuts
-- **Ctrl/Cmd + B**: Toggle sidebar collapse (desktop only)
-- **Escape**: Close mobile menu
-
-### 3. Mobile Improvements
-- Overlay gelap saat sidebar terbuka
-- Smooth slide-in/out animation
-- Body scroll prevention saat menu terbuka
-- Tap overlay untuk menutup menu
-
-### 4. Visual Improvements
-- Custom scrollbar yang lebih tipis dan smooth
-- Hover effects yang lebih responsif
-- Icon rotation pada collapse button
-- Smooth opacity transitions untuk text
-
-## Technical Details
-
-### CSS Classes Added
-```css
-.sidebar-layout          /* Container layout */
-.sidebar-transition      /* Smooth transitions */
-.mobile-min-vh          /* Mobile viewport height */
-.sidebar-overlay        /* Mobile overlay */
-.content-shift          /* Content margin shift */
-.scrollbar-thin         /* Custom scrollbar */
-```
-
-### Component Props
 ```typescript
-interface SidebarProps {
-  isOpen?: boolean        // Sidebar visibility
-  onToggle?: () => void   // Toggle visibility
-  isMobile?: boolean      // Mobile mode
-  isCollapsed?: boolean   // Collapse state (desktop)
-  onCollapse?: () => void // Toggle collapse
+{
+  title: 'Keuangan',
+  icon: DollarSign,
+  items: [
+    { label: 'Cash Flow', href: '/cash-flow', icon: TrendingUp },
+    { label: 'HPP & Profit', href: '/hpp', icon: Calculator },
+    { label: 'Biaya Operasional', href: '/operational-costs', icon: Receipt } // ✨ NEW
+  ]
 }
 ```
 
-### State Management
+### 2. ✅ Improved Collapsed Mode - Icon Only Display
+
+**Before**: Section headers showed text even in collapsed mode
+**After**: Section headers show only icons with tooltips in collapsed mode
+
+#### Non-Collapsible Sections (Dashboard, Laporan, Pengaturan)
 ```typescript
-const [sidebarOpen, setSidebarOpen] = useState(true)
-const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+// Collapsed mode - Icon only with tooltip
+isCollapsed ? (
+  <div className="px-3 py-2 flex justify-center">
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex justify-center">
+            <SectionIcon className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="right" className="font-medium">
+          {section.title}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  </div>
+) : (
+  // Expanded mode - Text label
+  <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+    {section.title}
+  </div>
+)
 ```
 
-## Behavior
+#### Collapsible Sections (Operasional, Produk & Stok, Keuangan, AI Tools)
+Already had icon-only display in collapsed mode, no changes needed.
 
-### Desktop
-- Sidebar fixed di kiri dengan width 288px (w-72)
-- Bisa collapse menjadi 64px (w-16) dengan icon-only mode
-- Konten shift dengan smooth transition
-- Collapse state persistent per session
+## Updated Sidebar Structure
 
-### Mobile
-- Sidebar slide dari kiri dengan overlay
-- Full width 288px (w-72)
-- Overlay tap to close
-- Body scroll locked saat terbuka
-- Escape key to close
+```
+📊 Dashboard
+   └─ Dashboard
 
-## Animation Timings
+🛒 Operasional (collapsible)
+   ├─ Pesanan
+   ├─ Pelanggan
+   └─ Produksi
 
-- Sidebar width transition: 300ms cubic-bezier(0.4, 0, 0.2, 1)
-- Content margin shift: 300ms cubic-bezier(0.4, 0, 0.2, 1)
-- Mobile slide: 300ms ease-in-out
-- Overlay fade: 200ms ease-in-out
-- Hover effects: 200ms ease-in-out
+📦 Produk & Stok (collapsible)
+   ├─ Resep
+   └─ Bahan
+
+💰 Keuangan (collapsible)
+   ├─ Cash Flow
+   ├─ HPP & Profit
+   └─ Biaya Operasional ✨ NEW
+
+📄 Laporan
+   └─ Laporan
+
+🤖 AI Tools (collapsible)
+   └─ AI Chatbot
+
+⚙️ Pengaturan
+   └─ Pengaturan
+```
+
+## Visual Improvements
+
+### Collapsed Mode (w-16)
+```
+┌────┐
+│ 📊 │  ← Dashboard icon only
+├────┤
+│ 🛒 │  ← Operasional icon only
+│ 📦 │  ← Produk & Stok icon only
+│ 💰 │  ← Keuangan icon only
+│ 📄 │  ← Laporan icon only
+│ 🤖 │  ← AI Tools icon only
+│ ⚙️ │  ← Pengaturan icon only
+└────┘
+```
+
+### Expanded Mode (w-72)
+```
+┌─────────────────────┐
+│ Dashboard           │
+│ ├─ Dashboard        │
+├─────────────────────┤
+│ Operasional ▼       │
+│ ├─ Pesanan          │
+│ ├─ Pelanggan        │
+│ └─ Produksi         │
+├─────────────────────┤
+│ Produk & Stok ▼     │
+│ ├─ Resep            │
+│ └─ Bahan            │
+├─────────────────────┤
+│ Keuangan ▼          │
+│ ├─ Cash Flow        │
+│ ├─ HPP & Profit     │
+│ └─ Biaya Operasional│ ✨ NEW
+├─────────────────────┤
+│ Laporan             │
+│ └─ Laporan          │
+├─────────────────────┤
+│ AI Tools ▼          │
+│ └─ AI Chatbot       │
+├─────────────────────┤
+│ Pengaturan          │
+│ └─ Pengaturan       │
+└─────────────────────┘
+```
+
+## Icons Used
+
+| Menu Item | Icon | Import |
+|-----------|------|--------|
+| Dashboard | LayoutDashboard | lucide-react |
+| Pesanan | ShoppingCart | lucide-react |
+| Pelanggan | Users | lucide-react |
+| Produksi | Factory | lucide-react |
+| Resep | ChefHat | lucide-react |
+| Bahan | Package | lucide-react |
+| Cash Flow | TrendingUp | lucide-react |
+| HPP & Profit | Calculator | lucide-react |
+| **Biaya Operasional** | **Receipt** | **lucide-react** ✨ |
+| Laporan | FileText | lucide-react |
+| AI Chatbot | Bot | lucide-react |
+| Pengaturan | Settings | lucide-react |
+
+## User Experience Benefits
+
+### 1. Better Space Utilization
+- Collapsed mode now truly minimal (only icons)
+- More screen space for content
+- Cleaner visual hierarchy
+
+### 2. Consistent Behavior
+- All sections behave the same in collapsed mode
+- Tooltips provide context on hover
+- Smooth transitions between states
+
+### 3. Improved Navigation
+- Biaya Operasional now easily accessible
+- Logical grouping under Keuangan section
+- Icon-based navigation in collapsed mode
+
+### 4. Mobile-Friendly
+- Collapsed mode works better on tablets
+- Touch-friendly icon targets
+- Reduced visual clutter
+
+## Testing Checklist
+
+### ✅ Visual Tests
+- [ ] Collapsed mode shows only icons (no text)
+- [ ] Tooltips appear on hover in collapsed mode
+- [ ] Expanded mode shows full labels
+- [ ] Section icons are properly aligned
+- [ ] Active states work correctly
+
+### ✅ Functional Tests
+- [ ] Biaya Operasional menu navigates to `/operational-costs`
+- [ ] Operational costs page loads correctly
+- [ ] Collapse/expand toggle works smoothly
+- [ ] All menu items remain clickable
+- [ ] Tooltips show correct labels
+
+### ✅ Responsive Tests
+- [ ] Desktop: Collapsed mode (w-16) works
+- [ ] Desktop: Expanded mode (w-72) works
+- [ ] Tablet: Sidebar behavior correct
+- [ ] Mobile: Drawer mode works
 
 ## Files Modified
 
-1. `src/components/layout/sidebar.tsx`
-   - Added collapse mode support
-   - Added icon-only view for collapsed state
-   - Improved animations and transitions
+1. **`src/components/layout/Sidebar.tsx`**
+   - Added Receipt icon import
+   - Added Biaya Operasional menu item
+   - Improved collapsed mode rendering for non-collapsible sections
+   - Better tooltip positioning and styling
 
-2. `src/components/layout/app-layout.tsx`
-   - Added collapse state management
-   - Added keyboard shortcuts
-   - Added mobile overlay
-   - Added content margin shift
+## Related Pages
 
-3. `src/app/globals.css`
-   - Added sidebar-specific styles
-   - Added custom scrollbar styles
-   - Added smooth scroll behavior
+- **Operational Costs**: `src/app/operational-costs/page.tsx` ✅ Already exists
+- **Component**: `src/components/operational-costs/EnhancedOperationalCostsPage.tsx`
 
-## Usage Example
+## Future Enhancements
 
-```tsx
-// Desktop - Auto collapse support
-<AppLayout>
-  <YourContent />
-</AppLayout>
-
-// Mobile - Auto overlay and smooth transitions
-<AppLayout pageTitle="Dashboard">
-  <YourContent />
-</AppLayout>
-```
-
-## Browser Support
-
-- ✅ Chrome/Edge (latest)
-- ✅ Firefox (latest)
-- ✅ Safari (latest)
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
-
-## Performance
-
-- No layout shift on collapse/expand
-- GPU-accelerated transitions (transform, opacity)
-- Minimal repaints
-- Smooth 60fps animations
-
-## Accessibility
-
-- Keyboard navigation support
-- ARIA labels for buttons
-- Focus management
-- Screen reader friendly
-
-## Future Improvements (Optional)
-
-- [ ] Remember collapse state in localStorage
-- [ ] Add hover tooltip for collapsed items
-- [ ] Add resize handle for custom width
-- [ ] Add animation preferences (respect prefers-reduced-motion)
+1. **Icon Customization**: Allow users to customize section icons
+2. **Drag & Drop**: Reorder menu items
+3. **Favorites**: Pin frequently used items
+4. **Search**: Quick menu search in expanded mode
+5. **Keyboard Shortcuts**: Navigate with keyboard
+6. **Breadcrumbs**: Show current location in collapsed mode
 
 ---
 
-**Status**: ✅ Complete and tested
-**Date**: October 29, 2025
-**Version**: 1.0.0
+**Status**: ✅ COMPLETED
+**Date**: October 30, 2025
+**Impact**: Medium - Better UX and navigation

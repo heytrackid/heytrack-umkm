@@ -22,7 +22,7 @@ interface ProfitFiltersProps {
   isMobile: boolean
 }
 
-export const ProfitFilters = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => (
+export const ProfitFiltersComponent = ({ filters, onFiltersChange, onApplyFilters, isMobile }: ProfitFiltersProps) => (
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">

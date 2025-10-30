@@ -65,7 +65,7 @@ export interface UseUnifiedHppReturn {
 
 // Type guard for recipe ingredient structure
 function isValidRecipeIngredient(ri: unknown): ri is RecipeIngredientRecord {
-  if (!ri || typeof ri !== 'object') return false
+  if (!ri || typeof ri !== 'object') {return false}
   const ingredient = ri as { ingredient_id?: unknown }
   return typeof ingredient.ingredient_id === 'string'
 }
@@ -86,7 +86,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   const [selectedRecipeId, setSelectedRecipeId] = useState<string>('')
 
   // Fetch all recipes
-  const { data: recipesData, isLoading: recipesLoading } = useQuery<Pick<Recipe, 'id' | 'name'>[]>({
+  const { data: recipesData, isLoading: recipesLoading } = useQuery<Array<Pick<Recipe, 'id' | 'name'>>>({
     queryKey: ['recipes-list'],
     queryFn: async (): Promise<Array<Pick<Recipe, 'id' | 'name'>>> => {
       const response = await fetch('/api/recipes?limit=100')
@@ -280,7 +280,7 @@ export function useUnifiedHpp(): UseUnifiedHppReturn {
   return {
     recipes: recipesData ?? [],
     overview: overviewData,
-    recipe: (recipeData ?? null) as RecipeWithCosts | null,
+    recipe: (recipeData ?? null),
     comparison: comparisonData ?? [],
     isLoading: recipesLoading || overviewLoading,
     recipeLoading,

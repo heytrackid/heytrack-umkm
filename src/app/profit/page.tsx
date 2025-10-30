@@ -155,158 +155,167 @@ export default function ProfitReportPage() {
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Main Content - Single Suspense Boundary to prevent cascading loading */}
         <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/4" />
-                <div className="grid gap-4 md:grid-cols-4">
-                  <div className="h-10 bg-muted rounded" />
-                  <div className="h-10 bg-muted rounded" />
-                  <div className="h-10 bg-muted rounded" />
-                  <div className="h-10 bg-muted rounded" />
+          <div className="space-y-6">
+            {/* Filters Loading */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-1/4" />
+                  <div className="grid gap-4 md:grid-cols-4">
+                    <div className="h-10 bg-muted rounded" />
+                    <div className="h-10 bg-muted rounded" />
+                    <div className="h-10 bg-muted rounded" />
+                    <div className="h-10 bg-muted rounded" />
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            
+            {/* Summary Cards Loading */}
+            <StatsSkeleton count={4} />
+            
+            {/* Product Profitability Chart Loading */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Product Profitability Table Loading */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-1/3" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <div key={i} className="h-12 bg-muted rounded" />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Ingredient Costs Loading */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-1/4" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 3 }, (_, i) => (
+                      <div key={i} className="h-12 bg-muted rounded" />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Operating Expenses Loading */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-1/3" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 4 }, (_, i) => (
+                      <div key={i} className="h-10 bg-muted rounded" />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Profit Breakdown Loading */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-1/4" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <div key={i} className="h-6 bg-muted rounded" />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Info Card Loading */}
+            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+              <CardContent className="pt-6">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-4 bg-muted rounded w-1/2" />
+                  <div className="space-y-2">
+                    <div className="h-3 bg-muted rounded" />
+                    <div className="h-3 bg-muted rounded w-3/4" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         }>
+          {/* Filters */}
           <ProfitFilters
             filters={filters}
             onFiltersChange={updateFilters}
             onApplyFilters={refetch}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Summary Cards */}
-        <Suspense fallback={<StatsSkeleton count={4} />}>
+          {/* Summary Cards */}
           <ProfitSummaryCards
             summary={summary}
             trends={profitData.trends}
             formatCurrency={formatCurrency}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Product Profitability Chart */}
-        <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
-        }>
-          <ProductProfitabilityChart
-            chartData={productChartData}
-            filters={filters}
-            onFiltersChange={updateFilters}
-            formatCurrency={formatCurrency}
-            isMobile={isMobile}
-          />
-        </Suspense>
-
-        {/* Product Profitability Table */}
-        <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/3" />
-                <div className="space-y-2">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <div key={i} className="h-12 bg-muted rounded" />
-                  ))}
+          {/* Product Profitability Chart - Keep as separate Suspense since it's a heavy component */}
+          <Suspense fallback={
+            <Card>
+              <CardContent className="p-6">
+                <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        }>
+              </CardContent>
+            </Card>
+          }>
+            <ProductProfitabilityChart
+              chartData={productChartData}
+              filters={filters}
+              onFiltersChange={updateFilters}
+              formatCurrency={formatCurrency}
+              isMobile={isMobile}
+            />
+          </Suspense>
+
+          {/* Product Profitability Table */}
           <ProductProfitabilityTable
             products={products}
             formatCurrency={formatCurrency}
           />
-        </Suspense>
 
-        {/* Ingredient Costs */}
-        <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/4" />
-                <div className="space-y-2">
-                  {Array.from({ length: 3 }, (_, i) => (
-                    <div key={i} className="h-12 bg-muted rounded" />
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        }>
+          {/* Ingredient Costs */}
           <IngredientCostsTable
             ingredients={ingredients}
             formatCurrency={formatCurrency}
           />
-        </Suspense>
 
-        {/* Operating Expenses */}
-        <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/3" />
-                <div className="space-y-2">
-                  {Array.from({ length: 4 }, (_, i) => (
-                    <div key={i} className="h-10 bg-muted rounded" />
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        }>
+          {/* Operating Expenses */}
           <OperatingExpenses
             operating_expenses={operating_expenses}
             summary={summary}
             formatCurrency={formatCurrency}
           />
-        </Suspense>
 
-        {/* Profit Breakdown */}
-        <Suspense fallback={
-          <Card>
-            <CardContent className="p-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/4" />
-                <div className="space-y-2">
-                  {Array.from({ length: 6 }, (_, i) => (
-                    <div key={i} className="h-6 bg-muted rounded" />
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        }>
+          {/* Profit Breakdown */}
           <ProfitBreakdown
             summary={summary}
             formatCurrency={formatCurrency}
           />
-        </Suspense>
 
-        {/* Info Card */}
-        <Suspense fallback={
-          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-            <CardContent className="pt-6">
-              <div className="animate-pulse space-y-4">
-                <div className="h-4 bg-muted rounded w-1/2" />
-                <div className="space-y-2">
-                  <div className="h-3 bg-muted rounded" />
-                  <div className="h-3 bg-muted rounded w-3/4" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        }>
+          {/* Info Card */}
           <ProfitInfoCard />
         </Suspense>
       </div>

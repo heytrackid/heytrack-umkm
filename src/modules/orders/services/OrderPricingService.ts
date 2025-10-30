@@ -65,7 +65,7 @@ export class OrderPricingService {
       // Define query result type using generated types
       type RecipeQueryResult = Recipe & {
         recipe_ingredients: Array<RecipeIngredient & {
-          ingredient: Pick<Ingredient, 'price_per_unit' | 'unit'>[]  // Supabase returns arrays
+          ingredient: Array<Pick<Ingredient, 'price_per_unit' | 'unit'>>  // Supabase returns arrays
         }>
       }
 
@@ -73,7 +73,7 @@ export class OrderPricingService {
        * Type guard for recipe query result
        */
       function isRecipeQueryResult(data: unknown): data is RecipeQueryResult {
-        if (!data || typeof data !== 'object') return false
+        if (!data || typeof data !== 'object') {return false}
         const recipe = data as RecipeQueryResult
         return (
           typeof recipe.id === 'string' &&

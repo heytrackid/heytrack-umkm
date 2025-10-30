@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 import type { Database } from '@/types/supabase-generated'
 
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -26,9 +27,9 @@ export function useIngredients(options?: UseIngredientsOptions) {
     queryKey: ['ingredients', options],
     queryFn: async () => {
       const params = new URLSearchParams()
-      if (options?.limit) params.set('limit', options.limit.toString())
-      if (options?.offset) params.set('offset', options.offset.toString())
-      if (options?.search) params.set('search', options.search)
+      if (options?.limit) {params.set('limit', options.limit.toString())}
+      if (options?.offset) {params.set('offset', options.offset.toString())}
+      if (options?.search) {params.set('search', options.search)}
       
       const response = await fetch(`/api/ingredients?${params}`)
       if (!response.ok) {
@@ -49,7 +50,7 @@ export function useIngredient(id: string | null) {
   return useQuery({
     queryKey: ['ingredient', id],
     queryFn: async () => {
-      if (!id) return null
+      if (!id) {return null}
       
       const response = await fetch(`/api/ingredients/${id}`)
       if (!response.ok) {
@@ -93,12 +94,13 @@ export function useCreateIngredient() {
         description: 'Bahan berhasil ditambahkan',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to create ingredient')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to create ingredient')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal menambahkan bahan',
+        description: message || 'Gagal menambahkan bahan',
         variant: 'destructive',
       })
     },
@@ -136,12 +138,13 @@ export function useUpdateIngredient() {
         description: 'Bahan berhasil diperbarui',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to update ingredient')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to update ingredient')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal memperbarui bahan',
+        description: message || 'Gagal memperbarui bahan',
         variant: 'destructive',
       })
     },
@@ -176,12 +179,13 @@ export function useDeleteIngredient() {
         description: 'Bahan berhasil dihapus',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to delete ingredient')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to delete ingredient')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal menghapus bahan',
+        description: message || 'Gagal menghapus bahan',
         variant: 'destructive',
       })
     },

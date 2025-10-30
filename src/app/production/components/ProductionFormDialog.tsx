@@ -114,9 +114,9 @@ export const ProductionFormDialog = ({ open, onOpenChange, onSuccess }: Producti
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Buat Batch Produksi Baru</DialogTitle>
+                    <DialogTitle className="text-wrap-mobile">Buat Batch Produksi Baru</DialogTitle>
                     <DialogDescription>
                         Rencanakan batch produksi untuk resep yang akan diproduksi
                     </DialogDescription>

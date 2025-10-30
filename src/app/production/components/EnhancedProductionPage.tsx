@@ -163,7 +163,7 @@ export const EnhancedProductionPage = () => {
     const handleStartProduction = async (id: string) => {
         try {
             const response = await fetch(`/api/production-batches/${id}`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     status: 'IN_PROGRESS',
@@ -182,7 +182,7 @@ export const EnhancedProductionPage = () => {
     const handleCompleteProduction = async (id: string) => {
         try {
             const response = await fetch(`/api/production-batches/${id}`, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     status: 'COMPLETED',
@@ -330,7 +330,7 @@ export const EnhancedProductionPage = () => {
                             </div>
 
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-full sm:w-[180px]">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -343,7 +343,7 @@ export const EnhancedProductionPage = () => {
                             </Select>
 
                             <Select value={dateFilter} onValueChange={setDateFilter}>
-                                <SelectTrigger className="w-[180px]">
+                                <SelectTrigger className="w-full sm:w-[180px]">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -518,87 +518,85 @@ const ProductionCard = ({
     onComplete,
     formatCurrency,
     getStatusBadge
-}: ProductionCardProps) => {
-    return (
-        <Card className="hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <CardTitle className="text-lg">{production.batch_number}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                            {production.recipe?.name || 'Unknown Recipe'}
-                        </p>
-                    </div>
-                    {getStatusBadge(production.status)}
+}: ProductionCardProps) => (
+    <Card className="hover:shadow-lg transition-shadow">
+        <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+                <div>
+                    <CardTitle className="text-lg">{production.batch_number}</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        {production.recipe?.name || 'Unknown Recipe'}
+                    </p>
                 </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                        <p className="text-muted-foreground">Quantity</p>
-                        <p className="font-medium">{production.quantity} {production.unit}</p>
-                    </div>
-                    <div>
-                        <p className="text-muted-foreground">Planned Date</p>
-                        <p className="font-medium">
-                            {format(new Date(production.planned_date), 'dd MMM yyyy', { locale: idLocale })}
-                        </p>
-                    </div>
+                {getStatusBadge(production.status)}
+            </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                    <p className="text-muted-foreground">Quantity</p>
+                    <p className="font-medium">{production.quantity} {production.unit}</p>
                 </div>
+                <div>
+                    <p className="text-muted-foreground">Planned Date</p>
+                    <p className="font-medium">
+                        {format(new Date(production.planned_date), 'dd MMM yyyy', { locale: idLocale })}
+                    </p>
+                </div>
+            </div>
 
-                {production.started_at && (
-                    <div className="text-sm">
-                        <p className="text-muted-foreground">Started</p>
-                        <p className="font-medium">
-                            {format(new Date(production.started_at), 'dd MMM yyyy HH:mm', { locale: idLocale })}
-                        </p>
-                    </div>
-                )}
+            {production.started_at && (
+                <div className="text-sm">
+                    <p className="text-muted-foreground">Started</p>
+                    <p className="font-medium">
+                        {format(new Date(production.started_at), 'dd MMM yyyy HH:mm', { locale: idLocale })}
+                    </p>
+                </div>
+            )}
 
-                {production.completed_at && (
-                    <div className="text-sm">
-                        <p className="text-muted-foreground">Completed</p>
-                        <p className="font-medium">
-                            {format(new Date(production.completed_at), 'dd MMM yyyy HH:mm', { locale: idLocale })}
-                        </p>
-                    </div>
-                )}
+            {production.completed_at && (
+                <div className="text-sm">
+                    <p className="text-muted-foreground">Completed</p>
+                    <p className="font-medium">
+                        {format(new Date(production.completed_at), 'dd MMM yyyy HH:mm', { locale: idLocale })}
+                    </p>
+                </div>
+            )}
 
-                {production.actual_cost && (
-                    <div className="pt-3 border-t">
-                        <p className="text-sm text-muted-foreground">Actual Cost</p>
-                        <p className="text-lg font-bold text-green-600">
-                            {formatCurrency(production.actual_cost)}
-                        </p>
-                    </div>
-                )}
+            {production.actual_cost && (
+                <div className="pt-3 border-t">
+                    <p className="text-sm text-muted-foreground">Actual Cost</p>
+                    <p className="text-lg font-bold text-green-600">
+                        {formatCurrency(production.actual_cost)}
+                    </p>
+                </div>
+            )}
 
-                {production.notes && (
-                    <div className="pt-2">
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                            {production.notes}
-                        </p>
-                    </div>
-                )}
+            {production.notes && (
+                <div className="pt-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                        {production.notes}
+                    </p>
+                </div>
+            )}
 
-                <div className="flex gap-2 pt-2">
-                    <Button variant="outline" size="sm" className="flex-1">
-                        Detail
+            <div className="flex gap-2 pt-2">
+                <Button variant="outline" size="sm" className="flex-1">
+                    Detail
+                </Button>
+                {production.status === 'PLANNED' && (
+                    <Button size="sm" className="flex-1" onClick={() => onStart(production.id)}>
+                        <Play className="h-4 w-4 mr-1" />
+                        Mulai
                     </Button>
-                    {production.status === 'PLANNED' && (
-                        <Button size="sm" className="flex-1" onClick={() => onStart(production.id)}>
-                            <Play className="h-4 w-4 mr-1" />
-                            Mulai
-                        </Button>
-                    )}
-                    {production.status === 'IN_PROGRESS' && (
-                        <Button size="sm" className="flex-1" onClick={() => onComplete(production.id)}>
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Selesai
-                        </Button>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
+                )}
+                {production.status === 'IN_PROGRESS' && (
+                    <Button size="sm" className="flex-1" onClick={() => onComplete(production.id)}>
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Selesai
+                    </Button>
+                )}
+            </div>
+        </CardContent>
+    </Card>
+)

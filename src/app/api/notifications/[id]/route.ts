@@ -5,14 +5,20 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const supabase = await createClient()
     const { id: notificationId } = params
+    
+    // Validate UUID format
+    if (!isValidUUID(notificationId)) {
+      return NextResponse.json({ error: 'Invalid notification ID format' }, { status: 400 })
+    }
     
     // Authenticate user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -69,7 +75,7 @@ export async function PATCH(
     return NextResponse.json(notification)
 
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PATCH /api/notifications/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PATCH /api/notifications/[id]')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

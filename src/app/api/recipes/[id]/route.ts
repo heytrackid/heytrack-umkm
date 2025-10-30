@@ -4,8 +4,9 @@ import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import type { Database } from '@/types/supabase-generated'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
-type RouteContext = {
+interface RouteContext {
   params: Promise<{ id: string }>
 }
 
@@ -16,6 +17,12 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid recipe ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -41,7 +48,7 @@ export async function GET(
 
     return NextResponse.json(recipe)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/recipes/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -53,6 +60,12 @@ export async function PUT(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid recipe ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -97,7 +110,7 @@ export async function PUT(
 
       // Insert new ingredients
       if (recipe_ingredients.length > 0) {
-        type RecipeIngredientInput = {
+        interface RecipeIngredientInput {
           ingredient_id?: string
           bahan_id?: string
           quantity?: number
@@ -106,7 +119,7 @@ export async function PUT(
           notes?: string
         }
 
-        const ingredientsToInsert: Database['public']['Tables']['recipe_ingredients']['Insert'][] = 
+        const ingredientsToInsert: Array<Database['public']['Tables']['recipe_ingredients']['Insert']> = 
           recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
             recipe_id: id,
             ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
@@ -148,7 +161,7 @@ export async function PUT(
 
     return NextResponse.json(completeRecipe)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/recipes/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/recipes/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -160,6 +173,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid recipe ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -188,7 +207,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Recipe deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in DELETE /api/recipes/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/recipes/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

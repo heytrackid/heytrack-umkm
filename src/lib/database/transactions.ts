@@ -31,7 +31,7 @@ export interface TransactionResult<T = unknown> {
  * Supabase Edge Functions with pg transactions.
  */
 export async function executeTransaction<T = unknown>(
-  operations: TransactionOperation<T>[],
+  operations: Array<TransactionOperation<T>>,
   options: {
     continueOnError?: boolean
     logProgress?: boolean
@@ -211,7 +211,7 @@ export async function executeParallel<T>(
   const { maxConcurrency = 5, continueOnError = false } = options
 
   const results: Array<{ success: boolean; data?: T; error?: Error }> = []
-  const executing: Promise<void>[] = []
+  const executing: Array<Promise<void>> = []
 
   for (const operation of operations) {
     const promise = (async () => {

@@ -303,11 +303,11 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
                 <div className="text-sm text-gray-500">Total Customers</div>
               </div>
               <div>
-                <div className="text-xl font-bold">{data.summary ? data.summary.split('T')[1]?.split('T')[1]?.replace(')', '') || 'N/A' : 'N/A'}</div>
+                <div className="text-xl font-bold">N/A</div>
                 <div className="text-sm text-gray-500">Retention Rate</div>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <div className="text-xl font-bold">{data.summary ? data.summary.split('T')[1] || 'N/A' : 'N/A'}</div>
+                <div className="text-xl font-bold">N/A</div>
                 <div className="text-sm text-gray-500">Avg Order Value</div>
               </div>
             </div>
@@ -368,7 +368,7 @@ const DataVisualization = ({ type, data, compact = false }: DataVisualizationPro
       <Card className="w-full">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center space-x-2">
-            <BarChart className="h-5 w-5 text-orange-600" />
+            <Package className="h-5 w-5 text-orange-600" />
             <span>Product Performance</span>
           </CardTitle>
         </CardHeader>

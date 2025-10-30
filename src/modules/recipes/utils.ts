@@ -116,7 +116,7 @@ export function validateRecipe(recipe: Partial<Recipe>): { isValid: boolean; err
     errors.push('Waktu memasak tidak boleh negatif')
   }
 
-  if (recipe.category && recipe.category.trim().length === 0) {
+  if (recipe.category?.trim().length === 0) {
     errors.push('Kategori harus dipilih')
   }
 

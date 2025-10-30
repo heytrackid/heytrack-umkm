@@ -28,10 +28,10 @@ export function useMemoizedArrayOps<T, M = T>(
     let result: T[] | M[] = [...array]
 
     if (operations.filter) {
-      result = (result as T[]).filter(operations.filter)
+      result = (result).filter(operations.filter)
     }
     if (operations.map) {
-      result = (result as T[]).map(operations.map)
+      result = (result).map(operations.map)
     }
     if (operations.sort) {
       result = [...(result as T[])].sort(operations.sort)

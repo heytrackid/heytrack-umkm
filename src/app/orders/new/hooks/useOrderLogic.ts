@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { FormEvent } from 'react'
 import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isArrayOf, isRecipe, isCustomer } from '@/lib/type-guards'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Customer = Database['public']['Tables']['customers']['Row']
@@ -81,13 +82,23 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/recipes')
       if (response.ok) {
         const data = await response.json()
-        const recipes = Array.isArray(data) ? data : (data?.recipes ?? [])
-        void setAvailableRecipes(recipes)
+        // Validate with type guards
+        if (isArrayOf(data, isRecipe)) {
+          void setAvailableRecipes(data)
+        } else if (data && typeof data === 'object' && Array.isArray(data?.recipes) && isArrayOf(data.recipes, isRecipe)) {
+          void setAvailableRecipes(data.recipes)
+        } else {
+          apiLogger.warn({ data }, 'API returned unexpected format for recipes')
+          void setAvailableRecipes([])
+        }
       } else {
+        const errorText = await response.text()
+        apiLogger.error({ error: errorText }, 'Failed to fetch recipes')
         void setAvailableRecipes([])
       }
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Failed to fetch recipes:')
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Failed to fetch recipes:')
       void setAvailableRecipes([])
     } finally {
       setLoading(false) // Set loading to false after fetch
@@ -99,13 +110,23 @@ export const useOrderLogic = () => {
       const response = await fetch('/api/customers')
       if (response.ok) {
         const data = await response.json()
-        const customersArr = Array.isArray(data) ? data : (data?.customers ?? [])
-        void setCustomers(customersArr)
+        // Validate with type guards
+        if (isArrayOf(data, isCustomer)) {
+          void setCustomers(data)
+        } else if (data && typeof data === 'object' && Array.isArray(data?.customers) && isArrayOf(data.customers, isCustomer)) {
+          void setCustomers(data.customers)
+        } else {
+          apiLogger.warn({ data }, 'API returned unexpected format for customers')
+          void setCustomers([])
+        }
       } else {
+        const errorText = await response.text()
+        apiLogger.error({ error: errorText }, 'Failed to fetch customers')
         void setCustomers([])
       }
     } catch (err: unknown) {
-      apiLogger.error({ err }, 'Failed to fetch customers:')
+      const message = getErrorMessage(err)
+      apiLogger.error({ error: message }, 'Failed to fetch customers:')
       void setCustomers([])
     }
   }
@@ -254,14 +275,15 @@ export const useOrderLogic = () => {
       
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Gagal menyimpan pesanan')
+        throw new Error(errorData.error || await response.text() || 'Gagal menyimpan pesanan')
       }
       
       // Redirect to orders page with success message
       void router.push('/orders?success=true')
       
     } catch (err) {
-      void setError(err instanceof Error ? err.message : 'Terjadi kesalahan')
+      const message = getErrorMessage(err)
+      void setError(message)
     } finally {
       void setIsSubmitting(false)
     }

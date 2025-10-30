@@ -5,6 +5,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { logger } from '@/lib/logger';
+import { getErrorMessage } from '@/lib/type-guards';
 import type { ChatMessage, ChatSuggestion, SessionListItem } from '@/types/features/chat';
 
 interface UseContextAwareChatReturn {
@@ -52,8 +53,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
       const data = await response.json();
       setSessions(data.sessions || []);
-    } catch (err) {
-      logger.error({ error: err }, 'Failed to load sessions');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to load sessions');
     }
   }, []);
 
@@ -69,8 +71,9 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
 
       const data = await response.json();
       setSuggestions(data.suggestions || []);
-    } catch (err) {
-      logger.error({ error: err }, 'Failed to load suggestions');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      logger.error({ error: message }, 'Failed to load suggestions');
     }
   }, [pathname]);
 
@@ -142,14 +145,14 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
             const sessionsData = await sessionsResponse.json();
             setSessions(sessionsData.sessions || []);
           }
-        } catch (err) {
-          logger.error({ error: err }, 'Failed to reload sessions');
+        } catch (error: unknown) {
+          const message = getErrorMessage(error)
+          logger.error({ error: message }, 'Failed to reload sessions');
         }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Terjadi kesalahan';
+      } catch (error: unknown) {
+        const errorMessage = getErrorMessage(error) || 'Terjadi kesalahan';
         setError(errorMessage);
-        logger.error({ error: err }, 'Failed to send message');
+        logger.error({ error: errorMessage }, 'Failed to send message');
 
         // Remove optimistic user message on error
         setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
@@ -174,11 +177,10 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
       const data = await response.json();
       setSessionId(newSessionId);
       setMessages(data.messages || []);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load session';
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error) || 'Failed to load session';
       setError(errorMessage);
-      logger.error({ error: err }, 'Failed to load session');
+      logger.error({ error: errorMessage }, 'Failed to load session');
     } finally {
       setIsLoading(false);
     }
@@ -215,12 +217,14 @@ export function useContextAwareChat(): UseContextAwareChatReturn {
             const sessionsData = await sessionsResponse.json();
             setSessions(sessionsData.sessions || []);
           }
-        } catch (err) {
-          logger.error({ error: err }, 'Failed to reload sessions');
+        } catch (error: unknown) {
+          const message = getErrorMessage(error)
+          logger.error({ error: message }, 'Failed to reload sessions');
         }
-      } catch (err) {
-        logger.error({ error: err }, 'Failed to delete session');
-        throw err;
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
+        logger.error({ error: message }, 'Failed to delete session');
+        throw error;
       }
     },
     [sessionId]

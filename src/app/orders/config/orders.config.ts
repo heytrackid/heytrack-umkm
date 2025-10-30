@@ -199,7 +199,7 @@ export const DEFAULT_ORDERS_CONFIG: OrdersModuleConfig = {
     auto_reminder_days: [3, 1] // Remind 3 days and 1 day before due date
   },
   
-  regional: REGIONAL_DEFAULTS['ID']! // Default to Indonesia
+  regional: REGIONAL_DEFAULTS['ID'] // Default to Indonesia
 }
 
 // Status color mappings for UI
@@ -342,7 +342,7 @@ export function validateOrdersConfig(config: Partial<OrdersModuleConfig>): strin
  * Create region-specific configuration
  */
 export function createRegionalOrdersConfig(countryCode: string): OrdersModuleConfig {
-  const regional = REGIONAL_DEFAULTS[countryCode] || REGIONAL_DEFAULTS['ID']!
+  const regional = REGIONAL_DEFAULTS[countryCode] || REGIONAL_DEFAULTS['ID']
   
   return {
     ...DEFAULT_ORDERS_CONFIG,

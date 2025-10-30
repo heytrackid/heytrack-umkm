@@ -18,12 +18,13 @@ interface ChartProps<T = Record<string, unknown>> {
   [key: string]: unknown
 }
 
-interface FinancialChartProps extends ChartProps {
-  period?: string
-  showLegend?: boolean
-  showTooltip?: boolean
-  currency?: string
-}
+// Unused interface - kept for future use
+// interface FinancialChartProps extends ChartProps {
+//   period?: string
+//   showLegend?: boolean
+//   showTooltip?: boolean
+//   currency?: string
+// }
 
 // Chart loading skeleton
 const ChartLoadingSkeleton = ({
@@ -84,7 +85,7 @@ const LazyMiniChart = lazy(
 // )
 
 // Chart wrapper components dengan loading states
-export function FinancialTrendsChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function FinancialTrendsChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Financial Trends" height="h-80" />}>
       <LazyFinancialTrendsChart {...props} />
@@ -92,7 +93,7 @@ export function FinancialTrendsChartWithLoading<T = Record<string, unknown>>(pro
   )
 }
 
-export function InventoryTrendsChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function InventoryTrendsChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Inventory Trends" height="h-80" />}>
       <LazyInventoryTrendsChart {...props} />
@@ -100,7 +101,7 @@ export function InventoryTrendsChartWithLoading<T = Record<string, unknown>>(pro
   )
 }
 
-export function ChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function ChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Chart" height="h-64" />}>
       <LazyChart {...props} />
@@ -108,7 +109,7 @@ export function ChartWithLoading<T = Record<string, unknown>>(props: T) {
   )
 }
 
-export function MiniChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function MiniChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<MiniChartLoadingSkeleton />}>
       <LazyMiniChart {...props} />
@@ -134,7 +135,7 @@ const LazyAreaChart = lazy(
 )
 
 // Custom chart wrapper untuk specific chart types
-export function PieChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function PieChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Pie Chart" height="h-64" />}>
       <LazyPieChart {...props} />
@@ -142,7 +143,7 @@ export function PieChartWithLoading<T = Record<string, unknown>>(props: T) {
   )
 }
 
-export function LineChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function LineChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Line Chart" height="h-64" />}>
       <LazyLineChart {...props} />
@@ -150,7 +151,7 @@ export function LineChartWithLoading<T = Record<string, unknown>>(props: T) {
   )
 }
 
-export function BarChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function BarChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Bar Chart" height="h-64" />}>
       <LazyBarChart {...props} />
@@ -158,7 +159,7 @@ export function BarChartWithLoading<T = Record<string, unknown>>(props: T) {
   )
 }
 
-export function AreaChartWithLoading<T = Record<string, unknown>>(props: T) {
+export function AreaChartWithLoading<T extends Record<string, unknown> = Record<string, unknown>>(props: T) {
   return (
     <Suspense fallback={<ChartLoadingSkeleton title="Area Chart" height="h-64" />}>
       <LazyAreaChart {...props} />

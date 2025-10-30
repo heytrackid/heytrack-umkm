@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { AIRecipeGenerationSchema } from '@/lib/validations/api-schemas'
 import { validateRequestOrRespond } from '@/lib/validations/validate-request'
 import type { Database } from '@/types/supabase-generated'
+import { isIngredient, isRecipe, isArrayOf, getErrorMessage, safeNumber } from '@/lib/type-guards'
 
 // Use generated types
 type Ingredient = Database['public']['Tables']['ingredients']['Row']

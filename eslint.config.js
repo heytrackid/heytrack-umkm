@@ -161,7 +161,7 @@ export default [
       // ============================================
       // HEYTRACK CUSTOM RULES
       // ============================================
-      "heytrack/consistent-error-handling": "error",
+      // "heytrack/consistent-error-handling": "error", // Disabled - needs update for ESLint 9
 
       // ============================================
       // CODE STYLE & CONSISTENCY

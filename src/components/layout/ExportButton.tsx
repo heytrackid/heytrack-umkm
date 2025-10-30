@@ -5,7 +5,7 @@ import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
-export function ExportButton() {
+export const ExportButton = () => {
     const [isExporting, setIsExporting] = useState(false)
 
     const handleExport = async () => {

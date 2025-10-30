@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { EnhancedIngredientsPage as IngredientsCRUD } from '@/components/ingredients/EnhancedIngredientsPage';
 import AppLayout from '@/components/layout/app-layout';
 import { StatsCards, StatCardPatterns, PageBreadcrumb, BreadcrumbPatterns } from '@/components/ui'
-import { EmptyState, EmptyStatePresets } from '@/components/ui/empty-state'
 import { useIngredients } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -14,14 +13,28 @@ import {
   AlertTriangle,
   Package,
   Plus,
-  ShoppingCart
+  ShoppingCart,
+  Upload
 } from 'lucide-react';
+import { ImportDialog } from '@/components/import';
+import {
+  parseIngredientsCSV,
+  generateIngredientsTemplate
+} from '@/components/import/csv-helpers';
 
 export default function IngredientsPage() {
   const { data: ingredients, loading, error } = useIngredients({ realtime: true });
   const { isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  // Generate template URL
+  const templateUrl = useMemo(() => {
+    const template = generateIngredientsTemplate()
+    const blob = new Blob([template], { type: 'text/csv' })
+    return URL.createObjectURL(blob)
+  }, []);
 
   // Handle auth errors
   useEffect(() => {
@@ -93,6 +106,14 @@ export default function IngredientsPage() {
           <div className="flex gap-2">
             <Button
               variant="outline"
+              onClick={() => setImportDialogOpen(true)}
+              className="flex-1 sm:flex-none"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => router.push('/ingredients/purchases')}
               className="flex-1 sm:flex-none"
             >
@@ -141,6 +162,49 @@ export default function IngredientsPage() {
 
         {/* Main Content */}
         <IngredientsCRUD />
+
+        {/* Import Dialog */}
+        <ImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          title="Import Bahan Baku"
+          description="Upload file CSV untuk import data bahan baku secara massal"
+          templateUrl={templateUrl}
+          templateFilename="template-bahan-baku.csv"
+          parseCSV={parseIngredientsCSV}
+          onImport={async (data) => {
+            try {
+              const response = await fetch('/api/ingredients/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ingredients: data })
+              })
+
+              const result = await response.json()
+
+              if (!response.ok) {
+                return {
+                  success: false,
+                  error: result.error || 'Import gagal',
+                  details: result.details
+                }
+              }
+
+              // Refresh data
+              window.location.reload()
+
+              return {
+                success: true,
+                count: result.count
+              }
+            } catch (error) {
+              return {
+                success: false,
+                error: 'Terjadi kesalahan saat import'
+              }
+            }
+          }}
+        />
       </div>
     </AppLayout>
   );

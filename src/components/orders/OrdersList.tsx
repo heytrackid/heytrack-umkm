@@ -114,15 +114,13 @@ const OrdersList = memo(({
         {paginatedOrders.map((order) => (
           <SwipeActions
             key={order.id}
-            leftActions={[
+            actions={[
               {
                 label: 'Lihat',
                 color: 'blue',
                 icon: <Eye className="h-4 w-4" />,
                 onAction: () => onViewOrder(order)
-              }
-            ]}
-            rightActions={[
+              },
               {
                 label: 'Edit',
                 color: 'green',
@@ -158,7 +156,7 @@ const OrdersList = memo(({
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{new Date(order.delivery_date).toLocaleDateString('id-ID')}</span>
+                    <span>{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('id-ID') : 'No date set'}</span>
                   </div>
 
                   {order.customer_phone && (
@@ -252,12 +250,12 @@ const OrdersList = memo(({
                     </td>
                     <td className="py-3">
                       <div>
-                        <div>{new Date(order.delivery_date).toLocaleDateString('id-ID')}</div>
+                        <div>{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('id-ID') : 'No date set'}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(order.delivery_date).toLocaleTimeString('id-ID', {
+                          {order.delivery_date ? new Date(order.delivery_date).toLocaleTimeString('id-ID', {
                             hour: '2-digit',
                             minute: '2-digit'
-                          })}
+                          }) : 'No time set'}
                         </div>
                       </div>
                     </td>

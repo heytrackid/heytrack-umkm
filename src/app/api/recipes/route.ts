@@ -7,6 +7,7 @@ import { withCache, cacheKeys, cacheInvalidation } from '@/lib/cache'
 import { RECIPE_FIELDS } from '@/lib/database/query-fields'
 import type { Database } from '@/types/supabase-generated'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { getErrorMessage } from '@/lib/type-guards'
 
 // GET /api/recipes - Get all recipes with ingredient relationships
 async function GET(request: NextRequest) {
@@ -129,8 +130,8 @@ async function GET(request: NextRequest) {
 
     return NextResponse.json(result)
 
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in GET /api/recipes:')
+  } catch (error: unknown) {
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -189,7 +190,7 @@ async function POST(request: NextRequest) {
     // If ingredients are provided, add them to recipe_ingredients
     const createdRecipe = recipe
     if (recipe_ingredients && recipe_ingredients.length > 0) {
-      type RecipeIngredientInput = {
+      interface RecipeIngredientInput {
         ingredient_id?: string
         bahan_id?: string
         quantity?: number
@@ -197,7 +198,7 @@ async function POST(request: NextRequest) {
         unit?: string
       }
 
-      const recipeIngredientsToInsert: Database['public']['Tables']['recipe_ingredients']['Insert'][] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
+      const recipeIngredientsToInsert: Array<Database['public']['Tables']['recipe_ingredients']['Insert']> = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
         recipe_id: createdRecipe.id,
         ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
         quantity: ingredient.quantity || ingredient.qty_per_batch || 0,
@@ -242,8 +243,8 @@ async function POST(request: NextRequest) {
     cacheInvalidation.recipes()
 
     return NextResponse.json(completeRecipe, { status: 201 })
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Error in POST /api/recipes:')
+  } catch (error: unknown) {
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/recipes:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

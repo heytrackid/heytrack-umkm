@@ -53,15 +53,14 @@ interface CreateModalProps<T = Record<string, unknown>, FormData = Record<string
 /**
  * Create modal with form
  */
-export function CreateModal<T = Record<string, unknown>, FormData = Record<string, unknown>>({
+export const CreateModal = <T = Record<string, unknown>, FormData = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: CreateModalProps<T, FormData>) {
-  return (
+}: CreateModalProps<T, FormData>) => (
     <CrudModal
       {...modalProps}
       title={`Tambah ${entityName} Baru`}
@@ -77,7 +76,6 @@ export function CreateModal<T = Record<string, unknown>, FormData = Record<strin
       </CrudForm>
     </CrudModal>
   )
-}
 
 interface EditModalProps<T = Record<string, unknown>, FormData = Record<string, unknown>> extends Omit<CrudModalProps, 'title'> {
   entityName: string
@@ -90,15 +88,14 @@ interface EditModalProps<T = Record<string, unknown>, FormData = Record<string, 
 /**
  * Edit modal with form
  */
-export function EditModal<T = Record<string, unknown>, FormData = Record<string, unknown>>({
+export const EditModal = <T = Record<string, unknown>, FormData = Record<string, unknown>>({
   entityName,
   form,
   onSubmit,
   isLoading,
   children,
   ...modalProps
-}: EditModalProps<T, FormData>) {
-  return (
+}: EditModalProps<T, FormData>) => (
     <CrudModal
       {...modalProps}
       title={`Edit ${entityName}`}
@@ -114,7 +111,6 @@ export function EditModal<T = Record<string, unknown>, FormData = Record<string,
       </CrudForm>
     </CrudModal>
   )
-}
 
 interface DeleteModalProps {
   isOpen: boolean

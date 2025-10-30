@@ -44,9 +44,9 @@ export default function EnhancedSummaryCards({
             ? (summary.total_expenses / summary.total_income) * 100
             : 0
 
-        if (ratio < 50) return { status: 'excellent', color: 'text-green-600', label: 'Sangat Baik' }
-        if (ratio < 70) return { status: 'good', color: 'text-blue-600', label: 'Baik' }
-        if (ratio < 90) return { status: 'warning', color: 'text-yellow-600', label: 'Perhatian' }
+        if (ratio < 50) {return { status: 'excellent', color: 'text-green-600', label: 'Sangat Baik' }}
+        if (ratio < 70) {return { status: 'good', color: 'text-blue-600', label: 'Baik' }}
+        if (ratio < 90) {return { status: 'warning', color: 'text-yellow-600', label: 'Perhatian' }}
         return { status: 'danger', color: 'text-red-600', label: 'Bahaya' }
     }
 
@@ -56,7 +56,7 @@ export default function EnhancedSummaryCards({
         : 0
 
     const renderTrendBadge = (value: number | undefined) => {
-        if (!value || value === 0) return null
+        if (!value || value === 0) {return null}
 
         const isPositive = value > 0
         return (

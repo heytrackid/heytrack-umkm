@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MessageCircle, Send, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { OrderData, WhatsAppTemplate } from '@/lib/communications/types';
+import type { OrderData } from '@/lib/communications/types';
 import { WhatsAppService } from '@/lib/communications/whatsapp';
 import { toast } from 'react-hot-toast';
 import { useSettings } from '@/contexts/settings-context';
@@ -120,7 +120,7 @@ const WhatsAppFollowUp = ({
 
       setGeneratedMessage(message);
     } catch (err: unknown) {
-      apiLogger.error({ error }, 'Error generating message:');
+      apiLogger.error({ err }, 'Error generating message:');
       toast.error('Gagal generate pesan. Coba template lain.');
     }
   };

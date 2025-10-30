@@ -8,6 +8,7 @@
 import type { ProductionBatch } from './types'
 import type { Database } from '@/types/supabase-generated'
 import { productionLogger } from '@/lib/logger'
+import { isIngredient } from '@/lib/type-guards'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type Ingredient = Database['public']['Tables']['ingredients']['Row']
@@ -123,7 +124,18 @@ export class ProductionServices {
       let feasible = true
 
       for (const ri of recipeIngredients) {
-        const ingredient = ri.ingredients as Ingredient
+        if (!ri.ingredients) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Missing ingredient data for recipe ingredient')
+          continue
+        }
+        
+        // Use type guard to validate ingredient data
+        if (!isIngredient(ri.ingredients)) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Invalid ingredient data structure')
+          continue
+        }
+        
+        const ingredient = ri.ingredients
         const requiredQuantity = ri.quantity_needed * quantity
         const availableQuantity = ingredient.current_stock || 0
 
@@ -174,12 +186,23 @@ export class ProductionServices {
         .eq('recipe_id', recipeId)
 
       if (error) {
-        throw err
+        throw error
       }
 
       // Update stock levels for each ingredient
       for (const ri of recipeIngredients || []) {
-        const ingredient = ri.ingredients as unknown as Ingredient
+        if (!ri.ingredients) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Missing ingredient data for recipe ingredient')
+          continue
+        }
+        
+        // Use type guard to validate ingredient data
+        if (!isIngredient(ri.ingredients)) {
+          productionLogger.warn({ recipeId, ingredientId: ri.ingredient_id }, 'Invalid ingredient data structure')
+          continue
+        }
+        
+        const ingredient = ri.ingredients
         const requiredQuantity = ri.quantity_needed * quantity
         const newStock = Math.max(0, (ingredient.current_stock || 0) - requiredQuantity)
 

@@ -5,7 +5,7 @@
 
 // Components
 export { ProfitSummaryCards } from './ProfitSummaryCards'
-export { ProfitFilters } from './ProfitFilters'
+export { ProfitFiltersComponent as ProfitFilters } from './ProfitFilters'
 export { ProductProfitabilityChart } from './ProductProfitabilityChart'
 export { ProductProfitabilityTable } from './ProductProfitabilityTable'
 export { IngredientCostsTable } from './IngredientCostsTable'

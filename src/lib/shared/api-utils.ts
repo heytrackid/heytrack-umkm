@@ -66,7 +66,7 @@ export function createPaginatedResponse<T>(
 }
 
 // Request validation helpers
-import { ZodSchema } from 'zod'
+import type { ZodSchema } from 'zod'
 
 export async function validateRequestData<T>(
   request: NextRequest,

@@ -55,7 +55,7 @@ export default function RootLayout({
                 enableSmartPreloading
                 enableIdlePreloading
                 enableNetworkAware
-                debug={process.env.NODE_ENV === 'development'}
+                debug={false}
               >
                 <GlobalErrorBoundary>
                   {/* Header temporarily disabled during development */}

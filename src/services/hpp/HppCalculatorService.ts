@@ -9,6 +9,7 @@
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
+import { isRecipeWithIngredients } from '@/lib/type-guards'
 import type { Database } from '@/types/supabase-generated'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -84,7 +85,12 @@ export class HppCalculatorService {
         throw new Error(`Recipe not found: ${recipeId}`)
       }
 
-      const recipeData = recipe as unknown as RecipeWithIngredients
+      // Use type guard to validate the structure of the returned recipe data
+      if (!isRecipeWithIngredients(recipe)) {
+        throw new Error('Invalid recipe data structure returned from database')
+      }
+
+      const recipeData = recipe
 
       // Calculate material costs using WAC when available
       const material_breakdown: HppCalculationResult['material_breakdown'] = []
@@ -334,13 +340,13 @@ export class HppCalculatorService {
       // Calculate WAC adjustment for each ingredient
       for (const ri of recipeIngredients) {
         const ingredient = ri.ingredients
-        if (!ingredient) continue
+        if (!ingredient) {continue}
 
         const ingredientTransactions = transactions.filter(
           t => t.ingredient_id === ri.ingredient_id
         )
 
-        if (ingredientTransactions.length === 0) continue
+        if (ingredientTransactions.length === 0) {continue}
 
         // Calculate weighted average cost from transactions
         const totalQuantity = ingredientTransactions.reduce(
@@ -352,7 +358,7 @@ export class HppCalculatorService {
           0
         )
 
-        if (totalQuantity === 0) continue
+        if (totalQuantity === 0) {continue}
 
         const wac = totalValue / totalQuantity
         const currentPrice = Number(ingredient.price_per_unit || 0)

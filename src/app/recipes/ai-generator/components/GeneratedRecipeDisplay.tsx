@@ -6,12 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { ChefHat, Clock, DollarSign } from 'lucide-react'
 import { useSettings } from '@/contexts/settings-context'
-import type { GeneratedRecipe } from './types'
+import type { GeneratedRecipe, AvailableIngredient } from './types'
 
 interface GeneratedRecipeDisplayProps {
   recipe: GeneratedRecipe
   onSave: () => void
   onGenerateAgain: () => void
+  availableIngredients: AvailableIngredient[]
 }
 
 export default function GeneratedRecipeDisplay({

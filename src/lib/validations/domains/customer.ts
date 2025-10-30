@@ -49,7 +49,7 @@ export const CustomerInsertSchema = z.object({
     .optional()
     .nullable(),
   
-  user_id: z.string().uuid()
+  user_id: z.string().uuid({ message: 'Invalid user ID format' })
 })
 
 /**
@@ -58,7 +58,7 @@ export const CustomerInsertSchema = z.object({
  * All fields optional except user_id
  */
 export const CustomerUpdateSchema = CustomerInsertSchema.partial().extend({
-  user_id: z.string().uuid()
+  user_id: z.string().uuid({ message: 'Invalid user ID format' })
 })
 
 /**

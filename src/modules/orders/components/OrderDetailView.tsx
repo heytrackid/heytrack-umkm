@@ -6,7 +6,7 @@ type Order = Database['public']['Tables']['orders']['Row']
 type OrderItem = Database['public']['Tables']['order_items']['Row']
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import { MapPin, Phone, Users } from 'lucide-react'
 import { useMemo } from 'react'
@@ -26,15 +26,15 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
   const priorityInfo = getPriorityInfo(order.priority ?? 'MEDIUM')
 
   return (
-    <Tabs defaultValue="overview" className="w-full">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-        <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-        <TabsTrigger value="items" className="text-xs sm:text-sm">Item</TabsTrigger>
-        <TabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</TabsTrigger>
-        <TabsTrigger value="payment" className="text-xs sm:text-sm">Bayar</TabsTrigger>
-      </TabsList>
+    <SwipeableTabs defaultValue="overview" className="w-full">
+      <SwipeableTabsList>
+        <SwipeableTabsTrigger value="overview" className="text-xs sm:text-sm">Overview</SwipeableTabsTrigger>
+        <SwipeableTabsTrigger value="items" className="text-xs sm:text-sm">Item</SwipeableTabsTrigger>
+        <SwipeableTabsTrigger value="customer" className="text-xs sm:text-sm">Pelanggan</SwipeableTabsTrigger>
+        <SwipeableTabsTrigger value="payment" className="text-xs sm:text-sm">Bayar</SwipeableTabsTrigger>
+      </SwipeableTabsList>
 
-      <TabsContent value="overview" className="space-y-4">
+      <SwipeableTabsContent value="overview" className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <div className="space-y-4">
             <div>
@@ -108,9 +108,9 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
             <p className="mt-2 text-sm text-muted-foreground p-3 bg-muted rounded-lg">{order.notes}</p>
           </div>
         )}
-      </TabsContent>
+      </SwipeableTabsContent>
 
-      <TabsContent value="items" className="space-y-4">
+      <SwipeableTabsContent value="items" className="space-y-4">
         <h3 className="font-medium">Item Pesanan ({order.order_items?.length || 0})</h3>
         <div className="space-y-2">
           {order.order_items?.map((item: OrderItem, index: number) => (
@@ -137,9 +137,9 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
             <span>Subtotal: {useMemo(() => formatCurrency((order.total_amount || 0) - (order.tax_amount || 0) + (order.discount || 0) - (order.delivery_fee || 0)), [order.total_amount, order.tax_amount, order.discount, order.delivery_fee])}</span>
           </div>
         </div>
-      </TabsContent>
+      </SwipeableTabsContent>
 
-      <TabsContent value="customer" className="space-y-4">
+      <SwipeableTabsContent value="customer" className="space-y-4">
         <div className="p-4 border rounded-lg">
           <h3 className="font-medium mb-3">Informasi Pelanggan</h3>
           <div className="space-y-2 text-sm">
@@ -170,9 +170,9 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
             </Button>
           </div>
         </div>
-      </TabsContent>
+      </SwipeableTabsContent>
 
-      <TabsContent value="payment" className="space-y-4">
+      <SwipeableTabsContent value="payment" className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-2">
@@ -204,7 +204,7 @@ export const OrderDetailView = ({ order }: OrderDetailViewProps) => {
             </p>
           </CardContent>
         </Card>
-      </TabsContent>
-    </Tabs>
+      </SwipeableTabsContent>
+    </SwipeableTabs>
   )
 }

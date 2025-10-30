@@ -29,18 +29,12 @@ export function usePagination({
   const [pageSize, setPageSize] = useState(initialPageSize)
 
   // Calculate total pages
-  const totalPages = useMemo(() => {
-    return Math.max(1, Math.ceil(totalItems / pageSize))
-  }, [totalItems, pageSize])
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(totalItems / pageSize)), [totalItems, pageSize])
 
   // Calculate start and end indices
-  const startIndex = useMemo(() => {
-    return (page - 1) * pageSize
-  }, [page, pageSize])
+  const startIndex = useMemo(() => (page - 1) * pageSize, [page, pageSize])
 
-  const endIndex = useMemo(() => {
-    return Math.min(startIndex + pageSize, totalItems)
-  }, [startIndex, pageSize, totalItems])
+  const endIndex = useMemo(() => Math.min(startIndex + pageSize, totalItems), [startIndex, pageSize, totalItems])
 
   // Reset to page 1 if current page exceeds total pages
   useEffect(() => {

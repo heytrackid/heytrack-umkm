@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { lazy, Suspense } from 'react'
@@ -60,15 +59,15 @@ const SimplePageLoading = ({ title }: { title: string }) => (
 )
 
 // Lazy loaded pages with proper loading states
-export const LazyOrdersPage = lazy(() => import(/* webpackChunkName: "page-orders" */ '@/components'))
-export const LazyProductionPage = lazy(() => import(/* webpackChunkName: "page-production" */ '@/components'))
-export const LazyRecipesPage = lazy(() => import(/* webpackChunkName: "page-recipes" */ '@/components'))
-export const LazyExpensesPage = lazy(() => import(/* webpackChunkName: "page-expenses" */ '@/components'))
-export const LazyFinancePage = lazy(() => import(/* webpackChunkName: "page-finance" */ '@/components'))
-export const LazyInventoryPage = lazy(() => import(/* webpackChunkName: "page-inventory" */ '@/components'))
-export const LazyCustomersPage = lazy(() => import(/* webpackChunkName: "page-customers" */ '@/components'))
-export const LazyReportsPage = lazy(() => import(/* webpackChunkName: "page-reports" */ '@/components'))
-export const LazySettingsPage = lazy(() => import(/* webpackChunkName: "page-settings" */ '@/components'))
+export const LazyOrdersPage = lazy(() => import(/* webpackChunkName: "page-orders" */ '@/app/orders/page'))
+export const LazyProductionPage = lazy(() => import(/* webpackChunkName: "page-production" */ '@/app/production/page'))
+export const LazyRecipesPage = lazy(() => import(/* webpackChunkName: "page-recipes" */ '@/app/recipes/page'))
+export const LazyExpensesPage = lazy(() => import(/* webpackChunkName: "page-expenses" */ '@/app/expenses/page'))
+export const LazyFinancePage = lazy(() => import(/* webpackChunkName: "page-finance" */ '@/app/finance/page'))
+export const LazyInventoryPage = lazy(() => import(/* webpackChunkName: "page-inventory" */ '@/app/inventory/page'))
+export const LazyCustomersPage = lazy(() => import(/* webpackChunkName: "page-customers" */ '@/app/customers/page'))
+export const LazyReportsPage = lazy(() => import(/* webpackChunkName: "page-reports" */ '@/app/reports/page'))
+export const LazySettingsPage = lazy(() => import(/* webpackChunkName: "page-settings" */ '@/app/settings/page'))
 
 // Page wrapper components
 export const OrdersPageWithLoading = () => (

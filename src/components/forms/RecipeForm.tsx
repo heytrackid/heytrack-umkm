@@ -18,6 +18,7 @@ import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { FormField } from './shared/FormField'
 import type { Database } from '@/types/supabase-generated'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 
@@ -30,19 +31,19 @@ interface RecipeFormProps {
 export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeFormProps) => {
   const { toast } = useToast()
 
-  const form = useForm<RecipeFormData>({
+  const form = useForm({
     resolver: zodResolver(RecipeFormSchema),
     defaultValues: {
       name: initialData?.name || '',
       description: initialData?.description || '',
       servings: initialData?.servings || 1,
-      preparation_time: initialData?.prep_time || 30,
-      cooking_time: initialData?.cook_time || 0,
+      preparation_time: initialData?.preparation_time || initialData?.prep_time || 30,
+      cooking_time: initialData?.cooking_time || initialData?.cook_time || 0,
       instructions: typeof initialData?.instructions === 'string' ? [] : initialData?.instructions || [],
       difficulty: (initialData?.difficulty as 'EASY' | 'MEDIUM' | 'HARD') || 'MEDIUM',
       category: initialData?.category || '',
       is_active: initialData?.is_active ?? true,
-      is_available: initialData?.is_active ?? true,
+      is_available: initialData?.is_available ?? true,
       selling_price: initialData?.selling_price || 0,
       ingredients: []
     }
@@ -58,10 +59,11 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
       if (!initialData) {
         form.reset()
       }
-    } catch (err: unknown) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
       toast({
         title: 'Error',
-        description: 'Gagal menyimpan resep',
+        description: message || 'Gagal menyimpan resep',
         variant: 'destructive'
       })
     }
@@ -145,9 +147,9 @@ export const RecipeForm = memo(({ initialData, onSubmit, isLoading }: RecipeForm
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Easy">Mudah</SelectItem>
-                  <SelectItem value="Medium">Sedang</SelectItem>
-                  <SelectItem value="Hard">Sulit</SelectItem>
+                  <SelectItem value="EASY">Mudah</SelectItem>
+                  <SelectItem value="MEDIUM">Sedang</SelectItem>
+                  <SelectItem value="HARD">Sulit</SelectItem>
                 </SelectContent>
               </Select>
             </FormField>

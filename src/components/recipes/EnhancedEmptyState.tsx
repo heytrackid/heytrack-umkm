@@ -8,8 +8,7 @@ interface EnhancedEmptyStateProps {
     onAdd: () => void
 }
 
-export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => {
-    return (
+export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => (
         <div className="space-y-6">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -72,4 +71,3 @@ export const EnhancedEmptyState = ({ onAdd }: EnhancedEmptyStateProps) => {
             </Card>
         </div>
     )
-}

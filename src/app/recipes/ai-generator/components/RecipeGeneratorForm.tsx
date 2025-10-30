@@ -16,9 +16,7 @@ import {
 } from '@/components/ui/select'
 import { AlertCircle, ChefHat, Loader2, Sparkles } from 'lucide-react'
 import type {
-  AvailableIngredient,
-  PRODUCT_TYPES,
-  DIETARY_RESTRICTIONS
+  AvailableIngredient
 } from './types'
 
 interface RecipeGeneratorFormProps {
@@ -37,6 +35,7 @@ interface RecipeGeneratorFormProps {
   availableIngredients: AvailableIngredient[]
   loading: boolean
   onGenerate: () => void
+  mode: 'complete' | 'quick'
 }
 
 export default function RecipeGeneratorForm({

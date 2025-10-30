@@ -74,10 +74,7 @@ export const XAxis = dynamic(() => import('recharts').then(mod => ({ default: mo
 export const YAxis = dynamic(() => import('recharts').then(mod => ({ default: mod.YAxis })))
 export const CartesianGrid = dynamic(() => import('recharts').then(mod => ({ default: mod.CartesianGrid })))
 export const Tooltip = dynamic(() => import('recharts').then(mod => ({ default: mod.Tooltip })))
-export const ChartLegend = dynamic(() => import('recharts').then(mod => mod.Legend), {
-  loading: () => <ChartSkeleton />,
-  ssr: false,
-})
+export const ChartLegend = dynamic(() => import('recharts').then(mod => ({ default: mod.Legend }))) as any
 export const ResponsiveContainer = dynamic(() => import('recharts').then(mod => ({ default: mod.ResponsiveContainer })))
 export const Cell = dynamic(() => import('recharts').then(mod => ({ default: mod.Cell })))
 
@@ -90,8 +87,7 @@ interface LazyChartWrapperProps {
     children: React.ReactNode
 }
 
-export function LazyChartWrapper({ title, description, children }: LazyChartWrapperProps) {
-    return (
+export const LazyChartWrapper = ({ title, description, children }: LazyChartWrapperProps) => (
         <Card>
             {(title || description) && (
                 <CardHeader>
@@ -104,4 +100,3 @@ export function LazyChartWrapper({ title, description, children }: LazyChartWrap
             </CardContent>
         </Card>
     )
-}

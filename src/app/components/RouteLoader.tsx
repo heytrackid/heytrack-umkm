@@ -30,7 +30,7 @@ const DefaultFallback = () => (
 /**
  * Lazy load route component with fallback
  */
-export function RouteLoader({ loader, fallback, props }: RouteLoaderProps) {
+export const RouteLoader = ({ loader, fallback, props }: RouteLoaderProps) => {
   const Component = lazy(loader)
 
   return (

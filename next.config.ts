@@ -36,11 +36,18 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000', '127.0.0.1:64869'],
     },
+    // Improve HMR performance
+    webpackBuildWorker: true,
+    // Faster refresh
+    optimisticClientCache: true,
   },
 
   // Turbopack configuration (Next.js 16+)
-  // Empty config to silence webpack warning - Turbopack handles HMR automatically
-  turbopack: {},
+  // Optimized for better HMR performance
+  turbopack: {
+    // Reduce memory usage
+    memoryLimit: 4096,
+  },
 
   // Webpack configuration for better HMR and dynamic imports
   webpack: (config, { dev, isServer }) => {

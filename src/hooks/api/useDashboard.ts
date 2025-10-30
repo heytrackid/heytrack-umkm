@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
+import { cachePresets } from '@/providers/QueryProvider'
 // Dashboard stats type
 export interface DashboardStats {
   revenue: {
@@ -247,18 +248,17 @@ const fetchTopProducts = async (): Promise<TopProductsData[]> => {
 export const useDashboardStats = () => useQuery({
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 60 * 1000, // Refetch every minute
+    ...cachePresets.dashboard,
   })
 
 export const useWeeklySales = () => useQuery({
     queryKey: ['dashboard', 'weekly-sales'],
     queryFn: fetchWeeklySales,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    ...cachePresets.analytics,
   })
 
 export const useTopProducts = () => useQuery({
     queryKey: ['dashboard', 'top-products'],
     queryFn: fetchTopProducts,
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    ...cachePresets.analytics,
   })

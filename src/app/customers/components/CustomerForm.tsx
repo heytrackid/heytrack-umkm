@@ -61,7 +61,7 @@ const CustomerFormSchema = z.object({
         .optional()
         .or(z.literal('')),
 
-    is_active: z.boolean().default(true),
+    is_active: z.boolean(),
 })
 
 type CustomerFormData = z.infer<typeof CustomerFormSchema>

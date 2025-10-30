@@ -328,6 +328,57 @@ export type Database = {
           },
         ]
       }
+      error_logs: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          error_message: string
+          error_type: string
+          id: string
+          is_resolved: boolean | null
+          metadata: Json | null
+          request_data: Json | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          stack_trace: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          error_message: string
+          error_type: string
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          request_data?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          stack_trace?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          error_message?: string
+          error_type?: string
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          request_data?: Json | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          stack_trace?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
@@ -1013,6 +1064,93 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          alert_enabled: boolean | null
+          created_at: string | null
+          email_digest: boolean | null
+          email_digest_frequency: string | null
+          email_enabled: boolean | null
+          error_enabled: boolean | null
+          finance_enabled: boolean | null
+          group_similar_enabled: boolean | null
+          group_time_window: number | null
+          id: string
+          info_enabled: boolean | null
+          inventory_enabled: boolean | null
+          min_priority: string | null
+          orders_enabled: boolean | null
+          production_enabled: boolean | null
+          quiet_hours_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sound_enabled: boolean | null
+          sound_for_urgent_only: boolean | null
+          sound_volume: number | null
+          success_enabled: boolean | null
+          system_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+          warning_enabled: boolean | null
+        }
+        Insert: {
+          alert_enabled?: boolean | null
+          created_at?: string | null
+          email_digest?: boolean | null
+          email_digest_frequency?: string | null
+          email_enabled?: boolean | null
+          error_enabled?: boolean | null
+          finance_enabled?: boolean | null
+          group_similar_enabled?: boolean | null
+          group_time_window?: number | null
+          id?: string
+          info_enabled?: boolean | null
+          inventory_enabled?: boolean | null
+          min_priority?: string | null
+          orders_enabled?: boolean | null
+          production_enabled?: boolean | null
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sound_enabled?: boolean | null
+          sound_for_urgent_only?: boolean | null
+          sound_volume?: number | null
+          success_enabled?: boolean | null
+          system_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+          warning_enabled?: boolean | null
+        }
+        Update: {
+          alert_enabled?: boolean | null
+          created_at?: string | null
+          email_digest?: boolean | null
+          email_digest_frequency?: string | null
+          email_enabled?: boolean | null
+          error_enabled?: boolean | null
+          finance_enabled?: boolean | null
+          group_similar_enabled?: boolean | null
+          group_time_window?: number | null
+          id?: string
+          info_enabled?: boolean | null
+          inventory_enabled?: boolean | null
+          min_priority?: string | null
+          orders_enabled?: boolean | null
+          production_enabled?: boolean | null
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sound_enabled?: boolean | null
+          sound_for_urgent_only?: boolean | null
+          sound_volume?: number | null
+          success_enabled?: boolean | null
+          system_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+          warning_enabled?: boolean | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -1347,6 +1485,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      performance_logs: {
+        Row: {
+          created_at: string | null
+          duration_ms: number
+          endpoint: string
+          id: string
+          ip_address: string | null
+          method: string
+          request_body: Json | null
+          response_body: Json | null
+          status: number
+          timestamp: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration_ms: number
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          method: string
+          request_body?: Json | null
+          response_body?: Json | null
+          status: number
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration_ms?: number
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          method?: string
+          request_body?: Json | null
+          response_body?: Json | null
+          status?: number
+          timestamp?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       production_batches: {
         Row: {
@@ -2191,6 +2374,7 @@ export type Database = {
           total_ingredient_cost: number
         }[]
       }
+      clean_old_logs: { Args: never; Returns: undefined }
       cleanup_expired_context_cache: { Args: never; Returns: undefined }
       decrement_ingredient_stock: {
         Args: { p_ingredient_id: string; p_quantity: number }
@@ -2200,7 +2384,9 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_active_connections: { Args: never; Returns: number }
       get_dashboard_stats: { Args: never; Returns: Json }
+      get_database_size: { Args: never; Returns: string }
       get_foreign_key_constraints: {
         Args: never
         Returns: {
@@ -2220,6 +2406,7 @@ export type Database = {
           table_size: string
         }[]
       }
+      get_total_rows: { Args: never; Returns: number }
       get_unread_alert_count: { Args: { p_user_id: string }; Returns: number }
       get_user_role: {
         Args: { user_uuid?: string }

@@ -8,6 +8,7 @@ import { OrderDetailView } from './OrderDetailView'
 import { OrderForm } from './OrderForm'
 
 import { uiLogger } from '@/lib/logger'
+import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import type { Database } from '@/types/supabase-generated'
 import type { OrderWithItems } from '@/app/orders/types/orders-db.types'
 
@@ -25,8 +26,19 @@ export const OrdersTableView = () => {
     queryKey: ['orders', 'table'],
     queryFn: async () => {
       const response = await fetch('/api/orders')
-      if (!response.ok) throw new Error('Failed to fetch orders')
-      return response.json() as Promise<Order[]>
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch orders: ${errorText}`)
+      }
+      const data = await response.json()
+      
+      // Validate the response with type guards
+      if (isArrayOf(data, isOrder)) {
+        return data
+      }
+      
+      uiLogger.warn({ data }, 'API returned unexpected format for orders')
+      return []
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
@@ -52,7 +64,10 @@ export const OrdersTableView = () => {
       const response = await fetch(`/api/orders/${orderId}`, {
         method: 'DELETE'
       })
-      if (!response.ok) throw new Error('Failed to delete order')
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to delete order: ${errorText}`)
+      }
       return orderId
     },
     onSuccess: () => {
@@ -60,7 +75,8 @@ export const OrdersTableView = () => {
       uiLogger.info('Order deleted successfully')
     },
     onError: (err) => {
-      uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error deleting order')
+      const message = getErrorMessage(err)
+      uiLogger.error({ error: message }, 'Error deleting order')
     }
   })
 
@@ -76,15 +92,27 @@ export const OrdersTableView = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       })
-      if (!response.ok) throw new Error('Failed to update status')
-      return response.json()
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to update status: ${errorText}`)
+      }
+      const data = await response.json()
+      
+      // Validate the response with type guards
+      if (isOrder(data)) {
+        return data
+      }
+      
+      uiLogger.warn({ data }, 'API returned unexpected format for updated order')
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       uiLogger.info('Order status updated')
     },
     onError: (err) => {
-      uiLogger.error({ error: err instanceof Error ? err.message : 'Unknown error' }, 'Error updating status')
+      const message = getErrorMessage(err)
+      uiLogger.error({ error: message }, 'Error updating status')
     }
   })
 

@@ -162,12 +162,12 @@ export async function POST(request: NextRequest) {
       amount: validatedData.amount,
       description: validatedData.description || '',
       expense_date: validatedData.date,
-      supplier: validatedData.vendor_name,
+      supplier: validatedData.vendor_name ?? undefined,
       payment_method: 'CASH',
       status: validatedData.is_paid ? 'paid' : 'pending',
       receipt_number: validatedData.invoice_number,
       is_recurring: validatedData.is_recurring,
-      recurring_frequency: validatedData.recurring_frequency,
+      recurring_frequency: validatedData.recurring_frequency ?? undefined,
       tags: []
     }
 
@@ -196,161 +196,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/**
- * PUT /api/operational-costs
- * 
- * Update an existing operational cost
- */
-export async function PUT(request: NextRequest) {
-  try {
-    // Create authenticated Supabase client
-    const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const body = await request.json()
-
-    // Validate request body with Zod (excluding id which is in URL)
-    const updateValidation = OperationalCostInsertSchema.safeParse(body)
-    if (!updateValidation.success) {
-      return NextResponse.json(
-        {
-          error: 'Invalid request data',
-          details: updateValidation.error.issues
-        },
-        { status: 400 }
-      )
-    }
-
-    const validatedData = updateValidation.data
-
-    // Validate required fields
-    if (!(body).id) {
-      return NextResponse.json(
-        { error: 'ID is required' },
-        { status: 400 }
-      )
-    }
-
-    // Build update object from validated data
-    const updatePayload: Database['public']['Tables']['expenses']['Update'] = {
-      category: validatedData.category,
-      subcategory: validatedData.subcategory,
-      amount: validatedData.amount,
-      description: validatedData.description || undefined,
-      expense_date: validatedData.date,
-      is_recurring: validatedData.is_recurring,
-      recurring_frequency: validatedData.recurring_frequency ?? null,
-      supplier: validatedData.vendor_name,
-      receipt_number: validatedData.invoice_number,
-      status: validatedData.is_paid ? 'paid' : 'pending'
-    }
-
-    const { data, error } = await supabase
-      .from('expenses')
-      .update(updatePayload)
-      .eq('id', body.id)
-      .eq('user_id', user.id)
-      .select('id, description, category, subcategory, amount, expense_date, supplier, payment_method, status, receipt_number, is_recurring, recurring_frequency, updated_at')
-      .single()
-
-    if (error) {
-      apiLogger.error({ error }, 'Error updating operational cost:')
-      return NextResponse.json(
-        { error: 'Failed to update operational cost' },
-        { status: 500 }
-      )
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { error: 'Operational cost not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(data)
-
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/operational-costs:')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
-  }
-}
-
-/**
- * DELETE /api/operational-costs
- * 
- * Delete an operational cost
- */
-export async function DELETE(request: NextRequest) {
-  try {
-    // Create authenticated Supabase client
-    const supabase = await createClient()
-
-    // Validate session
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'ID is required' },
-        { status: 400 }
-      )
-    }
-
-    // Delete operational cost
-    const { data, error } = await supabase
-      .from('expenses')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select('id')
-      .single()
-
-    if (error) {
-      apiLogger.error({ error }, 'Error deleting operational cost:')
-      return NextResponse.json(
-        { error: 'Failed to delete operational cost' },
-        { status: 500 }
-      )
-    }
-
-    if (!data) {
-      return NextResponse.json(
-        { error: 'Operational cost not found or cannot be deleted' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json({ success: true })
-
-  } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in DELETE /api/operational-costs:')
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
-  }
-}
+// PUT and DELETE moved to /api/operational-costs/[id]/route.ts

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 interface AuthState {
@@ -61,8 +62,9 @@ export function useAuth() {
           isLoading: false,
           isAuthenticated: !!user,
         })
-      } catch (err) {
-        apiLogger.error({ err }, 'Auth initialization error:')
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
+        apiLogger.error({ error: message }, 'Auth initialization error:')
         setAuthState({
           user: null,
           session: null,
@@ -117,8 +119,9 @@ export function useAuth() {
         isAuthenticated: false,
       })
       void router.push('/auth/login')
-    } catch (err) {
-      apiLogger.error({ err }, 'Sign out error:')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Sign out error:')
     }
   }
 

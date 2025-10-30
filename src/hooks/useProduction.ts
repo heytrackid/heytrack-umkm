@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 
 /**
  * Fetch all production batches
@@ -56,12 +57,13 @@ export function useCreateProductionBatch() {
         description: 'Batch produksi berhasil dibuat',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to create production batch')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to create production batch')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal membuat batch produksi',
+        description: message || 'Gagal membuat batch produksi',
         variant: 'destructive',
       })
     },
@@ -78,7 +80,7 @@ export function useUpdateProductionBatch() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const response = await fetch(`/api/production-batches/${id}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       })
@@ -98,12 +100,13 @@ export function useUpdateProductionBatch() {
         description: 'Status produksi berhasil diperbarui',
       })
     },
-    onError: (error: Error) => {
-      apiLogger.error({ error }, 'Failed to update production batch')
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error)
+      apiLogger.error({ error: message }, 'Failed to update production batch')
       
       toast({
         title: 'Error',
-        description: error.message || 'Gagal memperbarui status produksi',
+        description: message || 'Gagal memperbarui status produksi',
         variant: 'destructive',
       })
     },

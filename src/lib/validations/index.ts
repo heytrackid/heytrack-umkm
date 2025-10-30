@@ -70,7 +70,7 @@ export {
   InventoryCalculationSchema,
   SalesCalculationSchema,
   ReportGenerationSchema,
-  CronJobConfigSchema,
+  // CronJobConfigSchema, // Removed - no longer using internal cron
   WebhookPayloadSchema,
 } from './api-validations'
 

@@ -369,9 +369,9 @@ const OrdersTable = ({
                     <div className="space-y-2">
                       <div className="font-medium">{formatCurrency(order.total_amount)}</div>
                       {getPaymentBadge(order.payment_status)}
-                      {order.paid_amount > 0 && order.payment_status !== 'PAID' && (
+                      {(order.paid_amount || 0) > 0 && order.payment_status !== 'PAID' && (
                         <div className="text-xs text-muted-foreground">
-                          Dibayar: {formatCurrency(order.paid_amount)}
+                          Dibayar: {formatCurrency(order.paid_amount || 0)}
                         </div>
                       )}
                     </div>

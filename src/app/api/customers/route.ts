@@ -4,6 +4,7 @@ import { CustomerInsertSchema } from '@/lib/validations/domains/customer'
 import { CUSTOMER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { typedInsert } from '@/lib/supabase/typed-insert'
+import { getErrorMessage, safeNumber, safeString } from '@/lib/type-guards'
 
 // GET /api/customers - Get all customers
 export async function GET(request: NextRequest) {
@@ -25,11 +26,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     // Parse query parameters with defaults
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '10')
-    const search = searchParams.get('search')
-    const sort_by = searchParams.get('sort_by')
-    const sort_order = searchParams.get('sort_order')
+    const page = safeNumber(searchParams.get('page'), 1)
+    const limit = safeNumber(searchParams.get('limit'), 10)
+    const search = safeString(searchParams.get('search'), '')
+    const sort_by = safeString(searchParams.get('sort_by'), 'name')
+    const sort_order = safeString(searchParams.get('sort_order'), 'asc')
 
     // ✅ OPTIMIZED: Use specific fields instead of SELECT *
     let query = supabase
@@ -38,12 +39,12 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
 
     // Add search filter if provided
-    if (search) {
+    if (search && search.length > 0) {
       query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`)
     }
 
     // Add sorting
-    const sortField = sort_by || 'name'
+    const sortField = sort_by
     const sortDirection = sort_order === 'asc'
     query = query.order(sortField, { ascending: sortDirection })
 
@@ -63,9 +64,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Unexpected error in GET /api/customers')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Unexpected error in GET /api/customers')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -144,9 +145,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data, { status: 201 })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Unexpected error in POST /api/customers')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Unexpected error in POST /api/customers')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

@@ -21,7 +21,9 @@ import {
   TrendingUp,
   DollarSign,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  FileText,
+  Receipt
 } from 'lucide-react'
 import {
   Tooltip,
@@ -89,11 +91,23 @@ const NAV_SECTIONS: SidebarSection[] = [
     collapsible: true,
     items: [
       { label: 'Cash Flow', href: '/cash-flow', icon: TrendingUp },
-      { label: 'HPP & Profit', href: '/hpp', icon: Calculator }
+      { label: 'HPP & Profit', href: '/hpp', icon: Calculator },
+      { label: 'Biaya Operasional', href: '/operational-costs', icon: Receipt }
     ]
   },
 
-  // 5. AI Assistant - Advanced features
+  // 5. Laporan - Reports
+  {
+    title: 'Laporan',
+    icon: FileText,
+    defaultOpen: false,
+    collapsible: false,
+    items: [
+      { label: 'Laporan', href: '/reports', icon: FileText }
+    ]
+  },
+
+  // 6. AI Assistant - Advanced features
   {
     title: 'AI Tools',
     icon: Bot,
@@ -239,17 +253,14 @@ const Sidebar = ({
                     </button>
                   )
                 ) : (
-                  <div className={cn(
-                    "px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider",
-                    isCollapsed && "text-center"
-                  )}>
-                    {!isCollapsed && section.title}
-                    {isCollapsed && (
+                  isCollapsed ? (
+                    // Non-collapsible section in collapsed mode - show only icon
+                    <div className="px-3 py-2 flex justify-center">
                       <TooltipProvider delayDuration={0}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex justify-center">
-                              <SectionIcon className="h-5 w-5" />
+                              <SectionIcon className="h-5 w-5 text-muted-foreground" />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="right" className="font-medium">
@@ -257,8 +268,13 @@ const Sidebar = ({
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    // Non-collapsible section in expanded mode - show text
+                    <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      {section.title}
+                    </div>
+                  )
                 )}
 
                 {/* Section Items */}
@@ -278,7 +294,7 @@ const Sidebar = ({
                           onClick={() => isMobile && onToggle?.()}
                           onMouseEnter={() => handlePrefetch(item.href)}
                           onFocus={() => handlePrefetch(item.href)}
-                          prefetch={true}
+                          prefetch
                           className={cn(
                             'flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors',
                             'hover:bg-muted',
@@ -311,7 +327,7 @@ const Sidebar = ({
                                 onClick={() => isMobile && onToggle?.()}
                                 onMouseEnter={() => handlePrefetch(item.href)}
                                 onFocus={() => handlePrefetch(item.href)}
-                                prefetch={true}
+                                prefetch
                                 className={cn(
                                   'flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
                                   'hover:bg-accent hover:text-accent-foreground',

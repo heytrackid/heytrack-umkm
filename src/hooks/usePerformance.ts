@@ -32,7 +32,7 @@ export function usePerformanceMonitor(componentName: string) {
 export function logBundleMetrics() {
   if (typeof window !== 'undefined' && 'performance' in window) {
     // Log basic performance metrics
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
 
     if (navigation) {
       // Performance metrics tracked silently
@@ -150,7 +150,7 @@ export function useMemoryMonitor() {
     if (typeof window !== 'undefined' && 'performance' in window) {
       const updateMemoryInfo = () => {
         if ('memory' in performance) {
-          const memory = (performance as any).memory
+          const {memory} = (performance as any)
           setMemoryInfo({
             usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
             totalJSHeapSize: Math.round(memory.totalJSHeapSize / 1024 / 1024), // MB
@@ -218,7 +218,7 @@ export function useNetworkStatus() {
 
     // Monitor connection quality if available
     if ('connection' in navigator) {
-      const connection = (navigator as any).connection
+      const {connection} = (navigator as any)
       if (connection) {
         setConnection({
           effectiveType: connection.effectiveType,

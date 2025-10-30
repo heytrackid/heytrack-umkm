@@ -25,7 +25,7 @@ interface SimplePaginationProps {
     itemLabel?: string
 }
 
-export function SimplePagination({
+export const SimplePagination = ({
     page,
     pageSize,
     totalPages,
@@ -40,7 +40,7 @@ export function SimplePagination({
     showPageSizeSelector = true,
     showFirstLast = false,
     itemLabel = 'item',
-}: SimplePaginationProps) {
+}: SimplePaginationProps) => {
     if (totalPages <= 1 && !showPageSizeSelector) {
         return null
     }

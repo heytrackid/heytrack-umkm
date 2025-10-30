@@ -21,7 +21,7 @@ export default function PurchaseStats({ purchases }: PurchaseStatsProps) {
 
   const uniqueSuppliers = new Set(purchases.filter((p) => p.supplier).map((p) => p.supplier))
 
-  const stats: (PurchaseStats & { icon: LucideIcon })[] = [
+  const stats: Array<PurchaseStats & { icon: LucideIcon }> = [
     {
       title: 'Pembelian (Bulan Ini)',
       value: thisMonth.length,

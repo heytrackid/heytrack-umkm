@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server'
-import { getErrorMessage } from '@/lib/type-guards';
+import { getErrorMessage, isValidUUID, isRecord, extractFirst, safeString } from '@/lib/type-guards';
 import { prepareUpdate } from '@/lib/supabase/insert-helpers';
 
 export async function GET(
@@ -8,6 +8,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
+  }
+  
   try {
     const supabase = await createClient();
     
@@ -33,6 +39,23 @@ export async function GET(
       )
     }
 
+    // ✅ V2: Validate expense structure
+    if (!isRecord(expense)) {
+      return NextResponse.json(
+        { error: 'Invalid expense data structure' },
+        { status: 500 }
+      )
+    }
+
+    // ✅ V2: Safe extraction of supplier data
+    if ('supplier' in expense) {
+      const supplier = extractFirst(expense.supplier)
+      if (supplier && isRecord(supplier) && 'name' in supplier) {
+        // Supplier data safely extracted
+        (expense as any).supplier_name = safeString(supplier.name, 'Unknown')
+      }
+    }
+
     return NextResponse.json(expense);
   } catch (error: unknown) {
     return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
@@ -44,6 +67,12 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
+  }
+  
   try {
     const supabase = await createClient();
     const body = await request.json();
@@ -82,6 +111,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
+  
+  // Validate UUID format
+  if (!isValidUUID(id)) {
+    return NextResponse.json({ error: 'Invalid expense ID format' }, { status: 400 });
+  }
+  
   try {
     const supabase = await createClient();
 

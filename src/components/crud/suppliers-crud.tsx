@@ -124,7 +124,7 @@ export const SuppliersCRUD = () => {
   }
 
   const handleSubmitEdit = async (data: Record<string, unknown>) => {
-    if (!selectedSupplier) {return}
+    if (!selectedSupplier) { return }
 
     try {
       await updateSupplier(selectedSupplier.id, data as Database['public']['Tables']['suppliers']['Update'])
@@ -144,7 +144,7 @@ export const SuppliersCRUD = () => {
   }
 
   const handleConfirmDelete = async () => {
-    if (!selectedSupplier) {return}
+    if (!selectedSupplier) { return }
 
     try {
       await deleteSupplier(selectedSupplier.id)
@@ -214,7 +214,7 @@ export const SuppliersCRUD = () => {
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
         entityName="Supplier"
-        itemName={selectedSupplier?.name}
+        itemName={selectedSupplier?.name || ''}
         isLoading={loading}
       />
     </div>

@@ -7,7 +7,7 @@ import { apiLogger } from '@/lib/logger'
  * PATCH /api/inventory/alerts/[id]
  * Acknowledge an alert
  */
-export async function PATCH(
+export async function PUT(
   __request: NextRequest,
   { params }: { params: { id: string } }
 ) {

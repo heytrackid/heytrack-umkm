@@ -167,7 +167,7 @@ export function usePerformanceMonitoring() {
 
   const observeNavigationTiming = () => {
     // Use Navigation Timing API
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+    const navigation = performance.getEntriesByType('navigation')[0]
 
     if (navigation) {
       setMetrics(prev => ({

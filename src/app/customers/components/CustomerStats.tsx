@@ -10,7 +10,7 @@ import type { Database } from '@/types/supabase-generated'
 type Customer = Database['public']['Tables']['customers']['Row']
 
 interface CustomerStatsProps {
-  customers: Array<Customer>
+  customers: Customer[]
   isLoading: boolean
   isMobile: boolean
 }

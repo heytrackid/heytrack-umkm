@@ -98,9 +98,9 @@ export const calculateEstimatedHPP = (
     price_per_unit: number
     unit: string
   }>,
-  servings: number = 1
+  servings = 1
 ): number => {
-  if (selectedIngredients.length === 0) return 0
+  if (selectedIngredients.length === 0) {return 0}
 
   // Get typical quantities for calculation
   const totalMaterialCost = selectedIngredients.reduce((sum, ingredient) => {
@@ -159,7 +159,7 @@ export const getDifficultyColor = (difficulty: 'easy' | 'medium' | 'hard'): stri
  * Format time display
  */
 export const formatTime = (minutes: number): string => {
-  if (minutes < 60) return `${minutes} menit`
+  if (minutes < 60) {return `${minutes} menit`}
   const hours = Math.floor(minutes / 60)
   const mins = minutes % 60
   return mins > 0 ? `${hours} jam ${mins} menit` : `${hours} jam`
@@ -214,7 +214,7 @@ export const loadDraft = (): {
 } | null => {
   try {
     const saved = localStorage.getItem('recipe-generator-draft')
-    if (!saved) return null
+    if (!saved) {return null}
 
     const draft = JSON.parse(saved)
 

@@ -66,8 +66,8 @@ export const UnifiedHppPage = memo(() => {
 
     updatePrice.mutate({
       recipeId: recipe.id,
-      price: price,
-      margin: margin
+      price,
+      margin
     })
   }, [recipe, updatePrice])
 

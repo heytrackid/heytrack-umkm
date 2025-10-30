@@ -6,8 +6,9 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { apiLogger } from '@/lib/logger'
 import type { Database } from '@/types/supabase-generated'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
-type RouteContext = {
+interface RouteContext {
   params: Promise<{ id: string }>
 }
 
@@ -18,6 +19,12 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
 
     // Authenticate
@@ -44,9 +51,9 @@ export async function GET(
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/customers/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/customers/[id]')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -59,6 +66,12 @@ export async function PUT(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
 
     // Authenticate
@@ -120,9 +133,9 @@ export async function PUT(
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/customers/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/customers/[id]')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }
@@ -135,6 +148,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid customer ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
 
     // Authenticate
@@ -180,9 +199,9 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Customer deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in DELETE /api/customers/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/customers/[id]')
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: getErrorMessage(error) },
       { status: 500 }
     )
   }

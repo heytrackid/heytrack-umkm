@@ -3,6 +3,7 @@ import { PricingAutomation, UMKM_CONFIG } from '@/lib/automation'
 import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase-generated'
+import { isRecipeWithIngredients, extractFirst, ensureArray, getErrorMessage } from '@/lib/type-guards'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           ...ri,
           ingredient: Array.isArray(ri.ingredients) ? ri.ingredients[0] : ri.ingredients
         }))
-      } as unknown as RecipeWithIngredients
+      } as RecipeWithIngredients
     }
 
     // Create a pricing automation instance and calculate pricing
@@ -82,8 +83,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       }))
     }
     
-    // Use type assertion to bypass strict type checking
-    const pricingAnalysis = pricingAutomation.calculateSmartPricing(recipeForPricing as any)
+    // Calculate pricing (the recipeForPricing should now match the expected type)
+    const pricingAnalysis = pricingAutomation.calculateSmartPricing(recipeForPricing)
 
     return NextResponse.json({
       success: true,

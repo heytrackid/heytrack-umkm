@@ -31,11 +31,11 @@ interface SmartReorderSuggestionsProps {
     onCreatePurchaseOrder?: (suggestions: ReorderSuggestion[]) => void
 }
 
-export function SmartReorderSuggestions({
+export const SmartReorderSuggestions = ({
     ingredients,
     usageHistory = {},
     onCreatePurchaseOrder
-}: SmartReorderSuggestionsProps) {
+}: SmartReorderSuggestionsProps) => {
     const { formatCurrency } = useCurrency()
     const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set())
 

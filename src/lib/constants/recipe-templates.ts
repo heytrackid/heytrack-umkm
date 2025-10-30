@@ -294,14 +294,10 @@ export const TEMPLATES_BY_CATEGORY = RECIPE_TEMPLATES.reduce((acc, template) => 
 }, {} as Record<string, RecipeTemplate[]>)
 
 // Get template by ID
-export const getTemplateById = (id: string): RecipeTemplate | undefined => {
-  return RECIPE_TEMPLATES.find(t => t.id === id)
-}
+export const getTemplateById = (id: string): RecipeTemplate | undefined => RECIPE_TEMPLATES.find(t => t.id === id)
 
 // Get templates by category
-export const getTemplatesByCategory = (category: string): RecipeTemplate[] => {
-  return TEMPLATES_BY_CATEGORY[category] || []
-}
+export const getTemplatesByCategory = (category: string): RecipeTemplate[] => TEMPLATES_BY_CATEGORY[category] || []
 
 // Get all categories
 export const RECIPE_CATEGORIES = Object.keys(TEMPLATES_BY_CATEGORY)

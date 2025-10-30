@@ -11,7 +11,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type DatabaseInternals = {
+export interface DatabaseInternals {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }

@@ -7,6 +7,7 @@ import type { Database } from '@/types/supabase-generated'
 import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
@@ -115,7 +116,7 @@ async function GET(request: NextRequest) {
 
     // Map data to match our interface (order_items -> items)
     // The query returns order_items with nested recipe data
-    type OrderItemWithRecipe = {
+    interface OrderItemWithRecipe {
       id: string
       quantity: number
       unit_price: number
@@ -144,7 +145,7 @@ async function GET(request: NextRequest) {
       meta: createPaginationMeta(page, limit, count || 0)
     })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/orders:')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -322,7 +323,7 @@ async function POST(request: NextRequest) {
       income_recorded: !!incomeRecordId
     }, { status: 201 })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in POST /api/orders:')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/orders:')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

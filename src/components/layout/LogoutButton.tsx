@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 
-export function LogoutButton() {
+export const LogoutButton = () => {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const router = useRouter()
 

@@ -63,29 +63,29 @@ export default function EnhancedTransactionForm({
     const validateField = (name: string, value: string) => {
         switch (name) {
             case 'description':
-                if (!value.trim()) return 'Deskripsi wajib diisi'
-                if (value.length < 3) return 'Deskripsi minimal 3 karakter'
-                if (value.length > 200) return 'Deskripsi maksimal 200 karakter'
+                if (!value.trim()) { return 'Deskripsi wajib diisi' }
+                if (value.length < 3) { return 'Deskripsi minimal 3 karakter' }
+                if (value.length > 200) { return 'Deskripsi maksimal 200 karakter' }
                 return ''
 
             case 'category':
-                if (!value) return 'Kategori wajib dipilih'
+                if (!value) { return 'Kategori wajib dipilih' }
                 return ''
 
             case 'amount':
-                if (!value) return 'Jumlah wajib diisi'
+                if (!value) { return 'Jumlah wajib diisi' }
                 const amount = parseFloat(value)
-                if (isNaN(amount)) return 'Jumlah harus berupa angka'
-                if (amount <= 0) return 'Jumlah harus lebih dari 0'
-                if (amount > 1000000000) return 'Jumlah terlalu besar'
+                if (isNaN(amount)) { return 'Jumlah harus berupa angka' }
+                if (amount <= 0) { return 'Jumlah harus lebih dari 0' }
+                if (amount > 1000000000) { return 'Jumlah terlalu besar' }
                 return ''
 
             case 'date':
-                if (!value) return 'Tanggal wajib diisi'
+                if (!value) { return 'Tanggal wajib diisi' }
                 const selectedDate = new Date(value)
                 const today = new Date()
                 today.setHours(23, 59, 59, 999)
-                if (selectedDate > today) return 'Tanggal tidak boleh di masa depan'
+                if (selectedDate > today) { return 'Tanggal tidak boleh di masa depan' }
                 return ''
 
             default:
@@ -116,7 +116,7 @@ export default function EnhancedTransactionForm({
         const newErrors: Record<string, string> = {}
         Object.keys(formData).forEach(key => {
             const error = validateField(key, formData[key as keyof TransactionFormData])
-            if (error) newErrors[key] = error
+            if (error) { newErrors[key] = error }
         })
         setErrors(newErrors)
         setTouched({
@@ -144,25 +144,25 @@ export default function EnhancedTransactionForm({
     // Format currency input
     const formatCurrencyInput = (value: string) => {
         const number = parseFloat(value.replace(/[^0-9]/g, ''))
-        if (isNaN(number)) return ''
+        if (isNaN(number)) { return '' }
         return number.toLocaleString('id-ID')
     }
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
+                    <DialogTitle className="flex items-center gap-2 text-wrap-mobile">
                         {transactionType === 'income' ? (
                             <>
-                                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg flex-shrink-0">
                                     <ArrowUpCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                                 </div>
                                 Tambah Pemasukan
                             </>
                         ) : (
                             <>
-                                <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg">
+                                <div className="p-2 bg-red-100 dark:bg-red-900 rounded-lg flex-shrink-0">
                                     <ArrowDownCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                                 </div>
                                 Tambah Pengeluaran

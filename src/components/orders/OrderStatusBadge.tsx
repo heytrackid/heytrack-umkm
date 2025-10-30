@@ -72,13 +72,13 @@ const statusConfig = {
     }
 }
 
-export function OrderStatusBadge({
+export const OrderStatusBadge = ({
     status,
     showNextAction = false,
     onNextAction,
     compact = false,
     className
-}: OrderStatusBadgeProps) {
+}: OrderStatusBadgeProps) => {
     const config = statusConfig[status]
     const Icon = config.icon
 
@@ -138,7 +138,7 @@ interface OrderProgressProps {
     className?: string
 }
 
-export function OrderProgress({ currentStatus, className }: OrderProgressProps) {
+export const OrderProgress = ({ currentStatus, className }: OrderProgressProps) => {
     const steps = [
         { status: 'pending', label: 'Order' },
         { status: 'confirmed', label: 'Konfirmasi' },

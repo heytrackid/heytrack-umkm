@@ -73,7 +73,7 @@ function calculateDateRange(period: PeriodType, startDate?: string, endDate?: st
 
 // Utility: Prepare chart data
 function prepareChartData(transactions: Transaction[]): ChartDataPoint[] {
-  if (!transactions || transactions.length === 0) return []
+  if (!transactions || transactions.length === 0) {return []}
 
   const dataByDate: Record<string, { date: string; income: number; expense: number; net: number }> = {}
 
@@ -112,7 +112,7 @@ function calculateComparison(
   currentSummary: CashFlowSummary,
   previousSummary: CashFlowSummary | null
 ): ComparisonData | null {
-  if (!previousSummary) return null
+  if (!previousSummary) {return null}
 
   const incomeChange = previousSummary.total_income > 0
     ? ((currentSummary.total_income - previousSummary.total_income) / previousSummary.total_income) * 100
@@ -161,8 +161,8 @@ export function useEnhancedCashFlow(): UseEnhancedCashFlowReturn {
       )
 
       const params = new URLSearchParams()
-      if (calculatedStartDate) params.append('start_date', calculatedStartDate)
-      if (calculatedEndDate) params.append('end_date', calculatedEndDate)
+      if (calculatedStartDate) {params.append('start_date', calculatedStartDate)}
+      if (calculatedEndDate) {params.append('end_date', calculatedEndDate)}
       params.append('compare', 'true') // Always fetch comparison data
 
       const response = await fetch(`/api/reports/cash-flow?${params.toString()}`)

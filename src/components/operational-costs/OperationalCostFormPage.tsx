@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { useSupabaseCRUD } from '@/hooks/supabase'
+import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -42,6 +43,7 @@ const COST_CATEGORIES = [
 export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPageProps) => {
     const router = useRouter()
     const { toast } = useToast()
+    const supabase = createClient()
     const { create, update } = useSupabaseCRUD('operational_costs')
 
     const [loading, setLoading] = useState(false)
@@ -61,12 +63,21 @@ export const OperationalCostFormPage = ({ mode, costId }: OperationalCostFormPag
     }, [mode, costId])
 
     const loadCost = async () => {
-        if (!costId) return
+        if (!costId) {return}
 
         try {
             setLoading(true)
-            const cost = await read(costId)
-            setFormData(cost)
+            const { data: cost } = await supabase
+                .from('operational_costs')
+                .select('*')
+                .eq('id', costId)
+                .single()
+            
+            if (cost) {
+                setFormData(cost)
+            } else {
+                throw new Error('Biaya tidak ditemukan')
+            }
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Gagal memuat biaya'
             toast({

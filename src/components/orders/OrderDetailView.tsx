@@ -76,9 +76,9 @@ export default function OrderDetailView({
         }
     }
 
-    const statusInfo = getStatusInfo(order.status)
-    const paymentInfo = getPaymentInfo(order.payment_status)
-    const priorityInfo = getPriorityInfo(order.priority)
+    const statusInfo = getStatusInfo((order.status || 'PENDING') as any)
+    const paymentInfo = getPaymentInfo((order.payment_status || 'unpaid') as any)
+    const priorityInfo = getPriorityInfo((order.priority || 'normal') as any)
 
     return (
         <div className="space-y-6">
@@ -188,7 +188,7 @@ export default function OrderDetailView({
 
             {/* Status Timeline */}
             <OrderStatusTimeline
-                currentStatus={order.status}
+                currentStatus={order.status || 'PENDING'}
                 onStatusChange={onUpdateStatus}
             />
 
@@ -256,12 +256,12 @@ export default function OrderDetailView({
                                 <div>
                                     <p className="text-sm text-muted-foreground">Tanggal Pengiriman</p>
                                     <p className="font-medium">
-                                        {new Date(order.delivery_date).toLocaleDateString('id-ID', {
+                                        {order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('id-ID', {
                                             weekday: 'long',
                                             day: 'numeric',
                                             month: 'long',
                                             year: 'numeric'
-                                        })}
+                                        }) : 'No date set'}
                                     </p>
                                 </div>
                             </div>

@@ -92,7 +92,7 @@ export function withSecurity<Params extends {} = {}>(
   return async (req: NextRequest, params: Params): Promise<NextResponse> => {
     const mergedConfig = { ...DEFAULT_SECURITY_CONFIG, ...config }
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
-    const url = req.url
+    const {url} = req
     
     // 1. Content-Type validation
     if (mergedConfig.validateContentType) {
@@ -146,9 +146,7 @@ export function withSecurity<Params extends {} = {}>(
       for (const [key, value] of Object.entries(sanitizedSearchParams)) {
         if (Array.isArray(value)) {
           value.forEach(v => newUrlObj.searchParams.append(key, v))
-        } else {
-          if (value) newUrlObj.searchParams.set(key, value)
-        }
+        } else if (value) {newUrlObj.searchParams.set(key, value)}
       }
       
       // Clone the request with the sanitized URL
@@ -241,7 +239,7 @@ export function withSecurity<Params extends {} = {}>(
 }
 
 // Helper function to flatten nested objects for security checks
-function flattenObject(obj: any, prefix: string = '', result: Record<string, any> = {}): Record<string, any> {
+function flattenObject(obj: any, prefix = '', result: Record<string, any> = {}): Record<string, any> {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const newKey = prefix ? `${prefix}.${key}` : key

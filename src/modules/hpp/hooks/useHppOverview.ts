@@ -47,7 +47,7 @@ export function useHppOverview() {
   const markAlertAsRead = useMutation({
     mutationFn: async (alertId: string) => {
       const response = await fetch(`/api/hpp/alerts/${alertId}/read`, {
-        method: 'PATCH'
+        method: 'PUT'
       })
       if (!response.ok) {
         throw new Error('Failed to mark alert as read')

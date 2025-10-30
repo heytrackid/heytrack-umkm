@@ -54,12 +54,12 @@ export class RecipeRecommendationService {
 
       type OrderQueryResult = Order & {
         order_items: Array<OrderItem & {
-          recipe: Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price'>[] | null
+          recipe: Array<Pick<Recipe, 'id' | 'name' | 'category' | 'selling_price'>> | null
         }> | null
       }
 
       // Analyze order patterns - use type instead of interface
-      type RecipeFrequencyData = {
+      interface RecipeFrequencyData {
         count: number
         recipe: {
           id: string

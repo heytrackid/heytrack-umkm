@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * ProductionTimeline
  * Visual Gantt chart timeline for production batch scheduling
@@ -37,10 +36,16 @@ import {
   batchSchedulingService
 } from '@/services/production/BatchSchedulingService'
 
+// Define the status type for production batches based on the enum
+type ProductionStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+
+// Define the resource type
+type ResourceType = 'oven' | 'mixer' | 'decorator' | 'packaging'
+
 interface ProductionTimelineProps {
   schedulingResult?: SchedulingResult
   onBatchSelect?: (batch: ProductionBatch) => void
-  onBatchStatusChange?: (batchId: string, status: ProductionBatch['status']) => void
+  onBatchStatusChange?: (batchId: string, status: ProductionStatus) => void
   className?: string
 }
 
@@ -52,18 +57,18 @@ interface TimelineGridConfig {
   totalWidth: number
 }
 
-const RESOURCE_COLORS = {
+const RESOURCE_COLORS: Record<ResourceType, string> = {
   oven: 'bg-orange-500',
-  mixer: 'bg-gray-100 dark:bg-gray-8000',
-  decorator: 'bg-gray-100 dark:bg-gray-8000',
-  packaging: 'bg-gray-100 dark:bg-gray-8000'
+  mixer: 'bg-gray-100 dark:bg-gray-800',
+  decorator: 'bg-gray-100 dark:bg-gray-800',
+  packaging: 'bg-gray-100 dark:bg-gray-800'
 }
 
-const STATUS_COLORS = {
-  scheduled: 'bg-gray-400',
-  in_progress: 'bg-gray-100 dark:bg-gray-8000',
-  completed: 'bg-gray-100 dark:bg-gray-8000',
-  cancelled: 'bg-gray-100 dark:bg-gray-8000',
+const STATUS_COLORS: Record<ProductionStatus | 'blocked', string> = {
+  PLANNED: 'bg-gray-400',
+  IN_PROGRESS: 'bg-blue-500',
+  COMPLETED: 'bg-green-500',
+  CANCELLED: 'bg-gray-400',
   blocked: 'bg-red-300'
 }
 
@@ -169,13 +174,13 @@ export default function ProductionTimeline({
   }, [schedulingResult])
 
   const handleBatchClick = (batch: ProductionBatch) => {
-    void setSelectedBatch(batch.id)
+    setSelectedBatch(batch.id)
     onBatchSelect?.(batch)
   }
 
   const handleStatusToggle = (batch: ProductionBatch) => {
-    const nextStatus = batch.status === 'scheduled' ? 'in_progress' :
-      batch.status === 'in_progress' ? 'completed' : 'scheduled'
+    const nextStatus: ProductionStatus = batch.status === 'PLANNED' ? 'IN_PROGRESS' :
+      batch.status === 'IN_PROGRESS' ? 'COMPLETED' : 'PLANNED'
     onBatchStatusChange?.(batch.id, nextStatus)
   }
 
@@ -205,7 +210,9 @@ export default function ProductionTimeline({
                 variant="outline"
                 size="sm"
                 onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.25))}
-              />
+              >
+                +
+              </Button>
 
               <Separator orientation="vertical" className="h-6" />
 
@@ -234,19 +241,19 @@ export default function ProductionTimeline({
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <CheckCircle className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'scheduled').length} scheduled
+                {schedulingResult.schedule.filter(b => b.status === 'PLANNED').length} planned
               </div>
               <div className="flex items-center gap-1">
                 <Play className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'in_progress').length} in progress
+                {schedulingResult.schedule.filter(b => b.status === 'IN_PROGRESS').length} in progress
               </div>
               <div className="flex items-center gap-1">
                 <AlertTriangle className="h-4 w-4" />
-                {schedulingResult.schedule.filter(b => b.status === 'blocked').length} blocked
+                {schedulingResult.schedule.filter(b => b.status === 'COMPLETED').length} completed
               </div>
               <div className="flex items-center gap-1">
                 <BarChart3 className="h-4 w-4" />
-                {Math.round(schedulingResult.resource_utilization.oven_utilization)}% oven utilization
+                {Math.round(schedulingResult.resource_utilization.oven_utilization || 0)}% oven utilization
               </div>
             </div>
           )}
@@ -278,7 +285,7 @@ export default function ProductionTimeline({
                         width: timelineGrid.pixelsPerHour
                       }}
                     >
-                      {format}
+                      {format(hour, 'HH:mm')}
                     </div>
                   ))}
 
@@ -288,12 +295,12 @@ export default function ProductionTimeline({
                     if (currentOffsetMinutes >= 0 && currentOffsetMinutes <= differenceInMinutes(timelineGrid.endDate, timelineGrid.startDate)) {
                       return (
                         <div
-                          className="absolute top-0 h-full w-0.5 bg-gray-100 dark:bg-gray-8000 z-20"
+                          className="absolute top-0 h-full w-0.5 bg-gray-100 dark:bg-gray-800 z-20"
                           style={{
                             left: (currentOffsetMinutes / 60) * timelineGrid.pixelsPerHour
                           }}
                         >
-                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-100 dark:bg-gray-8000 rounded-full" />
+                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-gray-100 dark:bg-gray-800 rounded-full" />
                         </div>
                       )
                     }
@@ -311,11 +318,10 @@ export default function ProductionTimeline({
                       <div className="flex items-center gap-2 mb-1">
                         {resourceType === 'oven' && <Oven className="h-4 w-4" />}
                         {resourceType === 'mixer' && <ChefHat className="h-4 w-4" />}
-                        {resourceType === 'decorator' && <Package className="h-4 w-4" />}
-                        {resourceType === 'packaging' && <Package className="h-4 w-4" />}
+                        {(resourceType === 'decorator' || resourceType === 'packaging') && <Package className="h-4 w-4" />}
 
                         <span className="text-sm font-medium capitalize">
-                          {resourceType} {resourceId.split('T')[1]}
+                          {resourceType} {resourceId.split('T')[1] || resourceId}
                         </span>
                       </div>
 
@@ -345,9 +351,9 @@ export default function ProductionTimeline({
                             <Tooltip key={slot.batch_id}>
                               <TooltipTrigger asChild>
                                 <div
-                                  className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch.status]
+                                  className={`absolute top-1 h-10 rounded cursor-pointer border-2 transition-all duration-200 ${STATUS_COLORS[batch.status as ProductionStatus] || 'bg-gray-400'
                                     } ${selectedBatch === batch.id
-                                      ? 'border-primary  scale-105'
+                                      ? 'border-primary scale-105'
                                       : 'border-transparent hover:border-primary/50'
                                     }`}
                                   style={{
@@ -357,24 +363,24 @@ export default function ProductionTimeline({
                                   onClick={() => handleBatchClick(batch)}
                                 >
                                   <div className="flex items-center justify-between h-full px-2 text-xs text-white font-medium">
-                                    <span className="truncate">
-                                      {batch.recipe_name}
+                                    <span className="truncate-desktop-only">
+                                      {batch.recipe_id || 'Batch'}
                                     </span>
-                                    <span className="ml-1">
-                                      {batch.quantity}
+                                    <span className="ml-1 flex-shrink-0">
+                                      {batch.quantity || 0}
                                     </span>
                                   </div>
 
                                   {/* Status indicator */}
                                   <div className="absolute -top-1 -right-1">
-                                    {batch.status === 'completed' && (
+                                    {batch.status === 'COMPLETED' && (
                                       <CheckCircle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
-                                    {batch.status === 'in_progress' && (
+                                    {batch.status === 'IN_PROGRESS' && (
                                       <Play className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
-                                    {batch.status === 'blocked' && (
-                                      <AlertTriangle className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
+                                    {batch.status === 'PLANNED' && (
+                                      <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400 bg-white rounded-full" />
                                     )}
                                   </div>
                                 </div>
@@ -382,14 +388,12 @@ export default function ProductionTimeline({
 
                               <TooltipContent side="top" className="max-w-xs">
                                 <div className="space-y-1">
-                                  <div className="font-semibold">{batch.recipe_name}</div>
+                                  <div className="font-semibold">{batch.recipe_id || 'Production Batch'}</div>
                                   <div className="text-xs space-y-1">
-                                    <div>Quantity: {batch.quantity}</div>
-                                    <div>Priority: {batch.priority}/10</div>
-                                    <div>Duration: {batch.estimated_duration} min</div>
+                                    <div>Quantity: {batch.quantity || 0}</div>
                                     <div>Status: <Badge variant="outline" className="text-xs">{batch.status}</Badge></div>
-                                    <div>Start: {format(new Date(batch.scheduled_start), 'HH:mm')}</div>
-                                    <div>End: {format(new Date(batch.scheduled_end), 'HH:mm')}</div>
+                                    <div>Start: {batch.scheduled_start ? format(new Date(batch.scheduled_start), 'HH:mm') : 'Not scheduled'}</div>
+                                    <div>End: {batch.scheduled_end ? format(new Date(batch.scheduled_end), 'HH:mm') : 'Not scheduled'}</div>
                                   </div>
 
                                   {/* Quick actions */}
@@ -403,8 +407,8 @@ export default function ProductionTimeline({
                                         void handleStatusToggle(batch)
                                       }}
                                     >
-                                      {batch.status === 'scheduled' ? 'Start' :
-                                        batch.status === 'in_progress' ? 'Complete' : 'Reset'}
+                                      {batch.status === 'PLANNED' ? 'Start' :
+                                        batch.status === 'IN_PROGRESS' ? 'Complete' : 'Reset'}
                                     </Button>
                                   </div>
                                 </div>
@@ -422,14 +426,14 @@ export default function ProductionTimeline({
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-gray-400 rounded" />
-                  <span>Scheduled</span>
+                  <span>Planned</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-100 dark:bg-gray-8000 rounded" />
+                  <div className="w-3 h-3 bg-blue-500 rounded" />
                   <span>In Progress</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-gray-100 dark:bg-gray-8000 rounded" />
+                  <div className="w-3 h-3 bg-green-500 rounded" />
                   <span>Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -449,12 +453,12 @@ export default function ProductionTimeline({
                 </div>
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                  <span>Decorator</span>
+                  <span>Other</span>
                 </div>
               </div>
 
               {/* Warnings and suggestions */}
-              {schedulingResult.warnings.length > 0 && (
+              {schedulingResult.warnings && schedulingResult.warnings.length > 0 && (
                 <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium mb-2">
                     <AlertTriangle className="h-4 w-4" />

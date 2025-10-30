@@ -29,12 +29,12 @@ interface SmartIngredientSelectorProps {
     productType: string
 }
 
-export function SmartIngredientSelector({
+export const SmartIngredientSelector = ({
     availableIngredients,
     selectedIngredients,
     onSelectionChange,
     productType
-}: SmartIngredientSelectorProps) {
+}: SmartIngredientSelectorProps) => {
     const [searchQuery, setSearchQuery] = useState('')
     const { formatCurrency } = useCurrency()
 

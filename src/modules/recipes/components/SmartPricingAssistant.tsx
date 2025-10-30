@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useCurrency } from '@/hooks/useCurrency'
 import type { SmartPricingAnalysis } from '@/types/features/analytics'
 import { uiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type Recipe = Database['public']['Tables']['recipes']['Row']
 type RecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row']
@@ -46,7 +47,7 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
   type PricingTierKey = 'economy' | 'standard' | 'premium'
 
   useEffect(() => {
-    if (recipe && recipe.recipe_ingredients) {
+    if (recipe?.recipe_ingredients) {
       analyzePricing()
     }
   }, [recipe])
@@ -70,8 +71,9 @@ export default function SmartPricingAssistant({ recipe, onPriceUpdate }: SmartPr
       const pricingAnalysis = await response.json() as SmartPricingAnalysis
       void setAnalysis(pricingAnalysis)
       void setCustomPrice(pricingAnalysis.pricing.standard.price)
-    } catch (err: unknown) {
-      uiLogger.error({ err }, 'Error analyzing pricing')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      uiLogger.error({ error: message }, 'Error analyzing pricing')
       // Set fallback analysis to prevent UI breaks
       // Calculate basic analysis as fallback for now
       if (recipe?.recipe_ingredients && recipe.recipe_ingredients.length > 0) {

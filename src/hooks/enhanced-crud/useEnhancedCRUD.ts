@@ -6,6 +6,7 @@ import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 import type { EnhancedCRUDOptions } from './types'
 import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils'
+import { getErrorMessage } from '@/lib/type-guards'
 
 type Tables = Database['public']['Tables']
 
@@ -108,7 +109,7 @@ export function useEnhancedCRUD<
       void handleSuccess('update')
       return result as TRow
     } catch (error: unknown) {
-      void handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
+      void handleCRUDError(new Error(getErrorMessage(error)), 'update', showErrorToast, customErrorHandler)
       throw error
     } finally {
       void setLoading(false)
@@ -147,7 +148,7 @@ export function useEnhancedCRUD<
       void handleSuccess('delete')
       return true
     } catch (error: unknown) {
-      void handleCRUDError(error as Error, 'delete', showErrorToast, customErrorHandler)
+      void handleCRUDError(new Error(getErrorMessage(error)), 'delete', showErrorToast, customErrorHandler)
       throw error
     } finally {
       void setLoading(false)
@@ -155,7 +156,7 @@ export function useEnhancedCRUD<
   }, [table, handleSuccess, showErrorToast, customErrorHandler])
 
   const bulkCreate = useCallback(async (records: TInsert[]): Promise<TRow[]> => {
-    validateBulkInputs('create', records as Record<string, unknown>[])
+    validateBulkInputs('create', records as Array<Record<string, unknown>>)
 
     void setLoading(true)
     void setError(null)
@@ -169,7 +170,7 @@ export function useEnhancedCRUD<
         .select('*')
 
       if (error) {
-        throw new Error((error instanceof Error ? error.message : String(error)))
+        throw new Error(getErrorMessage(error))
       }
 
       if (showSuccessToast) {
@@ -181,7 +182,7 @@ export function useEnhancedCRUD<
 
       return result as TRow[]
     } catch (error: unknown) {
-      void handleCRUDError(error as Error, 'create', showErrorToast, customErrorHandler)
+      void handleCRUDError(new Error(getErrorMessage(error)), 'create', showErrorToast, customErrorHandler)
       throw error
     } finally {
       void setLoading(false)
@@ -191,7 +192,7 @@ export function useEnhancedCRUD<
   const bulkUpdate = useCallback(async (
     updates: Array<{ id: string; data: TUpdate }>
   ): Promise<TRow[]> => {
-    validateBulkInputs('update', updates as Record<string, unknown>[])
+    validateBulkInputs('update', updates as Array<Record<string, unknown>>)
 
     void setLoading(true)
     void setError(null)
@@ -224,7 +225,7 @@ export function useEnhancedCRUD<
 
       return results
     } catch (error: unknown) {
-      void handleCRUDError(error as Error, 'update', showErrorToast, customErrorHandler)
+      void handleCRUDError(new Error(getErrorMessage(error)), 'update', showErrorToast, customErrorHandler)
       throw error
     } finally {
       void setLoading(false)
@@ -232,7 +233,7 @@ export function useEnhancedCRUD<
   }, [table, showSuccessToast, showErrorToast, customErrorHandler])
 
   const bulkDelete = useCallback(async (ids: string[]) => {
-    validateBulkInputs('delete', ids as unknown as Record<string, unknown>[])
+    validateBulkInputs('delete', ids as unknown as Array<Record<string, unknown>>)
 
     void setLoading(true)
     void setError(null)
@@ -246,7 +247,7 @@ export function useEnhancedCRUD<
         .in('id', ids as never)
 
       if (error) {
-        throw new Error((error instanceof Error ? error.message : String(error)))
+        throw new Error(getErrorMessage(error))
       }
 
       if (showSuccessToast) {
@@ -258,7 +259,7 @@ export function useEnhancedCRUD<
 
       return true
     } catch (error: unknown) {
-      void handleCRUDError(error as Error, 'delete', showErrorToast, customErrorHandler)
+      void handleCRUDError(new Error(getErrorMessage(error)), 'delete', showErrorToast, customErrorHandler)
       throw error
     } finally {
       void setLoading(false)

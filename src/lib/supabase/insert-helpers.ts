@@ -44,6 +44,6 @@ export function castRow<T extends TableName>(
 export function castRows<T extends TableName>(
   _tableName: T,
   data: unknown
-): Tables[T]['Row'][] {
-  return data as Tables[T]['Row'][]
+): Array<Tables[T]['Row']> {
+  return data as Array<Tables[T]['Row']>
 }

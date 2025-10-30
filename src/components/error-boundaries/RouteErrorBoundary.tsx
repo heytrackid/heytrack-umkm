@@ -100,7 +100,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
                 Go Back
               </Button>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {this.state.error && (
                 <details className="bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs">
                   <summary className="cursor-pointer text-gray-700 dark:text-gray-300 mb-2">
                     Error Details

@@ -12,7 +12,6 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { useCurrency } from '@/hooks/useCurrency'
-import { LOADING_KEYS, useLoading } from '@/hooks/loading'
 import { usePagePreloading } from '@/providers/PreloadingProvider'
 import {
   BarChart3,
@@ -24,8 +23,8 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
-
-
+import { useQuery } from '@tanstack/react-query'
+import { apiLogger } from '@/lib/logger'
 
 // Import lightweight components normally - no need for lazy loading
 import StatsCardsSection from './components/StatsCardsSection'
@@ -33,41 +32,79 @@ import RecentOrdersSection from './components/RecentOrdersSection'
 import StockAlertsSection from './components/StockAlertsSection'
 import HppDashboardWidget from './components/HppDashboardWidget'
 
-// Sample data removed - now using real data from API
-// const sampleStats = {
-//   totalSales: 15420000,
-//   totalOrders: 148,
-//   totalCustomers: 89,
-//   totalIngredients: 45,
-//   salesGrowth: 12.5,
-//   ordersGrowth: 8.3,
-//   customersGrowth: 15.2,
-//   ingredientsLow: 5
-// }
+// Dashboard data structure
+interface DashboardData {
+  stats: {
+    totalSales: number
+    totalOrders: number
+    totalCustomers: number
+    totalIngredients: number
+    salesGrowth: number
+    ordersGrowth: number
+    customersGrowth: number
+    ingredientsLow: number
+  }
+  orders: {
+    recent: Array<{
+      id: string
+      customer: string
+      amount: number | null
+      status: string | null
+      time: string | null
+    }>
+  }
+  inventory: {
+    lowStockAlerts: Array<{
+      id: string
+      name: string
+      currentStock: number
+      reorderPoint: number
+    }>
+  }
+}
 
-// Placeholder data until API integration
-const placeholderStats = {
-  totalSales: 0,
-  totalOrders: 0,
-  totalCustomers: 0,
-  totalIngredients: 0,
-  salesGrowth: 0,
-  ordersGrowth: 0,
-  customersGrowth: 0,
-  ingredientsLow: 0
+// Parallel data fetching function
+const fetchDashboardData = async (): Promise<DashboardData> => {
+  // Fetch all data in parallel
+  const [statsResponse, ordersResponse, inventoryResponse] = await Promise.all([
+    fetch('/api/dashboard/stats'),
+    fetch('/api/orders/recent'),
+    fetch('/api/inventory/low-stock')
+  ])
+
+  // Check if all responses are successful
+  const results = await Promise.all([
+    statsResponse.ok ? statsResponse.json() : Promise.reject(new Error('Stats API failed')),
+    ordersResponse.ok ? ordersResponse.json() : Promise.reject(new Error('Orders API failed')),
+    inventoryResponse.ok ? inventoryResponse.json() : Promise.reject(new Error('Inventory API failed'))
+  ])
+
+  return {
+    stats: results[0],
+    orders: results[1],
+    inventory: results[2]
+  }
 }
 
 export default function Dashboard() {
   const { formatCurrency } = useCurrency()
   const [currentTime, setCurrentTime] = useState(new Date())
-  const { setLoading, isLoading } = useLoading({
-    [LOADING_KEYS.DASHBOARD_STATS]: true,
-    [LOADING_KEYS.RECENT_ORDERS]: true,
-    [LOADING_KEYS.STOCK_ALERTS]: true
-  })
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
+
+  // Parallel data loading with React Query
+  const {
+    data: dashboardData,
+    isLoading: isDataLoading,
+    error
+  } = useQuery({
+    queryKey: ['dashboard', 'all-data'],
+    queryFn: fetchDashboardData,
+    staleTime: 60000, // 1 minute
+    retry: 2,
+    refetchOnWindowFocus: false
+  })
 
   // Enable smart preloading for dashboard
   usePagePreloading('dashboard')
@@ -87,30 +124,6 @@ export default function Dashboard() {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000)
     return () => clearInterval(timer)
-  }, [])
-
-  // Simulate loading states
-  useEffect(() => {
-    // Simulate dashboard stats loading
-    const statsTimer = setTimeout(() => {
-      void setLoading(LOADING_KEYS.DASHBOARD_STATS, false)
-    }, 1500)
-
-    // Simulate recent orders loading
-    const ordersTimer = setTimeout(() => {
-      void setLoading(LOADING_KEYS.RECENT_ORDERS, false)
-    }, 2000)
-
-    // Simulate stock alerts loading  
-    const stockTimer = setTimeout(() => {
-      void setLoading(LOADING_KEYS.STOCK_ALERTS, false)
-    }, 1800)
-
-    return () => {
-      clearTimeout(statsTimer)
-      clearTimeout(ordersTimer)
-      clearTimeout(stockTimer)
-    }
   }, [])
 
   // Show loading state while auth is initializing
@@ -133,11 +146,26 @@ export default function Dashboard() {
     )
   }
 
+  if (error) {
+    apiLogger.error({ error }, 'Dashboard data loading error')
+    return (
+      <AppLayout>
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-semibold mb-4">Gagal Memuat Dashboard</h2>
+          <p className="text-muted-foreground mb-6">
+            Terjadi kesalahan saat memuat data dashboard. Silakan coba lagi.
+          </p>
+          <Button onClick={() => window.location.reload()}>Muat Ulang</Button>
+        </div>
+      </AppLayout>
+    )
+  }
+
   return (
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
+        {isDataLoading ? (
           <DashboardHeaderSkeleton />
         ) : (
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -159,70 +187,96 @@ export default function Dashboard() {
                 </p>
               )}
             </div>
-
-
           </div>
         )}
 
-        {/* Stats Cards (Suspense + dynamic) */}
-        {isLoading(LOADING_KEYS.DASHBOARD_STATS) ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }, (_, i) => (
-              <StatsCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <Suspense fallback={
+        {/* Main Dashboard Content - Single Suspense boundary to prevent cascading loading */}
+        <Suspense fallback={
+          <div className="space-y-6">
+            {/* Stats Cards Loading */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {Array.from({ length: 4 }, (_, i) => (
                 <StatsCardSkeleton key={i} />
               ))}
             </div>
-          }>
-            <StatsCardsSection formatCurrency={formatCurrency} stats={placeholderStats} />
-          </Suspense>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Orders (Suspense + dynamic) */}
-          {isLoading(LOADING_KEYS.RECENT_ORDERS) ? (
-            <RecentOrdersSkeleton />
-          ) : (
-            <Suspense fallback={<RecentOrdersSkeleton />}>
-              <RecentOrdersSection />
-            </Suspense>
-          )}
-
-          {/* Low Stock Alert (Suspense + dynamic) */}
-          {isLoading(LOADING_KEYS.STOCK_ALERTS) ? (
-            <StockAlertSkeleton />
-          ) : (
-            <Suspense fallback={<StockAlertSkeleton />}>
-              <StockAlertsSection />
-            </Suspense>
-          )}
-        </div>
-
-        {/* HPP Dashboard Widget */}
-        <Suspense fallback={
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5" />
-                HPP & Costing Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="animate-pulse space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="h-16 bg-gray-200 rounded" />
-                  <div className="h-16 bg-gray-200 rounded" />
+            
+            {/* Recent Orders & Stock Alerts Loading */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RecentOrdersSkeleton />
+              <StockAlertSkeleton />
+            </div>
+            
+            {/* HPP Widget Loading */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="h-5 w-5" />
+                  HPP & Costing Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="animate-pulse space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-16 bg-gray-200 rounded" />
+                    <div className="h-16 bg-gray-200 rounded" />
+                  </div>
+                  <div className="h-32 bg-gray-200 rounded" />
                 </div>
-                <div className="h-32 bg-gray-200 rounded" />
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         }>
+          {/* Stats Cards */}
+          {isDataLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <StatsCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatsCardsSection 
+                stats={dashboardData?.stats ? {
+                  revenue: {
+                    total: dashboardData.stats.totalSales,
+                    growth: dashboardData.stats.salesGrowth.toString(),
+                    trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
+                  },
+                  orders: {
+                    total: dashboardData.stats.totalOrders,
+                    active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
+                  },
+                  customers: {
+                    total: dashboardData.stats.totalCustomers,
+                    vip: 0 // Placeholder - need to determine VIP customers
+                  },
+                  inventory: {
+                    total: dashboardData.stats.totalIngredients,
+                    lowStock: dashboardData.stats.ingredientsLow
+                  }
+                } : undefined} 
+                formatCurrency={formatCurrency} 
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Orders */}
+            {isDataLoading ? (
+              <RecentOrdersSkeleton />
+            ) : (
+              <RecentOrdersSection orders={dashboardData?.orders?.recent} />
+            )}
+
+            {/* Low Stock Alert */}
+            {isDataLoading ? (
+              <StockAlertSkeleton />
+            ) : (
+              <StockAlertsSection lowStockItems={dashboardData?.inventory?.lowStockAlerts} />
+            )}
+          </div>
+
+          {/* HPP Dashboard Widget */}
           <HppDashboardWidget />
         </Suspense>
 

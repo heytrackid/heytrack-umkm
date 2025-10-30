@@ -57,7 +57,7 @@ export const InventoryNotifications = () => {
   const markAsRead = async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_read: true })
       })
@@ -75,7 +75,7 @@ export const InventoryNotifications = () => {
   const dismissNotification = async (notificationId: string) => {
     try {
       const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_dismissed: true })
       })
@@ -188,9 +188,8 @@ export const InventoryNotifications = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 border rounded-lg ${
-                    !notification.is_read ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200' : 'bg-card'
-                  }`}
+                  className={`p-4 border rounded-lg ${!notification.is_read ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200' : 'bg-card'
+                    }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3 flex-1">

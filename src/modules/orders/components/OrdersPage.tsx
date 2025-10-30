@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import { uiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 import {
   BarChart3,
   Calendar,
@@ -102,7 +103,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
     gcTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const error = queryError ? (queryError as Error).message : null
+  const error = queryError ? (queryError).message : null
 
   // ✅ Calculate stats with useMemo for performance
   const stats = useMemo<OrderStats>(() => ({
@@ -127,16 +128,16 @@ export default function OrdersPage({ }: OrdersPageProps) {
   }), [orders])
 
   const getStatusColor = (status: OrderStatus | null) => {
-    if (!status) return 'bg-gray-100 text-gray-800'
+    if (!status) { return 'bg-gray-100 text-gray-800' }
     const config = ORDER_STATUS_CONFIG[status]
     if (!config) { return 'bg-gray-100 text-gray-800' }
     return config.color
   }
 
-  const getPaymentStatusColor = (_status: string | null) => {
+  const getPaymentStatusColor = (_status: string | null) =>
     // Simplified - just return default color
-    return 'bg-gray-100 text-gray-800'
-  }
+    'bg-gray-100 text-gray-800'
+
 
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
@@ -164,14 +165,15 @@ export default function OrdersPage({ }: OrdersPageProps) {
     try {
       // Update status via API
       await fetch(`/api/orders/${orderId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       })
       // Refetch orders after update
       // Note: TanStack Query will handle cache invalidation
-    } catch (err) {
-      uiLogger.error({ err }, 'Failed to update status')
+    } catch (error: unknown) {
+      const message = getErrorMessage(error)
+      uiLogger.error({ error: message }, 'Failed to update status')
     }
   }
 
@@ -354,15 +356,15 @@ export default function OrdersPage({ }: OrdersPageProps) {
       </Card>
 
       {/* Navigation Tabs */}
-      <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="dashboard">Ringkasan</TabsTrigger>
-          <TabsTrigger value="list">Daftar Pesanan</TabsTrigger>
-          <TabsTrigger value="calendar">Kalender</TabsTrigger>
-          <TabsTrigger value="analytics">Analitik</TabsTrigger>
-        </TabsList>
+      <SwipeableTabs value={activeView} onValueChange={(value) => setActiveView(value as ActiveView)}>
+        <SwipeableTabsList>
+          <SwipeableTabsTrigger value="dashboard">Ringkasan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="list">Daftar Pesanan</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="calendar">Kalender</SwipeableTabsTrigger>
+          <SwipeableTabsTrigger value="analytics">Analitik</SwipeableTabsTrigger>
+        </SwipeableTabsList>
 
-        <TabsContent value="dashboard" className="mt-6">
+        <SwipeableTabsContent value="dashboard" className="mt-6">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Recent Orders */}
             <Card>
@@ -403,7 +405,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(ORDER_STATUSES).map(([status, config]) => {
+                  {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => {
                     const count = orders.filter(o => o.status === status).length
                     const percentage = orders.length > 0 ? (count / orders.length) * 100 : 0
 
@@ -426,9 +428,9 @@ export default function OrdersPage({ }: OrdersPageProps) {
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
+        </SwipeableTabsContent>
 
-        <TabsContent value="list" className="mt-6">
+        <SwipeableTabsContent value="list" className="mt-6">
           {/* Filters */}
           <Card className="mb-6">
             <CardContent className="pt-6">
@@ -455,12 +457,12 @@ export default function OrdersPage({ }: OrdersPageProps) {
                       }))
                     }}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Semua Status</SelectItem>
-                      {Object.entries(ORDER_STATUSES).map(([status, config]) => (
+                      {Object.entries(ORDER_STATUS_CONFIG).map(([status, config]) => (
                         <SelectItem key={status} value={status}>
                           {config.label}
                         </SelectItem>
@@ -585,7 +587,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                             value={order.status}
                             onValueChange={(newStatus) => handleUpdateStatus(order.id, newStatus as OrderStatus)}
                           >
-                            <SelectTrigger className="w-[200px] h-8 text-sm">
+                            <SelectTrigger className="w-full sm:w-[200px] h-8 text-sm">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -607,9 +609,9 @@ export default function OrdersPage({ }: OrdersPageProps) {
               </>
             )}
           </div>
-        </TabsContent>
+        </SwipeableTabsContent>
 
-        <TabsContent value="calendar" className="mt-6">
+        <SwipeableTabsContent value="calendar" className="mt-6">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -621,9 +623,9 @@ export default function OrdersPage({ }: OrdersPageProps) {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        </SwipeableTabsContent>
 
-        <TabsContent value="analytics" className="mt-6">
+        <SwipeableTabsContent value="analytics" className="mt-6">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-12">
@@ -635,8 +637,8 @@ export default function OrdersPage({ }: OrdersPageProps) {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </SwipeableTabsContent>
+      </SwipeableTabs>
     </div >
   )
 }

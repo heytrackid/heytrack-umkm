@@ -53,7 +53,7 @@ export function useAIPowered() {
     try {
       const response = await fetch('/api/ai/health')
       return response.ok
-    } catch (error) {
+    } catch (error: unknown) {
       return false
     }
   }, [])

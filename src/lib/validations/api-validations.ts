@@ -247,16 +247,17 @@ export const ReportGenerationSchema = z.object({
   includeSummary: z.boolean().default(true),
 })
 
-export const CronJobConfigSchema = z.object({
-  name: z.string().min(1),
-  schedule: z.string().regex(/^(\*|(\d+)) (\*|(\d+)) (\*|(\d+)) (\*|(\d+)) (\*|(\d+))$/),
-  enabled: z.boolean().default(true),
-  timeout: z.number().min(1000).max(3600000).default(300000),
-  retryAttempts: z.number().min(0).max(10).default(3),
-  retryDelay: z.number().min(1000).max(300000).default(60000),
-  notificationOnFailure: z.boolean().default(true),
-  priority: z.enum(['low', 'normal', 'high', 'critical']).default('normal'),
-})
+// Cron job config removed - no longer using internal cron
+// export const CronJobConfigSchema = z.object({
+//   name: z.string().min(1),
+//   schedule: z.string().regex(/^(\*|(\d+)) (\*|(\d+)) (\*|(\d+)) (\*|(\d+)) (\*|(\d+))$/),
+//   enabled: z.boolean().default(true),
+//   timeout: z.number().min(1000).max(3600000).default(300000),
+//   retryAttempts: z.number().min(0).max(10).default(3),
+//   retryDelay: z.number().min(1000).max(300000).default(60000),
+//   notificationOnFailure: z.boolean().default(true),
+//   priority: z.enum(['low', 'normal', 'high', 'critical']).default('normal'),
+// })
 
 // Type exports
 export type FileUpload = z.infer<typeof FileUploadSchema>
@@ -273,4 +274,4 @@ export type CurrencyFormat = z.infer<typeof CurrencyFormatSchema>
 export type InventoryCalculation = z.infer<typeof InventoryCalculationSchema>
 export type SalesCalculation = z.infer<typeof SalesCalculationSchema>
 export type ReportGeneration = z.infer<typeof ReportGenerationSchema>
-export type CronJobConfig = z.infer<typeof CronJobConfigSchema>
+// export type CronJobConfig = z.infer<typeof CronJobConfigSchema>

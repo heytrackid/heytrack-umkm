@@ -4,6 +4,7 @@ import type { Database } from '@/types/supabase-generated'
 import { apiLogger } from '@/lib/logger'
 import { calculateRecipeCOGS, toNumber } from '@/lib/supabase/query-helpers'
 import type { RecipeWithIngredients } from '@/types/query-results'
+import { isOrder, isRecipe, isArrayOf, extractFirst, ensureArray, getErrorMessage } from '@/lib/type-guards'
 
 type Order = Database['public']['Tables']['orders']['Row']
 type OrderItem = Database['public']['Tables']['order_items']['Row']
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
       ...recipe,
       recipe_ingredients: (recipe.recipe_ingredients ?? []).map((ri) => ({
         ...ri,
-        ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient!
+        ingredient: Array.isArray(ri.ingredient) ? ri.ingredient[0]! : ri.ingredient
       }))
     })) as RecipeWithIngredients[]
 
@@ -382,15 +383,15 @@ function calculateCOGSBreakdown(
   recipes.forEach(recipe => recipeMap.set(recipe.id, recipe))
 
   orders.forEach(order => {
-    if (!order.order_items) return
+    if (!order.order_items) {return}
     
     for (const item of order.order_items) {
       const recipe = recipeMap.get(item.recipe_id)
-      if (!recipe?.recipe_ingredients) continue
+      if (!recipe?.recipe_ingredients) {continue}
       
       for (const ri of recipe.recipe_ingredients) {
-        const ingredient = ri.ingredient
-        if (!ingredient) continue
+        const {ingredient} = ri
+        if (!ingredient) {continue}
         
         const ingredientName = ingredient.name
         if (!breakdown[ingredientName]) {
@@ -435,7 +436,7 @@ function getPeriodKey(date: string, period: string): string {
     case 'weekly': {
       const weekStart = new Date(d)
       weekStart.setDate(d.getDate() - d.getDay())
-      return weekStart.toISOString().split('T')[0]!
+      return weekStart.toISOString().split('T')[0]
     }
     case 'monthly':
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`

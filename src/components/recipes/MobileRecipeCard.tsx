@@ -36,8 +36,7 @@ export const MobileRecipeCard = ({
     getCategoryIcon,
     getDifficultyColor,
     getDifficultyLabel,
-}: MobileRecipeCardProps) => {
-    return (
+}: MobileRecipeCardProps) => (
         <Card className="hover:shadow-md transition-shadow" onClick={() => onView(recipe)}>
             <CardContent className="p-4">
                 <div className="space-y-3">
@@ -117,4 +116,3 @@ export const MobileRecipeCard = ({
             </CardContent>
         </Card>
     )
-}

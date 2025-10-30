@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SwipeableTabs, SwipeableTabsContent, SwipeableTabsList, SwipeableTabsTrigger } from '@/components/ui/swipeable-tabs'
 import {
     TrendingUp,
     TrendingDown,
@@ -357,15 +357,15 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
             </Card>
 
             {/* Charts and Details */}
-            <Tabs defaultValue="trend" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="trend">Trend</TabsTrigger>
-                    <TabsTrigger value="products">Produk</TabsTrigger>
-                    <TabsTrigger value="expenses">Biaya</TabsTrigger>
-                    <TabsTrigger value="comparison">Perbandingan</TabsTrigger>
-                </TabsList>
+            <SwipeableTabs defaultValue="trend" className="space-y-4">
+                <SwipeableTabsList>
+                    <SwipeableTabsTrigger value="trend">Trend</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="products">Produk</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="expenses">Biaya</SwipeableTabsTrigger>
+                    <SwipeableTabsTrigger value="comparison">Perbandingan</SwipeableTabsTrigger>
+                </SwipeableTabsList>
 
-                <TabsContent value="trend">
+                <SwipeableTabsContent value="trend">
                     <Card>
                         <CardHeader>
                             <CardTitle>Trend Profit</CardTitle>
@@ -385,9 +385,9 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
-                </TabsContent>
+                </SwipeableTabsContent>
 
-                <TabsContent value="products">
+                <SwipeableTabsContent value="products">
                     <div className="grid gap-4 md:grid-cols-2">
                         <Card>
                             <CardHeader>
@@ -441,9 +441,9 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                             </CardContent>
                         </Card>
                     </div>
-                </TabsContent>
+                </SwipeableTabsContent>
 
-                <TabsContent value="expenses">
+                <SwipeableTabsContent value="expenses">
                     <Card>
                         <CardHeader>
                             <CardTitle>Breakdown Biaya Operasional</CardTitle>
@@ -459,7 +459,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                                             cx="50%"
                                             cy="50%"
                                             outerRadius={100}
-                                            label={(entry) => `${entry.category}: ${entry.percentage.toFixed(1)}%`}
+                                            label={(entry) => `${entry.category}: ${(entry.percentage as number).toFixed(1)}%`}
                                         >
                                             {profitData.operating_expenses_breakdown.map((_, index) => (
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -491,9 +491,9 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                             </div>
                         </CardContent>
                     </Card>
-                </TabsContent>
+                </SwipeableTabsContent>
 
-                <TabsContent value="comparison">
+                <SwipeableTabsContent value="comparison">
                     <Card>
                         <CardHeader>
                             <CardTitle>Perbandingan Revenue vs COGS vs Profit</CardTitle>
@@ -513,8 +513,8 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
-                </TabsContent>
-            </Tabs>
+                </SwipeableTabsContent>
+            </SwipeableTabs>
         </div>
     )
 }

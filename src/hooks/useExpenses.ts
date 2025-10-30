@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage } from '@/lib/type-guards'
 export interface Expense {
   id: string
   date: string
@@ -35,9 +36,9 @@ export function useExpenses() {
       const data = await response.json()
       void setExpenses(data)
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = getErrorMessage(err)
       void setError(errorMessage)
-      apiLogger.error({ error: err }, 'Error fetching expenses:')
+      apiLogger.error({ error: errorMessage }, 'Error fetching expenses:')
     } finally {
       void setLoading(false)
     }
@@ -61,7 +62,7 @@ export function useExpenses() {
       void setExpenses(prev => [newExpense, ...prev])
       return newExpense
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = getErrorMessage(err)
       void setError(errorMessage)
       throw err
     }
@@ -89,7 +90,7 @@ export function useExpenses() {
       )
       return updatedExpense
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = getErrorMessage(err)
       void setError(errorMessage)
       throw err
     }
@@ -107,7 +108,7 @@ export function useExpenses() {
 
       setExpenses(prev => prev.filter(expense => expense.id !== id))
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = getErrorMessage(err)
       void setError(errorMessage)
       throw err
     }

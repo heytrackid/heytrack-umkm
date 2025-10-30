@@ -158,7 +158,7 @@ export function useQualityChecks(batchId: string) {
 
 // Equipment management
 export function useProductionEquipment(filters?: { type?: string; status?: string }) {
-  const queryFilter: Record<string, unknown> | undefined = filters
+  const queryFilter: Partial<Record<string, string | number | boolean | null>> | undefined = filters
     ? {
         ...(filters.type ? { type: filters.type } : {}),
         ...(filters.status ? { status: filters.status } : {})
@@ -193,7 +193,7 @@ export function useProductionEquipment(filters?: { type?: string; status?: strin
 
 // Staff management
 export function useProductionStaff(filters?: { role?: string; active?: boolean }) {
-  const queryFilter: Record<string, unknown> | undefined = filters
+  const queryFilter: Partial<Record<string, string | number | boolean | null>> | undefined = filters
     ? {
         ...(filters.role ? { role: filters.role } : {}),
         ...(filters.active !== undefined ? { active: filters.active } : {})
@@ -306,8 +306,8 @@ export function useProductionCapacity(date: string): {
   const capacity = useMemo((): ProductionCapacity | null => {
     if (!batches || !equipment || !staff) {return null}
 
-    const eqArray = equipment as ProductionEquipment[]
-    const staffArray = staff as ProductionStaff[]
+    const eqArray = equipment
+    const staffArray = staff
     const batchArray = batches
     const totalEquipmentCapacity = eqArray.reduce((sum: number, eq: ProductionEquipment) => sum + eq.capacity, 0)
     const totalStaffCapacity = staffArray.reduce((sum: number, s: ProductionStaff) => sum + s.max_concurrent_batches, 0)
@@ -503,7 +503,7 @@ export function useProductionAnalytics(filters?: ProductionFilters): {
 
 // Production notifications
 export function useProductionNotifications() {
-  type Notification = {
+  interface Notification {
     id: string
     title: string
     message: string
@@ -535,7 +535,7 @@ export function useProductionNotifications() {
   }
 
   const unreadCount = (notificationsData as Notification[] | undefined)?.filter((n) => {
-    const notif = n as Notification
+    const notif = n
     return !notif.read
   }).length || 0
 

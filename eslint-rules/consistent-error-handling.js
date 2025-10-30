@@ -5,7 +5,7 @@
  * Requires using 'error' instead of 'err', 'e', or other variations.
  */
 
-module.exports = {
+export default {
   meta: {
     type: 'suggestion',
     docs: {

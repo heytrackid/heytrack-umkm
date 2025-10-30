@@ -7,6 +7,7 @@ import { PaginationQuerySchema, DateRangeQuerySchema } from '@/lib/validations/d
 import type { Database } from '@/types/supabase-generated'
 import { formatCurrency } from '@/lib/currency'
 import { withSecurity, SecurityPresets } from '@/utils/security'
+import { getErrorMessage } from '@/lib/type-guards'
 
 // Define the original GET function
 async function GET(request: NextRequest) {
@@ -127,7 +128,7 @@ async function GET(request: NextRequest) {
       .gte('expense_date', `${thisMonth}-01`)
       .lte('expense_date', `${thisMonth}-31`)
 
-    type ExpensePartial = { amount: number; category: string }
+    interface ExpensePartial { amount: number; category: string }
     
     const todayTotal = todayExpenses?.reduce((sum: number, exp: ExpensePartial) =>
       sum + safeParseAmount(exp.amount), 0) || 0
@@ -156,9 +157,8 @@ async function GET(request: NextRequest) {
       }
     })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error fetching expenses:')
-    const message = error instanceof Error ? error.message : 'Failed to fetch expenses'
-    return NextResponse.json({ error: message }, { status: 500 })
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error fetching expenses:')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
@@ -226,9 +226,8 @@ async function POST(request: NextRequest) {
 
     return NextResponse.json(expense, { status: 201 })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error creating expense:')
-    const message = error instanceof Error ? error.message : 'Failed to create expense'
-    return NextResponse.json({ error: message }, { status: 500 })
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error creating expense:')
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 

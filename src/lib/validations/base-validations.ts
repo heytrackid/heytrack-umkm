@@ -20,8 +20,8 @@ export const percentage = z.number().min(0, 'validation.nonNegativePercentage').
 export const indonesianName = z.string().min(2, 'validation.nameMinLength').max(100, 'validation.nameMaxLength')
 
 // Enhanced base schemas
-export const UUIDSchema = z.string().uuid()
-export const EmailSchema = z.string().email()
+export const UUIDSchema = z.string().uuid({ message: 'Invalid UUID format' })
+export const EmailSchema = z.string().email({ message: 'Invalid email format' })
 export const PhoneSchema = z.string().regex(/^(\+62|62|0)[8-9][0-9]{7,11}$/, 'Invalid Indonesian phone number')
 export const DateStringSchema = z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid date string')
 export const PositiveNumberSchema = z.number().positive()
@@ -51,8 +51,8 @@ export const EnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url('Invalid app URL'),
   NODE_ENV: z.enum(['development', 'production', 'test']),
 
-  // Optional: Cron Job Authentication
-  CRON_SECRET: z.string().optional(),
+  // Cron removed - no longer needed
+  // CRON_SECRET: z.string().optional(),
 }).refine((env) => 
   // At least one AI service must be configured
    env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY
@@ -74,7 +74,7 @@ export function validateEnvironment(): EnvConfig {
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     NEXT_PUBLIC_APP_URL: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
     NODE_ENV: process.env.NODE_ENV || 'development',
-    CRON_SECRET: process.env.CRON_SECRET,
+    // CRON_SECRET: process.env.CRON_SECRET, // Removed
   }
 
   const validation = EnvSchema.safeParse(env)

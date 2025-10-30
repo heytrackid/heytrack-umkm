@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import { safeNumber, getErrorMessage } from '@/lib/type-guards'
 
 // Unused types removed
 
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in POST /api/financial/records')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/financial/records')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -105,7 +106,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('start_date')
     const endDate = searchParams.get('end_date')
     const type = searchParams.get('type') // income or expense
-    const limit = parseInt(searchParams.get('limit') || '100')
+    const limit = safeNumber(searchParams.get('limit'), 100)
 
     let query = supabase
       .from('financial_records')
@@ -144,7 +145,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/financial/records')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/financial/records')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

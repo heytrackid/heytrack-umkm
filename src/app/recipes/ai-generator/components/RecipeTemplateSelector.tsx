@@ -24,7 +24,7 @@ interface RecipeTemplateSelectorProps {
     selectedTemplateId?: string
 }
 
-export function RecipeTemplateSelector({ onSelectTemplate, selectedTemplateId }: RecipeTemplateSelectorProps) {
+export const RecipeTemplateSelector = ({ onSelectTemplate, selectedTemplateId }: RecipeTemplateSelectorProps) => {
     const [selectedCategory, setSelectedCategory] = useState<string>(RECIPE_CATEGORIES[0])
     const { formatCurrency } = useCurrency()
 

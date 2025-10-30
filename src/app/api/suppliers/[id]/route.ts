@@ -3,10 +3,11 @@ import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
 import type { Database } from '@/types/supabase-generated'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
 type SupplierUpdate = Database['public']['Tables']['suppliers']['Update']
 
-type RouteContext = {
+interface RouteContext {
   params: Promise<{ id: string }>
 }
 
@@ -17,6 +18,12 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid supplier ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -41,7 +48,7 @@ export async function GET(
 
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in GET /api/suppliers/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/suppliers/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -53,6 +60,12 @@ export async function PUT(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid supplier ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -85,7 +98,7 @@ export async function PUT(
     cacheInvalidation.suppliers()
     return NextResponse.json(data)
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in PUT /api/suppliers/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in PUT /api/suppliers/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -97,6 +110,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params
+    
+    // Validate UUID format
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid supplier ID format' }, { status: 400 })
+    }
+    
     const supabase = await createClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -133,7 +152,7 @@ export async function DELETE(
     cacheInvalidation.suppliers()
     return NextResponse.json({ message: 'Supplier deleted successfully' })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Error in DELETE /api/suppliers/[id]')
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in DELETE /api/suppliers/[id]')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

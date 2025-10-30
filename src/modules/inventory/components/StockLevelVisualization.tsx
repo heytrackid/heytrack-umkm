@@ -22,10 +22,10 @@ interface StockLevelVisualizationProps {
 type StockStatus = 'critical' | 'low' | 'normal' | 'good'
 
 const getStockStatus = (current: number, min: number): StockStatus => {
-    if (current <= 0) return 'critical'
-    if (current <= min * 0.5) return 'critical'
-    if (current <= min) return 'low'
-    if (current <= min * 2) return 'normal'
+    if (current <= 0) {return 'critical'}
+    if (current <= min * 0.5) {return 'critical'}
+    if (current <= min) {return 'low'}
+    if (current <= min * 2) {return 'normal'}
     return 'good'
 }
 
@@ -56,13 +56,13 @@ const getStockLabel = (status: StockStatus) => {
     }
 }
 
-export function StockLevelVisualization({ ingredients }: StockLevelVisualizationProps) {
+export const StockLevelVisualization = ({ ingredients }: StockLevelVisualizationProps) => {
     const { formatCurrency } = useCurrency()
 
     // Group by status
     const byStatus = ingredients.reduce((acc, ing) => {
         const status = getStockStatus(ing.current_stock ?? 0, ing.min_stock ?? 0)
-        if (!acc[status]) acc[status] = []
+        if (!acc[status]) {acc[status] = []}
         acc[status].push(ing)
         return acc
     }, {} as Record<StockStatus, Ingredient[]>)
@@ -223,7 +223,7 @@ export function StockLevelVisualization({ ingredients }: StockLevelVisualization
             {/* Detailed List by Status */}
             {(['critical', 'low', 'normal', 'good'] as StockStatus[]).map(status => {
                 const items = byStatus[status] || []
-                if (items.length === 0) return null
+                if (items.length === 0) {return null}
 
                 const Icon = getStockIcon(status)
                 const colorClass = getStockColor(status)

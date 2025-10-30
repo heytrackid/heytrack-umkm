@@ -121,7 +121,7 @@ function getUserFriendlyError(error: unknown): {
     }
 }
 
-export function ErrorMessage({
+export const ErrorMessage = ({
     title,
     message,
     error,
@@ -130,7 +130,7 @@ export function ErrorMessage({
     showTechnicalDetails = false,
     variant = 'card',
     className
-}: ErrorMessageProps) {
+}: ErrorMessageProps) => {
     const [showDetails, setShowDetails] = useState(false)
 
     const errorInfo = error ? getUserFriendlyError(error) : null

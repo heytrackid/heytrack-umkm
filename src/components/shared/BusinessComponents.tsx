@@ -24,7 +24,7 @@ import {
 import { formatCurrency, formatNumber } from '@/lib/shared/utilities'
 
 // Inventory Status Components
-import { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
+import type { InventoryAlert as DatabaseInventoryAlert } from '@/modules/inventory/types'
 
 // Define a UI-specific type that extends the database type with UI-specific fields
 interface BaseInventoryAlert extends DatabaseInventoryAlert {

@@ -47,7 +47,7 @@ export default function OrdersFilters({
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="" />
             </SelectTrigger>
             <SelectContent>
@@ -60,22 +60,22 @@ export default function OrdersFilters({
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <Input
               type="date"
               placeholder=""
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="w-[140px]"
+              className="flex-1 sm:w-[140px]"
             />
-            <span className="text-muted-foreground">-</span>
+            <span className="text-muted-foreground flex-shrink-0">-</span>
             <Input
               type="date"
               placeholder=""
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="w-[140px]"
+              className="flex-1 sm:w-[140px]"
             />
           </div>
         </div>

@@ -7,14 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Package } from 'lucide-react'
 
 interface RecipeSelectorProps {
-    recipes: Pick<Recipe, 'id' | 'name'>[]
+    recipes: Array<Pick<Recipe, 'id' | 'name'>>
     selectedRecipeId: string
     onRecipeSelect: (recipeId: string) => void
     isLoading?: boolean
 }
 
-export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLoading }: RecipeSelectorProps) => {
-    return (
+export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLoading }: RecipeSelectorProps) => (
         <Card>
             <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
@@ -46,4 +45,3 @@ export const RecipeSelector = ({ recipes, selectedRecipeId, onRecipeSelect, isLo
             </CardContent>
         </Card>
     )
-}

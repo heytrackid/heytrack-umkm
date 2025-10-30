@@ -33,6 +33,7 @@ import { useMobile } from '@/hooks/useResponsive'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 import Sidebar from './sidebar'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 
 interface MobileHeaderProps {
   title?: string
@@ -79,7 +80,7 @@ const MobileHeader = ({
         const { data: { user } } = await supabase.auth.getUser()
         void setUser(user)
       } catch (err) {
-        uiLogger.error({ error }, 'Error getting user:')
+        uiLogger.error({ error: err }, 'Error getting user:')
       } finally {
         void setLoading(false)
       }
@@ -227,6 +228,9 @@ const MobileHeader = ({
 
         {/* Right Section - Actions */}
         <div className="flex items-center space-x-1">
+          {/* Notification Bell */}
+          <NotificationBell />
+
           {/* Dark/Light Mode Toggle */}
           <ThemeToggle />
 

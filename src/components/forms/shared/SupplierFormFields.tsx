@@ -28,22 +28,26 @@ export const SupplierFormFields = ({
       >
         <FormField
           label="Nama Supplier"
-          name="name"
-          type="text"
-          {...register('name')}
           error={errors.name?.message}
           required
-          hint="Nama supplier atau perusahaan"
-        />
+        >
+          <input
+            {...register('name')}
+            type="text"
+            placeholder="Nama supplier atau perusahaan"
+          />
+        </FormField>
 
         <FormField
           label="Contact Person"
-          name="contact_person"
-          type="text"
-          {...register('contact_person')}
           error={errors.contact_person?.message}
-          hint="Nama orang yang bisa dihubungi"
-        />
+        >
+          <input
+            {...register('contact_person')}
+            type="text"
+            placeholder="Nama orang yang bisa dihubungi"
+          />
+        </FormField>
       </FormSection>
 
       <FormSection
@@ -53,47 +57,53 @@ export const SupplierFormFields = ({
         <FormGrid cols={2}>
           <FormField
             label="Nomor Telepon"
-            name="phone"
-            type="tel"
-            {...register('phone')}
             error={errors.phone?.message}
-            hint="Nomor telepon yang bisa dihubungi"
-          />
+          >
+            <input
+              {...register('phone')}
+              type="tel"
+              placeholder="Nomor telepon yang bisa dihubungi"
+            />
+          </FormField>
 
           <FormField
             label="Email"
-            name="email"
-            type="email"
-            {...register('email')}
             error={errors.email?.message}
-            hint="Alamat email untuk komunikasi"
-          />
+          >
+            <input
+              {...register('email')}
+              type="email"
+              placeholder="Alamat email untuk komunikasi"
+            />
+          </FormField>
         </FormGrid>
       </FormSection>
 
       <FormSection title="Alamat">
         <FormField
           label="Alamat Lengkap"
-          name="address"
-          type="textarea"
-          {...register('address')}
           error={errors.address?.message}
-          rows={3}
-          hint="Alamat lengkap supplier"
-        />
+        >
+          <textarea
+            {...register('address')}
+            placeholder="Alamat lengkap supplier"
+            rows={3}
+          />
+        </FormField>
       </FormSection>
 
       {showNotes && (
         <FormSection title="Catatan Tambahan">
           <FormField
             label="Catatan"
-            name="notes"
-            type="textarea"
-            {...register('notes')}
             error={errors.notes?.message}
-            rows={2}
-            hint="Catatan tambahan tentang supplier (opsional)"
-          />
+          >
+            <textarea
+              {...register('notes')}
+              placeholder="Catatan tambahan tentang supplier (opsional)"
+              rows={2}
+            />
+          </FormField>
         </FormSection>
       )}
     </>
