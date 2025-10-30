@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Home, RefreshCw } from 'lucide-react'
 import { useEffect } from 'react'
 import { uiLogger } from '@/lib/logger'
+import { captureException } from '@/lib/errors/monitoring-service'
 
 /**
  * Global error boundary for the application
@@ -21,8 +22,11 @@ export default function Error({
         // Log error for debugging
         uiLogger.error({ error, digest: error.digest }, 'Application error occurred')
 
-        // TODO: Send to error tracking service (e.g., Sentry)
-        // logErrorToService(error)
+        // Send to error tracking service
+        captureException(error, {
+            tags: { location: 'global-error-boundary' },
+            extra: { digest: error.digest }
+        })
     }, [error])
 
     return (

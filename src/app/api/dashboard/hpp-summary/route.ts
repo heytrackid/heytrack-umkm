@@ -30,9 +30,9 @@ export async function GET() {
     // Get latest HPP calculations
     const { data: hppCalculations, error: hppError } = await supabase
       .from('hpp_calculations')
-      .select('recipe_id, hpp_value, margin_percentage, updated_at')
+      .select('recipe_id, total_hpp, created_at')
       .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: false })
 
     if (hppError) throw hppError
 
@@ -53,38 +53,48 @@ export async function GET() {
     const recipesWithHpp = recipesWithHppSet.size
 
     // Calculate average HPP
-    const validHppValues = hppCalculations?.filter(calc => calc.hpp_value && calc.hpp_value > 0) || []
+    const validHppValues = hppCalculations?.filter(calc => calc.total_hpp && calc.total_hpp > 0) || []
     const averageHpp = validHppValues.length > 0
-      ? validHppValues.reduce((sum, calc) => sum + (calc.hpp_value || 0), 0) / validHppValues.length
-      : 0
-
-    // Calculate average margin
-    const validMargins = hppCalculations?.filter(calc => calc.margin_percentage !== null) || []
-    const averageMargin = validMargins.length > 0
-      ? validMargins.reduce((sum, calc) => sum + (calc.margin_percentage || 0), 0) / validMargins.length
+      ? validHppValues.reduce((sum, calc) => sum + (calc.total_hpp || 0), 0) / validHppValues.length
       : 0
 
     // Count alerts
     const totalAlerts = alerts?.length || 0
     const unreadAlerts = alerts?.filter(alert => !alert.is_read).length || 0
 
-    // Get top recipes by margin
+    // Get top recipes by margin - create map first
     const recipeHppMap = new Map<string, HppCalculation>()
     hppCalculations?.forEach(calc => {
-      if (!recipeHppMap.has(calc.recipe_id)) {
+      if (calc.recipe_id && !recipeHppMap.has(calc.recipe_id)) {
         recipeHppMap.set(calc.recipe_id, calc)
       }
     })
 
+    // Calculate average margin from recipes (since margin is calculated from selling price vs hpp)
+    const recipesWithMargin = recipes?.filter(recipe => recipe.selling_price && recipe.selling_price > 0) || []
+    const averageMargin = recipesWithMargin.length > 0
+      ? recipesWithMargin.reduce((sum, recipe) => {
+          const hppCalc = recipeHppMap.get(recipe.id)
+          const hpp = hppCalc?.total_hpp || 0
+          const sellingPrice = recipe.selling_price || 0
+          const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
+          return sum + margin
+        }, 0) / recipesWithMargin.length
+      : 0
+
     const topRecipes = recipes
       ?.map(recipe => {
         const hppCalc = recipeHppMap.get(recipe.id)
+        const hpp = hppCalc?.total_hpp || 0
+        const sellingPrice = recipe.selling_price || 0
+        const margin = sellingPrice > 0 ? ((sellingPrice - hpp) / sellingPrice) * 100 : 0
+        
         return {
           id: recipe.id,
           name: recipe.name,
-          hpp_value: hppCalc?.hpp_value || 0,
-          margin_percentage: hppCalc?.margin_percentage || 0,
-          last_updated: hppCalc?.updated_at || recipe.updated_at || ''
+          hpp_value: hpp,
+          margin_percentage: margin,
+          last_updated: hppCalc?.created_at || recipe.updated_at || ''
         }
       })
       .filter(r => r.hpp_value > 0)

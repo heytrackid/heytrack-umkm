@@ -94,15 +94,17 @@ export function withSecurity<Params extends {} = {}>(
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown'
     const {url} = req
     
-    // 1. Content-Type validation
+    // 1. Content-Type validation (only for requests with body)
     if (mergedConfig.validateContentType) {
       const contentType = req.headers.get('content-type')?.split(';')[0] || ''
-      if (req.method !== 'GET' && req.method !== 'HEAD') {
-        if (!mergedConfig.allowedContentTypes?.includes(contentType)) {
+      // Only validate content-type for methods that typically have a body
+      if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+        if (contentType && !mergedConfig.allowedContentTypes?.includes(contentType)) {
           apiLogger.warn({ 
             clientIP, 
             url, 
-            contentType 
+            contentType,
+            method: req.method
           }, 'Invalid content type')
           return NextResponse.json(
             { error: 'Invalid content type. Only application/json is allowed.' },
@@ -156,9 +158,11 @@ export function withSecurity<Params extends {} = {}>(
     // 4. Request body sanitization
     let sanitizedBody: any = undefined
     
-    if (mergedConfig.sanitizeInputs && req.method !== 'GET' && req.method !== 'HEAD') {
+    if (mergedConfig.sanitizeInputs && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
       try {
-        const body = await req.json()
+        // Clone the request to avoid consuming the body
+        const clonedReq = req.clone()
+        const body = await clonedReq.json()
         sanitizedBody = APISecurity.sanitizeRequestBody(body)
       } catch (e) {
         // If parsing fails, continue without sanitization but log
@@ -170,10 +174,12 @@ export function withSecurity<Params extends {} = {}>(
     if (mergedConfig.checkForSQLInjection || mergedConfig.checkForXSS) {
       let checkData = sanitizedBody || {}
       
-      // If we don't have a sanitized body, parse the original for security checks
-      if (!sanitizedBody) {
+      // If we don't have a sanitized body and method has body, parse for security checks
+      if (!sanitizedBody && req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'DELETE') {
         try {
-          checkData = await req.json()
+          // Clone the request to avoid consuming the body
+          const clonedReq = req.clone()
+          checkData = await clonedReq.json()
         } catch (e) {
           // If we can't parse the body, use an empty object
           checkData = {}
@@ -226,15 +232,21 @@ export function withSecurity<Params extends {} = {}>(
       })
     }
 
-    // 7. Add security headers to response
-    const response = await handler(processedReq, params)
-    
-    // Add security headers to the response
-    response.headers.set('X-Content-Type-Options', 'nosniff')
-    response.headers.set('X-Frame-Options', 'DENY')
-    response.headers.set('X-XSS-Protection', '1; mode=block')
-    
-    return response
+    // 7. Call the handler and add security headers to response
+    try {
+      const response = await handler(processedReq, params)
+      
+      // Add security headers to the response
+      response.headers.set('X-Content-Type-Options', 'nosniff')
+      response.headers.set('X-Frame-Options', 'DENY')
+      response.headers.set('X-XSS-Protection', '1; mode=block')
+      
+      return response
+    } catch (error) {
+      // Log handler errors
+      apiLogger.error({ error, url, clientIP }, 'Handler error in security middleware')
+      throw error
+    }
   }
 }
 
@@ -287,6 +299,16 @@ function hasXSSPattern(input: string): boolean {
 
 // Common security configurations presets
 export const SecurityPresets = {
+  // Development mode - minimal security for faster development
+  development: (): SecurityConfig => ({
+    sanitizeInputs: true,
+    sanitizeQueryParams: true,
+    validateContentType: false, // Allow any content type in dev
+    rateLimit: { maxRequests: 1000, windowMs: 15 * 60 * 1000 }, // Very high limit for dev
+    checkForSQLInjection: false,
+    checkForXSS: false
+  }),
+  
   // Basic security for most API routes
   basic: (): SecurityConfig => ({
     sanitizeInputs: true,

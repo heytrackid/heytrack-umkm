@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { uiLogger } from '@/lib/logger'
 
 export const ExportButton = () => {
     const [isExporting, setIsExporting] = useState(false)
@@ -32,7 +33,7 @@ export const ExportButton = () => {
 
             toast.success('Export berhasil!')
         } catch (error) {
-            console.error('Export error:', error)
+            uiLogger.error({ error }, 'Export error')
             toast.error('Export gagal. Silakan coba lagi.')
         } finally {
             setIsExporting(false)

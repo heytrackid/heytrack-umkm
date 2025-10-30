@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import type { ComponentType, SVGProps } from 'react'
 import { cn } from '@/lib/utils'
 import {
@@ -146,9 +146,17 @@ const Sidebar = ({
   const router = useRouter()
   const sections = useMemo(() => NAV_SECTIONS, [])
 
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+  // Initialize expanded sections - use function to ensure consistent initial state
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() =>
     new Set(sections.filter(s => s.defaultOpen).map(s => s.title))
   )
+
+  // Track if component is mounted to prevent hydration issues
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Prefetch route on hover for faster navigation
   const handlePrefetch = useCallback((href: string) => {
@@ -177,18 +185,17 @@ const Sidebar = ({
       {/* Header */}
       <div className="border-b border-border px-4 py-4">
         <div className="flex items-center justify-between">
-          {!isCollapsed && (
+          {!isCollapsed ? (
             <div className="transition-opacity duration-200">
               <h2 className="text-lg font-bold text-foreground">HeyTrack</h2>
               <p className="text-xs text-muted-foreground">UMKM Management</p>
             </div>
-          )}
-          {isCollapsed && (
+          ) : (
             <div className="w-full flex justify-center">
               <LayoutDashboard className="h-6 w-6 text-primary" />
             </div>
           )}
-          {isMobile && onToggle && (
+          {isMobile && onToggle && isMounted && (
             <button
               onClick={onToggle}
               className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted"
@@ -267,7 +274,7 @@ const Sidebar = ({
                           prefetch
                           className={cn(
                             'relative flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all duration-200',
-                            'hover:bg-muted',
+                            'hover:bg-muted hover:text-foreground',
                             active
                               ? 'bg-primary text-primary-foreground font-medium shadow-sm'
                               : 'text-muted-foreground'
@@ -293,7 +300,7 @@ const Sidebar = ({
                       const active = isActive(item.href)
 
                       return (
-                        <TooltipProvider key={item.href} delayDuration={0}>
+                        <TooltipProvider key={item.href} delayDuration={300}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Link
@@ -304,7 +311,7 @@ const Sidebar = ({
                                 prefetch
                                 className={cn(
                                   'relative flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200',
-                                  'hover:bg-accent hover:text-accent-foreground',
+                                  'hover:bg-muted hover:text-foreground',
                                   active
                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                     : 'text-muted-foreground'
@@ -317,7 +324,12 @@ const Sidebar = ({
                                 )}
                               </Link>
                             </TooltipTrigger>
-                            <TooltipContent side="right" className="font-medium" sideOffset={10}>
+                            <TooltipContent
+                              side="right"
+                              className="font-medium bg-popover text-popover-foreground border shadow-lg z-50"
+                              sideOffset={12}
+                              avoidCollisions={true}
+                            >
                               <div className="flex items-center gap-2">
                                 <span>{item.label}</span>
                                 {active && (
@@ -340,7 +352,7 @@ const Sidebar = ({
       {/* Footer */}
       <div className="border-t border-border p-4 space-y-2">
         {/* Export & Logout - Show on mobile and desktop (when not collapsed) */}
-        {!isCollapsed && (
+        {!isCollapsed && isMounted && (
           <>
             <ExportButton />
             <LogoutButton />
@@ -348,22 +360,27 @@ const Sidebar = ({
         )}
 
         {/* Collapse/Expand button - Desktop only */}
-        {!isMobile && onCollapse && (
+        {!isMobile && onCollapse && isMounted && (
           isCollapsed ? (
-            <TooltipProvider delayDuration={0}>
+            <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     onClick={onCollapse}
                     className={cn(
                       "w-full flex items-center justify-center px-3 py-2.5 text-sm rounded-lg transition-all duration-200",
-                      "hover:bg-accent hover:text-accent-foreground text-muted-foreground"
+                      "hover:bg-muted hover:text-foreground text-muted-foreground"
                     )}
                   >
                     <PanelLeftOpen className="h-5 w-5 flex-shrink-0" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="font-medium">
+                <TooltipContent
+                  side="right"
+                  className="font-medium bg-popover text-popover-foreground border shadow-lg z-50"
+                  sideOffset={12}
+                  avoidCollisions={true}
+                >
                   Perluas sidebar
                 </TooltipContent>
               </Tooltip>
@@ -383,7 +400,7 @@ const Sidebar = ({
         )}
 
         {/* Footer text - Show when not collapsed */}
-        {!isCollapsed && (
+        {!isCollapsed && isMounted && (
           <div className="text-xs text-muted-foreground text-center transition-opacity duration-200">
             <p>© 2025 HeyTrack</p>
             <p className="mt-1">v1.0.0</p>

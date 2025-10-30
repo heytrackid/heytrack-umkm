@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, lazy } from 'react'
+import { Fragment } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { useResponsive } from '@/hooks/useResponsive'
 import PrefetchLink from '@/components/ui/prefetch-link'
@@ -13,9 +13,9 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 
-// Lazy load extracted components for better performance and code splitting
-const CategoryList = lazy(() => import('./components/CategoryList'))
-const CategoryForm = lazy(() => import('./components/CategoryForm').then(m => ({ default: m.CategoryForm })))
+// Import components directly for better parallel loading
+import CategoryList from './components/CategoryList'
+import { CategoryForm } from './components/CategoryForm'
 
 import { useCategories } from './hooks/useCategories'
 

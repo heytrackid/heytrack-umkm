@@ -6,6 +6,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase-generated'
 import { createClient } from '@/utils/supabase/client'
+import { apiLogger } from '@/lib/logger'
 
 // ============================================================================
 // TYPE UTILITIES
@@ -44,6 +45,16 @@ export async function typedInsert<T extends TableName>(
     .insert(data)
     .select()
 
+  // Log error if there's one, but don't crash the function
+  if (result.error) {
+    apiLogger.error({
+      table,
+      operation: 'insert',
+      error: result.error,
+      data
+    }, 'Supabase insert error')
+  }
+
   return result as {
     data: Array<TableRow<T>> | null
     error: Error | null
@@ -65,6 +76,17 @@ export async function typedUpdate<T extends TableName>(
     .eq('id', id)
     .select()
 
+  // Log error if there's one, but don't crash the function
+  if (result.error) {
+    apiLogger.error({
+      table,
+      operation: 'update',
+      id,
+      error: result.error,
+      data
+    }, 'Supabase update error')
+  }
+
   return result as {
     data: Array<TableRow<T>> | null
     error: Error | null
@@ -84,6 +106,16 @@ export async function typedDelete<T extends TableName>(
     .delete()
     .eq('id', id)
     .select()
+
+  // Log error if there's one, but don't crash the function
+  if (result.error) {
+    apiLogger.error({
+      table,
+      operation: 'delete',
+      id,
+      error: result.error
+    }, 'Supabase delete error')
+  }
 
   return result as {
     data: Array<TableRow<T>> | null
@@ -135,6 +167,16 @@ export async function typedSelect<T extends TableName>(
   const result = query?.single
     ? await queryBuilder.single()
     : await queryBuilder
+
+  // Log error if there's one, but don't crash the function
+  if ('error' in result && result.error) {
+    apiLogger.error({
+      table,
+      operation: 'select',
+      query,
+      error: result.error
+    }, 'Supabase select error')
+  }
 
   return result as {
     data: TableRow<T> | Array<TableRow<T>> | null

@@ -42,20 +42,29 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
 
-    // Validate optional date range parameters
-    const dateRangeValidation = DateRangeQuerySchema.safeParse({
-      start_date: searchParams.get('start_date'),
-      end_date: searchParams.get('end_date'),
-    })
-
-    if (!dateRangeValidation.success) {
-      return NextResponse.json(
-        { error: 'Invalid date parameters', details: dateRangeValidation.error.issues },
-        { status: 400 }
-      )
+    // Validate optional date range parameters - make validation more flexible
+    const startDateParam = searchParams.get('start_date')
+    const endDateParam = searchParams.get('end_date')
+    
+    let startDate: string | undefined
+    let endDate: string | undefined
+    
+    // Only validate if parameters are provided
+    if (startDateParam) {
+      const startDateValidation = DateRangeQuerySchema.shape.start_date.safeParse(startDateParam)
+      if (startDateValidation.success) {
+        startDate = startDateValidation.data
+      }
+      // If validation fails, we'll just ignore the parameter and use default behavior
     }
-
-    const { start_date: _start_date, end_date: _end_date } = dateRangeValidation.data
+    
+    if (endDateParam) {
+      const endDateValidation = DateRangeQuerySchema.shape.end_date.safeParse(endDateParam)
+      if (endDateValidation.success) {
+        endDate = endDateValidation.data
+      }
+      // If validation fails, we'll just ignore the parameter and use default behavior
+    }
 
     const supabase = await createClient()
     
@@ -72,35 +81,76 @@ export async function GET(request: Request) {
     yesterdayDate.setDate(yesterdayDate.getDate() - 1)
     const yesterdayStr = yesterdayDate.toISOString().split('T')[0]
     
+    // Calculate date ranges for comparison if needed
+    let comparisonStartDate: string | undefined = undefined
+    let comparisonEndDate: string | undefined = undefined
+    
+    if (startDate && endDate) {
+      // Calculate equivalent previous period for comparison
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      const diffTime = end.getTime() - start.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      
+      const comparisonEnd = new Date(start)
+      comparisonEnd.setDate(comparisonEnd.getDate() - 1)
+      const comparisonStart = new Date(comparisonEnd)
+      comparisonStart.setDate(comparisonStart.getDate() - diffDays)
+      
+      comparisonStartDate = comparisonStart.toISOString().split('T')[0]
+      comparisonEndDate = comparisonEnd.toISOString().split('T')[0]
+    }
+    
     // ✅ OPTIMIZED: Fetch all data in parallel to reduce total query time
     const [
       ordersResult,
-      todayOrdersResult,
-      yesterdayOrdersResult,
+      currentPeriodOrdersResult,
+      comparisonOrdersResult,
       customersResult,
       ingredientsResult,
       recipesResult,
-      todayExpensesResult
+      expensesResult
     ] = await Promise.all([
-      // All orders
-      supabase
-        .from('orders')
-        .select('id, total_amount, status, order_date, customer_name, created_at')
-        .eq('user_id', user.id),
+      // Orders in the specified date range
+      startDate && endDate 
+        ? supabase
+            .from('orders')
+            .select('id, total_amount, status, order_date, customer_name, created_at')
+            .eq('user_id', user.id)
+            .gte('order_date', startDate)
+            .lte('order_date', endDate)
+        : supabase
+            .from('orders')
+            .select('id, total_amount, status, order_date, customer_name, created_at')
+            .eq('user_id', user.id),
       
-      // Today's orders
-      supabase
-        .from('orders')
-        .select('id, total_amount, status, customer_name, created_at')
-        .eq('user_id', user.id)
-        .eq('order_date', today),
+      // Current period orders (today's if no date range) - for daily metrics
+      startDate && endDate
+        ? supabase
+            .from('orders')
+            .select('id, total_amount, status, customer_name, created_at')
+            .eq('user_id', user.id)
+            .gte('order_date', startDate)
+            .lte('order_date', endDate)
+        : supabase
+            .from('orders')
+            .select('id, total_amount, status, customer_name, created_at')
+            .eq('user_id', user.id)
+            .eq('order_date', today),
       
-      // Yesterday's orders for comparison
-      supabase
-        .from('orders')
-        .select('total_amount')
-        .eq('user_id', user.id)
-        .eq('order_date', yesterdayStr),
+      // Previous period orders for comparison - if date range provided
+      startDate && endDate && comparisonStartDate && comparisonEndDate
+        ? supabase
+            .from('orders')
+            .select('total_amount')
+            .eq('user_id', user.id)
+            .gte('order_date', comparisonStartDate)
+            .lte('order_date', comparisonEndDate)
+        : supabase
+            .from('orders')
+            .select('total_amount')
+            .eq('user_id', user.id)
+            .eq('order_date', yesterdayStr),
       
       // Customers
       supabase
@@ -120,27 +170,34 @@ export async function GET(request: Request) {
         .select('id, times_made, name')
         .eq('user_id', user.id),
       
-      // Today's expenses
-      supabase
-        .from('expenses')  
-        .select('amount')
-        .eq('user_id', user.id)
-        .eq('expense_date', today)
+      // Expenses in the specified date range
+      startDate && endDate
+        ? supabase
+            .from('expenses')  
+            .select('amount')
+            .eq('user_id', user.id)
+            .gte('expense_date', startDate)
+            .lte('expense_date', endDate)
+        : supabase
+            .from('expenses')  
+            .select('amount')
+            .eq('user_id', user.id)
+            .eq('expense_date', today)
     ])
     
     const orders = ordersResult.data
-    const todayOrders = todayOrdersResult.data
-    const yesterdayOrders = yesterdayOrdersResult.data
+    const currentPeriodOrders = currentPeriodOrdersResult.data
+    const comparisonOrders = comparisonOrdersResult.data
     const customers = customersResult.data
     const ingredients = ingredientsResult.data
     const recipes = recipesResult.data
-    const todayExpenses = todayExpensesResult.data
+    const expenses = expensesResult.data
     
     // Calculate metrics
     const totalRevenue = orders?.reduce((sum: number, order: OrderStats) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
 
-    const todayRevenue = todayOrders?.reduce((sum: number, order: OrderStats) =>
+    const currentPeriodRevenue = currentPeriodOrders?.reduce((sum: number, order: OrderStats) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
 
     const validStatuses = ['PENDING', 'CONFIRMED', 'IN_PROGRESS'] as const
@@ -160,10 +217,10 @@ export async function GET(request: Request) {
     const totalIngredients = ingredients?.length || 0
     const totalRecipes = recipes?.length || 0
     
-    const todayExpensesTotal = todayExpenses?.reduce((sum: number, expense: ExpenseStats) =>
+    const expensesTotal = expenses?.reduce((sum: number, expense: ExpenseStats) =>
       sum + safeParseAmount(expense.amount), 0) || 0
 
-    const yesterdayRevenue = yesterdayOrders?.reduce((sum: number, order: { total_amount: number | null }) =>
+    const comparisonRevenue = comparisonOrders?.reduce((sum: number, order: { total_amount: number | null }) =>
       sum + safeParseAmount(order.total_amount), 0) || 0
     
     // Category breakdown for ingredients
@@ -199,12 +256,12 @@ export async function GET(request: Request) {
       ?.slice(0, 5) || []
 
     // Calculate growth percentage
-    const revenueGrowth = yesterdayRevenue > 0 ?
-      ((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100) : 0
+    const revenueGrowth = comparisonRevenue > 0 ?
+      ((currentPeriodRevenue - comparisonRevenue) / comparisonRevenue * 100) : 0
     
     return NextResponse.json({
       revenue: {
-        today: todayRevenue,
+        today: currentPeriodRevenue,
         total: totalRevenue,
         growth: revenueGrowth.toFixed(1),
         trend: revenueGrowth >= 0 ? 'up' : 'down'
@@ -212,7 +269,7 @@ export async function GET(request: Request) {
       orders: {
         active: activeOrders,
         total: orders?.length || 0,
-        today: todayOrders?.length || 0,
+        today: currentPeriodOrders?.length || 0,
         recent: recentOrders.map((order: OrderStats) => ({
           id: order.id,
           customer: safeString(order.customer_name, 'Walk-in customer'),
@@ -244,12 +301,12 @@ export async function GET(request: Request) {
           ?.slice(0, 3) || []
       },
       expenses: {
-        today: todayExpensesTotal,
-        netProfit: todayRevenue - todayExpensesTotal
+        today: expensesTotal,
+        netProfit: currentPeriodRevenue - expensesTotal
       },
       alerts: {
         lowStock: lowStockItems,
-        highExpenses: todayExpensesTotal > 500000 ? 1 : 0
+        highExpenses: expensesTotal > 500000 ? 1 : 0
       },
       lastUpdated: new Date().toISOString()
     })

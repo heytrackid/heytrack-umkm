@@ -4,6 +4,7 @@
  */
 
 import type { RecipeTemplate } from '@/lib/constants/recipe-templates'
+import { uiLogger } from '@/lib/logger'
 
 export interface IngredientSuggestion {
   name: string
@@ -196,8 +197,11 @@ export const saveDraft = (draft: {
       timestamp: Date.now()
     }
     localStorage.setItem('recipe-generator-draft', JSON.stringify(draftData))
-  } catch (error) {
-    console.error('Failed to save draft:', error)
+  } catch (error: unknown) {
+    // Silent fail - draft saving is non-critical
+    if (process.env.NODE_ENV === 'development') {
+      uiLogger.error({ error }, 'Failed to save draft')
+    }
   }
 }
 
@@ -222,8 +226,11 @@ export const loadDraft = (): {
     const isRecent = Date.now() - draft.timestamp < 24 * 60 * 60 * 1000
 
     return isRecent ? draft : null
-  } catch (error) {
-    console.error('Failed to load draft:', error)
+  } catch (error: unknown) {
+    // Silent fail - draft loading is non-critical
+    if (process.env.NODE_ENV === 'development') {
+      uiLogger.error({ error }, 'Failed to load draft')
+    }
     return null
   }
 }
@@ -234,7 +241,10 @@ export const loadDraft = (): {
 export const clearDraft = () => {
   try {
     localStorage.removeItem('recipe-generator-draft')
-  } catch (error) {
-    console.error('Failed to clear draft:', error)
+  } catch (error: unknown) {
+    // Silent fail - draft clearing is non-critical
+    if (process.env.NODE_ENV === 'development') {
+      uiLogger.error({ error }, 'Failed to clear draft')
+    }
   }
 }

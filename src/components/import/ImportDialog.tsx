@@ -8,6 +8,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { uiLogger } from '@/lib/logger'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Upload, Download, FileText, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
@@ -102,7 +103,7 @@ export function ImportDialog({
             }
 
         } catch (error) {
-            console.error('Import error:', error)
+            uiLogger.error({ error }, 'Import error')
             setResult({
                 success: false,
                 error: 'Terjadi kesalahan saat import'

@@ -1,162 +1,146 @@
-import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { ErrorLogSchema } from '@/lib/validations/api-schemas'
-import { validateRequestOrRespond } from '@/lib/validations/validate-request'
+import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
+import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
-interface ErrorRecord {
-  id: string
-  timestamp: string
-  message: string
-  url: string
-  stack?: string
-  level: string
-  context?: Record<string, unknown>
-  user_id?: string
-}
-
-// Simple in-memory error store (in production, use a real database/service)
-const errorStore: ErrorRecord[] = []
-
-const MAX_ERRORS = 1000 // Keep only last 1000 errors
-
+// POST /api/errors - Log errors to database
 export async function POST(request: NextRequest) {
   try {
-    // ✅ Add authentication
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Authenticate user (optional - errors can be logged without auth)
+    let userId: string | null = null
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.id) {
+        userId = user.id
+      }
+    } catch (authError) {
+      apiLogger.debug({ error: getErrorMessage(authError) }, 'Authentication failed for error logging')
+      // Continue without user ID
     }
 
-    // Validate request body
-    const validatedData = await validateRequestOrRespond(request, ErrorLogSchema)
-    if (validatedData instanceof NextResponse) {return validatedData}
+    const errorData = await request.json()
     
-    // Create error record with user context
-    const errorRecord: ErrorRecord = {
-      id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: validatedData.timestamp || new Date().toISOString(),
-      message: validatedData.message,
-      url: validatedData.url || request.url || '',
-      stack: validatedData.stack,
-      level: validatedData.level,
-      context: validatedData.context,
-      user_id: user.id, // ✅ Associate with user
+    // Validate error data structure
+    if (!errorData || typeof errorData !== 'object') {
+      return NextResponse.json(
+        { error: 'Invalid error data format' },
+        { status: 400 }
+      )
     }
-    
-    // Add to store
-    errorStore.push(errorRecord)
-    
-    // Keep only recent errors
-    if (errorStore.length > MAX_ERRORS) {
-      errorStore.splice(0, errorStore.length - MAX_ERRORS)
+
+    // Validate required fields
+    if (!errorData.message || typeof errorData.message !== 'string') {
+      return NextResponse.json(
+        { error: 'Error message is required' },
+        { status: 400 }
+      )
     }
-    
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      apiLogger.error({ error: {
-        id: errorRecord.id,
-        message: errorRecord.message,
-        url: errorRecord.url,
-        timestamp: errorRecord.timestamp,
-        userId: errorRecord.user_id
-      } }, '🔴 Client Error Logged:')
+
+    // Sanitize error data to prevent injection
+    const sanitizedErrorData = {
+      message: String(errorData.message).substring(0, 1000), // Limit length
+      stack: errorData.stack ? String(errorData.stack).substring(0, 5000) : null,
+      name: errorData.name ? String(errorData.name).substring(0, 100) : null,
+      timestamp: errorData.timestamp || new Date().toISOString(),
+      context: typeof errorData.context === 'object' ? errorData.context : {},
+      url: errorData.url ? String(errorData.url).substring(0, 500) : null,
+      userAgent: errorData.userAgent ? String(errorData.userAgent).substring(0, 500) : null,
+      componentStack: errorData.componentStack ? String(errorData.componentStack).substring(0, 2000) : null,
+      level: errorData.level || 'error',
+      tags: typeof errorData.tags === 'object' ? errorData.tags : {},
     }
-    
-    // In production, you might want to:
-    // 1. Send to external error tracking service (Sentry, LogRocket, etc.)
-    // 2. Store in database
-    // 3. Send alert notifications for critical errors
-    
-    if (process.env.NODE_ENV === 'production') {
-      // Example: Send to external service
-      // await sendToExternalService(errorRecord)
+
+    // Store error in database if Supabase is available
+    try {
+      const supabase = await createClient()
       
-      // Example: Check if error is critical and send alert
-      if (isCriticalError(errorRecord)) {
-        apiLogger.error({ error: errorRecord }, '🚨 CRITICAL ERROR:')
-        // await sendCriticalErrorAler""
+      const errorRecord = {
+        user_id: userId,
+        message: sanitizedErrorData.message,
+        stack: sanitizedErrorData.stack,
+        error_type: sanitizedErrorData.name,
+        error_level: sanitizedErrorData.level,
+        context: sanitizedErrorData.context,
+        url: sanitizedErrorData.url,
+        user_agent: sanitizedErrorData.userAgent,
+        component_stack: sanitizedErrorData.componentStack,
+        tags: sanitizedErrorData.tags,
+        occurred_at: new Date().toISOString(),
       }
+
+      const { error: insertError } = await supabase
+        .from('error_logs')
+        .insert(errorRecord)
+
+      if (insertError) {
+        apiLogger.error({ error: insertError }, 'Failed to insert error log into database')
+        // Don't fail the request if database insert fails, just log it
+      } else {
+        apiLogger.info({ 
+          errorId: errorRecord.occurred_at,
+          userId: userId 
+        }, 'Error logged to database')
+      }
+    } catch (dbError) {
+      apiLogger.error({ error: getErrorMessage(dbError) }, 'Database error when logging error')
+      // Continue to return success even if DB logging fails
     }
-    
-    return NextResponse.json({
-      success: true,
-      errorId: errorRecord.id,
-      message: 'Error logged successfully'
-    })
-    
-  } catch (err: unknown) {
-    apiLogger.error({ err }, 'Failed to log error:')
-    
+
+    // Also log to our logger
+    apiLogger.error({
+      ...sanitizedErrorData,
+      userId
+    }, 'Client-side error reported')
+
+    return NextResponse.json({ success: true })
+  } catch (error: unknown) {
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/errors')
     return NextResponse.json(
-      { error: 'Failed to log error' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
 }
 
+// GET /api/errors - Get recent errors (admin only)
 export async function GET(request: NextRequest) {
   try {
-    // ✅ Add authentication
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
-    // Only allow in development or with proper authentication
-    if (process.env.NODE_ENV !== 'development') {
+    // Check if user is authenticated and has admin privileges
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
       return NextResponse.json(
-        { error: 'Not available in production' },
-        { status: 403 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       )
     }
-    
-    const url = new URL(request.url)
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100)
-    
-    // ✅ Filter errors by user_id
-    const userErrors = errorStore.filter(err => err.user_id === user.id)
-    const recentErrors = userErrors
-      .slice(-limit)
-      .reverse() // Most recent first
-    
-    return NextResponse.json({
-      errors: recentErrors,
-      total: userErrors.length
-    })
+
+    // For now, just fetch the most recent errors for the user
+    // In a real implementation, you might have role-based access controls
+    const { data: errors, error: queryError } = await supabase
+      .from('error_logs')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('occurred_at', { ascending: false })
+      .limit(50)
+
+    if (queryError) {
+      apiLogger.error({ error: queryError }, 'Failed to fetch error logs')
+      return NextResponse.json(
+        { error: 'Failed to fetch error logs' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ errors })
   } catch (error: unknown) {
-    apiLogger.error({ error }, 'Failed to fetch errors')
-    return NextResponse.json({ error: 'Failed to fetch errors' }, { status: 500 })
+    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/errors')
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
-
-function isCriticalError(error: ErrorRecord): boolean {
-  const criticalKeywords = [
-    'network error',
-    'database connection',
-    'authentication failed',
-    'permission denied',
-    'out of memory',
-    'security violation'
-  ]
-  
-  const errorText = `${error.message} ${error.stack || ''}`.toLowerCase()
-  
-  return criticalKeywords.some(keyword => errorText.includes(keyword))
-}
-
-// Example function to send to external service
-// async function sendToExternalService(error: typeof errorStore[0]) {
-//   // Sentry example:
-//   // Sentry.captureException(new Error((error instanceof Error ? (error as any).message : String(error))), {
-//   //   extra: {
-//   //     componentStack: error.componentStack,
-//   //     url: error.url,
-//   //     errorId: error.errorId
-//   //   }
-//   // })
-// }

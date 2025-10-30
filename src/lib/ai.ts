@@ -11,17 +11,28 @@ import { apiLogger } from '@/lib/logger'
 
 export class AIClient {
   /**
+   * Call OpenRouter API (primary method)
+   */
+  static async callAI(
+    prompt: string,
+    systemPrompt: string,
+    model = 'meta-llama/llama-3.1-8b-instruct:free'
+  ): Promise<string> {
+    return await this.callOpenRouter(prompt, systemPrompt, model)
+  }
+
+  /**
    * Call OpenRouter API with enhanced security
    */
   static async callOpenRouter(
     prompt: string,
     systemPrompt: string,
-    model = 'meta-llama/llama-3.3-8b-instruct:free'
+    model = 'meta-llama/llama-3.1-8b-instruct:free'
   ): Promise<string> {
     const apiKey = process.env['OPENROUTER_API_KEY']
 
     if (!apiKey) {
-      throw new Error('OpenRouter API key not configured')
+      throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY in your .env file')
     }
 
     try {
@@ -51,16 +62,83 @@ export class AIClient {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
+        const errorText = await response.text()
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = { error: { message: errorText } }
+        }
+        
+        apiLogger.error({ 
+          status: response.status, 
+          error: errorData,
+          model,
+          hasApiKey: !!apiKey 
+        }, 'OpenRouter API Error')
+        
         throw new Error(`OpenRouter API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
       }
 
       const data = await response.json()
-      return data.choices[0]?.message?.content || 'No response generated'
+      const content = data.choices?.[0]?.message?.content
+      
+      if (!content) {
+        throw new Error('No content in OpenRouter response')
+      }
+      
+      return content
+      
     } catch (err) {
-      apiLogger.error({ error: err }, 'AI Client Error')
+      apiLogger.error({ error: err, model, hasApiKey: !!apiKey }, 'OpenRouter Client Error')
       throw err
     }
+  }
+
+  /**
+   * Call OpenAI API as fallback
+   */
+  static async callOpenAI(
+    prompt: string,
+    systemPrompt: string,
+    model = 'gpt-3.5-turbo'
+  ): Promise<string> {
+    const apiKey = process.env['OPENAI_API_KEY']
+
+    if (!apiKey) {
+      throw new Error('OpenAI API key not configured')
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500
+      })
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+    }
+
+    const data = await response.json()
+    return data.choices[0]?.message?.content || 'No response generated'
   }
 
   /**
@@ -215,8 +293,8 @@ export class AIService {
     // Build secure system prompt
     const secureSystemPrompt = PromptBuilder.buildSystemPrompt(safeSystemPrompt)
 
-    // Call AI service using AIClient
-    return await AIClient.callOpenRouter(safePrompt, secureSystemPrompt)
+    // Call AI service using AIClient with fallback
+    return await AIClient.callAI(safePrompt, secureSystemPrompt)
   }
 
   /**
@@ -270,6 +348,8 @@ export interface NLPEntities {
   amounts?: string[]
   categories?: string[]
   actions?: string[]
+  questionType?: string | null
+  hasQuestion?: boolean
 }
 
 export class NLPProcessor {
@@ -715,10 +795,132 @@ export class BusinessAI {
    * Generate business insights from data
    */
   static async getBusinessInsights(data: Record<string, unknown>): Promise<string> {
-    const prompt = PromptBuilder.buildAnalysisPrompt(data, 'comprehensive business intelligence and strategic recommendations')
-    const systemPrompt = 'You are a business consultant specializing in Indonesian UMKM food businesses.'
+    try {
+      // Extract key information from the data
+      const { query, intent, entities, userId } = data
+      
+      // Build context-aware prompt based on intent
+      let contextualPrompt = ''
+      
+      if (typeof intent === 'string') {
+        switch (intent) {
+          case 'check_inventory':
+            contextualPrompt = `User bertanya tentang stok inventory: "${query}". Berikan informasi tentang cara mengecek stok, tips manajemen inventory, dan saran untuk optimasi stok bahan baku.`
+            break
+          case 'analyze_hpp':
+            contextualPrompt = `User bertanya tentang HPP (Harga Pokok Produksi): "${query}". Jelaskan cara menghitung HPP, faktor-faktor yang mempengaruhi, dan tips untuk mengoptimalkan biaya produksi.`
+            break
+          case 'analyze_profit':
+            contextualPrompt = `User bertanya tentang profit/keuntungan: "${query}". Berikan analisis tentang cara meningkatkan profit margin, strategi pricing, dan tips bisnis kuliner.`
+            break
+          case 'recipe_query':
+            contextualPrompt = `User bertanya tentang resep: "${query}". Berikan saran tentang manajemen resep, optimasi bahan, dan tips produksi yang efisien.`
+            break
+          case 'pricing_strategy':
+            contextualPrompt = `User bertanya tentang strategi harga: "${query}". Berikan saran tentang penetapan harga yang kompetitif, analisis margin, dan strategi pricing untuk UMKM kuliner.`
+            break
+          case 'marketing_strategy':
+            contextualPrompt = `User bertanya tentang marketing: "${query}". Berikan tips marketing untuk UMKM kuliner, strategi promosi, dan cara meningkatkan penjualan.`
+            break
+          case 'order_management':
+            contextualPrompt = `User bertanya tentang manajemen pesanan: "${query}". Berikan tips untuk mengelola pesanan, optimasi workflow, dan meningkatkan efisiensi operasional.`
+            break
+          default:
+            contextualPrompt = `User bertanya: "${query}". Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia.`
+        }
+      } else {
+        contextualPrompt = `User bertanya: "${query}". Berikan jawaban yang membantu terkait bisnis kuliner UMKM di Indonesia.`
+      }
 
-    return await AIService.callOpenRouter(prompt, systemPrompt)
+      const systemPrompt = `Anda adalah asisten AI HeyTrack yang ahli dalam bisnis kuliner UMKM Indonesia. 
+
+KONTEKS:
+- HeyTrack adalah sistem manajemen bisnis untuk UMKM kuliner
+- User menggunakan sistem untuk tracking HPP, inventory, resep, dan profit
+- Fokus pada solusi praktis dan actionable untuk bisnis kuliner
+
+GAYA KOMUNIKASI:
+- Gunakan bahasa Indonesia yang ramah dan profesional
+- Berikan jawaban yang spesifik dan actionable
+- Sertakan contoh praktis jika relevan
+- Gunakan format yang mudah dibaca (bullet points, numbering)
+- Fokus pada solusi bisnis yang realistis untuk UMKM
+
+BATASAN:
+- Hanya jawab pertanyaan terkait bisnis kuliner dan manajemen
+- Jangan berikan informasi yang tidak akurat
+- Jika tidak yakin, arahkan user ke fitur yang relevan di HeyTrack`
+
+      const response = await AIService.callOpenRouter(contextualPrompt, systemPrompt)
+      return response
+      
+    } catch (error) {
+      apiLogger.error({ error, data }, 'Error generating business insights')
+      
+      // Enhanced fallback based on query content
+      const query = data.query as string || ''
+      const lowerQuery = query.toLowerCase()
+      
+      if (lowerQuery.includes('stok') || lowerQuery.includes('inventory')) {
+        return `📦 **Manajemen Stok Bahan Baku**
+
+Untuk mengelola stok dengan baik:
+
+1. **Cek Stok Reguler** - Pantau stok harian di halaman Inventory
+2. **Set Minimum Stock** - Atur batas minimum untuk alert otomatis  
+3. **Tracking Penggunaan** - Catat penggunaan bahan per produksi
+4. **Supplier Backup** - Siapkan supplier alternatif
+
+💡 **Tips**: Gunakan fitur reorder alert di HeyTrack untuk menghindari kehabisan stok.
+
+Akses: Dashboard → Inventory → Kelola Stok`
+      }
+      
+      if (lowerQuery.includes('hpp') || lowerQuery.includes('biaya')) {
+        return `💰 **Analisis HPP (Harga Pokok Produksi)**
+
+HPP yang akurat penting untuk profit:
+
+1. **Hitung Biaya Bahan** - Semua ingredient + packaging
+2. **Biaya Operasional** - Listrik, gas, tenaga kerja
+3. **Overhead** - Sewa, depresiasi alat
+4. **Margin Keuntungan** - Minimal 30-50% untuk sustainability
+
+📊 **Formula**: HPP + Margin = Harga Jual
+
+Akses: Dashboard → HPP Calculator → Analisis Biaya`
+      }
+      
+      if (lowerQuery.includes('profit') || lowerQuery.includes('untung')) {
+        return `📈 **Optimasi Profit Margin**
+
+Strategi meningkatkan keuntungan:
+
+1. **Efisiensi Bahan** - Kurangi waste, optimasi porsi
+2. **Pricing Strategy** - Review harga secara berkala
+3. **Volume Sales** - Fokus pada produk high-margin
+4. **Cost Control** - Monitor biaya operasional
+
+🎯 **Target**: Margin 35-50% untuk produk makanan
+
+Akses: Dashboard → Reports → Profit Analysis`
+      }
+      
+      return `🤖 **Asisten AI HeyTrack**
+
+Saya bisa membantu Anda dengan:
+
+• 📦 **Manajemen Inventory** - Stok, reorder, supplier
+• 💰 **Analisis HPP** - Kalkulasi biaya produksi  
+• 📊 **Profit Analysis** - Margin, pricing strategy
+• 🍳 **Manajemen Resep** - Optimasi bahan, costing
+• 📋 **Tracking Pesanan** - Workflow, customer management
+
+Coba tanyakan hal spesifik seperti:
+- "Bagaimana cara menghitung HPP brownies?"
+- "Tips mengoptimalkan stok bahan baku"
+- "Strategi pricing untuk produk baru"`
+    }
   }
 }
 

@@ -13,39 +13,71 @@ const isTest = process.env.NODE_ENV === 'test'
 
 // Configure Pino logger
 const logger = pino({
-  level: isTest ? 'silent' : isDevelopment ? 'info' : 'info',
-  browser: {
-    asObject: true,
-  },
-  // Disable transport in development to avoid thread-stream issues
-  // ...(isDevelopment && {
-  //   transport: {
-  //     target: 'pino-pretty',
-  //     options: {
-  //       colorize: true,
-  //       translateTime: 'HH:MM:ss',
-  //       ignore: 'pid,hostname',
-  //     },
-  //   },
-  // }),
+  level: isTest ? 'silent' : isDevelopment ? 'debug' : 'info',
+  ...(isDevelopment && {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+        singleLine: false,
+      },
+    },
+  }),
 })
-
-// Suppress logs in test environment
-if (isTest) {
-  logger.level = 'silent'
-}
 
 /**
  * Create a child logger with context
  */
 export const createLogger = (context: string) => logger.child({ context })
 
+/**
+ * Helper to safely serialize errors for logging
+ * Handles non-serializable properties like Error objects
+ */
+export const serializeError = (error: unknown): Record<string, unknown> => {
+  if (error instanceof Error) {
+    const serialized: Record<string, unknown> = {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    }
+    
+    if (error.cause) {
+      serialized.cause = serializeError(error.cause)
+    }
+    
+    return serialized
+  }
+  
+  if (typeof error === 'object' && error !== null) {
+    return { error: String(error) }
+  }
+  
+  return { error: String(error) }
+}
+
+/**
+ * Helper to log errors safely in API routes
+ * Usage: logError(apiLogger, error, 'Failed to create order', { userId, orderId })
+ */
+export const logError = (
+  logger: pino.Logger,
+  error: unknown,
+  message: string,
+  context?: Record<string, unknown>
+) => {
+  logger.error({
+    ...(context || {}),
+    error: serializeError(error),
+  }, message)
+}
+
 // Context-specific loggers
 export const apiLogger = createLogger('API')
 export const dbLogger = createLogger('Database')
 export const authLogger = createLogger('Auth')
-// Cron logger removed - cron jobs no longer in codebase
-// export const cronLogger = createLogger('Cron')
 export const automationLogger = createLogger('Automation')
 export const uiLogger = createLogger('UI')
 export const middlewareLogger = createLogger('Middleware')

@@ -175,6 +175,12 @@ export default function Dashboard() {
     )
   }
 
+  // Check if user has no data yet (empty state)
+  const hasNoData = dashboardData &&
+    dashboardData.stats.totalOrders === 0 &&
+    dashboardData.stats.totalIngredients === 0 &&
+    dashboardData.stats.totalCustomers === 0
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -200,11 +206,53 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Empty State - Show when user has no data */}
+        {hasNoData && (
+          <Card className="border-dashed">
+            <CardContent className="pt-6">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Mulai Kelola Bisnis Kuliner Anda
+                  </h3>
+                  <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                    Belum ada data di sistem. Mulai dengan menambahkan bahan baku,
+                    membuat resep, atau mencatat pesanan pertama Anda.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3 justify-center pt-2">
+                  <Button asChild>
+                    <a href="/ingredients">
+                      <Package className="h-4 w-4 mr-2" />
+                      Tambah Bahan Baku
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href="/recipes">
+                      <ChefHat className="h-4 w-4 mr-2" />
+                      Buat Resep
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <a href="/orders">
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Catat Pesanan
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Dashboard Content - Single Suspense boundary to prevent cascading loading */}
         <Suspense fallback={
           <div className="space-y-6">
             {/* Stats Cards Loading */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {Array.from({ length: 4 }, (_, i) => (
                 <StatsCardSkeleton key={i} />
               ))}
@@ -237,30 +285,28 @@ export default function Dashboard() {
           </div>
         }>
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatsCardsSection
-              stats={dashboardData?.stats ? {
-                revenue: {
-                  total: dashboardData.stats.totalSales,
-                  growth: dashboardData.stats.salesGrowth.toString(),
-                  trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
-                },
-                orders: {
-                  total: dashboardData.stats.totalOrders,
-                  active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
-                },
-                customers: {
-                  total: dashboardData.stats.totalCustomers,
-                  vip: 0 // Placeholder - need to determine VIP customers
-                },
-                inventory: {
-                  total: dashboardData.stats.totalIngredients,
-                  lowStock: dashboardData.stats.ingredientsLow
-                }
-              } : undefined}
-              formatCurrency={formatCurrency}
-            />
-          </div>
+          <StatsCardsSection
+            stats={dashboardData?.stats ? {
+              revenue: {
+                total: dashboardData.stats.totalSales,
+                growth: dashboardData.stats.salesGrowth.toString(),
+                trend: dashboardData.stats.salesGrowth >= 0 ? 'up' : 'down'
+              },
+              orders: {
+                total: dashboardData.stats.totalOrders,
+                active: dashboardData.stats.totalOrders // Placeholder - need to determine active orders
+              },
+              customers: {
+                total: dashboardData.stats.totalCustomers,
+                vip: 0 // Placeholder - need to determine VIP customers
+              },
+              inventory: {
+                total: dashboardData.stats.totalIngredients,
+                lowStock: dashboardData.stats.ingredientsLow
+              }
+            } : undefined}
+            formatCurrency={formatCurrency}
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Orders */}
@@ -317,7 +363,7 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    </AppLayout>
+      </div >
+    </AppLayout >
   )
 }

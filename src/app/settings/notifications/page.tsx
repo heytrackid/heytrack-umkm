@@ -17,6 +17,7 @@ import {
     BreadcrumbSeparator
 } from '@/components/ui/breadcrumb'
 import { PrefetchLink } from '@/components/ui/prefetch-link'
+import { apiLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { Volume2, Bell, Clock, Layers } from 'lucide-react'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
@@ -51,7 +52,7 @@ export default function NotificationSettingsPage() {
                 setPreferences(data)
             }
         } catch (error) {
-            console.error('Failed to fetch preferences:', error)
+            apiLogger.error({ error }, 'Failed to fetch preferences')
             toast.error('Gagal memuat pengaturan')
         } finally {
             setIsLoading(false)
@@ -75,7 +76,7 @@ export default function NotificationSettingsPage() {
                 toast.error('Gagal menyimpan pengaturan')
             }
         } catch (error) {
-            console.error('Failed to save preferences:', error)
+            apiLogger.error({ error }, 'Failed to save preferences')
             toast.error('Gagal menyimpan pengaturan')
         } finally {
             setIsSaving(false)

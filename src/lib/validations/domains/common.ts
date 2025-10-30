@@ -15,11 +15,11 @@ export const PaginationSchema = z.object({
 })
 
 export const PaginationQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(100).default(10),
-  search: z.string().optional(),
-  sort_by: z.string().optional(),
-  sort_order: z.enum(['asc', 'desc']).default('desc'),
+  page: z.coerce.number().int().min(1).default(1).catch(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10).catch(10),
+  search: z.string().nullable().optional().transform(val => val ?? undefined),
+  sort_by: z.string().nullable().optional().transform(val => val ?? undefined),
+  sort_order: z.enum(['asc', 'desc']).nullable().default('desc').catch('desc'),
 })
 
 // Date range schemas

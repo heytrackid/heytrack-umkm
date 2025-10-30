@@ -321,24 +321,14 @@ export default function ProfitReportPage() {
               isMobile={isMobile}
             />
 
-            {/* Product Profitability Chart - Keep as separate Suspense since it's a heavy component */}
-            <Suspense fallback={
-              <Card>
-                <CardContent className="p-6">
-                  <div className="h-[350px] bg-muted animate-pulse rounded flex items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
-            }>
-              <ProductProfitabilityChart
-                chartData={productChartData}
-                filters={filters}
-                onFiltersChange={updateFilters}
-                formatCurrency={formatCurrency}
-                isMobile={isMobile}
-              />
-            </Suspense>
+            {/* Product Profitability Chart */}
+            <ProductProfitabilityChart
+              chartData={productChartData}
+              filters={filters}
+              onFiltersChange={updateFilters}
+              formatCurrency={formatCurrency}
+              isMobile={isMobile}
+            />
 
             {/* Product Profitability Table */}
             <ProductProfitabilityTable

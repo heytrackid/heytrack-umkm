@@ -8,6 +8,8 @@ import { ORDER_FIELDS } from '@/lib/database/query-fields'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage } from '@/lib/type-guards'
+import { handleAPIError } from '@/lib/errors/api-error-handler'
+import { EnhancedErrorLogger } from '@/lib/errors/error-logger'
 
 type FinancialRecordInsert = Database['public']['Tables']['financial_records']['Insert']
 type FinancialRecordUpdate = Database['public']['Tables']['financial_records']['Update']
@@ -26,7 +28,11 @@ async function GET(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
+      EnhancedErrorLogger.logApiError(authError, {
+        userId: user?.id,
+        url: request.url,
+        userAgent: request.headers.get('user-agent') || undefined
+      });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -45,6 +51,11 @@ async function GET(request: NextRequest) {
     })
 
     if (!queryValidation.success) {
+      EnhancedErrorLogger.logApiError(new Error('Invalid query parameters'), {
+        userId: user.id,
+        url: request.url,
+        validationErrors: queryValidation.error.issues
+      });
       return NextResponse.json(
         { error: 'Invalid query parameters', details: queryValidation.error.issues },
         { status: 400 }
@@ -71,7 +82,10 @@ async function GET(request: NextRequest) {
     const { count, error: countError } = await countQuery
 
     if (countError) {
-      apiLogger.error({ error: countError }, 'Error counting orders:')
+      EnhancedErrorLogger.logDatabaseError(countError, {
+        userId: user.id,
+        url: request.url
+      });
       return NextResponse.json(
         { error: 'Failed to count orders' },
         { status: 500 }
@@ -107,7 +121,10 @@ async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      apiLogger.error({ error }, 'Error fetching orders:')
+      EnhancedErrorLogger.logDatabaseError(error, {
+        userId: user.id,
+        url: request.url
+      });
       return NextResponse.json(
         { error: 'Failed to fetch orders' },
         { status: 500 }
@@ -145,11 +162,11 @@ async function GET(request: NextRequest) {
       meta: createPaginationMeta(page, limit, count || 0)
     })
   } catch (error: unknown) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in GET /api/orders:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    EnhancedErrorLogger.logApiError(error, {
+      url: request.url,
+      userAgent: request.headers.get('user-agent') || undefined
+    });
+    return handleAPIError(error, 'GET /api/orders');
   }
 }
 
@@ -163,7 +180,11 @@ async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      apiLogger.error({ error: authError }, 'Auth error:')
+      EnhancedErrorLogger.logApiError(authError, {
+        userId: user?.id,
+        url: request.url,
+        userAgent: request.headers.get('user-agent') || undefined
+      });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -176,6 +197,11 @@ async function POST(request: NextRequest) {
     // Validate request body
     const validation = OrderInsertSchema.safeParse(body)
     if (!validation.success) {
+      EnhancedErrorLogger.logApiError(new Error('Invalid request data'), {
+        userId: user.id,
+        url: request.url,
+        validationErrors: validation.error.issues
+      });
       return NextResponse.json(
         {
           error: 'Invalid request data',
@@ -208,7 +234,10 @@ async function POST(request: NextRequest) {
         .single()
 
       if (incomeError) {
-        apiLogger.error({ error: incomeError }, 'Error creating income record:')
+        EnhancedErrorLogger.logDatabaseError(incomeError, {
+          userId: user.id,
+          url: request.url
+        });
         return NextResponse.json(
           { error: 'Failed to create income record' },
           { status: 500 }
@@ -245,7 +274,10 @@ async function POST(request: NextRequest) {
       .single()
 
     if (orderError) {
-      apiLogger.error({ error: orderError }, 'Error creating order:')
+      EnhancedErrorLogger.logDatabaseError(orderError, {
+        userId: user.id,
+        url: request.url
+      });
       // Rollback income record if order creation fails
       if (incomeRecordId) {
         await supabase
@@ -292,7 +324,10 @@ async function POST(request: NextRequest) {
         .insert(orderItems)
 
       if (itemsError) {
-        apiLogger.error({ error: itemsError }, 'Error creating order items:')
+        EnhancedErrorLogger.logDatabaseError(itemsError, {
+          userId: user.id,
+          url: request.url
+        });
         
         // Complete rollback: delete order AND financial record
         await supabase
@@ -323,11 +358,11 @@ async function POST(request: NextRequest) {
       income_recorded: !!incomeRecordId
     }, { status: 201 })
   } catch (error: unknown) {
-    apiLogger.error({ error: getErrorMessage(error) }, 'Error in POST /api/orders:')
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    EnhancedErrorLogger.logApiError(error, {
+      url: request.url,
+      userAgent: request.headers.get('user-agent') || undefined
+    });
+    return handleAPIError(error, 'POST /api/orders');
   }
 }
 

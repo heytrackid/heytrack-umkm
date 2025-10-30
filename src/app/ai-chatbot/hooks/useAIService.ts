@@ -5,17 +5,68 @@ import { createClient } from '@/utils/supabase/client'
 const supabase = createClient()
 
 export function useAIService() {
+  const generateSuggestions = (intent: string): string[] => {
+    switch (intent) {
+      case 'check_inventory':
+        return [
+          "Berapa stok tepung terigu yang tersisa?",
+          "Bahan apa saja yang perlu direstock?",
+          "Tips mengoptimalkan stok bahan baku"
+        ]
+      case 'analyze_hpp':
+        return [
+          "Bagaimana cara menghitung HPP brownies?",
+          "Faktor apa yang mempengaruhi HPP?",
+          "Tips menurunkan biaya produksi"
+        ]
+      case 'analyze_profit':
+        return [
+          "Produk mana yang paling menguntungkan?",
+          "Bagaimana cara meningkatkan profit margin?",
+          "Analisis keuntungan bulan ini"
+        ]
+      case 'recipe_query':
+        return [
+          "Resep apa yang cocok untuk hari ini?",
+          "Bagaimana optimasi resep untuk profit?",
+          "Tips manajemen resep yang efisien"
+        ]
+      case 'pricing_strategy':
+        return [
+          "Berapa harga jual yang optimal?",
+          "Strategi pricing untuk produk baru",
+          "Cara menentukan margin yang sehat"
+        ]
+      case 'marketing_strategy':
+        return [
+          "Tips marketing untuk UMKM kuliner",
+          "Strategi promosi yang efektif",
+          "Cara meningkatkan penjualan online"
+        ]
+      default:
+        return [
+          "Berapa stok bahan baku yang tersedia?",
+          "Rekomendasikan resep untuk hari ini", 
+          "Analisis profit margin bulan ini",
+          "Status pesanan terbaru"
+        ]
+    }
+  }
+
   const processAIQuery = async (query: string) => {
     // Get current user ID for database filtering
     const { data: { user } } = await supabase.auth.getUser()
     const userId = user?.id
 
     if (!userId) {
+      apiLogger.warn('AI Chatbot accessed without authentication')
       return {
         message: '❌ **Error:** Anda perlu login untuk menggunakan AI Chatbot',
         suggestions: ['Login terlebih dahulu', 'Refresh halaman']
       }
     }
+
+    apiLogger.info({ userId, query: query.substring(0, 100) }, 'Processing AI chatbot query')
 
     try {
       // Use available NLP processing
@@ -25,61 +76,93 @@ export function useAIService() {
       const insights = await generateAIInsights({
         query,
         nlpAnalysis: nlpResult,
-        userId
+        userId,
+        intent: nlpResult.primaryIntent,
+        entities: nlpResult.entities
       })
+
+      // Generate contextual suggestions based on intent
+      const suggestions = this.generateSuggestions(nlpResult.primaryIntent)
+
+      apiLogger.info({ 
+        userId, 
+        intent: nlpResult.primaryIntent, 
+        responseLength: insights.length 
+      }, 'AI query processed successfully')
 
       return {
         message: insights,
-        suggestions: [
-          "Berapa stok bahan baku yang tersedia?",
-          "Rekomendasikan resep untuk hari ini",
-          "Analisis profit margin bulan ini",
-          "Status pesanan terbaru"
-        ],
+        suggestions,
         data: nlpResult
       }
     } catch (error) {
-      apiLogger.error({ error }, 'Error processing AI query:')
+      apiLogger.error({ error, userId, query }, 'Error processing AI query')
 
-      // Fallback to basic responses
+      // Enhanced fallback responses with better error handling
       const lowerQuery = query.toLowerCase()
+      
+      // Check if it's an API configuration issue
+      if (error instanceof Error && error.message.includes('API key')) {
+        return {
+          message: '⚠️ **Konfigurasi AI Service**\n\nLayanan AI sedang tidak tersedia. Silakan hubungi administrator untuk mengaktifkan fitur AI chatbot.',
+          suggestions: [
+            'Refresh halaman dan coba lagi',
+            'Gunakan fitur manual di dashboard'
+          ]
+        }
+      }
 
+      // Provide intelligent fallback based on query
       if (lowerQuery.includes('stok') || lowerQuery.includes('bahan') || lowerQuery.includes('inventory')) {
         return {
-          message: 'Untuk informasi stok bahan baku, silakan akses halaman Inventory atau gunakan fitur pencarian di dashboard.',
-          suggestions: ['Buka halaman Inventory', 'Cek dashboard utama']
+          message: '📦 **Manajemen Stok Bahan Baku**\n\nUntuk mengelola stok dengan optimal:\n\n• **Monitoring Real-time** - Pantau stok di halaman Inventory\n• **Alert Otomatis** - Set minimum stock untuk notifikasi\n• **Tracking Penggunaan** - Catat konsumsi per produksi\n• **Supplier Management** - Kelola data supplier dan lead time\n\n💡 **Tips**: Gunakan fitur reorder point untuk menghindari stockout.',
+          suggestions: this.generateSuggestions('check_inventory')
         }
       }
 
       if (lowerQuery.includes('resep') || lowerQuery.includes('recipe') || lowerQuery.includes('produksi')) {
         return {
-          message: 'Untuk resep dan produksi, silakan akses halaman Recipes atau gunakan fitur manajemen resep.',
-          suggestions: ['Buka halaman Recipes', 'Tambah resep baru']
+          message: '🍳 **Manajemen Resep & Produksi**\n\nOptimalkan resep untuk profit maksimal:\n\n• **Cost Analysis** - Hitung HPP setiap resep\n• **Ingredient Optimization** - Sesuaikan komposisi bahan\n• **Batch Planning** - Rencanakan produksi efisien\n• **Quality Control** - Standardisasi proses produksi\n\n💡 **Tips**: Fokus pada resep dengan margin tertinggi.',
+          suggestions: this.generateSuggestions('recipe_query')
         }
       }
 
-      if (lowerQuery.includes('uang') || lowerQuery.includes('profit') || lowerQuery.includes('harga') || lowerQuery.includes('financial')) {
+      if (lowerQuery.includes('hpp') || lowerQuery.includes('biaya') || lowerQuery.includes('cost')) {
         return {
-          message: 'Untuk analisis keuangan, silakan akses halaman Profit atau Reports untuk melihat laporan lengkap.',
-          suggestions: ['Buka halaman Profit', 'Akses laporan keuangan']
+          message: '💰 **Analisis HPP (Harga Pokok Produksi)**\n\nKelola biaya produksi dengan tepat:\n\n• **Ingredient Costing** - Hitung biaya bahan per unit\n• **Operational Costs** - Alokasi biaya operasional\n• **Margin Analysis** - Tentukan markup yang sehat\n• **Price Optimization** - Sesuaikan harga jual\n\n💡 **Formula**: HPP + Margin = Harga Jual Optimal',
+          suggestions: this.generateSuggestions('analyze_hpp')
         }
       }
 
-      if (lowerQuery.includes('pesanan') || lowerQuery.includes('order') || lowerQuery.includes('pelanggan')) {
+      if (lowerQuery.includes('profit') || lowerQuery.includes('untung') || lowerQuery.includes('laba')) {
         return {
-          message: 'Untuk pesanan dan pelanggan, silakan akses halaman Orders untuk melihat detail pesanan.',
-          suggestions: ['Buka halaman Orders', 'Lihat status pesanan']
+          message: '📈 **Analisis Profitabilitas**\n\nMaximalkan keuntungan bisnis:\n\n• **Margin Tracking** - Monitor profit per produk\n• **Cost Efficiency** - Identifikasi area penghematan\n• **Revenue Optimization** - Fokus produk high-margin\n• **Trend Analysis** - Analisis performa bulanan\n\n💡 **Target**: Margin 35-50% untuk sustainability.',
+          suggestions: this.generateSuggestions('analyze_profit')
         }
       }
 
-      // Default fallback
+      if (lowerQuery.includes('harga') || lowerQuery.includes('pricing') || lowerQuery.includes('price')) {
+        return {
+          message: '🏷️ **Strategi Pricing**\n\nTentukan harga yang kompetitif:\n\n• **Market Research** - Analisis harga kompetitor\n• **Cost-Plus Pricing** - HPP + margin target\n• **Value-Based Pricing** - Sesuai perceived value\n• **Dynamic Pricing** - Sesuaikan dengan demand\n\n💡 **Tips**: Review harga secara berkala sesuai market.',
+          suggestions: this.generateSuggestions('pricing_strategy')
+        }
+      }
+
+      if (lowerQuery.includes('marketing') || lowerQuery.includes('promosi') || lowerQuery.includes('jualan')) {
+        return {
+          message: '📢 **Strategi Marketing UMKM**\n\nTingkatkan penjualan dengan:\n\n• **Digital Marketing** - Social media & online presence\n• **Customer Retention** - Program loyalitas pelanggan\n• **Product Positioning** - Highlight unique selling point\n• **Seasonal Campaigns** - Promo sesuai momen\n\n💡 **Focus**: Build brand awareness & customer loyalty.',
+          suggestions: this.generateSuggestions('marketing_strategy')
+        }
+      }
+
+      // Default comprehensive fallback
       return {
-        message: 'Saya bisa membantu Anda dengan manajemen inventory, resep, analisis keuangan, dan pesanan. Coba tanyakan hal spesifik seperti "Berapa stok tepung terigu?" atau "Rekomendasikan resep roti untuk hari ini".',
+        message: '🤖 **Asisten AI HeyTrack**\n\nSaya siap membantu mengelola bisnis kuliner Anda!\n\n**Layanan yang tersedia:**\n• 📦 Manajemen Inventory & Stok\n• 💰 Analisis HPP & Costing\n• 📊 Profit & Financial Analysis\n• 🍳 Optimasi Resep & Produksi\n• 🏷️ Strategi Pricing\n• 📢 Marketing & Sales\n\n**Contoh pertanyaan:**\n• "Bagaimana cara menghitung HPP brownies?"\n• "Tips mengoptimalkan stok bahan baku"\n• "Strategi pricing untuk produk baru"',
         suggestions: [
-          "Berapa stok bahan baku yang tersedia?",
-          "Rekomendasikan resep untuk hari ini",
-          "Analisis profit margin bulan ini",
-          "Status pesanan terbaru"
+          "Bagaimana cara menghitung HPP?",
+          "Tips mengoptimalkan stok bahan",
+          "Strategi pricing yang efektif",
+          "Cara meningkatkan profit margin"
         ]
       }
     }

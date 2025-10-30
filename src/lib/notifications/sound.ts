@@ -1,3 +1,5 @@
+import { uiLogger } from '@/lib/logger'
+
 /**
  * Notification Sound Manager
  * Handles playing notification sounds with volume control
@@ -47,8 +49,11 @@ export function playNotificationSound(volume: number = soundVolume): void {
     oscillator.start(now)
     oscillator.stop(now + 0.3)
 
-  } catch (error) {
-    console.error('Failed to play notification sound:', error)
+  } catch (error: unknown) {
+    // Silent fail - notification sounds are non-critical
+    if (process.env.NODE_ENV === 'development') {
+      uiLogger.error({ error }, 'Failed to play notification sound')
+    }
   }
 }
 
@@ -86,8 +91,11 @@ export function playUrgentNotificationSound(volume: number = soundVolume): void 
     osc2.start(now + 0.2)
     osc2.stop(now + 0.35)
 
-  } catch (error) {
-    console.error('Failed to play urgent notification sound:', error)
+  } catch (error: unknown) {
+    // Silent fail - notification sounds are non-critical
+    if (process.env.NODE_ENV === 'development') {
+      uiLogger.error({ error }, 'Failed to play urgent notification sound')
+    }
   }
 }
 

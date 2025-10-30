@@ -1,6 +1,6 @@
 'use client'
 
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import AppLayout from '@/components/layout/app-layout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,13 +18,13 @@ import {
 } from '@/components/ui/breadcrumb'
 import { StatsSkeleton, CardSkeleton } from '@/components/ui'
 
-// Lazy load enhanced components for better performance and code splitting
-const EnhancedTransactionForm = lazy(() => import('./components/EnhancedTransactionForm'))
-const EnhancedSummaryCards = lazy(() => import('./components/EnhancedSummaryCards'))
-const EnhancedCashFlowChart = lazy(() => import('./components/EnhancedCashFlowChart'))
-const EnhancedTransactionList = lazy(() => import('./components/EnhancedTransactionList'))
-const CategoryBreakdown = lazy(() => import('./components/CategoryBreakdown'))
-const FilterPeriod = lazy(() => import('./components/FilterPeriod'))
+// Import components directly - no lazy loading for better parallel loading
+import EnhancedTransactionForm from './components/EnhancedTransactionForm'
+import EnhancedSummaryCards from './components/EnhancedSummaryCards'
+import EnhancedCashFlowChart from './components/EnhancedCashFlowChart'
+import EnhancedTransactionList from './components/EnhancedTransactionList'
+import CategoryBreakdown from './components/CategoryBreakdown'
+import FilterPeriod from './components/FilterPeriod'
 
 import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
 
@@ -131,8 +131,30 @@ export default function CashFlowPage() {
           </div>
         </div>
 
-        {/* Enhanced Transaction Form Dialog */}
-        <Suspense fallback={null}>
+        {/* Main Content - Single Suspense boundary for parallel loading */}
+        <Suspense fallback={
+          <div className="space-y-6">
+            {/* Filters Loading */}
+            <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />
+
+            {/* Summary Cards Loading */}
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
+              {Array.from({ length: 3 }, (_, i) => (
+                <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
+              ))}
+            </div>
+
+            {/* Chart Loading */}
+            <div className="h-80 bg-gray-100 animate-pulse rounded-lg" />
+
+            {/* Transactions Loading */}
+            <div className="h-96 bg-gray-100 animate-pulse rounded-lg" />
+
+            {/* Category Breakdown Loading */}
+            <div className="h-48 bg-gray-100 animate-pulse rounded-lg" />
+          </div>
+        }>
+          {/* Enhanced Transaction Form Dialog */}
           <EnhancedTransactionForm
             isOpen={isAddDialogOpen}
             onOpenChange={setIsAddDialogOpen}
@@ -141,42 +163,40 @@ export default function CashFlowPage() {
             onSubmit={handleAddTransaction}
             loading={loading}
           />
-        </Suspense>
 
-        {/* Quick Actions for Mobile */}
-        {isMobile && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  variant="outline"
-                  className="h-20 flex-col gap-2"
-                  onClick={() => {
-                    setTransactionType('income')
-                    setIsAddDialogOpen(true)
-                  }}
-                >
-                  <ArrowUpCircle className="h-6 w-6 text-green-600" />
-                  <span className="text-sm">Pemasukan</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-20 flex-col gap-2"
-                  onClick={() => {
-                    setTransactionType('expense')
-                    setIsAddDialogOpen(true)
-                  }}
-                >
-                  <ArrowDownCircle className="h-6 w-6 text-red-600" />
-                  <span className="text-sm">Pengeluaran</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {/* Quick Actions for Mobile */}
+          {isMobile && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col gap-2"
+                    onClick={() => {
+                      setTransactionType('income')
+                      setIsAddDialogOpen(true)
+                    }}
+                  >
+                    <ArrowUpCircle className="h-6 w-6 text-green-600" />
+                    <span className="text-sm">Pemasukan</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col gap-2"
+                    onClick={() => {
+                      setTransactionType('expense')
+                      setIsAddDialogOpen(true)
+                    }}
+                  >
+                    <ArrowDownCircle className="h-6 w-6 text-red-600" />
+                    <span className="text-sm">Pengeluaran</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        {/* Filters */}
-        <Suspense fallback={<div className="h-32 bg-gray-100 animate-pulse rounded-lg" />}>
+          {/* Filters */}
           <FilterPeriod
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
@@ -188,26 +208,16 @@ export default function CashFlowPage() {
             loading={loading}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Enhanced Summary Cards */}
-        <Suspense fallback={
-          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
-            {Array.from({ length: 3 }, (_, i) => (
-              <div key={i} className="h-24 bg-gray-100 animate-pulse rounded-lg" />
-            ))}
-          </div>
-        }>
+          {/* Enhanced Summary Cards */}
           <EnhancedSummaryCards
             summary={summary}
             comparison={comparison}
             formatCurrency={formatCurrency}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Enhanced Cash Flow Trend Chart */}
-        <Suspense fallback={<div className="h-80 bg-gray-100 animate-pulse rounded-lg" />}>
+          {/* Enhanced Cash Flow Trend Chart */}
           <EnhancedCashFlowChart
             chartData={chartData}
             selectedPeriod={selectedPeriod}
@@ -218,20 +228,16 @@ export default function CashFlowPage() {
             onEndDateChange={setEndDate}
             isMobile={isMobile}
           />
-        </Suspense>
 
-        {/* Enhanced Transactions List */}
-        <Suspense fallback={<div className="h-96 bg-gray-100 animate-pulse rounded-lg" />}>
+          {/* Enhanced Transactions List */}
           <EnhancedTransactionList
             transactions={transactions}
             onDeleteTransaction={handleDeleteTransaction}
             formatCurrency={formatCurrency}
             loading={loading}
           />
-        </Suspense>
 
-        {/* Category Breakdown */}
-        <Suspense fallback={<div className="h-48 bg-gray-100 animate-pulse rounded-lg" />}>
+          {/* Category Breakdown */}
           <CategoryBreakdown
             summary={summary}
             formatCurrency={formatCurrency}

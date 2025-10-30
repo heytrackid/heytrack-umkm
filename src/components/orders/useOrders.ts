@@ -3,9 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Order, OrderFilters, OrderFormData, OrderStats, OrderStatus } from './types'
 import type { OrderWithRelations } from '@/app/orders/types/orders.types'
 import { generateOrderNo } from './utils'
-import { apiLogger } from '@/lib/logger'
 import { getErrorMessage, isArrayOf, isOrder } from '@/lib/type-guards'
 import { cachePresets } from '@/providers/QueryProvider'
+import { clientLogger } from '@/lib/logger/client-logger'
 
 // Query keys for cache management
 const orderKeys = {
@@ -27,36 +27,68 @@ export function useOrders() {
   const { data: ordersResponse, isLoading: loading, error: queryError } = useQuery({
     queryKey: orderKeys.list(50),
     queryFn: async () => {
-      const response = await fetch('/api/orders?limit=50')
-      if (!response.ok) {
-        const errorText = await response.text()
-        apiLogger.error({ status: response.status, error: errorText }, 'Failed to fetch orders')
-        throw new Error(`Failed to fetch orders: ${errorText}`)
-      }
-      
-      const json = await response.json()
-      
-      // ✅ FIX: API returns { data: [...], meta: {...} }
-      if (json && typeof json === 'object' && 'data' in json && Array.isArray(json.data)) {
-        apiLogger.info({ count: json.data.length }, 'Orders fetched successfully')
+      try {
+        const response = await fetch('/api/orders?limit=50')
         
-        // Map order_items to items for compatibility
-        const mappedOrders = json.data.map((order: any) => ({
-          ...order,
-          items: order.order_items || order.items || []
-        }))
+        // Handle different HTTP status codes with specific errors
+        if (!response.ok) {
+          const errorText = await response.text()
+          
+          // Log to console for debugging
+          clientLogger.error({ status: response.status, error: errorText }, 'API request failed')
+          
+          // Throw specific errors based on status code
+          if (response.status === 401) {
+            throw new Error('Unauthorized: Please login again')
+          }
+          if (response.status === 403) {
+            throw new Error('Forbidden: You do not have permission')
+          }
+          if (response.status === 404) {
+            throw new Error('Not found: Orders endpoint not available')
+          }
+          if (response.status >= 500) {
+            throw new Error('Server error: Please try again later')
+          }
+          
+          // Generic error for other status codes
+          throw new Error(`Request failed with status ${response.status}: ${errorText}`)
+        }
         
-        return mappedOrders as Order[]
+        const json = await response.json()
+        
+        // ✅ FIX: API returns { data: [...], meta: {...} }
+        if (json && typeof json === 'object' && 'data' in json && Array.isArray(json.data)) {
+          clientLogger.info({ count: json.data.length }, 'Orders fetched successfully')
+          
+          // Map order_items to items for compatibility
+          const mappedOrders = json.data.map((order: any) => ({
+            ...order,
+            items: order.order_items || order.items || []
+          }))
+          
+          return mappedOrders as Order[]
+        }
+        
+        // Fallback: if API returns array directly (backward compatibility)
+        if (Array.isArray(json)) {
+          clientLogger.info({ count: json.length }, 'Orders fetched (legacy format)')
+          return json as Order[]
+        }
+        
+        clientLogger.error({ response: json }, 'API returned unexpected format')
+        return [] as Order[]
+        
+      } catch (err) {
+        // Handle network errors specifically
+        if (err instanceof TypeError && err.message.includes('fetch')) {
+          clientLogger.error({ error: err }, 'Network error')
+          throw new Error('Network error: Please check your internet connection')
+        }
+        
+        // Re-throw other errors
+        throw err
       }
-      
-      // Fallback: if API returns array directly (backward compatibility)
-      if (Array.isArray(json)) {
-        apiLogger.info({ count: json.length }, 'Orders fetched (legacy format)')
-        return json as Order[]
-      }
-      
-      apiLogger.error({ response: json }, 'API returned unexpected format')
-      return [] as Order[]
     },
     ...cachePresets.frequentlyUpdated,
     retry: 2,
@@ -163,16 +195,16 @@ export function useOrders() {
         return data
       }
       
-      apiLogger.warn({ data }, 'API returned unexpected format for created order')
+      clientLogger.warn({ data }, 'API returned unexpected format for created order')
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      apiLogger.info('Order created successfully')
+      clientLogger.info({}, 'Order created successfully')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      apiLogger.error({ error: message }, 'Error creating order:')
+      clientLogger.error({ error: message }, 'Error creating order')
     }
   })
 
@@ -222,16 +254,16 @@ export function useOrders() {
         return data
       }
       
-      apiLogger.warn({ data }, 'API returned unexpected format for updated order')
+      clientLogger.warn({ data }, 'API returned unexpected format for updated order')
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      apiLogger.info('Order updated successfully')
+      clientLogger.info({}, 'Order updated successfully')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      apiLogger.error({ error: message }, 'Error updating order:')
+      clientLogger.error({ error: message }, 'Error updating order')
     }
   })
 
@@ -265,7 +297,7 @@ export function useOrders() {
         return data
       }
       
-      apiLogger.warn({ data }, 'API returned unexpected format for order status update')
+      clientLogger.warn({ data }, 'API returned unexpected format for order status update')
       return data
     },
     onSuccess: async (_data, variables) => {
@@ -275,11 +307,11 @@ export function useOrders() {
       // The API route will call InventoryUpdateService which creates stock_transactions
       // Database trigger will automatically update current_stock
       
-      apiLogger.info({ orderId: variables.orderId, status: variables.newStatus }, 'Order status updated')
+      clientLogger.info({ orderId: variables.orderId, status: variables.newStatus }, 'Order status updated')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      apiLogger.error({ error: message }, 'Error updating order status:')
+      clientLogger.error({ error: message }, 'Error updating order status')
     }
   })
 
@@ -308,11 +340,11 @@ export function useOrders() {
     },
     onSuccess: (orderId) => {
       queryClient.invalidateQueries({ queryKey: orderKeys.all })
-      apiLogger.info({ orderId }, 'Order deleted successfully')
+      clientLogger.info({ orderId }, 'Order deleted successfully')
     },
     onError: (err) => {
       const message = getErrorMessage(err)
-      apiLogger.error({ error: message }, 'Error deleting order:')
+      clientLogger.error({ error: message }, 'Error deleting order')
     }
   })
 

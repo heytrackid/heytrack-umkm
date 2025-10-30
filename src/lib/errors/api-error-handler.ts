@@ -1,185 +1,241 @@
 /**
- * API Error Handler
- * Centralized error handling for API routes
+ * Centralized Error Response Handler for API Routes
+ * Provides consistent error responses across all API endpoints
  */
 
-import { NextResponse } from 'next/server'
-import { apiLogger } from '@/lib/logger'
-import type { PostgrestError } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server';
+import { 
+  AppError, 
+  ValidationError, 
+  AuthenticationError, 
+  AuthorizationError, 
+  NotFoundError,
+  DatabaseError,
+  ExternalServiceError,
+  RateLimitError
+} from './app-error';
+import { apiLogger } from '../logger';
 
-/**
- * Custom API Error class
- */
-export class APIError extends Error {
-  constructor(
-    message: string,
-    public statusCode = 500,
-    public code?: string,
-    public details?: unknown
-  ) {
-    super(message)
-    this.name = 'APIError'
-  }
+// Export AppError as APIError for backward compatibility
+export { AppError as APIError } from './app-error';
+export type { AppError };
+
+interface ErrorResponse {
+  error: string;
+  code?: string;
+  status: number;
+  details?: Record<string, unknown>;
+  timestamp: string;
 }
 
 /**
- * Handle API errors consistently
+ * Centralized error response handler
  */
-export function handleAPIError(error: unknown): NextResponse {
-  // Handle APIError
-  if (error instanceof APIError) {
-    apiLogger.error(
-      {
-        error: error.message,
-        code: error.code,
-        statusCode: error.statusCode,
-        details: error.details,
-      },
-      'API Error'
-    )
+export function handleAPIError(error: unknown, context?: string): NextResponse {
+  // Log the error with context
+  apiLogger.error({
+    error,
+    context,
+    timestamp: new Date().toISOString()
+  }, 'API Error Handler');
 
-    return NextResponse.json(
-      {
-        error: error.message,
-        code: error.code,
-        details: error.details,
-      },
-      { status: error.statusCode }
-    )
+  // Handle AppError instances
+  if (error instanceof AppError) {
+    const errorResponse: ErrorResponse = {
+      error: error.message,
+      code: error.code,
+      status: error.status,
+      details: error.details,
+      timestamp: error.timestamp,
+    };
+
+    return NextResponse.json(errorResponse, { status: error.status });
   }
 
-  // Handle Supabase/Postgrest errors
-  if (isPostgrestError(error)) {
-    const statusCode = getPostgrestStatusCode(error)
-    
-    apiLogger.error(
-      {
-        error: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
+  // Handle Zod validation errors
+  if (isZodError(error)) {
+    const zodError = error as any;
+    const errorResponse: ErrorResponse = {
+      error: 'Validation failed',
+      code: 'VALIDATION_ERROR',
+      status: 400,
+      details: {
+        issues: zodError.issues?.map((issue: any) => ({
+          path: issue.path?.join('.'),
+          message: issue.message,
+        })),
       },
-      'Database Error'
-    )
+      timestamp: new Date().toISOString(),
+    };
 
-    return NextResponse.json(
-      {
-        error: getUserFriendlyMessage(error),
-        code: error.code,
-      },
-      { status: statusCode }
-    )
+    return NextResponse.json(errorResponse, { status: 400 });
   }
 
-  // Handle standard Error
+  // Handle Supabase errors
+  if (isSupabaseError(error)) {
+    const supabaseError = error as any;
+    const errorResponse: ErrorResponse = {
+      error: supabaseError.message || 'Database error occurred',
+      code: 'DATABASE_ERROR',
+      status: supabaseError.status || 500,
+      details: {
+        code: supabaseError.code,
+        hint: supabaseError.hint,
+        details: supabaseError.details,
+      },
+      timestamp: new Date().toISOString(),
+    };
+
+    // Map specific Supabase error codes to appropriate HTTP status codes
+    let status = supabaseError.status || 500;
+    if (supabaseError.code === '23505') status = 409; // Unique violation
+    if (supabaseError.code === '23503') status = 400; // Foreign key violation
+    if (supabaseError.code === '23502') status = 400; // Not null violation
+
+    return NextResponse.json(errorResponse, { status });
+  }
+
+  // Handle regular Error objects
   if (error instanceof Error) {
-    apiLogger.error(
-      {
-        error: error.message,
-        stack: error.stack,
-      },
-      'Unexpected Error'
-    )
+    const errorResponse: ErrorResponse = {
+      error: error.message,
+      code: 'INTERNAL_ERROR',
+      status: 500,
+      timestamp: new Date().toISOString(),
+    };
 
-    return NextResponse.json(
-      {
-        error: process.env.NODE_ENV === 'production' 
-          ? 'Internal server error' 
-          : error.message,
-      },
-      { status: 500 }
-    )
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 
-  // Handle unknown errors
-  apiLogger.error({ error }, 'Unknown Error')
+  // Handle other types of errors
+  const errorResponse: ErrorResponse = {
+    error: 'An unknown error occurred',
+    code: 'UNKNOWN_ERROR',
+    status: 500,
+    timestamp: new Date().toISOString(),
+  };
 
-  return NextResponse.json(
-    {
-      error: 'Internal server error',
-    },
-    { status: 500 }
-  )
+  return NextResponse.json(errorResponse, { status: 500 });
 }
 
 /**
- * Type guard for Postgrest errors
+ * Type guard to check if an error is a Zod error
  */
-function isPostgrestError(error: unknown): error is PostgrestError {
+function isZodError(error: unknown): error is { issues: Array<{ path: string[]; message: string }> } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'issues' in error &&
+    Array.isArray((error as any).issues)
+  );
+}
+
+/**
+ * Type guard to check if an error is a Supabase error
+ */
+function isSupabaseError(error: unknown): error is any {
   return (
     typeof error === 'object' &&
     error !== null &&
     'code' in error &&
     'message' in error &&
-    'details' in error
-  )
+    typeof (error as any).message === 'string'
+  );
 }
 
 /**
- * Get HTTP status code from Postgrest error
+ * Create a standardized error response for validation failures
  */
-function getPostgrestStatusCode(error: PostgrestError): number {
-  // Map common Postgrest error codes to HTTP status codes
-  const errorCodeMap: Record<string, number> = {
-    '23505': 409, // unique_violation
-    '23503': 409, // foreign_key_violation
-    '23502': 400, // not_null_violation
-    '23514': 400, // check_violation
-    '42501': 403, // insufficient_privilege
-    'PGRST116': 404, // not found
-    'PGRST301': 400, // invalid request
-  }
-
-  return errorCodeMap[error.code] || 500
+export function createValidationError(
+  message: string, 
+  details?: Record<string, unknown>,
+  context?: string
+): NextResponse {
+  const validationError = new ValidationError(message, details);
+  return handleAPIError(validationError, context);
 }
 
 /**
- * Get user-friendly error message
+ * Create a standardized error response for authentication failures
  */
-function getUserFriendlyMessage(error: PostgrestError): string {
-  const messageMap: Record<string, string> = {
-    '23505': 'Data sudah ada. Silakan gunakan data yang berbeda.',
-    '23503': 'Data terkait tidak ditemukan.',
-    '23502': 'Data wajib tidak boleh kosong.',
-    '23514': 'Data tidak valid.',
-    '42501': 'Anda tidak memiliki akses untuk melakukan tindakan ini.',
-    'PGRST116': 'Data tidak ditemukan.',
-    'PGRST301': 'Permintaan tidak valid.',
-  }
-
-  return messageMap[error.code] || error.message
+export function createAuthError(
+  message?: string,
+  context?: string
+): NextResponse {
+  const authError = new AuthenticationError(message);
+  return handleAPIError(authError, context);
 }
 
 /**
- * Validate required fields
+ * Create a standardized error response for authorization failures
  */
-export function validateRequired(
-  data: Record<string, unknown>,
-  fields: string[]
-): void {
-  const missing = fields.filter(field => !data[field])
-  
-  if (missing.length > 0) {
-    throw new APIError(
-      `Missing required fields: ${missing.join(', ')}`,
-      400,
-      'VALIDATION_ERROR',
-      { missing }
-    )
-  }
+export function createAuthorizationError(
+  message?: string,
+  context?: string
+): NextResponse {
+  const authError = new AuthorizationError(message);
+  return handleAPIError(authError, context);
 }
 
 /**
- * Validate UUID format
+ * Create a standardized error response for not found errors
  */
-export function validateUUID(id: string, fieldName = 'id'): void {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  
-  if (!uuidRegex.test(id)) {
-    throw new APIError(
-      `Invalid ${fieldName} format`,
-      400,
-      'VALIDATION_ERROR'
-    )
-  }
+export function createNotFoundError(
+  message?: string,
+  context?: string
+): NextResponse {
+  const notFoundError = new NotFoundError(message);
+  return handleAPIError(notFoundError, context);
+}
+
+/**
+ * Create a standardized error response for database errors
+ */
+export function createDatabaseError(
+  message: string,
+  details?: Record<string, unknown>,
+  context?: string
+): NextResponse {
+  const dbError = new DatabaseError(message, details);
+  return handleAPIError(dbError, context);
+}
+
+/**
+ * Create a standardized error response for external service errors
+ */
+export function createExternalServiceError(
+  message: string,
+  service: string,
+  details?: Record<string, unknown>,
+  context?: string
+): NextResponse {
+  const serviceError = new ExternalServiceError(message, service, details);
+  return handleAPIError(serviceError, context);
+}
+
+/**
+ * Create a standardized error response for rate limit errors
+ */
+export function createRateLimitError(
+  message?: string,
+  context?: string
+): NextResponse {
+  const rateLimitError = new RateLimitError(message);
+  return handleAPIError(rateLimitError, context);
+}
+
+/**
+ * Wrap an API route handler with centralized error handling
+ */
+export function withAPIErrorHandler<T extends Record<string, any>>(
+  handler: (req: Request, ctx: T) => Promise<NextResponse>,
+  context?: string
+) {
+  return async (req: Request, ctx: T): Promise<NextResponse> => {
+    try {
+      return await handler(req, ctx);
+    } catch (error) {
+      return handleAPIError(error, context || `API Route: ${req.url}`);
+    }
+  };
 }

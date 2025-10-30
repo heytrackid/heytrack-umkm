@@ -14,6 +14,7 @@ import { createClient } from '@/utils/supabase/client'
 import type { Notification } from '@/types/domain/notifications'
 import type { NotificationPreferences } from '@/types/domain/notification-preferences'
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
+import { apiLogger } from '@/lib/logger'
 
 export function NotificationBell() {
     const [notifications, setNotifications] = useState<Notification[]>([])
@@ -35,8 +36,11 @@ export function NotificationBell() {
                 setSoundEnabled(prefs.sound_enabled)
                 setSoundVolume(prefs.sound_volume)
             }
-        } catch (error) {
-            console.error('Failed to fetch preferences:', error)
+        } catch (error: unknown) {
+            // Silent fail - preferences are non-critical
+            if (process.env.NODE_ENV === 'development') {
+                apiLogger.error({ error }, 'Failed to fetch preferences')
+            }
         }
     }, [])
 
@@ -74,8 +78,11 @@ export function NotificationBell() {
                 setNotifications(newNotifications)
                 setUnreadCount(data.unread_count || 0)
             }
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error)
+        } catch (error: unknown) {
+            // Silent fail - will retry on next fetch
+            if (process.env.NODE_ENV === 'development') {
+                apiLogger.error({ error }, 'Failed to fetch notifications')
+            }
         } finally {
             setIsLoading(false)
         }
@@ -124,8 +131,11 @@ export function NotificationBell() {
             if (response.ok) {
                 await fetchNotifications()
             }
-        } catch (error) {
-            console.error('Failed to mark all as read:', error)
+        } catch (error: unknown) {
+            // Silent fail - user can retry
+            if (process.env.NODE_ENV === 'development') {
+                apiLogger.error({ error }, 'Failed to mark all as read')
+            }
         }
     }
 
@@ -140,8 +150,11 @@ export function NotificationBell() {
             if (response.ok) {
                 await fetchNotifications()
             }
-        } catch (error) {
-            console.error('Failed to update notification:', error)
+        } catch (error: unknown) {
+            // Silent fail - user can retry
+            if (process.env.NODE_ENV === 'development') {
+                apiLogger.error({ error }, 'Failed to update notification')
+            }
         }
     }
 

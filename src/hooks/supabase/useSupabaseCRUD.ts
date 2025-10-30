@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react'
+import { apiLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase-generated'
 import { getErrorMessage } from '@/lib/type-guards'
@@ -91,14 +92,20 @@ export function useSupabaseCRUD<TTable extends string>(
       const { data: result, error: queryError } = await query
 
       if (queryError) {
-        console.error(`[useSupabaseCRUD] Error fetching from ${table}:`, queryError)
+        if (process.env.NODE_ENV === 'development') {
+          apiLogger.error({ table, error: queryError }, 'Error fetching from table')
+        }
         throw queryError
       }
 
-      console.log(`[useSupabaseCRUD] Fetched ${result?.length || 0} rows from ${table}`)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[useSupabaseCRUD] Fetched ${result?.length || 0} rows from ${table}`)
+      }
       void setData((result as unknown as Array<TableRow<TTable>>) ?? null)
     } catch (err) {
-      console.error(`[useSupabaseCRUD] Error in fetchData:`, err)
+      if (process.env.NODE_ENV === 'development') {
+        apiLogger.error({ error: err, table }, 'Error in fetchData')
+      }
       setError(new Error(getErrorMessage(err)))
     } finally {
       void setLoading(false)
@@ -123,13 +130,17 @@ export function useSupabaseCRUD<TTable extends string>(
         .single()
 
       if (readError) {
-        console.error(`[useSupabaseCRUD] Read error:`, readError)
+        if (process.env.NODE_ENV === 'development') {
+          apiLogger.error({ table, error: readError }, 'Read error')
+        }
         throw readError
       }
 
       return result as unknown as TableRow<TTable>
     } catch (err) {
-      console.error(`[useSupabaseCRUD] Error in read:`, err)
+      if (process.env.NODE_ENV === 'development') {
+        apiLogger.error({ error: err, table }, 'Error in read')
+      }
       const error = new Error(getErrorMessage(err))
       setError(error)
       throw error
@@ -153,14 +164,18 @@ export function useSupabaseCRUD<TTable extends string>(
         .eq('user_id' as never, user.id as never) // RLS filter
 
       if (deleteError) {
-        console.error(`[useSupabaseCRUD] Delete error:`, deleteError)
+        if (process.env.NODE_ENV === 'development') {
+          apiLogger.error({ table, error: deleteError }, 'Delete error')
+        }
         throw deleteError
       }
 
       // Refresh data after delete
       await fetchData()
     } catch (err) {
-      console.error(`[useSupabaseCRUD] Error in remove:`, err)
+      if (process.env.NODE_ENV === 'development') {
+        apiLogger.error({ error: err, table }, 'Error in remove')
+      }
       const error = new Error(getErrorMessage(err))
       setError(error)
       throw error
@@ -190,7 +205,9 @@ export function useSupabaseCRUD<TTable extends string>(
         .single()
 
       if (createError) {
-        console.error(`[useSupabaseCRUD] Create error:`, createError)
+        if (process.env.NODE_ENV === 'development') {
+          apiLogger.error({ table, error: createError }, 'Create error')
+        }
         throw createError
       }
 
@@ -198,7 +215,9 @@ export function useSupabaseCRUD<TTable extends string>(
       await fetchData()
       return result as unknown as TableRow<TTable>
     } catch (err) {
-      console.error(`[useSupabaseCRUD] Error in create:`, err)
+      if (process.env.NODE_ENV === 'development') {
+        apiLogger.error({ error: err, table }, 'Error in create')
+      }
       const error = new Error(getErrorMessage(err))
       setError(error)
       throw error
@@ -224,7 +243,9 @@ export function useSupabaseCRUD<TTable extends string>(
         .single()
 
       if (updateError) {
-        console.error(`[useSupabaseCRUD] Update error:`, updateError)
+        if (process.env.NODE_ENV === 'development') {
+          apiLogger.error({ table, error: updateError }, 'Update error')
+        }
         throw updateError
       }
 
@@ -232,7 +253,9 @@ export function useSupabaseCRUD<TTable extends string>(
       await fetchData()
       return result as unknown as TableRow<TTable>
     } catch (err) {
-      console.error(`[useSupabaseCRUD] Error in update:`, err)
+      if (process.env.NODE_ENV === 'development') {
+        apiLogger.error({ error: err, table }, 'Error in update')
+      }
       const error = new Error(getErrorMessage(err))
       setError(error)
       throw error

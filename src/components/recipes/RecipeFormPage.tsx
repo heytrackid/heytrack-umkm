@@ -67,12 +67,15 @@ export const RecipeFormPage = ({ mode, recipeId }: RecipeFormPageProps) => {
                 setIngredients(data)
             }
         } catch (error: unknown) {
-            console.error('Failed to load ingredients:', error)
+            // Silent fail - will show empty ingredients list
+            if (process.env.NODE_ENV === 'development') {
+                uiLogger.error({ error }, 'Failed to load ingredients')
+            }
         }
     }
 
     const loadRecipe = async () => {
-        if (!recipeId) {return}
+        if (!recipeId) { return }
 
         try {
             setLoading(true)

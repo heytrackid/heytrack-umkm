@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { toast } from 'sonner'
+import { uiLogger } from '@/lib/logger'
 
 export const LogoutButton = () => {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -24,8 +25,11 @@ export const LogoutButton = () => {
             } else {
                 throw new Error('Logout gagal')
             }
-        } catch (error) {
-            console.error('Logout error:', error)
+        } catch (error: unknown) {
+            // Silent fail - user can retry
+            if (process.env.NODE_ENV === 'development') {
+                uiLogger.error({ error }, 'Logout error')
+            }
             toast.error('Logout gagal. Silakan coba lagi.')
             setIsLoggingOut(false)
         }
