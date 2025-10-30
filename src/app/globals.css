@@ -542,3 +542,22 @@
   }
   
 }
+
+/* Toast Custom Styles (CSP-compliant) */
+.toast-custom {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.625rem !important;
+  z-index: 9999 !important;
+}
+
+.toast-custom[data-type="success"] {
+  --toast-icon-primary: hsl(var(--primary));
+  --toast-icon-secondary: hsl(var(--primary-foreground));
+}
+
+.toast-custom[data-type="error"] {
+  --toast-icon-primary: #ef4444;
+  --toast-icon-secondary: #ffffff;
+}

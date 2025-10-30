@@ -86,7 +86,7 @@ Sama seperti production, tapi dengan tambahan:
 
 ## 🚨 Security Improvements Made
 
-### 1. ✅ IMPROVED CSP WITH NONCE SUPPORT
+### 1. ✅ CSP WITH NEXT.JS COMPATIBILITY
 **Before:**
 ```
 script-src 'self' 'unsafe-inline' 'unsafe-eval'
@@ -95,16 +95,22 @@ style-src 'self' 'unsafe-inline'
 
 **After:**
 ```
-script-src 'self' 'nonce-{random}' 'unsafe-inline' https://*.supabase.co ...
-style-src 'self' 'nonce-{random}' 'unsafe-inline' https://fonts.googleapis.com
+script-src 'self' 'unsafe-inline' https://*.supabase.co ...
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
 ```
 
-**Why we need `'unsafe-inline'`:**
+**Why we use `'unsafe-inline'` (without nonce):**
+
+**CRITICAL ISSUE with nonce:**
+- When nonce is present in CSP directive, `'unsafe-inline'` is IGNORED by browsers
+- Next.js injects inline scripts for hydration WITHOUT nonce attributes
+- These framework scripts would be blocked, breaking the app
+- React uses inline `style` attributes that cannot have nonces
 
 **For scripts:**
-- Next.js injects inline hydration scripts that cannot have nonces
-- These are framework-generated, not user-controlled
-- Nonce is still provided for custom inline scripts
+- Next.js hydration scripts are framework-generated (safe, not user-controlled)
+- Cannot add nonce to Next.js internal scripts
+- Using `'unsafe-inline'` allows Next.js to work properly
 - Production removes `'unsafe-eval'` (only for dev HMR)
 
 **For styles:**
@@ -113,9 +119,14 @@ style-src 'self' 'nonce-{random}' 'unsafe-inline' https://fonts.googleapis.com
 - Inline style attributes are generally safe (not executable code)
 - Alternative would require rewriting all React components
 
-**Note:** When both nonce and `'unsafe-inline'` are present, browsers prioritize nonce for `<script>` tags with nonce attribute, and fall back to `'unsafe-inline'` for framework scripts.
+**Security Trade-off:**
+- ✅ Allows Next.js/React to function properly
+- ✅ Framework scripts are safe (not user input)
+- ✅ Still blocks external scripts (whitelist only)
+- ⚠️ Less strict than nonce-based CSP
+- ⚠️ User-generated inline scripts would be allowed (but we don't have any)
 
-**Impact:** 🔒 **Balanced Security** - Secure while maintaining Next.js/React compatibility
+**Impact:** 🔒 **Pragmatic Security** - Balanced security while maintaining framework compatibility
 
 ### 2. Removed `'unsafe-eval'` in Production
 **Before:**

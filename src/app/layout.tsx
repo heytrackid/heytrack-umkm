@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { getNonce } from '@/lib/nonce';
 // import SupabaseProvider from '@/providers/SupabaseProvider'; // Temporarily disabled
 import "./globals.css";
 
@@ -26,11 +27,14 @@ export const metadata: Metadata = {
   description: "Comprehensive culinary business management system with AI Assistant, COGS calculation, inventory management, orders tracking, and financial analytics for Indonesian SMEs",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  // Get CSP nonce for this request
+  const nonce = await getNonce()
+
   return (
     <html lang="id" suppressHydrationWarning className="h-full">
       <head>
@@ -39,6 +43,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href={process.env['NEXT_PUBLIC_SUPABASE_URL'] || ''} />
         <link rel="preconnect" href="https://api.openrouter.ai" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.openrouter.ai" />
+
+        {/* CSP nonce for Next.js inline scripts */}
+        {nonce && (
+          <meta property="csp-nonce" content={nonce} />
+        )}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full m-0 p-0 w-full`}
@@ -71,25 +80,7 @@ export default function RootLayout({
                 position="bottom-right"
                 toastOptions={{
                   duration: 4000,
-                  style: {
-                    background: 'hsl(var(--background))',
-                    color: 'hsl(var(--foreground))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '0.625rem',
-                    zIndex: 9999,
-                  },
-                  success: {
-                    iconTheme: {
-                      primary: 'hsl(var(--primary))',
-                      secondary: 'hsl(var(--primary-foreground))',
-                    },
-                  },
-                  error: {
-                    iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#ffffff',
-                    },
-                  },
+                  className: 'toast-custom',
                 }}
               />
               {/* Performance Monitoring - Removed temporarily */}

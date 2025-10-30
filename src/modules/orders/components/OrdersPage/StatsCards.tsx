@@ -78,7 +78,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
                             <p className="text-2xl font-bold">{formatCurrency(stats.pending_revenue)}</p>
                             <p className="text-xs text-muted-foreground mt-1">belum dibayar</p>
                         </div>
-                        <Clock className="h-8 w-8 text-orange-600" />
+                        <Clock className="h-8 w-8 text-muted-foreground" />
                     </div>
                 </CardContent>
             </Card>

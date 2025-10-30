@@ -43,11 +43,9 @@ const nextConfig = {
   },
 
   // Turbopack configuration (Next.js 16+)
-  // Optimized for better HMR performance
-  turbopack: {
-    // Reduce memory usage
-    memoryLimit: 4096,
-  },
+  // Empty config to silence webpack migration warning
+  // Turbopack is enabled by default in Next.js 16+
+  turbopack: {},
 
   // Webpack configuration for better HMR and dynamic imports
   webpack: (config, { dev, isServer }) => {
@@ -169,8 +167,8 @@ const nextConfig = {
   serverExternalPackages: [
     '@supabase/realtime-js',
     '@supabase/ssr',
-    'exceljs',
-    'jsdom'
+    'exceljs'
+    // ❌ Removed 'jsdom' - not needed in production, causes ESM errors
   ],
 
   // Redirects for security

@@ -48,7 +48,7 @@ const categoryIcons = {
 }
 
 const typeColors = {
-    info: 'text-blue-500',
+    info: 'text-muted-foreground',
     warning: 'text-yellow-500',
     error: 'text-red-500',
     success: 'text-green-500',

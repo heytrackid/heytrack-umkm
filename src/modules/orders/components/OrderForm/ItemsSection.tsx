@@ -42,7 +42,7 @@ export function ItemsSection({
                 <div className="flex items-center gap-2">
                     <h3 className="text-lg font-medium">Item Pesanan ({orderItems.length})</h3>
                     {fieldErrors['items'] && (
-                        <div className="flex items-center gap-1 text-sm text-red-600">
+                        <div className="flex items-center gap-1 text-sm text-destructive">
                             <AlertCircle className="h-4 w-4" />
                             <span>{fieldErrors['items']}</span>
                         </div>
@@ -100,7 +100,7 @@ export function ItemsSection({
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            className="text-gray-600 dark:text-gray-400 hover:text-red-700 ml-2 mt-4"
+                                            className="text-muted-foreground hover:text-destructive ml-2 mt-4"
                                             onClick={() => onRemoveItem(index)}
                                         >
                                             <Trash2 className="h-4 w-4" />
@@ -193,7 +193,7 @@ export function ItemsSection({
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    className="text-gray-600 dark:text-gray-400 hover:text-red-700"
+                                    className="text-muted-foreground hover:text-destructive"
                                     onClick={() => onRemoveItem(index)}
                                 >
                                     <Trash2 className="h-4 w-4" />

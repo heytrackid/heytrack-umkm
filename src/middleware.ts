@@ -89,38 +89,49 @@ export async function middleware(request: NextRequest) {
     // Add strict CSP header to response
     response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
 
-    // Get user from the updated session
-    const supabase = createServerClient(
-      process.env['NEXT_PUBLIC_SUPABASE_URL']!,
-      process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-            response = NextResponse.next({
-              request,
-            })
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            )
-          },
-        },
-      }
-    )
-
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
-
-    if (error) {
-      middlewareLogger.error({ error }, 'Middleware auth error')
-    }
-
     const {pathname} = request.nextUrl
+
+    // ✅ Check for auth cookies first - avoid AuthSessionMissingError
+    const hasAuthCookie = request.cookies.has('sb-access-token') || 
+                          request.cookies.has('sb:token') ||
+                          request.cookies.getAll().some(cookie => cookie.name.startsWith('sb-'))
+    
+    let user = null
+    
+    // Only attempt auth check if cookies exist
+    if (hasAuthCookie) {
+      const supabase = createServerClient(
+        process.env['NEXT_PUBLIC_SUPABASE_URL']!,
+        process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY']!,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll()
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+              response = NextResponse.next({
+                request,
+              })
+              cookiesToSet.forEach(({ name, value, options }) =>
+                response.cookies.set(name, value, options)
+              )
+            },
+          },
+        }
+      )
+
+      try {
+        const { data, error } = await supabase.auth.getUser()
+        
+        if (!error && data?.user) {
+          user = data.user
+        }
+        // Silently ignore auth errors - cookies might be expired
+      } catch {
+        // Silently handle exceptions - don't block the request
+      }
+    }
 
     // Check if the current path is protected (optimized with Set)
     const isProtectedRoute = Array.from(PROTECTED_ROUTES).some((route) =>

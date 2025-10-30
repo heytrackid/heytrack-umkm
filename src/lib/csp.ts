@@ -28,19 +28,22 @@ export async function calculateHash(content: string): Promise<string> {
 }
 
 /**
- * Get strict CSP header with nonce (no unsafe-inline)
+ * Get strict CSP header with nonce
+ * Uses nonce for inline scripts/styles for maximum security
+ * Next.js will automatically inject nonce into its scripts when available
  */
 export function getStrictCSP(nonce: string, isDev = false): string {
   const policies = [
     "default-src 'self'",
     
-    // Scripts: Use nonce + unsafe-inline for Next.js hydration scripts
+    // Scripts: Use nonce for strict CSP (Next.js will use it automatically)
     isDev 
-      ? `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live`
-      : `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com`,
+      ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live`
+      : `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com`,
     
-    // Styles: Use nonce for <style> tags, unsafe-inline for style attributes (React needs this)
-    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline' https://fonts.googleapis.com`,
+    // Styles: Use unsafe-inline (React needs this for style attributes)
+    // Note: style attributes (not <style> tags) cannot use nonce
+    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     
     // Images
     "img-src 'self' data: https: blob: https://*.supabase.co https://vercel.com",

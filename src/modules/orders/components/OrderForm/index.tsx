@@ -276,7 +276,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
                 </SwipeableTabsList>
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded flex items-center gap-2">
+                    <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded flex items-center gap-2">
                         <AlertCircle className="h-4 w-4" />
                         {error}
                     </div>

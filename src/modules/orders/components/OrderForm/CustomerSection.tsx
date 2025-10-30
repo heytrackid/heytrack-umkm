@@ -107,11 +107,11 @@ export function CustomerSection({
                             if (fieldErrors['customer_name']) onClearError('customer_name')
                         }}
                         required
-                        className={`mt-1 ${fieldErrors['customer_name'] ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                         aria-invalid={!!fieldErrors['customer_name']}
                     />
                     {fieldErrors['customer_name'] && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 mt-1">
+                        <div className="flex items-center gap-2 text-sm text-destructive mt-1">
                             <AlertCircle className="h-4 w-4" />
                             {fieldErrors['customer_name']}
                         </div>

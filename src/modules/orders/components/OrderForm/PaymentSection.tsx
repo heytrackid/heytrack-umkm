@@ -95,11 +95,11 @@ export function PaymentSection({
                         }}
                         min="0"
                         step="1000"
-                        className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
+                        className={`mt-1 ${fieldErrors['paid_amount'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                         aria-invalid={!!fieldErrors['paid_amount']}
                     />
                     {fieldErrors['paid_amount'] && (
-                        <div className="flex items-center gap-2 text-sm text-red-600 mt-1">
+                        <div className="flex items-center gap-2 text-sm text-destructive mt-1">
                             <AlertCircle className="h-4 w-4" />
                             {fieldErrors['paid_amount']}
                         </div>
@@ -137,7 +137,7 @@ export function PaymentSection({
                     </div>
                     <div className="flex justify-between font-medium text-base">
                         <span>Sisa:</span>
-                        <span className={totalAmount - formData.paid_amount > 0 ? 'text-red-600' : 'text-green-600'}>
+                        <span className={totalAmount - formData.paid_amount > 0 ? 'text-foreground font-medium' : 'text-muted-foreground'}>
                             {formatCurrency(Math.max(0, totalAmount - formData.paid_amount))}
                         </span>
                     </div>
