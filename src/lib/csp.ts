@@ -34,10 +34,10 @@ export function getStrictCSP(nonce: string, isDev = false): string {
   const policies = [
     "default-src 'self'",
     
-    // Scripts: Use nonce instead of unsafe-inline
+    // Scripts: Use nonce + unsafe-inline for Next.js hydration scripts
     isDev 
-      ? `script-src 'self' 'nonce-${nonce}' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live`
-      : `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com`,
+      ? `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com https://vercel.live`
+      : `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' https://*.supabase.co https://api.openrouter.ai https://va.vercel-scripts.com`,
     
     // Styles: Use nonce for <style> tags, unsafe-inline for style attributes (React needs this)
     `style-src 'self' 'nonce-${nonce}' 'unsafe-inline' https://fonts.googleapis.com`,
@@ -74,9 +74,6 @@ export function getStrictCSP(nonce: string, isDev = false): string {
     
     // Manifest
     "manifest-src 'self'",
-    
-    // Prefetch
-    "prefetch-src 'self' https://*.supabase.co",
     
     // Upgrade insecure requests
     "upgrade-insecure-requests",
@@ -118,7 +115,6 @@ export function getHashBasedCSP(hashes: { scripts?: string[], styles?: string[] 
     "form-action 'self'",
     "frame-ancestors 'none'",
     "manifest-src 'self'",
-    "prefetch-src 'self' https://*.supabase.co",
     "upgrade-insecure-requests",
     "block-all-mixed-content"
   ]

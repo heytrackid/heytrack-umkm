@@ -30,11 +30,11 @@ block-all-mixed-content
 ```
 
 **Key Features:**
-- ✅ **NO `'unsafe-inline'` for scripts** - Uses nonce-based CSP for scripts
-- ✅ **`'unsafe-inline'` for styles only** - Required for React inline style attributes
-- ✅ **NO `'unsafe-eval'`** in production
+- ✅ **Nonce + `'unsafe-inline'` for scripts** - Next.js requires this for hydration scripts
+- ✅ **`'unsafe-inline'` for styles** - Required for React inline style attributes
+- ✅ **NO `'unsafe-eval'`** in production (only in dev for HMR)
 - ✅ **Per-request nonce** - Generated in middleware
-- ✅ **A+ Security Rating** - Strictest CSP possible for React apps
+- ✅ **Balanced Security** - Secure while compatible with Next.js/React
 
 ### Development CSP (Relaxed)
 Sama seperti production, tapi dengan tambahan:
@@ -86,7 +86,7 @@ Sama seperti production, tapi dengan tambahan:
 
 ## 🚨 Security Improvements Made
 
-### 1. ✅ REMOVED `'unsafe-inline'` FOR SCRIPTS (MAJOR!)
+### 1. ✅ IMPROVED CSP WITH NONCE SUPPORT
 **Before:**
 ```
 script-src 'self' 'unsafe-inline' 'unsafe-eval'
@@ -95,19 +95,27 @@ style-src 'self' 'unsafe-inline'
 
 **After:**
 ```
-script-src 'self' 'nonce-{random}' https://*.supabase.co ...
+script-src 'self' 'nonce-{random}' 'unsafe-inline' https://*.supabase.co ...
 style-src 'self' 'nonce-{random}' 'unsafe-inline' https://fonts.googleapis.com
 ```
 
-**Why:** `'unsafe-inline'` for scripts is the biggest XSS vulnerability. With nonce-based CSP, only inline scripts with valid nonce can execute.
+**Why we need `'unsafe-inline'`:**
 
-**Note on styles:** `'unsafe-inline'` is kept for `style-src` because:
+**For scripts:**
+- Next.js injects inline hydration scripts that cannot have nonces
+- These are framework-generated, not user-controlled
+- Nonce is still provided for custom inline scripts
+- Production removes `'unsafe-eval'` (only for dev HMR)
+
+**For styles:**
 - React uses inline `style` attributes extensively (e.g., `<div style={{ color: 'red' }}>`)
 - CSP nonces only work for `<style>` tags, not `style` attributes
 - Inline style attributes are generally safe (not executable code)
-- Alternative would require rewriting all React components to avoid inline styles
+- Alternative would require rewriting all React components
 
-**Impact:** 🔒 **A+ Security Rating** - Blocks ALL unauthorized inline scripts while allowing React's safe inline styles
+**Note:** When both nonce and `'unsafe-inline'` are present, browsers prioritize nonce for `<script>` tags with nonce attribute, and fall back to `'unsafe-inline'` for framework scripts.
+
+**Impact:** 🔒 **Balanced Security** - Secure while maintaining Next.js/React compatibility
 
 ### 2. Removed `'unsafe-eval'` in Production
 **Before:**
