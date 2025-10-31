@@ -25,7 +25,7 @@ interface ImportDialogProps {
     parseCSV: (text: string) => any[]
 }
 
-export function ImportDialog({
+export const ImportDialog = ({
     open,
     onOpenChange,
     title,
@@ -34,7 +34,7 @@ export function ImportDialog({
     templateFilename,
     onImport,
     parseCSV
-}: ImportDialogProps) {
+}: ImportDialogProps) => {
     const [file, setFile] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<{
@@ -63,7 +63,7 @@ export function ImportDialog({
     }
 
     const handleImport = async () => {
-        if (!file) return
+        if (!file) {return}
 
         setLoading(true)
         setResult(null)
@@ -102,7 +102,7 @@ export function ImportDialog({
                 }, 2000)
             }
 
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error({ error }, 'Import error')
             setResult({
                 success: false,

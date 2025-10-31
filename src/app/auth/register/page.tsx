@@ -7,7 +7,7 @@ import { RegistrationSuccess, RegistrationForm } from './components'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-export default function RegisterPage() {
+const RegisterPage = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -56,3 +56,5 @@ export default function RegisterPage() {
     </div>
   )
 }
+
+export default RegisterPage

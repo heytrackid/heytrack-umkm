@@ -3,10 +3,10 @@
 import AppLayout from '@/components/layout/app-layout'
 import { EnhancedProductionPage } from './components/EnhancedProductionPage'
 
-export default function ProductionListPage() {
-    return (
-        <AppLayout pageTitle="Production Tracking">
-            <EnhancedProductionPage />
-        </AppLayout>
-    )
-}
+const ProductionListPage = () => (
+    <AppLayout pageTitle="Production Tracking">
+        <EnhancedProductionPage />
+    </AppLayout>
+)
+
+export default ProductionListPage

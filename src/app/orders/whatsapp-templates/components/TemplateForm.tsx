@@ -7,7 +7,6 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { uiLogger } from '@/lib/client-logger'
 import {
@@ -145,7 +144,7 @@ export default function TemplateForm({
                     resetForm()
                 }
             }
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error('Error saving template', error)
         }
     }
@@ -292,7 +291,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {'{' + variable.name + '}'}
+                                                                {`{${  variable.name  }}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -328,7 +327,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {'{' + variable.name + '}'}
+                                                                {`{${  variable.name  }}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -364,7 +363,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {'{' + variable.name + '}'}
+                                                                {`{${  variable.name  }}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -400,7 +399,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {'{' + variable.name + '}'}
+                                                                {`{${  variable.name  }}`}
                                                             </code>
                                                             <Button
                                                                 type="button"
@@ -436,7 +435,7 @@ export default function TemplateForm({
                                                     <div key={variable.name} className="text-xs space-y-1 pb-2 border-b last:border-0">
                                                         <div className="flex items-center justify-between">
                                                             <code className="bg-white px-2 py-1 rounded border font-mono">
-                                                                {'{' + variable.name + '}'}
+                                                                {`{${  variable.name  }}`}
                                                             </code>
                                                             <Button
                                                                 type="button"

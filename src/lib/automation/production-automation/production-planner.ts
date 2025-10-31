@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Production Planner Module
  * Core production planning logic

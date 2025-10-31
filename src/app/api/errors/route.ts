@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { apiLogger } from '@/lib/logger'
 import { getErrorMessage } from '@/lib/type-guards'
 import { withSecurity, SecurityPresets } from '@/utils/security'
-import { ErrorLogsInsert } from '@/types/database'
+import type { ErrorLogsInsert } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'

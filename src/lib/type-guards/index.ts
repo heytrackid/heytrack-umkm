@@ -51,7 +51,7 @@ type Customer = CustomersTable
  * Check if value is a valid Recipe
  */
 export function isRecipe(value: unknown): value is Recipe {
-  if (!isObject(value)) return false
+  if (!isObject(value)) {return false}
   
   return (
     isString(value.id) &&
@@ -64,7 +64,7 @@ export function isRecipe(value: unknown): value is Recipe {
  * Check if value is a valid Ingredient
  */
 export function isIngredient(value: unknown): value is Ingredient {
-  if (!isObject(value)) return false
+  if (!isObject(value)) {return false}
   
   return (
     isString(value.id) &&
@@ -78,7 +78,7 @@ export function isIngredient(value: unknown): value is Ingredient {
  * Check if value is a valid Order
  */
 export function isOrder(value: unknown): value is Order {
-  if (!isObject(value)) return false
+  if (!isObject(value)) {return false}
   
   return (
     isString(value.id) &&
@@ -91,7 +91,7 @@ export function isOrder(value: unknown): value is Order {
  * Check if value is a valid Customer
  */
 export function isCustomer(value: unknown): value is Customer {
-  if (!isObject(value)) return false
+  if (!isObject(value)) {return false}
   
   return (
     isString(value.id) &&
@@ -117,7 +117,7 @@ interface RecipeWithIngredients extends Recipe {
  * Check if value is a Recipe with ingredients
  */
 export function isRecipeWithIngredients(value: unknown): value is RecipeWithIngredients {
-  if (!isRecipe(value)) return false
+  if (!isRecipe(value)) {return false}
   
   const recipe = value as RecipeWithIngredients
   
@@ -141,7 +141,7 @@ interface OrderWithItems extends Order {
  * Check if value is an Order with items
  */
 export function isOrderWithItems(value: unknown): value is OrderWithItems {
-  if (!isOrder(value)) return false
+  if (!isOrder(value)) {return false}
   
   const order = value as OrderWithItems
   
@@ -187,7 +187,7 @@ export function isErrorResponse<T>(
  * Check if value is a valid UUID
  */
 export function isUUID(value: unknown): value is string {
-  if (!isString(value)) return false
+  if (!isString(value)) {return false}
   
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(value)
@@ -197,10 +197,10 @@ export function isUUID(value: unknown): value is string {
  * Check if value is a valid date string (YYYY-MM-DD)
  */
 export function isDateString(value: unknown): value is string {
-  if (!isString(value)) return false
+  if (!isString(value)) {return false}
   
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-  if (!dateRegex.test(value)) return false
+  if (!dateRegex.test(value)) {return false}
   
   const date = new Date(value)
   return !isNaN(date.getTime())
@@ -210,7 +210,7 @@ export function isDateString(value: unknown): value is string {
  * Check if value is a valid email
  */
 export function isEmail(value: unknown): value is string {
-  if (!isString(value)) return false
+  if (!isString(value)) {return false}
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(value)
@@ -272,7 +272,7 @@ import type { OrderStatus, ProductionStatus } from '@/types/database'
  * Check if value is a valid order status
  */
 export function isOrderStatus(value: unknown): value is OrderStatus {
-  if (!isString(value)) return false
+  if (!isString(value)) {return false}
   
   const validStatuses: OrderStatus[] = ['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'READY', 'CANCELLED', 'DELIVERED']
   return validStatuses.includes(value as OrderStatus)
@@ -282,7 +282,7 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
  * Check if value is a valid production status
  */
 export function isProductionStatus(value: unknown): value is ProductionStatus {
-  if (!isString(value)) return false
+  if (!isString(value)) {return false}
   
   const validStatuses: ProductionStatus[] = ['PLANNED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
   return validStatuses.includes(value as ProductionStatus)

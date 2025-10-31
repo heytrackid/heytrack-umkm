@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Business Services Convenience Functions
  * Easy-to-use wrapper functions for common business operations

@@ -24,12 +24,12 @@ interface EnhancedSummaryCardsProps {
     isMobile: boolean
 }
 
-export default function EnhancedSummaryCards({
+const EnhancedSummaryCards = ({
     summary,
     comparison,
     formatCurrency,
     isMobile
-}: EnhancedSummaryCardsProps) {
+}: EnhancedSummaryCardsProps) => {
     if (!summary) {
         return null
     }
@@ -250,3 +250,5 @@ export default function EnhancedSummaryCards({
         </div>
     )
 }
+
+export default EnhancedSummaryCards

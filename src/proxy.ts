@@ -34,7 +34,7 @@ const UrlValidationSchema = z.object({
   search: z.string().max(2048).optional(),
 })
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development'
   const nonce = generateNonce()
 
@@ -66,7 +66,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // Update session and get user (this handles cookie refresh)
-    const { user, response } = await updateSession(request)
+    let user = null
+    let response: NextResponse
+    
+    try {
+      const result = await updateSession(request)
+      user = result.user
+      response = result.response
+    } catch (_error) {
+      // If auth fails, continue without user (they'll be redirected to login if needed)
+      middlewareLogger.debug({ error }, 'Middleware auth error')
+      user = null
+      response = NextResponse.next()
+    }
 
     // Add CSP headers to response
     response.headers.set('Content-Security-Policy', getStrictCSP(nonce, isDev))
@@ -122,7 +134,7 @@ export async function middleware(request: NextRequest) {
     }
 
     return response
-  } catch (error) {
+  } catch (_error) {
     middlewareLogger.error({ error }, 'Middleware error')
     // Return basic response with CSP on error
     const errorResponse = NextResponse.next()

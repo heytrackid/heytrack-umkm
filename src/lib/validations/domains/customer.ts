@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Customer Domain Validation Schemas
 // Source of truth for customer data validation
 

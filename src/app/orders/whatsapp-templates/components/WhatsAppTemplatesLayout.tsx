@@ -69,7 +69,7 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error('Error fetching WhatsApp templates', error)
             toast({
                 title: 'Error',
@@ -109,7 +109,7 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error('Error deleting WhatsApp template', error, { templateId: id })
             toast({
                 title: 'Error',
@@ -143,7 +143,7 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error('Error updating WhatsApp template', error, { template })
             toast({
                 title: 'Error',
@@ -199,7 +199,7 @@ export default function WhatsAppTemplatesPage() {
                     variant: 'destructive',
                 })
             }
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error('Error generating default templates', error)
             toast({
                 title: 'Error',

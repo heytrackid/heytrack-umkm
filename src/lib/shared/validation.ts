@@ -100,7 +100,7 @@ export const validationFunctions = {
     try {
       new URL(value)
       return validationPatterns.url.test(value)
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -292,7 +292,7 @@ export const validationHelpers = {
   // Validate single field
   validateField: <T>(schema: z.ZodSchema<T>, field: keyof T, value: unknown): string | null => {
     try {
-      const fieldSchema = (schema as any)._def.shape?.[field]
+      const fieldSchema = (schema as z.ZodObject<Record<string, z.ZodTypeAny>>)._def.shape?.[field as string]
       if (fieldSchema) {
         fieldSchema.parse(value)
         return null
@@ -311,7 +311,7 @@ export const validationHelpers = {
     try {
       schema.parse(data)
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }

@@ -22,7 +22,7 @@ interface StatsCardsProps {
     stats: OrderStats
 }
 
-export function StatsCards({ stats }: StatsCardsProps) {
+export const StatsCards = ({ stats }: StatsCardsProps) => {
     const { formatCurrency } = useCurrency()
 
     return (

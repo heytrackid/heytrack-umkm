@@ -1,7 +1,7 @@
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Database, Json, InventoryAlertsInsert } from '@/types/database'
+import type { Json, InventoryAlertsInsert } from '@/types/database'
 
 /**
  * Service for managing inventory alerts

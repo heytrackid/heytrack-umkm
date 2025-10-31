@@ -2,11 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
 import { Loader2 } from 'lucide-react'
 
 import { apiLogger } from '@/lib/logger'
-export default function AuthCallbackPage() {
+const AuthCallbackPage = () => {
   const router = useRouter()
   const supabase = createClient()
 
@@ -26,7 +25,7 @@ export default function AuthCallbackPage() {
         } else {
           void router.push('/auth/login')
         }
-      } catch (err) {
+      } catch (_err) {
         apiLogger.error({ err }, 'Unexpected error in auth callback:')
         void router.push('/auth/login?error=unexpected_error')
       }
@@ -45,3 +44,5 @@ export default function AuthCallbackPage() {
     </div>
   )
 }
+
+export default AuthCallbackPage

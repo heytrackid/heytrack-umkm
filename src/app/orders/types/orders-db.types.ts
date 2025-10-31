@@ -12,7 +12,7 @@ export type { OrderStatus, PaymentMethod }
 
 // Backwards compatible aliases
 export type Order = OrderRow
-export type OrderItem = OrderItemRow
+export // type OrderItem = OrderItemRow
 
 // Extended types with relations for UI
 export interface OrderWithItems extends OrderRow {

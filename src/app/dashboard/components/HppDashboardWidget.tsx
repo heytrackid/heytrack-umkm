@@ -44,7 +44,7 @@ interface HppDashboardData {
   }>
 }
 
-export default function HppDashboardWidget() {
+const HppDashboardWidget = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const router = useRouter()
@@ -226,3 +226,5 @@ export default function HppDashboardWidget() {
     </Card>
   )
 }
+
+export default HppDashboardWidget

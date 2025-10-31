@@ -1,4 +1,3 @@
-import { formatCurrency } from '@/shared'
 import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
 // Use generated types from Supabase

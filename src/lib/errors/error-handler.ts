@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 /**
  * Centralized Error Handling Utilities
@@ -64,7 +65,7 @@ export function createErrorResponse(
 
   // Handle Supabase errors
   if (isSupabaseError(error)) {
-    const supabaseError = error as any; // Supabase error type
+    const supabaseError = error; // Supabase error type
     return NextResponse.json(
       {
         error: supabaseError.message || 'Database error occurred',

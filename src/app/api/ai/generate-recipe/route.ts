@@ -7,7 +7,7 @@ import type { IngredientsTable, RecipesTable } from '@/types/database'
 
 // Use generated types from database.ts (these are already Row types)
 type Ingredient = IngredientsTable
-type Recipe = RecipesTable
+type _Recipe = RecipesTable
 
 // AI response structure (not a table type)
 interface RecipeIngredient {
@@ -15,6 +15,18 @@ interface RecipeIngredient {
   quantity: number
   unit: string
   notes?: string
+}
+
+// Generated recipe from AI (before saving to DB)
+interface GeneratedRecipe {
+  name: string
+  ingredients: RecipeIngredient[]
+  instructions: string[]
+  servings?: number
+  prep_time?: number
+  cook_time?: number
+  description?: string
+  category?: string
 }
 
 // interface AIGeneratedRecipe {
@@ -359,7 +371,7 @@ async function callAIServiceWithRetry(prompt: string, maxRetries = 3): Promise<s
             const result = await callAIService(prompt)
             apiLogger.info({ attempt }, 'AI service call successful')
             return result
-        } catch (error) {
+        } catch (_error) {
             lastError = error as Error
             apiLogger.warn({ attempt, maxRetries, error }, 'AI service call failed')
             
@@ -432,7 +444,7 @@ Your SOLE FUNCTION: Create professional, accurate UMKM recipes with proper measu
 
         const data = await response.json()
         return data.choices[0].message.content
-    } catch (error) {
+    } catch (_error) {
         apiLogger.error({ error }, 'OpenRouter API call failed, trying fallback model')
         
         try {
@@ -488,7 +500,7 @@ Generate professional UMKM recipes with accurate measurements.`
 /**
  * Parse and validate AI response
  */
-function parseRecipeResponse(response: string) {
+function parseRecipeResponse(response: string): GeneratedRecipe {
     try {
         // Remove markdown code blocks if present
         let cleanResponse = response.trim()
@@ -570,7 +582,7 @@ function findBestIngredientMatch(
  * Calculate HPP for the generated recipe
  */
 async function calculateRecipeHPP(
-    recipe: Recipe, 
+    recipe: GeneratedRecipe, 
     availableIngredients: Array<Pick<Ingredient, 'id' | 'name' | 'unit' | 'price_per_unit' | 'current_stock'>>, 
     userId: string
 ) {
@@ -586,8 +598,8 @@ async function calculateRecipeHPP(
     
     const supabaseClient = await createClient()
 
-    const recipeIngredients = Array.isArray((recipe as any).ingredients) ? 
-        (recipe as any).ingredients as RecipeIngredient[] : []
+    const recipeIngredients = Array.isArray(recipe.ingredients) ? 
+        recipe.ingredients : []
     for (const recipeIng of recipeIngredients) {
         // Find matching ingredient using fuzzy matching
         const ingredient = findBestIngredientMatch(recipeIng.name, availableIngredients)

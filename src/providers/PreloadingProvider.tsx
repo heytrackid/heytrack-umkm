@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
@@ -60,7 +59,7 @@ export const PreloadingProvider = ({
 
   const [isPreloading, setIsPreloading] = useState(false)
   const [preloadedRoutes, setPreloadedRoutes] = useState(new Set<string>())
-  const [preloadedComponents, setPreloadedComponents] = useState(new Set<string>())
+  const [_preloadedComponents, _setPreloadedComponents] = useState(new Set<string>())
 
   // Enable smart preloading based on user patterns
   if (enableSmartPreloading) {

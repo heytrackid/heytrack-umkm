@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { CustomerUpdateSchema } from '@/lib/validations/domains/customer'
 import { apiLogger } from '@/lib/logger'
-import { CustomersUpdate } from '@/types/database'
+import type { CustomersUpdate } from '@/types/database'
 import { getErrorMessage, isValidUUID } from '@/lib/type-guards'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)

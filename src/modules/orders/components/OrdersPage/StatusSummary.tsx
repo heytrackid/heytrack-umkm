@@ -18,8 +18,7 @@ interface StatusSummaryProps {
     }
 }
 
-export function StatusSummary({ stats }: StatusSummaryProps) {
-    return (
+export const StatusSummary = ({ stats }: StatusSummaryProps) => (
         <Card>
             <CardHeader>
                 <CardTitle>Status Pesanan</CardTitle>
@@ -54,4 +53,3 @@ export function StatusSummary({ stats }: StatusSummaryProps) {
             </CardContent>
         </Card>
     )
-}

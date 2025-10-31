@@ -95,7 +95,7 @@ export function useProfitReport(): UseProfitReportReturn {
     try {
       const filename = `laporan-laba-${new Date().toISOString().split('T')[0]}.${format}`
       exportProfitReport(profitData, format, filename)
-    } catch (err) {
+    } catch (_err) {
       apiLogger.error({ error: err }, 'Error exporting report:')
       alert('Gagal mengekspor laporan')
     }

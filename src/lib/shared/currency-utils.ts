@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Shared Currency Utilities
  * Centralized currency formatting and utilities

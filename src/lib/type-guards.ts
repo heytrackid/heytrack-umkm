@@ -59,7 +59,7 @@ export function hasKeys<T extends string>(
   value: unknown,
   keys: readonly T[]
 ): value is Record<T, unknown> {
-  if (!isRecord(value)) return false
+  if (!isRecord(value)) {return false}
   return keys.every(key => key in value)
 }
 
@@ -89,8 +89,8 @@ export function safeNumber(value: unknown, fallback = 0): number {
  * Handles null, undefined, and converts other types to string
  */
 export function safeString(value: unknown, fallback = ''): string {
-  if (typeof value === 'string') return value
-  if (value === null || value === undefined) return fallback
+  if (typeof value === 'string') {return value}
+  if (value === null || value === undefined) {return fallback}
   return String(value)
 }
 
@@ -98,7 +98,7 @@ export function safeString(value: unknown, fallback = ''): string {
  * Validate UUID format (v4)
  */
 export function isValidUUID(value: unknown): value is string {
-  if (typeof value !== 'string') return false
+  if (typeof value !== 'string') {return false}
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(value)
 }
@@ -112,7 +112,7 @@ export const isUUID = isValidUUID
  * Check if value is a valid date string
  */
 export function isDateString(value: unknown): value is string {
-  if (typeof value !== 'string') return false
+  if (typeof value !== 'string') {return false}
   const date = new Date(value)
   return !isNaN(date.getTime())
 }
@@ -348,8 +348,8 @@ export function validateOrder(value: unknown): ValidationResult {
  * const ingredient = extractFirst(ri.ingredient) // T | null
  */
 export function extractFirst<T>(data: T | T[] | null | undefined): T | null {
-  if (data === null || data === undefined) return null
-  if (Array.isArray(data)) return data[0] ?? null
+  if (data === null || data === undefined) {return null}
+  if (Array.isArray(data)) {return data[0] ?? null}
   return data
 }
 
@@ -360,8 +360,8 @@ export function extractFirst<T>(data: T | T[] | null | undefined): T | null {
  * const ingredients = ensureArray(data.recipe_ingredients) // T[]
  */
 export function ensureArray<T>(data: T | T[] | null | undefined): T[] {
-  if (data === null || data === undefined) return []
-  if (Array.isArray(data)) return data
+  if (data === null || data === undefined) {return []}
+  if (Array.isArray(data)) {return data}
   return [data]
 }
 
@@ -384,7 +384,7 @@ interface RecipeIngredientItem {
 }
 
 function isRecipeIngredientItem(value: unknown): value is RecipeIngredientItem {
-  if (!isRecord(value)) return false
+  if (!isRecord(value)) {return false}
   
   return (
     typeof value.quantity === 'number' &&
@@ -403,7 +403,7 @@ function isRecipeIngredientItem(value: unknown): value is RecipeIngredientItem {
 export type Recipe = RecipesTable
 
 export function isRecipe(data: unknown): data is Recipe {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'name']) &&
@@ -434,7 +434,7 @@ export interface RecipeWithIngredients {
 }
 
 export function isRecipeWithIngredients(data: unknown): data is RecipeWithIngredients {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'name', 'recipe_ingredients']) &&
@@ -464,7 +464,7 @@ export function assertRecipeWithIngredients(
 export type Ingredient = IngredientsTable
 
 export function isIngredient(data: unknown): data is Ingredient {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'name', 'unit', 'price_per_unit']) &&
@@ -503,7 +503,7 @@ interface OrderItem {
 }
 
 function isOrderItem(value: unknown): value is OrderItem {
-  if (!isRecord(value)) return false
+  if (!isRecord(value)) {return false}
   
   return (
     hasKeys(value, ['id', 'recipe_id', 'quantity', 'unit_price', 'total_price']) &&
@@ -533,7 +533,7 @@ export function isOrderStatus(value: unknown): value is OrderStatus {
 export type Order = OrdersTable
 
 export function isOrder(data: unknown): data is Order {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id']) &&
@@ -565,7 +565,7 @@ export interface OrderWithItems {
 }
 
 export function isOrderWithItems(data: unknown): data is OrderWithItems {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'order_no', 'status', 'total_amount', 'order_items']) &&
@@ -604,7 +604,7 @@ export function isProductionStatus(value: unknown): value is ProductionStatus {
 export type ProductionBatch = ProductionsTable
 
 export function isProductionBatch(data: unknown): data is ProductionBatch {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'recipe_id', 'quantity', 'status']) &&
@@ -623,7 +623,7 @@ export function isProductionBatch(data: unknown): data is ProductionBatch {
 export type HppCalculationData = HppCalculationsTable
 
 export function isHppCalculation(data: unknown): data is HppCalculationData {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'recipe_id', 'calculation_date', 'material_cost', 'labor_cost', 'overhead_cost', 'total_hpp', 'cost_per_unit']) &&
@@ -644,7 +644,7 @@ export function isHppCalculation(data: unknown): data is HppCalculationData {
 export type Customer = CustomersTable
 
 export function isCustomer(data: unknown): data is Customer {
-  if (!isRecord(data)) return false
+  if (!isRecord(data)) {return false}
   
   return (
     hasKeys(data, ['id', 'name']) &&

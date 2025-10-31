@@ -1,4 +1,3 @@
-// @ts-nocheck - Chart/modal type issues
 "use client"
 
 import { forwardRef, type ComponentProps, type ComponentType, type HTMLAttributes } from 'react'

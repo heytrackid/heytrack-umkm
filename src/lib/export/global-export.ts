@@ -50,7 +50,7 @@ export class GlobalExportService {
       .select('id, name, servings, selling_price, cost_per_unit, is_active, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-    if (error) throw error
+    if (error) {throw error}
     return data || []
   }
 
@@ -60,7 +60,7 @@ export class GlobalExportService {
       .select('id, order_no, customer_name, total_amount, status, order_date, created_at')
       .eq('user_id', userId)
       .order('order_date', { ascending: false })
-    if (error) throw error
+    if (error) {throw error}
     return data || []
   }
 
@@ -70,7 +70,7 @@ export class GlobalExportService {
       .select('id, name, unit, current_stock, min_stock, weighted_average_cost, price_per_unit, created_at')
       .eq('user_id', userId)
       .order('name')
-    if (error) throw error
+    if (error) {throw error}
     return data || []
   }
 
@@ -80,7 +80,7 @@ export class GlobalExportService {
       .select('id, name, phone, email, address, created_at')
       .eq('user_id', userId)
       .order('name')
-    if (error) throw error
+    if (error) {throw error}
     return data || []
   }
 
@@ -91,7 +91,7 @@ export class GlobalExportService {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(500)
-    if (error) throw error
+    if (error) {throw error}
     return data || []
   }
 

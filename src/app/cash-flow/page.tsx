@@ -29,7 +29,7 @@ import FilterPeriod from './components/FilterPeriod'
 
 import { useEnhancedCashFlow } from './hooks/useEnhancedCashFlow'
 
-export default function CashFlowPage() {
+const CashFlowPage = () => {
   const { formatCurrency } = useSettings()
   const { isMobile } = useResponsive()
 
@@ -240,3 +240,5 @@ export default function CashFlowPage() {
     </AppLayout>
   )
 }
+
+export default CashFlowPage

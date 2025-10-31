@@ -23,7 +23,7 @@ const categoryColors = [
   'bg-teal-500'
 ]
 
-export default function CategoryBreakdown({ summary, formatCurrency, isMobile }: CategoryBreakdownProps) {
+const CategoryBreakdown = ({ summary, formatCurrency, isMobile }: CategoryBreakdownProps) => {
   if (!summary) { return null }
 
   const hasIncomeData = Object.keys(summary.income_by_category || {}).length > 0
@@ -153,3 +153,5 @@ export default function CategoryBreakdown({ summary, formatCurrency, isMobile }:
     </div>
   )
 }
+
+export default CategoryBreakdown

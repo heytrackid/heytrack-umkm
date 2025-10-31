@@ -113,7 +113,7 @@ export default function AdminDashboard(_props: AdminDashboardProps) {
                 const data = await errorRes.json()
                 setErrorLogs(data)
             }
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: 'Error',
                 description: 'Failed to load admin metrics',
@@ -137,7 +137,7 @@ export default function AdminDashboard(_props: AdminDashboardProps) {
     const handleExportLogs = async () => {
         try {
             const response = await fetch('/api/admin/export-logs')
-            if (!response.ok) throw new Error('Export failed')
+            if (!response.ok) {throw new Error('Export failed')}
 
             const blob = await response.blob()
             const url = window.URL.createObjectURL(blob)
@@ -153,7 +153,7 @@ export default function AdminDashboard(_props: AdminDashboardProps) {
                 title: 'Success',
                 description: 'Logs exported successfully'
             })
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: 'Error',
                 description: 'Failed to export logs',

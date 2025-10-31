@@ -38,12 +38,12 @@ const COST_CATEGORIES = [
     { id: 'other', name: 'Lainnya', icon: '📦', description: 'Biaya lainnya' },
 ]
 
-export function OperationalCostFormDialog({
+export const OperationalCostFormDialog = ({
     open,
     onOpenChange,
     cost,
     onSuccess
-}: OperationalCostFormDialogProps) {
+}: OperationalCostFormDialogProps) => {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = cost ? 'edit' : 'create'
@@ -116,7 +116,7 @@ export function OperationalCostFormDialog({
 
             onOpenChange(false)
             onSuccess?.()
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: 'Error',
                 description: error instanceof Error ? error.message : 'Terjadi kesalahan',

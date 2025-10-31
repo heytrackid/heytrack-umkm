@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Communications Manager Module
  * Unified manager for all communication services

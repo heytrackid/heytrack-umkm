@@ -165,7 +165,7 @@ export async function PUT(request: NextRequest) {
         } else {
           errorCount++
         }
-      } catch (err) {
+      } catch (_err) {
         errorCount++
         apiLogger.error({ err, recipeId: recipe.id }, 'Error calculating HPP for recipe')
       }

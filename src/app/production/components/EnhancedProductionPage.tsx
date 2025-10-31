@@ -31,7 +31,6 @@ import {
 } from 'lucide-react'
 import { useCurrency } from '@/hooks/useCurrency'
 import { useResponsive } from '@/hooks/useResponsive'
-import { format } from 'date-fns'
 import { id as idLocale } from 'date-fns/locale'
 import { apiLogger } from '@/lib/logger'
 import { ProductionFormDialog } from './ProductionFormDialog'
@@ -88,7 +87,7 @@ export const EnhancedProductionPage = () => {
                 const data = await response.json()
                 setProductions(data)
             }
-        } catch (error) {
+        } catch (_error) {
             apiLogger.error({ error }, 'Error fetching productions')
         } finally {
             setLoading(false)
@@ -173,7 +172,7 @@ export const EnhancedProductionPage = () => {
             if (response.ok) {
                 await fetchProductions()
             }
-        } catch (error) {
+        } catch (_error) {
             apiLogger.error({ error }, 'Error starting production')
         }
     }
@@ -192,7 +191,7 @@ export const EnhancedProductionPage = () => {
             if (response.ok) {
                 await fetchProductions()
             }
-        } catch (error) {
+        } catch (_error) {
             apiLogger.error({ error }, 'Error completing production')
         }
     }

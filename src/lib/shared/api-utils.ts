@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable */
 /**
  * Shared API Utilities
  * Common API response patterns and utilities
@@ -159,6 +159,7 @@ export function createRateLimitKey(identifier: string, action: string): string {
 
 // Caching helpers
 export function generateETag(data: unknown): string {
+   
   const crypto = require('crypto')
   return crypto.createHash('md5').update(JSON.stringify(data)).digest('hex')
 }

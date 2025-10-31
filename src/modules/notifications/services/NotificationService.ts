@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database, NotificationsInsert } from '@/types/database'
 import type { CreateNotificationParams } from '@/types/domain/notifications'

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect, Suspense, type ReactNode } from 'react'
@@ -308,7 +307,7 @@ export function useProgressiveData<T>(
       void setError(null)
       const result = await fetchFunction()
       void setData(result)
-    } catch (err) {
+    } catch (_err) {
       void setError(err as Error)
     } finally {
       void setLoading(false)

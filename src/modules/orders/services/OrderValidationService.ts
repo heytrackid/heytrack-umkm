@@ -1,7 +1,6 @@
-// @ts-nocheck
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Database, RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 
 type Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
@@ -10,7 +9,7 @@ type Ingredient = IngredientsTable
 // Type for the Supabase query result - matches the actual structure returned by Supabase joins
 type RecipeWithIngredientsForValidation = Recipe & {
   recipe_ingredients: Array<RecipeIngredient & {
-    ingredient: (Ingredient | null)[]
+    ingredient: Array<Ingredient | null>
   }>
 }
 

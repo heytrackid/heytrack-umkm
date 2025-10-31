@@ -22,7 +22,7 @@ import type { AppError, ErrorState } from './types'
  *
  * try {
  *   await someAsyncOperation()
- * } catch (err) {
+ * } catch (_err) {
  *   handleError(err, 'MyComponent.operation')
  * }
  *

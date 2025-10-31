@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { PaymentStatus, PaymentMethod, DeliveryMethod } from './types'
 import type { OrderStatus } from '@/types/database'
 import { formatCurrentCurrency } from '@/lib/currency'

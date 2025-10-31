@@ -41,7 +41,7 @@ interface EnhancedCashFlowChartProps {
 
 type ChartType = 'line' | 'bar' | 'area'
 
-export default function EnhancedCashFlowChart({
+const EnhancedCashFlowChart = ({
     chartData,
     selectedPeriod,
     onPeriodChange,
@@ -50,7 +50,7 @@ export default function EnhancedCashFlowChart({
     onStartDateChange,
     onEndDateChange,
     isMobile
-}: EnhancedCashFlowChartProps) {
+}: EnhancedCashFlowChartProps) => {
     const [chartType, setChartType] = useState<ChartType>('line')
 
     // Calculate trend
@@ -438,3 +438,5 @@ export default function EnhancedCashFlowChart({
         </Card>
     )
 }
+
+export default EnhancedCashFlowChart

@@ -4,7 +4,7 @@ import { OrderUpdateSchema } from '@/lib/validations/domains/order'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-import { OrdersUpdate, FinancialRecordsUpdate } from '@/types/database'
+import type { OrdersUpdate, FinancialRecordsUpdate } from '@/types/database'
 import { apiLogger } from '@/lib/logger'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 import { getErrorMessage, isValidUUID, isRecord } from '@/lib/type-guards'

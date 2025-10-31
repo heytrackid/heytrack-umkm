@@ -282,7 +282,7 @@ export const useOrderLogic = () => {
       // Redirect to orders page with success message
       void router.push('/orders?success=true')
       
-    } catch (err) {
+    } catch (_err) {
       const message = getErrorMessage(err)
       void setError(message)
     } finally {

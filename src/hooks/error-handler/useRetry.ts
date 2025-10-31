@@ -53,7 +53,7 @@ export function useRetry(maxRetries = 3, initialDelay = 1000) {
           void setRetryCount(0)
           void setIsRetrying(false)
           return result
-        } catch (error) {
+        } catch (_error) {
           lastError = error as Error
 
           if (attempt < maxRetries) {

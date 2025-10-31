@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
-export type ResponsiveValue<T> = T | Partial<Record<Breakpoint, T>>;
+export type ResponsiveValue<T> = T | Partial<Record<Breakpoint, _T>>;
 
 // Breakpoint pixel values (matching Tailwind CSS defaults)
 export const BREAKPOINTS = {

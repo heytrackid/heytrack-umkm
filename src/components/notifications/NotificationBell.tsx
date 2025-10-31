@@ -16,7 +16,7 @@ import type { NotificationPreferences } from '@/types/domain/notification-prefer
 import { playNotificationSound, playUrgentNotificationSound, setSoundEnabled, setSoundVolume } from '@/lib/notifications/sound'
 import { apiLogger } from '@/lib/logger'
 
-export function NotificationBell() {
+export const NotificationBell = () => {
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [unreadCount, setUnreadCount] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
@@ -93,7 +93,7 @@ export function NotificationBell() {
     }, [fetchPreferences])
 
     useEffect(() => {
-        if (!preferences) return
+        if (!preferences) {return}
 
         fetchNotifications()
 

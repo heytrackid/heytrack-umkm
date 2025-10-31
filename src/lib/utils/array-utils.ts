@@ -85,7 +85,7 @@ export function uniqueBy<T>(
  */
 export function sortBy<T>(
   array: T[],
-  ...keyFns: Array<(item: T) => any>
+  ...keyFns: Array<(item: T) => string | number | boolean>
 ): T[] {
   return [...array].sort((a, b) => {
     for (const keyFn of keyFns) {

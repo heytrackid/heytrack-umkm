@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
     Select,
     SelectContent,
@@ -19,7 +18,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
 import { Loader2, Save, X, User, Phone, Mail, MapPin, Tag, Percent, FileText } from 'lucide-react'
@@ -72,7 +70,7 @@ interface CustomerFormProps {
     onCancel: () => void
 }
 
-export default function CustomerForm({ customer, onSuccess, onCancel }: CustomerFormProps) {
+const CustomerForm = ({ customer, onSuccess, onCancel }: CustomerFormProps) => {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const isEditMode = !!customer
@@ -365,3 +363,5 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
         </Card>
     )
 }
+
+export default CustomerForm

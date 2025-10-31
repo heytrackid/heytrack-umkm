@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
@@ -31,13 +30,9 @@ export default function NotificationSettingsPage() {
     const [isSaving, setIsSaving] = useState(false)
 
     // Helper to convert null to undefined for React components
-    const toBool = (value: boolean | null | undefined): boolean => {
-        return value === true
-    }
+    const toBool = (value: boolean | null | undefined): boolean => value === true
 
-    const toNumber = (value: number | null | undefined): number => {
-        return value ?? 0.5
-    }
+    const toNumber = (value: number | null | undefined): number => value ?? 0.5
 
     useEffect(() => {
         fetchPreferences()
@@ -51,7 +46,7 @@ export default function NotificationSettingsPage() {
                 const data = await response.json()
                 setPreferences(data)
             }
-        } catch (error) {
+        } catch (_error) {
             apiLogger.error({ error }, 'Failed to fetch preferences')
             toast.error('Gagal memuat pengaturan')
         } finally {
@@ -60,7 +55,7 @@ export default function NotificationSettingsPage() {
     }
 
     const savePreferences = async () => {
-        if (!preferences) return
+        if (!preferences) {return}
 
         try {
             setIsSaving(true)
@@ -75,7 +70,7 @@ export default function NotificationSettingsPage() {
             } else {
                 toast.error('Gagal menyimpan pengaturan')
             }
-        } catch (error) {
+        } catch (_error) {
             apiLogger.error({ error }, 'Failed to save preferences')
             toast.error('Gagal menyimpan pengaturan')
         } finally {
@@ -87,7 +82,7 @@ export default function NotificationSettingsPage() {
         key: K,
         value: NotificationPreferences[K]
     ) => {
-        if (!preferences) return
+        if (!preferences) {return}
         setPreferences({ ...preferences, [key]: value })
     }
 

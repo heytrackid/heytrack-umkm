@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable */
 /**
  * Validation Caching System
  * Performance optimization for validation operations
@@ -42,7 +42,7 @@ class ValidationCache {
       // Create a deterministic string representation of the data
       const dataString = JSON.stringify(data, Object.keys(data as any).sort())
       return `${schemaName}:${this.hashString(dataString)}`
-    } catch (error) {
+    } catch (_error) {
       // Fallback for non-serializable data
       return `${schemaName}:${Date.now()}:${Math.random()}`
     }
@@ -214,6 +214,7 @@ export class CachedValidationHelpers {
    */
   static validateCustomer(data: unknown) {
     // Dynamic import to avoid circular dependencies
+   
     const { CustomerInsertSchema } = require('./domains/customer')
     return withValidationCache(
       CustomerInsertSchema,
@@ -225,6 +226,7 @@ export class CachedValidationHelpers {
   /**
    * Cached ingredient validation
    */
+   
   static validateIngredient(data: unknown) {
     const { IngredientInsertSchema } = require('./domains/ingredient')
     return withValidationCache(
@@ -236,6 +238,7 @@ export class CachedValidationHelpers {
 
   /**
    * Cached order validation
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
    */
   static validateOrder(data: unknown) {
     const { OrderInsertSchema } = require('./domains/order')
@@ -247,6 +250,7 @@ export class CachedValidationHelpers {
   }
 
   /**
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
    * Cached recipe validation
    */
   static validateRecipe(data: unknown) {

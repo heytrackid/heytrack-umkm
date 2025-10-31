@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
     Select,
     SelectContent,
@@ -28,14 +27,14 @@ interface EnhancedTransactionFormProps {
     loading: boolean
 }
 
-export default function EnhancedTransactionForm({
+const EnhancedTransactionForm = ({
     isOpen,
     onOpenChange,
     transactionType,
     onTransactionTypeChange,
     onSubmit,
     loading
-}: EnhancedTransactionFormProps) {
+}: EnhancedTransactionFormProps) => {
     const [formData, setFormData] = useState<TransactionFormData>({
         description: '',
         category: '',
@@ -360,3 +359,5 @@ export default function EnhancedTransactionForm({
         </Dialog>
     )
 }
+
+export default EnhancedTransactionForm

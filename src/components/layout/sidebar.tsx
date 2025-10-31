@@ -328,7 +328,7 @@ const Sidebar = ({
                               side="right"
                               className="font-medium bg-popover text-popover-foreground border shadow-lg z-50"
                               sideOffset={12}
-                              avoidCollisions={true}
+                              avoidCollisions
                             >
                               <div className="flex items-center gap-2">
                                 <span>{item.label}</span>
@@ -379,7 +379,7 @@ const Sidebar = ({
                   side="right"
                   className="font-medium bg-popover text-popover-foreground border shadow-lg z-50"
                   sideOffset={12}
-                  avoidCollisions={true}
+                  avoidCollisions
                 >
                   Perluas sidebar
                 </TooltipContent>

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Type helpers for Supabase operations
  * Properly typed Supabase operations without using "any" types

@@ -45,7 +45,7 @@ export const InventoryNotifications = () => {
 
       const data = await response.json()
       void setNotifications(data)
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       void setError(errorMessage)
       uiLogger.error({ err }, 'Failed to fetch inventory notifications')
@@ -67,7 +67,7 @@ export const InventoryNotifications = () => {
           prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
         )
       }
-    } catch (err) {
+    } catch (_err) {
       uiLogger.error({ err, notificationId }, 'Failed to mark notification as read')
     }
   }
@@ -83,7 +83,7 @@ export const InventoryNotifications = () => {
       if (response.ok) {
         setNotifications(prev => prev.filter(n => n.id !== notificationId))
       }
-    } catch (err) {
+    } catch (_err) {
       uiLogger.error({ err, notificationId }, 'Failed to dismiss notification')
     }
   }

@@ -1,4 +1,3 @@
-// @ts-nocheck - Chart/modal type issues
 'use client'
 
 import type { ReactNode } from 'react'
@@ -48,7 +47,7 @@ export const CreateModal = <T extends Record<string, unknown>>({
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-    } catch (error) {
+    } catch (_error) {
       uiLogger.error({ error }, 'Create error:')
     }
   }
@@ -90,7 +89,7 @@ export const EditModal = <T extends Record<string, unknown>>({
   const handleSubmit = async (data: T) => {
     try {
       await onSubmit(data)
-    } catch (error) {
+    } catch (_error) {
       uiLogger.error({ error }, 'Edit error:')
     }
   }
@@ -131,7 +130,7 @@ export const DeleteModal = ({
   const handleConfirm = async () => {
     try {
       await onConfirm()
-    } catch (error) {
+    } catch (_error) {
       uiLogger.error({ error }, 'Delete error:')
     }
   }

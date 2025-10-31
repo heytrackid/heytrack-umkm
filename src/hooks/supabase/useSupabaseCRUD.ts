@@ -66,7 +66,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       if (options?.filter) {
         Object.entries(options.filter).forEach(([key, value]) => {
           if (value === undefined) {return}
-          const column = key as keyof TableRow<TTable> & string
+          const column = key
           if (value === null) {
             query = query.is(column, null)
           } else {
@@ -91,11 +91,12 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw queryError
       }
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[useSupabaseCRUD] Fetched ${result?.length || 0} rows from ${table}`)
-      }
+      apiLogger.debug({ 
+        table, 
+        rowCount: result?.length || 0 
+      }, `Fetched rows from ${table}`)
       void setData(result)
-    } catch (err) {
+    } catch (_err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in fetchData')
       }
@@ -129,8 +130,8 @@ export function useSupabaseCRUD<TTable extends TableKey>(
         throw readError
       }
 
-      return result as TableRow<TTable>
-    } catch (err) {
+      return result
+    } catch (_err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in read')
       }
@@ -165,7 +166,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
 
       // Refresh data after delete
       await fetchData()
-    } catch (err) {
+    } catch (_err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in remove')
       }
@@ -207,7 +208,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Refresh data after create
       await fetchData()
       return result
-    } catch (err) {
+    } catch (_err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in create')
       }
@@ -245,7 +246,7 @@ export function useSupabaseCRUD<TTable extends TableKey>(
       // Refresh data after update
       await fetchData()
       return result
-    } catch (err) {
+    } catch (_err) {
       if (process.env.NODE_ENV === 'development') {
         apiLogger.error({ error: err, table }, 'Error in update')
       }

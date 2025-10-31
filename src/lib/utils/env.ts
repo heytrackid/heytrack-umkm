@@ -14,7 +14,7 @@ export const isProduction = !isDevelopment
 
 // Get environment variable (client-side only, must be NEXT_PUBLIC_*)
 export function getEnv(key: string): string | undefined {
-  if (typeof window === 'undefined') return undefined
+  if (typeof window === 'undefined') {return undefined}
   
   // Access from window object to avoid Turbopack issues
   const env = (window as any).__NEXT_DATA__?.props?.pageProps?.env

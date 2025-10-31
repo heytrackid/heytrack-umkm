@@ -55,7 +55,7 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
 
   // Handle Zod validation errors
   if (isZodError(error)) {
-    const zodError = error as { issues: Array<{ path: (string | number)[]; message: string }> };
+    const zodError = error as { issues: Array<{ path: Array<string | number>; message: string }> };
     const errorResponse: ErrorResponse = {
       error: 'Validation failed',
       code: 'VALIDATION_ERROR',
@@ -95,9 +95,9 @@ export function handleAPIError(error: unknown, context?: string): NextResponse {
 
     // Map specific Supabase error codes to appropriate HTTP status codes
     let status = supabaseError.status || 500;
-    if (supabaseError.code === '23505') status = 409; // Unique violation
-    if (supabaseError.code === '23503') status = 400; // Foreign key violation
-    if (supabaseError.code === '23502') status = 400; // Not null violation
+    if (supabaseError.code === '23505') {status = 409;} // Unique violation
+    if (supabaseError.code === '23503') {status = 400;} // Foreign key violation
+    if (supabaseError.code === '23502') {status = 400;} // Not null violation
 
     return NextResponse.json(errorResponse, { status });
   }

@@ -47,7 +47,7 @@ interface HppCalculationExtended {
   user_id: string
 }
 
-export default function HppCalculatorPage() {
+const HppCalculatorPage = () {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 
@@ -303,3 +303,5 @@ export default function HppCalculatorPage() {
     </AppLayout>
   )
 }
+
+export default HppCalculatorPage

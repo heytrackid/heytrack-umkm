@@ -148,8 +148,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Type-safe ingredient data
-        type IngredientRow = typeof ingredient
-        const ingredientData = ingredient as IngredientRow
+        type _IngredientRow = typeof ingredient
+        const ingredientData = ingredient
 
         // 1. Create financial transaction (expense)
         let financialTransactionId: string | null = null

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { z } from 'zod'
 
 export const NotificationPreferencesUpdateSchema = z.object({

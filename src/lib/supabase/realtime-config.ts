@@ -27,7 +27,7 @@ export function isRealtimeAvailable(): boolean {
       dbLogger.warn('Invalid Supabase URL protocol')
       return false
     }
-  } catch (error) {
+  } catch (_error) {
     dbLogger.error({ error }, 'Invalid Supabase URL format')
     return false
   }
@@ -68,7 +68,7 @@ export function safeRealtimeSubscribe<T>(
 
   try {
     return subscriptionFn()
-  } catch (error) {
+  } catch (_error) {
     dbLogger.error({ error }, 'Failed to create realtime subscription')
     onError?.(error)
     return null

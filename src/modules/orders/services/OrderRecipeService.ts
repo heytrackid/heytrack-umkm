@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RecipeAvailabilityService } from './RecipeAvailabilityService'
 import { OrderPricingService } from './OrderPricingService'
 import { OrderValidationService } from './OrderValidationService'

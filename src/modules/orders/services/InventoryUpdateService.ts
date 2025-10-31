@@ -1,9 +1,8 @@
-// @ts-nocheck
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createServiceRoleClient } from '@/utils/supabase/service-role'
 import { extractFirst } from '@/lib/type-guards'
-import type { Database, Tables, TablesInsert, RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
+import type { TablesInsert, RecipesTable, RecipeIngredientsTable, IngredientsTable } from '@/types/database'
 import { InventoryAlertService } from '@/services/inventory/InventoryAlertService'
 
 type Recipe = RecipesTable

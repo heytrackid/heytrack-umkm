@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Consolidated Supabase Client Utilities
  * Single source for all Supabase client operations and utilities
@@ -215,7 +214,7 @@ export async function isAuthenticated() {
     const supabase = getSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
     return !!user
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
@@ -243,7 +242,7 @@ export async function signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) {throw error}
     return { success: true }
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error }
   }
 }

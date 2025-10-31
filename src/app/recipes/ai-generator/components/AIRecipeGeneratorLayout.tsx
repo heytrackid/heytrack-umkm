@@ -11,7 +11,6 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { createClient as createSupabaseClient } from '@/utils/supabase/client'
 import { apiLogger } from '@/lib/logger'
 import type { GeneratedRecipe, AvailableIngredient } from './types'
 

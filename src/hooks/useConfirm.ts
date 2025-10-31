@@ -29,7 +29,7 @@ export function useConfirm() {
       void setLoading(true)
       await config.onConfirm()
       void setIsOpen(false)
-    } catch (err) {
+    } catch (_err) {
       apiLogger.error({ err }, 'Confirmation action failed:')
     } finally {
       void setLoading(false)

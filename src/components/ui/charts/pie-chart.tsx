@@ -1,4 +1,3 @@
-// @ts-nocheck - Chart/modal type issues
 /**
  * Mobile Pie Chart Component
  * Optimized pie chart for mobile devices

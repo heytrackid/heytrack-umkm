@@ -8,6 +8,8 @@
  * 4. Defer non-critical code
  */
 
+import { performanceLogger } from '@/lib/client-logger'
+
 /**
  * Dynamically import heavy libraries only when needed
  */
@@ -144,7 +146,7 @@ export function removeUnusedCSS() {
   })
 
   // Log unused selectors (in dev)
-  console.log('Used CSS selectors:', usedSelectors.size)
+  performanceLogger.debug({ count: usedSelectors.size }, 'Used CSS selectors')
 }
 
 /**
@@ -192,9 +194,9 @@ export function monitorBundleSize() {
   const totalJSSize = jsResources.reduce((acc, r) => acc + (r.transferSize || 0), 0)
   const totalCSSSize = cssResources.reduce((acc, r) => acc + (r.transferSize || 0), 0)
   
-  console.group('📦 Bundle Size Monitor')
-  console.log(`JavaScript: ${(totalJSSize / 1024).toFixed(2)} KB`)
-  console.log(`CSS: ${(totalCSSSize / 1024).toFixed(2)} KB`)
-  console.log(`Total: ${((totalJSSize + totalCSSSize) / 1024).toFixed(2)} KB`)
-  console.groupEnd()
+  performanceLogger.info({ 
+    jsKB: (totalJSSize / 1024).toFixed(2),
+    cssKB: (totalCSSSize / 1024).toFixed(2),
+    totalKB: ((totalJSSize + totalCSSSize) / 1024).toFixed(2)
+  }, '📦 Bundle Size Monitor')
 }

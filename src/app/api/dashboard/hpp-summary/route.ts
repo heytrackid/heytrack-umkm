@@ -5,7 +5,7 @@ import { apiLogger } from '@/lib/logger'
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
-type HppCalculationSummary = {
+interface HppCalculationSummary {
   recipe_id: string | null
   total_hpp: number
   created_at: string | null
@@ -28,7 +28,7 @@ export async function GET() {
       .eq('user_id', user.id)
       .eq('is_active', true)
 
-    if (recipesError) throw recipesError
+    if (recipesError) {throw recipesError}
 
     // Get latest HPP calculations
     const { data: hppCalculations, error: hppError } = await supabase
@@ -37,7 +37,7 @@ export async function GET() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (hppError) throw hppError
+    if (hppError) {throw hppError}
 
     // Get HPP alerts
     const { data: alerts, error: alertsError } = await supabase
@@ -46,7 +46,7 @@ export async function GET() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (alertsError) throw alertsError
+    if (alertsError) {throw alertsError}
 
     // Calculate metrics
     const totalRecipes = recipes?.length || 0

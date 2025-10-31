@@ -64,7 +64,7 @@ export class ChatbotPromptBuilder {
   }
 
   private static buildBusinessDataContext(businessData?: BusinessData): string[] {
-    if (!businessData) return []
+    if (!businessData) {return []}
 
     const parts: string[] = []
 
@@ -119,7 +119,7 @@ export class ChatbotPromptBuilder {
 
   private static buildConversationHistory(history: Array<{ role: string; content: string }>): string[] {
     const recentHistory = history.slice(-5)
-    if (recentHistory.length === 0) return []
+    if (recentHistory.length === 0) {return []}
 
     const parts = ['=== RIWAYAT PERCAKAPAN ===']
     recentHistory.forEach(msg => {

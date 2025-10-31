@@ -3,10 +3,10 @@ import type { ReactNode } from 'react'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-export default function AuthLayout({
+const AuthLayout = ({
     children,
 }: {
     children: ReactNode
-}) {
-    return <>{children}</>
-}
+}) => <>{children}</>
+
+export default AuthLayout

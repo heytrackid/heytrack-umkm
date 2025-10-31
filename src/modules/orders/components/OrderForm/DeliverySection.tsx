@@ -21,8 +21,7 @@ interface DeliverySectionProps {
     onInputChange: <K extends keyof any>(field: K, value: any) => void
 }
 
-export function DeliverySection({ formData, onInputChange }: DeliverySectionProps) {
-    return (
+export const DeliverySection = ({ formData, onInputChange }: DeliverySectionProps) => (
         <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
@@ -81,4 +80,3 @@ export function DeliverySection({ formData, onInputChange }: DeliverySectionProp
             </div>
         </div>
     )
-}

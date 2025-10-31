@@ -21,7 +21,7 @@ interface OrdersListProps {
     onClearFilters: () => void
 }
 
-export function OrdersList({
+export const OrdersList = ({
     orders,
     hasFilters,
     onCreateOrder,
@@ -29,7 +29,7 @@ export function OrdersList({
     onEditOrder,
     onUpdateStatus,
     onClearFilters
-}: OrdersListProps) {
+}: OrdersListProps) => {
     if (orders.length === 0) {
         return (
             <Card>

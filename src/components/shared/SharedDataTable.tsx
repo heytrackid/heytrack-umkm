@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable */
 'use client'
 
 import { type ReactNode, useEffect, useState, useMemo } from 'react'

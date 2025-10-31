@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { Badge } from '@/components/ui/badge'
@@ -147,7 +146,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
 
   const getStatusColor = (status: OrderStatus | null) => {
     if (!status) { return 'bg-gray-100 text-gray-800' }
-    const config = ORDER_STATUS_CONFIG[status as keyof typeof ORDER_STATUS_CONFIG]
+    const config = ORDER_STATUS_CONFIG[status]
     if (!config) { return 'bg-gray-100 text-gray-800' }
     return config.color
   }
@@ -623,7 +622,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
                               </SelectItem>
                               {ORDER_STATUS_CONFIG[order.status as keyof typeof ORDER_STATUS_CONFIG]?.nextStatuses?.map((status) => (
                                 <SelectItem key={status} value={status}>
-                                  {status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[status as keyof typeof ORDER_STATUS_LABELS] : status}
+                                  {status in ORDER_STATUS_LABELS ? ORDER_STATUS_LABELS[status] : status}
                                 </SelectItem>
                               ))}
                             </SelectContent>

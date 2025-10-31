@@ -1,7 +1,6 @@
 'use client'
 
-import type { FormEvent} from 'react';
-import { useEffect } from 'react'
+import { type FormEvent, useEffect } from 'react'
 import Link from 'next/link'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'

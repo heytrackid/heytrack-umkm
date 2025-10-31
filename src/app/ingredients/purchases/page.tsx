@@ -3,6 +3,6 @@
 
 import IngredientPurchasesLayout from './components/IngredientPurchasesLayout'
 
-export default function IngredientPurchasesPage() {
-  return <IngredientPurchasesLayout />
-}
+const IngredientPurchasesPage = () => <IngredientPurchasesLayout />
+
+export default IngredientPurchasesPage

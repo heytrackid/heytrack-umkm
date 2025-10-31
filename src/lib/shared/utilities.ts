@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Shared utilities for formatting, calculations, and common operations
 
 /**
@@ -276,7 +275,7 @@ export function safeLocalStorage() {
       try {
         const item = window.localStorage.getItem(key)
         return item ? JSON.parse(item) : defaultValue
-      } catch (error) {
+      } catch (_error) {
         return defaultValue
       }
     },
@@ -286,7 +285,7 @@ export function safeLocalStorage() {
       try {
         window.localStorage.setItem(key, JSON.stringify(value))
         return true
-      } catch (error) {
+      } catch (_error) {
         return false
       }
     },
@@ -296,7 +295,7 @@ export function safeLocalStorage() {
       try {
         window.localStorage.removeItem(key)
         return true
-      } catch (error) {
+      } catch (_error) {
         return false
       }
     },
@@ -306,7 +305,7 @@ export function safeLocalStorage() {
       try {
         window.localStorage.clear()
         return true
-      } catch (error) {
+      } catch (_error) {
         return false
       }
     }

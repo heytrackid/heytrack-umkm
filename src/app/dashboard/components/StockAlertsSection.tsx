@@ -15,7 +15,7 @@ interface StockAlertsSectionProps {
   lowStockItems?: LowStockItem[]
 }
 
-export default function StockAlertsSection({ lowStockItems }: StockAlertsSectionProps) {
+const StockAlertsSection = ({ lowStockItems }: StockAlertsSectionProps) => {
   // Show skeleton if data is undefined
   if (lowStockItems === undefined) {
     return (
@@ -82,3 +82,5 @@ export default function StockAlertsSection({ lowStockItems }: StockAlertsSection
     </Card>
   )
 }
+
+export default StockAlertsSection

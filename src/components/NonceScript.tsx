@@ -5,7 +5,7 @@ import { getNonce } from '@/lib/nonce'
  * Script component with CSP nonce support
  * Use this instead of regular <script> tags for inline scripts
  */
-export async function NonceScript({
+export const NonceScript = async ({
     children,
     id,
     ...props
@@ -13,7 +13,7 @@ export async function NonceScript({
     children: string
     id?: string
     strategy?: 'beforeInteractive' | 'afterInteractive' | 'lazyOnload'
-}) {
+}) => {
     const nonce = await getNonce()
 
     return (

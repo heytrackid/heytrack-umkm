@@ -86,7 +86,7 @@ export default function OrdersPage({ }: OrdersPageProps) {
         queryKey: ['orders', 'all'],
         queryFn: async () => {
             const response = await fetch('/api/orders')
-            if (!response.ok) throw new Error('Failed to fetch orders')
+            if (!response.ok) {throw new Error('Failed to fetch orders')}
             const data = await response.json()
             return Array.isArray(data) ? data : []
         },
@@ -96,11 +96,11 @@ export default function OrdersPage({ }: OrdersPageProps) {
 
     // Ensure orders is always an array
     const orders = useMemo(() => {
-        if (!ordersData) return []
+        if (!ordersData) {return []}
         return Array.isArray(ordersData) ? ordersData : []
     }, [ordersData])
 
-    const error = queryError ? (queryError as Error).message : null
+    const error = queryError ? (queryError).message : null
 
     // Calculate stats with safe array operations
     const stats = useMemo<OrderStats>(() => {

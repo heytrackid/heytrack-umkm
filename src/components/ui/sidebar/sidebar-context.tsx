@@ -48,7 +48,7 @@ export const SidebarProvider = ({
 
   // Read cookie value on mount (client-side only)
   const getInitialOpenState = () => {
-    if (typeof window === 'undefined') return defaultOpen
+    if (typeof window === 'undefined') {return defaultOpen}
 
     const cookieValue = document.cookie
       .split('; ')

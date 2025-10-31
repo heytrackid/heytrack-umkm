@@ -1,4 +1,3 @@
-// @ts-nocheck - Production custom types need DB schema update
 // Active Batches List Component - Lazy Loaded
 // Displays the list of active and scheduled production batches
 'use client'

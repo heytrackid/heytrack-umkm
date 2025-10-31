@@ -28,7 +28,7 @@ interface PaymentSectionProps {
     onClearError: (field: string) => void
 }
 
-export function PaymentSection({
+export const PaymentSection = ({
     formData,
     fieldErrors,
     subtotal,
@@ -37,7 +37,7 @@ export function PaymentSection({
     deliveryFee,
     onInputChange,
     onClearError
-}: PaymentSectionProps) {
+}: PaymentSectionProps) => {
     const { formatCurrency } = useCurrency()
 
     return (
@@ -91,7 +91,7 @@ export function PaymentSection({
                         value={formData.paid_amount}
                         onChange={(e) => {
                             onInputChange('paid_amount', safeNumber(e.target.value, 0))
-                            if (fieldErrors['paid_amount']) onClearError('paid_amount')
+                            if (fieldErrors['paid_amount']) {onClearError('paid_amount')}
                         }}
                         min="0"
                         step="1000"

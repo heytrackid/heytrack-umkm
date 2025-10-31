@@ -49,9 +49,7 @@ export default function TemplatesTable({
     onPreview,
     onDuplicate
 }: TemplatesTableProps) {
-    const getCategoryLabel = (category: string) => {
-        return TEMPLATE_CATEGORIES.find(cat => cat.value === category)?.label || category
-    }
+    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find(cat => cat.value === category)?.label || category
 
     return (
         <Card>

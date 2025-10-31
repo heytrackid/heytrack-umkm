@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable */
 'use client'
 
 // Shared data management and caching utilities

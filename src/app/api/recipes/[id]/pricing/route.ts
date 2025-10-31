@@ -103,7 +103,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     
     // Calculate pricing using the original recipeData which should have the right structure
     const pricingAnalysis = pricingAutomation.calculateSmartPricing({
-      ...recipeData!,
+      ...recipeData,
       recipe_ingredients: recipeForPricing.recipe_ingredients?.map(ri => ({
         ...ri,
         ingredient: ri.ingredient!
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       data: pricingAnalysis
     })
 
-  } catch (err) {
+  } catch (_err) {
     apiLogger.error({ err }, 'Error calculating pricing')
     return NextResponse.json({ 
       error: 'Internal server error',

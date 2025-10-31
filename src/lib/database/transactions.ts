@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Database Transaction Management
  * 
@@ -63,7 +62,7 @@ export async function executeTransaction<T = unknown>(
         if (logProgress) {
           dbLogger.debug({ operation: operation.name }, 'Operation completed')
         }
-      } catch (error) {
+      } catch (_error) {
         failedOperation = operation.name
         
         dbLogger.error(
@@ -96,7 +95,7 @@ export async function executeTransaction<T = unknown>(
       data: results,
       completedOperations,
     }
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
@@ -181,7 +180,7 @@ export async function retryWithBackoff<T>(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fn()
-    } catch (error) {
+    } catch (_error) {
       lastError = error instanceof Error ? error : new Error('Unknown error')
       
       if (attempt < maxRetries) {
@@ -219,7 +218,7 @@ export async function executeParallel<T>(
       try {
         const data = await operation()
         results.push({ success: true, data })
-      } catch (error) {
+      } catch (_error) {
         const err = error instanceof Error ? error : new Error('Unknown error')
         results.push({ success: false, error: err })
         

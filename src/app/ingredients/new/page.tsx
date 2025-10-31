@@ -14,13 +14,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
 import { ArrowLeft, Package } from 'lucide-react'
 import type { IngredientsInsert } from '@/types/database'
 
 type IngredientInsert = IngredientsInsert
 
-export default function NewIngredientPage() {
+const NewIngredientPage = () => {
   const router = useRouter()
   const { create: createIngredient } = useSupabaseCRUD('ingredients')
   const { toast } = useToast()
@@ -145,3 +144,5 @@ export default function NewIngredientPage() {
     </AppLayout>
   )
 }
+
+export default NewIngredientPage

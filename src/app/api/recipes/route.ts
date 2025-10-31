@@ -201,7 +201,7 @@ async function POST(request: NextRequest) {
         unit?: string
       }
 
-      const recipeIngredientsToInsert: Array<RecipeIngredientsInsert> = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
+      const recipeIngredientsToInsert: RecipeIngredientsInsert[] = recipe_ingredients.map((ingredient: RecipeIngredientInput) => ({
         recipe_id: createdRecipe.id,
         ingredient_id: ingredient.ingredient_id || ingredient.bahan_id || '',
         quantity: ingredient.quantity || ingredient.qty_per_batch || 0,

@@ -34,7 +34,7 @@ import { useRouter } from 'next/navigation'
 import { use, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
-export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+const CustomerDetailPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const { id } = use(params)
   const router = useRouter()
   const { formatCurrency } = useCurrency()
@@ -60,7 +60,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       await deleteCustomer(id)
       toast.success('Pelanggan berhasil dihapus')
       void router.push('/customers')
-    } catch (err) {
+    } catch (_err) {
       toast.error('Gagal menghapus pelanggan')
     }
   }
@@ -281,3 +281,5 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     </AppLayout>
   )
 }
+
+export default CustomerDetailPage

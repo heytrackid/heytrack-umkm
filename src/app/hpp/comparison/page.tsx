@@ -45,7 +45,7 @@ interface BenchmarkData {
   totalProduction: number
 }
 
-export default function ComparisonAnalyticsPage() {
+const ComparisonAnalyticsPage = () {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recipes, setRecipes] = useState<RecipeComparison[]>([])
@@ -433,3 +433,5 @@ export default function ComparisonAnalyticsPage() {
     </AppLayout>
   )
 }
+
+export default ComparisonAnalyticsPage

@@ -3,6 +3,6 @@
 
 import WhatsAppTemplatesLayout from './components/WhatsAppTemplatesLayout'
 
-export default function WhatsAppTemplatesPage() {
-    return <WhatsAppTemplatesLayout />
-}
+const WhatsAppTemplatesPage = () => <WhatsAppTemplatesLayout />
+
+export default WhatsAppTemplatesPage

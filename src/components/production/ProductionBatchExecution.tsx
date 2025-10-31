@@ -1,4 +1,3 @@
-// @ts-nocheck - Production custom types need DB schema update
 /**
  * ProductionBatchExecution
  * Interface for starting, monitoring, and completing production batches
@@ -191,7 +190,7 @@ export default function ProductionBatchExecution({
 
       // Update production progress in the system
       // Note: UpdateProductionProgress is not defined in the service, so we'll just log for now
-      console.log('Production completed, updating system', { batchId, status: 'COMPLETED' })
+      apiLogger.info({ batchId, status: 'COMPLETED' }, 'Production completed, updating system')
 
       onBatchUpdate?.(batchId, 'COMPLETED', `Batch completed at ${format(completedAt, 'HH:mm')}`)
       toast({

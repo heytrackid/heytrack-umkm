@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 import type { CustomersTable } from '@/types/database'
 type Customer = CustomersTable
@@ -78,7 +77,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
     queryFn: async () => {
       const response = await fetch('/api/recipes')
       if (!response.ok) { throw new Error('Failed to fetch recipes') }
-      const data: Array<RecipesTable> = await response.json()
+      const data: RecipesTable[] = await response.json()
       return data.filter(recipe => recipe.is_active)
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

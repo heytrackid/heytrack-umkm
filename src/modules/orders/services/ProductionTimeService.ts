@@ -1,8 +1,7 @@
-// @ts-nocheck
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Database, RecipesTable } from '@/types/database'
+import type { RecipesTable } from '@/types/database'
 
 type Recipe = RecipesTable
 

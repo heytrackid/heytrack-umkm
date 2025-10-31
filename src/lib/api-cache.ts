@@ -1,4 +1,3 @@
-// @ts-nocheck - API type constraints
 /**
  * API Response Caching Utilities
  * Provides HTTP caching headers and in-memory cache

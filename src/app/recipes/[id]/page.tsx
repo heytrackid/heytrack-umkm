@@ -11,14 +11,14 @@ interface RecipePageProps {
     }
 }
 
-export default function RecipePage({ params }: RecipePageProps) {
-    return (
-        <AppLayout pageTitle="Detail Resep">
-            <div className="p-6">
-                <Suspense fallback={<DataGridSkeleton rows={8} />}>
-                    <RecipeDetailPage recipeId={params.id} />
-                </Suspense>
-            </div>
-        </AppLayout>
-    )
-}
+const RecipePage = ({ params }: RecipePageProps) => (
+    <AppLayout pageTitle="Detail Resep">
+        <div className="p-6">
+            <Suspense fallback={<DataGridSkeleton rows={8} />}>
+                <RecipeDetailPage recipeId={params.id} />
+            </Suspense>
+        </div>
+    </AppLayout>
+)
+
+export default RecipePage

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { Fragment, type ReactNode, useState } from 'react'

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import OrdersTable from '@/components/orders/orders-table'

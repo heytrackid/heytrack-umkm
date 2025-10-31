@@ -3,9 +3,10 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Package
+  Package,
+  ArrowUpRight,
+  ArrowDownRight
 } from 'lucide-react'
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import type { ProfitData } from './types'
 
 interface ProfitSummaryCardsProps {

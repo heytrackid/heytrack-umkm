@@ -117,11 +117,11 @@ export type Ingredient = Tables<'ingredients'>
 export type Recipe = Tables<'recipes'>
 export type RecipeIngredient = Tables<'recipe_ingredients'>
 export type Order = Tables<'orders'>
-export type OrderItem = Tables<'order_items'>
+export // type OrderItem = Tables<'order_items'>
 export type Customer = Tables<'customers'>
 export type Supplier = Tables<'suppliers'>
 export type Expense = Tables<'expenses'>
-export type OperationalCost = Tables<'operational_costs'>
+export // type OperationalCost = Tables<'operational_costs'>
 
 // Complex types
 export type RecipeWithIngredients = Recipe & {

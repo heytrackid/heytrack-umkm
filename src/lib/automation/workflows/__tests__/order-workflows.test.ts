@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Order Workflow Tests
  * Tests for automated order processing workflows

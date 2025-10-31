@@ -3,6 +3,6 @@
 
 import AIRecipeGeneratorLayout from './components/AIRecipeGeneratorLayout'
 
-export default function AIRecipeGeneratorPage() {
-  return <AIRecipeGeneratorLayout />
-}
+const AIRecipeGeneratorPage = () => <AIRecipeGeneratorLayout />
+
+export default AIRecipeGeneratorPage

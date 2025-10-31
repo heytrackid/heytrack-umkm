@@ -1,4 +1,3 @@
-// @ts-nocheck
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'

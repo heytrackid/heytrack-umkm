@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Performance Optimizations untuk Skeleton Loading System
  * 

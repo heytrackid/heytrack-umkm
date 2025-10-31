@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Inventory Services
  * Service for inventory management operations

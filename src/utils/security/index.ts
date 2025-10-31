@@ -1,29 +1,25 @@
 // Security Utilities
 // Input sanitization, validation, and security helpers
 
-import DOMPurify from 'isomorphic-dompurify'
-
-// Input Sanitization
+// Input Sanitization (Basic client-safe version)
 export class InputSanitizer {
-  // Sanitize HTML input to prevent XSS
+  // Sanitize HTML input to prevent XSS (basic strip tags version)
   static sanitizeHtml(input: string): string {
-    // Use DOMPurify for comprehensive HTML sanitization
-    return DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-      ALLOWED_ATTR: [],
-      FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'frame', 'frameset', 'meta', 'link', 'style'],
-    })
+    // Basic HTML sanitization without DOMPurify (client-safe)
+    // For server-side with full DOMPurify, use @/utils/security/server
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+      .replace(/<embed[^>]*>/gi, '')
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+      .trim()
   }
 
   // Sanitize for rich text (limited HTML)
   static sanitizeRichText(input: string): string {
-    // Use DOMPurify for rich text sanitization
-    return DOMPurify.sanitize(input, {
-      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'div'],
-      ALLOWED_ATTR: ['class', 'style'],
-      FORBID_TAGS: ['script', 'object', 'embed', 'iframe', 'frame', 'frameset', 'meta', 'link', 'style'],
-      FORBID_ATTR: ['style'] // Forbid style attributes to prevent CSS injection
-    })
+    // Basic rich text sanitization (client-safe)
+    return InputSanitizer.sanitizeHtml(input)
   }
 
   // Sanitize SQL-like inputs (remove dangerous characters)
@@ -144,7 +140,11 @@ export class SecurityHeaders {
   // Deprecated: Use getStrictCSP from @/lib/csp instead
   // Kept for backward compatibility
   static getCSPHeader(isDev = false): string {
-    console.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
+    // Deprecation warning shown in development only (console allowed for deprecation notices)
+     
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('SecurityHeaders.getCSPHeader is deprecated. Use getStrictCSP from @/lib/csp instead.')
+    }
     const policies = [
       "default-src 'self'",
       isDev 

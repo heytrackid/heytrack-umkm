@@ -128,7 +128,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
         // Update session context
         if (result.session_id) {
           setContext({
-            userId: userId,
+            userId,
             sessionId: result.session_id,
             conversationHistory: messages
               .filter(m => m.role !== 'system')
@@ -298,7 +298,7 @@ Tanya apa aja tentang bisnis kuliner kamu, aku siap bantuin! 😊`,
                 <div className="mt-3">
                   {(() => {
                     // Determine visualization type based on message data structure
-                    const data = message.data as Record<string, unknown>;
+                    const {data} = message;
                     if (data.profitMargin !== undefined) {
                       return <DataVisualization type="financial" data={data} compact />;
                     } if (data.criticalItems) {

@@ -104,7 +104,7 @@ export function useProfitData() {
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-    } catch (err) {
+    } catch (_err) {
       apiLogger.error({ error: err }, 'Error exporting report:')
       alert('Gagal mengekspor laporan')
     }

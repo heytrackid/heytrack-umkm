@@ -39,7 +39,7 @@ export function useAsyncError() {
         void setIsLoading(true)
         resetError()
         await asyncFn()
-      } catch (err) {
+      } catch (_err) {
         void handleErr(err, 'useAsyncError')
       } finally {
         void setIsLoading(false)

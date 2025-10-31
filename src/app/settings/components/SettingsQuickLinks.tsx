@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button'
 /**
  * Quick links component for settings shortcuts
  */
-export const SettingsQuickLinks = () => {
-  return (
+export const SettingsQuickLinks = () => (
     <Card>
       <CardHeader>
         <CardTitle>Pengaturan Lanjutan</CardTitle>
@@ -46,4 +45,3 @@ export const SettingsQuickLinks = () => {
       </CardContent>
     </Card>
   )
-}

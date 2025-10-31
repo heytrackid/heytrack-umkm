@@ -23,7 +23,7 @@ function getAudioContext(): AudioContext {
  * Creates a pleasant notification tone
  */
 export function playNotificationSound(volume: number = soundVolume): void {
-  if (!soundEnabled || typeof window === 'undefined') return
+  if (!soundEnabled || typeof window === 'undefined') {return}
 
   try {
     const ctx = getAudioContext()
@@ -62,7 +62,7 @@ export function playNotificationSound(volume: number = soundVolume): void {
  * Play urgent notification sound (more attention-grabbing)
  */
 export function playUrgentNotificationSound(volume: number = soundVolume): void {
-  if (!soundEnabled || typeof window === 'undefined') return
+  if (!soundEnabled || typeof window === 'undefined') {return}
 
   try {
     const ctx = getAudioContext()

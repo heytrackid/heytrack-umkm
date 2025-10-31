@@ -1,4 +1,3 @@
-// @ts-nocheck - API type constraints
 /**
  * API Client
  * Centralized API client with error handling and type safety

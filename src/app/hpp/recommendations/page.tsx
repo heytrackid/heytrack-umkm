@@ -35,7 +35,7 @@ interface Recommendation {
   } | null
 }
 
-export default function HppRecommendationsPage() {
+const HppRecommendationsPage = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recommendations, setRecommendations] = useState<Recommendation[]>([])
@@ -360,3 +360,6 @@ export default function HppRecommendationsPage() {
     </AppLayout>
   )
 }
+
+export default HppRecommendationsPage
+

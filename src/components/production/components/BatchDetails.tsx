@@ -1,4 +1,3 @@
-// @ts-nocheck - Production custom types need DB schema update
 // Batch Details Component - Lazy Loaded
 // Displays detailed view of selected batch with quality control and notes
 

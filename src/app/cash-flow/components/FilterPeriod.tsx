@@ -23,7 +23,7 @@ const presetPeriods = [
   { value: 'custom' as PeriodType, label: 'Kustom', shortLabel: 'Kustom' }
 ]
 
-export default function FilterPeriod({
+const FilterPeriod = ({
   selectedPeriod,
   onPeriodChange,
   startDate,
@@ -33,7 +33,7 @@ export default function FilterPeriod({
   onApplyFilters,
   loading,
   isMobile
-}: FilterPeriodProps) {
+}: FilterPeriodProps) => {
   const handlePresetClick = (period: PeriodType) => {
     onPeriodChange(period)
     if (period !== 'custom') {
@@ -117,3 +117,5 @@ export default function FilterPeriod({
     </Card>
   )
 }
+
+export default FilterPeriod

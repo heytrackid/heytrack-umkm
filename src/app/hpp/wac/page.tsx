@@ -14,7 +14,7 @@ import type { IngredientsTable } from '@/types/database'
 
 type Ingredient = IngredientsTable
 
-export default function WacEnginePage() {
+const WacEnginePage = () {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
 
@@ -311,3 +311,5 @@ export default function WacEnginePage() {
     </AppLayout>
   )
 }
+
+export default WacEnginePage

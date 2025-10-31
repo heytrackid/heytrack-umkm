@@ -2,15 +2,14 @@
 // Displays purchase statistics and metrics cards
 
 import { Card, CardContent } from '@/components/ui/card'
-import { DollarSign, Package, ShoppingCart, TrendingUp } from 'lucide-react'
+import { DollarSign, Package, ShoppingCart, TrendingUp, type LucideIcon } from 'lucide-react'
 import type { IngredientPurchase, PurchaseStats } from './types'
-import type { LucideIcon } from 'lucide-react'
 
 interface PurchaseStatsProps {
   purchases: IngredientPurchase[]
 }
 
-export default function PurchaseStats({ purchases }: PurchaseStatsProps) {
+const PurchaseStats = ({ purchases }: PurchaseStatsProps) => {
   // Calculate stats
   const thisMonth = purchases.filter((p) => {
     const purchaseDate = new Date(p.purchase_date)
@@ -83,3 +82,5 @@ export default function PurchaseStats({ purchases }: PurchaseStatsProps) {
     </div>
   )
 }
+
+export default PurchaseStats

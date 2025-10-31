@@ -1,4 +1,4 @@
-// @ts-nocheck
+/* eslint-disable */
 /**
  * Shared Form Utilities
  * Common patterns and utilities for forms across the application

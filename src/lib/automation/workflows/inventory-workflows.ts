@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Inventory Workflow Handlers
  * Workflow automation handlers for inventory-related events

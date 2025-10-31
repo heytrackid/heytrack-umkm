@@ -28,18 +28,18 @@ interface CustomerSectionProps {
     onClearError: (field: string) => void
 }
 
-export function CustomerSection({
+export const CustomerSection = ({
     formData,
     fieldErrors,
     availableCustomers,
     onInputChange,
     onClearError
-}: CustomerSectionProps) {
+}: CustomerSectionProps) => {
     const [customerSearch, setCustomerSearch] = useState('')
     const [showNewCustomer, setShowNewCustomer] = useState(false)
 
     const selectCustomer = (customer: Customer | undefined) => {
-        if (!customer) return
+        if (!customer) {return}
         onInputChange('customer_name', customer.name)
         onInputChange('customer_phone', customer.phone || '')
         onInputChange('customer_address', customer.address || '')
@@ -104,7 +104,7 @@ export function CustomerSection({
                         value={formData.customer_name}
                         onChange={(e) => {
                             onInputChange('customer_name', e.target.value)
-                            if (fieldErrors['customer_name']) onClearError('customer_name')
+                            if (fieldErrors['customer_name']) {onClearError('customer_name')}
                         }}
                         required
                         className={`mt-1 ${fieldErrors['customer_name'] ? 'border-destructive focus-visible:ring-destructive' : ''}`}

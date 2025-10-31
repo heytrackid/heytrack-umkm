@@ -49,7 +49,7 @@ import { handleCRUDError, validateCRUDInputs, validateBulkInputs } from './utils
 import { getErrorMessage } from '@/lib/type-guards'
 
 // Mapping table names to their corresponding types
-type TableMap = {
+interface TableMap {
   // App settings
   'app_settings': { row: AppSettingsTable; insert: AppSettingsInsert; update: AppSettingsUpdate }
   'chat_context_cache': { row: ChatContextCacheTable; insert: ChatContextCacheInsert; update: ChatContextCacheUpdate }
@@ -188,7 +188,7 @@ export function useEnhancedCRUD<
       }
 
       void handleSuccess('update')
-      return result!
+      return result
     } catch (error: unknown) {
       void handleCRUDError(new Error(getErrorMessage(error)), 'update', showErrorToast, customErrorHandler)
       throw error

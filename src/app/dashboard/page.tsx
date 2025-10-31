@@ -179,8 +179,7 @@ export default function Dashboard() {
   }
 
   // Check if user has no data yet (empty state)
-  const hasNoData = dashboardData &&
-    dashboardData.stats.totalOrders === 0 &&
+  const hasNoData = dashboardData?.stats.totalOrders === 0 &&
     dashboardData.stats.totalIngredients === 0 &&
     dashboardData.stats.totalCustomers === 0
 

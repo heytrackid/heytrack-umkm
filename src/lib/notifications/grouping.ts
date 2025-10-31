@@ -19,7 +19,7 @@ export interface GroupedNotification {
  */
 export function groupNotifications(
   notifications: Notification[],
-  timeWindowSeconds: number = 300 // 5 minutes default
+  timeWindowSeconds = 300 // 5 minutes default
 ): GroupedNotification[] {
   if (!notifications || notifications.length === 0) {
     return []
@@ -90,9 +90,7 @@ export function groupNotifications(
   }
 
   // Convert to array and sort by latest timestamp
-  return Array.from(groups.values()).sort((a, b) => {
-    return new Date(b.latest_created_at).getTime() - new Date(a.latest_created_at).getTime()
-  })
+  return Array.from(groups.values()).sort((a, b) => new Date(b.latest_created_at).getTime() - new Date(a.latest_created_at).getTime())
 }
 
 /**
@@ -155,11 +153,11 @@ export function getGroupedMessage(group: GroupedNotification): string {
 export function shouldGroup(
   notif1: Notification,
   notif2: Notification,
-  timeWindowSeconds: number = 300
+  timeWindowSeconds = 300
 ): boolean {
   // Same category and entity type
-  if (notif1.category !== notif2.category) return false
-  if (notif1.entity_type !== notif2.entity_type) return false
+  if (notif1.category !== notif2.category) {return false}
+  if (notif1.entity_type !== notif2.entity_type) {return false}
 
   // Within time window
   const time1 = new Date(notif1.created_at).getTime()

@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { type NextRequest, NextResponse } from 'next/server'
 import { FinancialRecordUpdateSchema } from '@/lib/validations/domains/finance'
 import { apiLogger } from '@/lib/logger'
-import { FinancialRecordsUpdate } from '@/types/database'
+import type { FinancialRecordsUpdate } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'

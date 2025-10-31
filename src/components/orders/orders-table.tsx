@@ -169,7 +169,7 @@ const OrdersTable = ({
   }
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return '-'
+    if (!dateString) {return '-'}
     return new Date(dateString).toLocaleDateString('id-ID', {
       day: '2-digit',
       month: 'short',

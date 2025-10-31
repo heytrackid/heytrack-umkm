@@ -38,7 +38,7 @@ import OrderSummary from './_components/OrderSummary'
 
 // ============= MAIN PAGE COMPONENT =============
 
-export default function NewOrderPage() {
+const NewOrderPage = () => {
   const {
     // State
     formData,
@@ -228,3 +228,5 @@ export default function NewOrderPage() {
     </AppLayout>
   )
 }
+
+export default NewOrderPage

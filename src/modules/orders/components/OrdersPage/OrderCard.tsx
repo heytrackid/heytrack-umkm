@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Order Card Component
  * Single order display card
@@ -23,7 +22,7 @@ interface OrderCardProps {
     onUpdateStatus: (orderId: string, newStatus: OrderStatus) => void
 }
 
-export function OrderCard({ order, onView, onEdit, onUpdateStatus }: OrderCardProps) {
+export const OrderCard = ({ order, onView, onEdit, onUpdateStatus }: OrderCardProps) => {
     const { formatCurrency } = useCurrency()
 
     const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
@@ -33,9 +32,9 @@ export function OrderCard({ order, onView, onEdit, onUpdateStatus }: OrderCardPr
     })
 
     const getStatusColor = (status: OrderStatus | null) => {
-        if (!status) return 'bg-gray-100 text-gray-800'
+        if (!status) {return 'bg-gray-100 text-gray-800'}
         const config = ORDER_STATUS_CONFIG[status]
-        if (!config) return 'bg-gray-100 text-gray-800'
+        if (!config) {return 'bg-gray-100 text-gray-800'}
         return config.color
     }
 

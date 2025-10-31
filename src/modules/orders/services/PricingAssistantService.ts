@@ -1,8 +1,6 @@
-// @ts-nocheck
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/client'
-import type { Database, RecipesTable } from '@/types/database'
-import { HppCalculatorService } from '@/services/hpp/HppCalculatorService'
+import type { RecipesTable } from '@/types/database'
 
 type Recipe = RecipesTable
 

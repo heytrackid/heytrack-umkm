@@ -56,7 +56,7 @@ export function useSupabaseQuery<T extends keyof TablesMap>(
 
       if (queryError) {throw queryError}
       void setData(result || [])
-    } catch (err) {
+    } catch (_err) {
       void setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       void setLoading(false)

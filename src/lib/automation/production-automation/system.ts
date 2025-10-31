@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Production Automation System Orchestrator
  * Main coordinator for production automation functionality

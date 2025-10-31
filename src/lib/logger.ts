@@ -28,8 +28,7 @@ const logger = pino({
   }),
   // Add more detailed serialization for better debugging
   serializers: {
-    error: (err: Error) => {
-      return {
+    error: (err: Error) => ({
         type: err.constructor.name,
         name: err.name,
         message: err.message,
@@ -38,16 +37,15 @@ const logger = pino({
         ...Object.getOwnPropertyNames(err).reduce((acc, key) => {
           if (!['name', 'message', 'stack'].includes(key)) {
             try {
-              acc[key as string] = (err as any)[key as any];
+              acc[key] = (err as any)[key as any];
             } catch {
               // If property can't be accessed, skip it
-              acc[key as string] = '[Non-serializable]';
+              acc[key] = '[Non-serializable]';
             }
           }
           return acc;
         }, {} as Record<string, any>)
-      };
-    }
+      })
   },
 })
 

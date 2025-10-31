@@ -8,17 +8,14 @@
  */
 
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/server'
 import { HPP_CONFIG } from '@/lib/constants/hpp-config'
 import { isRecipeWithIngredients } from '@/lib/type-guards'
-import type { Database, RecipesTable, RecipeIngredientsTable, IngredientsTable, ProductionsTable, StockTransactionsTable, HppCalculationsTable } from '@/types/database'
+import type { Database, RecipesTable, RecipeIngredientsTable, IngredientsTable, HppCalculationsTable } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-type Recipe = RecipesTable
+type _Recipe = RecipesTable
 type RecipeIngredient = RecipeIngredientsTable
 type Ingredient = IngredientsTable
-type Production = ProductionsTable
-type StockTransaction = StockTransactionsTable
 
 export interface HppCalculationResult {
   recipe_id: string // Use snake_case for consistency with DB

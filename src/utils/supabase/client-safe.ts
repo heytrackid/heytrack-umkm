@@ -37,7 +37,7 @@ export async function createServerClient() {
   const serverModule = await (async () => {
     // Import path as a variable to avoid static analysis
     const serverPath = './server'
-    return await import(serverPath)
+    return import(serverPath)
   })()
   
   return serverModule.createClient()

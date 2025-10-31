@@ -59,7 +59,7 @@ export function useApi<T = unknown >(
         })
         onError?.(error)
       }
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState({
         data: null,
@@ -97,7 +97,7 @@ export function useApi<T = unknown >(
         }))
         onError?.(error)
       }
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setState((prev) => ({
         ...prev,
@@ -187,7 +187,7 @@ export function useMutationApi<T = unknown , R = unknown >(
           onError?.(error)
           throw new Error(error)
         }
-      } catch (err) {
+      } catch (_err) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
         setState({
           data: null,

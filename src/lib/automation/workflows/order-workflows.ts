@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Order Workflow Handlers
  * Workflow automation handlers for order-related events

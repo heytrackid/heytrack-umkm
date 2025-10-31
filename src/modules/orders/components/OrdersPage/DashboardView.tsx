@@ -19,7 +19,7 @@ interface DashboardViewProps {
     onCreateOrder?: () => void
 }
 
-export function DashboardView({ orders, onCreateOrder }: DashboardViewProps) {
+export const DashboardView = ({ orders, onCreateOrder }: DashboardViewProps) => {
     const { formatCurrency } = useCurrency()
 
     const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('id-ID', {
@@ -29,9 +29,9 @@ export function DashboardView({ orders, onCreateOrder }: DashboardViewProps) {
     })
 
     const getStatusColor = (status: string | null) => {
-        if (!status) return 'bg-gray-100 text-gray-800'
+        if (!status) {return 'bg-gray-100 text-gray-800'}
         const config = ORDER_STATUS_CONFIG[status as keyof typeof ORDER_STATUS_CONFIG]
-        if (!config) return 'bg-gray-100 text-gray-800'
+        if (!config) {return 'bg-gray-100 text-gray-800'}
         return config.color
     }
 
@@ -75,7 +75,7 @@ export function DashboardView({ orders, onCreateOrder }: DashboardViewProps) {
                                     <div className="text-right">
                                         <div className="font-medium">{formatCurrency(order.total_amount ?? 0)}</div>
                                         <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                                            {order.status ? ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] : 'N/A'}
+                                            {order.status ? ORDER_STATUS_LABELS[order.status] : 'N/A'}
                                         </Badge>
                                     </div>
                                 </div>

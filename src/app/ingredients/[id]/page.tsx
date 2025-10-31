@@ -14,14 +14,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { apiLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
 import { ArrowLeft, Package, Loader2 } from 'lucide-react'
 import type { IngredientsTable, IngredientsUpdate } from '@/types/database'
 
 type Ingredient = IngredientsTable
 type IngredientUpdate = IngredientsUpdate
 
-export default function EditIngredientPage() {
+const EditIngredientPage = () => {
     const router = useRouter()
     const params = useParams()
     const id = params.id as string
@@ -215,3 +214,5 @@ export default function EditIngredientPage() {
         </AppLayout>
     )
 }
+
+export default EditIngredientPage

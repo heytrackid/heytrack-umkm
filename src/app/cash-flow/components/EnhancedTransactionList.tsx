@@ -37,12 +37,12 @@ type SortBy = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 
 const ITEMS_PER_PAGE = 10
 
-export default function EnhancedTransactionList({
+const EnhancedTransactionList = ({
     transactions,
     onDeleteTransaction,
     formatCurrency,
     loading
-}: EnhancedTransactionListProps) {
+}: EnhancedTransactionListProps) => {
     const [filterType, setFilterType] = useState<FilterType>('all')
     const [searchQuery, setSearchQuery] = useState('')
     const [sortBy, setSortBy] = useState<SortBy>('date-desc')
@@ -336,3 +336,5 @@ export default function EnhancedTransactionList({
         </>
     )
 }
+
+export default EnhancedTransactionList

@@ -15,7 +15,7 @@ import type { RecipesTable } from '@/types/database'
 
 interface ItemsSectionProps {
     orderItems: OrderItemWithRecipe[]
-    availableRecipes: Array<RecipesTable>
+    availableRecipes: RecipesTable[]
     fieldErrors: Record<string, string>
     subtotal: number
     onAddItem: () => void
@@ -24,7 +24,7 @@ interface ItemsSectionProps {
     onClearError: (field: string) => void
 }
 
-export function ItemsSection({
+export const ItemsSection = ({
     orderItems,
     availableRecipes,
     fieldErrors,
@@ -33,7 +33,7 @@ export function ItemsSection({
     onUpdateItem,
     onRemoveItem,
     onClearError
-}: ItemsSectionProps) {
+}: ItemsSectionProps) => {
     const { formatCurrency } = useCurrency()
 
     return (
@@ -53,7 +53,7 @@ export function ItemsSection({
                     size="sm"
                     onClick={() => {
                         onAddItem()
-                        if (fieldErrors['items']) onClearError('items')
+                        if (fieldErrors['items']) {onClearError('items')}
                     }}
                     className="w-full sm:w-auto"
                 >

@@ -12,7 +12,7 @@ import { ReportsLayout } from './components/ReportsLayout'
 import { StatsCardSkeleton } from '@/components/ui/skeletons/dashboard-skeletons'
 import { PageHeader } from '@/components/layout/PageHeader'
 
-export default function ReportsPage() {
+const ReportsPage = () => {
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
@@ -58,3 +58,5 @@ export default function ReportsPage() {
 
   return <ReportsLayout />
 }
+
+export default ReportsPage

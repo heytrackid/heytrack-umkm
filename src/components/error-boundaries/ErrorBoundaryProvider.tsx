@@ -3,7 +3,8 @@
  * Wraps the application to catch and handle UI errors gracefully
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import EnhancedErrorBoundary from '@/components/error-boundaries/EnhancedErrorBoundary';
 
 interface ErrorBoundaryProviderProps {
@@ -16,12 +17,10 @@ const ErrorBoundaryProvider: React.FC<ErrorBoundaryProviderProps> = ({
   children,
   fallback,
   onError
-}) => {
-  return (
+}) => (
     <EnhancedErrorBoundary fallback={fallback} onError={onError}>
       {children}
     </EnhancedErrorBoundary>
   );
-};
 
 export default ErrorBoundaryProvider;

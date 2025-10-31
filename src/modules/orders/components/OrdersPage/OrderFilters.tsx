@@ -29,13 +29,13 @@ interface OrderFiltersProps {
     onClearFilters: () => void
 }
 
-export function OrderFilters({
+export const OrderFilters = ({
     filters,
     totalOrders,
     filteredCount,
     onFilterChange,
     onClearFilters
-}: OrderFiltersProps) {
+}: OrderFiltersProps) => {
     const hasActiveFilters = filters.status?.length > 0 || filters.customer_search
 
     return (

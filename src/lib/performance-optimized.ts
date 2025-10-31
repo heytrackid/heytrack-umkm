@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Advanced Performance Optimization Utilities
  * Extends base performance.ts with more advanced features

@@ -1,10 +1,7 @@
-// @ts-nocheck
 import 'server-only'
 import { dbLogger } from '@/lib/logger'
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/database'
 import type { RecipeOption } from '../types'
-import type { RecipeWithIngredients } from '@/types/query-results'
 
 /**
  * Service for handling recipe availability and ingredient checking

@@ -18,7 +18,7 @@ interface OrdersFiltersProps {
   _t?: unknown
 }
 
-export default function OrdersFilters({
+const OrdersFilters = ({
   searchTerm,
   setSearchTerm,
   statusFilter,
@@ -83,3 +83,5 @@ export default function OrdersFilters({
     </Card>
   )
 }
+
+export default OrdersFilters

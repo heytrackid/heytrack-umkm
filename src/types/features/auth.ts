@@ -6,7 +6,9 @@
 import type { 
   UserProfilesTable as UserProfilesTableType,
   UserProfilesInsert,
-  UserProfilesUpdate
+  UserProfilesUpdate,
+  UserRole as UserRoleEnum,
+  BusinessUnit as BusinessUnitEnum
 } from '@/types/database'
 
 // Re-export table types from generated
@@ -18,7 +20,6 @@ export type UserProfileInsert = UserProfilesInsert
 export type UserProfileUpdate = UserProfilesUpdate
 
 // Re-export enums from generated
-import type { UserRole as UserRoleEnum, BusinessUnit as BusinessUnitEnum } from '@/types/database'
 
 export type UserRole = UserRoleEnum
 export type BusinessUnit = BusinessUnitEnum

@@ -70,7 +70,7 @@ export default function OrderDetailView({
         if (navigator.share) {
             try {
                 await navigator.share(shareData)
-            } catch (err) {
+            } catch (_err) {
                 // User cancelled or error occurred
             }
         }

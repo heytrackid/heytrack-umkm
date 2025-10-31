@@ -26,7 +26,7 @@ import PurchasesTable from './PurchasesTable'
 
 import type { IngredientPurchase, AvailableIngredient } from './types'
 
-export default function IngredientPurchasesLayout() {
+const IngredientPurchasesLayout = () => {
   const [purchases, setPurchases] = useState<IngredientPurchase[]>([])
   const [ingredients, setIngredients] = useState<AvailableIngredient[]>([])
   const { isLoading: isAuthLoading, isAuthenticated } = useAuth()
@@ -180,3 +180,5 @@ export default function IngredientPurchasesLayout() {
     </AppLayout>
   )
 }
+
+export default IngredientPurchasesLayout

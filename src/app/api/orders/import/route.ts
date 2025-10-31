@@ -2,13 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
 import { cacheInvalidation } from '@/lib/cache'
-import type { OrderStatus } from '@/types/database'
+import type { OrderStatus, CustomersInsert, OrdersInsert, OrderItemsInsert } from '@/types/database'
 import { withSecurity, SecurityPresets } from '@/utils/security'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
-
-import type { CustomersInsert, OrdersInsert, OrderItemsInsert } from '@/types/database'
 
 type CustomerInsert = CustomersInsert
 type OrderInsert = OrdersInsert

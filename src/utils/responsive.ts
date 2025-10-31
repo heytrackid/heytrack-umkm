@@ -70,7 +70,7 @@ export function getResponsiveValue<T>(
     return value;
   }
 
-  const responsiveValues = value as Partial<Record<Breakpoint, T>>;
+  const responsiveValues = value as Partial<Record<Breakpoint, _T>>;
   
   // Check current breakpoint first, then fall back to smaller breakpoints
   const breakpointOrder: Breakpoint[] = ['2xl', 'xl', 'lg', 'md', 'sm', 'xs'];

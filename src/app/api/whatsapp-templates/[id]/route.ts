@@ -6,14 +6,14 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { apiLogger } from '@/lib/logger'
-import { WhatsappTemplatesUpdate } from '@/types/database'
+import type { WhatsappTemplatesUpdate } from '@/types/database'
 
 // ✅ Force Node.js runtime (required for DOMPurify/jsdom)
 export const runtime = 'nodejs'
 
 type WhatsAppTemplateUpdate = WhatsappTemplatesUpdate
 
-type RouteContext = {
+interface RouteContext {
   params: Promise<{ id: string }>
 }
 

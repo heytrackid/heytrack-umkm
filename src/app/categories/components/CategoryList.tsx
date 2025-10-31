@@ -46,7 +46,7 @@ interface CategoryListProps {
   onClearSelection: () => void
 }
 
-export default function CategoryList({
+const CategoryList = ({
   categories,
   filteredCategories,
   paginatedCategories,
@@ -150,3 +150,5 @@ export default function CategoryList({
     </div>
   )
 }
+
+export default CategoryList

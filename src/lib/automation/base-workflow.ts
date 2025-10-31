@@ -1,4 +1,3 @@
-// @ts-nocheck - Automation type constraints
 /**
  * Base Workflow Automation
  * Core workflow automation system with event processing

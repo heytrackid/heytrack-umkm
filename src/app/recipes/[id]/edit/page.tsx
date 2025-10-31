@@ -11,14 +11,14 @@ interface EditRecipePageProps {
     }
 }
 
-export default function EditRecipePage({ params }: EditRecipePageProps) {
-    return (
-        <AppLayout pageTitle="Edit Resep">
-            <div className="p-6">
-                <Suspense fallback={<DataGridSkeleton rows={6} />}>
-                    <RecipeFormPage mode="edit" recipeId={params.id} />
-                </Suspense>
-            </div>
-        </AppLayout>
-    )
-}
+const EditRecipePage = ({ params }: EditRecipePageProps) => (
+    <AppLayout pageTitle="Edit Resep">
+        <div className="p-6">
+            <Suspense fallback={<DataGridSkeleton rows={6} />}>
+                <RecipeFormPage mode="edit" recipeId={params.id} />
+            </Suspense>
+        </div>
+    </AppLayout>
+)
+
+export default EditRecipePage

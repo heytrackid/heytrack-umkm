@@ -1,6 +1,5 @@
 import { apiLogger } from '@/lib/logger'
 import { processChatbotQuery, generateAIInsights } from '@/lib/ai'
-import { createClient } from '@/utils/supabase/client'
 
 const supabase = createClient()
 
@@ -95,7 +94,7 @@ export function useAIService() {
         suggestions,
         data: nlpResult
       }
-    } catch (error) {
+    } catch (_error) {
       apiLogger.error({ error, userId, query }, 'Error processing AI query')
 
       // Enhanced fallback responses with better error handling

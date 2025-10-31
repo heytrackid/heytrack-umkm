@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Charts Domain Module
  * Centralized exports untuk semua chart components dan utilities

@@ -4,7 +4,6 @@
  */
 
 import { cn } from '@/lib/utils'
-import { formatCurrentCurrency } from '@/lib/currency'
 
 // ============================================================================
 // SHARED UTILITIES

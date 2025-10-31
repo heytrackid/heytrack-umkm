@@ -94,7 +94,7 @@ export default function AutoSyncFinancialDashboard() {
       } else {
         void setError(result.error || 'Failed to fetch auto-sync data')
       }
-    } catch (err) {
+    } catch (_err) {
       void setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       void setLoading(false)

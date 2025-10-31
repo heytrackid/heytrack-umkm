@@ -10,7 +10,7 @@
  */
 
 import { apiLogger, dbLogger, uiLogger, serializeError } from './logger';
-import pino from 'pino';
+import type pino from 'pino';
 
 interface DebugContext {
   userId?: string;
@@ -47,7 +47,8 @@ class DebugLogger {
   private logger: pino.Logger;
   private context: DebugContext = {};
 
-  constructor(context: string = 'Debug') {
+  constructor(context = 'Debug') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     this.logger = require('./logger').createLogger(context); // Dynamic import to avoid circular dependencies
   }
 
@@ -274,7 +275,7 @@ class DebugLogger {
   }
 
   private safeSerialize(obj: any): any {
-    if (obj === null || obj === undefined) return obj;
+    if (obj === null || obj === undefined) {return obj;}
     
     if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
       return obj;
@@ -296,7 +297,7 @@ class DebugLogger {
       // Prevent circular references
       const seen = new WeakSet();
       const serialize = (obj: any): any => {
-        if (obj === null || obj === undefined) return obj;
+        if (obj === null || obj === undefined) {return obj;}
         
         if (typeof obj === 'string' || typeof obj === 'number' || typeof obj === 'boolean') {
           return obj;
@@ -381,7 +382,7 @@ export function withDetailedDebug<T extends (...args: any[]) => any>(
     performanceTracking: true,
     includeMemory: true
   });
-  return wrappedHandler as T;
+  return wrappedHandler;
 }
 
 /**
@@ -413,7 +414,7 @@ export async function measurePerformanceAsync<T>(
 export function detailedErrorLog(
   error: unknown,
   context: DebugContext,
-  message: string = 'Detailed error occurred'
+  message = 'Detailed error occurred'
 ): void {
   const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const logData = {

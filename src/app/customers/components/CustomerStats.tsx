@@ -22,11 +22,11 @@ interface CustomerStatsData {
   averageOrders: number
 }
 
-export default function CustomerStats({
+const CustomerStats = ({
   customers,
   isLoading,
   isMobile
-}: CustomerStatsProps) {
+}: CustomerStatsProps) => {
   const { formatCurrency, settings } = useSettings()
 
   const stats: CustomerStatsData = {
@@ -96,3 +96,5 @@ export default function CustomerStats({
     </div>
   )
 }
+
+export default CustomerStats

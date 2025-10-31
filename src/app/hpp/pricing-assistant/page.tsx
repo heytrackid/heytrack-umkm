@@ -53,7 +53,7 @@ interface PricingRecommendation {
   }
 }
 
-export default function PricingAssistantPage() {
+const PricingAssistantPage = () => {
   const { formatCurrency } = useCurrency()
   const { toast } = useToast()
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -432,3 +432,6 @@ export default function PricingAssistantPage() {
     </AppLayout>
   )
 }
+
+export default PricingAssistantPage
+

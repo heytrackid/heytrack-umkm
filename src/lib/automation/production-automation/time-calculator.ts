@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Time Calculator Module
  * Handles production time calculations and scheduling

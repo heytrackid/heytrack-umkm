@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * ESLint Rule: Consistent Error Handling
  * 

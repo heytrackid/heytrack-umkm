@@ -81,7 +81,7 @@ export const OrdersListWithPagination = () => {
 
             setOrders(result.data)
             setTotalItems(result.meta.total)
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: 'Error',
                 description: 'Gagal memuat data pesanan',

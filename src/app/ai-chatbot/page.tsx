@@ -12,7 +12,7 @@ const chatbotBreadcrumbs = [
   { label: 'Chatbot' }
 ]
 
-export default function AIChatbotPage() {
+const AIChatbotPage = () => {
   const { messages, isLoading, scrollAreaRef, addMessage, setLoading } = useChatMessages()
   const { processAIQuery } = useAIService()
   const [input, setInput] = useState('')
@@ -45,7 +45,7 @@ export default function AIChatbotPage() {
       }
 
       addMessage(assistantMessage)
-    } catch (err) {
+    } catch (_err) {
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant' as const,
@@ -90,3 +90,5 @@ export default function AIChatbotPage() {
     </AppLayout>
   )
 }
+
+export default AIChatbotPage

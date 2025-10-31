@@ -41,7 +41,7 @@ interface PurchaseFormProps {
   onSuccess: () => void
 }
 
-export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) {
+const PurchaseForm = ({ ingredients, onSubmit, onSuccess }: PurchaseFormProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const form = useForm<IngredientPurchaseInsert>({
@@ -79,7 +79,7 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
 
       void setIsDialogOpen(false)
       onSuccess()
-    } catch (err) {
+    } catch (_err) {
       uiLogger.error({ err }, 'Error creating purchase')
       alert('Gagal menambahkan pembelian')
     }
@@ -216,3 +216,5 @@ export default function PurchaseForm({ ingredients, onSubmit, onSuccess }: Purch
     </Dialog>
   )
 }
+
+export default PurchaseForm

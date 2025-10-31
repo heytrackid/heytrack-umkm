@@ -33,9 +33,20 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Safely get user, handle missing session gracefully
+  let user = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    
+    // Only set user if we have valid data and no error
+    if (data?.user && !error) {
+      user = data.user
+    }
+  } catch (_error) {
+    // AuthSessionMissingError is expected for unauthenticated users
+    // Don't log as error, just continue with null user
+    user = null
+  }
 
   // Return both user and response for use in middleware
   return { user, response: supabaseResponse }

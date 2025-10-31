@@ -31,7 +31,7 @@ class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBou
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const errorId = this.state.errorId;
+    const {errorId} = this.state;
 
     // Log the error with additional context
     apiLogger.error({

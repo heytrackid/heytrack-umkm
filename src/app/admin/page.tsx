@@ -15,7 +15,7 @@ export const metadata = {
     description: 'System administration and performance monitoring'
 }
 
-export default async function AdminPage() {
+const AdminPage = async () => {
     const supabase = await createClient()
 
     // Check authentication
@@ -56,3 +56,5 @@ export default async function AdminPage() {
         </div>
     )
 }
+
+export default AdminPage

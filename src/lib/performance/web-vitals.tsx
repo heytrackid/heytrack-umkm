@@ -3,6 +3,7 @@
 
 import { useEffect } from 'react'
 import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals'
+import { performanceLogger } from '@/lib/client-logger'
 
 /**
  * Web Vitals tracking
@@ -10,13 +11,11 @@ import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from 'web-vitals'
 export function useWebVitals(onMetric?: (metric: Metric) => void) {
     useEffect(() => {
         const handleMetric = (metric: Metric) => {
-            // Log to console in development (check hostname instead of process.env)
-            const isDev = typeof window !== 'undefined' &&
-                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-
-            if (isDev) {
-                console.log(`[Web Vitals] ${metric.name}:`, metric.value)
-            }
+            performanceLogger.info({ 
+                name: metric.name, 
+                value: metric.value,
+                rating: metric.rating 
+            }, `Web Vitals: ${metric.name}`)
 
             // Send to analytics
             onMetric?.(metric)
@@ -64,7 +63,7 @@ export function usePerformanceObserver(
         try {
             observer.observe({ entryTypes })
         } catch (e) {
-            console.error('PerformanceObserver error:', e)
+            performanceLogger.error({ error: e }, 'PerformanceObserver error')
         }
 
         return () => observer.disconnect()
@@ -78,7 +77,11 @@ export function useLongTaskTracking() {
     usePerformanceObserver(['longtask'], (entries) => {
         entries.forEach((entry) => {
             if (entry.duration > 50) {
-                console.warn(`Long task detected: ${entry.duration}ms`)
+                performanceLogger.warn({ 
+                    duration: entry.duration,
+                    startTime: entry.startTime,
+                    name: entry.name 
+                }, `Long task detected: ${entry.duration}ms`)
 
                 // Send to analytics
                 if (typeof window !== 'undefined' && 'sendBeacon' in navigator) {
@@ -103,7 +106,7 @@ export function useResourceTiming() {
         )
 
         if (slowResources.length > 0) {
-            console.warn('Slow resources detected:', slowResources)
+            performanceLogger.warn({ count: slowResources.length, resources: slowResources }, 'Slow resources detected')
         }
     })
 }

@@ -11,8 +11,7 @@ import type {
   OrderFilters,
   OrderSummary,
   OrderTotalsBreakdown,
-  InvoiceData,
-  OrderStatus
+  InvoiceData
 } from '@/app/orders/types/orders.types'
 import {
   DEFAULT_ORDERS_CONFIG,
@@ -60,7 +59,7 @@ export function useOrders(filters?: OrderFilters) {
 
     if (filters) {
       if (filters.status && Array.isArray(filters.status)) {
-        filteredOrders = filteredOrders.filter(order => order.status && filters.status!.includes(order.status as OrderStatus))
+        filteredOrders = filteredOrders.filter(order => order.status && filters.status!.includes(order.status))
       }
       if (filters.payment_status && Array.isArray(filters.payment_status)) {
         filteredOrders = filteredOrders.filter(order => order.payment_status && filters.payment_status!.includes(order.payment_status as 'paid' | 'unpaid' | 'partial' | 'refunded'))

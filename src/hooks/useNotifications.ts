@@ -32,8 +32,8 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       setError(null)
 
       const params = new URLSearchParams()
-      if (unreadOnly) params.append('unread_only', 'true')
-      if (category) params.append('category', category)
+      if (unreadOnly) {params.append('unread_only', 'true')}
+      if (category) {params.append('category', category)}
       params.append('limit', limit.toString())
 
       const response = await fetch(`/api/notifications?${params.toString()}`)
@@ -45,7 +45,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       const data = await response.json()
       setNotifications(data.notifications || [])
       setUnreadCount(data.unread_count || 0)
-    } catch (err) {
+    } catch (_err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setIsLoading(false)
@@ -65,7 +65,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       await fetchNotifications()
-    } catch (err) {
+    } catch (_err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [fetchNotifications])
@@ -83,7 +83,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       await fetchNotifications()
-    } catch (err) {
+    } catch (_err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [fetchNotifications])
@@ -101,7 +101,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       }
 
       await fetchNotifications()
-    } catch (err) {
+    } catch (_err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }, [fetchNotifications])
@@ -113,7 +113,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
 
   // Auto refresh
   useEffect(() => {
-    if (!autoRefresh) return
+    if (!autoRefresh) {return}
 
     const interval = setInterval(() => {
       fetchNotifications()

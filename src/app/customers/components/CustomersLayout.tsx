@@ -32,7 +32,7 @@ import CustomerForm from './CustomerForm'
 import type { CustomersTable as CustomersTableType } from '@/types/database'
 import type { Customer } from './types'
 
-export default function CustomersLayout() {
+const CustomersLayout = () => {
   const router = useRouter()
   const { isMobile } = useResponsive()
   const { formatCurrency } = useSettings()
@@ -46,7 +46,7 @@ export default function CustomersLayout() {
     [LOADING_KEYS.FETCH_CUSTOMERS]: true
   })
 
-  const [customers, setCustomers] = useState<Array<CustomersTableType>>([])
+  const [customers, setCustomers] = useState<CustomersTableType[]>([])
   const { toast } = useToast()
 
   // Fetch customers on mount - auth is handled by middleware
@@ -365,3 +365,5 @@ export default function CustomersLayout() {
     </AppLayout>
   )
 }
+
+export default CustomersLayout

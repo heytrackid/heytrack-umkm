@@ -29,7 +29,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil ditambahkan",
       })
       return result
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: "Error",
         description: "Gagal menambahkan data",
@@ -50,7 +50,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil diperbarui",
       })
       return result
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: "Error",
         description: "Gagal memperbarui data",
@@ -71,7 +71,7 @@ export function useGenericCRUD<TTable extends keyof TablesMap>(tableName: TTable
         description: "Data berhasil dihapus",
       })
       return result
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: "Error",
         description: "Gagal menghapus data",
@@ -200,7 +200,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     try {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : defaultValue
-    } catch (error) {
+    } catch (_error) {
       return defaultValue
     }
   })
@@ -213,7 +213,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore))
       }
-    } catch (err) {
+    } catch (_err) {
       // Storage error handled silently
     }
   }, [key, value])
@@ -224,7 +224,7 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key)
       }
-    } catch (err) {
+    } catch (_err) {
       // Storage error handled silently
     }
   }, [key, defaultValue])

@@ -30,9 +30,7 @@ export default function TemplatePreview({
 }: TemplatePreviewProps) {
     const [showExampleData, setShowExampleData] = useState(true)
 
-    const getCategoryLabel = (category: string) => {
-        return TEMPLATE_CATEGORIES.find(cat => cat.value === category)?.label || category
-    }
+    const getCategoryLabel = (category: string) => TEMPLATE_CATEGORIES.find(cat => cat.value === category)?.label || category
 
     const getExampleValue = (variableName: string): string => {
         const variable = AVAILABLE_VARIABLES.find(v => v.name === variableName)
@@ -40,7 +38,7 @@ export default function TemplatePreview({
     }
 
     const renderPreview = (content: string): string => {
-        if (!showExampleData) return content
+        if (!showExampleData) {return content}
 
         let preview = content
         const variableRegex = /\{([^}]+)\}/g

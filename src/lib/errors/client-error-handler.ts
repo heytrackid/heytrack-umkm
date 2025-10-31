@@ -14,7 +14,7 @@ export interface ApiResponse<T = any> {
 }
 
 export class ApiErrorHandler {
-  static handle(error: unknown, context?: string, showNotification: boolean = true): ApiResponse {
+  static handle(error: unknown, context?: string, showNotification = true): ApiResponse {
     // Log the error
     apiLogger.error({
       error,
@@ -89,7 +89,7 @@ export class ApiErrorHandler {
   static async handleFetchError(
     response: Response,
     context?: string,
-    showNotification: boolean = true
+    showNotification = true
   ): Promise<ApiResponse> {
     const errorData = await response.json().catch(() => ({}));
     
@@ -108,7 +108,7 @@ export class ApiErrorHandler {
   static async safeExecute<T>(
     apiCall: () => Promise<T>,
     context?: string,
-    showNotification: boolean = true
+    showNotification = true
   ): Promise<ApiResponse<T>> {
     try {
       const data = await apiCall();
@@ -129,26 +129,20 @@ export const useErrorHandler = () => {
   const handleError = (
     error: unknown,
     context?: string,
-    showNotification: boolean = true
-  ): ApiResponse => {
-    return ApiErrorHandler.handle(error, context, showNotification);
-  };
+    showNotification = true
+  ): ApiResponse => ApiErrorHandler.handle(error, context, showNotification);
 
   const handleFetchError = async (
     response: Response,
     context?: string,
-    showNotification: boolean = true
-  ): Promise<ApiResponse> => {
-    return ApiErrorHandler.handleFetchError(response, context, showNotification);
-  };
+    showNotification = true
+  ): Promise<ApiResponse> => ApiErrorHandler.handleFetchError(response, context, showNotification);
 
   const safeExecute = async <T,>(
     apiCall: () => Promise<T>,
     context?: string,
-    showNotification: boolean = true
-  ): Promise<ApiResponse<T>> => {
-    return ApiErrorHandler.safeExecute(apiCall, context, showNotification);
-  };
+    showNotification = true
+  ): Promise<ApiResponse<T>> => ApiErrorHandler.safeExecute(apiCall, context, showNotification);
 
   return {
     handleError,

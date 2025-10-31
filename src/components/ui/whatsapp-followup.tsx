@@ -97,7 +97,7 @@ export default function WhatsAppFollowUp({ order, onSent }: WhatsAppFollowUpProp
           void setSelectedTemplateId(data[0].id)
         }
       }
-    } catch (err) {
+    } catch (_err) {
       apiLogger.error({ error: err }, 'Error fetching templates:')
     } finally {
       void setLoading(false)

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { lazy, Suspense, useState, useCallback } from 'react'

@@ -47,7 +47,7 @@ const AppLayout = memo(({
       try {
         const { data: { user } } = await supabase.auth.getUser()
         void setUser(user)
-      } catch (err) {
+      } catch (_err) {
         uiLogger.error({ err }, 'Error getting user:')
       } finally {
         void setLoading(false)

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Recommendations Module
  * Generates production recommendations and optimizations

@@ -1,4 +1,3 @@
-// @ts-nocheck - Complex form/modal type constraints
 'use client'
 
 import { Button } from '@/components/ui/button'

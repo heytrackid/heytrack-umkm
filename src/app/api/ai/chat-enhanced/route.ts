@@ -90,8 +90,8 @@ export async function POST(request: NextRequest) {
       /new\s+instructions?:/i,
       /system\s*:\s*/i,
       /\[SYSTEM\]/i,
-      /\<\|im_start\|\>/i,
-      /\<\|im_end\|\>/i,
+      /<\|im_start\|>/i,
+      /<\|im_end\|>/i,
     ];
 
     const containsSuspiciousPattern = suspiciousPatterns.some(pattern =>
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         fallback_used: fallbackUsed,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Error in enhanced chat API: ${errorMessage}`);
 

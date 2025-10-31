@@ -20,12 +20,12 @@ interface IngredientFormDialogProps {
     onSuccess?: () => void
 }
 
-export function IngredientFormDialog({
+export const IngredientFormDialog = ({
     open,
     onOpenChange,
     ingredient,
     onSuccess
-}: IngredientFormDialogProps) {
+}: IngredientFormDialogProps) => {
     const { toast } = useToast()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const mode = ingredient ? 'edit' : 'create'
@@ -74,7 +74,7 @@ export function IngredientFormDialog({
             form.reset()
             onOpenChange(false)
             onSuccess?.()
-        } catch (error) {
+        } catch (_error) {
             toast({
                 title: 'Error',
                 description: error instanceof Error ? error.message : 'Terjadi kesalahan',

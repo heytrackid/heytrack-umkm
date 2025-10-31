@@ -9,11 +9,10 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { getAuthErrorMessage, validateEmail } from '@/lib/auth-errors'
 import { CheckCircle, Loader2, Mail } from 'lucide-react'
 import Link from 'next/link'
-import type { FormEvent} from 'react';
-import { useState, useTransition } from 'react'
+import { type FormEvent, useState, useTransition } from 'react'
 import { resetPassword } from './actions'
 
-export default function ResetPasswordPage() {
+const ResetPasswordPage = () => {
   const [error, setError] = useState('')
   const [errorAction, setErrorAction] = useState<{ label: string; href: string } | null>(null)
   const [fieldErrors, setFieldErrors] = useState<{ email?: string }>({})
@@ -200,3 +199,5 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
+
+export default ResetPasswordPage

@@ -124,7 +124,7 @@ export default function EnhancedProfitReport({ dateRange }: ProfitReportProps) {
 
             const data = await response.json()
             setProfitData(data)
-        } catch (err) {
+        } catch (_err) {
             apiLogger.error({ err }, 'Error fetching profit data')
         } finally {
             setLoading(false)

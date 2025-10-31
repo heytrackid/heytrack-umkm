@@ -84,7 +84,7 @@ export function validateEmail(email: string): {
   try {
     EmailSchema.parse(email)
     return { isValid: true }
-  } catch (error) {
+  } catch (_error) {
     if (error instanceof z.ZodError) {
       return {
         isValid: false,

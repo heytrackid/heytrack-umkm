@@ -1,4 +1,3 @@
-// @ts-nocheck - API type constraints
 /**
  * Route Handlers Module
  * Utilities for creating standardized API route handlers

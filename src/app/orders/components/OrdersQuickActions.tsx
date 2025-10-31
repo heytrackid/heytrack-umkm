@@ -9,7 +9,7 @@ interface OrdersQuickActionsProps {
   _t?: unknown
 }
 
-export default function OrdersQuickActions({ _t: _ }: OrdersQuickActionsProps) {
+const OrdersQuickActions = ({ _t: _ }: OrdersQuickActionsProps) => {
   return (
     <Card>
       <CardContent className="p-4">
@@ -37,3 +37,5 @@ export default function OrdersQuickActions({ _t: _ }: OrdersQuickActionsProps) {
     </Card>
   )
 }
+
+export default OrdersQuickActions

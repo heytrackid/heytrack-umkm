@@ -32,7 +32,7 @@ export const ExportButton = () => {
             document.body.removeChild(a)
 
             toast.success('Export berhasil!')
-        } catch (error) {
+        } catch (_error) {
             uiLogger.error({ error }, 'Export error')
             toast.error('Export gagal. Silakan coba lagi.')
         } finally {

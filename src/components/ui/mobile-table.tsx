@@ -1,4 +1,3 @@
-// @ts-nocheck - Generic type constraints
 'use client'
 
 import { type ReactNode, useState, useCallback, useMemo, memo } from 'react'

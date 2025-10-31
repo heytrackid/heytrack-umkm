@@ -18,7 +18,7 @@ interface CustomerSearchFiltersProps {
   isLoading: boolean
 }
 
-export default function CustomerSearchFilters({
+const CustomerSearchFilters = ({
   searchTerm,
   onSearchChange,
   filteredCustomers,
@@ -27,7 +27,7 @@ export default function CustomerSearchFilters({
   onBulkEdit,
   onBulkDelete,
   isLoading
-}: CustomerSearchFiltersProps) {
+}: CustomerSearchFiltersProps) => {
   if (isLoading) {
     return <SearchFormSkeleton />
   }
@@ -89,3 +89,5 @@ export default function CustomerSearchFilters({
     </div>
   )
 }
+
+export default CustomerSearchFilters

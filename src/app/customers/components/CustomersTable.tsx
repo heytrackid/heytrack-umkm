@@ -34,7 +34,7 @@ import { useMemo, useState } from 'react'
 import type { CustomersTable } from '@/types/database'
 
 interface CustomersTableProps {
-  customers: Array<CustomersTable>
+  customers: CustomersTable[]
   selectedItems: string[]
   onSelectItem: (itemId: string) => void
   onSelectAll: () => void
@@ -50,7 +50,7 @@ interface CustomersTableProps {
  * Customers Table Component with Pagination
  * Extracted from customers/page.tsx for code splitting
  */
-export default function CustomersTable({
+const CustomersTable = ({
   customers,
   selectedItems,
   onSelectItem,
@@ -60,7 +60,7 @@ export default function CustomersTable({
   onDelete,
   onAddNew,
   formatCurrency
-}: CustomersTableProps) {
+}: CustomersTableProps) => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -268,3 +268,5 @@ export default function CustomersTable({
     </Card>
   )
 }
+
+export default CustomersTable

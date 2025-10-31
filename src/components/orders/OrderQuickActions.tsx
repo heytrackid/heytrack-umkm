@@ -24,7 +24,7 @@ export default function OrderQuickActions({ order }: OrderQuickActionsProps) {
             await navigator.clipboard.writeText(text)
             setCopiedField(field)
             setTimeout(() => setCopiedField(null), 2000)
-        } catch (err) {
+        } catch (_err) {
             // Fallback for older browsers
             const textArea = document.createElement('textarea')
             textArea.value = text

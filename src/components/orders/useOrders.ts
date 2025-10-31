@@ -110,7 +110,7 @@ export function useOrders() {
         queryLogger.error('API returned unexpected format', undefined, { response: json })
         throw new Error('API returned unexpected format. Expected { data: [...] } or array.')
         
-      } catch (err) {
+      } catch (_err) {
         // Handle network errors specifically
         if (err instanceof TypeError && err.message.includes('fetch')) {
           queryLogger.error('Network error', err)
@@ -248,7 +248,7 @@ export function useOrders() {
         
         queryLogger.warn('API returned unexpected format for created order', { data })
         return data
-      } catch (err) {
+      } catch (_err) {
         queryLogger.error('Error in createOrder mutation', err)
         throw err
       }

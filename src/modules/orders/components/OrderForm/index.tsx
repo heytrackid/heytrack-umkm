@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Order Form - Main Component (Refactored)
  * Modular architecture with separated sections + Code Splitting
@@ -13,7 +12,7 @@ import { memo, useState, type FormEvent } from 'react'
 import { useQuery } from '@tanstack/react-query'
 // import { ORDER_CONFIG } from '@/lib/constants'
 import type { Order, OrderFormProps, OrderItemWithRecipe, PaymentMethod } from '@/app/orders/types/orders-db.types'
-import { calculateOrderTotals, generateOrderNo } from '../../utils/helpers'
+import { calculateOrderTotals, generateOrderNo } from '@/modules/orders/utils/helpers'
 import { warningToast } from '@/hooks/use-toast'
 import type { RecipesTable, CustomersTable } from '@/types/database'
 import dynamic from 'next/dynamic'
@@ -93,8 +92,8 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         queryKey: ['recipes', 'active'],
         queryFn: async () => {
             const response = await fetch('/api/recipes')
-            if (!response.ok) throw new Error('Failed to fetch recipes')
-            const data: Array<RecipesTable> = await response.json()
+            if (!response.ok) {throw new Error('Failed to fetch recipes')}
+            const data: RecipesTable[] = await response.json()
             return data.filter(recipe => recipe.is_active)
         },
         staleTime: 5 * 60 * 1000,
@@ -105,7 +104,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         queryKey: ['customers', 'all'],
         queryFn: async () => {
             const response = await fetch('/api/customers')
-            if (!response.ok) throw new Error('Failed to fetch customers')
+            if (!response.ok) {throw new Error('Failed to fetch customers')}
             return response.json() as Promise<Customer[]>
         },
         staleTime: 5 * 60 * 1000,
@@ -130,7 +129,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         }
 
         const firstRecipe = recipesData[0]
-        if (!firstRecipe) return
+        if (!firstRecipe) {return}
 
         const newItem: OrderItemWithRecipe = {
             id: `temp-${Date.now()}`,
@@ -163,7 +162,7 @@ export const OrderForm = memo(({ order, onSubmit, onCancel, loading = false, err
         setOrderItems(prev => {
             const updated = [...prev]
             const currentItem = updated[index]
-            if (!currentItem) return updated
+            if (!currentItem) {return updated}
 
             if (field === 'recipe_id') {
                 const selectedRecipe = recipesData.find(recipe => recipe.id === value)

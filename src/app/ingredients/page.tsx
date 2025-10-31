@@ -24,7 +24,7 @@ import {
 import { IngredientFormDialog } from '@/components/ingredients/IngredientFormDialog';
 import { PageHeader } from '@/components/layout/PageHeader';
 
-export default function IngredientsPage() {
+const IngredientsPage = () => {
   const { data: ingredients, isLoading: loading, error } = useIngredients();
   const { isLoading: isAuthLoading } = useAuth();
   const { toast } = useToast();
@@ -41,10 +41,10 @@ export default function IngredientsPage() {
 
   // Handle auth errors
   useEffect(() => {
-    if (error && typeof error === 'object' && (error as Error).message?.includes('401')) {
+    if (error && typeof error === 'object' && (error).message?.includes('401')) {
       toast({
         title: 'Sesi berakhir',
-        description: typeof error === 'string' ? error : (error as Error).message || 'Terjadi kesalahan autentikasi',
+        description: typeof error === 'string' ? error : (error).message || 'Terjadi kesalahan autentikasi',
         variant: 'destructive',
       });
       router.push('/auth/login');
@@ -228,7 +228,7 @@ export default function IngredientsPage() {
                 success: true,
                 count: result.count
               }
-            } catch (error) {
+            } catch (_error) {
               return {
                 success: false,
                 error: 'Terjadi kesalahan saat import'
@@ -247,3 +247,5 @@ export default function IngredientsPage() {
     </AppLayout>
   );
 }
+
+export default IngredientsPage

@@ -1,7 +1,6 @@
 // API Route: Business Context Loading
 
-import type { NextRequest} from 'next/server';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { BusinessContextService } from '@/lib/services/BusinessContextService';
 import { logger } from '@/lib/logger';
@@ -36,7 +35,7 @@ export async function GET(request: NextRequest) {
       cached: false, // TODO: Implement cache detection
       expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     });
-  } catch (error) {
+  } catch (_error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Failed to load context: ${errorMessage}`);
     return NextResponse.json(
@@ -63,7 +62,7 @@ export async function DELETE() {
     await BusinessContextService.invalidateCache(user.id);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (_error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error(`Failed to invalidate context: ${errorMessage}`);
     return NextResponse.json(

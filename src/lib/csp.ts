@@ -1,3 +1,4 @@
+ 
 // src/lib/csp.ts
 /**
  * Edge-safe CSP helpers
@@ -69,4 +70,4 @@ export function getHashBasedCSP(hashes: { scripts?: string[]; styles?: string[] 
   return policies.join(' ')
 }
 
-export type CSPNonce = { nonce: string }
+export interface CSPNonce { nonce: string }

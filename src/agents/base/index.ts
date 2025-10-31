@@ -1,5 +1,4 @@
 import { dbLogger } from '@/lib/logger'
-import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ZodType } from 'zod'

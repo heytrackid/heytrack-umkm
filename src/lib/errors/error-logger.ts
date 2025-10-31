@@ -208,10 +208,10 @@ export class EnhancedErrorLogger {
 /**
  * Convenience functions for different loggers
  */
-export const logApiError = EnhancedErrorLogger.logApiError;
-export const logDatabaseError = EnhancedErrorLogger.logDatabaseError;
-export const logUiError = EnhancedErrorLogger.logUiError;
-export const logErrorWithContext = EnhancedErrorLogger.logErrorWithContext;
-export const logWarning = EnhancedErrorLogger.logWarning;
-export const logInfo = EnhancedErrorLogger.logInfo;
-export const createContextFromRequest = EnhancedErrorLogger.createContextFromRequest;
+export const {logApiError} = EnhancedErrorLogger;
+export const {logDatabaseError} = EnhancedErrorLogger;
+export const {logUiError} = EnhancedErrorLogger;
+export const {logErrorWithContext} = EnhancedErrorLogger;
+export const {logWarning} = EnhancedErrorLogger;
+export const {logInfo} = EnhancedErrorLogger;
+export const {createContextFromRequest} = EnhancedErrorLogger;
